@@ -6,7 +6,7 @@
 and 3Icon_data.amb)
 - Icon graphic data (1Icon_gfx.amb, 2Icon_gfx.amb and 3Icon_gfx.amb)
 
-Each of those contains multiple files which represent a specific map, icon or icon graphic.
+Each of those contains multiple files which represent a specific map, icon data (tileset) or icon graphic.
 
 ## Icon graphics
 
@@ -40,6 +40,8 @@ Offset | Type | Description
 0x0007 | ubyte | Unknown
 
 The icon graphic index refers to a icon graphic. The index starts with 1 (index 1 is the first icon graphic). The number of animation tiles specifies the number of icon graphics belonging to the tile's animation (e.g. water uses multiple tiles for animation). Non-animated tile have a value of 1.
+
+So if you have icon graphic index 1 and 3 animation tiles the icons 1, 2 and 3 are used for the animation.
 
 ## Map data
 
