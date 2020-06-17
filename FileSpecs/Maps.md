@@ -57,7 +57,7 @@ Offset | Type | Description
 0x0008 | ulong | **Unknown**
 0x000C | ubyte[320] | Event data (content **unknown**)
 0x014C | TileData[Width*Height] | Map tile data
-* | ? | Remaining bytes **unknown**
+... | ? | Remaining bytes **unknown**
 
 A tile data entry (TileData) looks like this:
 
