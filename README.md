@@ -4,6 +4,8 @@ This repository should serve as a place where resources and information about Am
 
 If you have some valuable input, feel free to contact me: trobt@web.de
 
+You can use the issue tracker or pull requests to contribute as well.
+
 ## Special thanks
 
 Most of the work was done by a bunch of good fellas.
