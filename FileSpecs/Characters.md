@@ -15,12 +15,15 @@ Offset | Type | Description
 0x0003 | ubyte | [Class](Enumerations/Classes.md)
 0x0004 | ubyte | [Usable spell types](Enumerations/SpellTypes.md)
 0x0005 | ubyte | Level (1-99)
-0x0006 | ubyte | **Unknown**
-0x0007 | ubyte | **Unknown**
+0x0006 | ubyte | **Unknown** (Mostly 0, a few have 1 or 2, Alkem has 255)
+0x0007 | ubyte | **Unknown** (Nera, Netsrak, Mando have 1, Chris and Targor 2, all others 0)
 0x0008 | ubyte | [Spoken languages](Enumerations/Languages.md)
-0x0009 | ubyte | **Unknown**
-0x000A | ubyte | Portrait index
-0x000B | ubyte[6] | **Unknown**
+0x0009 | uword | Portrait index
+0x000B | ushort | **Unknown** (only used for monsters)
+0x000D | ubyte | **Unknown** (only used for monsters, looks likes percent values like 70, 90, 100, etc. -> max value is 100), most likely a kind of parry/dodge chance as low monsters have 0. but many have 100 (maybe it's reduced by party member ATT ability?)
+0x000E | ubyte | **Unknown** (only used for monsters, 0-5, maybe critical strike chance for monsters?)
+0x000F | ubyte | Monster attack chance (monsters only)
+0x0010 | ubyte | **Unknown** (always 0 except for guard demon which has 158/0x9E)
 0x0011 | ubyte | Attacks per round (APR)
 0x0012 | ubyte[2] | **Unknown**
 0x0014 | uword | Spell learning points (SLP)
@@ -74,7 +77,7 @@ Offset | Type | Description
 0x00FE | ulong | Learned [spells](Enumerations/Spells.md)
 0x0102 | ubyte[12] | **Unknown**
 0x010E | ulong | Weight
-0x0112 | Char[20] | Name (not sure about the length)
+0x0112 | Char[16] | Name
 ... | ... | ...
 
 To be continued ...
