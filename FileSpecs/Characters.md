@@ -1,6 +1,11 @@
 # Character file format spec
 
-Offsets are given in hex. Sizes/lengths in dec.
+This format is used for the following files:
+- Monster_char_data.amb
+- NPC_char.amb
+- Party_char.amb
+
+Offsets are given in hex. Sizes/lengths in dec. 16 and 32 bit values are stored in big endian format. So the most significant bytes come first. Example: The value 0x1234 is stored as 0x12 0x34 and the value 0x12345678 is stored as 0x12 0x34 0x56 0x78.
 
 Offset | Type | Description
 ----|----|----
