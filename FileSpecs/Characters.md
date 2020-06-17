@@ -1,3 +1,5 @@
+# Character file format spec
+
 Offsets are given in hex. Sizes/lengths in dec.
 
 Offset | Type | Description
