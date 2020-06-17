@@ -34,23 +34,23 @@ Offset | Type | Description
 0x0032 | uword[4] | INT (see [Attributes](Enumerations/Attributes.md))
 0x003A | uword[4] | DEX (see [Attributes](Enumerations/Attributes.md))
 0x0042 | uword[4] | SPD (see [Attributes](Enumerations/Attributes.md))
-0x004A | uword[4] | CON (see [Attributes](Enumerations/Attributes.md))
+0x004A | uword[4] | STA (see [Attributes](Enumerations/Attributes.md))
 0x0052 | uword[4] | CHA (see [Attributes](Enumerations/Attributes.md))
 0x005A | uword[4] | LUK (see [Attributes](Enumerations/Attributes.md))
 0x0062 | uword[4] | A-M (see [Attributes](Enumerations/Attributes.md))
 0x006A | uword | Current age
 0x006C | uword | Max age
 0x006E | ubyte[12] | **Unknown**
-0x007A | uword[4] | ATT (see [Skills](Enumerations/Skills.md))
-0x0082 | uword[4] | PAR (see [Skills](Enumerations/Skills.md))
-0x008A | uword[4] | SWI (see [Skills](Enumerations/Skills.md))
-0x0092 | uword[4] | CRI (see [Skills](Enumerations/Skills.md))
-0x009A | uword[4] | F-T (see [Skills](Enumerations/Skills.md))
-0x00A2 | uword[4] | D-T (see [Skills](Enumerations/Skills.md))
-0x00AA | uword[4] | L-P (see [Skills](Enumerations/Skills.md))
-0x00B2 | uword[4] | SRC (see [Skills](Enumerations/Skills.md))
-0x00BA | uword[4] | R-S (see [Skills](Enumerations/Skills.md))
-0x00C2 | uword[4] | U-M (see [Skills](Enumerations/Skills.md))
+0x007A | uword[4] | ATT (see [Abilities](Enumerations/Abilities.md))
+0x0082 | uword[4] | PAR (see [Abilities](Enumerations/Abilities.md))
+0x008A | uword[4] | SWI (see [Abilities](Enumerations/Abilities.md))
+0x0092 | uword[4] | CRI (see [Abilities](Enumerations/Abilities.md))
+0x009A | uword[4] | F-T (see [Abilities](Enumerations/Abilities.md))
+0x00A2 | uword[4] | D-T (see [Abilities](Enumerations/Abilities.md))
+0x00AA | uword[4] | L-P (see [Abilities](Enumerations/Abilities.md))
+0x00B2 | uword[4] | SRC (see [Abilities](Enumerations/Abilities.md))
+0x00BA | uword[4] | R-M (see [Abilities](Enumerations/Abilities.md))
+0x00C2 | uword[4] | U-M (see [Abilities](Enumerations/Abilities.md))
 0x00CA | uword | Current hit points
 0x00CC | uword | Max hit points
 0x00CE | uword | Bonus hit points
