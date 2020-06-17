@@ -31,3 +31,10 @@ At least some contributions will come from me as well like some file specs and t
 - File types and their encoding
 - File format specs
 - etc
+
+## Language
+
+I will document everything in english so most people will understand. But I only played the german version and translated some things to my best knowledge. So there might by differences between the names and values given here and the names used in the original english game.
+
+If you know the english version or have some other translation improvements, just let me know. You can use the issue tracker for that for example.
+
