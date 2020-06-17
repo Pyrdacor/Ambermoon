@@ -18,6 +18,8 @@ I just want to gather the whole findings at a central place and provide it on a 
 
 At least some contributions will come from me as well like some file specs and the formatting of all the data. :)
 
+I marked unknown values in the specs as **Unknown**. Would be nice if some of those values' meaning could be revealed by someone.
+
 ## Resources
 
 - Map graphics

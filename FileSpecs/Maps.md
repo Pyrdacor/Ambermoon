@@ -37,7 +37,7 @@ Offset | Type | Description
 0x0000 | ulong | **Unknown**
 0x0004 | uword | Icon graphic index
 0x0006 | ubyte | Number of animation tiles
-0x0007 | ubyte | Unknown
+0x0007 | ubyte | **Unknown**
 
 The icon graphic index refers to a icon graphic. The index starts with 1 (index 1 is the first icon graphic). The number of animation tiles specifies the number of icon graphics belonging to the tile's animation (e.g. water uses multiple tiles for animation). Non-animated tile have a value of 1.
 
