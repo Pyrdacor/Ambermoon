@@ -22,17 +22,19 @@ Offset | Type | Description
 0x000B | ushort | **Unknown** (only used for monsters)
 0x000D | ubyte | **Unknown** (only used for monsters, looks likes percent values like 70, 90, 100, etc. -> max value is 100), most likely a kind of parry/dodge chance as low monsters have 0. but many have 100 (maybe it's reduced by party member ATT ability?)
 0x000E | ubyte | **Unknown** (only used for monsters, 0-5, maybe critical strike chance for monsters?)
-0x000F | ubyte | Monster attack chance (monsters only)
-0x0010 | ubyte | **Unknown** (always 0 except for guard demon which has 158/0x9E)
+0x000F | ubyte | Monster attack hit chance (monsters only)
+0x0010 | ubyte | **Unknown** (always 0 except for guard demon which has 158/0x9E so this might be some immunity bit flag)
 0x0011 | ubyte | Attacks per round (APR)
-0x0012 | ubyte[2] | **Unknown**
+0x0012 | ubyte | [Monster flags](Enumerations/MonsterFlags.md) (monsters only)
+0x0013 | ubyte | [Monster elements?](Enumerations/MonsterElements.md) (only used for monsters)
 0x0014 | uword | Spell learning points (SLP)
 0x0016 | uword | Training points (TP)
 0x0018 | uword | Gold
 0x001A | uword | Food
-0x001C | ubyte[2] | **Unknown** (often 0xffff)
+0x001C | uword | **Unknown** (0xffff for all monsters, NPCs and most party members except for Selena (0x22c2), Sabine (0x23a0), Valdyn (0x2400) and Gryban (0x0000)). The values do not make sense as they are so I guess those are bit flags.
 0x001E | uword | [Ailments](Enumerations/Ailments.md)
-0x0020 | ubyte[10] | **Unknown**
+0x0020 | uword | Monster experience (gained when defeating it)
+0x0022 | ubyte[8] | **Unknown** (always 0)
 0x002A | uword[4] | STR (see [Attributes](Enumerations/Attributes.md))
 0x0032 | uword[4] | INT (see [Attributes](Enumerations/Attributes.md))
 0x003A | uword[4] | DEX (see [Attributes](Enumerations/Attributes.md))
@@ -43,7 +45,8 @@ Offset | Type | Description
 0x0062 | uword[4] | A-M (see [Attributes](Enumerations/Attributes.md))
 0x006A | uword | Current age
 0x006C | uword | Max age
-0x006E | ubyte[12] | **Unknown**
+0x006E | uword[2] | Looks like age has a bonus and 4th value as well but they are always 0.
+0x0072 | uword[4] | **Unknown**. This looks like a hidden attribute/ability cause it uses most likely 4 uwords as well. The current and max value is always 0. The bonus is 25 for Chris and 5 for Gryban. The last value is 0 as well.
 0x007A | uword[4] | ATT (see [Abilities](Enumerations/Abilities.md))
 0x0082 | uword[4] | PAR (see [Abilities](Enumerations/Abilities.md))
 0x008A | uword[4] | SWI (see [Abilities](Enumerations/Abilities.md))
@@ -71,13 +74,26 @@ Offset | Type | Description
 0x00E6 | uword | SP per level
 0x00E8 | uword | SLP per level
 0x00EA | uword | TP per level
-0x00EC | uword | **Unknown** (only seen 0x0000 or 0xffff)
+0x00EC | uword | **Unknown** (0xffff for all monsters, Thalion, Chris and Gryban, 0x0007 for the NPC Dönner, 0x0000 for all others)
 0x00EE | ulong | Experience (EXP)
-0x00F2 | ubyte[12] | **Unknown**
-0x00FE | ulong | Learned [spells](Enumerations/Spells.md)
-0x0102 | ubyte[12] | **Unknown**
+0x00F2 | ulong | Learned healing [spells](Enumerations/Spells.md)
+0x00F6 | ulong | Learned alchemistic [spells](Enumerations/Spells.md)
+0x00FA | ulong | Learned mystic [spells](Enumerations/Spells.md)
+0x00FE | ulong | Learned destruction [spells](Enumerations/Spells.md)
+0x0102 | ubyte[12] | **Unknown** (always 0)
 0x010E | ulong | Weight
-0x0112 | Char[16] | Name
+0x0112 | byte[16] | Name (encoding DOS-Latin-1, codepage 850 or 437)
+0x0122 | uword | **Unknown** Only used for NPCs and the beast (which can become a kind of NPC) and Tar the dark (which was an NPC before)
+0x0124 | uword | **Unknown** (always 0)
+0x0126 | uword | **Unknown** Only used for NPCs and the beast (which can become a kind of NPC) and Tar the dark (which was an NPC before)
+0x0128 | uword | **Unknown**
+0x012A | ubyte | **Unknown** (NPCs only, only very few have value 16)
+0x012B | ubyte | **Unknown** (NPCs only)
+0x012C | ubyte | **Unknown** (NPCs only, only very few have value 16)
+0x012D | ubyte | **Unknown** (NPCs, party members and a few monsters)
+0x012E | ubyte | **Unknown** (Zombie master and Nera have 1, some NPCs have 16, others always 0)
+0x012F | ubyte | **Unknown** (NPCs only)
+0x0130 | ubyte | **Unknown** (NPCs only, only 0 or 16)
 ... | ... | ...
 
 To be continued ...
