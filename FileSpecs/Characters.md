@@ -97,3 +97,10 @@ Offset | Type | Description
 ... | ... | ...
 
 To be continued ...
+
+
+## Monster groups
+
+Monsters are grouped for fights. The file Monster_groups.amb contains all monster formations in the game. Each file consists of 18 uwords which represent the 18 tiles in combat where a monster can be placed starting at the upper-left and going line by line from left to right.
+
+Each uword can contain a monster index starting at 1 (0 = no monster).

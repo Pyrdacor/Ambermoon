@@ -1,6 +1,6 @@
 # Monster flags
 
-Each monster has special flags that are stored in a 8 bit big endian value. Each bit represents a specific property of the monster.
+Each monster has special flags that are stored in a 8 bit value. Each bit represents a specific property of the monster.
 
 The following table is not complete yet.
 

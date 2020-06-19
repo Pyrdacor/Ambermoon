@@ -1,6 +1,6 @@
 # Monster elements
 
-Each monster has special flags that are stored in a 8 bit big endian value. I am not sure about this value but it looks like the lower 3 bits mark some immunity and the higher 5 bits mark an element.
+Each monster has special flags that are stored in a 8 bit value. I am not sure about this value but it looks like the lower 3 bits mark some immunity and the higher 5 bits mark an element.
 
 The following table is not complete yet.
 
