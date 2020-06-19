@@ -12,11 +12,11 @@ File | Disk | Format
 3Wall3D.amb | F | GFX 128x80, 4 bit textures
 Automap_graphics | G | GFX
 Combat_background.amb | H | GFX width 320, 5 planes
-Combat_graphics | H | GFX
+Combat_graphics | G | GFX
 Event_pix.amb | G | GFX width 320, 5 planes
 Floors.amb | G | GFX width 64, 4 planes
 Lab_background.amb | G | GFX
-Layouts.amb | | GFX width 320, 3 planes
+Layouts.amb | G | GFX width 320, 3 planes
 Monster_gfx.amb | H | GFX width 96, 5 planes
 NPC_gfx.amb | G | GFX
 Object_icons | G | GFX
@@ -47,20 +47,20 @@ File | Disk | Content
 [1Map_data.amb](../FileSpecs/Maps.md) | C | Map data
 2Lab_data.amb | D | Labyrinth data?
 [2Map_data.amb](../FileSpecs/Maps.md) | D | Map data
-2Object3D.amb | E | 3D object data (floats?)
+2Object3D.amb | D | 3D object data (floats?)
 2Overlay3D.amb | E | 3D object data (floats?)
 3Lab_data.amb | F | Labyrinth data?
 [3Map_data.amb](../FileSpecs/Maps.md) | F | Map data
 3Object3D.amb | F | 3D object data (floats?)
 3Overlay3D.amb | F | 3D object data (floats?)
 [Icon_data.amb](../FileSpecs/Maps.md) | G | Tilesets / Animation information
-[Automap.amb](../FileSpecs/Maps.md) | G | Exploration state of 3D dungeons
-Chest_data.amb | G | Data of all chests
-Merchant_data.amb | G | Data of all merchants
+[Automap.amb](../FileSpecs/Maps.md) | J | Exploration state of 3D dungeons
+Chest_data.amb | J | Data of all chests
+Merchant_data.amb | J | Data of all merchants
 [Monster_char_data.amb](../FileSpecs/Characters.md) | H | Monster data
 [Monster_groups.amb](../FileSpecs/Characters.md) | H | Monster formation info
 [NPC_char.amb](../FileSpecs/Characters.md) | G | NPC data
-[Party_char.amb](../FileSpecs/Characters.md) | G | Party character data
+[Party_char.amb](../FileSpecs/Characters.md) | J | Party character data
 Place_data.amb | G | Data for locations like merchants
 
 

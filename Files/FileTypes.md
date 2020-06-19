@@ -10,7 +10,7 @@ VOL1 | Another [LOB encoded](LOB.md) file | 0x564f4c31 ('VOL1')
 AMNC | Multiple file container (data uses [JH](JH.md) encoding). The C stands for "crypted". | 0x414d4e43 ('AMNC')
 AMNP | Multiple file container (data uses [JH](JH.md) encoding and the files are often [LOB](LOB.md) encoded in addition). The P stands for "packed". | 0x414d4e50 ('AMNP')
 AMBR | Multiple file container (no encryption). The R stands for "raw". | 0x414d4252 ('AMNR')
-AMPC | Another multiple file container | 0x414d5043 ('AMPC')
+AMPC | Another multiple file container (only compressed, not JH encrypted) | 0x414d5043 ('AMPC')
 
 The music is stored in another format which can be loaded by the tool [Sonic Arranger](https://www.exotica.org.uk/wiki/Sonic_Arranger).
 
