@@ -10,4 +10,6 @@ Value | Name
 5 | Sylphe
 6 | Felinic
 7 | Moranian
-8 | Thalionic
+8 | Thalionic (only Netsrak)
+13 | Animal (only Necros the cat NPC)
+14 | Monster (all non-human monsters)

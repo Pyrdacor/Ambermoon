@@ -11,6 +11,8 @@ Value | Name
 6 | Alchemist
 7 | Mystic
 8 | Mage
+9 | Animal (only Necros the cat NPC)
+10 | Monster (monsters who aren't mages, thiefs, etc)
 
 ## On items
 
