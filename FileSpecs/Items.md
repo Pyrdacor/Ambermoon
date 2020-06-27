@@ -4,7 +4,7 @@ In contrast to other game data the item data is stored inside the code/executabl
 
 Each item uses 60 bytes. There are a total of 402 items. In total that makes 24120 bytes.
 
-As executables differ in each version of the game the correct offset for the item data is different in each version too. The first item is the paralyzed condition (yes even ailments symbols are treated as items). So maybe it can be helpful to search for the text "PARALYZED" (or whatever it is called in the english version) or "GELÄHMT" (in the german version). The name of the item is at offset 40 (decimal) in relation to the item. So if you found the mentioned text you have to subtract 40 from that offset to find the offset of the first item inside the data.
+As executables differ in each version of the game the correct offset for the item data is different in each version too. The first item is the lamed condition (yes even ailment symbols are treated as items). So maybe it can be helpful to search for the text "LAMED" (english version) or "GELÄHMT" (german version, not that the letter Ä is special and is encoded as C4 hex). The name of the item is at offset 40 (decimal) in relation to the item. So if you found the mentioned text you have to subtract 40 from that offset to find the offset of the first item inside the data.
 
 Some known offsets are 0x4CAD4 (english version) and 0x4D144 (german version) but that also may depent on the game version or patch.
 
