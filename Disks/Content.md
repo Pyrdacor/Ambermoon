@@ -4,6 +4,7 @@ Disk A:
 
 - Installer
 - Initial save game
+- Program code (including item data)
 
 Disk B:
 
@@ -36,3 +37,4 @@ Disk H:
 Disk I:
 
 - Music
+- Extro / outro
