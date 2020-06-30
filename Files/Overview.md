@@ -4,18 +4,18 @@
 
 File | Disk | Format
 ---- | ---- | ----
-AM2_BLIT | A | ?
-AM2_CPU | A | ?
+AM2_BLIT | A | ? (not imploded)
+AM2_CPU | A | ? (imploded)
 
 ## Graphics
 
 File | Disk | Format
 ---- | ---- | ----
-[1Icon_gfx.amb](../FileSpecs/Maps.md) | C | GFX width 16, 5 planes
-[2Icon_gfx.amb](../FileSpecs/Maps.md) | D | GFX width 16, 5 planes
+[1Icon_gfx.amb](../FileSpecs/Maps.md) | C | GFX (16x16, 5 planes)
+[2Icon_gfx.amb](../FileSpecs/Maps.md) | D | GFX (16x16, 5 planes)
 2Wall3D.amb | E | GFX 128x80, 4 bit textures
-[3Icon_gfx.amb](../FileSpecs/Maps.md) | F | GFX width 16, 5 planes
-3Wall3D.amb | F | GFX 128x80, 4 bit textures
+[3Icon_gfx.amb](../FileSpecs/Maps.md) | F | GFX (16x16, 5 planes)
+3Wall3D.amb | F | GFX (128x80, 4 planes)
 Automap_graphics | G | GFX
 Combat_background.amb | H | GFX width 320, 5 planes
 Combat_graphics | G | GFX
@@ -25,9 +25,9 @@ Lab_background.amb | G | GFX
 Layouts.amb | G | GFX width 320, 3 planes
 Monster_gfx.amb | H | GFX width 96, 5 planes
 NPC_gfx.amb | G | GFX
-Object_icons | G | GFX
-Palettes.amb | G | PAL
-Party_gfx.amb | G | GFX width 16, 5 planes
+Object_icons | G | Item GFX (16x16, 5 planes, Palette 33)
+Palettes.amb | G | PAL (64 colors, 16bit X4R4G4B4 each)
+Party_gfx.amb | G | GFX (16x16, 5 planes)
 Pics_80x80.amb | G | GFX width 80, 5 planes
 Portraits.amb | G | GFX width 32, 5 planes
 Riddlemouth_graphics | G | GFX

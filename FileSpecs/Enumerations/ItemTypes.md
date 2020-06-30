@@ -22,3 +22,4 @@ Value | Name
 17 | Magical item
 18 | Special item
 19 | Transportation
+21 | Ailment
