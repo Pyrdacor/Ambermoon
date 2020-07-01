@@ -11,10 +11,10 @@ AM2_CPU | A | ? (imploded)
 
 File | Disk | Format
 ---- | ---- | ----
-[1Icon_gfx.amb](../FileSpecs/Maps.md) | C | GFX (16x16, 5 planes)
-[2Icon_gfx.amb](../FileSpecs/Maps.md) | D | GFX (16x16, 5 planes)
+[1Icon_gfx.amb](../FileSpecs/Maps2D.md) | C | GFX (16x16, 5 planes)
+[2Icon_gfx.amb](../FileSpecs/Maps2D.md) | D | GFX (16x16, 5 planes)
 2Wall3D.amb | E | GFX 128x80, 4 bit textures
-[3Icon_gfx.amb](../FileSpecs/Maps.md) | F | GFX (16x16, 5 planes)
+[3Icon_gfx.amb](../FileSpecs/Maps2D.md) | F | GFX (16x16, 5 planes)
 3Wall3D.amb | F | GFX (128x80, 4 planes)
 Automap_graphics | G | GFX
 Combat_background.amb | H | GFX width 320, 5 planes
