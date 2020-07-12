@@ -5,7 +5,7 @@ Data for map events is stored in the map data files. See [Maps](Maps.md) for mor
 Here the data format for specific map events is shown. Each map event can use up to 9 bytes for the event data.
 
 
-## Change map event
+## Change map event (0x01)
 
 Offset | Type | Description
 --- | --- | ---
@@ -16,7 +16,7 @@ Offset | Type | Description
 0x05 | uword | New map index
 0x07 | ubyte[2] | **Unknown**
 
-## Treasure event
+## Treasure event (0x03)
 
 Used for chests, piles, lootable map objects etc.
 
@@ -36,7 +36,7 @@ Offset | Type | Description
 0x05 | uword | Key index if locked
 0x07 | uword | **Unknown** (seems to be 0xffff for unlocked, and some id otherwise, trap index maybe?)
 
-## Text popup event
+## Text popup event (0x04)
 
 Assumption of data inside the unknown data:
 - Optional image index (e.g. grandfather in bed or the valdyn portal)
@@ -48,3 +48,10 @@ Offset | Type | Description
 0x03 | uword | Map text index
 0x05 | ubyte[4] | **Unknown**
 
+## Riddlemouth event (0x08)
+
+Offset | Type | Description
+--- | --- | ---
+0x00 | ubyte | Riddle text index
+0x01 | ubyte | Solution text index (used when riddle was solved)
+0x02 | ubyte[7] | **Unknown**
