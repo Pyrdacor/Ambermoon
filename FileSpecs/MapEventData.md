@@ -65,3 +65,25 @@ Offset | Type | Description
 0x02 | ubyte[3] | **Unknown**
 0x05 | uword | New tile overlay index
 0x07 | ubyte[2] | **Unknown**
+
+## Condition event (0x0D)
+
+Condition events represent conditions that control if following events (in the list) are executed or not. Multiple conditions can be chained which equals a logical AND conjunction.
+
+Offset | Type | Description
+--- | --- | ---
+0x00 | ubyte | Condition type
+0x01 | ubyte | Condition value (e.g. variable value)
+0x02 | ubyte[4] | **Unknown**
+0x05 | ubyte | Object index (depends on condition's type, e.g. variable or item index)
+0x07 | ubyte[2] | **Unknown**
+
+### Condition types
+
+Value | Type
+--- | ---
+0 | Map variable
+1 | Global variable (game variable)
+7 | Use item (from inventory)
+9 | Treasure looted (chained after a treasures)
+14 | Hand cursor interaction
