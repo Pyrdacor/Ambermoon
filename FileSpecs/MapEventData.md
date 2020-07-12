@@ -87,3 +87,11 @@ Value | Type
 7 | Use item (from inventory)
 9 | Treasure looted (chained after a treasures)
 14 | Hand cursor interaction
+
+Research: There might be the following condition types:
+- Eye cursor
+- Mouth cursor
+- Has items (in inventory or equipped)
+- Has party member
+- Has level
+- Drop items (stones into the well)
