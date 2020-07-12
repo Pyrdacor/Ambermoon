@@ -61,7 +61,7 @@ Offset | Type | Description
 0x014C | TileData[Width*Height] | Map tile data
 ... | ? | Map events etc
 
-A tile data entry (TileData) consist of 4 ubytes.
+A tile data entry (TileData) consists of 4 ubytes.
 
 ```
 underlay_tile_index = ((tile_data[1] & 0xe0) << 3) | tile_data[0];
@@ -79,40 +79,16 @@ Stored as 16 bits. 1 means true/active, 0 means false/inactive. Most significant
 
 Bit | Meaning
 --- | ---
-1 | Indoor
-2 | Outdoor
-3 | Dungeon
-4 | Automapper (if active the map has to be explored)
-5 | Unknown1
-6 | WorldSurface
-7 | SecondaryUI3D
-8 | NoSleepUntilDawn (if active sleep time is always 8 hours)
-9 | StationaryGraphics
-10 | Unknown2
-11 | SecondaryUI2D
-12 | Unknown3 (only 0 in map 269 which is the house of the baron of Spannenberg, also in map 148 but this is a bug)
-13-15 | Unknown / unused
-
-## Automap
-
-The automap is used to track the exploration of 3D maps. Each tile is represented by a bit. The file Automap.amb contains a sub-file for each 3D map with the same index/name as the map. The size of the automap is `ceil(MAP_WIDTH * MAP_HEIGHT / 8)`.
-
-Example: The map 259 has a size of 19x19 tiles. So in total this are 361 tiles. The automap contains 1 bit for each tile -> 361 bits. 361 bits are 45 full bytes and 1 additional bit so 46 bytes are needed to store all exploration bits.
-
-If a bit is set to 0 it is not explored, if set to 1 it is explored.
-
-Note that the initial maps seem to be fully explored but if a map is entered and the map should not be explored at this state, the automap is adjusted to represent an unexplored map.
-
-### Bit order
-
-Each byte is read as 8 bits. Then the lowest bit comes first.
-
-Example: Automap starts with F0 03 70 01
-
-The first byte F0 is 1111_0000 in binary. The lowest bit is the right-most 0. So the first 4 tiles are unexplored (0) and the next 4 tiles are explored (1). Then the second byte 03 is considered which is 0000_0011 in binary. We again start on the right with the 1. So the next 2 tiles are explored (1) and the following 6 are not (0).
-
-Order:
-
-    7654 3210 FEDC BA98 ...
-
-The correctly ordered bit sequence for the exploration example above would look like: 00001111110000000000111010000000.
+0 | Indoor
+1 | Outdoor
+2 | Dungeon
+3 | Automapper (if active the map has to be explored)
+4 | Unknown1
+5 | WorldSurface
+6 | SecondaryUI3D
+7 | NoSleepUntilDawn (if active sleep time is always 8 hours)
+8 | StationaryGraphics
+9 | Unknown2
+10 | SecondaryUI2D
+11 | Unknown3 (only 0 in map 269 which is the house of the baron of Spannenberg, also in map 148 but this is a bug)
+12-15 | Unknown / unused
