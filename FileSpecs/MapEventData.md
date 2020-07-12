@@ -20,6 +20,12 @@ Offset | Type | Description
 
 Used for chests, piles, lootable map objects etc.
 
+Assumption of data inside the unknown data:
+- Trap types
+- Trap damage
+- Ability to disarm the trap
+- Ability to lockpick the chest
+
 Offset | Type | Description
 --- | --- | ---
 0x00 | ubyte | Lock flags (0: open, 1: locked, can be opened by lockpick, many values, not sure yet)
@@ -29,4 +35,16 @@ Offset | Type | Description
 0x04 | ubyte | Remove if empty (0 or 1)
 0x05 | uword | Key index if locked
 0x07 | uword | **Unknown** (seems to be 0xffff for unlocked, and some id otherwise, trap index maybe?)
+
+## Text popup event
+
+Assumption of data inside the unknown data:
+- Optional image index (e.g. grandfather in bed or the valdyn portal)
+- Popup size
+
+Offset | Type | Description
+--- | --- | ---
+0x00 | ubyte[3] | **Unknown**
+0x03 | uword | Map text index
+0x05 | ubyte[4] | **Unknown**
 
