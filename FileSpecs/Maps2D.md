@@ -73,6 +73,26 @@ Underlay is the background tile graphic and overlay an optional graphic on top o
 
 The indices refer to an IconData from the given tileset. Index 0 means 'nothing' or 'empty'.
 
+### Map flags
+
+Stored as 16 bits. 1 means true/active, 0 means false/inactive. Most significant bit is bit 15 and least significant is bit 0.
+
+Bit | Meaning
+--- | ---
+1 | Indoor
+2 | Outdoor
+3 | Dungeon
+4 | Automapper (if active the map has to be explored)
+5 | Unknown1
+6 | WorldSurface
+7 | SecondaryUI3D
+8 | NoSleepUntilDawn (if active sleep time is always 8 hours)
+9 | StationaryGraphics
+10 | Unknown2
+11 | SecondaryUI2D
+12 | Unknown3 (only 0 in map 269 which is the house of the baron of Spannenberg, also in map 148 but this is a bug)
+13-15 | Unknown / unused
+
 ## Automap
 
 The automap is used to track the exploration of 3D maps. Each tile is represented by a bit. The file Automap.amb contains a sub-file for each 3D map with the same index/name as the map. The size of the automap is `ceil(MAP_WIDTH * MAP_HEIGHT / 8)`.
