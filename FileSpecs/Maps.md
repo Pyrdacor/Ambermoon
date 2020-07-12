@@ -78,6 +78,22 @@ Offset | Type | Description
 0x0001 | ubyte[9] | Event data
 0x000A | uword | Next event (in the list) or 0xffff if none
 
+#### Event types
+
+Value | Type
+--- | ---
+1 | Map change
+3 | Treasure
+4 | Text popup
+6 | Damage
+8 | Riddlemouth
+10 | Change tile
+13 | Condition
+14 | Action
+* | Rest is not decoded yet
+
+The data for those events is described in a separate file [MapEventData](MapEventData.md).
+
 ## Maps
 
 The first 256 maps (1 to 256) build the Lyramion world map. Each is 50x50 tiles in size.
