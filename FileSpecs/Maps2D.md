@@ -46,24 +46,28 @@ So if you have icon graphic index 1 and 3 animation tiles the icons 1, 2 and 3 a
 
 Offset | Type | Description
 ----|----|----
-0x0000 | uword | **Unknown**
+0x0000 | uword | Flags
 0x0002 | ubyte | Type (1: 3D map, 2: 2D map)
-0x0003 | ubyte | **Unknown**
+0x0003 | ubyte | Music index
 0x0004 | ubyte | Width in tiles
 0x0005 | ubyte | Height in tiles
 0x0006 | ubyte | Tileset (1-8)
-0x0007 | ubyte | **Unknown**
-0x0008 | ulong | **Unknown**
-0x000C | ubyte[320] | Event data (content **unknown**)
+0x0007 | ubyte | NPC gfx index
+0x0008 | ubyte | Lab back index
+0x0009 | ubyte | Palette index
+0x000A | ubyte | World (0: Lyramion, 1: Forest moon, 2: Morag)
+0x000B | ubyte | End of map header (always 0)
+0x000C | ubyte[320] | **Unknown**
 0x014C | TileData[Width*Height] | Map tile data
-... | ? | Remaining bytes **unknown**
+... | ? | Map events etc
 
-A tile data entry (TileData) looks like this:
+A tile data entry (TileData) consist of 4 ubytes.
 
-Offset | Type | Description
-----|----|----
-0x0000 | uword | Underlay index
-0x0002 | uword | Overlay index
+```
+underlay_tile_index = ((tile_data[1] & 0xe0) << 3) | tile_data[0];
+overlay_tile_index = ((tile_data[2] & 0x07) << 8) | tile_data[3];
+map_event_index = tile_data[1] & 0x1f;
+```
 
 Underlay is the background tile graphic and overlay an optional graphic on top of the background.
 
