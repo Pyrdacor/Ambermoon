@@ -46,7 +46,7 @@ So if you have icon graphic index 1 and 3 animation tiles the icons 1, 2 and 3 a
 
 Offset | Type | Description
 ----|----|----
-0x0000 | ubyte[12] | Header (see (Maps)[Maps.md])
+0x0000 | ubyte[12] | Header (see [Maps](Maps.md))
 0x000C | ubyte[320] | **Unknown**
 0x014C | TileData[Width*Height] | Map tile data
 ... | ? | Map events etc
@@ -62,23 +62,3 @@ map_event_index = tile_data[1] & 0x1f;
 Underlay is the background tile graphic and overlay an optional graphic on top of the background.
 
 The indices refer to an IconData from the given tileset. Index 0 means 'nothing' or 'empty'.
-
-### Map flags
-
-Stored as 16 bits. 1 means true/active, 0 means false/inactive. Most significant bit is bit 15 and least significant is bit 0.
-
-Bit | Meaning
---- | ---
-0 | Indoor
-1 | Outdoor
-2 | Dungeon
-3 | Automapper (if active the map has to be explored)
-4 | Unknown1
-5 | WorldSurface
-6 | SecondaryUI3D
-7 | NoSleepUntilDawn (if active sleep time is always 8 hours)
-8 | StationaryGraphics
-9 | Unknown2
-10 | SecondaryUI2D
-11 | Unknown3 (only 0 in map 269 which is the house of the baron of Spannenberg, also in map 148 but this is a bug)
-12-15 | Unknown / unused
