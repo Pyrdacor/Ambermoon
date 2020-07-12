@@ -90,7 +90,7 @@ Value | Type
 10 | Change tile
 13 | Condition
 14 | Action
-* | Rest is not decoded yet
+\* | Rest is not decoded yet
 
 The data for those events is described in a separate file [MapEventData](MapEventData.md).
 
