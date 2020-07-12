@@ -55,3 +55,13 @@ Offset | Type | Description
 0x00 | ubyte | Riddle text index
 0x01 | ubyte | Solution text index (used when riddle was solved)
 0x02 | ubyte[7] | **Unknown**
+
+## Change tile overlay event (0x0A)
+
+Offset | Type | Description
+--- | --- | ---
+0x00 | ubyte | Tile‘s x coordinate (1-based)
+0x01 | ubyte | Tile's y coordinate (1-based)
+0x02 | ubyte[3] | **Unknown**
+0x05 | uword | New tile overlay index
+0x07 | ubyte[2] | **Unknown**
