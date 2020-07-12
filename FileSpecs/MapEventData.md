@@ -11,7 +11,8 @@ Offset | Type | Description
 --- | --- | ---
 0x00 | ubyte | New x coordinate (1-based)
 0x01 | ubyte | New y coordinate (1-based)
-0x02 | ubyte[3] | **Unknown**
+0x02 | ubyte | New direction (0: up, 1: right, 2: down, 3: left)
+0x03 | ubyte[2] | **Unknown**
 0x05 | uword | New map index
 0x07 | ubyte[2] | **Unknown**
 
@@ -21,7 +22,7 @@ Used for chests, piles, lootable map objects etc.
 
 Offset | Type | Description
 --- | --- | ---
-0x00 | ubyte | Lock flags
+0x00 | ubyte | Lock flags (0: open, 1: locked, can be opened by lockpick, many values, not sure yet)
 0x01 | ubyte | **Unknown** (always 0 except for one chest with 20 blue discs which has 0x32 and lock flags of 0x00)
 0x02 | ubyte | **Unknown** (0xff for unlocked chests)
 0x03 | ubyte | Chest data index
