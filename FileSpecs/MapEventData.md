@@ -56,7 +56,7 @@ Offset | Type | Description
 --- | --- | ---
 0x00 | ubyte[9] | **Unknown**
 
-## Damage event (0x05)
+## Damage event (0x06)
 
 Damages the player (fireplaces, traps, etc).
 
@@ -120,6 +120,25 @@ Research: There might be the following condition types:
 - Has party member
 - Has level
 - Drop items (stones into the well)
+
+## Action event (0x0E)
+
+Actions are related to conditions. For example they can change variable values which are used in conditions.
+
+Offset | Type | Description
+--- | --- | ---
+0x00 | ubyte | Action type
+0x01 | ubyte | Action value (e.g. variable value to set)
+0x02 | ubyte[4] | **Unknown**
+0x05 | ubyte | Object index (depends on action's type, e.g. variable index)
+0x07 | ubyte[2] | **Unknown**
+
+### Action types
+
+Value | Type
+--- | ---
+0 | Set map variable
+1 | Set global variable (game variable)
 
 ## Question popup event (0x13)
 
