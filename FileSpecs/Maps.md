@@ -85,11 +85,14 @@ Value | Type
 1 | Map change
 3 | Treasure
 4 | Text popup
+5 | Spinner
 6 | Damage
 8 | Riddlemouth
-10 | Change tile
+9 | Change player attribute
+10 | Change tile appearance
 13 | Condition
 14 | Action
+19 | Question popup
 \* | Rest is not decoded yet
 
 The data for those events is described in a separate file [MapEventData](MapEventData.md).

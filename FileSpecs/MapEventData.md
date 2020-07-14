@@ -48,6 +48,22 @@ Offset | Type | Description
 0x03 | uword | Map text index
 0x05 | ubyte[4] | **Unknown**
 
+## Spinner event (0x05)
+
+Only used in 3D maps. Rotates the player to a random direction if he steps onto it.
+
+Offset | Type | Description
+--- | --- | ---
+0x00 | ubyte[9] | **Unknown**
+
+## Damage event (0x05)
+
+Damages the player (fireplaces, traps, etc).
+
+Offset | Type | Description
+--- | --- | ---
+0x00 | ubyte[9] | **Unknown**
+
 ## Riddlemouth event (0x08)
 
 Offset | Type | Description
@@ -55,6 +71,15 @@ Offset | Type | Description
 0x00 | ubyte | Riddle text index
 0x01 | ubyte | Solution text index (used when riddle was solved)
 0x02 | ubyte[7] | **Unknown**
+
+## Change player attribute (0x09)
+
+Offset | Type | Description
+--- | --- | ---
+0x00 | ubyte[6] | **Unknown**
+0x06 | ubyte | [Attribute](Enumerations/Attributes.md)
+0x07 | ubyte | **Unknown**
+0x08 | ubyte | Value to add
 
 ## Change tile overlay event (0x0A)
 
@@ -95,3 +120,18 @@ Research: There might be the following condition types:
 - Has party member
 - Has level
 - Drop items (stones into the well)
+
+## Question popup event (0x13)
+
+Text popup as question with buttons 'Yes' and 'No'.
+The next map event is only executed if answered with 'Yes'.
+
+Assumption of data inside the unknown data:
+- Optional image index (e.g. grandfather in bed or the valdyn portal)
+- Popup size
+- Button texts
+
+Offset | Type | Description
+--- | --- | ---
+0x00 | byte | Map text index
+0x05 | ubyte[8] | **Unknown**
