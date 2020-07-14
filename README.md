@@ -6,6 +6,40 @@ If you have some valuable input, feel free to contact me: trobt@web.de
 
 You can use the issue tracker or pull requests to contribute as well.
 
+## Content
+
+Section | Description
+--- | ---
+Disks | Game version and patches
+FileSpecs | File format specifications
+Files | General file encoding information and file list
+Graphics | Exported game graphics
+
+### File format specifications
+
+- [Characters](FileSpecs/Characters.md) (data of party members, monsters and NPCs)
+- [Graphics](FileSpecs/Graphics.md) (information about graphic formats)
+- [Items](FileSpecs/Items.md) (data of items and where to find it)
+- [Maps](FileSpecs/Maps.md) (data of maps)
+  - [Maps2D](FileSpecs/Maps2D.md) (data specific for 2D maps)
+  - [Maps3D](FileSpecs/Maps3D.md) (data specific for 3D maps)
+  - [MapEventData](FileSpecs/MapEventData.md) (data structure of specific map events)
+- Enumerations (values of game enumerations)
+  - [Abilities](FileSpecs/Enumerations/Abilities.md)
+  - [Ailments](FileSpecs/Enumerations/Ailments.md)
+  - [Attributes](FileSpecs/Enumerations/Attributes.md)
+  - [CharacterTypes](FileSpecs/Enumerations/CharacterTypes.md)
+  - [Classes](FileSpecs/Enumerations/Classes.md)
+  - [Gender](FileSpecs/Enumerations/Gender.md)
+  - [ItemTypes](FileSpecs/Enumerations/ItemTypes.md)
+  - [Languages](FileSpecs/Enumerations/Languages.md)
+  - [MonsterElements](FileSpecs/Enumerations/MonsterElements.md)
+  - [MonsterFlags](FileSpecs/Enumerations/MonsterFlags.md)
+  - [Races](FileSpecs/Enumerations/Races.md)
+  - [Spells](FileSpecs/Enumerations/Spells.md)
+  - [SpellTypes](FileSpecs/Enumerations/SpellTypes.md)
+
+
 ## Ambermoon.net
 
 I plan to develop Ambermoon from scratch with C#. Have a look [here](https://github.com/Pyrdacor/Ambermoon.net).
