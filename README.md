@@ -10,10 +10,10 @@ You can use the issue tracker or pull requests to contribute as well.
 
 Section | Description
 --- | ---
-Disks | Game version and patches
-FileSpecs | File format specifications
-Files | General file encoding information and file list
-Graphics | Exported game graphics
+[Disks](Disks) | Game versions and patches
+[FileSpecs](FileSpecs) | File format specifications
+[Files](Files) | General file encoding information and file list
+[Graphics](Graphics) | Exported game graphics
 
 ### File format specifications
 
@@ -39,6 +39,12 @@ Graphics | Exported game graphics
   - [Races](FileSpecs/Enumerations/Races.md)
   - [Spells](FileSpecs/Enumerations/Spells.md)
   - [SpellTypes](FileSpecs/Enumerations/SpellTypes.md)
+
+### Graphics
+
+-[Items](Graphics/Items)
+-[Maps](Graphics/Maps)
+-[Palettes](Graphics/Palettes.jpg)
 
 
 ## Ambermoon.net
