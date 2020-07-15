@@ -112,7 +112,7 @@ Offset | Type | Description
 0x01 | ubyte | Condition value (e.g. variable value)
 0x02 | ubyte[4] | **Unknown**
 0x05 | ubyte | Object index (depends on condition's type, e.g. variable or item index)
-0x07 | ubyte[2] | Map event index to continue with if condition is met (0xffff means continue with next map event in the list)
+0x07 | ubyte[2] | Map event index to continue with if condition is met (0xffff means continue with next map event in the list). The index is 0-based.
 
 ### Condition types
 
