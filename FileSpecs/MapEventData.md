@@ -112,7 +112,7 @@ Offset | Type | Description
 0x01 | ubyte | Condition value (e.g. variable value)
 0x02 | ubyte[4] | **Unknown**
 0x05 | ubyte | Object index (depends on condition's type, e.g. variable or item index)
-0x07 | ubyte[2] | **Unknown**
+0x07 | ubyte[2] | Map event index to continue with if condition is met (0xffff means continue with next map event in the list)
 
 ### Condition types
 
@@ -121,7 +121,7 @@ Value | Type
 0 | Map variable
 1 | Global variable (game variable)
 7 | Use item (from inventory)
-9 | Treasure looted (chained after a treasures)
+9 | Success (is chained after other events like battles or treasures and is something like "battle won" or "treasure fully looted")
 14 | Hand cursor interaction
 
 Research: There might be the following condition types:
