@@ -34,7 +34,7 @@ Offset | Type | Description
 0x03 | ubyte | Chest data index
 0x04 | ubyte | Remove if empty (0 or 1)
 0x05 | uword | Key index if locked
-0x07 | uword | **Unknown** (seems to be 0xffff for unlocked, and some id otherwise, trap index maybe?)
+0x07 | uword | Unlock fail event index (0-based)
 
 ## Text popup event (0x04 / 4)
 
