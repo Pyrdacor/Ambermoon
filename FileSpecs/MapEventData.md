@@ -163,8 +163,9 @@ Assumption of data inside the unknown data:
 
 Offset | Type | Description
 --- | --- | ---
-0x00 | byte | Map text index
-0x05 | ubyte[8] | **Unknown**
+0x00 | ubyte | Map text index
+0x05 | ubyte[6] | **Unknown**
+0x07 | uword | Event index (0-based) of index to continue with when 'No' is chosen
 
 ## Change music event (0x14 / 20)
 
