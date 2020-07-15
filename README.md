@@ -30,6 +30,7 @@ Graphics | Exported game graphics
   - [Attributes](FileSpecs/Enumerations/Attributes.md)
   - [CharacterTypes](FileSpecs/Enumerations/CharacterTypes.md)
   - [Classes](FileSpecs/Enumerations/Classes.md)
+  - [Directions](FileSpecs/Enumerations/Directions.md)
   - [Gender](FileSpecs/Enumerations/Gender.md)
   - [ItemTypes](FileSpecs/Enumerations/ItemTypes.md)
   - [Languages](FileSpecs/Enumerations/Languages.md)

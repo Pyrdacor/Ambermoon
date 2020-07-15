@@ -52,11 +52,12 @@ Offset | Type | Description
 
 ## Spinner event (0x05 / 5)
 
-Only used in 3D maps. Rotates the player to a random direction if he steps onto it.
+Only used in 3D maps. Rotates the player to a specific or random direction if he steps onto it.
 
 Offset | Type | Description
 --- | --- | ---
-0x00 | ubyte[9] | **Unknown**
+0x00 | ubyte | Post-spin [direction](Enumerations/Directions.md)
+0x01 | ubyte[8] | Unused
 
 ## Damage event (0x06 / 6)
 
