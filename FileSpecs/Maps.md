@@ -40,11 +40,24 @@ Bit | Meaning
 
 ### Map data
 
-After the header there are 320 ubytes. The purpose is not decoded yet.
+After the header there are 320 ubytes which represent references to party members, NPCs or monsters on the map. Maybe other references as well. See below.
 
 Following these bytes there is the tile data at offset 0x014C. For 2D maps each tile is represented by 4 bytes, for 3D maps there are 2 bytes per tile.
 
 The tile graphic indices are encoded in these bytes as well as the map event index.
+
+### Character references
+
+There are 32 possible references with 10 bytes each (in total 320 ubytes).
+
+Each entry looks like this:
+
+Offset | Type | Description
+--- | --- | ---
+0x00 | ubyte | Index (of party member, NPC or monster group)
+0x01 | ubyte | **Unknown** (only seen 1 so far)
+0x02 | ubyte | Type (4 = party member, 5 = NPC, 6 = monster)
+0x03 | ubyte[7] | **Unknown**
 
 ### Map events
 
