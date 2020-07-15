@@ -94,6 +94,14 @@ Offset | Type | Description
 0x05 | uword | New tile overlay index
 0x07 | ubyte[2] | **Unknown**
 
+## Start battle event (0x0B / 11)
+
+Offset | Type | Description
+--- | --- | ---
+0x00 | ubyte[6] | **Unknown**
+0x06 | ubyte | Monster group index
+0x07 | ubyte[2] | **Unknown**
+
 ## Condition event (0x0D / 13)
 
 Condition events represent conditions that control if following events (in the list) are executed or not. Multiple conditions can be chained which equals a logical AND conjunction.

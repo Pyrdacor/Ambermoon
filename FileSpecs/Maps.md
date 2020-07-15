@@ -90,9 +90,11 @@ Value | Type
 8 | Riddlemouth
 9 | Change player attribute
 10 | Change tile appearance
+11 | Start battle
 13 | Condition
 14 | Action
 19 | Question popup
+20 | Change music
 \* | Rest is not decoded yet
 
 The data for those events is described in a separate file [MapEventData](MapEventData.md).
