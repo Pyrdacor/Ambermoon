@@ -42,9 +42,9 @@ Section | Description
 
 ### Graphics
 
--[Items](Graphics/Items)
--[Maps](Graphics/Maps)
--[Palettes](Graphics/Palettes.jpg)
+- [Items](Graphics/Items)
+- [Maps](Graphics/Maps)
+- [Palettes](Graphics/Palettes.jpg)
 
 
 ## Ambermoon.net
