@@ -46,8 +46,9 @@ Assumption of data inside the unknown data:
 
 Offset | Type | Description
 --- | --- | ---
-0x00 | ubyte[3] | **Unknown**
-0x03 | uword | Map text index
+0x00 | ubyte | Event picture index (0-based) or 0xff if no image
+0x01 | ubyte[3] | **Unknown**
+0x04 | ubyte | Map text index
 0x05 | ubyte[4] | **Unknown**
 
 ## Spinner event (0x05 / 5)
