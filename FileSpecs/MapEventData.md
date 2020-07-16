@@ -21,8 +21,6 @@ Offset | Type | Description
 Used for chests, piles, lootable map objects etc.
 
 Assumption of data inside the unknown data:
-- Trap types
-- Trap damage
 - Ability to disarm the trap
 - Ability to lockpick the chest
 
@@ -41,7 +39,7 @@ Offset | Type | Description
 Show a text popup with an optional image. Note that the following map events in the list are only executed after the popup is closed. This is important e.g. for music change events before and after this event.
 
 Assumption of data inside the unknown data:
-- Optional image index (e.g. grandfather in bed or the valdyn portal)
+- Border style / appearance
 - Popup size
 
 Offset | Type | Description
@@ -158,15 +156,16 @@ Text popup as question with buttons 'Yes' and 'No'.
 The next map event is only executed if answered with 'Yes'.
 
 Assumption of data inside the unknown data:
-- Optional image index (e.g. grandfather in bed or the valdyn portal)
+- Optional image index
 - Popup size
 - Button texts
+- Border style / appearance
 
 Offset | Type | Description
 --- | --- | ---
 0x00 | ubyte | Map text index
 0x05 | ubyte[6] | **Unknown**
-0x07 | uword | Event index (0-based) of index to continue with when 'No' is chosen
+0x07 | uword | Index (0-based) of map event to continue with when 'No' is chosen
 
 ## Change music event (0x14 / 20)
 
