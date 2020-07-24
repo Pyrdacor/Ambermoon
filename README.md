@@ -48,6 +48,7 @@ Section | Description
   - [Forest moon map](Graphics/Maps/300.png)
   - [Morag map](Graphics/Maps/513.png)
 - [Objects3D](Graphics/Objects3D)
+- [Floors](Graphics/Floors)
 - [Palettes](Graphics/Palettes.jpg)
 
 
