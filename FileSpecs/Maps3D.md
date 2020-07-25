@@ -2,13 +2,53 @@
 
 3D Maps use multiple files:
 - The actual map data (2Map_data.amb and 3Map_data.amb)
-- Texture data (2Wall3D.amb, 3Wall3D.amb)
+- Wall texture data (2Wall3D.amb, 3Wall3D.amb)
+- Floor/ceiling texture data (Floors.amb)
 - Overlay texture data (2Overlay3D.amb, 3Overlay3D.amb)
-- Labyrinth data (2Lab_data_.amb, 3Lab_data_.amb)
+- Object texture data (2Object3D.amb, 3Object3D.amb)
+- [Labyrinth data](Labdata.md) (2Lab_data_.amb, 3Lab_data_.amb)
 
 Each of those contains multiple files which represent a specific map, texture or labyrinth structure.
 
-Todo... 
+## Map data
+
+Offset | Type | Description
+----|----|----
+0x0000 | ubyte[12] | Header (see [Maps](Maps.md))
+0x000C | ubyte[320] | Character references (see [Maps](Maps.md))
+0x014C | BlockData[Width*Height] | Map block data
+... | ? | Map events etc
+
+A block data entry (BlockData) consists of 2 ubytes.
+
+```
+if (block_data[0] <= 100)
+{
+    // it's an object
+    object_index = block_data[0];
+    wall_index = 0;
+}
+else if (block_data[0] < 255)
+{
+    // it's a wall
+    object_index = 0;
+    wall_index = block_data[0] - 100;
+}
+else // block_data[0] == 255
+{
+    // it's the map border (no wall nor object)
+    object_index = 0;
+    wall_index = 0;
+}
+
+map_event_index = tile_data[1];
+```
+
+So a block can mark a wall, an object or the map border (which isn't drawn at all).
+
+A wall uses the wall index to access wall data from the [Labdata](Labdata.md). An object uses the object index to access object data from the [Labdata](Labdata.md).
+
+Note that those indices are 1-based while 0 means "no wall" or "no object". But inside the labdata they might be 0-based so you might have to subtract 1 to get the right data.
 
 ## Automap
 

@@ -47,7 +47,7 @@ So if you have icon graphic index 1 and 3 animation tiles the icons 1, 2 and 3 a
 Offset | Type | Description
 ----|----|----
 0x0000 | ubyte[12] | Header (see [Maps](Maps.md))
-0x000C | ubyte[320] | **Unknown**
+0x000C | ubyte[320] | Character references (see [Maps](Maps.md))
 0x014C | TileData[Width*Height] | Map tile data
 ... | ? | Map events etc
 

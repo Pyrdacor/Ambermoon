@@ -11,9 +11,9 @@ Offset | Type | Description
 0x0003 | ubyte | Music index
 0x0004 | ubyte | Width in tiles
 0x0005 | ubyte | Height in tiles
-0x0006 | ubyte | Tileset (1-8)
+0x0006 | ubyte | Tileset (1-8) in 2D or labdata index in 3D
 0x0007 | ubyte | NPC gfx index
-0x0008 | ubyte | Lab back index
+0x0008 | ubyte | Labyrinth background index
 0x0009 | ubyte | Palette index
 0x000A | ubyte | World (0: Lyramion, 1: Forest moon, 2: Morag)
 0x000B | ubyte | End of map header (always 0)
