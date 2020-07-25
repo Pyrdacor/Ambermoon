@@ -57,7 +57,7 @@ In the 16 pixel wide example each plane has 16 bits (= 2 bytes). The most signif
 
 ### Textures
 
-There is a special format for wall, object and overlay textures mentioned above as **4 bit packed texture graphics**. Instead of having planes for each pixel row it has a plane for every 8 pixels. So if for example you have a 16x32 pixel texture like mentioned above you would have two plane iterations per pixel row:
+There is a special format for wall, object and overlay textures mentioned above as **4 bit packed texture graphics**. Instead of having planes for each pixel row it has planes for every 8 pixels (I call these a chunk below). So if for example you have a 16x32 pixel texture like mentioned above you would have two plane iterations per pixel row:
 
 ```
 Chunk0Plane0 Chunk0Plane1 Chunk0Plane2 Chunk0Plane3 Chunk1Plane0 Chunk1Plane1 Chunk1Plane2 Chunk1Plane3
