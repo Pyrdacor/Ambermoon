@@ -85,6 +85,6 @@ Value | Name
 0 | None
 1 | Wall (not shown as symbol but used by wall data)
 2 | Riddlemouth
-9 | Open door
-10 | Closed door
+9 | Closed door
+10 | Open door
 14 | Exit
