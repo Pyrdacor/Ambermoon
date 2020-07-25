@@ -28,6 +28,7 @@ Value in byte stream (hex): 08 21
 - G = 2 * 16 = 32
 - B = 1 * 16 = 16
 
+To get better results you can add the value itself to the shifted result. So that color components become 0x11,0x22,0xff,etc instead of 0x10,0x20,0xf0,etc. This reflects the original colors better.
 
 ## Other graphics
 
@@ -66,7 +67,7 @@ Chunk2Plane0 Chunk2Plane1 Chunk2Plane2 Chunk2Plane3 Chunk3Plane0 Chunk3Plane1 Ch
 Chunk62Plane0 Chunk62Plane1 Chunk62Plane2 Chunk62Plane3 Chunk63Plane0 Chunk63Plane1 Chunk63Plane2 Chunk63Plane3
 ```
 
-I guess this was done to achieve better compression for large textures.
+I guess this was done to achieve better compression for large textures. The 4 planes always form a dword (32 bit value).
 
 To make it a bit more complicated there are textures which are 4 bytes larger then the expected data size. In this case you have to skip the first 4 bytes. I am not sure yet what the purpose of this was or if I just decompressed the data wrong but it works if you do so.
 
