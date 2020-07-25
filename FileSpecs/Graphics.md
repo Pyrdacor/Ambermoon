@@ -1,10 +1,11 @@
 # Graphics
 
-There are 4 graphic formats in Ambermoon.
+There are 5 graphic formats in Ambermoon.
 
 - 3 bit palette graphics
 - 4 bit palette graphics
 - 5 bit palette graphics
+- 4 bit packed texture graphics
 - and palettes themselves
 
 ## Palettes
@@ -30,7 +31,7 @@ Value in byte stream (hex): 08 21
 
 ## Other graphics
 
-All other graphics use colors from a palette. So they only store the palette indices. There are 3 versions that use 3, 4 or 5 bits to store the indices. Fewer bits mean less amount of colors.
+All other graphics use colors from a palette. So they only store the palette indices. There are 4 versions that use 3, 4 or 5 bits to store the indices. Fewer bits mean less amount of colors.
 
 - 3 bit: 8 possible colors (e.g. used by the user interface)
 - 4 bit: 16 possible colors (e.g. used by 3D textures)
@@ -42,12 +43,36 @@ Each plane contains a specific bit (e.g. the first) of each pixel. So a 3 bit gr
 
 But it's a bit more complicated. The graphic is divided into pixel lines. For each pixel line there are the mentioned 3 to 5 planes containing bits 0 to 4 of each pixel in the pixel line.
 
-A very easy example would be a graphic with the size of 8x8. There would be 8 pixel lines. Each of them 8 pixels wide. Each plane contains 1 bit for each pixel in the line. So in this example each plane is 8 bits in size (which equals 1 byte).
+So if you have an 4bit 16x32 pixel graphic you would have 4 planes for every 16 pixel row. As each plane has 1 bit per pixel you would have 16 bits per plane and row:
 
-If we had a 4 bit graphic we would have 4 planes. So for each pixel line there would be 4 bytes. The first byte would contain all the first bits (bit 0) of the 8 pixel values, the second byte would contain all the second bits (bit 1) of the 8 pixel values and so on. Then for each of the 8 rows the same is done (32 bytes in total).
+```
+Row0Plane0 Row0Plane1 Row0Plane2 Row0Plane3
+Row1Plane0 Row1Plane1 Row1Plane2 Row1Plane3
+Row2Plane0 Row2Plane1 Row2Plane2 Row2Plane3
+...
+Row31Plane0 Row31Plane1 Row31Plane2 Row31Plane3
+```
 
+In the 16 pixel wide example each plane has 16 bits (= 2 bytes). The most significant bit of the first byte is always for the first pixel and the least significant bit of the last byte is for the last pixel.
 
-### Example data
+### Textures
+
+There is a special format for wall, object and overlay textures mentioned above as **4 bit packed texture graphics**. Instead of having planes for each pixel row it has a plane for every 8 pixels. So if for example you have a 16x32 pixel texture like mentioned above you would have two plane iterations per pixel row:
+
+```
+Chunk0Plane0 Chunk0Plane1 Chunk0Plane2 Chunk0Plane3 Chunk1Plane0 Chunk1Plane1 Chunk1Plane2 Chunk1Plane3
+Chunk2Plane0 Chunk2Plane1 Chunk2Plane2 Chunk2Plane3 Chunk3Plane0 Chunk3Plane1 Chunk3Plane2 Chunk3Plane3
+...
+Chunk62Plane0 Chunk62Plane1 Chunk62Plane2 Chunk62Plane3 Chunk63Plane0 Chunk63Plane1 Chunk63Plane2 Chunk63Plane3
+```
+
+I guess this was done to achieve better compression for large textures.
+
+To make it a bit more complicated there are textures which are 4 bytes larger then the expected data size. In this case you have to skip the first 4 bytes. I am not sure yet what the purpose of this was or if I just decompressed the data wrong but it works if you do so.
+
+Note: Floor textures don't use this format. They use the normal 4 bit palette format without the 8 pixel packing.
+
+### Example data (not packed)
 
 The first pixel line (4 bytes, each digit/letter is a bit):
 
@@ -83,3 +108,5 @@ Pixel | Palette index (bin) | Palette index (dec)
 Graphics do not specify which palette they are using. So this must be stored elsewhere or be known by the game.
 
 For instance the map tiles use specific palettes based on the tileset index.
+
+Textures for floors, walls, objects and overlays can just use palette 18 but the palette index is given by the map which uses these textures as well.
