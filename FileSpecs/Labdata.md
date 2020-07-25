@@ -43,7 +43,8 @@ Each object info consists of 14 bytes:
 
 Offset | Type | Description
 ----|----|----
-0x0000 | ubyte[4] | Flags/Header/Collision info? (**Unknown** yet)
+0x0000 | ubyte[3] | Header/Collision info? (**Unknown** yet)
+0x0003 | ubyte | Object flags (see below)
 0x0004 | uword | Texture index (taken from XObject3D.amb)
 0x0006 | ubyte | Num animation frames
 0x0007 | ubyte | **Unknown**
@@ -53,6 +54,14 @@ Offset | Type | Description
 0x000C | uword | Mapped texture height (used in rendering)
 
 The mapped texture dimensions are used to resize the texture (stretch or shrink). For example if the mapped texture width is twice the normal texture size, the object appears wider.
+
+### Object flags
+
+Bit | Property
+----|----
+3 | Floor object? (e.g. used by the hole in grandfather's cellar)
+7 | Block movement (e.g. solid barrels)
+Rest | **Unknown**
 
 ## Walls
 
@@ -73,6 +82,15 @@ Offset | Type | Description
 0x0007 | ubyte | Number of overlays
 
 If the number of overlays is greater than zero then there will be this amount of overlay data entries for this wall.
+
+### Wall flags
+
+Bit | Property
+----|----
+1 | Block sight (not 100% sure but beside walls this is used by doors or exits)
+3 | Transparency (e.g. spider webs)
+7 | Block movement (e.g. normal solid walls)
+Rest | **Unknown**
 
 ### Overlay data entry
 
