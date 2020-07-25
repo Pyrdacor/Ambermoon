@@ -73,3 +73,18 @@ Order:
     7654 3210 FEDC BA98 ...
 
 The correctly ordered bit sequence for the exploration example above would look like: 00001111110000000000111010000000.
+
+### Automap types
+
+On the automap there are symbols for specific objects on the map like doors, riddlemouths, levers, teleporters, etc.
+
+The following list only contains those where the associated value is verified inside the data. If the graphic indices match these values is not verified yet.
+
+Value | Name
+----|----
+0 | None
+1 | Wall (not shown as symbol but used by wall data)
+2 | Riddlemouth
+9 | Open door
+10 | Closed door
+14 | Exit

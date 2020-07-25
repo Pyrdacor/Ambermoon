@@ -78,7 +78,8 @@ Offset | Type | Description
 0x0000 | ubyte[3] | **Unknown**
 0x0003 | ubyte | Flags (see below)
 0x0004 | ubyte | Texture index (taken from XWall3D.amb)
-0x0005 | ubyte[2] | **Unknown**
+0x0005 | ubyte | Automap type (see [Maps3D](Maps3D.md))
+0x0006 | ubyte | **Unknown**
 0x0007 | ubyte | Number of overlays
 
 If the number of overlays is greater than zero then there will be this amount of overlay data entries for this wall.
