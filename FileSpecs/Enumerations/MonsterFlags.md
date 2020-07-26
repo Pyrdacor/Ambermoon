@@ -14,4 +14,4 @@ Bit | Property
 
 Note: It is a known bug that Reg is not marked as boss so you could cast Fear on him and he will flee with all the items. So I guess he should have bit 3 set as well. Possibly bit 1 was set for him by mistake.
 
-If Reg is fixed, bit 2 above is only set for gargoyles and demons. Exceptions are the beast and Thornahuun.
+If Reg is fixed, bit 1 above is only set for gargoyles and demons. Exceptions are the beast and Thornahuun.
