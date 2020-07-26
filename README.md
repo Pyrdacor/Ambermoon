@@ -63,8 +63,12 @@ I plan to develop Ambermoon from scratch with C#. Have a look [here](https://git
 
 Most of the work was done by a bunch of good fellas.
 - Oliver Gantert and others of project [Amberworld](http://amberworld.sourceforge.net/)
-- Daniel Schulz from [Slothsoft](http://slothsoft.net/Ambermoon/) with his Savegame editor
+- Daniel Schulz from [Slothsoft](http://slothsoft.net/Ambermoon/) with his savegame editor
+- Nico Bendlin and his [ambermoon research project](https://gitlab.com/ambermoon/research)
+
+ And others provide information about Thalion and Ambermoon for ages now.
 - Alex Holland from the [Thalion Webshrine](http://thalion.exotica.org.uk/)
+- Gerald Müller-Bruhnke from the [Thalion Source](http://home.wtal.de/gmb/index.htm)
 - and many others (if you know anyone I forgot, please let me know)
 
 I just want to gather the whole findings at a central place and provide it on a save storage for the future.
