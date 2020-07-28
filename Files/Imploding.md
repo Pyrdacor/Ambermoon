@@ -226,3 +226,213 @@ The algorithm described above can be used to decompress the DATA hunk of the imp
 The hunk sizes can be taken from the BSS hunks in the imploded file. I don't know how to distribute the decompressed data to the destination hunks correctly as I didn't bother with it yet. I only needed this to read the item data and other stuff from AM2_CPU and I can also read it from the undistributed decompressed data. So if you have any input, feel free to add this info.
 
 Another point is the size of the uncompressed data. There is a 24-bit big-endian value at offset 0x1D in the decompress CODE hunk which seem to be about right. But I am not sure if this is 100% correct as my testing revealed that a bunch of bytes (around 50) remain in the input untouched. Counting together the sizes of the BSS hunk sizes seem to be wrong as well (maybe there is some stuff in-between that is not decoded?). I don't know but you can add this information if you want.
+
+## C# example code
+
+```cs
+/// <summary>
+/// Data deploding
+/// </summary>
+/// <param name="buffer">A buffer that is large enough to contain all the decompressed data.
+/// On entry, the buffer should contain the entire compressed data at offset 0.
+/// On successful exit, the buffer will contain the decompressed data at offset 0.</param>
+/// <param name="table">Explosion table, consisting of 8 16-bit big-endian "base offset" values and
+/// 12 8-bit "extra bits" values.</param>
+/// <param name="implodedSize">Compressed size in bytes</param>
+/// <param name="explodedSize">Decompressed size in bytes</param>
+/// <returns></returns>
+unsafe bool Explode(byte* buffer, byte[] table, uint implodedSize, uint explodedSize, uint firstLiteralLength, byte initialBitBuffer)
+{
+	byte* input = buffer + implodedSize - 3; /* input pointer  */
+	byte* output = buffer + explodedSize; /* output pointer */
+	byte* match; /* match pointer  */
+	byte bitBuffer;
+	uint literalLength;
+	uint matchLength;
+	uint selector, x, y;
+	uint[] matchBase = new uint[8];
+
+	uint ReadBits(uint count)
+	{
+		uint result = 0;
+
+		if ((count & 0x80) != 0)
+		{
+			result = *(--input);
+			count &= 0x7f;
+		}
+
+		for (int i = 0; i < count; i++)
+		{
+			byte bit = (byte)(bitBuffer >> 7);
+			bitBuffer <<= 1;
+
+			if (bitBuffer == 0)
+			{
+				byte temp = bit;
+				bitBuffer = *(--input);
+				bit = (byte)(bitBuffer >> 7);
+				bitBuffer <<= 1;
+				if (temp != 0)
+					++bitBuffer;
+			}
+
+			result <<= 1;
+			result |= bit;
+		}
+
+		return result;
+	}
+
+	/* read the 'base' part of the explosion table into native byte order,
+	 * for speed */
+	for (x = 0; x < 8; x++)
+	{
+		matchBase[x] = (uint)((table[x * 2] << 8) | table[x * 2 + 1]);
+	}
+
+	literalLength = firstLiteralLength; // word at offset 0x1E6 in the last code hunk
+	bitBuffer = initialBitBuffer; // byte at offset 0x1E8 in the last code hunk
+	int i;
+
+	while (true)
+	{
+		/* copy literal run */
+		if ((output - buffer) < literalLength)
+			return false; /* enough space? */
+
+		for (i = 0; i < literalLength; ++i)
+			*--output = *--input;
+
+		/* main exit point - after the literal copy */
+		if (output <= buffer)
+			break;
+
+		/* static Huffman encoding of the match length and selector: 
+		 * 
+		 * 0     -> selector = 0, match_len = 1
+		 * 10    -> selector = 1, match_len = 2
+		 * 110   -> selector = 2, match_len = 3
+		 * 1110  -> selector = 3, match_len = 4
+		 * 11110 -> selector = 3, match_len = 5 + next three bits (5-12)
+		 * 11111 -> selector = 3, match_len = (next input byte)-1 (0-254)
+		 * 
+		 */
+		if (ReadBits(1) != 0)
+		{
+			if (ReadBits(1) != 0)
+			{
+				if (ReadBits(1) != 0)
+				{
+					selector = 3;
+
+					if (ReadBits(1) != 0)
+					{
+						if (ReadBits(1) != 0) // 11111
+						{
+							matchLength = *--input;
+
+							if (matchLength == 0)
+								return false; /* bad input */
+
+							matchLength--;
+						}
+						else // 11110
+						{
+							matchLength = 5 + ReadBits(3);
+						}
+					}
+					else // 1110
+					{
+						matchLength = 4;
+					}
+				}
+				else // 110
+				{
+					selector = 2;
+					matchLength = 3;
+				}
+			}
+			else // 10
+			{
+				selector = 1;
+				matchLength = 2;
+			}
+		}
+		else // 0
+		{
+			selector = 0;
+			matchLength = 1;
+		}
+
+		/* another Huffman tuple, for deciding the base value (y) and number
+		 * of extra bits required from the input stream (x) to create the
+		 * length of the next literal run. Selector is 0-3, as previously
+		 * obtained.
+		 *
+		 * 0  -> base = 0,                      extra = {1,1,1,1}[selector]
+		 * 10 -> base = 2,                      extra = {2,3,3,4}[selector]
+		 * 11 -> base = {6,10,10,18}[selector]  extra = {4,5,7,14}[selector]
+		 */
+		y = 0;
+		x = selector;
+		if (ReadBits(1) != 0)
+		{
+			if (ReadBits(1) != 0) // 11
+			{
+				y = ExplodeLiteralBase[x];
+				x += 8;
+			}
+			else // 10
+			{
+				y = 2;
+				x += 4;
+			}
+		}
+		x = ExplodeLiteralExtraBits[x];
+
+		/* next literal run length: read [x] bits and add [y] */
+		literalLength = y + ReadBits(x);
+
+		/* another Huffman tuple, for deciding the match distance: _base and
+		 * _extra are from the explosion table, as passed into the explode
+		 * function.
+		 *
+		 * 0  -> base = 1                        extra = _extra[selector + 0]
+		 * 10 -> base = 1 + _base[selector + 0]  extra = _extra[selector + 4]
+		 * 11 -> base = 1 + _base[selector + 4]  extra = _extra[selector + 8]
+		 */
+		match = output + 1;
+		x = selector;
+		if (ReadBits(1) != 0)
+		{
+			if (ReadBits(1) != 0)
+			{
+				match += matchBase[selector + 4];
+				x += 8;
+			}
+			else
+			{
+				match += matchBase[selector];
+				x += 4;
+			}
+		}
+		x = table[x + 16];
+
+		/* obtain the value of the next [x] extra bits and
+		 * add it to the match offset */
+		match += ReadBits(x);
+
+
+		/* copy match */
+		if ((output - buffer) < matchLength)
+			return false; /* enough space? */
+
+		for (i = 0; i < matchLength + 1; ++i)
+			*--output = *--match;
+	}
+
+	/* return true if we used up all input bytes (as we should) */
+	return input == buffer;
+}
+```
