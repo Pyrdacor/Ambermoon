@@ -63,6 +63,13 @@ Note that the imploder stores the compressed data in reverse order so the first 
 
 This is basically a simple copy byte operation. Initialize the literal length with the **first literal length** and then use the literal length for the copy amount in each iteration of the decompression. The literal length will be updated to the next literal length in step 3.
 
+Pseudo code for reversed order:
+
+```
+for (i = 0; i < literalLength; ++i)
+    *--output = *--input;
+```
+
 If the output pointer has reached the full size you should stop decompressing right after this step.
 
 #### 2. Read the next match length
@@ -131,13 +138,21 @@ So we use the **explosion table** here which was mentioned in the beginning. Thi
 
 The algorithm to calculate the real match offset is similar to this of step 3. You take the base offset and add the value of `readBits(extraBits)`;
 
-But there is one specialty here. The extra bits value can have a special encoding where the most significant bit is set. For example you get the value 0x80 or 0x81 here. Such a value means that you will read a full byte first and then add n bits to the right where n is the value without the upper bit set (= `value & 0x7f`). What this basically means is that bit amounts >= 8 are read in a way where the first 8 bits are read as a full byte from the input stream and then continue with the rest bits from the **bit buffer** as usual. The first 8 bits are the most siginificant ones. So if you for example have to read 9 bits in total you get `bbbbbbbbx` where b are the bits of the whole read byte and x is the additional 9th bit.
+But there is one specialty here. The extra bits value can have a special encoding where the most significant bit is set. For example you get the value 0x80 or 0x81 here. Such a value means that you will read a full byte first and then add n bits to the right where n is the value without the upper bit set (= `value & 0x7f`). What this basically means is that bit amounts >= 8 are read in a way where the first 8 bits are read as a full byte from the input stream and then continue with the rest bits from the **bit buffer** as usual. The first 8 bits are the most significant ones. So if you for example have to read 9 bits in total you get `bbbbbbbbx` where b are the bits of the whole read byte and x is the additional 9th bit.
 
 *Side note: It took me quiet some time to reverse-engineer this undocumented specialty. :) But it is used in AM2_CPU.*
 
 #### 5. Copy the match
 
-Basically you read n bytes at the output pointer - the match offset where n is the match length and write each byte to the output pointer. If you decode in reverse order the minus becomes a plus of course. ;)
+Basically you read n bytes at the output pointer minus the match offset where n is the match length and write each byte to the output pointer. If you decode in reverse order the minus becomes a plus of course. ;)
+
+Pseudo code for reversed order:
+
+```
+match = output + matchOffset; // use minus here for non-reversed order
+for (i = 0; i < matchLength; ++i)
+    *--output = *--match;
+```
 
 ### Bit buffer
 
@@ -145,14 +160,14 @@ The **bit buffer** is a byte that is used by all readBits operations either for 
 
 When reading from the **bit buffer** the most significant bit is read first. So you literally read the bits from left to right from most significant to least significant.
 
-But the reading is special. After each reading the content is bit-shifted left by 1. If the **bit buffer** becomes 0 after this, the **bit buffer** is immediately replaced by the next input byte and the read bit value is the first bit of the new **bit buffer**. If the previously read bit was 1 (which is always the case if the initial bit buffer wasn't 0) the new **bit buffer** is increased by 1. This last thing ensures that every new **bit buffer** ends with a 1.
+But the reading is special. After each reading the content is bit-shifted left by 1. If the **bit buffer** becomes 0 after this, the **bit buffer** is immediately replaced by the next input byte and the read bit value is the first bit of the new **bit buffer**. If the previously read bit was 1 (which is always the case if the initial bit buffer wasn't 0) the new **bit buffer** is increased by 1. This last step ensures that every new **bit buffer** ends with a 1-bit.
 
-The mentioned algorithm is equivalent to reading each bit for every bit buffer but the initial bit buffer. The initial bit buffer is only read until the last 1 is found.
+The mentioned algorithm is equivalent to reading each bit of the bit buffer in a loop. But **it differs for the initial bit buffer**! The initial bit buffer is only read until the last 1-bit is found.
 
 **Example:**
 
-Initial bit buffer = 0xa2 (binary: ‭10100010‬) \
-Next input byte = 0x00 (binary: 00000000)
+Initial bit buffer = 0xA2 (binary: ‭10100010‬) \
+Next input byte = 0x04 (binary: 00000100)
 
 Read | Bit value | New bit buffer after left-shift
 --- | --- | ---
@@ -162,13 +177,15 @@ Read | Bit value | New bit buffer after left-shift
 4th | 0 | 00100000
 5th | 0 | 01000000
 6rd | 0 | 10000000
-7th | 0 | 00000000 <- next byte is read, new bit buffer is 00000001
+7th | 0 | 00000000 <- next byte is read, new bit buffer is 00001001
 
-You see that on the 7th read (bit 6) the content becomes 0 and so the buffer is immediately replaced by the next input byte (which is 0x00). The resulting bit value is the most significant bit of the new byte (which is 0). So the 7th read does not return 1 but 0 and what is more important: the last 3 bits of the initial bit buffer are not read at all. The last 1-bit of the initial bit buffer is a marker and no real data.
+You see that on the 7th read (bit 6) the content becomes 0 and so the buffer is immediately replaced by the next input byte (which is 0x04). The resulting bit value is the most significant bit of the new byte (which is 0). So the 7th read does not return 1 but 0 and what is more important: the last 3 bits of the initial bit buffer are not read as data at all. The last 1-bit of the initial bit buffer is a marker and no real data. Every bit behind this marker bit is discarded in the initial bit buffer.
 
-Note that in the example the next byte (0x00) is left-shifted immediately too after reading the first bit and then the 1 from the previous read is added. So the new bit buffer content becomes `(0x00 << 1) + 1` which is 00000001 in binary.
+Note that in the example the next byte (0x04) is left-shifted immediately too after reading the first bit and then the 1 from the previous read is added. So the new bit buffer content becomes `(0x04 << 1) + 1` which is 00001001 in binary.
 
-Then the last 1 which was added is again a marker and no data. But on each bit buffer swap the marker 1 is moved over to the next buffer and as the marker is at the 8th position (7th but it was shifted before), all 8 bits of each following bit buffer are used.
+Then the last 1-bit which was added is again a marker and no data. But on each bit buffer swap the marker 1 is moved over to the next buffer and as the marker is placed at the 8th position (7th but it was shifted before), all 8 bits of each following bit buffer are used.
+
+Note that the initial bit buffer will provide 0 to 7 data bits depending on the position of the last 1-bit. It can never provide 8 data bits because of the mentioned behavior above.
 
 ### Read multiple bits
 
@@ -195,16 +212,16 @@ I won't go into details about huffman trees here. If you are interested you migh
 
 Basically speaking the huffman tree encodes data with fewer bits. A static huffman tree provides static bit sequences with an associated meaning. In our context it is basically a dictionary of bit sequences like the tables above.
 
-When you read a huffman value you have to read bit by bit. After each read it is clear if the read bit sequence represents a huffman code or more bits are needed.
+When you read a huffman value you have to read it bit by bit. After each read it is clear if the read bit sequence represents a huffman code or more bits are needed.
 
 If you have for example the possible binary huffman codes 0, 10 and 11 you will read like this:
 
 Read the first bit. If it is 0 you immediately know it is code 0. If it is 1 you have to read more bits. So in this case read the second bit. If it is 0 you have code 10, if it is 1 you have code 11. All huffman codes above work like this.
 
-You can represent this by consecutive if-statement like:
+You can represent this by consecutive if-statements like:
 
 ```
-if (readBits(1) == 1) // code 1X need more bits
+if (readBits(1) == 1) // code 1X -> need more bits
 {
     if (readBits(1) == 1) // code 11
     {
@@ -227,7 +244,7 @@ The algorithm described above can be used to decompress the DATA hunk of the imp
 
 The hunk sizes can be taken from the BSS hunks in the imploded file. I don't know how to distribute the decompressed data to the destination hunks correctly as I didn't bother with it yet. I only needed this to read the item data and other stuff from AM2_CPU and I can also read it from the undistributed decompressed data. So if you have any input, feel free to add this info.
 
-Another point is the size of the uncompressed data. There is a 24-bit big-endian value at offset 0x1D in the decompress CODE hunk which seem to be about right. But I am not sure if this is 100% correct as my testing revealed that a bunch of bytes (around 50) remain in the input untouched. Counting together the sizes of the BSS hunk sizes seem to be wrong as well (maybe there is some stuff in-between that is not decoded?). I don't know but you can add this information if you want.
+Another point is the total size of the uncompressed data which is required to stop decompressing. There is a 24-bit big-endian value at offset 0x1D in the decompress CODE hunk which seems to be about right. But I am not sure if this is 100% correct as my testing revealed that a bunch of bytes (around 50) remain in the input untouched. Counting together the sizes of the BSS hunk sizes seem to be wrong as well (maybe there is some stuff in-between that is not decoded?). I don't know but you can add this information if you want.
 
 ## C# example code
 
