@@ -162,7 +162,7 @@ When reading from the **bit buffer** the most significant bit is read first. So 
 
 But the reading is special. After each reading the content is bit-shifted left by 1. If the **bit buffer** becomes 0 after this, the **bit buffer** is immediately replaced by the next input byte and the read bit value is the first bit of the new **bit buffer**. If the previously read bit was 1 (which is always the case if the initial bit buffer wasn't 0) the new **bit buffer** is increased by 1. This last step ensures that every new **bit buffer** ends with a 1-bit.
 
-The mentioned algorithm is equivalent to reading each bit of the bit buffer in a loop. But **it differs for the initial bit buffer**! The initial bit buffer is only read until the last 1-bit is found.
+The mentioned algorithm is equivalent to reading each of the 8 bits of the bit buffer (e.g. by testing the highest bit and then shifting left). But **it differs for the initial bit buffer**! The initial bit buffer is only read until the last 1-bit is found.
 
 **Example:**
 
@@ -176,7 +176,7 @@ Read | Bit value | New bit buffer after left-shift
 3rd | 1 | 00010000
 4th | 0 | 00100000
 5th | 0 | 01000000
-6rd | 0 | 10000000
+6th | 0 | 10000000
 7th | 0 | 00000000 <- next byte is read, new bit buffer is 00001001
 
 You see that on the 7th read (bit 6) the content becomes 0 and so the buffer is immediately replaced by the next input byte (which is 0x04). The resulting bit value is the most significant bit of the new byte (which is 0). So the 7th read does not return 1 but 0 and what is more important: the last 3 bits of the initial bit buffer are not read as data at all. The last 1-bit of the initial bit buffer is a marker and no real data. Every bit behind this marker bit is discarded in the initial bit buffer.
