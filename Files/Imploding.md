@@ -78,7 +78,9 @@ Bits | Selector | Match length
 11110 | 3 | 6 + next 3 bits (length range is 6 to 13)
 11111 | 3 | next input byte (length range is 1 to 255, 0 is invalid)
 
-So in the last 2 cases you have to read additional bits from the **bit buffer** to get the real match length. The selector is needed in steps 3 and 4.
+So in the second last case you have to read additional bits from the **bit buffer** to get the real match length. In the last case you have to read the next input byte.
+
+The selector is needed in steps 3 and 4.
 
 #### 3. Read the next literal length
 
