@@ -94,9 +94,9 @@ Bits | Base length | Extra bits
 
 So here you need the static literal length tables mentioned at the beginning. The selector given in step 2 is used as an index inside these tables.
 
-Example:
+**Example:**
 
-Selector was 2 and you read the static huffman value 11 (binary).
+We assume that the selector was 2 and you read the static huffman value 11 (binary).
 So the next literal length would be:
 
 ```
@@ -109,13 +109,13 @@ Which is equivalent to:
 nextLiteralLength = 10 + readBits(7);
 ```
 
-An much more easier example would be with huffman code 0 where the base length value is fixed at 0 and the extra bits are always 1 regardless of the selector. So in this case the next literal length is either 0 or 1:
+An easier example would be with huffman code 0 where the base length value is fixed at 0 and the extra bits are always 1 regardless of the selector. So in this case the next literal length is either 0 or 1:
 
 ```
 nextLiteralLength = 0 + readBits(1);
 ```
 
-In the next decompression loop in step 1 you will have to copy this number as raw literals.
+In the next decompression loop in step 1 you will copy this number of raw literals.
 
 #### 4. Read the next match offset
 
@@ -129,9 +129,9 @@ Bits | Base offset | Extra bits
 
 So we use the **explosion table** here which was mentioned in the beginning. This table is provided in the decompression CODE hunk. explosionTableBaseOffsets is the array of 16-bit base offsets and explosionTableExtraBits is the part with the 8-bit extra bit values.
 
-The algorithm to calculate the real match offset as similar to this of step 3. You take the base offset and add the value of `readBits(extraBits)`;
+The algorithm to calculate the real match offset is similar to this of step 3. You take the base offset and add the value of `readBits(extraBits)`;
 
-But there is one specialty here. The extra bits value can have a special encoding where the most significant bit is set. For example you get the value 0x80 or 0x81 here. Such a value means that you will read a full byte first and then add n bits to the right where n is the value & 0x7f. What this basically means is that bit amounts >= 8 are read in a way where the first 8 bits are read as a full byte from the input stream and then continue with the rest bits from the **bit buffer** as usual.
+But there is one specialty here. The extra bits value can have a special encoding where the most significant bit is set. For example you get the value 0x80 or 0x81 here. Such a value means that you will read a full byte first and then add n bits to the right where n is the value without the upper bit set (= `value & 0x7f`). What this basically means is that bit amounts >= 8 are read in a way where the first 8 bits are read as a full byte from the input stream and then continue with the rest bits from the **bit buffer** as usual. The first 8 bits are the most siginificant ones. So if you for example have to read 9 bits in total you get `bbbbbbbbx` where b are the bits of the whole read byte and x is the additional 9th bit.
 
 *Side note: It took me quiet some time to reverse-engineer this undocumented specialty. :) But it is used in AM2_CPU.*
 
