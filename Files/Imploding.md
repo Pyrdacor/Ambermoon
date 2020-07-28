@@ -229,6 +229,8 @@ Another point is the size of the uncompressed data. There is a 24-bit big-endian
 
 ## C# example code
 
+Note that the data is decompressed in reverse order (from back to front) and the decompressed data still will be reversed. You have to reverse the order on your own after deploding.
+
 ```cs
 /// <summary>
 /// Data deploding
@@ -241,7 +243,7 @@ Another point is the size of the uncompressed data. There is a 24-bit big-endian
 /// <param name="implodedSize">Compressed size in bytes</param>
 /// <param name="explodedSize">Decompressed size in bytes</param>
 /// <returns></returns>
-unsafe bool Explode(byte* buffer, byte[] table, uint implodedSize, uint explodedSize, uint firstLiteralLength, byte initialBitBuffer)
+unsafe bool Deplode(byte* buffer, byte[] table, uint implodedSize, uint explodedSize, uint firstLiteralLength, byte initialBitBuffer)
 {
 	byte* input = buffer + implodedSize - 3; /* input pointer  */
 	byte* output = buffer + explodedSize; /* output pointer */
