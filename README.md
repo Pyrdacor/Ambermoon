@@ -40,6 +40,9 @@ Section | Description
   - [Races](FileSpecs/Enumerations/Races.md)
   - [Spells](FileSpecs/Enumerations/Spells.md)
   - [SpellTypes](FileSpecs/Enumerations/SpellTypes.md)
+- [Executables](Files/Executables.md)
+  - [Hunk format](Files/Hunks.md)
+  - [Imploder](Files/Imploding.md)
 
 ### Graphics
 
