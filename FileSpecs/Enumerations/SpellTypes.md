@@ -27,3 +27,27 @@ Healer | 0x81
 Alchemist | 0x82
 Mystic | 0x84
 Mage | 0x08
+
+
+## On items
+
+Items that provide a spell on usage (e.g. scrolls or magical items) also define a spell type as follows:
+
+Value | Name
+----|----
+0 | Healing (white spells)
+1 | Alchemistic (blue spells)
+2 | Mystic (green spells)
+3 | Destruction (black spells)
+6 | Special
+
+You can determine if an item provides a spell by checking the spell index or usage count.
+
+The special spell type is used with the following spell indices (this might not be complete yet):
+
+Value | Name
+----|----
+1 | Lockpicking (used by lockpick)
+2 | Call eagle (used by flute)
+4 | Play elf harp (used by elf harp)
+11 | Magical map (use by magical map)
