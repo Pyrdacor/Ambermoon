@@ -4,32 +4,34 @@
 
 File | Disk | Format
 ---- | ---- | ----
-AM2_BLIT | A | ? (not imploded)
-AM2_CPU | A | ? (imploded)
+AM2_BLIT | A | Normal [hunk file](Hunks.md)
+AM2_CPU | A | [Imploded](Imploding.md) [hunk file](Hunks.md)
 
 ## Graphics
+
+For further details about the formats look [here](../FileSpecs/Graphics.md).
 
 File | Disk | Format
 ---- | ---- | ----
 [1Icon_gfx.amb](../FileSpecs/Maps2D.md) | C | GFX (16x16, 5 planes)
 [2Icon_gfx.amb](../FileSpecs/Maps2D.md) | D | GFX (16x16, 5 planes)
-2Wall3D.amb | E | GFX 128x80, 4 bit textures
+2Wall3D.amb | E | GFX 128x80, 4 bit texture)
 [3Icon_gfx.amb](../FileSpecs/Maps2D.md) | F | GFX (16x16, 5 planes)
-3Wall3D.amb | F | GFX (128x80, 4 planes)
+3Wall3D.amb | F | GFX (128x80, 4 bit texture)
 Automap_graphics | G | GFX
 Combat_background.amb | H | GFX width 320, 5 planes
 Combat_graphics | G | GFX
 Event_pix.amb | G | GFX width 320, 5 planes
-Floors.amb | G | GFX width 64, 4 planes
-Lab_background.amb | G | GFX
-Layouts.amb | G | GFX width 320, 3 planes
+Floors.amb | G | GFX (64x64, 4 planes)
+Lab_background.amb | G | GFX (144x20, 4 planes)
+Layouts.amb | G | GFX (320x163, 3 planes)
 Monster_gfx.amb | H | GFX width 96, 5 planes
 NPC_gfx.amb | G | GFX
-Object_icons | G | Item GFX (16x16, 5 planes, Palette 33)
-Palettes.amb | G | PAL (64 colors, 16bit X4R4G4B4 each)
+Object_icons | G | Item GFX (16x16, 5 planes, [Special palette](../FileSpecs/Graphics.md))
+Palettes.amb | G | GFX (32 colors, 16bit big-endian X4R4G4B4 each, see [here](../FileSpecs/Graphics.md))
 Party_gfx.amb | G | GFX (16x16, 5 planes)
 Pics_80x80.amb | G | GFX width 80, 5 planes
-Portraits.amb | G | GFX width 32, 5 planes
+Portraits.amb | G | GFX width (32x32, 5 planes, [Special palette](../FileSpecs/Graphics.md))
 Riddlemouth_graphics | G | GFX
 Stationary | G | GFX width 32, 5 planes
 Travel_gfx.amb | G | GFX width 16, 4 planes

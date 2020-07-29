@@ -47,6 +47,7 @@ Section | Description
 ### Graphics
 
 - [Items](Graphics/Items)
+- [Portraits](Graphics/Portraits)
 - [Maps](Graphics/Maps)
   - [Lyramion world map](Graphics/Maps/001.png)
   - [Forest moon map](Graphics/Maps/300.png)
@@ -55,6 +56,7 @@ Section | Description
 - [Walls3D](Graphics/Walls3D)
 - [Overlays3D](Graphics/Overlays3D)
 - [Floors](Graphics/Floors)
+- [World backgrounds](Graphics/WorldBackgrounds)
 - [Palettes](Graphics/Palettes.jpg)
 
 
@@ -78,23 +80,9 @@ I just want to gather the whole findings at a central place and provide it on a 
 
 At least some contributions will come from me as well like some file specs and the formatting of all the data. :)
 
-My latest contributions are decoding of map events, 3D map and lab formats and packed texture formats.
+My latest contributions are decoding of map events, 3D map and lab formats and packed texture formats. Moreover I reverse engineered the imploder algorithm so the file AM2_CPU can be deploded and read on PCs.
 
 I marked unknown values in the specs as **Unknown**. Would be nice if some of those values' meaning could be revealed by someone.
-
-## Resources
-
-- Map graphics
-- Portraits
-- Screenshots
-- Texts
-- etc
-
-## Information
-
-- File types and their encoding
-- File format specs
-- etc
 
 ## Language
 

@@ -18,6 +18,8 @@ Note: The headers are stored in big endian format. So 'JH' is stored as 'J' (0x4
 
 Note: The JH encoding is just an encryption while the LOB encoding is a compression.
 
+If you want to know how to decode a whole file look [here](FileDecoding.md).
+
 ## Usage
 
 File | Size (<a name="U"></a>[U](#U "Uncompressed")/<a name="C"></a>[C](#C "Compressed")) | Format

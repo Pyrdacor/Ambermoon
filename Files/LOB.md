@@ -2,7 +2,7 @@
 
 The LOB compression was created by Lothar Beck who was related to Ambermoon. It is a proprietary algorithm so not much is known.
 
-There was a piece of C code in the Amberworld project which could decompress LOB data (see the below C code example).
+There was a piece of C code in the Amberworld project which could decompress LOB data (see the below C code example). Oliver Gantert from the Amberworld project mentioned recently that he can now also compress with LOB.
 
 After looking at this code for a while I understood how LOB works and that the algorithm for decompression is actually much simpler. See my C# code example below.
 

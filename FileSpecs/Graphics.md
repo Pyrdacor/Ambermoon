@@ -69,8 +69,6 @@ Chunk62Plane0 Chunk62Plane1 Chunk62Plane2 Chunk62Plane3 Chunk63Plane0 Chunk63Pla
 
 I guess this was done to achieve better compression for large textures. The 4 planes always form a dword (32 bit value).
 
-To make it a bit more complicated there are textures which are 4 bytes larger then the expected data size. In this case you have to skip the first 4 bytes. I am not sure yet what the purpose of this was or if I just decompressed the data wrong but it works if you do so.
-
 Note: Floor textures don't use this format. They use the normal 4 bit palette format without the 8 pixel packing.
 
 ### Example data (not packed)
