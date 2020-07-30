@@ -15,11 +15,15 @@ build:
 artifacts:
   - path: AmbermoonTools-Windows.zip
     name: AmbermoonTools-Windows
+  - path: AmbermoonTools\**\*.nupkg
+    name: NugetPackages
 
 after_build:
   - 7z a AmbermoonTools-Windows.zip "%APPVEYOR_BUILD_FOLDER%\AmbermoonTools\Ambermoon.Common\bin\Release\netstandard2.1\Ambermoon.Common.dll"
   - 7z a AmbermoonTools-Windows.zip "%APPVEYOR_BUILD_FOLDER%\AmbermoonTools\Ambermoon.Data.Common\bin\Release\netstandard2.1\Ambermoon.Data.Common.dll"
   - 7z a AmbermoonTools-Windows.zip "%APPVEYOR_BUILD_FOLDER%\AmbermoonTools\Ambermoon.Data.Legacy\bin\Release\netstandard2.1\Ambermoon.Data.Legacy.dll"
+  - mkdir "%APPVEYOR_BUILD_FOLDER%\AmbermoonTools\nuget"
+  - xcopy /Y /I "%APPVEYOR_BUILD_FOLDER%\AmbermoonTools\Ambermoon.Data.Legacy\bin\Release\*.nupkg" "%APPVEYOR_BUILD_FOLDER%\nuget\*"
 
 test: off
 
@@ -37,9 +41,9 @@ deploy:
     on:
       APPVEYOR_REPO_TAG: true
   - provider: NuGet
+    name: NugetPackages
     api_key:
       secure: UwVH6GHdh4zr7mDxC/HWXBQni/uzh36MV5lsXRmrgyyYEXJ67H63sI31QG4AByXY
     skip_symbols: true
-    artifact: /.*(\.|\.s)nupkg/
     on:
       APPVEYOR_REPO_TAG: true
