@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using System.IO;
-using System.Text;
 
 namespace Ambermoon.Data.Legacy
 {
@@ -14,13 +13,19 @@ namespace Ambermoon.Data.Legacy
             ForceExtracted
         }
 
+        public interface ILogger
+        {
+            void Append(string text);
+            void AppendLine(string text);
+        }
+
         public Dictionary<string, IFileContainer> Files { get; } = new Dictionary<string, IFileContainer>();
         private readonly Dictionary<char, Dictionary<string, byte[]>> _loadedDisks = new Dictionary<char, Dictionary<string, byte[]>>();
         private readonly LoadPreference _loadPreference;
-        private readonly StringBuilder _log;
+        private readonly ILogger _log;
         private readonly bool _stopAtFirstError;
 
-        public GameData(LoadPreference loadPreference = LoadPreference.PreferExtracted, StringBuilder logger = null, bool stopAtFirstError = true)
+        public GameData(LoadPreference loadPreference = LoadPreference.PreferExtracted, ILogger logger = null, bool stopAtFirstError = true)
         {
             _loadPreference = loadPreference;
             _log = logger;
