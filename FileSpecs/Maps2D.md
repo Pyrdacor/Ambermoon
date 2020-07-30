@@ -33,7 +33,8 @@ A data entry (IconData) looks like this:
 
 Offset | Type | Description
 ----|----|----
-0x0000 | ulong | **Unknown**
+0x0000 | uword | Tile flags (see below)
+0x0002 | uword | **Unknown**
 0x0004 | uword | Icon graphic index
 0x0006 | ubyte | Number of animation tiles
 0x0007 | ubyte | **Unknown**
@@ -41,6 +42,17 @@ Offset | Type | Description
 The icon graphic index refers to an icon graphic. The index starts with 1 (index 1 is the first icon graphic). The number of animation tiles specifies the number of icon graphics belonging to the tile's animation (e.g. water uses multiple tiles for animation). Non-animated tiles have a value of 1.
 
 So if you have icon graphic index 1 and 3 animation tiles the icons 1, 2 and 3 are used for the animation.
+
+### Tile flags
+
+- Bit 0: Allow movement (0 means block movement)
+- Bit 7-9: Sit/sleep value
+  - 0 -> no sitting nor sleeping
+  - 1 -> sit and look up
+  - 2 -> sit and look right
+  - 3 -> sit and look down
+  - 4 -> sit and look left
+  - 5 -> sleep (always face down)
 
 ## Map data
 
