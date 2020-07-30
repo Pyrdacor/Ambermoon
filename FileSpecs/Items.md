@@ -16,7 +16,7 @@ Offset | Type | Description
 ----|----|----
 0x0000 | ubyte | Item graphic index
 0x0001 | ubyte | [Item type](Enumerations/ItemTypes.md)
-0x0002 | ubyte | **Unknown**
+0x0002 | ubyte | [Equipment slot](Enumerations/EquipmentSlots.md)
 0x0003 | ubyte | **Unknown**
 0x0004 | ubyte | [Gender](Enumerations/Gender.md)
 0x0005 | ubyte | Number of hands
@@ -29,7 +29,13 @@ Offset | Type | Description
 0x000C | sbyte | Ability value
 0x000D | sbyte | Protection / defense
 0x000E | sbyte | Damage
-0x000F | ubyte[15] | **Unknown**
+0x000F | ubyte[6] | **Unknown**
+0x0015 | ubyte | Index for either [special item purpose](Enumerations/SpecialItemPurpose.md), [transportation](Enumerations/Transportation.md) or text of a text scroll
+0x0016 | ubyte | **Unknown**
+0x0017 | ubyte | [Spell type](Enumerations/SpellTypes.md)
+0x0018 | ubyte | [Spell index](Enumerations/Spells.md)
+0x0019 | ubyte | Spell usage count (255 means unlimited)
+0x001A | ubyte[4] | **Unknown**
 0x001E | sbyte | M-B-R value (magic armor level)
 0x001F | sbyte | M-B-W value (magic attack level)
 0x0020 | ubyte | Bit 0: Accursed, Bit 1: Purchasable
