@@ -6,6 +6,12 @@ environment:
 platform: Any CPU
 configuration: Release
 
+install:
+  - appveyor DownloadFile https://dist.nuget.org/win-x86-commandline/latest/nuget.exe
+
+before_build:
+  - dotnet restore AmbermoonTools/AmbermoonTools.sln --verbosity normal
+
 build:
   project: AmbermoonTools/AmbermoonTools.sln
 
