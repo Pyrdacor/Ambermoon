@@ -36,10 +36,10 @@ deploy:
     force_update: true
     on:
       APPVEYOR_REPO_TAG: true
-
-deploy:
-  provider: NuGet
-  api_key:
-    secure: UwVH6GHdh4zr7mDxC/HWXBQni/uzh36MV5lsXRmrgyyYEXJ67H63sI31QG4AByXY
-  skip_symbols: true
-  artifact: /.*(\.|\.s)nupkg/
+  - provider: NuGet
+    api_key:
+      secure: UwVH6GHdh4zr7mDxC/HWXBQni/uzh36MV5lsXRmrgyyYEXJ67H63sI31QG4AByXY
+    skip_symbols: true
+    artifact: /.*(\.|\.s)nupkg/
+    on:
+      APPVEYOR_REPO_TAG: true
