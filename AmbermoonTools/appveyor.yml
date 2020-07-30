@@ -1,8 +1,5 @@
 image: Visual Studio 2019
 
-environment:
-  WINDOWS: 1
-
 platform: Any CPU
 configuration: Release
 
@@ -20,9 +17,9 @@ artifacts:
     name: AmbermoonTools-Windows
 
 after_build:
-  - 7z a AmbermoonTools-Windows.zip "%APPVEYOR_BUILD_FOLDER%\AmbermoonTools\Ambermoon.Common\bin\Any CPU\Release\win-x64\publish\Ambermoon.Common.dll"
-  - 7z a AmbermoonTools-Windows.zip "%APPVEYOR_BUILD_FOLDER%\AmbermoonTools\Ambermoon.Data.Common\bin\Any CPU\Release\win-x64\publish\Ambermoon.Data.Common.dll"
-  - 7z a AmbermoonTools-Windows.zip "%APPVEYOR_BUILD_FOLDER%\AmbermoonTools\Ambermoon.Data.Legacy\bin\Any CPU\Release\win-x64\publish\Ambermoon.Data.Legacy.dll"
+  - 7z a AmbermoonTools-Windows.zip "%APPVEYOR_BUILD_FOLDER%\AmbermoonTools\Ambermoon.Common\bin\Release\netstandard2.1\Ambermoon.Common.dll"
+  - 7z a AmbermoonTools-Windows.zip "%APPVEYOR_BUILD_FOLDER%\AmbermoonTools\Ambermoon.Data.Common\bin\Release\netstandard2.1\Ambermoon.Data.Common.dll"
+  - 7z a AmbermoonTools-Windows.zip "%APPVEYOR_BUILD_FOLDER%\AmbermoonTools\Ambermoon.Data.Legacy\bin\Release\netstandard2.1\Ambermoon.Data.Legacy.dll"
 
 test: off
 
@@ -39,3 +36,10 @@ deploy:
     force_update: true
     on:
       APPVEYOR_REPO_TAG: true
+
+deploy:
+  provider: NuGet
+  api_key:
+    secure: UwVH6GHdh4zr7mDxC/HWXBQni/uzh36MV5lsXRmrgyyYEXJ67H63sI31QG4AByXY
+  skip_symbols: true
+  artifact: /.*(\.|\.s)nupkg/
