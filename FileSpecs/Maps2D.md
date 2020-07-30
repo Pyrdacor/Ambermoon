@@ -54,6 +54,8 @@ So if you have icon graphic index 1 and 3 animation tiles the icons 1, 2 and 3 a
   - 4 -> sit and look left
   - 5 -> sleep (always face down)
 
+Note: If there is an overlay tile, its flags are used and if not, the underlay flags are used.
+
 ## Map data
 
 Offset | Type | Description
