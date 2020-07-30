@@ -2,13 +2,14 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.1</TargetFramework>
-    <Authors>Pyrdacor</Authors>
+    <Authors>Robert Schneckenhaus</Authors>
     <Description>Library to load and process legacy data from the Amiga game Ambermoon.</Description>
     <PackageProjectUrl>https://github.com/Pyrdacor/Ambermoon</PackageProjectUrl>
     <RepositoryUrl>https://github.com/Pyrdacor/Ambermoon</RepositoryUrl>
     <RepositoryType>Github</RepositoryType>
     <PackageTags>Ambermoon Legacy Amiga Game Data</PackageTags>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <Version>1.0.1</Version>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
