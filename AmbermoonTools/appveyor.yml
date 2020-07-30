@@ -1,0 +1,40 @@
+image: Visual Studio 2019
+
+environment:
+  WINDOWS: 1
+
+platform: Any CPU
+configuration: Release
+
+install:
+  - appveyor DownloadFile https://dist.nuget.org/win-x86-commandline/latest/nuget.exe
+  - dotnet restore AmbermoonTools.sln --verbosity normal
+  - dotnet build AmbermoonTools.sln -c Release
+  - dotnet test AmbermoonTools.sln -c Release --no-build --verbosity normal
+  - dotnet publish -c Release Ambermoon.Data.Legacy/Ambermoon.Data.Legacy.csproj -p:PublishSingleFile=true -r win-x64
+
+build:
+  project: AmbermoonTools.sln
+
+artifacts:
+  - path: AmbermoonTools-Windows.zip
+    name: AmbermoonTools-Windows
+
+after_build:
+  - 7z a AmbermoonTools-Windows.zip "%APPVEYOR_BUILD_FOLDER%\Ambermoon.Data.Legacy\bin\Any CPU\Release\win-x64\publish\Ambermoon.Data.Legacy.dll"
+
+test: off
+
+deploy:
+  - provider: GitHub
+    name: AmbermoonTools-Windows
+    tag: $(APPVEYOR_REPO_TAG_NAME)
+    release: $(APPVEYOR_REPO_TAG_NAME)
+    description: 'Release $(APPVEYOR_REPO_TAG_NAME)'
+    auth_token:
+      secure: CP6qsCjIlyJrYsuHs4tzdrYUWOO83Jlx6/U0Gqtl/SicGmBaN1hrYUEk6RSL6D8j
+    draft: true
+    prerelease: false
+    force_update: true
+    on:
+      APPVEYOR_REPO_TAG: true
