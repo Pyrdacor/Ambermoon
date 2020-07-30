@@ -16,7 +16,7 @@ The most significant bit of the header is processed first.
 
 Example header: 19hex -> in binary 00011001
 
-This means the first 3 following bytes are normal bytes. Then two matches follow (2 bytes each). Then two normal bytes follow and at last there is another match.
+This means the first 3 following bytes are matches (2 bytes each). Then two normal bytes follow, then two matches again and at last there is another normal byte.
 
 ### Match encoding
 
