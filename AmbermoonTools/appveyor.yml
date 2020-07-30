@@ -13,7 +13,7 @@ install:
   - dotnet test AmbermoonTools/AmbermoonTools.sln -c Release --no-build --verbosity normal
 
 build:
-  project: AmbermoonTools.sln
+  project: AmbermoonTools/AmbermoonTools.sln
 
 artifacts:
   - path: AmbermoonTools-Windows.zip
