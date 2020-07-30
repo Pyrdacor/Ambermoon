@@ -11,7 +11,7 @@ install:
   - dotnet restore AmbermoonTools/AmbermoonTools.sln --verbosity normal
   - dotnet build AmbermoonTools/AmbermoonTools.sln -c Release
   - dotnet test AmbermoonTools/AmbermoonTools.sln -c Release --no-build --verbosity normal
-  - dotnet publish -c Release AmbermoonTools/Ambermoon.Data.Legacy/Ambermoon.Data.Legacy.csproj -p:PublishSingleFile=true -r win-x64
+  - dotnet publish -c Release -unsafe AmbermoonTools/Ambermoon.Data.Legacy/Ambermoon.Data.Legacy.csproj -p:PublishSingleFile=true -r win-x64
 
 build:
   project: AmbermoonTools.sln
