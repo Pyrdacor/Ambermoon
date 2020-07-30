@@ -11,7 +11,6 @@ install:
   - dotnet restore AmbermoonTools/AmbermoonTools.sln --verbosity normal
   - dotnet build AmbermoonTools/AmbermoonTools.sln -c Release
   - dotnet test AmbermoonTools/AmbermoonTools.sln -c Release --no-build --verbosity normal
-  - dotnet publish -c Release -unsafe AmbermoonTools/Ambermoon.Data.Legacy/Ambermoon.Data.Legacy.csproj -p:PublishSingleFile=true -r win-x64
 
 build:
   project: AmbermoonTools.sln
@@ -21,6 +20,8 @@ artifacts:
     name: AmbermoonTools-Windows
 
 after_build:
+  - 7z a AmbermoonTools-Windows.zip "%APPVEYOR_BUILD_FOLDER%\Ambermoon.Common\bin\Any CPU\Release\win-x64\publish\Ambermoon.Common.dll"
+  - 7z a AmbermoonTools-Windows.zip "%APPVEYOR_BUILD_FOLDER%\Ambermoon.Data.Common\bin\Any CPU\Release\win-x64\publish\Ambermoon.Data.Common.dll"
   - 7z a AmbermoonTools-Windows.zip "%APPVEYOR_BUILD_FOLDER%\Ambermoon.Data.Legacy\bin\Any CPU\Release\win-x64\publish\Ambermoon.Data.Legacy.dll"
 
 test: off
