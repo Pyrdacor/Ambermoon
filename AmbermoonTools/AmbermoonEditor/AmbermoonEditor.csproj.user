@@ -5,6 +5,9 @@
     <Compile Update="CharacterControl.cs">
       <SubType>UserControl</SubType>
     </Compile>
+    <Compile Update="DataControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
     <Compile Update="ItemControl.cs">
       <SubType>UserControl</SubType>
     </Compile>

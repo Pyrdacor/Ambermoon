@@ -1,7 +1,4 @@
 ﻿using System;
-using System.Drawing;
-using System.IO;
-using System.Net.Security;
 using System.Text;
 
 namespace Ambermoon.Data.Legacy
@@ -11,7 +8,7 @@ namespace Ambermoon.Data.Legacy
 
     internal class DataReader : IDataReader
     {
-        private static readonly Encoding encoding;
+        public static readonly Encoding Encoding;
         protected readonly byte[] _data;
         private int _position = 0;
         public int Position
@@ -30,7 +27,7 @@ namespace Ambermoon.Data.Legacy
         static DataReader()
         {
             Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
-            encoding = Encoding.GetEncoding(437);
+            Encoding = Encoding.GetEncoding(437);
         }
 
         public DataReader(byte[] data, int offset, int length)
@@ -96,7 +93,7 @@ namespace Ambermoon.Data.Legacy
         public string ReadString(int length)
         {
             CheckOutOfRange(length);
-            var str = encoding.GetString(_data, Position, length);
+            var str = Encoding.GetString(_data, Position, length);
             Position += length;
             return str;
         }
@@ -167,7 +164,7 @@ namespace Ambermoon.Data.Legacy
 
         public long FindString(string str, long offset)
         {
-            return FindByteSequence(encoding.GetBytes(str), offset);
+            return FindByteSequence(Encoding.GetBytes(str), offset);
         }
     }
 }

@@ -1,6 +1,6 @@
 ﻿namespace AmbermoonEditor
 {
-    partial class MapTextControl
+    partial class DataControl
     {
         /// <summary> 
         /// Required designer variable.
@@ -28,8 +28,16 @@
         /// </summary>
         private void InitializeComponent()
         {
-            components = new System.ComponentModel.Container();
+            this.SuspendLayout();
+            // 
+            // DataControl
+            // 
+            this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 20F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.Name = "DataControl";
+            this.Size = new System.Drawing.Size(790, 400);
+            this.ResumeLayout(false);
+
         }
 
         #endregion

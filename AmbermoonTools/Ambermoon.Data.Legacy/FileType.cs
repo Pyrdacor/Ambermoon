@@ -1,6 +1,6 @@
 ﻿namespace Ambermoon.Data.Legacy
 {
-    internal enum FileType : uint
+    public enum FileType : uint
     {
         None = 0,
         /// <summary>

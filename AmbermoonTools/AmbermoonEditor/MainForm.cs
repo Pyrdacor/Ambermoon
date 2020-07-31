@@ -23,12 +23,21 @@ namespace AmbermoonEditor
 
         private void InitializeData(GameData gameData)
         {
-            var overviewControl = new OverviewControl();
-            var itemControl = new ItemControl();
+            InitializeTabPage(TabPageOverview, new OverviewControl(), gameData);
+            InitializeTabPage(TabPageItems, new ItemControl(), gameData);
+            InitializeTabPage(TabPageMapTexts, new MapTextControl(), gameData);
+            InitializeTabPage(TabPageCharacters, new CharacterControl(), gameData);
+            InitializeTabPage(TabPageMonsters, new MonsterControl(), gameData);
+            InitializeTabPage(TabPageNPCs, new NPCControl(), gameData);
 
-            TabPageOverview.Controls.Add(overviewControl);
-            TabPageItems.Controls.Add(itemControl);
-            // TODO
+            tabControlMain.SelectedIndex = 0;
+        }
+
+        private void InitializeTabPage(TabPage page, DataControl mainControl, GameData gameData)
+        {
+            page.Controls.Add(mainControl);
+            mainControl.GameData = gameData;
+            mainControl.Dock = DockStyle.Fill;
         }
     }
 }

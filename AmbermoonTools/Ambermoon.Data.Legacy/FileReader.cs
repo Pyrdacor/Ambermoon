@@ -181,57 +181,6 @@ namespace Ambermoon.Data.Legacy
                 }
             }
 
-            // Old algorithm (C# port of amblib C snippet).
-            // Works too but is harder to understand.
-            // Left here in case someone is interested.
-            /*fixed (byte* dataPtr = decodedData)
-            {
-                byte* dstPtr = dataPtr;
-                byte* matchPtr;
-                uint remainingSize = decodedSize;
-                ushort flag = 0x80;
-                ushort matchOffset;
-                int matchLength;
-                bool carry;
-
-                while (remainingSize != 0)
-                {
-                    flag += flag;
-                    carry = (flag > 0xff);
-                    flag &= 0x00ff;
-
-                    if (flag == 0)
-                    {
-                        flag = reader.ReadByte();
-                        flag += flag;
-                        if (carry)
-                            ++flag;
-                        carry = (flag > 0xff);
-                        flag &= 0x00ff;
-                    }
-
-                    if (!carry)
-                    {
-                        matchOffset = reader.ReadByte();
-                        matchLength = (matchOffset & 0x000f) + 3;
-                        matchOffset <<= 4;
-                        matchOffset &= 0xff00;
-                        matchOffset |= reader.ReadByte();
-                        matchPtr = dstPtr - matchOffset;
-                        while (matchLength-- != 0)
-                        {
-                            *(dstPtr++) = *(matchPtr++);
-                            --remainingSize;
-                        }
-                    }
-                    else
-                    {
-                        *(dstPtr++) = reader.ReadByte();
-                        --remainingSize;
-                    }
-                }
-            }*/
-
             return new DataReader(decodedData);
         }
 
