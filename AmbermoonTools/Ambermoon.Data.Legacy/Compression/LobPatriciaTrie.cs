@@ -1,19 +1,24 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Ambermoon.Data.Legacy.Compression
 {
     /// <summary>
-    /// This is a modified patricia trie. It only stored 1 byte literal (key)
+    /// This is a modified patricia trie. It only stores 1 byte literal (key)
     /// in each branch node but the leaf nodes still may contain a whole
-    /// byte array (theoretically up to 17 bytes).
+    /// byte array (theoretically up to 17 bytes). Each node also contains a
+    /// last match offset which is updated if a node is visit again.
+    /// 
+    /// An additional dictionary keeps track of nodes that are no longer
+    /// valid due to leaving the match window. Those nodes are removed
+    /// after each adding so that they won't be considered any longer.
     /// </summary>
     public class LobPatriciaTrie
     {
         abstract class Node
         {
             public BranchNode Parent { get; set; }
-            public int RefCounter { get; set; }
             public byte Key { get; set; }
             public int LastMatchOffset { get; set; }
             public abstract Node GetChild(byte symbol);
@@ -49,10 +54,26 @@ namespace Ambermoon.Data.Legacy.Compression
                 Offset += length + 1;
                 Length -= length + 1;
             }
+            public int TotalMatchOffset
+            {
+                get
+                {
+                    int totalOffset = LastMatchOffset;
+                    var parent = Parent;
+
+                    do
+                    {
+                        ++totalOffset;
+                        parent = parent.Parent;
+                    } while (parent != null);
+
+                    return totalOffset - 1; // the root node is counted in but has no real offset depth, therefore -1
+                }
+            }
         }
 
         readonly BranchNode _rootNode = new BranchNode();
-        readonly Queue<Node> _matchNodes = new Queue<Node>();
+        readonly SortedDictionary<int, Node> _matchNodes = new SortedDictionary<int, Node>();
         const int MaxMatchOffset = (1 << 12) - 1;
 
         /// <summary>
@@ -76,7 +97,6 @@ namespace Ambermoon.Data.Legacy.Compression
                     if (child is BranchNode)
                         child.LastMatchOffset = offset;
                     node = child;
-                    ++node.RefCounter;
                 }
                 else
                 {
@@ -87,10 +107,9 @@ namespace Ambermoon.Data.Legacy.Compression
                         // split the leaf
                         int matchLength = leaf.GetLeafMatchLength(sequence, offset + i, length - i);
 
-                        if (matchLength == length - i) // full match, nothing to do (last match offset has been updated before)
+                        if (matchLength == length - i) // full match, update last match offset only
                         {
-                            ++leaf.RefCounter;
-                            _matchNodes.Enqueue(leaf);
+                            leaf.LastMatchOffset = offset;
                         }
                         else
                         {
@@ -101,7 +120,6 @@ namespace Ambermoon.Data.Legacy.Compression
                             var newBranchNode = new BranchNode
                             {
                                 Parent = parent,
-                                RefCounter = 1,
                                 Key = leaf.Key,
                                 LastMatchOffset = offset
                             };
@@ -114,7 +132,6 @@ namespace Ambermoon.Data.Legacy.Compression
                                 newBranchNode = new BranchNode
                                 {
                                     Parent = parent,
-                                    RefCounter = 1,
                                     Key = sequence[leaf.Offset + n],
                                     LastMatchOffset = offset
                                 };
@@ -126,7 +143,6 @@ namespace Ambermoon.Data.Legacy.Compression
                             var newLeaf = new LeafNode
                             {
                                 Parent = parent,
-                                RefCounter = 1,
                                 Key = sequence[offset + i + n],
                                 Offset = offset + i + n + 1,
                                 Length = length - i - n - 1,
@@ -136,7 +152,6 @@ namespace Ambermoon.Data.Legacy.Compression
                             parent.Children.Add(newLeaf.Key, newLeaf);
 
                             leaf.Truncate(sequence, matchLength);
-                            ++leaf.RefCounter;
                             leaf.Parent = parent;
 
                             parent.Children[leaf.Key] = leaf;
@@ -150,7 +165,6 @@ namespace Ambermoon.Data.Legacy.Compression
                         var newLeaf = new LeafNode
                         {
                             Parent = branch,
-                            RefCounter = 1,
                             Key = sequence[offset + i],
                             Offset = offset + i + 1,
                             Length = length - i - 1,
@@ -165,19 +179,30 @@ namespace Ambermoon.Data.Legacy.Compression
                 }
             }
 
-            _matchNodes.Enqueue(node);
+            _matchNodes.Add(offset, node);
 
-            // Remove first node as it is outside the match window
-            if (_matchNodes.Count > MaxMatchOffset)
-                Remove(_matchNodes.Dequeue());
+            // Remove nodes that are too far away
+            int firstOffset = offset - MaxMatchOffset + 1; // we check match before adding new sequences so add 1 to the first offset here
+            foreach (var matchNode in _matchNodes.ToList())
+            {
+                if (matchNode.Key < firstOffset)
+                {
+                    Remove(matchNode.Value, firstOffset);
+                    _matchNodes.Remove(matchNode.Key);
+                }
+                else
+                    break;
+            }
         }
 
-        void Remove(Node node)
+        void Remove(Node node, int firstOffset)
         {
             do
             {
-                if (--node.RefCounter == 0)
+                if (node.LastMatchOffset < firstOffset)
                     node.Parent.Children.Remove(node.Key);
+                else
+                    break;
 
                 node = node.Parent;
             } while (node != _rootNode);

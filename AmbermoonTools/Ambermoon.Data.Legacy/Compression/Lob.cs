@@ -16,7 +16,7 @@ namespace Ambermoon.Data.Legacy.Compression
             var compressedData = new List<byte>(data.Length / 2);
             var trie = new LobPatriciaTrie();
             int currentHeaderPosition = 0;
-            byte currentHeaderBitMask = 1 << 4;
+            byte currentHeaderBitMask = 1 << 4; // skip first 3 bits
             byte currentHeader = 0xe0; // first 3 entries/bytes are no matches
             compressedData.Add(0); // add header dummy
             int i = 0;
@@ -69,9 +69,9 @@ namespace Ambermoon.Data.Legacy.Compression
 
                 trie.Add(data, i, MaxMatchLength);
 
-                if (match.Value > 3)
+                if (match.Value > 2)
                 {
-                    AddMatch(match.Key, match.Value);
+                    AddMatch(i - match.Key, match.Value);
                     i += match.Value - 1; // -1 cause of for's ++i
                 }
                 else
@@ -84,9 +84,9 @@ namespace Ambermoon.Data.Legacy.Compression
 
                 trie.Add(data, i, MaxMatchLength);
 
-                if (match.Value > 3)
+                if (match.Value > 2)
                 {
-                    AddMatch(match.Key, match.Value, i + match.Value == data.Length);
+                    AddMatch(i - match.Key, match.Value, i + match.Value == data.Length);
                     i += match.Value - 1; // -1 cause of for's ++i
                 }
                 else
@@ -100,9 +100,9 @@ namespace Ambermoon.Data.Legacy.Compression
 
                 trie.Add(data, i, length);
 
-                if (match.Value > 3)
+                if (match.Value > 2)
                 {
-                    AddMatch(match.Key, match.Value, i + match.Value == data.Length);
+                    AddMatch(i - match.Key, match.Value, i + match.Value == data.Length);
                     i += match.Value - 1; // -1 cause of for's ++i
                 }
                 else
