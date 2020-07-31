@@ -4,8 +4,8 @@
 
 File | Disk | Format
 ---- | ---- | ----
-AM2_BLIT | A | Normal [hunk file](Hunks.md)
-AM2_CPU | A | [Imploded](Imploding.md) [hunk file](Hunks.md)
+AM2_BLIT | A | [Hunk file](Hunks.md) (might be [imploded](Imploding.md))
+AM2_CPU | A | [Hunk file](Hunks.md) (might be [imploded](Imploding.md))
 
 ## Graphics
 
