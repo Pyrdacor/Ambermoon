@@ -6,7 +6,7 @@ namespace Ambermoon.Data.Legacy
     using word = UInt16;
     using dword = UInt32;
 
-    internal class DataReader : IDataReader
+    public class DataReader : IDataReader
     {
         public static readonly Encoding Encoding;
         protected readonly byte[] _data;

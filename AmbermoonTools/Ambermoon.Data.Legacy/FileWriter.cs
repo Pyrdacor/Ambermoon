@@ -1,45 +1,94 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.IO;
 
 namespace Ambermoon.Data.Legacy
 {
     public static class FileWriter
     {
-        public static void WriteJH(Stream stream, byte[] fileData)
+        public static void WriteJH(DataWriter writer, byte[] fileData, ushort encryptKey, bool additionalLobCompression)
         {
-            // TODO
-            throw new NotImplementedException();
+            if (additionalLobCompression)
+            {
+                var lobWriter = new DataWriter();
+                WriteLob(lobWriter, fileData, (uint)FileType.LOB);
+                fileData = lobWriter.ToArray();
+            }
+
+            var encryptedData = Compression.JH.Crypt(fileData, encryptKey);
+            uint header = (uint)FileType.JH | encryptKey;         
+
+            writer.Write(header);
+            writer.Write(encryptedData);
         }
 
-        public static void WriteLob(Stream stream, byte[] fileData)
+        public static void WriteLob(DataWriter writer, byte[] fileData)
         {
-            WriteLob(stream, fileData, (uint)FileType.LOB);
+            WriteLob(writer, fileData, (uint)FileType.LOB);
         }
 
-        public static void WriteVol1(Stream stream, byte[] fileData)
+        public static void WriteVol1(DataWriter writer, byte[] fileData)
         {
-            WriteLob(stream, fileData, (uint)FileType.VOL1);
+            WriteLob(writer, fileData, (uint)FileType.VOL1);
         }
 
-        static void WriteLob(Stream stream, byte[] fileData, uint header)
+        static void WriteLob(DataWriter writer, byte[] fileData, uint header)
         {
             var compressedData = Compression.Lob.CompressData(fileData);
-
-            var writer = new DataWriter();
 
             writer.Write(header);
             writer.Write((uint)fileData.Length);
             writer.Write((uint)compressedData.Length);
             writer.Write(compressedData);
-
-            writer.CopyTo(stream);
         }
 
         public static void WriteContainer(Stream stream, List<byte[]> filesData, FileType fileType)
         {
-            // TODO
-            throw new NotImplementedException();
+            switch (fileType)
+            {
+                case FileType.AMNC:
+                case FileType.AMNP:
+                case FileType.AMBR:
+                case FileType.AMPC:
+                    {
+                        if (filesData.Count >= 0xffff) // -1 cause JH uses the 1-based index as a word
+                            throw new AmbermoonException(ExceptionScope.Data, $"In a container file there can only be {0xffff-1} files at max.");
+
+                        var writer = new DataWriter();
+
+                        writer.Write((uint)fileType);
+                        writer.Write((ushort)filesData.Count);
+
+                        int fileIndex = 1;
+
+                        foreach (var fileData in filesData)
+                        {
+                            /*
+                             * AMNC | Multiple file container (data uses [JH](JH.md) encoding). The C stands for "crypted". | 0x414d4e43 ('AMNC')
+                               AMNP | Multiple file container (data uses [JH](JH.md) encoding and the files are often [LOB](LOB.md) encoded in addition). The P stands for "packed". | 0x414d4e50 ('AMNP')
+                               AMBR | Multiple file container (no encryption). The R stands for "raw". | 0x414d4252 ('AMNR')
+                               AMPC | Another multiple file container (only compressed, not JH encrypted) | 0x414d5043 ('AMPC')
+                             */
+                            if (fileType == FileType.AMNC)
+                                WriteJH(writer, fileData, (ushort)fileIndex++, false);
+                            else if (fileType == FileType.AMBR)
+                                writer.Write(fileData);
+                            else if (fileType == FileType.AMPC)
+                                WriteLob(writer, fileData);
+                            else // AMNP
+                            {
+                                // this is always JH encoded and may be LOB compress if size is better
+                                var lobWriter = new DataWriter();
+                                WriteLob(lobWriter, fileData, (uint)FileType.LOB);
+                                var compressedData = lobWriter.ToArray();
+                                var data = compressedData.Length - 4 < fileData.Length ? compressedData : fileData;
+                                WriteJH(writer, data, (ushort)fileIndex++, false);
+                            }
+                        }
+                    }
+                    break;
+                default:
+                    throw new AmbermoonException(ExceptionScope.Data, $"File type '{fileType}' is no container format.");
+            }
         }
     }
 }

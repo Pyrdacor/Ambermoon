@@ -8,7 +8,7 @@ namespace Ambermoon.Data.Legacy
     using word = UInt16;
     using dword = UInt32;
 
-    internal class DataWriter
+    public class DataWriter
     {
         public static readonly Encoding Encoding = DataReader.Encoding;
         protected readonly List<byte> _data = new List<byte>();
@@ -123,5 +123,7 @@ namespace Ambermoon.Data.Legacy
         {
             stream.Write(_data.ToArray(), 0, _data.Count);
         }
+
+        public byte[] ToArray() => _data.ToArray();
     }
 }

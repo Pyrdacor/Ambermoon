@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using Ambermoon.Data.Legacy.Compression;
+using System.Collections.Generic;
 using System.IO;
 
 namespace Ambermoon.Data.Legacy
@@ -95,27 +96,27 @@ namespace Ambermoon.Data.Legacy
             if (fileType == FileType.JH)
             {
                 reader.Position += 4; // skip header
-                reader = new DataReader(DecryptJHFile(reader, (ushort)((((uint)header & 0xffff0000) >> 16) ^ ((uint)header & 0x0000ffff))));
+                reader = new DataReader(JH.Crypt(reader, (ushort)(((header & 0xffff0000u) >> 16) ^ (header & 0x0000ffffu))));
             }
             else if (containerType == FileType.AMNC) // AMNC archives are always encoded
             {
-                reader = new DataReader(DecryptJHFile(reader, (ushort)fileNumber));
+                reader = new DataReader(JH.Crypt(reader, (ushort)fileNumber));
             }
 
-            header = reader.PeekDword(); // Note: The reader might have changed above.
+            header = reader.PeekDword(); // Note: The header might have changed above.
             fileType = (FileType)header; // Note: No need to check for JH here as this can not happen.
 
             // See if it is a LOB file
             if (fileType == FileType.LOB || fileType == FileType.VOL1)
             {
                 reader.Position += 4; // skip header
-                uint decodedSize = reader.PeekDword() & 0x00ffffff; // the first byte would contain the offset for the size entry
+                uint decodedSize = reader.PeekDword() & 0x00ffffff; // the first byte would contain the offset for the size entry (= 6)
 
                 // AMNP archives are always encoded
                 if (containerType == FileType.AMNP)
                 {
                     reader.Position += 4; // skip decoded size
-                    reader = new DataReader(DecryptJHFile(reader, (ushort)fileNumber));
+                    reader = new DataReader(JH.Crypt(reader, (ushort)fileNumber));
                     reader.Position += 4; // skip encoded size
                 }
                 else
@@ -130,7 +131,7 @@ namespace Ambermoon.Data.Legacy
                 // AMNP archives are always encoded
                 if (containerType == FileType.AMNP)
                 {
-                    reader = new DataReader(DecryptJHFile(reader, (ushort)fileNumber, 4));
+                    reader = new DataReader(JH.Crypt(reader, (ushort)fileNumber, 4));
 
                     // ensure and skip the header (should be FileType.None here)
                     if (reader.ReadDword() != (uint)FileType.None)
@@ -182,36 +183,6 @@ namespace Ambermoon.Data.Legacy
             }
 
             return new DataReader(decodedData);
-        }
-
-        private static byte[] DecryptJHFile(DataReader reader, ushort key, int offset = 0)
-        {
-            byte[] data = new byte[reader.Size - reader.Position];
-            int numWords = (data.Length - offset + 1) >> 1;
-            ushort d0 = key, d1;
-
-            for (int i = 0; i < offset; ++i)
-                data[i] = reader.ReadByte();
-
-            for (int i = 0; i < numWords; ++i)
-            {
-                var value = (reader.Position == reader.Size - 1) ? (ushort)(reader.ReadByte() << 8) : reader.ReadWord();
-                value ^= d0;
-                WriteWord(data, offset + i * 2, value);
-                d1 = d0;
-                d0 <<= 4;
-                d0 = (ushort)((d0 + d1 + 87) & 0xffff);
-            }
-
-            return data;
-        }
-
-        private static void WriteWord(byte[] data, int offset, ushort word)
-        {
-            data[offset] = (byte)(word >> 8);
-
-            if (offset < data.Length - 1)
-                data[offset + 1] = (byte)(word & 0xff);
         }
     }
 }
