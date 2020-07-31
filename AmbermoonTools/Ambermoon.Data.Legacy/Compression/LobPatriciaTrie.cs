@@ -54,22 +54,6 @@ namespace Ambermoon.Data.Legacy.Compression
                 Offset += length + 1;
                 Length -= length + 1;
             }
-            public int TotalMatchOffset
-            {
-                get
-                {
-                    int totalOffset = LastMatchOffset;
-                    var parent = Parent;
-
-                    do
-                    {
-                        ++totalOffset;
-                        parent = parent.Parent;
-                    } while (parent != null);
-
-                    return totalOffset - 1; // the root node is counted in but has no real offset depth, therefore -1
-                }
-            }
         }
 
         readonly BranchNode _rootNode = new BranchNode();

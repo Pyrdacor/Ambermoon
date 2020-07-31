@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 namespace Ambermoon.Data.Legacy.Compression
 {
@@ -72,6 +73,10 @@ namespace Ambermoon.Data.Legacy.Compression
                 if (match.Value > 2)
                 {
                     AddMatch(i - match.Key, match.Value);
+
+                    for (int j = 1; j < match.Value; ++j)
+                        trie.Add(data, i + j, MaxMatchLength);
+
                     i += match.Value - 1; // -1 cause of for's ++i
                 }
                 else
@@ -87,6 +92,10 @@ namespace Ambermoon.Data.Legacy.Compression
                 if (match.Value > 2)
                 {
                     AddMatch(i - match.Key, match.Value, i + match.Value == data.Length);
+
+                    for (int j = 1; j < match.Value; ++j)
+                        trie.Add(data, i + j, Math.Min(MaxMatchLength, data.Length - i - j));
+
                     i += match.Value - 1; // -1 cause of for's ++i
                 }
                 else
@@ -103,6 +112,10 @@ namespace Ambermoon.Data.Legacy.Compression
                 if (match.Value > 2)
                 {
                     AddMatch(i - match.Key, match.Value, i + match.Value == data.Length);
+
+                    for (int j = 1; j < match.Value; ++j)
+                        trie.Add(data, i + j, length - j);
+
                     i += match.Value - 1; // -1 cause of for's ++i
                 }
                 else
