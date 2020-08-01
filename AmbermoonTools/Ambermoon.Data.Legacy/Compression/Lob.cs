@@ -10,17 +10,17 @@ namespace Ambermoon.Data.Legacy.Compression
 
         public static byte[] CompressData(byte[] data)
         {
-            // ease algorithm by not compressing very small data (22 bytes)
-            if (data.Length < MinMatchLength + MaxMatchLength + 1)
+            // ease algorithm by not compressing very small data (20 bytes)
+            if (data.Length <  MaxMatchLength + 2)
                 return data;
 
             var compressedData = new List<byte>(data.Length / 2);
-            var trie = new LobPatriciaTrie();
+            var trie = new LobTrie();
             int currentHeaderPosition = 0;
-            byte currentHeaderBitMask = 1 << 4; // skip first 3 bits
-            byte currentHeader = 0xe0; // first 3 entries/bytes are no matches
+            byte currentHeaderBitMask = 0x80 >> 1; // skip first bit
+            byte currentHeader = 0x80; // first entriy/byte is no match
             compressedData.Add(0); // add header dummy
-            int i = 0;
+            int i = 1;
 
             void AddByte(byte b, bool last = false)
             {
@@ -57,31 +57,9 @@ namespace Ambermoon.Data.Legacy.Compression
 
             // Note: The multiple for loops avoid additional if branches and therefore hopefully add to speed.
 
-            for (; i < MinMatchLength; ++i)
-            {
-                // first 3 bytes can not contain matches
-                trie.Add(data, i, MaxMatchLength);
-                compressedData.Add(data[i]);
-            }
-
-            for (; i < MaxMatchLength; ++i)
-            {
-                var match = trie.GetLongestMatch(data, i, i);
-
-                trie.Add(data, i, MaxMatchLength);
-
-                if (match.Value > 2)
-                {
-                    AddMatch(i - match.Key, match.Value);
-
-                    for (int j = 1; j < match.Value; ++j)
-                        trie.Add(data, i + j, MaxMatchLength);
-
-                    i += match.Value - 1; // -1 cause of for's ++i
-                }
-                else
-                    AddByte(data[i]);
-            }
+            // first byte can not contain a match
+            trie.Add(data, 0, MaxMatchLength);
+            compressedData.Add(data[0]);
 
             for (; i <= data.Length - MaxMatchLength; ++i)
             {

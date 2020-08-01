@@ -36,7 +36,7 @@ namespace Ambermoon.Data.Legacy
             var compressedData = Compression.Lob.CompressData(fileData);
 
             writer.Write(header);
-            writer.Write((uint)fileData.Length);
+            writer.Write((uint)fileData.Length | 0x06000000u);
             writer.Write((uint)compressedData.Length);
             writer.Write(compressedData);
         }

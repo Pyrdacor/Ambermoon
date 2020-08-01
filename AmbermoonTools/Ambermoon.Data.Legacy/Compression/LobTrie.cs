@@ -14,7 +14,7 @@ namespace Ambermoon.Data.Legacy.Compression
     /// valid due to leaving the match window. Those nodes are removed
     /// after each adding so that they won't be considered any longer.
     /// </summary>
-    public class LobPatriciaTrie
+    public class LobTrie
     {
         abstract class Node
         {
