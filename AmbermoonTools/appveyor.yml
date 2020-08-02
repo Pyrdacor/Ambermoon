@@ -23,7 +23,7 @@ after_build:
   - 7z a AmbermoonTools-Windows.zip "%APPVEYOR_BUILD_FOLDER%\AmbermoonTools\Ambermoon.Common\bin\Release\netstandard2.1\Ambermoon.Common.dll"
   - 7z a AmbermoonTools-Windows.zip "%APPVEYOR_BUILD_FOLDER%\AmbermoonTools\Ambermoon.Data.Common\bin\Release\netstandard2.1\Ambermoon.Data.Common.dll"
   - 7z a AmbermoonTools-Windows.zip "%APPVEYOR_BUILD_FOLDER%\AmbermoonTools\Ambermoon.Data.Legacy\bin\Release\netstandard2.1\Ambermoon.Data.Legacy.dll"
-  - 7z a AmbermoonTools-Windows.zip "%APPVEYOR_BUILD_FOLDER%\AmbermoonTools\AmbermoonPack\bin\Release\netcoreapp3.1\win-x64\publish\AmbermoonPack.exe"
+  - 7z a AmbermoonTools-Windows.zip "%APPVEYOR_BUILD_FOLDER%\AmbermoonTools\AmbermoonPack\bin\Any CPU\Release\netcoreapp3.1\win-x64\publish\AmbermoonPack.exe"
   - mkdir "AmbermoonTools\nuget"
   - xcopy /Y /I "AmbermoonTools\Ambermoon.Common\bin\Release\*.nupkg" "AmbermoonTools\nuget\*"
   - xcopy /Y /I "AmbermoonTools\Ambermoon.Data.Legacy\bin\Release\*.nupkg" "AmbermoonTools\nuget\*"
