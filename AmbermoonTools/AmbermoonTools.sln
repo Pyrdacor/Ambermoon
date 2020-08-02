@@ -14,7 +14,9 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		appveyor.yml = appveyor.yml
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AmbermoonEditor", "AmbermoonEditor\AmbermoonEditor.csproj", "{590149D8-C736-46EA-A5E1-189AF81EE0C2}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AmbermoonEditor", "AmbermoonEditor\AmbermoonEditor.csproj", "{590149D8-C736-46EA-A5E1-189AF81EE0C2}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AmbermoonPack", "AmbermoonPack\AmbermoonPack.csproj", "{5A049015-D6F7-4DE9-86E5-1289053DC54B}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -38,6 +40,10 @@ Global
 		{590149D8-C736-46EA-A5E1-189AF81EE0C2}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{590149D8-C736-46EA-A5E1-189AF81EE0C2}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{590149D8-C736-46EA-A5E1-189AF81EE0C2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5A049015-D6F7-4DE9-86E5-1289053DC54B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5A049015-D6F7-4DE9-86E5-1289053DC54B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5A049015-D6F7-4DE9-86E5-1289053DC54B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5A049015-D6F7-4DE9-86E5-1289053DC54B}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
