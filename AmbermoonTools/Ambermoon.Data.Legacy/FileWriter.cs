@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.IO;
 
 namespace Ambermoon.Data.Legacy
 {
@@ -41,7 +40,7 @@ namespace Ambermoon.Data.Legacy
             writer.Write(compressedData);
         }
 
-        public static void WriteContainer(Stream stream, List<byte[]> filesData, FileType fileType)
+        public static void WriteContainer(DataWriter writer, List<byte[]> filesData, FileType fileType)
         {
             switch (fileType)
             {
@@ -52,8 +51,6 @@ namespace Ambermoon.Data.Legacy
                     {
                         if (filesData.Count >= 0xffff) // -1 cause JH uses the 1-based index as a word
                             throw new AmbermoonException(ExceptionScope.Data, $"In a container file there can only be {0xffff-1} files at max.");
-
-                        var writer = new DataWriter();
 
                         writer.Write((uint)fileType);
                         writer.Write((ushort)filesData.Count);
