@@ -6,6 +6,12 @@ If you have some valuable input, feel free to contact me: trobt@web.de
 
 You can use the issue tracker or pull requests to contribute as well.
 
+I will provide some helpful tools too.
+
+## Tool releases
+
+[v1.0.8 for Windows](https://github.com/Pyrdacor/Ambermoon/releases/download/v1.0.8/AmbermoonTools-Windows.zip): This is the first release with a command line packer which is untested yet.
+
 ## Content
 
 Section | Description
