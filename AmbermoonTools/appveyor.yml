@@ -34,7 +34,10 @@ test: off
 deploy:
   - provider: GitHub
     name: AmbermoonTools-Windows
-    description: 'Release XXX'
+    artifact: AmbermoonTools-Windows
+    tag: $(APPVEYOR_REPO_TAG_NAME)
+    release: $(APPVEYOR_REPO_TAG_NAME)
+    description: 'Release $(APPVEYOR_REPO_TAG_NAME)'
     auth_token:
       secure: CP6qsCjIlyJrYsuHs4tzdrYUWOO83Jlx6/U0Gqtl/SicGmBaN1hrYUEk6RSL6D8j
     draft: true
