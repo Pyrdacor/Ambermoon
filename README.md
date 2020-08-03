@@ -12,6 +12,10 @@ I will provide some helpful tools too.
 
 [v1.0.8 for Windows](https://github.com/Pyrdacor/Ambermoon/releases/download/v1.0.8/AmbermoonTools-Windows.zip): This is the first release with a command line packer which is untested yet.
 
+[![Build status](https://ci.appveyor.com/api/projects/status/dn5n21r8m11an48i/branch/master?svg=true)](https://ci.appveyor.com/project/Pyrdacor/ambermoon/branch/master)
+
+
+
 ## Content
 
 Section | Description
