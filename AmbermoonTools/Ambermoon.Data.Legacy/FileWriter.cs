@@ -14,7 +14,7 @@ namespace Ambermoon.Data.Legacy
             }
 
             var encryptedData = Compression.JH.Crypt(fileData, encryptKey);
-            uint header = (uint)FileType.JH | encryptKey;         
+            uint header = (uint)FileType.JH | (uint)((ushort)((uint)FileType.JH >> 16) ^ encryptKey);
 
             writer.Write(header);
             writer.Write(encryptedData);

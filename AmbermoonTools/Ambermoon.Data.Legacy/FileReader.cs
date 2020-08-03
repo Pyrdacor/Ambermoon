@@ -126,7 +126,7 @@ namespace Ambermoon.Data.Legacy
                     reader.Position += 8;  // skip decoded and encoded size
                 }
 
-                return UnLOB(reader, decodedSize);
+                return Lob.Decompress(reader, decodedSize);
             }
             else
             {
@@ -142,49 +142,6 @@ namespace Ambermoon.Data.Legacy
 
                 return reader;
             }            
-        }
-
-        private static DataReader UnLOB(DataReader reader, uint decodedSize)
-        {
-            var decodedData = new byte[decodedSize];
-            uint decodeIndex = 0;
-            uint matchOffset;
-            uint matchLength;
-            uint matchIndex;
-
-            while (decodeIndex < decodedSize)
-            {
-                byte header = reader.ReadByte();
-
-                for (int i = 0; i < 8; ++i)
-                {
-                    if ((header & 0x80) == 0) // match
-                    {
-                        matchOffset = reader.ReadByte();
-                        matchLength = (matchOffset & 0x000f) + 3;
-                        matchOffset <<= 4;
-                        matchOffset &= 0xff00;
-                        matchOffset |= reader.ReadByte();
-                        matchIndex = decodeIndex - matchOffset;
-
-                        while (matchLength-- != 0)
-                        {
-                            decodedData[decodeIndex++] = decodedData[matchIndex++];
-                        }
-                    }
-                    else // normal byte
-                    {
-                        decodedData[decodeIndex++] = reader.ReadByte();
-                    }
-
-                    if (decodeIndex == decodedSize)
-                        break;
-
-                    header <<= 1;
-                }
-            }
-
-            return new DataReader(decodedData);
         }
     }
 }

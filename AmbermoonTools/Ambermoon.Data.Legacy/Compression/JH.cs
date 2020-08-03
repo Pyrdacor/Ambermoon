@@ -16,9 +16,10 @@
 
             for (int i = 0; i < numWords; ++i)
             {
-                var value = (i == data.Length - 1) ? (ushort)(data[i] << 8) : ReadWord(data, i);
+                int index = offset + i * 2;
+                var value = (index == data.Length - 1) ? (ushort)((ushort)data[index] << 8) : ReadWord(data, index);
                 value ^= d0;
-                WriteWord(data, offset + i * 2, value);
+                WriteWord(data, index, value);
                 d1 = d0;
                 d0 <<= 4;
                 d0 = (ushort)((d0 + d1 + 87) & 0xffff);
@@ -27,7 +28,7 @@
             return data;
         }
 
-        internal static byte[] Crypt(DataReader reader, ushort key, int offset = 0)
+        public static byte[] Crypt(DataReader reader, ushort key, int offset = 0)
         {
             byte[] data = new byte[reader.Size - reader.Position];
             int numWords = (data.Length - offset + 1) >> 1;
@@ -51,7 +52,7 @@
 
         private static ushort ReadWord(byte[] data, int offset)
         {
-            return (ushort)((data[offset] << 8) | data[offset + 1]);
+            return (ushort)(((ushort)data[offset] << 8) | data[offset + 1]);
         }
 
         private static void WriteWord(byte[] data, int offset, ushort word)

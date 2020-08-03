@@ -8,12 +8,17 @@
     <PackageProjectUrl>https://github.com/Pyrdacor/Ambermoon</PackageProjectUrl>
     <RepositoryUrl>https://github.com/Pyrdacor/Ambermoon</RepositoryUrl>
     <RepositoryType>Github</RepositoryType>
-    <PackageTags>Ambermoon Packer File Legacy Amiga</PackageTags>
+    <PackageTags>Ambermoon Packer File Legacy Amiga Compression Encryption</PackageTags>
     <RuntimeIdentifiers>win-x64;linux-x64</RuntimeIdentifiers>
+    <Version>1.0.1</Version>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Ambermoon.Data.Legacy" Version="1.0.7" />
+    <PackageReference Include="Ambermoon.Data.Legacy" Version="1.0.10" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Ambermoon.Data.Legacy\Ambermoon.Data.Legacy.csproj" />
   </ItemGroup>
 
 </Project>
