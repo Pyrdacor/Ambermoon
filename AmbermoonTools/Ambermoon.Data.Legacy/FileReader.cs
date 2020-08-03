@@ -16,6 +16,7 @@ namespace Ambermoon.Data.Legacy
         private class FileContainer : IFileContainer
         {
             public string Name { get; set; }
+            public FileType FileType { get; set; }
             public Dictionary<int, IDataReader> Files { get; } = new Dictionary<int, IDataReader>();
         }
 
@@ -62,7 +63,7 @@ namespace Ambermoon.Data.Legacy
 
         private IFileContainer ProcessFileInfo(string name, FileInfo fileInfo, DataReader reader)
         {
-            var fileContainer = new FileContainer { Name = name };
+            var fileContainer = new FileContainer { Name = name, FileType = fileInfo.FileType };
 
             if (fileInfo.SingleFile)
             {
