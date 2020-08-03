@@ -10,6 +10,7 @@
         Charisma,
         Luck,
         AntiMagic,
-        Age
+        Age,
+        Unknown // There seems to be a 10th unused attribute
     }
 }
