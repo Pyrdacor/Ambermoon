@@ -5,15 +5,15 @@ namespace Ambermoon.Data.Legacy
 {
 	/**
 	 * The imploder creates
-	 * - 1 first code chunk
-	 * - n BSS chunks (one for each in the exploded file except for RELOC32 hunks) which allocate empty memory
-	 * - then another code chunk
-	 * - then a data chunk
-	 * - and finally another BSS chunk (I guess for internal stuff)
+	 * - 1 first code hunk (startup code)
+	 * - n BSS hunks (one for each in the deploded file except for RELOC32 hunks) which allocate empty memory
+	 * - then another code hunk (actual decompression logic)
+	 * - then a data hunk (compressed data of all destination hunks)
+	 * - and finally another BSS hunk (decompression buffer)
 	 * 
-	 * The hunk sizes of the exploded hunks match the sizes of the BSS allocations.
+	 * The hunk sizes of the deploded hunks match the sizes of the BSS allocations.
 	 * 
-	 * AM2_CPU has 8 chunks:
+	 * AM2_CPU has 8 hunks:
 	 * - Code
 	 * - Reloc32
 	 * - 2x BSS
@@ -21,14 +21,14 @@ namespace Ambermoon.Data.Legacy
 	 * - Another Reloc32
 	 * - Another BSS
 	 * 
-	 * The Reloc32 hunks are not reflected in the imploder BSS chunks.
+	 * The Reloc32 hunks are not reflected in the imploder BSS hunks.
 	 * 
 	 * If we are only interested in the data (and maybe code) hunks of AM2_CPU
-	 * we can just get the file sizes from the first, fourth and fifth BSS chunk
-	 * which are the exploded sizes (without the header -> number of dwords).
+	 * we can just get the file sizes from the first, fourth and fifth BSS hunk
+	 * which are the deploded sizes (without the header -> number of dwords).
 	 */
 
-    internal class ExecutableExploder
+    internal class ExecutableDeploder
     {
 		struct Hunk
         {
@@ -46,10 +46,10 @@ namespace Ambermoon.Data.Legacy
 			END = 0x3F2
         }
 
-		static readonly byte[] ExplodeLiteralBase = { 6, 10, 10, 18 };
-		static readonly byte[] ExplodeLiteralExtraBits = { 1, 1, 1, 1, 2, 3, 3, 4, 4, 5, 7, 14 };
+		static readonly byte[] DeplodeLiteralBase = { 6, 10, 10, 18 };
+		static readonly byte[] DeplodeLiteralExtraBits = { 1, 1, 1, 1, 2, 3, 3, 4, 4, 5, 7, 14 };
 
-		public unsafe byte[] Explode(IDataReader dataReader)
+		public unsafe byte[] Deplode(IDataReader dataReader)
         {
 			dataReader = new DataReader(System.IO.File.ReadAllBytes(@"C:\Projects\ambermoon.net\AM2_CPU"));
 
@@ -187,22 +187,22 @@ namespace Ambermoon.Data.Legacy
 			/*var totalSize = (uint)bssHunks.Take(bssHunks.Count - 1) // skip last BSS hunk as it is only a temp buffer hunk
 				.Select(h => h.NumEntries * 4).Sum(x => x);*/
 			var totalSize = ((uint)lastCodeHunk.Data[0x1D] << 16) | ((uint)lastCodeHunk.Data[0x1E] << 8) | lastCodeHunk.Data[0x1F];
-			byte[] explodedData = new byte[totalSize];
-			Buffer.BlockCopy(data, 0, explodedData, 0, data.Length);
+			byte[] deplodedData = new byte[totalSize];
+			Buffer.BlockCopy(data, 0, deplodedData, 0, data.Length);
 
-			fixed (byte* ptr = &explodedData[0])
+			fixed (byte* ptr = &deplodedData[0])
 			{
 				// TODO: This does not read everything (the size does not fit I guess). But it's good enough for now.
 				/*if (!*/
-				Explode(ptr, table, (uint)data.Length, (uint)explodedData.Length, firstLiteralLength, initialBitBuffer)/*)*/;
+				Deplode(ptr, table, (uint)data.Length, (uint)deplodedData.Length, firstLiteralLength, initialBitBuffer)/*)*/;
 					//throw new AmbermoonException(ExceptionScope.Data, "Invalid imploded data.");
 			}
 
-			byte[] reversedData = new byte[explodedData.Length];
+			byte[] reversedData = new byte[deplodedData.Length];
 			int dataSize = reversedData.Length - 1;
 
-			for (int i = 0; i < explodedData.Length; ++i)
-				reversedData[dataSize - i] = explodedData[i];
+			for (int i = 0; i < deplodedData.Length; ++i)
+				reversedData[dataSize - i] = deplodedData[i];
 
 			return reversedData;
         }
@@ -216,12 +216,12 @@ namespace Ambermoon.Data.Legacy
 		/// <param name="table">Explosion table, consisting of 8 16-bit big-endian "base offset" values and
 		/// 12 8-bit "extra bits" values.</param>
 		/// <param name="implodedSize">Compressed size in bytes</param>
-		/// <param name="explodedSize">Decompressed size in bytes</param>
+		/// <param name="deplodedSize">Decompressed size in bytes</param>
 		/// <returns></returns>
-		unsafe bool Explode(byte* buffer, byte[] table, uint implodedSize, uint explodedSize, uint firstLiteralLength, byte initialBitBuffer)
+		unsafe bool Deplode(byte* buffer, byte[] table, uint implodedSize, uint deplodedSize, uint firstLiteralLength, byte initialBitBuffer)
 		{
 			byte* input = buffer + implodedSize - 3; /* input pointer  */
-			byte* output = buffer + explodedSize; /* output pointer */
+			byte* output = buffer + deplodedSize; /* output pointer */
 			byte* match; /* match pointer  */
 			byte bitBuffer;
 			uint literalLength;
@@ -357,7 +357,7 @@ namespace Ambermoon.Data.Legacy
 				{
 					if (ReadBits(1) != 0) // 11
 					{
-						y = ExplodeLiteralBase[x];
+						y = DeplodeLiteralBase[x];
 						x += 8;
 					}
 					else // 10
@@ -366,13 +366,13 @@ namespace Ambermoon.Data.Legacy
 						x += 4;
 					}
 				}
-				x = ExplodeLiteralExtraBits[x];
+				x = DeplodeLiteralExtraBits[x];
 
 				/* next literal run length: read [x] bits and add [y] */
 				literalLength = y + ReadBits(x);
 
 				/* another Huffman tuple, for deciding the match distance: _base and
-				 * _extra are from the explosion table, as passed into the explode
+				 * _extra are from the explosion table, as passed into the deplode
 				 * function.
 				 *
 				 * 0  -> base = 1                        extra = _extra[selector + 0]

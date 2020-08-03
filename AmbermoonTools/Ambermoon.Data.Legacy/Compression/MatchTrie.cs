@@ -5,8 +5,8 @@ using System.Linq;
 namespace Ambermoon.Data.Legacy.Compression
 {
     /// <summary>
-    /// This is a modified patricia trie. It only stores 1 byte literal (key)
-    /// in each branch node but the leaf nodes still may contain a whole
+    /// This is a modified trie. It only stores 1 byte literal (key)
+    /// in each branch node but the leaf nodes may contain a whole
     /// byte array (theoretically up to 17 bytes). Each node also contains a
     /// last match offset which is updated if a node is visit again.
     /// 
@@ -14,7 +14,7 @@ namespace Ambermoon.Data.Legacy.Compression
     /// valid due to leaving the match window. Those nodes are removed
     /// after each adding so that they won't be considered any longer.
     /// </summary>
-    public class LobTrie
+    public class MatchTrie
     {
         abstract class Node
         {
@@ -58,7 +58,17 @@ namespace Ambermoon.Data.Legacy.Compression
 
         readonly BranchNode _rootNode = new BranchNode();
         readonly SortedDictionary<int, Node> _matchNodes = new SortedDictionary<int, Node>();
-        const int MaxMatchOffset = (1 << 12) - 1;
+        readonly int maxMatchOffset = (1 << 12) - 1;
+
+        public MatchTrie()
+        {
+
+        }
+
+        public MatchTrie(int maxMatchOffset)
+        {
+            this.maxMatchOffset = maxMatchOffset;
+        }
 
         /// <summary>
         /// Add a new sequence (mostly 18 bytes as this is the max match length for LOB).
@@ -166,7 +176,7 @@ namespace Ambermoon.Data.Legacy.Compression
             _matchNodes.Add(offset, node);
 
             // Remove nodes that are too far away
-            int firstOffset = offset - MaxMatchOffset + 1; // we check match before adding new sequences so add 1 to the first offset here
+            int firstOffset = offset - maxMatchOffset + 1; // we check match before adding new sequences so add 1 to the first offset here
             foreach (var matchNode in _matchNodes.ToList())
             {
                 if (matchNode.Key < firstOffset)

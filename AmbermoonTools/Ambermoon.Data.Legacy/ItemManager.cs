@@ -11,8 +11,8 @@ namespace Ambermoon.Data.Legacy
             var file = gameData.Files[$"AM2_CPU"].Files[1];
 
             file.Position = 0;
-            var exploder = new ExecutableExploder();
-            var data = exploder.Explode(file);
+            var exploder = new ExecutableDeploder();
+            var data = exploder.Deplode(file);
             file = new DataReader(data);
 
             // First find the item offset (the lamed ailment is the first item)

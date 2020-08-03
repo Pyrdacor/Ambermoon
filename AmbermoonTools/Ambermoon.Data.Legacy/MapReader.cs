@@ -171,21 +171,6 @@ namespace Ambermoon.Data.Legacy
 
                 foreach (var mapEventOffset in mapEventOffsets)
                     map.EventLists.Add(mapEvents[(int)mapEventOffset].Item1);
-
-                if (false/*map.Index == 267 || map.Index == 258 || map.Index == 262*/)
-                {
-                    int foo = 1;
-                    foreach (var ev in map.Events)
-                    {
-                        Console.WriteLine($"{foo++}: {ev.Type} -> {ev}");
-                        var x = ev.Next;
-                        while (x != null)
-                        {
-                            Console.WriteLine($"\t{x.Type} -> {x}");
-                            x = x.Next;
-                        }
-                    }
-                }
             }
 
             // TODO

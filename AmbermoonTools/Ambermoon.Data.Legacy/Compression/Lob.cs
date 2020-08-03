@@ -15,7 +15,7 @@ namespace Ambermoon.Data.Legacy.Compression
                 return data;
 
             var compressedData = new List<byte>(data.Length / 2);
-            var trie = new LobTrie();
+            var trie = new MatchTrie();
             int currentHeaderPosition = 0;
             byte currentHeaderBitMask = 0x80 >> 1; // skip first bit
             byte currentHeader = 0x80; // first entriy/byte is no match
