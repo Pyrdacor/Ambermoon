@@ -17,6 +17,7 @@ namespace Ambermoon.Data.Legacy
         {
             public string Name { get; set; }
             public FileType FileType { get; set; }
+            public uint Header => (uint)FileType;
             public Dictionary<int, IDataReader> Files { get; } = new Dictionary<int, IDataReader>();
         }
 
