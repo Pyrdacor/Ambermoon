@@ -35,9 +35,7 @@
             this.TabPageCharacters = new System.Windows.Forms.TabPage();
             this.TabPageMonsters = new System.Windows.Forms.TabPage();
             this.TabPageNPCs = new System.Windows.Forms.TabPage();
-            this.button1 = new System.Windows.Forms.Button();
             this.tabControlMain.SuspendLayout();
-            this.TabPageOverview.SuspendLayout();
             this.SuspendLayout();
             // 
             // tabControlMain
@@ -54,10 +52,10 @@
             this.tabControlMain.SelectedIndex = 2;
             this.tabControlMain.Size = new System.Drawing.Size(1263, 740);
             this.tabControlMain.TabIndex = 0;
+            this.tabControlMain.SelectedIndexChanged += new System.EventHandler(this.TabControlMain_SelectedIndexChanged);
             // 
             // TabPageOverview
             // 
-            this.TabPageOverview.Controls.Add(this.button1);
             this.TabPageOverview.Location = new System.Drawing.Point(4, 29);
             this.TabPageOverview.Name = "TabPageOverview";
             this.TabPageOverview.Padding = new System.Windows.Forms.Padding(3);
@@ -110,15 +108,6 @@
             this.TabPageNPCs.TabIndex = 5;
             this.TabPageNPCs.Text = "NPCs";
             // 
-            // button1
-            // 
-            this.button1.Location = new System.Drawing.Point(502, 139);
-            this.button1.Name = "button1";
-            this.button1.Size = new System.Drawing.Size(94, 29);
-            this.button1.TabIndex = 0;
-            this.button1.Text = "button1";
-            this.button1.UseVisualStyleBackColor = true;
-            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 20F);
@@ -129,7 +118,6 @@
             this.Text = "Ambermoon Editor";
             this.Load += new System.EventHandler(this.MainForm_Load);
             this.tabControlMain.ResumeLayout(false);
-            this.TabPageOverview.ResumeLayout(false);
             this.ResumeLayout(false);
 
         }
@@ -143,7 +131,6 @@
         private System.Windows.Forms.TabPage TabPageCharacters;
         private System.Windows.Forms.TabPage TabPageMonsters;
         private System.Windows.Forms.TabPage TabPageNPCs;
-        private System.Windows.Forms.Button button1;
     }
 }
 

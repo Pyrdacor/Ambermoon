@@ -2,33 +2,37 @@
 {
     public partial class OverviewControl : DataControl
     {
-        private System.Windows.Forms.Label label1;
+        private System.Windows.Forms.TextBox textBox1;
 
         public OverviewControl()
         {
 
         }
 
-        private void InitializeComponent()
+        protected override void InitializeComponent()
         {
-            this.label1 = new System.Windows.Forms.Label();
+            this.textBox1 = new System.Windows.Forms.TextBox();
             this.SuspendLayout();
             // 
-            // label1
+            // textBox1
             // 
-            this.label1.BackColor = System.Drawing.Color.Red;
-            this.label1.Location = new System.Drawing.Point(0, 0);
-            this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(780, 390);
-            this.label1.TabIndex = 0;
-            this.label1.Text = "label1";
+            this.textBox1.BackColor = System.Drawing.SystemColors.Control;
+            this.textBox1.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.textBox1.Location = new System.Drawing.Point(0, 0);
+            this.textBox1.Multiline = true;
+            this.textBox1.Name = "textBox1";
+            this.textBox1.Size = new System.Drawing.Size(790, 400);
+            this.textBox1.TabIndex = 0;
+            this.textBox1.Text = "\r\n\r\n\r\nWelcome to Ambermoon Editor.\r\n\r\nThis tool is still work in progress. ;)";
+            this.textBox1.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
             // 
             // OverviewControl
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 20F);
-            this.Controls.Add(this.label1);
+            this.Controls.Add(this.textBox1);
             this.Name = "OverviewControl";
             this.ResumeLayout(false);
+            this.PerformLayout();
 
         }
     }

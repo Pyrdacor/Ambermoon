@@ -35,9 +35,14 @@ namespace AmbermoonEditor
 
         private void InitializeTabPage(TabPage page, DataControl mainControl, GameData gameData)
         {
-            page.Controls.Add(mainControl);
             mainControl.GameData = gameData;
             mainControl.Dock = DockStyle.Fill;
+            page.Controls.Add(mainControl);
+        }
+
+        private void TabControlMain_SelectedIndexChanged(object sender, EventArgs e)
+        {
+
         }
     }
 }

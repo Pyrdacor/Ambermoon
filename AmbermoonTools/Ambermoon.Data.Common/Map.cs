@@ -93,7 +93,7 @@ namespace Ambermoon.Data
         public Block[,] Blocks { get; set; }
         public List<MapEvent> Events { get; } = new List<MapEvent>();
         public List<MapEvent> EventLists { get; } = new List<MapEvent>();
-        public List<string> Texts { get; } = new List<string>();
+        public List<string> Texts { get; set; } = new List<string>();
         public CharacterReference[] CharacterReferences { get; } = new CharacterReference[32];
         public bool IsLyramionWorldMap => IsWorldMap && World == World.Lyramion;
         public bool IsForestMoonWorldMap => IsWorldMap && World == World.ForestMoon;

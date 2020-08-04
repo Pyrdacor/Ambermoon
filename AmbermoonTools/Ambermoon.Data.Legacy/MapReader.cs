@@ -9,23 +9,6 @@ namespace Ambermoon.Data.Legacy
     // - interaction type (move onto, hand, eye, mouth, etc)
     public class MapReader : IMapReader
     {
-        void ReadMapTexts(Map map, IDataReader textDataReader)
-        {
-            map.Texts.Clear();
-
-            if (textDataReader != null)
-            {
-                int numMapTexts = textDataReader.ReadWord();
-                int[] mapTextLengths = new int[numMapTexts];
-
-                for (int i = 0; i < numMapTexts; ++i)
-                    mapTextLengths[i] = textDataReader.ReadWord();
-
-                for (int i = 0; i < numMapTexts; ++i)
-                    map.Texts.Add(textDataReader.ReadString(mapTextLengths[i]).Trim(' ', '\0'));
-            }
-        }
-
         static Map.TileType TileTypeFromTile(Map.Tile tile, Tileset tileset)
         {
             var tilesetTile = tile.FrontTileIndex == 0 ? tileset.Tiles[tile.BackTileIndex - 1] : tileset.Tiles[tile.FrontTileIndex - 1];
@@ -42,10 +25,29 @@ namespace Ambermoon.Data.Legacy
             return Map.TileType.Free;
         }
 
+        public List<string> ReadMapTexts(IDataReader textDataReader)
+        {
+            var texts = new List<string>();
+
+            if (textDataReader != null)
+            {
+                int numMapTexts = textDataReader.ReadWord();
+                int[] mapTextLengths = new int[numMapTexts];
+
+                for (int i = 0; i < numMapTexts; ++i)
+                    mapTextLengths[i] = textDataReader.ReadWord();
+
+                for (int i = 0; i < numMapTexts; ++i)
+                    texts.Add(textDataReader.ReadString(mapTextLengths[i]).Trim(' ', '\0'));
+            }
+
+            return texts;
+        }
+
         public void ReadMap(Map map, IDataReader dataReader, IDataReader textDataReader, Dictionary<uint, Tileset> tilesets)
         {
             // Load map texts
-            ReadMapTexts(map, textDataReader);
+            map.Texts = ReadMapTexts(textDataReader);
 
             map.Flags = (MapFlags)dataReader.ReadWord();
             map.Type = (MapType)dataReader.ReadByte();
