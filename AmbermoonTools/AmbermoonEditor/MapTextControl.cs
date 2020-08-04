@@ -144,6 +144,8 @@ namespace AmbermoonEditor
             // MapTextControl
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 20F);
+            this.AutoSize = true;
+            this.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
             this.Controls.Add(this.groupBoxTexts);
             this.Controls.Add(this.textBoxName);
             this.Controls.Add(this.labelName);
@@ -167,11 +169,19 @@ namespace AmbermoonEditor
 
         private void MapTextControl_Load(object sender, System.EventArgs e)
         {
+            bool[] mapTextsAvailable = new bool[3] { false, false, false };
+
             for (int i = 1; i <= 3; ++i)
             {
-                var container = GameData.Files[$"{i}Map_texts.amb"];
+                string containerName = $"{i}Map_texts.amb";
 
-                MapReader reader = new MapReader();
+                if (!GameData.Files.ContainsKey(containerName))
+                    continue;
+
+                mapTextsAvailable[i - 1] = true;
+
+                var container = GameData.Files[containerName];
+                var reader = new MapReader();
 
                 foreach (var file in container.Files)
                 {
@@ -179,17 +189,37 @@ namespace AmbermoonEditor
                 }
             }
 
-            for (int i = 1; i <= 528; ++i)
-                comboBoxMaps.Items.Add(i);
-
-            comboBoxMaps.SelectedIndex = 256; // skip lyramion world maps as they are not that interesting for map texts
+            if (mapTextsAvailable[0])
+            {
+                for (int i = 1; i <= 256; ++i)
+                    comboBoxMaps.Items.Add(i);
+                if (!mapTextsAvailable[1])
+                    comboBoxMaps.SelectedIndex = 0;
+            }
+            if (mapTextsAvailable[1])
+            {
+                for (int i = 257; i <= 299; ++i)
+                    comboBoxMaps.Items.Add(i);
+                for (int i = 400; i <= 528; ++i)
+                    comboBoxMaps.Items.Add(i);
+                comboBoxMaps.SelectedIndex = mapTextsAvailable[0] ? 256 : 0;
+            }
+            if (mapTextsAvailable[2])
+            {
+                for (int i = 300; i <= 369; ++i)
+                    comboBoxMaps.Items.Add(i);
+                if (!mapTextsAvailable[0] && !mapTextsAvailable[1])
+                    comboBoxMaps.SelectedIndex = 0;
+            }
         }
+
+        int MapIndex => (int)comboBoxMaps.SelectedItem;
 
         private void ComboBoxMaps_SelectedIndexChanged(object sender, System.EventArgs e)
         {
-            if (!_mapTexts.TryGetValue(comboBoxMaps.SelectedIndex + 1, out var texts))
+            if (!_mapTexts.TryGetValue(MapIndex, out var texts))
                 texts = new List<TextEntry>();
-            isWorldMap = IsWorldMap(comboBoxMaps.SelectedIndex + 1);
+            isWorldMap = IsWorldMap(MapIndex);
 
             labelName.Enabled = !isWorldMap;
             textBoxName.Enabled = !isWorldMap;
@@ -223,16 +253,16 @@ namespace AmbermoonEditor
         {
             int offset = isWorldMap ? 0 : 1;
 
-            if (!_mapTexts.ContainsKey(comboBoxMaps.SelectedIndex + 1))
-                _mapTexts.Add(comboBoxMaps.SelectedIndex + 1, new List<TextEntry>());
+            if (!_mapTexts.ContainsKey(MapIndex))
+                _mapTexts.Add(MapIndex, new List<TextEntry>());
             else
-                _mapTexts[comboBoxMaps.SelectedIndex + 1][offset + currentTextIndex].Text = textBoxText.Text;
+                _mapTexts[MapIndex][offset + currentTextIndex].Text = textBoxText.Text;
 
             currentTextIndex = comboBoxTexts.SelectedIndex;
 
-            if (_mapTexts[comboBoxMaps.SelectedIndex + 1].Count == offset + currentTextIndex)
-                _mapTexts[comboBoxMaps.SelectedIndex + 1].Add(new TextEntry { Text = "<enter text>" });
-            textBoxText.Text = _mapTexts[comboBoxMaps.SelectedIndex + 1][offset + currentTextIndex].Text;
+            if (_mapTexts[MapIndex].Count == offset + currentTextIndex)
+                _mapTexts[MapIndex].Add(new TextEntry { Text = "<enter text>" });
+            textBoxText.Text = _mapTexts[MapIndex][offset + currentTextIndex].Text;
         }
 
         private void ButtonAdd_Click(object sender, System.EventArgs e)

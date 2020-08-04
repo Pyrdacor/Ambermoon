@@ -79,11 +79,19 @@ namespace Ambermoon.Data.Legacy
                 if (_loadPreference == LoadPreference.PreferExtracted && File.Exists(path))
                 {
                     Files.Add(name, fileReader.ReadFile(name, File.OpenRead(path)));
+
+                    if (_log != null)
+                        _log.AppendLine("succeeded");
                 }
                 else if (_loadPreference == LoadPreference.ForceExtracted)
                 {
                     if (File.Exists(path))
+                    {
                         Files.Add(name, fileReader.ReadFile(name, File.OpenRead(path)));
+
+                        if (_log != null)
+                            _log.AppendLine("succeeded");
+                    }
                     else
                     {
                         if (_log != null)
