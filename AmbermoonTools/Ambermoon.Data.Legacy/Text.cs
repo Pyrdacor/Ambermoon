@@ -38,35 +38,6 @@ namespace Ambermoon.Data.Legacy
 
     public class TextProcessor : ITextProcessor
     {
-        /// <summary>
-        /// Main character name
-        /// </summary>
-        public string LeadName { get; set; }
-        /// <summary>
-        /// Active character name
-        /// </summary>
-        public string SelfName { get; set; }
-        /// <summary>
-        /// Current caster name
-        /// </summary>
-        public string CastName { get; set; }
-        /// <summary>
-        /// Current inventory owner name
-        /// </summary>
-        public string InvnName { get; set; }
-        /// <summary>
-        /// Current subject name
-        /// </summary>
-        public string SubjName { get; set; }
-        /// <summary>
-        /// Current sex-dependent 3rd person pronoun (e.g. 'he' or 'she')
-        /// </summary>
-        public string Sex1Name { get; set; }
-        /// <summary>
-        /// Current sex-dependent 3rd person possessive determiner (e.g. 'his' or 'her')
-        /// </summary>
-        public string Sex2Name { get; set; }
-
         static byte CharToGlyph(char ch, bool rune)
         {
             if (ch >= 'a' && ch <= 'z')
@@ -141,17 +112,17 @@ namespace Ambermoon.Data.Legacy
                 throw new AmbermoonException(ExceptionScope.Data, $"Unsupported text character '{ch}'.");
         }
 
-        public IText ProcessText(string text, List<string> dictionary)
+        public IText ProcessText(string text, ITextNameProvider nameProvider, List<string> dictionary)
         {
             List<byte> glyphIndices = new List<byte>();
 
-            text = text.Replace("~LEAD~", LeadName);
-            text = text.Replace("~SELF~", SelfName);
-            text = text.Replace("~CAST~", CastName);
-            text = text.Replace("~INVN~", InvnName);
-            text = text.Replace("~SUBJ~", SubjName);
-            text = text.Replace("~SEX1~", LeadName);
-            text = text.Replace("~SEX2~", LeadName);
+            text = text.Replace("~LEAD~", nameProvider.LeadName);
+            text = text.Replace("~SELF~", nameProvider.SelfName);
+            text = text.Replace("~CAST~", nameProvider.CastName);
+            text = text.Replace("~INVN~", nameProvider.InvnName);
+            text = text.Replace("~SUBJ~", nameProvider.SubjName);
+            text = text.Replace("~SEX1~", nameProvider.Sex1Name);
+            text = text.Replace("~SEX2~", nameProvider.Sex2Name);
 
             bool rune = false;
             int tagStart = -1;
