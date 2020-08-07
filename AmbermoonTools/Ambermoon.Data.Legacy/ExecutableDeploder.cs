@@ -107,7 +107,7 @@ namespace Ambermoon.Data.Legacy
 							uint numEntries = dataReader.ReadDword();
 							hunks[j].NumEntries = numEntries;
 							hunks[j].Data = dataReader.ReadBytes((int)numEntries * 4);
-							Console.WriteLine($"Hunk{i:00}: {type}, Size: {4 + numEntries * 4}, NumEntries: {numEntries}");
+							//Console.WriteLine($"Hunk{i:00}: {type}, Size: {4 + numEntries * 4}, NumEntries: {numEntries}");
 							++j;
 						}
 						break;
@@ -115,7 +115,7 @@ namespace Ambermoon.Data.Legacy
 						{
 							uint allocSize = dataReader.ReadDword();
 							hunks[j].NumEntries = allocSize;
-							Console.WriteLine($"Hunk{i:00}: {type}, Size: 4, AllocSize: {allocSize * 4}");
+							//Console.WriteLine($"Hunk{i:00}: {type}, Size: 4, AllocSize: {allocSize * 4}");
 							++j;
 						}
 						break;
@@ -132,13 +132,13 @@ namespace Ambermoon.Data.Legacy
 								dataReader.Position += 4 + (int)numOffsets * 4;
                             }
 
-							Console.WriteLine($"Hunk{i:00}: {type}, Size: {size - 4}, Num offsets: {totalOffsets}");
+							//Console.WriteLine($"Hunk{i:00}: {type}, Size: {size - 4}, Num offsets: {totalOffsets}");
 							++numHunks;
 						}
 						break;
 					case HunkType.END:
 						{
-							Console.WriteLine($"Hunk{i:00}: {type}");
+							//Console.WriteLine($"Hunk{i:00}: {type}");
 							++numHunks;
 						}
 						break;
