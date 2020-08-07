@@ -57,12 +57,12 @@ namespace Ambermoon.Data
 
         public IEnumerator<CharacterValue> GetEnumerator()
         {
-            return (IEnumerator<CharacterValue>)values.GetEnumerator();
+            return ((IEnumerable<CharacterValue>)values).GetEnumerator();
         }
 
         IEnumerator IEnumerable.GetEnumerator()
         {
-            return values.GetEnumerator();
+            return GetEnumerator();
         }
     }
 }
