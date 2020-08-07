@@ -20,6 +20,9 @@ namespace Ambermoon.Data
         public CharacterValueCollection(int size)
         {
             values = new CharacterValue[size];
+
+            for (int i = 0; i < size; ++i)
+                values[i] = new CharacterValue();
         }
 
         public CharacterValueCollection(params CharacterValue[] values)
