@@ -36,6 +36,10 @@
         public uint TotalWeight { get; set; }
         public ushort PortraitIndex { get; set; }
         public string Name { get; set; }
+        public bool Alive =>
+            !Ailments.HasFlag(Ailment.DeadCorpse) &&
+            !Ailments.HasFlag(Ailment.DeadAshes) &&
+            !Ailments.HasFlag(Ailment.DeadDust);
 
         protected Character(CharacterType type)
         {
