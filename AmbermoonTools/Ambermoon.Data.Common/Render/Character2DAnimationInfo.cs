@@ -1,4 +1,4 @@
-﻿namespace Ambermoon.Data
+﻿namespace Ambermoon.Render
 {
     public struct Character2DAnimationInfo
     {
