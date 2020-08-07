@@ -79,6 +79,17 @@ namespace Ambermoon.Data.Legacy
                 }
             });
 
+            // TODO: The following bytes were extracted from AM2_CPU (behind cursors).
+            // It really looks like 3 palettes. Maybe for text rendering?
+            /* 00 00 0E DC 0F FE 0B BC 08 9A 05 78 02 56 00 34 0F C9 0E A7 0C 85 0A 63 08 42 05 21 0B 80 0D A0
+             * 0F C0 0F 90 0C 60 08 12 0C 43 0E 63 0A A4 05 73 02 54 05 09 02 22 04 43 06 65 08 87 0A A9 0C CB
+             * 
+             * 00 00 0F DC 0E B9 0C 96 04 10 08 51 0A 74 06 30 0F 60 0D 30 09 00 0F C0 0B 90 08 60 09 A3 05 70
+             * 02 40 08 BE 03 8C 00 48 0C 8D 0A 69 08 36 0F FF 07 9D 01 6A 02 11 04 32 06 54 08 76 0A 98 0C BA
+             * 
+             * 00 00 0E DC 0F FE 0B BC 08 9A 05 78 02 56 00 34 0F C9 0E A7 0C 85 0A 63 08 42 05 21 0B 80 0D A0
+             * 0F C0 0F 90 0C 60 08 12 0C 43 0E 63 0A A4 05 73 04 9D 02 59 02 10 04 31 06 53 08 75 0A 97 0C B9
+             */
 
             foreach (GraphicType type in Enum.GetValues(typeof(GraphicType)))
             {
@@ -96,7 +107,9 @@ namespace Ambermoon.Data.Legacy
 
         static GraphicInfo paletteGraphicInfo = new GraphicInfo
         {
-            Width = 32, Height = 1, GraphicFormat = GraphicFormat.XRGB16
+            Width = 32,
+            Height = 1,
+            GraphicFormat = GraphicFormat.XRGB16
         };
         static readonly string paletteFile = "Palettes.amb";
         static readonly Dictionary<GraphicType, GraphicFile[]> graphicFiles = new Dictionary<GraphicType, GraphicFile[]>();
@@ -227,7 +240,7 @@ namespace Ambermoon.Data.Legacy
                     info.PaletteOffset = 0;
                     info.Alpha = false;
                     break;
-                // TODO
+                    // TODO
             }
 
             return info;

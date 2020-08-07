@@ -203,8 +203,10 @@ namespace Ambermoon.Data
                 if (mapEvent is MapChangeEvent mapChangeEvent)
                 {
                     // The position (x, y) is 1-based in the data so we subtract 1.
-                    // Morover the players position is 1 tile below its drawing position so subtract another 1 from y.
-                    player.MoveTo(mapManager.GetMap(mapChangeEvent.MapIndex), mapChangeEvent.X - 1, mapChangeEvent.Y - 2, ticks, true, mapChangeEvent.Direction);
+                    var map = mapManager.GetMap(mapChangeEvent.MapIndex);
+                    // Moreover the players position is 1 tile below its drawing position in 2D so subtract another 1 from y.
+                    player.MoveTo(map, mapChangeEvent.X - 1, mapChangeEvent.Y - (map.Type == MapType.Map2D ? 2u : 1u),
+                        ticks, true, mapChangeEvent.Direction);
                 }
             }
         }
