@@ -133,11 +133,11 @@ namespace Ambermoon.Data.Legacy
                 // AMNP archives are always encoded
                 if (containerType == FileType.AMNP)
                 {
-                    reader = new DataReader(JH.Crypt(reader, (ushort)fileNumber, 4));
-
                     // ensure and skip the header (should be FileType.None here)
                     if (reader.ReadDword() != (uint)FileType.None)
                         throw new AmbermoonException(ExceptionScope.Data, "Invalid AMNP file data.");
+
+                    reader = new DataReader(JH.Crypt(reader, (ushort)fileNumber));
                 }
 
                 return reader;
