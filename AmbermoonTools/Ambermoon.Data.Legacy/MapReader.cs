@@ -19,6 +19,8 @@ namespace Ambermoon.Data.Legacy
                 return Map.TileType.ChairUp + (int)tilesetTile.SitDirection.Value;
             if (tilesetTile.BlockMovement)
                 return Map.TileType.Obstacle;
+            if (tilesetTile.Invisible)
+                return Map.TileType.Invisible;
 
             // TODO
 

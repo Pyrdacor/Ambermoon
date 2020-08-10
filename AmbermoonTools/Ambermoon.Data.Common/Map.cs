@@ -32,6 +32,7 @@ namespace Ambermoon.Data
             ChairDown,
             ChairLeft,
             Bed,
+            Invisible, // player is invisible while passing (standing on it)
             Obstacle, // can be passed by witch broom and eagle (this is also used for obstacles in water!)
             Water, // can swim in it, flying disc can fly over
             Ocean, // can not swim in it, flying disc can not fly over

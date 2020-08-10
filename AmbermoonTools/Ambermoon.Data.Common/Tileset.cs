@@ -9,8 +9,10 @@
             public bool BlockMovement { get; set; }
             public CharacterDirection? SitDirection { get; set; }
             public bool Sleep { get; set; }
+            public bool Invisible { get; set; } // player is invisible while standing on that tile
             public ushort Unknown1 { get; set; } // TODO: What is this? Remove if unused later.
             public byte Unknown2 { get; set; } // TODO: What is this? Remove if unused later.
+            public ushort Flags { get; set; } // TODO: REMOVE later
         }
 
         public uint Index { get; set; }
