@@ -9,8 +9,8 @@
     <RepositoryType>Github</RepositoryType>
     <PackageTags>Ambermoon Legacy Amiga Game Data</PackageTags>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <Version>1.0.25</Version>
-    <AssemblyVersion>1.0.25.0</AssemblyVersion>
+    <Version>1.0.26</Version>
+    <AssemblyVersion>1.0.26.0</AssemblyVersion>
   </PropertyGroup>
 
   <PropertyGroup>

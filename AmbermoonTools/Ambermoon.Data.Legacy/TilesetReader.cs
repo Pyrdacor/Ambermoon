@@ -23,6 +23,8 @@
 
         void ParseTileFlags(Tileset.Tile tile, ulong flags)
         {
+            // Bit 2: Draw in background
+            // Bit 6: Draw above player (not sure as it is in combination with bit 2 often, but it seems to work if this overrides bit 2)
             // Bit 8: Allow movement (0 means block movement)
             // Bit 16: Unknown. It has the same value as bit 8 most of the times (but not always).
             // Bit 23-25: Sit/sleep value
@@ -34,6 +36,12 @@
             //  5 -> sleep (always face down)
             // Bit 26: Player invisible (doors, behind towers/walls, etc)
 
+            // Another possible explanation for bit 2/6 would be:
+            // - Bit 2: Disable baseline rendering / use custom sprite ordering
+            // - Bit 6: 0 = behind player, 1 = above player (only used if Bit 2 is set)
+
+            tile.Background = (flags & 0x04) != 0;
+            tile.BringToFront = (flags & 0x40) != 0;
             tile.BlockMovement = (flags & 0x0100) == 0;
             var sitSleepValue = (flags >> 23) & 0x07;
             tile.SitDirection = (sitSleepValue == 0 || sitSleepValue > 4) ? (CharacterDirection?)null : (CharacterDirection)(sitSleepValue - 1);
