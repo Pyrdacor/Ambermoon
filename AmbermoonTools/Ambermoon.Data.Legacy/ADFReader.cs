@@ -24,7 +24,7 @@ namespace Ambermoon.Data.Legacy
             public UInt32 Offset = UInt32.MaxValue;
             public UInt32 Length = 0u;
 
-            public byte[] GetData(BinaryReader reader, UInt32 fileSize = 0u)
+            public byte[] GetData(BinaryReader reader, bool ffs, UInt32 fileSize = 0u)
             {
                 if (Type != SectorType.File)
                     return null;
@@ -51,7 +51,7 @@ namespace Ambermoon.Data.Legacy
                     if (dataOffsets[i] == 0)
                         break;
 
-                    AppendData(reader, fileData, ref offset, dataOffsets[i]);
+                    AppendData(reader, fileData, ref offset, dataOffsets[i], ffs, Math.Min(512, fileData.Length - offset));
                 }
 
                 if (FirstExtensionBlock != 0)
@@ -61,12 +61,12 @@ namespace Ambermoon.Data.Legacy
                     if (extensionSector == null)
                         throw new IOException($"Invalid ADF file data for file \"{Name}\".");
 
-                    var extensionData = extensionSector.GetData(reader, fileSize - (UInt32)offset);
+                    var extensionData = extensionSector.GetData(reader, ffs, fileSize - (UInt32)offset);
 
                     if (offset + extensionData.Length != fileSize)
                         throw new IOException($"Invalid ADF file data for file \"{Name}\".");
 
-                    System.Buffer.BlockCopy(extensionData, 0, fileData, offset, extensionData.Length);
+                    Buffer.BlockCopy(extensionData, 0, fileData, offset, extensionData.Length);
 
                     offset = (int)fileSize;
                 }
@@ -77,49 +77,63 @@ namespace Ambermoon.Data.Legacy
                 return fileData;
             }
 
-            void AppendData(BinaryReader reader, byte[] buffer, ref int offset, UInt32 block)
+            void AppendData(BinaryReader reader, byte[] buffer, ref int offset, UInt32 block, bool ffs, int maxSize)
             {
                 reader.BaseStream.Position = block * 512;
 
-                if (reader.ReadUInt32BigEndian() != 8)
-                    throw new IOException("Invalid file data sector header.");
+                if (ffs)
+                {
+                    var data = reader.ReadBytes(maxSize);
 
-                reader.ReadBytes(8); // skip some bytes
+                    Buffer.BlockCopy(data, 0, buffer, offset, data.Length);
 
-                var size = reader.ReadUInt32BigEndian();
+                    offset += data.Length;
+                }
+                else // OFS
+                {
+                    if (reader.ReadUInt32BigEndian() != 8)
+                        throw new IOException("Invalid file data sector header.");
 
-                if (size > 512 - 24)
-                    throw new IOException("Invalid file data sector size.");
+                    reader.ReadBytes(8); // skip some bytes
 
-                reader.ReadBytes(8); // skip some bytes
+                    var size = reader.ReadUInt32BigEndian();
 
-                var data = reader.ReadBytes((int)size);
+                    if (size > 512 - 24 || size > maxSize)
+                        throw new IOException("Invalid file data sector size.");
 
-                System.Buffer.BlockCopy(data, 0, buffer, offset, data.Length);
+                    reader.ReadBytes(8); // skip some bytes
 
-                offset += data.Length;
+                    var data = reader.ReadBytes((int)size);
+
+                    Buffer.BlockCopy(data, 0, buffer, offset, data.Length);
+
+                    offset += data.Length;
+                }
             }
         }
 
-        private static UInt32 GetHash(string name)
+        private static UInt32 GetHash(string name, bool internationalMode)
         {
             UInt32 hash, l;
 
             l = hash = (UInt32)name.Length;
+            Func<char, char> toUpper = internationalMode
+                ? (char ch) => (ch >= 'a' && ch <= 'z') || (ch >= 224 && ch <= 254 && ch != 247) ? (char)(ch - ('a' - 'A')) : ch
+                : (Func<char, char>)char.ToUpper;
 
             for (int i = 0; i < l; ++i)
             {
                 hash *= 13;
-                hash += (UInt32)char.ToUpper(name[i]);
+                hash += (UInt32)toUpper(name[i]);
                 hash &= 0x7ff;
             }
 
             return hash % 72;
         }
 
-        private static Sector GetSector(BinaryReader reader, UInt32[] hashTable, string name)
+        private static Sector GetSector(BinaryReader reader, UInt32[] hashTable, string name, bool internationalMode)
         {
-            var hash = GetHash(name);
+            var hash = GetHash(name, internationalMode);
 
             if (hash == 0)
                 return null;
@@ -203,9 +217,32 @@ namespace Ambermoon.Data.Legacy
                     throw new IOException("Invalid ADF file header.");
 
                 byte flags = (byte)(header[3] & 0x07);
+                bool ffs;
+                bool internationalMode;
 
-                if (flags != 0)
-                    throw new IOException("Invalid ADF file format." + Environment.NewLine + "Supported is only AmigaDOS 1.2 format (OFS)");
+                switch (flags)
+                {
+                    case 0: // OFS
+                        ffs = false;
+                        internationalMode = false;
+                        break;
+                    case 1: // FFS
+                        ffs = true;
+                        internationalMode = false;
+                        break;
+                    case 2: // OFS/INTL
+                    case 4: // OFS/DIRC/INTL
+                        ffs = false;
+                        internationalMode = true;
+                        break;
+                    case 3: // FFS/INTL
+                    case 5: // FFS/DIRC/INTL
+                        ffs = true;
+                        internationalMode = true;
+                        break;
+                    default:
+                        throw new IOException("Invalid ADF file format.");
+                }
 
                 // Reading rootblock (sector 880 -> offset 0x6e000)
                 reader.BaseStream.Position = 0x6e000;
@@ -248,10 +285,10 @@ namespace Ambermoon.Data.Legacy
 
                 foreach (var file in Files.AmigaFiles.Keys)
                 {
-                    var fileSector = GetSector(reader, hashTable, file);
+                    var fileSector = GetSector(reader, hashTable, file, internationalMode);
 
                     if (fileSector != null)
-                        loadedFiles.Add(file, fileSector.GetData(reader));
+                        loadedFiles.Add(file, fileSector.GetData(reader, ffs));
                 }
 
                 return loadedFiles;
