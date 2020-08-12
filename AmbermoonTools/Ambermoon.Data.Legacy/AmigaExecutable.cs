@@ -106,7 +106,7 @@ namespace Ambermoon.Data.Legacy
 		static readonly byte[] DeplodeLiteralBase = { 6, 10, 10, 18 };
 		static readonly byte[] DeplodeLiteralExtraBits = { 1, 1, 1, 1, 2, 3, 3, 4, 4, 5, 7, 14 };
 
-		public static List<Hunk> Read(IDataReader dataReader)
+		public static List<Hunk> Read(IDataReader dataReader, bool deplodeIfNecessary = true)
         {
 			static void Throw()
 			{
@@ -207,24 +207,29 @@ namespace Ambermoon.Data.Legacy
 				hunks.Add(hunk);
 			}
 
-			bool imploded = false;
+			if (deplodeIfNecessary)
+			{
+				bool imploded = false;
 
-			if (hunks.Count != 0)
-            {
-				imploded = true;
-				var firstHunkData = hunks.First().Data;
+				if (hunks.Count != 0)
+				{
+					imploded = true;
+					var firstHunkData = hunks.First().Data;
 
-				for (int i = 0; i < 10; ++i)
-                {
-					if (firstHunkData[i] != ImplodeHunkHeader[i])
-                    {
-						imploded = false;
-						break;
-                    }
-                }
-            }
+					for (int i = 0; i < ImplodeHunkHeader.Length; ++i)
+					{
+						if (firstHunkData[i] != ImplodeHunkHeader[i])
+						{
+							imploded = false;
+							break;
+						}
+					}
+				}
 
-			return imploded ? ReadImploded(hunks) : hunks;
+				return imploded ? ReadImploded(hunks) : hunks;
+			}
+
+			return hunks;
 		}
 
 		static readonly byte[] ImplodeHunkHeader = new byte[10]
@@ -338,7 +343,7 @@ namespace Ambermoon.Data.Legacy
 
 		public static unsafe byte[] Deplode(IDataReader dataReader, out List<uint> deplodedHunkSizes)
         {
-			return Deplode(Read(dataReader), out deplodedHunkSizes);
+			return Deplode(Read(dataReader, false), out deplodedHunkSizes);
 		}
 
 		static unsafe byte[] Deplode(List<Hunk> imploderHunks, out List<uint> deplodedHunkSizes)
