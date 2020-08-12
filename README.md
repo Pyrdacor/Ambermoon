@@ -87,6 +87,10 @@ Most of the work was done by a bunch of good fellas.
 - Gerald Müller-Bruhnke from the [Thalion Source](http://home.wtal.de/gmb/index.htm)
 - and many others (if you know anyone I forgot, please let me know)
 
+Moreover there are some Albion reworks and reverse engineering projects. The data formats are very similar so there is some valuable information as well:
+- [freealbion](https://github.com/freealbion/freealbion) by Florian Ziesche
+- [ualbion](https://github.com/csinkers/ualbion) by Cam Sinclair
+
 I just want to gather the whole findings at a central place and provide it on a save storage for the future.
 
 At least some contributions will come from me as well like some file specs and the formatting of all the data. :)
@@ -97,7 +101,7 @@ I marked unknown values in the specs as **Unknown**. Would be nice if some of th
 
 ## Language
 
-I will document everything in english so most people will understand. But I only played the german version and translated some things to my best knowledge. So there might by differences between the names and values given here and the names used in the original english game.
+I will document everything in english so most people will understand. But I only played the german version and translated some things to my best knowledge. So there might be differences between the names and values given here and the names used in the original english game.
 
 If you know the english version or have some other translation improvements, just let me know. You can use the issue tracker for that for example.
 
