@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 
 namespace Ambermoon
 {
@@ -85,5 +86,10 @@ namespace Ambermoon
 
             return max;
         }
+
+        public static string BytesToHexString(string separator, params byte[] bytes) =>
+            string.Join(separator, bytes.Select(b => b.ToString("x2")));
+
+        public static string BytesToHexString(params byte[] bytes) => BytesToHexString(" ", bytes);
     }
 }

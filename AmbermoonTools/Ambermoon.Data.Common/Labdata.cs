@@ -45,11 +45,11 @@ namespace Ambermoon.Data
         [Flags]
         public enum WallFlags
         {
+            // Note: Only the mentioned 3 bits/flags are used in Ambermoon.
             None = 0,
             BlockSight = 0x02, // Not sure but beside walls this is also used by non-bocking doors or exits
             Transparency = 0x08,
             BlockMovement = 0x80,
-            // TODO
         }
 
         [Flags]
@@ -100,6 +100,20 @@ namespace Ambermoon.Data
             }
         }
 
+        /// <summary>
+        /// The floor dimension (tile width/height) seems to be considered as 250.
+        /// So if this value is 250 as well, the wall's height is exactly a tile
+        /// width and therefore each map block is a cube. If the value would be
+        /// 500, a wall would be twice as height as a tile width, etc.
+        /// </summary>
+        public uint WallHeight { get; set; }
+        /// <summary>
+        /// There are 16 combat background sets.
+        /// See <see cref="CombatBackgrounds"/>.
+        /// </summary>
+        public uint CombatBackground { get; set; }
+        public byte Unknown1 { get; set; }
+        public byte[] Unknown2 { get; set; }
         public List<Object> Objects { get; } = new List<Object>();
         public List<ObjectInfo> ObjectInfos { get; } = new List<ObjectInfo>();
         public List<WallData> Walls { get; } = new List<WallData>();

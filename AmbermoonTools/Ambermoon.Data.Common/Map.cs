@@ -76,6 +76,7 @@ namespace Ambermoon.Data
         }
 
         public uint Index { get; private set; }
+        public string Name => IsWorldMap ? $"{World}{Index:000}" : Texts[0]; // TODO: use correct language later?
         public MapFlags Flags { get; set; }
         public MapType Type { get; set; }
         public uint MusicIndex { get; set; }
@@ -86,7 +87,23 @@ namespace Ambermoon.Data
         /// Labdata index in 3D
         /// </summary>
         public uint TilesetOrLabdataIndex { get; set; }
-        public uint NPCGfxIndex { get; set; } // TODO: combat background gfx?
+        /// <summary>
+        /// This is only used in non-world-surface 2D maps.
+        /// To more precise it could be used in any 2D map
+        /// but it only makes sense for maps which have 2D NPCs.
+        /// There are 2 NPC graphic files inside the NPC_gfx.amb.
+        /// This index specifies which to load (0 = none, 1 or 2).
+        /// </summary>
+        public uint NPCGfxIndex { get; set; }
+        /// <summary>
+        /// This is used for outdoor 3D maps (towns). It basically
+        /// depends on the world (there is one for each world).
+        /// 0: Not used, 1: Lyramion, 2: Forest Moon, 3: Morag
+        /// 
+        /// TODO: This is also used for all Lyramion and Morag
+        /// 2D world maps where it is set to 1. For all other 2D
+        /// maps (including forest moon world maps) it is 0.
+        /// </summary>
         public uint LabyrinthBackgroundIndex { get; set; }
         public uint PaletteIndex { get; set; }
         public World World { get; set; }

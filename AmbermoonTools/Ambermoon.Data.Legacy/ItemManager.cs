@@ -15,8 +15,6 @@ namespace Ambermoon.Data.Legacy
             var data = AmigaExecutable.Read(file).Last(h => h.Type == AmigaExecutable.HunkType.Data).Data;
             file = new DataReader(data);
 
-            // TODO: Test if the offset inside the data hunk is always the same (expecting 0xF8B4)
-
             // First find the item offset (the lamed ailment is the first item)
             long offset = file.FindString("LAMED", 0);
 

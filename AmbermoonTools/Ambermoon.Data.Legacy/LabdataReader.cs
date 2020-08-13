@@ -8,7 +8,13 @@ namespace Ambermoon.Data.Legacy
     {
         public void ReadLabdata(Labdata labdata, IDataReader dataReader, IGameData gameData)
         {
-            dataReader.ReadBytes(6); // Unknown
+            labdata.WallHeight = dataReader.ReadWord();
+            labdata.Unknown1 = dataReader.ReadByte(); // Unknown
+            labdata.CombatBackground = dataReader.ReadByte() & 0x0fu;
+            labdata.Unknown2 = dataReader.ReadBytes(2); // Unknown
+            // Note: The ceiling texture index can be 0 in which case a sky is used.
+            //       The sky is composed of a color gradient and a lab background
+            //       which is given inside the map data.
             uint ceilingTextureIndex = dataReader.ReadByte();
             uint floorTextureIndex = dataReader.ReadByte();
 
@@ -39,7 +45,7 @@ namespace Ambermoon.Data.Legacy
             {
                 var objectInfo = new Labdata.ObjectInfo
                 {
-                    Unknown1 = dataReader.ReadBytes(3),
+                    Unknown1 = dataReader.ReadBytes(3), // TODO: Collision info for all 3 axes?
                     Flags = (Labdata.ObjectFlags)dataReader.ReadByte(),
                     TextureIndex = dataReader.ReadWord(),
                     NumAnimationFrames = dataReader.ReadByte(),
@@ -87,7 +93,7 @@ namespace Ambermoon.Data.Legacy
             {
                 var wallData = new Labdata.WallData
                 {
-                    Unknown1 = dataReader.ReadBytes(3),
+                    Unknown1 = dataReader.ReadBytes(3), // TODO: Collision info for all 3 axes?
                     Flags = (Labdata.WallFlags)dataReader.ReadByte(),
                     TextureIndex = dataReader.ReadByte(),
                     AutomapType = (Labdata.AutomapType)dataReader.ReadByte(),

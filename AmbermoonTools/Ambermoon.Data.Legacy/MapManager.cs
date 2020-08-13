@@ -43,5 +43,7 @@ namespace Ambermoon.Data.Legacy
         public Map GetMap(uint index) => maps[index];
         public Tileset GetTilesetForMap(Map map) => tilesets[map.TilesetOrLabdataIndex];
         public Labdata GetLabdataForMap(Map map) => labdatas[map.TilesetOrLabdataIndex];
+
+        public IEnumerable<Map> Maps => maps.Values;
     }
 }
