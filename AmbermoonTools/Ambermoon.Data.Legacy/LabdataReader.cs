@@ -96,7 +96,7 @@ namespace Ambermoon.Data.Legacy
                     Unknown1 = dataReader.ReadBytes(3), // TODO: Collision info for all 3 axes?
                     Flags = (Labdata.WallFlags)dataReader.ReadByte(),
                     TextureIndex = dataReader.ReadByte(),
-                    AutomapType = (Labdata.AutomapType)dataReader.ReadByte(),
+                    AutomapType = (AutomapType)dataReader.ReadByte(),
                     Unknown2 = dataReader.ReadByte()
                 };
                 int numOverlays = dataReader.ReadByte();

@@ -127,8 +127,8 @@
         // Special spells
         Lockpicking = 181, // 6 * 30 + 1
         CallEagle = 182,
-        DecreaseAge = 183, // youth potion
-        PlayElfHarp = 184,
+        DecreaseAge = 183, // youth potion / youth
+        PlayElfHarp = 184, // magic music
         SpellPointsI = 185,
         SpellPointsII = 186,
         SpellPointsIII = 187,
@@ -142,12 +142,10 @@
         AddSpeed = 195,
         AddStamina = 196,
         AddCharisma = 197,
-        // ? = 198
+        AddLuck = 198,
         AddAntiMagic = 199,
-        Rope = 200, // levitation on a rope
-        StinkingMushroom = 201, // stinking mushroom?
-
-        // TODO?
+        Rope = 200, // levitation on a rope / climb
+        Drugs = 201 // stinking mushroom
     }
 
     public enum HealingSpell

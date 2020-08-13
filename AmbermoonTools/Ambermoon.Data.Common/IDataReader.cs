@@ -14,6 +14,7 @@ namespace Ambermoon.Data
         string ReadChar();
         string ReadString();
         string ReadString(int length);
+        string ReadNullTerminatedString();
         byte PeekByte();
         word PeekWord();
         dword PeekDword();
@@ -23,5 +24,6 @@ namespace Ambermoon.Data
         byte[] ReadBytes(int amount);
         long FindByteSequence(byte[] sequence, long offset);
         long FindString(string str, long offset);
+        void AlignToWord();
     }
 }

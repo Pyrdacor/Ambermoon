@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Ambermoon.Data.Enumerations;
+using System;
 using System.Collections.Generic;
 
 namespace Ambermoon.Data
@@ -58,19 +59,6 @@ namespace Ambermoon.Data
             None = 0,
             FloorObject = 0x08, // like holes in the ground
             BlockMovement = 0x80,
-            // TODO
-        }
-
-        public enum AutomapType
-        {
-            None = 0, // empty / no automap symbol
-            Wall = 1,
-            Riddlemouth = 2,
-            DoorClosed = 9,
-            DoorOpen = 10,
-            Exit = 14,
-            // TODO: fake wall? secret door?
-            // TODO: trap, teleporter, spinner, monster, npc, merchant, goto point, ...
             // TODO
         }
 

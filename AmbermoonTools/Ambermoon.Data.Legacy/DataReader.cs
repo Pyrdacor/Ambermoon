@@ -98,6 +98,19 @@ namespace Ambermoon.Data.Legacy
             return str;
         }
 
+        public string ReadNullTerminatedString()
+        {
+            string result = "";
+            byte[] buffer = new byte[1];
+
+            while (Position < Size && (buffer[0] = ReadByte()) != 0)
+            {
+                result += Encoding.GetString(buffer);
+            }
+
+            return result;
+        }
+
         public byte PeekByte()
         {
             CheckOutOfRange(1);
@@ -165,6 +178,12 @@ namespace Ambermoon.Data.Legacy
         public long FindString(string str, long offset)
         {
             return FindByteSequence(Encoding.GetBytes(str), offset);
+        }
+
+        public void AlignToWord()
+        {
+            if (Position % 2 == 1)
+                ++Position;
         }
     }
 }
