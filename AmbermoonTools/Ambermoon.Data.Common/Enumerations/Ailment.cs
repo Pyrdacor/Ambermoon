@@ -13,7 +13,7 @@ namespace Ambermoon.Data
         Blind = 0x0010,
         Drugged = 0x0020,
         Exhausted = 0x0040,
-        Unknown = 0x0080, // TODO: Unused?
+        Unused = 0x0080,
         Lamed = 0x0100,
         Poisoned = 0x0200,
         Petrified = 0x0400,

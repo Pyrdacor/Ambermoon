@@ -64,7 +64,7 @@ namespace Ambermoon.Data.Legacy.ExecutableData
         /// 
         /// It will be behind the file list after this.
         /// </summary>
-        public FileList(IDataReader dataReader)
+        internal FileList(IDataReader dataReader)
         {
             int numEntries = dataReader.ReadWord() * 4;
             dataReader.ReadWord(); // TODO: always 0?

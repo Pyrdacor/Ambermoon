@@ -11,7 +11,12 @@
         Felinic,
         Moranian,
         Thalionic, // only Netsrak
-        Animal = 13, // only Necros the cat NPC on Nera's isle
-        Monster = 14 // all non-human monsters
+        Unknown9,
+        Unknown10,
+        Unknown11,
+        Unknown12,
+        Unknown13,
+        Animal, // only Necros the cat NPC on Nera's isle
+        Monster // all non-human monsters
     }
 }

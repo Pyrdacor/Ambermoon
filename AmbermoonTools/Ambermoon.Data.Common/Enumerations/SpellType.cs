@@ -10,7 +10,7 @@ namespace Ambermoon.Data
         Destruction,
         Unknown1,
         Unknown2,
-        Special // lockpicking, call eagle, play elf harp etc
+        Function // lockpicking, call eagle, play elf harp etc
     }
 
     [Flags]

@@ -21,7 +21,7 @@ namespace Ambermoon.Data.Legacy.ExecutableData
         /// 
         /// It will be behind the world names after this.
         /// </summary>
-        public WorldNames(IDataReader dataReader)
+        internal WorldNames(IDataReader dataReader)
         {
             var offsets = new uint[3];
             int endOffset = dataReader.Position;

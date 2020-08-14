@@ -3,16 +3,26 @@
 namespace Ambermoon.Data.Legacy.ExecutableData
 {
     /// <summary>
-    /// All kind of ingame messages.
+    /// All kind of game messages.
     /// 
-    /// They follow after the <see cref="InsertDiskMessages"/>.
+    /// They follow after the <see cref="WorldNames"/>.
     /// 
     /// They are stored as sections. A section can contain
     /// just null-terminated texts after each other or a
-    /// offset section similar to <see cref="InsertDiskMessages"/> etc.
+    /// offset section. These sections are used for split
+    /// texts that are filled with values at runtime.
     /// 
     /// An offset section starts with a word-aligned 0-longword which
-    /// must be skipped then.
+    /// must be skipped then. I also found some additional 0-longwords.
+    /// They should be skipped as well.
+    /// 
+    /// Each offset entry contains 8 bytes. First 4 bytes are the absolute
+    /// offset to the text string inside the data hunk. The last 4 bytes
+    /// seem to be always 0. Maybe they can adjust the index of the value
+    /// to insert/replace? The resulting string is produces by reading the
+    /// partial strings at all offsets and concatenate them. Between each
+    /// of the partial strings there will be a value provide by the game
+    /// at runtime. So you can add C# format placeholders like {0} there.
     /// 
     /// I am not sure yet if I understand this encoding correctly
     /// but it works for now to parse all messages.
@@ -22,7 +32,7 @@ namespace Ambermoon.Data.Legacy.ExecutableData
         public List<string> Entries { get; } = new List<string>();
         // Found 300 words in-between the messages. Maybe something with dictionary entries? Words to say?
         public List<uint> UnknownIndices { get; }
-        const int NumFirstMessages = 69;
+        const int NumFirstMessages = 42;
         const int NumSecondMessages = 295;
 
         /// <summary>
@@ -32,10 +42,10 @@ namespace Ambermoon.Data.Legacy.ExecutableData
         /// 
         /// It will be behind all the message sections after this.
         /// </summary>
-        public Messages(IDataReader dataReader)
+        internal Messages(IDataReader dataReader)
         {
             while (Entries.Count < NumFirstMessages)
-                ReadSection(dataReader);
+                ReadText(dataReader);
 
             --dataReader.Position;
             dataReader.AlignToWord();
@@ -47,37 +57,46 @@ namespace Ambermoon.Data.Legacy.ExecutableData
                 UnknownIndices.Add(dataReader.ReadWord());
 
             while (Entries.Count < NumFirstMessages + NumSecondMessages)
-                ReadSection(dataReader);
+                ReadText(dataReader);
 
-            --dataReader.Position;
             dataReader.AlignToWord();
         }
 
-        void ReadSection(IDataReader dataReader)
+        void ReadText(IDataReader dataReader)
         {
-            if (dataReader.PeekDword() == 0) // offset section
+            if (dataReader.PeekWord() == 0) // offset section / split text with placeholders
             {
                 dataReader.AlignToWord();
-                dataReader.Position += 4;
 
+                if (dataReader.PeekWord() != 0)
+                    throw new AmbermoonException(ExceptionScope.Data, "Invalid text section.");
+
+                while (dataReader.PeekDword() == 0)
+                    dataReader.Position += 4;
+
+                string text = "";
                 var offsets = new List<uint>();
                 int endOffset = dataReader.Position;
 
                 while (dataReader.PeekByte() == 0)
                 {
                     offsets.Add(dataReader.ReadDword());
-                    dataReader.ReadDword(); // TODO: always 0?
+                    dataReader.ReadDword(); // TODO: always 0? Maybe some placeholder index reshifting?
                 }
 
                 for (int i = 0; i < offsets.Count; ++i)
                 {
                     dataReader.Position = (int)offsets[i];
-                    Entries.Add(dataReader.ReadNullTerminatedString());
+                    text += dataReader.ReadNullTerminatedString();
+
+                    if (i != offsets.Count - 1) // Insert placeholder
+                        text += "{" + i + "}";
 
                     if (dataReader.Position > endOffset)
                         endOffset = dataReader.Position;
                 }
 
+                Entries.Add(text);
                 dataReader.Position = endOffset;
             }
             else // just a text
