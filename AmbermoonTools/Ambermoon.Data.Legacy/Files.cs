@@ -55,6 +55,7 @@ namespace Ambermoon.Data.Legacy
             // Disk G
             { "Automap_graphics", 'G' },
             { "Combat_graphics", 'G' },
+            { "Dictionary.english", 'G' },
             { "Dictionary.german", 'G' },
             { "Event_pix.amb", 'G' },
             { "Floors.amb", 'G' },
