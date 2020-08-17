@@ -67,6 +67,31 @@ namespace Ambermoon.Data.Legacy
         {
             var ambermoonFiles = Legacy.Files.AmigaFiles;
             var fileReader = new FileReader();
+            bool foundAnyDictionary = false; // one is sufficient
+
+            void HandleFileLoaded(string file)
+            {
+                if (_log != null)
+                    _log.AppendLine("succeeded");
+
+                if (file.ToLower().EndsWith(".dictionary"))
+                    foundAnyDictionary = true;
+            }
+
+            void HandleFileNotFound(string file)
+            {
+                if (_log != null)
+                {
+                    _log.AppendLine("failed");
+                    _log.AppendLine($" -> Unable to find file '{file}'.");
+                }
+
+                if (foundAnyDictionary && file.ToLower().EndsWith(".dictionary"))
+                    return;
+
+                if (_stopAtFirstError)
+                    throw new FileNotFoundException($"Unable to find file '{file}'.");
+            }
 
             foreach (var ambermoonFile in ambermoonFiles)
             {
@@ -81,8 +106,7 @@ namespace Ambermoon.Data.Legacy
                 {
                     Files.Add(name, fileReader.ReadFile(name, File.OpenRead(path)));
 
-                    if (_log != null)
-                        _log.AppendLine("succeeded");
+                    HandleFileLoaded(name);
                 }
                 else if (_loadPreference == LoadPreference.ForceExtracted)
                 {
@@ -90,19 +114,11 @@ namespace Ambermoon.Data.Legacy
                     {
                         Files.Add(name, fileReader.ReadFile(name, File.OpenRead(path)));
 
-                        if (_log != null)
-                            _log.AppendLine("succeeded");
+                        HandleFileLoaded(name);
                     }
                     else
                     {
-                        if (_log != null)
-                        {
-                            _log.AppendLine("failed");
-                            _log.AppendLine($" -> Unable to find file '{name}'.");
-                        }
-
-                        if (_stopAtFirstError)
-                            throw new FileNotFoundException($"Unable to find file '{name}'.");
+                        HandleFileNotFound(name);
                     }                        
                 }
                 else
@@ -133,14 +149,7 @@ namespace Ambermoon.Data.Legacy
                             {
                                 if (!File.Exists(path))
                                 {
-                                    if (_log != null)
-                                    {
-                                        _log.AppendLine("failed");
-                                        _log.AppendLine($" -> Unabled to find ADF disk file with letter '{disk}'. Try to rename your ADF file to 'ambermoon_{disk}.adf'.");
-                                    }
-
-                                    if (_stopAtFirstError)
-                                        throw new FileNotFoundException($"Unabled to find ADF disk file with letter '{disk}'. Try to rename your ADF file to 'ambermoon_{disk}.adf'.");
+                                    HandleFileNotFound(name);
                                 }
                                 else
                                 {
@@ -148,8 +157,7 @@ namespace Ambermoon.Data.Legacy
                                 }
                             }
 
-                            if (_log != null)
-                                _log.AppendLine("succeeded");
+                            HandleFileLoaded(name);
 
                             continue;
                         }
@@ -159,8 +167,7 @@ namespace Ambermoon.Data.Legacy
 
                     Files.Add(name, fileReader.ReadFile(name, _loadedDisks[disk][name]));
 
-                    if (_log != null)
-                        _log.AppendLine("succeeded");
+                    HandleFileLoaded(name);
                 }
 
             }
