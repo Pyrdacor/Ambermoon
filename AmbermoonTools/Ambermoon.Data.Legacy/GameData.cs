@@ -63,6 +63,8 @@ namespace Ambermoon.Data.Legacy
             return null;
         }
 
+        static bool IsDictionary(string file) => file.ToLower().StartsWith("dictionary.");
+
         public void Load(string folderPath)
         {
             var ambermoonFiles = Legacy.Files.AmigaFiles;
@@ -74,7 +76,7 @@ namespace Ambermoon.Data.Legacy
                 if (_log != null)
                     _log.AppendLine("succeeded");
 
-                if (file.ToLower().EndsWith(".dictionary"))
+                if (IsDictionary(file))
                     foundNoDictionary = false;
             }
 
@@ -86,7 +88,7 @@ namespace Ambermoon.Data.Legacy
                     _log.AppendLine($" -> Unable to find file '{file}'.");
                 }
 
-                if (file.ToLower().EndsWith(".dictionary"))
+                if (IsDictionary(file))
                     return;
 
                 if (_stopAtFirstError)
