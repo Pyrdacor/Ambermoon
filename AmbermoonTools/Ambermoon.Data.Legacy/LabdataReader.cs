@@ -154,7 +154,7 @@ namespace Ambermoon.Data.Legacy
                 {
                     foreach (var overlay in wall.Overlays)
                     {
-                        wallGraphic.AddOverlay(overlay.PositionY, overlay.PositionY, ReadGraphic(graphicReader,
+                        wallGraphic.AddOverlay(overlay.PositionX, overlay.PositionY, ReadGraphic(graphicReader,
                             overlayTextureFiles[(int)overlay.TextureIndex], (int)overlay.TextureWidth, (int)overlay.TextureHeight, true, true));
                     }
                 }
