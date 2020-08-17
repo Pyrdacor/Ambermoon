@@ -105,7 +105,6 @@ namespace Ambermoon.Data.Legacy
                 if (_loadPreference == LoadPreference.PreferExtracted && File.Exists(path))
                 {
                     Files.Add(name, fileReader.ReadFile(name, File.OpenRead(path)));
-
                     HandleFileLoaded(name);
                 }
                 else if (_loadPreference == LoadPreference.ForceExtracted)
@@ -113,7 +112,6 @@ namespace Ambermoon.Data.Legacy
                     if (File.Exists(path))
                     {
                         Files.Add(name, fileReader.ReadFile(name, File.OpenRead(path)));
-
                         HandleFileLoaded(name);
                     }
                     else
@@ -165,9 +163,13 @@ namespace Ambermoon.Data.Legacy
                         _loadedDisks.Add(disk, ADFReader.ReadADF(File.OpenRead(diskFile)));
                     }
 
-                    Files.Add(name, fileReader.ReadFile(name, _loadedDisks[disk][name]));
-
-                    HandleFileLoaded(name);
+                    if (!_loadedDisks[disk].ContainsKey(name))
+                        HandleFileNotFound(name);
+                    else
+                    {
+                        Files.Add(name, fileReader.ReadFile(name, _loadedDisks[disk][name]));
+                        HandleFileLoaded(name);
+                    }
                 }
 
             }
