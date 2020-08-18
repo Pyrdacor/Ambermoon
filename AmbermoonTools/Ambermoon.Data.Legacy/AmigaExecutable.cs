@@ -139,7 +139,7 @@ namespace Ambermoon.Data.Legacy
 				hunkSizes[i] = hunkSize & 0x3FFFFFFF;
 			}
 
-			List<Hunk> hunks = new List<Hunk>((int)numHunks);
+			var hunks = new List<Hunk>((int)numHunks);
 
 			for (int i = 0; i < numHunks; ++i)
 			{

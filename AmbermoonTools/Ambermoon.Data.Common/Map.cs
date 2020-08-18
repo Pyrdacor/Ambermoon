@@ -213,49 +213,6 @@ namespace Ambermoon.Data
 
         }
 
-        void ExecuteEvent(IRenderPlayer player, uint x, uint y, IMapManager mapManager, uint ticks, MapEvent mapEvent)
-        {
-            if (mapEvent.Type == MapEventType.MapChange)
-            {
-                // TODO: conditions?
-                if (mapEvent is MapChangeEvent mapChangeEvent)
-                {
-                    // The position (x, y) is 1-based in the data so we subtract 1.
-                    var map = mapManager.GetMap(mapChangeEvent.MapIndex);
-                    // Moreover the players position is 1 tile below its drawing position in 2D so subtract another 1 from y.
-                    player.MoveTo(map, mapChangeEvent.X - 1, mapChangeEvent.Y - (map.Type == MapType.Map2D ? 2u : 1u),
-                        ticks, true, mapChangeEvent.Direction);
-                }
-            }
-        }
-
-        public void TriggerEvents(IRenderPlayer player, MapEventTrigger trigger, uint x, uint y, IMapManager mapManager, uint ticks)
-        {
-            var mapEventId = Type == MapType.Map2D ? Tiles[x, y].MapEventId : Blocks[x, y].MapEventId;
-
-            if (mapEventId == 0)
-                return; // no map events at this position
-
-            var mapEvents = Events[(int)mapEventId - 1];
-
-            switch (trigger)
-            {
-                case MapEventTrigger.Move:
-                    ExecuteEvent(player, x, y, mapManager, ticks, mapEvents);
-                    // TODO
-                    break;
-                case MapEventTrigger.Hand:
-                    // TODO
-                    break;
-                case MapEventTrigger.Eye:
-                    // TODO
-                    break;
-                case MapEventTrigger.Mouth:
-                    // TODO
-                    break;
-            }
-        }
-
         public static Map Load(uint index, IMapReader mapReader, IDataReader dataReader, IDataReader textDataReader,
             Dictionary<uint, Tileset> tilesets)
         {
