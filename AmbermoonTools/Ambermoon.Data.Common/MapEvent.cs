@@ -31,18 +31,6 @@ namespace Ambermoon.Data
         // Maybe: Message popup, activatable by hand/eye/mouth cursor, etc
     }
 
-    public enum MapEventTrigger
-    {
-        Move,
-        Hand,
-        Eye,
-        Mouth,
-        /// <summary>
-        /// If a specific item is needed for triggering use Item0 + ItemIndex
-        /// </summary>
-        Item0
-    }
-
     public class MapEvent
     {
         public uint Index { get; set; }
