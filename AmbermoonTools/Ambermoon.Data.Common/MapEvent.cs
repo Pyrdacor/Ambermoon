@@ -36,7 +36,11 @@ namespace Ambermoon.Data
         Move,
         Hand,
         Eye,
-        Mouth
+        Mouth,
+        /// <summary>
+        /// If a specific item is needed for triggering use Item0 + ItemIndex
+        /// </summary>
+        Item0
     }
 
     public class MapEvent
