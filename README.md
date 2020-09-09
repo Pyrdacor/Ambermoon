@@ -35,6 +35,7 @@ Section | Description
   - [Maps3D](FileSpecs/Maps3D.md) (data specific for 3D maps)
   - [Labdata](FileSpecs/Labdata.md) (labyrinth data for 3D maps)
   - [MapEventData](FileSpecs/MapEventData.md) (data structure of specific map events)
+- [Savegames](FileSpecs/Savegame.md)
 - Enumerations (values of game enumerations)
   - [Abilities](FileSpecs/Enumerations/Abilities.md)
   - [Ailments](FileSpecs/Enumerations/Ailments.md)

@@ -37,13 +37,13 @@ Offset | Type | Description
 
 ## Chest locked states
 
-There are only 185 chests (1-131 and 203-256). But it seems possible that there can be up to 512 chest (including chest index 0).
+There are only 185 chests (1-131 and 203-256). But it seems possible that there can be up to 512 chests (including chest index 0).
 
 Each bit has the following meaning:
 - 0: Chest is locked
 - 1: Chest is unlocked
 
-The order of the bits is this (where each digit is a chest index in hex).
+The order of the bits is this (where each digit is a chest index in hex). \
 76543210 FEDCBA98 ...
 
 
@@ -53,7 +53,7 @@ There can be an arbitrary amount of events. Each is encoded as 6 bytes. The end 
 
 Not every event is decoded yet.
 
-The only sure decoded event is the change tile event:
+The only 100% decoded event is the change tile event:
 
 Offset | Type | Description
 --- | --- | ---
@@ -64,4 +64,4 @@ Offset | Type | Description
 
 As all map-related events seem to start with the map index other events must start with a word that is greater than the highest map index (I guess >= 0x0300, maybe even >= 0x0800).
 
-There are map-related events that use a new front tile index >= 0x0800. But they can be 0x07ff at max. I guess this is used to decode some other map-related event.
+There are map-related events that use a new front tile index >= 0x0800. But they can be 0x07ff (11 bits) at max. I guess this is used to decode some other map-related event.
