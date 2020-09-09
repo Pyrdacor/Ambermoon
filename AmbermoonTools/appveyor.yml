@@ -15,19 +15,10 @@ build:
 artifacts:
   - path: AmbermoonTools-Windows.zip
     name: AmbermoonTools-Windows
-  - path: AmbermoonTools\nuget\*.nupkg
-    name: NugetPackages
 
 after_build:
   - dotnet publish -c Release "%APPVEYOR_BUILD_FOLDER%\AmbermoonTools\AmbermoonPack\AmbermoonPack.csproj" -p:PublishSingleFile=true -r win-x64 --no-restore
-  - 7z a AmbermoonTools-Windows.zip "%APPVEYOR_BUILD_FOLDER%\AmbermoonTools\Ambermoon.Common\bin\Release\netstandard2.1\Ambermoon.Common.dll"
-  - 7z a AmbermoonTools-Windows.zip "%APPVEYOR_BUILD_FOLDER%\AmbermoonTools\Ambermoon.Data.Common\bin\Release\netstandard2.1\Ambermoon.Data.Common.dll"
-  - 7z a AmbermoonTools-Windows.zip "%APPVEYOR_BUILD_FOLDER%\AmbermoonTools\Ambermoon.Data.Legacy\bin\Release\netstandard2.1\Ambermoon.Data.Legacy.dll"
   - 7z a AmbermoonTools-Windows.zip "%APPVEYOR_BUILD_FOLDER%\AmbermoonTools\AmbermoonPack\bin\Any CPU\Release\netcoreapp3.1\win-x64\publish\AmbermoonPack.exe"
-  - mkdir "AmbermoonTools\nuget"
-  - xcopy /Y /I "AmbermoonTools\Ambermoon.Common\bin\Release\*.nupkg" "AmbermoonTools\nuget\*"
-  - xcopy /Y /I "AmbermoonTools\Ambermoon.Data.Legacy\bin\Release\*.nupkg" "AmbermoonTools\nuget\*"
-  - xcopy /Y /I "AmbermoonTools\Ambermoon.Data.Common\bin\Release\*.nupkg" "AmbermoonTools\nuget\*"
 
 test: off
 
@@ -43,10 +34,3 @@ deploy:
     draft: true
     prerelease: false
     force_update: true
-  - provider: NuGet
-    name: NugetPackages
-    api_key:
-      secure: UwVH6GHdh4zr7mDxC/HWXBQni/uzh36MV5lsXRmrgyyYEXJ67H63sI31QG4AByXY
-    skip_symbols: true
-    on:
-      APPVEYOR_REPO_TAG: true
