@@ -31,9 +31,29 @@ Offset | Type | Description
 0x002C | uword | Active party member index (1-based -> 1-6)
 0x002E | uword[6] | Character index of all the 6 party member slots
 0x003A | ... | **Unknown**
+0x0044 | TransportLocation[32] | Location of transports (see below)
 0x35A4 | ubyte[64] | Chest locked states (512 bits for chest 0-511). See below.
 0x35E4 | \* | Events (see below).
 
+
+## Transport locations
+
+Locations of horses, rafts, ships, etc are stored here. There are 32 possible locations.
+On game start there are already 2 ships and 1 raft.
+
+Each transport location is stored as 6 bytes:
+
+Offset | Type | Description
+--- | --- | ---
+0x00 | ubyte | [Travel type](Enumerations/TravelType.md)
+0x01 | ubyte | X coordinate
+0x02 | ubyte | Y coordinate
+0x03 | ubyte | Unknown
+0x04 | uword | Map index
+
+Note: The direction of the transport is not stored. It always will face left after loading
+regardless of the direction on save. The unknown byte seems to be 0 all the time. Don't
+know if it has a purpose or why it wasn't use to store the direction.
 
 ## Chest locked states
 
