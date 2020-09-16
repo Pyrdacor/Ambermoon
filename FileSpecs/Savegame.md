@@ -51,9 +51,10 @@ Offset | Type | Description
 0x03 | ubyte | Unknown
 0x04 | uword | Map index
 
-Note: The direction of the transport is not stored. It always will face left after loading
-regardless of the direction on save. The unknown byte seems to be 0 all the time. Don't
-know if it has a purpose or why it wasn't use to store the direction.
+Note: The direction of the transport is not stored.
+There isn't even an image for each transport direction
+but only one static image. The transport images are stored
+inside the Stationary file.
 
 ## Chest locked states
 
