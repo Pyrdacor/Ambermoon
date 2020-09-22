@@ -59,3 +59,23 @@ The general price formula is:
 ### Signed bytes
 
 Positive values range from 0x00 to 0x7F. Negative values range from 0x80 to 0xFF.
+
+
+### Item slots
+
+Equipment, inventory, chest, merchants, etc all store items as item slots. They all use the same format:
+
+Offset | Type | Description
+----|----|----
+0x00 | ubyte | Amount of items (only stackable items can have a value greater than 1)
+0x01 | ubyte[2] | **Unknown**
+0x03 | ubyte | Flags (see below)
+0x04 | uword | Item index
+
+#### Item slot flags
+
+Value | Name
+----|----
+0x00 | None
+0x01 | Identified
+0x02 | Broken

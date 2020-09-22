@@ -33,8 +33,7 @@ A data entry (IconData) looks like this:
 
 Offset | Type | Description
 ----|----|----
-0x0000 | uword | Tile flags (see below)
-0x0002 | uword | **Unknown**
+0x0000 | udword | Tile flags (see below)
 0x0004 | uword | Icon graphic index
 0x0006 | ubyte | Number of animation tiles
 0x0007 | ubyte | **Unknown**
@@ -45,16 +44,19 @@ So if you have icon graphic index 1 and 3 animation tiles the icons 1, 2 and 3 a
 
 ### Tile flags
 
-- Bit 0: Allow movement (0 means block movement)
-- Bit 7-9: Sit/sleep value
+- Bit 2: 0: Baseline rendering (lower baseline is drawn above), 1: Custom ordered rendering (not sure about this)
+- Bit 6: 0: Draw behind player, 1: Draw above player (only if bit 2 is set, not sure about this)
+- Bit 8-18: Allowed [travel types](Enumerations/TravelType.md) (lsb = walk, msb = sand ship), if a bit is set you can pass the tile with the travel type (this will not block horses from water or building entrances though!)
+- Bit 23-25: Sit/sleep value
   - 0 -> no sitting nor sleeping
   - 1 -> sit and look up
   - 2 -> sit and look right
   - 3 -> sit and look down
   - 4 -> sit and look left
   - 5 -> sleep (always face down)
+- Bit 26: Hide player (e.g. used by doors)
 
-Note: If there is an overlay tile, its flags are used and if not, the underlay flags are used.
+Note: If there is an overlay tile, its flags are used and if not, the underlay tile flags are used.
 
 ## Map data
 

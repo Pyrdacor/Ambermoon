@@ -34,7 +34,10 @@ Offset | Type | Description
 0x001C | uword | **Unknown** (0xffff for all monsters, NPCs and most party members except for Selena (0x22c2), Sabine (0x23a0), Valdyn (0x2400) and Gryban (0x0000)). The values do not make sense as they are so I guess those are bit flags.
 0x001E | uword | [Ailments](Enumerations/Ailments.md)
 0x0020 | uword | Monster experience (gained when defeating it)
-0x0022 | ubyte[8] | **Unknown** (always 0)
+0x0022 | ubyte[2] | **Unknown** (always 0?)
+0x0024 | uword | Mark of return x-coordinate (1-based, party member only)
+0x0026 | uword | Mark of return y-coordinate (1-based, party member only)
+0x0028 | uword | Mark of return map index (party member only)
 0x002A | uword[4] | STR (see [Attributes](Enumerations/Attributes.md))
 0x0032 | uword[4] | INT (see [Attributes](Enumerations/Attributes.md))
 0x003A | uword[4] | DEX (see [Attributes](Enumerations/Attributes.md))
@@ -46,7 +49,7 @@ Offset | Type | Description
 0x006A | uword | Current age
 0x006C | uword | Max age
 0x006E | uword[2] | Looks like age has a bonus and 4th value as well but they are always 0.
-0x0072 | uword[4] | **Unknown**. This looks like a hidden attribute/ability cause it uses most likely 4 uwords as well. The current and max value is always 0. The bonus is 25 for Chris and 5 for Gryban. The last value is 0 as well.
+0x0072 | uword[4] | **Unknown**. This looks like a hidden attribute/ability cause it uses most likely 4 uwords as well. The current and max value is always 0. The bonus is 25 for Chris and 5 for Gryban. The last value is 0 as well. With this there are 10 attributes. I guess this was a reserve and matches the amount of abilities.
 0x007A | uword[4] | ATT (see [Abilities](Enumerations/Abilities.md))
 0x0082 | uword[4] | PAR (see [Abilities](Enumerations/Abilities.md))
 0x008A | uword[4] | SWI (see [Abilities](Enumerations/Abilities.md))
@@ -83,21 +86,11 @@ Offset | Type | Description
 0x0102 | ubyte[12] | **Unknown** (always 0)
 0x010E | ulong | Weight
 0x0112 | byte[16] | Name (encoding DOS-Latin-1, codepage 850 or 437)
-0x0122 | uword | **Unknown** Only used for NPCs and the beast (which can become a kind of NPC) and Tar the dark (which was an NPC before)
-0x0124 | uword | **Unknown** (always 0)
-0x0126 | uword | **Unknown** Only used for NPCs and the beast (which can become a kind of NPC) and Tar the dark (which was an NPC before)
-0x0128 | uword | **Unknown**
-0x012A | ubyte | **Unknown** (NPCs only, only very few have value 16)
-0x012B | ubyte | **Unknown** (NPCs only)
-0x012C | ubyte | **Unknown** (NPCs only, only very few have value 16)
-0x012D | ubyte | **Unknown** (NPCs, party members and a few monsters)
-0x012E | ubyte | **Unknown** (Zombie master and Nera have 1, some NPCs have 16, others always 0)
-0x012F | ubyte | **Unknown** (NPCs only)
-0x0130 | ubyte | **Unknown** (NPCs only, only 0 or 16)
+0x0122 | [ItemSlot](Items.md)[9] | Equipment
+0x0158 | [ItemSlot](Items.md)[24] | Inventory items
 ... | ... | ...
 
 To be continued ...
-
 
 ## Monster groups
 

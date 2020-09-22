@@ -21,20 +21,42 @@ Note: Not all of the data is decoded yet.
 
 Offset | Type | Description
 --- | --- | ---
-0x0000 | ubyte[10] | **Unknown**
+0x0000 | ubyte[6] | **Unknown**
+0x0006 | uword | Current hour
+0x0008 | uword | Current minute (always a multiple of 5)
 0x000A | uword | Current map index
 0x000C | uword | X in tiles on the map
 0x000E | uword | Y in tiles on the map
 0x0010 | uword | [Character direction](Enumerations/Directions.md)
-0x0012 | ... | **Unknown**
+0x0012 | ActiveSpell[6] | Active spells (see below)
 0x002A | uword | Number of party members (1-6)
 0x002C | uword | Active party member index (1-based -> 1-6)
 0x002E | uword[6] | Character index of all the 6 party member slots
 0x003A | ... | **Unknown**
+0x0043 | ubyte | Hours without sleep (when reaching 24 you get messages about party getting tired every hour, when reaching 36 you got totally exhausted)
 0x0044 | TransportLocation[32] | Location of transports (see below)
 0x35A4 | ubyte[64] | Chest locked states (512 bits for chest 0-511). See below.
 0x35E4 | \* | Events (see below).
 
+## Active spells
+
+There are 6 possible active spells:
+
+- Light
+- Magic barrier
+- Magic attack
+- Anti-magic barrier
+- Clairvoyance
+- Mystic map
+
+Each of the 6 spells are stored as 2 uwords:
+
+Offset | Type | Description
+--- | --- | ---
+0x00 | uword | Duration in 5 minute chunks (e.g. 120 = 120 * 5 minutes = 600 minutes = 10 ingame hours)
+0x02 | uword | Level of the spell (e.g. for light: 1 = magic torch, 2 = magic lantern, 3 = magic sun, etc)
+
+If the duration is 0, the spell is not active at the moment, otherwise it is.
 
 ## Transport locations
 
