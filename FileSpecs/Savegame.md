@@ -21,7 +21,9 @@ Note: Not all of the data is decoded yet.
 
 Offset | Type | Description
 --- | --- | ---
-0x0000 | ubyte[6] | **Unknown**
+0x0000 | uword | Current year (starting with 978)
+0x0002 | uword | Current month (1-12 starting at 1)
+0x0004 | uword | Current day of month (1-31 starting at 15)
 0x0006 | uword | Current hour
 0x0008 | uword | Current minute (always a multiple of 5)
 0x000A | uword | Current map index
@@ -32,11 +34,18 @@ Offset | Type | Description
 0x002A | uword | Number of party members (1-6)
 0x002C | uword | Active party member index (1-based -> 1-6)
 0x002E | uword[6] | Character index of all the 6 party member slots
-0x003A | ... | **Unknown**
-0x0043 | ubyte | Hours without sleep (when reaching 24 you get messages about party getting tired every hour, when reaching 36 you got totally exhausted)
+0x003A | uword | **Unknown**
+0x003C | uword | Current [travel type](Enumerations/TravelType.md)
+0x003E | uword | Currently active [special items](Enumerations/SpecialItemPurpose.md)
+0x0040 | uword | Current game options (see below)
+0x0042 | uword | Hours without sleep (when reaching 24 you get messages about party getting tired every hour, when reaching 36 you got totally exhausted)
 0x0044 | TransportLocation[32] | Location of transports (see below)
+0x0104 | ... | **Unknown**
+0x0112 | uword | Wind gate active status (1 bit for each gate, 1 = active, 0 = broken)
+0x0116 | ... | **Unknown**
 0x35A4 | ubyte[64] | Chest locked states (512 bits for chest 0-511). See below.
-0x35E4 | \* | Events (see below).
+0x35E4 | ubyte[6] | Battle positions for all 6 party members (each can be 0 to 11)
+0x35EB | \* | Events (see below).
 
 ## Active spells
 
@@ -92,7 +101,7 @@ The order of the bits is this (where each digit is a chest index in hex). \
 
 ## Events
 
-There can be an arbitrary amount of events. Each is encoded as 6 bytes. The end of events is encoded as a 0-uword.
+There can be an arbitrary amount of events. Each is encoded as 6 bytes. The end of events is encoded as a 0-uword (end marker).
 
 Not every event is decoded yet.
 
@@ -108,3 +117,44 @@ Offset | Type | Description
 As all map-related events seem to start with the map index other events must start with a word that is greater than the highest map index (I guess >= 0x0300, maybe even >= 0x0800).
 
 There are map-related events that use a new front tile index >= 0x0800. But they can be 0x07ff (11 bits) at max. I guess this is used to decode some other map-related event.
+
+
+## Game options
+
+0 means default value. Therefore music is on if 0 and off if 1!
+
+Value | Name
+----|----
+0x01 | Music (0 = on, 1 = off)
+0x02 | Fast battle mode
+0x04 | Justified text
+0x08 | 3D floor texture
+0x10 | 3D ceiling texture
+
+
+## Time and date
+
+The date (day, month and year) is stored and also manipulated through the game but not actually used in any way to my knowledge.
+
+The time is always increased by 5 minutes. This happens
+
+- every 10 seconds of real time
+- every 5 steps on indoor 2D maps
+- every 5 steps (block changes) on 3D maps
+- every x steps on world maps (see following table)
+
+Travel type | Possible steps per 5 minutes
+----|----
+Walk | 2
+Horse | 3
+Raft | 2
+Ship | 4
+Magical disc | 2
+Eagle | 6
+Flying | 256
+Swim | 2
+Witch's broom | 4
+Sand lizard | 3
+Sand ship | 4
+
+Flying is not really used in the game but seeing those values assumes that it is either an unknown cheat or was used by the developers to explore the map quickly.
