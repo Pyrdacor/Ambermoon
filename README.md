@@ -83,7 +83,7 @@ Most of the work was done by a bunch of good fellas.
 - Oliver Gantert and others of project [Amberworld](http://amberworld.sourceforge.net/)
 - Daniel Schulz from [Slothsoft](http://slothsoft.net/Ambermoon/) with his savegame editor
 - Nico Bendlin and his [ambermoon research project](https://gitlab.com/ambermoon/research)
-- Metibor helped a lot in decoding the savegame data (see [https://github.com/Pyrdacor/Ambermoon.net/issues/45](here))
+- Metibor helped a lot in decoding the savegame data (see [here](https://github.com/Pyrdacor/Ambermoon.net/issues/45))
 
  And others provide information about Thalion and Ambermoon for ages now.
 - Alex Holland from the [Thalion Webshrine](http://thalion.exotica.org.uk/)
