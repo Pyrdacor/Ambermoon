@@ -43,6 +43,8 @@ Offset | Type | Description
 0x0104 | ... | **Unknown**
 0x0112 | uword | Wind gate active status (1 bit for each gate, 1 = active, 0 = broken)
 0x0116 | ... | **Unknown**
+0x04FC | EventBits[529] | This assumes that there are event bits for map index 0 to 529. Maybe there is not for map index 0 or more than 529. For event bit structure see below.
+0x3504 | ubyte[15] | Dictionary words (see below). Maybe there are some more bytes/bits here but in original game there are only 115 possible dictionary entries. 15 bytes are enough for 115 entries.
 0x35A4 | ubyte[64] | Chest locked states (512 bits for chest 0-511). See below.
 0x35E4 | ubyte[6] | Battle positions for all 6 party members (each can be 0 to 11)
 0x35EB | \* | Events (see below).
@@ -87,6 +89,39 @@ There isn't even an image for each transport direction
 but only one static image. The transport images are stored
 inside the Stationary file.
 
+## Event bits
+
+For each map (at least 1 to 528) there are 64 event bits (8 bytes per map). Each bit represents a map event from the [event list](Maps.md) of that map.
+If a bit is 0, the event is active which means the player is able to trigger it. If a bit is 1, the event is inactive and the player can't trigger it.
+
+For example this is used for one-time text popups. After triggering it, a map event will set the event bit and therefore the event can not be triggered again.
+
+The order of the bits is this
+
+Byte | 0 | 1 | ...
+--- | --- | --- | ---
+&nbsp; | 76543210 | FEDCBA98 | ...
+
+- So map event 0 (first one) would be deactivated by the following 8 bytes (in hex): 01 00 00 00 00 00 00 00
+- And map event 63 (last possible one) would be deactivated by the following 8 bytes (in hex): 00 00 00 00 00 00 00 80
+
+Also have a look at the [action map event](MapEventData.md) to change so bits.
+
+## Dictionary words
+
+There are 115 possible dictionary words in Ambermoon (texts can be found in the Dictionary.* files). The unlock state of these words is stored
+by a bit sequence of at least 15 bytes (15 * 8 bits = 120 bits, large enough to store all the 115 bits).
+
+The order is like for the event bits: 76543210 FEDCBA98 ...
+
+The first word in Ambermoon is "Hello". It is unlocked right from the start. Therefore the initial byte sequence is 01 00 00 00 ... (in hex).
+
+To unlock for example the word "Ruins" which is the last word, the last byte has to be set to 04 cause 4 in binary is 00000100 so the 3rd bit of the last byte is set (14 bytes * 8 bits = 112 bits, 112 + 3 = text index 115).
+
+A set bit means "unlocked" and an unset one means "not unlocked yet".
+
+**NOTE:** There seems to be a bug in original. When unlocking more than 113 words, the game crashes when opening the dictionary. So if you set the first 14 bytes to 0xff (all bits set) and the last byte has more than 1 bit set, the game crashes. So you can't unlock all words without the crash.
+
 ## Chest locked states
 
 There are only 185 chests (1-131 and 203-256). But it seems possible that there can be up to 512 chests (including chest index 0).
@@ -97,26 +132,6 @@ Each bit has the following meaning:
 
 The order of the bits is this (where each digit is a chest index in hex). \
 76543210 FEDCBA98 ...
-
-
-## Events
-
-There can be an arbitrary amount of events. Each is encoded as 6 bytes. The end of events is encoded as a 0-uword (end marker).
-
-Not every event is decoded yet.
-
-The only 100% decoded event is the change tile event:
-
-Offset | Type | Description
---- | --- | ---
-0x00 | uword | Map index
-0x02 | ubyte | X in tiles
-0x03 | ubyte | Y in tiles
-0x04 | uword | New front tile index (for 3D it is the new block index)
-
-As all map-related events seem to start with the map index other events must start with a word that is greater than the highest map index (I guess >= 0x0300, maybe even >= 0x0800).
-
-There are map-related events that use a new front tile index >= 0x0800. But they can be 0x07ff (11 bits) at max. I guess this is used to decode some other map-related event.
 
 
 ## Game options
@@ -158,3 +173,23 @@ Sand lizard | 3
 Sand ship | 4
 
 Flying is not really used in the game but seeing those values assumes that it is either an unknown cheat or was used by the developers to explore the map quickly.
+
+
+## Events
+
+There can be an arbitrary amount of events. Each is encoded as 6 bytes. The end of events is encoded as a 0-uword (end marker).
+
+Not every event is decoded yet.
+
+The only 100% decoded event is the change tile event:
+
+Offset | Type | Description
+--- | --- | ---
+0x00 | uword | Map index
+0x02 | ubyte | X in tiles
+0x03 | ubyte | Y in tiles
+0x04 | uword | New front tile index (for 3D it is the new block index)
+
+As all map-related events seem to start with the map index other events must start with a word that is greater than the highest map index (I guess >= 0x0300, maybe even >= 0x0800).
+
+There are map-related events that use a new front tile index >= 0x0800. But they can be 0x07ff (11 bits) at max. I guess this is used to decode some other map-related event.
