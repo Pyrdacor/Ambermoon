@@ -142,6 +142,10 @@ If the character has the flag "random movement" set, there are 2 bytes for the c
 One for x and one for y. This is the start position on map entering. The monster will
 move randomly every 5 ingame minutes starting at that location.
 
+For monsters (and NPCs?) on 3D maps, there is also only one position if the random movement
+flag is not set. In that case the monster will stay on that position and will only walk to the
+player when he is near enough to attack.
+
 If the character has no random movement there are 288 positions (each 2 bytes). Each
 position is for a 5 minute ingame duration starting at 00:00. So there is a position
 for every timeslot of a day. This is also used for static characters. They will have
