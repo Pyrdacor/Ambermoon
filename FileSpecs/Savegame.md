@@ -43,7 +43,7 @@ Offset | Type | Description
 0x0104 | ... | **Unknown**
 0x0112 | uword | Wind gate active status (1 bit for each gate, 1 = active, 0 = broken)
 0x0116 | ... | **Unknown**
-0x04FC | EventBits[529] | This assumes that there are event bits for map index 0 to 529. Maybe there is not for map index 0 or more than 529. For event bit structure see below.
+0x04FC | EventBits[529] | Event active state bits. This assumes that there are event bits for map index 0 to 528. Maybe there is not for map index 0 or more than 529. For event bit structure see below.
 0x3504 | ubyte[15] | Dictionary words (see below). Maybe there are some more bytes/bits here but in original game there are only 115 possible dictionary entries. 15 bytes are enough for 115 entries.
 0x35A4 | ubyte[64] | Chest locked states (512 bits for chest 0-511). See below.
 0x35E4 | ubyte[6] | Battle positions for all 6 party members (each can be 0 to 11)
