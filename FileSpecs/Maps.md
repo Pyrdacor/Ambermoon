@@ -40,7 +40,7 @@ Bit | Meaning
 
 ### Map data
 
-After the header there are 320 ubytes which represent references to party members, NPCs or monsters on the map. Maybe other references as well. See below.
+After the header there are 320 ubytes which represent references to party members, NPCs or monsters on the map. See below.
 
 Following these bytes there is the tile data at offset 0x014C. For 2D maps each tile is represented by 4 bytes, for 3D maps there are 2 bytes per tile.
 
@@ -54,10 +54,32 @@ Each entry looks like this:
 
 Offset | Type | Description
 --- | --- | ---
-0x00 | ubyte | Index (of party member, NPC or monster group)
+0x00 | ubyte | Index (of party member, NPC, monster group or map text)
 0x01 | ubyte | **Unknown** (only seen 1 so far)
-0x02 | ubyte | Type (4 = party member, 5 = NPC, 6 = monster)
-0x03 | ubyte[7] | **Unknown**
+0x02 | ubyte | Type and flags
+0x03 | ubyte | Event index
+0x04 | uword | Graphic index
+0x03 | ubyte[4] | **Unknown**
+
+The graphic index is:
+- an object index inside the labdata for 3D maps
+- a tile index inside the tileset for 2D maps if flag "Use tileset" is set
+- an NPC graphic index for 2D maps if flag "Use tileset" is not set and it's an NPC
+
+#### Type and flags
+
+The lower 2 bits represent the character type:
+- 0: Party member
+- 1: NPC
+- 2: Monster
+- 3: Map object (like non-interactive small spiders, etc)
+
+The upper 6 bits contain the flags:
+- Bit 2: Random movement
+- Bit 3: Use tileset
+- Bit 4: Text popup
+
+For NPCs if flag "Text popup" is set, the index is a map text index and only a text popup is shown on interaction.
 
 ### Map events
 
@@ -111,6 +133,19 @@ Value | Type
 \* | Rest is not decoded yet
 
 The data for those events is described in a separate file [MapEventData](MapEventData.md).
+
+### Character movement
+
+After the map events there is the movement data of all character references.
+
+If the character has the flag "random movement" set, there are 2 bytes for the character.
+One for x and one for y. This is the start position on map entering. The monster will
+move randomly every 5 ingame minutes starting at that location.
+
+If the character has no random movement there are 288 positions (each 2 bytes). Each
+position is for a 5 minute ingame duration starting at 00:00. So there is a position
+for every timeslot of a day. This is also used for static characters. They will have
+288 identical positions.
 
 ## Maps
 
