@@ -117,8 +117,11 @@ Offset | Type | Description
 
 Value | Type
 --- | ---
-0 | Map variable
-1 | Global variable (game variable)
+0 | Global variable (game variable)
+1 | Event bit
+4 | Map variable
+5 | Party member present
+6 | Item owned (item in inventory)
 7 | Use item (from inventory)
 9 | Success (is chained after other events like battles or treasures and is something like "battle won" or "treasure fully looted")
 14 | Hand cursor interaction
@@ -126,8 +129,7 @@ Value | Type
 Research: There might be the following condition types:
 - Eye cursor
 - Mouth cursor
-- Has items (in inventory or equipped)
-- Has party member
+- Has item equipped
 - Has level
 - Drop items (stones into the well)
 
@@ -138,17 +140,23 @@ Actions are related to conditions. For example they can change variable values w
 Offset | Type | Description
 --- | --- | ---
 0x00 | ubyte | Action type
-0x01 | ubyte | Action value (e.g. variable value to set)
+0x01 | ubyte | Action value (e.g. variable value to set, seems to be a boolean 0 or 1)
 0x02 | ubyte[4] | **Unknown**
 0x05 | ubyte | Object index (depends on action's type, e.g. variable index)
 0x07 | ubyte[2] | **Unknown**
+
+For the change event bit action, only the lower 6 bits of the object index gives the event index.
+The highest 2 bits can have some value as well so you have to mask it to get the right event index.
 
 ### Action types
 
 Value | Type
 --- | ---
-0 | Set map variable
-1 | Set global variable (game variable)
+0 | Set global variable (game variable)
+1 | Change event bit
+4 | Set map variable
+6 | Set inventory item
+8 | Set keyword
 
 ## Question popup event (0x13 / 19)
 
