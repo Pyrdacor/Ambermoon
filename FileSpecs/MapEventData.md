@@ -81,7 +81,7 @@ Damages the player (fireplaces, traps, etc).
 Offset | Type | Description
 --- | --- | ---
 0x00 | ubyte | Trap type (0 = damage, there are other **unknown** values like 5)
-0x01 | ubyte | Damage target (0 = active player, 1 = all party members)
+0x01 | ubyte | Trap target (0 = active player, 1 = all party members)
 0x02 | ubyte | Value (damage, maybe in percentage of max health? may depent on trap type?)
 0x03 | ubyte | **Unknown** (most of the time 3, the big vortex has 150 and a value of 0)
 0x04 | ubyte[5] | Unused
@@ -172,6 +172,12 @@ Offset | Type | Description
 0x06 | ubyte | Monster group index
 0x07 | ubyte[2] | **Unknown**
 
+## Enter place event (0x0C / 12)
+
+Offset | Type | Description
+--- | --- | ---
+0x00 | ubyte[9] | **Unknown**
+
 ## Condition event (0x0D / 13)
 
 Condition events represent conditions that control if following events (in the list) are executed or not. Multiple conditions can be chained which equals a logical AND conjunction.
@@ -229,6 +235,34 @@ Value | Type
 6 | Set inventory item
 8 | Set keyword
 
+## Dice 100 event (0x0F / 15)
+
+Offset | Type | Description
+--- | --- | ---
+0x00 | ubyte | Chance (0..100)
+0x01 | ubyte[6] | Unused
+0x07 | uword | Map event index if failed
+
+## Conversation event (0x10 / 16)
+
+Offset | Type | Description
+--- | --- | ---
+0x00 | ubyte[9] | **Unknown**
+
+## Print text event (0x11 / 17)
+
+Offset | Type | Description
+--- | --- | ---
+0x00 | ubyte[9] | **Unknown**
+
+## Create event (0x12 / 18)
+
+Create items etc.
+
+Offset | Type | Description
+--- | --- | ---
+0x00 | ubyte[9] | **Unknown**
+
 ## Question popup event (0x13 / 19)
 
 Text popup as question with buttons 'Yes' and 'No'.
@@ -258,3 +292,23 @@ Offset | Type | Description
 0x00 | word | Music index (0x00ff = default map music)
 0x02 | byte | Volume (always 0xff -> 100%, not sure about this)
 0x03 | ubyte[6] | Unused
+
+## Exit event (0x15 / 21)
+
+Offset | Type | Description
+--- | --- | ---
+0x00 | ubyte[9] | **Unknown**
+
+## Spawn event (0x16 / 22)
+
+Spawn monsters etc.
+
+Offset | Type | Description
+--- | --- | ---
+0x00 | ubyte[9] | **Unknown**
+
+## Nop event (0x17 / 23)
+
+Offset | Type | Description
+--- | --- | ---
+0x00 | ubyte[9] | **Unknown**

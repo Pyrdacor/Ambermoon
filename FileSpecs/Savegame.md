@@ -105,7 +105,7 @@ Byte | 0 | 1 | ...
 - So map event 0 (first one) would be deactivated by the following 8 bytes (in hex): 01 00 00 00 00 00 00 00
 - And map event 63 (last possible one) would be deactivated by the following 8 bytes (in hex): 00 00 00 00 00 00 00 80
 
-Also have a look at the [action map event](MapEventData.md) to change so bits.
+Also have a look at the [action map event](MapEventData.md) to change those bits.
 
 ## Dictionary words
 
