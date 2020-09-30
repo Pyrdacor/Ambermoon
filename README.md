@@ -69,7 +69,8 @@ Section | Description
 - [Overlays3D](Graphics/Overlays3D)
 - [Floors](Graphics/Floors)
 - [World backgrounds](Graphics/WorldBackgrounds)
-- [Travel_gfx.amb](Graphics/TravelGfx)
+- [Travel graphics](Graphics/TravelGfx)
+- [NPCs](Graphics/NPCs)
 - [Palettes](Graphics/Palettes.jpg)
 
 
