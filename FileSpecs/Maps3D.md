@@ -41,7 +41,7 @@ else // block_data[0] == 255
     wall_index = 0;
 }
 
-map_event_index = tile_data[1];
+map_event_index = block_data[1];
 ```
 
 So a block can mark a wall, an object or the map border (which isn't drawn at all).
