@@ -16,7 +16,22 @@ Offset | Type | Description
 0x05 | uword | New map index
 0x07 | ubyte[2] | **Unknown**
 
-## Treasure event (0x03 / 3)
+## Door event (0x02 / 2)
+
+Used for locked doors.
+
+Assumption of data inside the unknown data:
+- Ability to disarm the trap
+- Ability to lockpick the door
+
+Offset | Type | Description
+--- | --- | ---
+0x00 | ubyte | Lock flags (0x00: open, 0x01: locked but can be opened by lockpick, 0x64 locked with special key, other values too)
+0x01 | ubyte[4] | **Unknown**
+0x05 | uword | Key index if locked
+0x07 | uword | Unlock fail event index (0-based)
+
+## Chest event (0x03 / 3)
 
 Used for chests, piles, lootable map objects etc.
 
@@ -26,7 +41,7 @@ Assumption of data inside the unknown data:
 
 Offset | Type | Description
 --- | --- | ---
-0x00 | ubyte | Lock flags (0: open, 1: locked, can be opened by lockpick, many values, not sure yet)
+0x00 | ubyte | Lock flags (0x00: open, 0x01: locked but can be opened by lockpick, 0x64 locked with special key, other values too)
 0x01 | ubyte | **Unknown** (always 0 except for one chest with 20 blue discs which has 0x32 and lock flags of 0x00)
 0x02 | ubyte | **Unknown** (0xff for unlocked chests)
 0x03 | ubyte | Chest data index
@@ -45,8 +60,9 @@ Assumption of data inside the unknown data:
 Offset | Type | Description
 --- | --- | ---
 0x00 | ubyte | Event picture index (0-based) or 0xff if no image
-0x01 | ubyte[3] | **Unknown**
-0x04 | ubyte | Map text index
+0x01 | ubyte | Popup trigger (0: none, 1: move, 2: hand/eye cursor, 3: both)
+0x02 | ubyte | **Unknown**
+0x03 | uword | Map text index
 0x05 | ubyte[4] | **Unknown**
 
 ## Spinner event (0x05 / 5)
@@ -58,13 +74,17 @@ Offset | Type | Description
 0x00 | ubyte | Post-spin [direction](Enumerations/Directions.md)
 0x01 | ubyte[8] | Unused
 
-## Damage event (0x06 / 6)
+## Trap event (0x06 / 6)
 
 Damages the player (fireplaces, traps, etc).
 
 Offset | Type | Description
 --- | --- | ---
-0x00 | ubyte[9] | **Unknown**
+0x00 | ubyte | Trap type (0 = damage, there are other **unknown** values like 5)
+0x01 | ubyte | Damage target (0 = active player, 1 = all party members)
+0x02 | ubyte | Value (damage, maybe in percentage of max health? may depent on trap type?)
+0x03 | ubyte | **Unknown** (most of the time 3, the big vortex has 150 and a value of 0)
+0x04 | ubyte[5] | Unused
 
 ## Riddlemouth event (0x08 / 8)
 
@@ -72,26 +92,77 @@ Offset | Type | Description
 --- | --- | ---
 0x00 | ubyte | Riddle text index
 0x01 | ubyte | Solution text index (used when riddle was solved)
-0x02 | ubyte[7] | **Unknown**
+0x02 | ubyte[5] | **Unknown**
+0x07 | uword | Correct answer index in word dictionary
 
-## Change player attribute (0x09 / 9)
+## Award (0x09 / 9)
 
-Offset | Type | Description
---- | --- | ---
-0x00 | ubyte[6] | **Unknown**
-0x06 | ubyte | [Attribute](Enumerations/Attributes.md)
-0x07 | ubyte | **Unknown**
-0x08 | ubyte | Value to add
-
-## Change tile overlay event (0x0A / 10)
+This gives some award to the party.
 
 Offset | Type | Description
 --- | --- | ---
-0x00 | ubyte | Tile‘s x coordinate (1-based)
+0x00 | ubyte | Award type
+0x01 | ubyte | Award operation
+0x02 | ubyte | Random (0 or 1)
+0x03 | ubyte | Award target
+0x04 | ubyte | **Unknown**
+0x05 | uword | Award type value (like which attribute)
+0x07 | uword | Value
+
+If "Random" is set, the real value is a random value between 0 and "Value".
+
+The operation "Fill" will ignore the Value and fully fill. This is used for LP/SP filling.
+
+### Award type
+
+Value | Meaning
+--- | ---
+0 | Attribute
+1 | Ability
+2 | LP
+3 | SP
+4 | SLP
+5 | TP
+6 | **Unknown**
+7 | Language
+8 | EP
+
+### Award operation
+
+Value | Meaning
+--- | ---
+0 | Increase / add
+4 | Fill
+
+There may be other operations like decrease.
+
+### Award target
+
+Value | Meaning
+--- | ---
+0 | Active player
+1 | Whole party
+
+## Change tile event (0x0A / 10)
+
+Offset | Type | Description
+--- | --- | ---
+0x00 | ubyte | Tile's x coordinate (1-based)
 0x01 | ubyte | Tile's y coordinate (1-based)
-0x02 | ubyte[3] | **Unknown**
-0x05 | uword | New tile overlay index
-0x07 | ubyte[2] | **Unknown**
+0x02 | ubyte | **Unknown**
+0x03 | ubyte[4] | Tile data
+0x07 | uword | Map index (0 means same map)
+
+The tile data is in the same format as for 2D maps. It is compatible to 3D maps as well (object/wall index). So you can use this:
+
+```cs
+BackTileIndex = ((uint)(tileData[1] & 0xe0) << 3) | tileData[0];
+FrontTileIndex = ((uint)(tileData[2] & 0x07) << 8) | tileData[3];
+// FrontTileIndex is used for 3D as object index (1..100), wall index (101..254) or empty (0).
+```
+
+In 2D mostly the overlay index is used. If it is not 0 and the underlay index is 0, this means that the back tile is removed. If both
+values are 0, only the front tile is removed. There must be always at least one tile (front or back) of course.
 
 ## Start battle event (0x0B / 11)
 

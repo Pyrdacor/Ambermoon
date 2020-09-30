@@ -118,19 +118,28 @@ Offset | Type | Description
 Value | Type
 --- | ---
 1 | Map change
-3 | Treasure
+2 | Door
+3 | Chest
 4 | Text popup
 5 | Spinner
-6 | Damage
+6 | Damage / trap
+7 | **Unknown**
 8 | Riddlemouth
-9 | Change player attribute
+9 | Award
 10 | Change tile appearance
 11 | Start battle
+12 | Enter place (like merchants)
 13 | Condition
 14 | Action
+15 | Dice 100 roll (Random)
+16 | Conversation
+17 | Print text
+18 | Create
 19 | Question popup
 20 | Change music
-\* | Rest is not decoded yet
+21 | Exit
+22 | Spawn
+23 | Nop (empty operation)
 
 The data for those events is described in a separate file [MapEventData](MapEventData.md).
 
@@ -142,12 +151,12 @@ If the character has the flag "random movement" set, there are 2 bytes for the c
 One for x and one for y. This is the start position on map entering. The monster will
 move randomly every 5 ingame minutes starting at that location.
 
-For monsters (and NPCs?) on 3D maps, there is also only one position if the random movement
-flag is not set. In that case the monster will stay on that position and will only walk to the
+For monsters, there is also only one position if the random movement flag is not set.
+In that case the monster will stay on that position and will only walk to the
 player when he is near enough to attack.
 
-If the character has no random movement there are 288 positions (each 2 bytes). Each
-position is for a 5 minute ingame duration starting at 00:00. So there is a position
+If the non-monster character has no random movement there are 288 positions (each 2 bytes).
+Each position is for a 5 minute ingame duration starting at 00:00. So there is a position
 for every timeslot of a day. This is also used for static characters. They will have
 288 identical positions.
 
