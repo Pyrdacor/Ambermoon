@@ -251,17 +251,24 @@ Offset | Type | Description
 
 ## Print text event (0x11 / 17)
 
+This is used to define the text to display in conversations.
+Therefore it must follow in an event chain which has a previous
+conversation event.
+
 Offset | Type | Description
 --- | --- | ---
-0x00 | ubyte[9] | **Unknown**
+0x00 | ubyte | NPC message index
+0x01 | ubyte[8] | Unused
 
 ## Create event (0x12 / 18)
 
-Create items etc.
+Create items etc. It is stored in the item view of conversation window for example.
 
 Offset | Type | Description
 --- | --- | ---
-0x00 | ubyte[9] | **Unknown**
+0x00 | ubyte[6] | **Unknown**
+0x06 | ubyte | Amount
+0x07 | uword | Item index
 
 ## Question popup event (0x13 / 19)
 

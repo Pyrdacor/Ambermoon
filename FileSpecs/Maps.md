@@ -141,7 +141,7 @@ Value | Type
 22 | Spawn
 23 | Nop (empty operation)
 
-The data for those events is described in a separate file [MapEventData](MapEventData.md).
+The data for those events is described in a separate file [EventData](EventData.md).
 
 ### Character movement
 

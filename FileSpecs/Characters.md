@@ -97,3 +97,15 @@ To be continued ...
 Monsters are grouped for fights. The file Monster_groups.amb contains all monster formations in the game. Each file consists of 18 uwords which represent the 18 tiles in combat where a monster can be placed starting at the upper-left and going line by line from left to right.
 
 Each uword can contain a monster index starting at 1 (0 = no monster).
+
+## NPCs
+
+NPCs have no equipment nor inventory items (no data for it). After the name there is an event section (same format as map events).
+
+NPC conversations are realized in the following way:
+
+- There is an event list usually starting with a Conversation event.
+- A conservation event just opens the conversation window without text.
+- The text is added by the PrintText event.
+
+There might be condition events which force jumps to different PrintText or Conversation events based on global variables and such things.
