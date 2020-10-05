@@ -210,6 +210,10 @@ Research: There might be the following condition types:
 - Has level
 - Drop items (stones into the well)
 
+Note: In conversations the global variable 0 is checked to be value 0 before executing a PrintText event that
+should be executed in any case. I guess PrintText events always need a preceding Condition event and the global
+variable 0 is always 0.
+
 ## Action event (0x0E / 14)
 
 Actions are related to conditions. For example they can change variable values which are used in conditions.
@@ -247,7 +251,28 @@ Offset | Type | Description
 
 Offset | Type | Description
 --- | --- | ---
-0x00 | ubyte[9] | **Unknown**
+0x00 | ubyte | Interaction type
+0x01 | ubyte[4] | Unused?
+0x05 | uword | Value
+0x07 | ubyte[2] | Unused?
+
+The value's meaning depends on the interaction type.
+
+For show or give item it is the item index.
+For keyword it is the dictionary index.
+
+### Interaction types
+
+Value | Type
+--- | ---
+0 | Keyword
+1 | Show item
+2 | Give item
+7 | Talk (mouth cursor)
+8 | Look (eye cursor)
+
+Most likely there is "ask to join" and "ask to leave" somewhere between 3 and 6.
+As well as "give gold" and "give food".
 
 ## Print text event (0x11 / 17)
 
@@ -259,6 +284,10 @@ Offset | Type | Description
 --- | --- | ---
 0x00 | ubyte | NPC message index
 0x01 | ubyte[8] | Unused
+
+Note: In conversations the global variable 0 is checked to be value 0 before executing a PrintText event that
+should be executed in any case. I guess PrintText events always need a preceding Condition event and the global
+variable 0 is always 0.
 
 ## Create event (0x12 / 18)
 
