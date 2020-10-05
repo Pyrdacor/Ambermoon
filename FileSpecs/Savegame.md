@@ -42,7 +42,7 @@ Offset | Type | Description
 0x0044 | TransportLocation[32] | Location of transports (see below)
 0x0104 | ubyte[1024] | Global variables (8192 bits). At 0x112 the wind gate active states seem to be located (1 bit for each gate, 1 = active, 0 = broken). Order is 76543210 FEDCBA98 ...
 0x0504 | EventBits[1024] | Event active state bits. This provides 64 event bits for maps 1 to 1024. But used are only maps 1 to 528. For event bit structure see below.
-0x2504 | ? | **Unknown**
+0x2504 | CharacterBits[1024] | Controls if map characters are present on the map.
 0x3504 | ubyte[15] | Dictionary words (see below). Maybe there are some more bytes/bits here but in original game there are only 115 possible dictionary entries. 15 bytes are enough for 115 entries.
 0x35A4 | ubyte[64] | Chest locked states (512 bits for chest 0-511). See below.
 0x35E4 | ubyte[6] | Battle positions for all 6 party members (each can be 0 to 11)
@@ -105,6 +105,17 @@ Byte | 0 | 1 | ...
 - And map event 63 (last possible one) would be deactivated by the following 8 bytes (in hex): 00 00 00 00 00 00 00 80
 
 Also have a look at the [action event](EventData.md) to change those bits.
+
+## Character bits
+
+For each map (1 to 1024) there are 32 character bits (4 bytes per map). Each bit represents a character on the map.
+If a bit is 0 the monster is on the map, if 1 it is not.
+
+The order of the bits is this
+
+Byte | 0 | 1 | ...
+--- | --- | --- | ---
+&nbsp; | 76543210 | FEDCBA98 | ...
 
 ## Dictionary words
 
