@@ -40,10 +40,9 @@ Offset | Type | Description
 0x0040 | uword | Current game options (see below)
 0x0042 | uword | Hours without sleep (when reaching 24 you get messages about party getting tired every hour, when reaching 36 you got totally exhausted)
 0x0044 | TransportLocation[32] | Location of transports (see below)
-0x0104 | ... | **Unknown**
-0x0112 | uword | Wind gate active status (1 bit for each gate, 1 = active, 0 = broken)
-0x0116 | ... | **Unknown**
-0x04FC | EventBits[529] | Event active state bits. This assumes that there are event bits for map index 0 to 528. Maybe there is not for map index 0 or more than 529. For event bit structure see below.
+0x0104 | ubyte[1024] | Global variables (8192 bits). At 0x112 the wind gate active states seem to be located (1 bit for each gate, 1 = active, 0 = broken). Order is 76543210 FEDCBA98 ...
+0x0504 | EventBits[1024] | Event active state bits. This provides 64 event bits for maps 1 to 1024. But used are only maps 1 to 528. For event bit structure see below.
+0x2504 | ? | **Unknown**
 0x3504 | ubyte[15] | Dictionary words (see below). Maybe there are some more bytes/bits here but in original game there are only 115 possible dictionary entries. 15 bytes are enough for 115 entries.
 0x35A4 | ubyte[64] | Chest locked states (512 bits for chest 0-511). See below.
 0x35E4 | ubyte[6] | Battle positions for all 6 party members (each can be 0 to 11)
@@ -91,7 +90,7 @@ inside the Stationary file.
 
 ## Event bits
 
-For each map (at least 1 to 528) there are 64 event bits (8 bytes per map). Each bit represents a map event from the [event list](Maps.md) of that map.
+For each map (1 to 1024) there are 64 event bits (8 bytes per map). Each bit represents a map event from the [event list](Maps.md) of that map.
 If a bit is 0, the event is active which means the player is able to trigger it. If a bit is 1, the event is inactive and the player can't trigger it.
 
 For example this is used for one-time text popups. After triggering it, a map event will set the event bit and therefore the event can not be triggered again.
