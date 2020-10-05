@@ -331,9 +331,14 @@ Offset | Type | Description
 
 ## Exit event (0x15 / 21)
 
+Used to exit a conversation or other window immediately.
+It is used if a conversation should not be continued
+and the window should close after the first text is
+displayed.
+
 Offset | Type | Description
 --- | --- | ---
-0x00 | ubyte[9] | **Unknown**
+0x00 | ubyte[9] | Unused
 
 ## Spawn event (0x16 / 22)
 
