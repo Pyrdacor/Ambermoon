@@ -13,3 +13,5 @@ Bit | Property
 4..7 | Unused
 
 Note: It is a known bug that Reg is not marked as boss so you could cast Fear on him and he will flee with all the items. So I guess he should have bit 3 set as well. Possibly bit 1 was set for him by mistake.
+
+I think spiders/lizards are the only monsters which can move more than one field per round. So bit 3 may be multi-field-move.
