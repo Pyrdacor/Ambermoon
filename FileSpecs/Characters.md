@@ -66,10 +66,10 @@ Offset | Type | Description
 0x00D0 | uword | Current spell points
 0x00D2 | uword | Max spell points
 0x00D4 | uword | Bonus spell points
-0x00D6 | uword | **Unknown**
-0x00D8 | uword | Defense
-0x00DA | uword | **Unknown**
-0x00DC | uword | Attack damage
+0x00D6 | uword | Combat defense
+0x00D8 | uword | Displayed defense
+0x00DA | uword | Combat attack damage
+0x00DC | uword | Displayed attack damage
 0x00DE | uword | Magic attack damage
 0x00E0 | uword | Magic defense
 0x00E2 | uword | APR per level
