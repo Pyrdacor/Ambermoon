@@ -15,8 +15,8 @@ Offset | Type | Description
 0x0003 | ubyte | [Class](Enumerations/Classes.md)
 0x0004 | ubyte | [Usable spell types](Enumerations/SpellTypes.md)
 0x0005 | ubyte | Level (1-99)
-0x0006 | ubyte | **Unknown** (Mostly 0, a few have 1 or 2, Alkem has 255)
-0x0007 | ubyte | **Unknown** (Nera, Netsrak, Mando have 1, Chris and Targor 2, all others 0)
+0x0006 | ubyte | Number of free hands (0-2, Alkem has 255 which might be a bug)
+0x0007 | ubyte | Number of free fingers (0-2)
 0x0008 | ubyte | [Spoken languages](Enumerations/Languages.md)
 0x0009 | uword | Portrait index
 0x000B | uword | Combat graphic index (only used for monsters)
