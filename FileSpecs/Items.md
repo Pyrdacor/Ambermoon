@@ -79,3 +79,4 @@ Value | Name
 0x00 | None
 0x01 | Identified
 0x02 | Broken
+0x04 | Cursed
