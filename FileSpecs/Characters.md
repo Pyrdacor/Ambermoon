@@ -83,7 +83,7 @@ Offset | Type | Description
 0x00F6 | ulong | Learned alchemistic [spells](Enumerations/Spells.md)
 0x00FA | ulong | Learned mystic [spells](Enumerations/Spells.md)
 0x00FE | ulong | Learned destruction [spells](Enumerations/Spells.md)
-0x0102 | ubyte[12] | **Unknown** (always 0)
+0x0102 | ulong[3] | Learned spells of type 5-7 (always 0, 5 and 6 unused, 7 are functional spells)
 0x010E | ulong | Weight
 0x0112 | byte[16] | Name (encoding DOS-Latin-1, codepage 850 or 437)
 0x0122 | [ItemSlot](Items.md)[9] | Equipment
