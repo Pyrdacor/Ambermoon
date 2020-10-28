@@ -31,3 +31,9 @@ Value | Name
 0x0040 | Alchemist
 0x0080 | Mystic
 0x0100 | Mage
+0x0200 | Animal
+0x0400 | Monster
+
+### Findings
+
+The game data (e.g. items) seems to use 0x7fff (15 bits) for "usable by all classes". So there seem to be 4 more possible but unused classes.

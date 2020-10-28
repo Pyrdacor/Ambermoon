@@ -17,7 +17,7 @@ Offset | Type | Description
 0x0000 | ubyte | Item graphic index
 0x0001 | ubyte | [Item type](Enumerations/ItemTypes.md)
 0x0002 | ubyte | [Equipment slot](Enumerations/EquipmentSlots.md)
-0x0003 | ubyte | **Unknown**
+0x0003 | ubyte | Break chance (0-100, used for some equip types like weapons or armor)
 0x0004 | ubyte | [Gender](Enumerations/Gender.md)
 0x0005 | ubyte | Number of hands
 0x0006 | ubyte | Number of fingers
@@ -29,23 +29,38 @@ Offset | Type | Description
 0x000C | sbyte | Ability value
 0x000D | sbyte | Protection / defense
 0x000E | sbyte | Damage
-0x000F | ubyte[6] | **Unknown**
+0x000F | ubyte | [Ammunition type](Enumerations/AmmunitionTypes.md) if this is ammunition
+0x0010 | ubyte | [Ammunition type](Enumerations/AmmunitionTypes.md) if this is a long-ranged weapon
+0x0011 | ubyte[4] | **Unknown**
 0x0015 | ubyte | Index for either [special item purpose](Enumerations/SpecialItemPurpose.md), [transportation](Enumerations/Transportation.md) or text of a text scroll
-0x0016 | ubyte | **Unknown**
+0x0016 | ubyte | Text sub-index (used only for text scrolls)
 0x0017 | ubyte | [Spell type](Enumerations/SpellTypes.md)
 0x0018 | ubyte | [Spell index](Enumerations/Spells.md)
 0x0019 | ubyte | Spell usage count (255 means unlimited)
 0x001A | ubyte[4] | **Unknown**
 0x001E | sbyte | M-B-R value (magic armor level)
 0x001F | sbyte | M-B-W value (magic attack level)
-0x0020 | ubyte | Bit 0: Accursed, Bit 1: Purchasable
-0x0021 | ubyte | **Unknown**
+0x0020 | ubyte | Item flags (see below)
+0x0021 | ubyte | Item slot flags (see below)
 0x0022 | uword | [Classes](Enumerations/Classes.md)
 0x0024 | uword | Price (see price formula below)
 0x0026 | uword | Weight
 0x0028 | byte[19] | Item name (filled with spaces (0x20) if shorter than 18 characters). There is a null byte after the name. This byte comes before the spaces.
 0x003B | byte | End of item (= 0)
 
+
+### Item flags
+
+Bit | Description
+----|----
+0 | Cursed
+1 | Sellable
+2 | Stackable
+3 | **Unknown**
+4 | Destroy after usage
+5 | Readable
+6 | **Unknown**
+7 | Unused
 
 ### Price formula
 
@@ -79,4 +94,5 @@ Value | Name
 0x00 | None
 0x01 | Identified
 0x02 | Broken
-0x04 | Cursed
+
+Note: Items also store an item slot flags value. I guess it overrides the one from the chest/merchant etc. or is kind of a default value. Maybe useful if the item is given to the party by events (like NPCs).
