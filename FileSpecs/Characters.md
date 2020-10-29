@@ -88,11 +88,6 @@ Offset | Type | Description
 0x0112 | byte[16] | Name (encoding DOS-Latin-1, codepage 850 or 437)
 0x0122 | [ItemSlot](Items.md)[9] | Equipment
 0x0158 | [ItemSlot](Items.md)[24] | Inventory items
-... | ... | ...
-
-To be continued ...
-
-Maybe Monster flags and element was misinterpreted and is really the immunity against ailments.
 
 ## Monster groups
 
@@ -104,7 +99,7 @@ Each uword can contain a monster index starting at 1 (0 = no monster).
 
 NPCs have no equipment nor inventory items (no data for it). After the name there is an event section (same format as map events).
 
-NPC conversations are realized in the following way:
+NPC conversations are implemented in the following way:
 
 - There is an event list usually starting with a Conversation event.
 - A conservation event just opens the conversation window without text.
