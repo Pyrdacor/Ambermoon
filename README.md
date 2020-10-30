@@ -10,7 +10,7 @@ I will provide some helpful tools too.
 
 ## Tool releases
 
-[v1.0.53 for Windows](https://github.com/Pyrdacor/Ambermoon/releases/download/v1.0.53/AmbermoonTools-Windows.zip): Current release with a command line packer and a command line monster value changer.
+[v1.0.54 for Windows](https://github.com/Pyrdacor/Ambermoon/releases/download/v1.0.54/AmbermoonTools-Windows.zip): Current release with a command line packer and a command line monster value changer.
 
 [![Build status](https://ci.appveyor.com/api/projects/status/dn5n21r8m11an48i/branch/master?svg=true)](https://ci.appveyor.com/project/Pyrdacor/ambermoon/branch/master)
 
