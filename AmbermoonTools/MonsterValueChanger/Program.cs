@@ -16,10 +16,12 @@ namespace MonsterValueChanger
             Console.WriteLine("USAGE: MonsterValueChanger --list");
             Console.WriteLine("       MonsterValueChanger <monsterIdOrName> <offset> <size>");
             Console.WriteLine("       MonsterValueChanger <monsterIdOrName> <offset> <size> <value>");
+            Console.WriteLine("       MonsterValueChanger --all <offset> <size>");
             Console.WriteLine();
             Console.WriteLine("1st version shows all monsters with their id and name.");
             Console.WriteLine("2nd version shows a value at the given offset with a given size.");
             Console.WriteLine("3rd version changes a value at the given offset.");
+            Console.WriteLine("4th version list the value for all monsters.");
             Console.WriteLine();
             Console.WriteLine("The <monsterIdOrName> param is case-insensitive.");
             Console.WriteLine("The <offset> param is in bytes and can be decimal or hex (with 0x prefix).");
@@ -155,7 +157,43 @@ namespace MonsterValueChanger
 
             foreach (var monster in monsters)
             {
-                Console.WriteLine($"{monster.Key}: {monster.Value.Name}");
+                Console.WriteLine($"{monster.Key:000}: {monster.Value.Name}");
+            }
+
+            Console.WriteLine();
+        }
+
+        static void ShowMonsterValues(long offset, long size)
+        {
+            var monsters = LoadMonsters(out var files);
+
+            if (monsters == null)
+                return;
+
+            Console.WriteLine(" -- Value --");
+
+            foreach (var monster in monsters)
+            {
+                var monsterFile = files[monster.Key];
+                monsterFile.Position = (int)offset;
+                uint value = size switch
+                {
+                    1 => monsterFile.ReadByte(),
+                    2 => monsterFile.ReadWord(),
+                    4 => monsterFile.ReadDword(),
+                    _ => 0
+                };
+                string hex = value.ToString($"x{size * 2}");
+                int sizeShift = (int)size * 8 - 1;
+                long signed = value & ((1 << sizeShift) - 1);
+                if ((value & (1 << sizeShift)) != 0)
+                    signed = -signed;
+
+                Console.WriteLine($"{monster.Key:000}: {monster.Value.Name}");
+                Console.WriteLine($" Dec unsigned: {value}");
+                Console.WriteLine($" Hex unsigned: {hex}");
+                Console.WriteLine($" Dec signed  : {signed}");
+                Console.WriteLine();
             }
 
             Console.WriteLine();
@@ -207,6 +245,14 @@ namespace MonsterValueChanger
                 return;
             }
 
+            if (options.Contains("--all") || options.Contains("-a"))
+            {
+                if (!ReadOffsetAndSize(parameters, 0, out long off, out long sz))
+                    return;
+                ShowMonsterValues(off, sz);
+                return;
+            }
+
             if (options.Count != 0)
             {
                 Console.WriteLine("Invalid options: " + string.Join(" ", options));
@@ -252,51 +298,8 @@ namespace MonsterValueChanger
                 return;
             }
 
-            long offset;
-            long size;
-
-            try
-            {
-                offset = ParseInt(parameters[1]);
-            }
-            catch
-            {
-                Console.WriteLine("Invalid <offset> parameter value: " + parameters[1]);
-                Exit(ErrorCode.InvalidArgumentFormat);
+            if (!ReadOffsetAndSize(parameters, 1, out long offset, out long size))
                 return;
-            }
-
-            try
-            {
-                size = ParseInt(parameters[2]);
-            }
-            catch
-            {
-                Console.WriteLine("Invalid <size> parameter value: " + parameters[2]);
-                Exit(ErrorCode.InvalidArgumentFormat);
-                return;
-            }
-
-            if (offset < 0 || offset > 809)
-            {
-                Console.WriteLine("Parameter <offset> must be between 0 and 809 but was: " + parameters[1]);
-                Exit(ErrorCode.ArgumentOutOfRange);
-                return;
-            }
-
-            if (size != 1 && size != 2 && size != 4)
-            {
-                Console.WriteLine("Parameter <size> must be 1, 2 or 4 but was: " + parameters[2]);
-                Exit(ErrorCode.ArgumentOutOfRange);
-                return;
-            }
-
-            if (offset + size > 810)
-            {
-                Console.WriteLine("Parameter <offset> plus <size> exceeds total size of 810. Please adjust values.");
-                Exit(ErrorCode.ArgumentOutOfRange);
-                return;
-            }
 
             if (parameters.Count == 3)
                 ShowMonsterValue(monsterFile, offset, size);
@@ -326,6 +329,57 @@ namespace MonsterValueChanger
             }
 
             Exit(ErrorCode.NoError);
+        }
+
+        static bool ReadOffsetAndSize(List<string> parameters, int index, out long offset, out long size)
+        {
+            offset = 0;
+            size = 0;
+
+            try
+            {
+                offset = ParseInt(parameters[index]);
+            }
+            catch
+            {
+                Console.WriteLine("Invalid <offset> parameter value: " + parameters[index]);
+                Exit(ErrorCode.InvalidArgumentFormat);
+                return false;
+            }
+
+            try
+            {
+                size = ParseInt(parameters[index + 1]);
+            }
+            catch
+            {
+                Console.WriteLine("Invalid <size> parameter value: " + parameters[index + 1]);
+                Exit(ErrorCode.InvalidArgumentFormat);
+                return false;
+            }
+
+            if (offset < 0 || offset > 809)
+            {
+                Console.WriteLine("Parameter <offset> must be between 0 and 809 but was: " + parameters[1]);
+                Exit(ErrorCode.ArgumentOutOfRange);
+                return false;
+            }
+
+            if (size != 1 && size != 2 && size != 4)
+            {
+                Console.WriteLine("Parameter <size> must be 1, 2 or 4 but was: " + parameters[2]);
+                Exit(ErrorCode.ArgumentOutOfRange);
+                return false;
+            }
+
+            if (offset + size > 810)
+            {
+                Console.WriteLine("Parameter <offset> plus <size> exceeds total size of 810. Please adjust values.");
+                Exit(ErrorCode.ArgumentOutOfRange);
+                return false;
+            }
+
+            return true;
         }
         
         static void ShowMonsterValue(IDataReader monsterFile, long offset, long size)
