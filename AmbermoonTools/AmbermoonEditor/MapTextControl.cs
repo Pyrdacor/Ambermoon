@@ -1,5 +1,6 @@
 ﻿using Ambermoon.Data;
 using Ambermoon.Data.Legacy;
+using Ambermoon.Data.Legacy.Serialization;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -181,11 +182,10 @@ namespace AmbermoonEditor
                 mapTextsAvailable[i - 1] = true;
 
                 var container = GameData.Files[containerName];
-                var reader = new MapReader();
 
                 foreach (var file in container.Files)
                 {
-                    _mapTexts.Add(file.Key, reader.ReadMapTexts(file.Value).Select(t => new TextEntry { Text = t }).ToList());
+                    _mapTexts.Add(file.Key, TextReader.ReadTexts(file.Value).Select(t => new TextEntry { Text = t }).ToList());
                 }
             }
 

@@ -1,12 +1,18 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>netcoreapp3.1</TargetFramework>
+    <RepositoryUrl>https://github.com/Pyrdacor/Ambermoon</RepositoryUrl>
+    <PackageProjectUrl>https://github.com/Pyrdacor/Ambermoon</PackageProjectUrl>
+    <RepositoryType>Github</RepositoryType>
+    <PackageTags>Ambermoon Monster Editor File Amiga</PackageTags>
+    <Authors>Robert Schneckenhaus</Authors>
+    <Description>Command line tool to show and edit monster values of legacy Ambermoon game data.</Description>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Ambermoon.Data.Legacy" Version="1.1.12" />
+    <PackageReference Include="Ambermoon.Data.Legacy" Version="1.1.13" />
   </ItemGroup>
 
 </Project>
