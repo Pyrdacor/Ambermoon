@@ -29,6 +29,32 @@ Mystic | 0x84
 Mage | 0x08
 
 
+## Immunity
+
+Characters can have immunities against spell types. The only one which used than in original game is the guard demon which is immune to alchemistic, mystic and destruction spells.
+
+The immunity flags are as follows:
+
+Value | Name
+----|----
+0x00 | Not immune
+0x01 | Immune to healing spells (white spells)
+0x02 | Immune to alchemistic spells (blue spells)
+0x04 | Immune to mystic (green spells)
+0x08 | Immune to destruction spells (black spells)
+0x10 | Immune to spells of type 5 (unused)
+0x20 | Immune to spells of type 6 (unused)
+0x40 | Immune to spells of type 7 (functional spells, unused)
+0x80 | Immune to spells of type 8 (unused)
+
+Note: The guard demon uses a value of 0x9e which means:
+- Immune to alchemistic spells
+- Immune to mystic spells
+- Immune to destruction spells
+- Immune to type 5 spells
+- Immune to type 8 spells
+
+
 ## On items
 
 Items that provide a spell on usage (e.g. scrolls or magical items) also define a spell type as follows:
