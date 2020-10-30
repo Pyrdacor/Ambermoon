@@ -6,14 +6,14 @@ The following table is not complete yet.
 
 Bit | Property
 ----|----
-0 | **Unknown**. Only used by the guard demon who is immune to all kind of damage and spells.
-1 | Immune to monster knowledge spell
-2 | **Unknown**. Only used by the guard demon who is immune to all kind of damage and spells.
-3 | Undead element (all undead), **unknown effect**
-4 | Stone/earth element (golems), immune to Poison, Paralyze and Disease. **Unknown** yet if there are more effects.
-5 | Wind element (Gargoyle and imp but not minor demon), **unknown effect**
-6 | Fire element (Demons and fire monsters), **unknown effect**
-7 | Water element (only the pond lizard), **unknown effect**
+0 | **Unknown**. Only used by the guard demon who is immune to all kind of damage and spells, no effect found.
+1 | Psychic element, immune to MonsterKnowledge, Fear, Sleep, Irritation and Madness
+2 | Ghost element, immune to DissolveVictim, Blindness, GhostWeapon, MagicProjectile and MagicArrows.
+3 | Undead element (all undead), immune to LP-Stealer.
+4 | Stone/earth element (golems), immune to Poison, Paralyze and Disease.
+5 | Wind element (Gargoyle and imp but not minor demon), no effect found.
+6 | Fire element (Demons and fire monsters), no effect found.
+7 | Water element (only the pond lizard), no effect found.
 
 First I thought that the elements would give several immunities against element spells but this doesn't seem to be the case at all.
 
