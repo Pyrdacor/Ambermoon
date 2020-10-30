@@ -19,6 +19,8 @@ artifacts:
 after_build:
   - dotnet publish -c Release "%APPVEYOR_BUILD_FOLDER%\AmbermoonTools\AmbermoonPack\AmbermoonPack.csproj" -p:PublishSingleFile=true -r win-x64 --no-restore
   - 7z a AmbermoonTools-Windows.zip "%APPVEYOR_BUILD_FOLDER%\AmbermoonTools\AmbermoonPack\bin\Any CPU\Release\netcoreapp3.1\win-x64\publish\AmbermoonPack.exe"
+  - dotnet publish -c Release "%APPVEYOR_BUILD_FOLDER%\AmbermoonTools\MonsterValueChanger\MonsterValueChanger.csproj" -p:PublishSingleFile=true -r win-x64 --no-restore
+  - 7z a AmbermoonTools-Windows.zip "%APPVEYOR_BUILD_FOLDER%\AmbermoonTools\MonsterValueChanger\bin\Any CPU\Release\netcoreapp3.1\win-x64\publish\MonsterValueChanger.exe"
 
 test: off
 
@@ -34,3 +36,5 @@ deploy:
     draft: true
     prerelease: false
     force_update: true
+    on:
+      APPVEYOR_REPO_TAG: true
