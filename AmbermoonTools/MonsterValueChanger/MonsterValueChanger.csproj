@@ -9,6 +9,7 @@
     <PackageTags>Ambermoon Monster Editor File Amiga</PackageTags>
     <Authors>Robert Schneckenhaus</Authors>
     <Description>Command line tool to show and edit monster values of legacy Ambermoon game data.</Description>
+    <RuntimeIdentifiers>win-x64;linux-x64</RuntimeIdentifiers>
   </PropertyGroup>
 
   <ItemGroup>
