@@ -26,7 +26,7 @@ Offset | Type | Description
 0x0010 | ubyte | Immunity to [spell types](Enumerations/SpellTypes.md)
 0x0011 | ubyte | Attacks per round (APR)
 0x0012 | ubyte | [Monster flags](Enumerations/MonsterFlags.md) (monsters only)
-0x0013 | ubyte | [Monster elements?](Enumerations/MonsterElements.md) (only used for monsters)
+0x0013 | ubyte | [Elements and immunities](Enumerations/ElementsAndImmunities.md) (in original only used for monsters)
 0x0014 | uword | Spell learning points (SLP)
 0x0016 | uword | Training points (TP)
 0x0018 | uword | Gold

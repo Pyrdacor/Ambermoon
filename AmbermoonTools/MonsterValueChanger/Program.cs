@@ -17,6 +17,7 @@ namespace MonsterValueChanger
             Console.WriteLine("       MonsterValueChanger <monsterIdOrName> <offset> <size>");
             Console.WriteLine("       MonsterValueChanger <monsterIdOrName> <offset> <size> <value>");
             Console.WriteLine("       MonsterValueChanger --all <offset> <size>");
+            Console.WriteLine("       MonsterValueChanger --all-not-0 <offset> <size>");
             Console.WriteLine();
             Console.WriteLine("1st version shows all monsters with their id and name.");
             Console.WriteLine("2nd version shows a value at the given offset with a given size.");
@@ -163,7 +164,7 @@ namespace MonsterValueChanger
             Console.WriteLine();
         }
 
-        static void ShowMonsterValues(long offset, long size)
+        static void ShowMonsterValues(long offset, long size, Func<Monster, uint, bool> condition)
         {
             var monsters = LoadMonsters(out var files);
 
@@ -183,6 +184,8 @@ namespace MonsterValueChanger
                     4 => monsterFile.ReadDword(),
                     _ => 0
                 };
+                if (!condition(monster.Value, value))
+                    continue;
                 string hex = value.ToString($"x{size * 2}");
                 int sizeShift = (int)size * 8 - 1;
                 long signed = value & ((1 << sizeShift) - 1);
@@ -249,7 +252,15 @@ namespace MonsterValueChanger
             {
                 if (!ReadOffsetAndSize(parameters, 0, out long off, out long sz))
                     return;
-                ShowMonsterValues(off, sz);
+                ShowMonsterValues(off, sz, (monster, value) => true);
+                return;
+            }
+
+            if (options.Contains("--all-not-0"))
+            {
+                if (!ReadOffsetAndSize(parameters, 0, out long off, out long sz))
+                    return;
+                ShowMonsterValues(off, sz, (monster, value) => value != 0);
                 return;
             }
 

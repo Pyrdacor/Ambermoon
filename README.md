@@ -48,7 +48,7 @@ Section | Description
   - [Gender](FileSpecs/Enumerations/Gender.md)
   - [ItemTypes](FileSpecs/Enumerations/ItemTypes.md)
   - [Languages](FileSpecs/Enumerations/Languages.md)
-  - [MonsterElements](FileSpecs/Enumerations/MonsterElements.md)
+  - [ElementsAndImmunities](FileSpecs/Enumerations/ElementsAndImmunities.md)
   - [MonsterFlags](FileSpecs/Enumerations/MonsterFlags.md)
   - [Races](FileSpecs/Enumerations/Races.md)
   - [SpecialItemPurpose](FileSpecs/Enumerations/SpecialItemPurpose.md)

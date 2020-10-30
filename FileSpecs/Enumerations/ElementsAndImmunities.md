@@ -1,19 +1,22 @@
-# Monster elements
+# Elements and immunities
 
-Each monster has special flags that are stored in a 8 bit value. I am not sure about this value but it looks like the lower 3 bits mark some immunity and the higher 5 bits mark an element.
+Each character has special flags that are stored in a 8 bit value. They grant some immunity and hence some are used in way that matches elements of specific monsters I guess it can also denote some monster element.
 
 The following table is not complete yet.
 
 Bit | Property
 ----|----
-0..2 | **Unknown**. Only used by the guard demon who is immune to all kind of damage and spells.
-3 | Undead element (all undead)
-4 | Stone/earth element (golems)
-5 | Wind element (Gargoyle and imp but not minor demon)
-6 | Fire element (Demons and fire monsters)
-7 | Water element (only the pond lizard)
+0 | **Unknown**. Only used by the guard demon who is immune to all kind of damage and spells.
+1 | Immune to monster knowledge spell
+2 | **Unknown**. Only used by the guard demon who is immune to all kind of damage and spells.
+3 | Undead element (all undead), **unknown effect**
+4 | Stone/earth element (golems), immune to Poison, Paralyze and Disease. **Unknown** yet if there are more effects.
+5 | Wind element (Gargoyle and imp but not minor demon), **unknown effect**
+6 | Fire element (Demons and fire monsters), **unknown effect**
+7 | Water element (only the pond lizard), **unknown effect**
 
 First I thought that the elements would give several immunities against element spells but this doesn't seem to be the case at all.
+
 
 ## Assumptions
 
