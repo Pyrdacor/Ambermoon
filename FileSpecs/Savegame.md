@@ -36,12 +36,17 @@ We will focus on the Party_data.sav here which has some very important stuff in 
 ### Savegame data
 
 The Party_data.sav contains things like:
+- Current ingame time and date
 - Current location (map, position, direction, etc)
-- Current party member indices
+- Current party members
+- Active spells and items like clock or compass
+- Location of transports like boats or horses
+- Global variables (quest states, game progress, etc)
+- Flags if monsters or characters are on a map or not
 - Information if chests are locked
-- Information about map changes (like pressed buttons, move walls, etc)
-
-Note: Not all of the data is decoded yet.
+- Learned dictionary words for conversations
+- Information about map tile changes (like pressed buttons, move walls, etc)
+- etc
 
 Offset | Type | Description
 --- | --- | ---
