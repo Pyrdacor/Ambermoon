@@ -2,24 +2,27 @@
 
 ## Names
 
-The names of the 10 savegames is stored in the file
+The names of the 10 savegames are stored in the file
 "Saves". This file starts with an unsigned big-endian
 16-bit value which gives the index of the last played
 savegame (0 to 10).
 
 Then for each of the 10 savegames there are 39 bytes.
 38 bytes can be used for the name and the last byte
-must be a terminating 0-byte. If the name is shorter
-than 38 characters the rest should be filled with
-0-bytes as well.
+is reserved for a terminating 0-byte which ends the
+name. If the name is shorter than 38 characters the
+rest should be filled with 0-bytes as well.
 
 Note: Some original versions used the wrong file size.
-It should be 392 bytes (header word + 10 * 39 bytes).
+It should be 392 bytes (2 byte header word + 10 * 39 bytes).
 But some versions had 382 bytes (only 38 bytes per
-savegame). I guess they forgot about the terminating
+savegame). I guess they forgot to count the terminating
 0-bytes. Anyway saving in slot 10 will not increase the
 filesize so with the 382 byte file the savegame name for
 slot 10 might be truncated if it is longer than 28 characters.
+
+
+## Content
 
 A savegame basically consists of 5 files:
 - Automap.amb: Stores exploration of 3D maps
@@ -30,7 +33,7 @@ A savegame basically consists of 5 files:
 
 We will focus on the Party_data.sav here which has some very important stuff in it.
 
-## Savegame data
+### Savegame data
 
 The Party_data.sav contains things like:
 - Current location (map, position, direction, etc)
@@ -69,7 +72,7 @@ Offset | Type | Description
 0x35E4 | ubyte[6] | Battle positions for all 6 party members (each can be 0 to 11)
 0x35EB | \* | Events (see below).
 
-## Active spells
+### Active spells
 
 There are 6 possible active spells:
 
@@ -89,7 +92,7 @@ Offset | Type | Description
 
 If the duration is 0, the spell is not active at the moment, otherwise it is.
 
-## Transport locations
+### Transport locations
 
 Locations of horses, rafts, ships, etc are stored here. There are 32 possible locations.
 On game start there are already 2 ships and 1 raft.
@@ -109,7 +112,7 @@ There isn't even an image for each transport direction
 but only one static image. The transport images are stored
 inside the Stationary file.
 
-## Event bits
+### Event bits
 
 For each map (1 to 1024) there are 64 event bits (8 bytes per map). Each bit represents a map event from the [event list](Maps.md) of that map.
 If a bit is 0, the event is active which means the player is able to trigger it. If a bit is 1, the event is inactive and the player can't trigger it.
@@ -127,7 +130,7 @@ Byte | 0 | 1 | ...
 
 Also have a look at the [action event](EventData.md) to change those bits.
 
-## Character bits
+### Character bits
 
 For each map (1 to 1024) there are 32 character bits (4 bytes per map). Each bit represents a character on the map.
 If a bit is 0 the monster is on the map, if 1 it is not.
@@ -138,7 +141,8 @@ Byte | 0 | 1 | ...
 --- | --- | --- | ---
 &nbsp; | 76543210 | FEDCBA98 | ...
 
-## Dictionary words
+
+### Dictionary words
 
 There are 115 possible dictionary words in Ambermoon (texts can be found in the Dictionary.* files). The unlock state of these words is stored
 by a bit sequence of at least 15 bytes (15 * 8 bits = 120 bits, large enough to store all the 115 bits).
@@ -153,7 +157,8 @@ A set bit means "unlocked" and an unset one means "not unlocked yet".
 
 **NOTE:** There seems to be a bug in original. When unlocking more than 113 words, the game crashes when opening the dictionary. So if you set the first 14 bytes to 0xff (all bits set) and the last byte has more than 1 bit set, the game crashes. So you can't unlock all words without the crash.
 
-## Chest locked states
+
+### Chest locked states
 
 There are only 185 chests (1-131 and 203-256). But it seems possible that there can be up to 512 chests (including chest index 0).
 
@@ -165,7 +170,7 @@ The order of the bits is this (where each digit is a chest index in hex). \
 76543210 FEDCBA98 ...
 
 
-## Game options
+### Game options
 
 0 means default value. Therefore music is on if 0 and off if 1!
 
@@ -178,7 +183,7 @@ Value | Name
 0x10 | 3D ceiling texture
 
 
-## Time and date
+### Time and date
 
 The date (day, month and year) is stored and also manipulated through the game but not actually used in any way to my knowledge.
 
@@ -206,7 +211,7 @@ Sand ship | 4
 Flying is not really used in the game but seeing those values assumes that it is either an unknown cheat or was used by the developers to explore the map quickly.
 
 
-## Events
+### Events
 
 There can be an arbitrary amount of events. Each is encoded as 6 bytes. The end of events is encoded as a 0-uword (end marker).
 
