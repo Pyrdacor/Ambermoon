@@ -73,7 +73,7 @@ The general price formula is:
 
 ### Signed bytes
 
-Positive values range from 0x00 to 0x7F. Negative values range from 0x80 to 0xFF.
+Positive values range from 0x00 (0) to 0x7F (127). Negative values range from 0x80 (-128) to 0xFF (-1).
 
 
 ### Item slots
@@ -88,7 +88,7 @@ Offset | Type | Description
 0x03 | ubyte | Flags (see below)
 0x04 | uword | Item index
 
-Note: The shield slot for two-handed weapons will have item index 0 but an amount of 1. The object image index 0 also contains the red cross which is used in that slot. So empty slots are determined only by the item amount and nut the item index. 
+Note: The shield slot for two-handed weapons will have item index 0 but an amount of 1. The object image index 0 also contains the red cross which is used in that slot. So empty slots are determined only by the item amount and not the item index. 
 
 #### Item slot flags
 
