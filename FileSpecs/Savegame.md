@@ -45,8 +45,8 @@ The Party_data.sav contains things like:
 - Flags if monsters or characters are on a map or not
 - Information if chests are locked
 - Learned dictionary words for conversations
-- Information about map tile changes (like pressed buttons, move walls, etc)
-- etc
+- Information about map tile changes (like pressed buttons, moved walls, etc)
+- Even the game options are part of the savegame and therefore distinct to other savegames
 
 Offset | Type | Description
 --- | --- | ---
