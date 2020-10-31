@@ -83,9 +83,12 @@ Equipment, inventory, chest, merchants, etc all store items as item slots. They 
 Offset | Type | Description
 ----|----|----
 0x00 | ubyte | Amount of items (only stackable items can have a value greater than 1)
-0x01 | ubyte[2] | **Unknown**
+0x01 | ubyte | Number of remaining charges
+0x02 | ubyte | **Unknown**. Maybe flags have 16 bits?
 0x03 | ubyte | Flags (see below)
 0x04 | uword | Item index
+
+Note: The shield slot for two-handed weapons will have item index 0 but an amount of 1. The object image index 0 also contains the red cross which is used in that slot. So empty slots are determined only by the item amount and nut the item index. 
 
 #### Item slot flags
 
