@@ -1,5 +1,26 @@
 # Savegame
 
+## Names
+
+The names of the 10 savegames is stored in the file
+"Saves". This file starts with an unsigned big-endian
+16-bit value which gives the index of the last played
+savegame (0 to 10).
+
+Then for each of the 10 savegames there are 39 bytes.
+38 bytes can be used for the name and the last byte
+must be a terminating 0-byte. If the name is shorter
+than 38 characters the rest should be filled with
+0-bytes as well.
+
+Note: Some original versions used the wrong file size.
+It should be 392 bytes (header word + 10 * 39 bytes).
+But some versions had 382 bytes (only 38 bytes per
+savegame). I guess they forgot about the terminating
+0-bytes. Anyway saving in slot 10 will not increase the
+filesize so with the 382 byte file the savegame name for
+slot 10 might be truncated if it is longer than 28 characters.
+
 A savegame basically consists of 5 files:
 - Automap.amb: Stores exploration of 3D maps
 - Chest_data.amb: Contents of all chests (including piles, etc)
