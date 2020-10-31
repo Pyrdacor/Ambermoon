@@ -241,6 +241,9 @@ Value | Type
 
 ## Dice 100 event (0x0F / 15)
 
+Rolls a dice and triggers the following event by a chance.
+Optionally an event can be triggered in case the fortune wasn't on your side.
+
 Offset | Type | Description
 --- | --- | ---
 0x00 | ubyte | Chance (0..100)
@@ -268,11 +271,15 @@ Value | Type
 0 | Keyword
 1 | Show item
 2 | Give item
-7 | Talk (mouth cursor)
-8 | Look (eye cursor)
+7 | Talk (mouth cursor), initial text
+8 | Leave (exit conversation)
 
 Most likely there is "ask to join" and "ask to leave" somewhere between 3 and 6.
 As well as "give gold" and "give food".
+
+Note: When examining someone, always the first text of the NPC
+or party member is used (text index 0). This is not done through
+events. Characters which won't open a conversation window can't be examined.
 
 ## Print text event (0x11 / 17)
 
