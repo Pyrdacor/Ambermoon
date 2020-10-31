@@ -95,6 +95,10 @@ Save.00/... | A | Initial savegame
 
 The initial savegame and other savegames contain 5 files. 4 of them were mentioned above and have the same format: Automap.amb, Chest_data.amb, Merchant_data.amb and Party_char.amb.
 
-The 5th file is Party_data.sav which contains additional data for party members like active buffs.
+The 5th file is Party_data.sav which contains additional data
+about the game's progress. See the [savegame file description ](../FileSpecs/Savegame.md) for more details.
 
-As the sav file is very large and there is no other place where the death of monsters are tracked I assume that this file also contains data of quest progress, defeated monsters, NPC talk states, etc.
+There is also a file called "Saves" in the main directory
+which contains the names of the 10 savegames and the information
+which of them is the last played savegame for the continue
+game option.
