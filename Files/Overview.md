@@ -19,7 +19,7 @@ File | Disk | Format
 [3Icon_gfx.amb](../FileSpecs/Maps2D.md) | F | GFX (16x16, 5 planes)
 3Wall3D.amb | F | GFX (128x80, 4 bit texture)
 Automap_graphics | G | GFX
-Combat_background.amb | H | GFX width 320, 5 planes
+Combat_background.amb | H | GFX (320x95, 5 planes)
 Combat_graphics | G | GFX
 Event_pix.amb | G | GFX width 320, 5 planes
 Floors.amb | G | GFX (64x64, 4 planes)
