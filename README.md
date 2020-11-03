@@ -77,6 +77,7 @@ Section | Description
 - [Travel graphics](Graphics/TravelGfx)
 - [NPCs](Graphics/NPCs)
 - [Combat graphics](Graphics/CombatGraphics)
+- [Monster graphics](Graphics/Monsters)
 - [Palettes](Graphics/Palettes.jpg)
 
 
