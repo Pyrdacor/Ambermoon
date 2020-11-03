@@ -76,12 +76,13 @@ Section | Description
 - [World backgrounds](Graphics/WorldBackgrounds)
 - [Travel graphics](Graphics/TravelGfx)
 - [NPCs](Graphics/NPCs)
+- [Combat graphics](Graphics/CombatGraphics)
 - [Palettes](Graphics/Palettes.jpg)
 
 
 ## Ambermoon.net
 
-I plan to develop Ambermoon from scratch with C#. Have a look [here](https://github.com/Pyrdacor/Ambermoon.net).
+I am developing Ambermoon from scratch with C#. Have a look [here](https://github.com/Pyrdacor/Ambermoon.net).
 
 ## Special thanks
 

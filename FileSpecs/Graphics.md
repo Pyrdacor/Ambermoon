@@ -8,6 +8,8 @@ There are 5 graphic formats in Ambermoon.
 - 4 bit packed texture graphics
 - and palettes themselves
 
+For special graphic formats see the end of this topic.
+
 ## Palettes
 
 These are the most simple graphics as they only store 16 bit for each color entry. A palette has always 32 color entries. So in total that makes 64 bytes per palette (32 * 16bit).
@@ -133,3 +135,69 @@ Portraits and items use a special palette which is not part of Palette.amb. A gu
 0x21, 0x54, 0x43, 0xff, 0x00, 0x10, 0x00, 0xff, 0x21, 0x21, 0x21, 0xff, 0x43, 0x43, 0x32, 0xff,
 0x65, 0x65, 0x54, 0xff, 0x87, 0x87, 0x76, 0xff, 0xa9, 0xa9, 0x98, 0xff, 0xcb, 0xcb, 0xba, 0xff
 ```
+
+
+## Special graphic formats
+
+### Combat graphics
+
+This file contains all kind of graphics used in the battle window.
+
+This includes:
+- Spell and other animations
+- An UI element
+- Battle field character icons
+
+Each of the graphics can have 1 or more frames (animation) and different sizes and bit depth.
+
+The following list shows the graphic info in the correct order:
+
+Frames | Width | Height | Bit depth | Description
+--- | --- | --- | --- | ---
+8 | 16 | 16 | 5 | Fire ball
+8 | 16 | 32 | 5 | Big fire pillar flame
+6 | 16 | 16 | 5 | Small flame (I guess when monsters get burned after spell use)
+24 | 32 | 32 | 5 | Magic projectile human
+12 | 32 | 32 | 5 | Magic projectile monster
+8 | 32 | 32 | 5 | Whirlwind
+4 | 32 | 32 | 5 | Blood (LP stealer?)
+5 | 16 | 16 | 5 | Snow flake (ice spells)
+5 | 16 | 16 | 5 | Green star (mystic spell like monster knowledge)
+2 | 32 | 32 | 5 | Lightning
+1 | 16 | 1 | 5 | Seems like a beam (destroy undead) but only 1 pixel line of it
+1 | 16 | 19 | 5 | Arrow (red) human
+1 | 16 | 19 | 5 | Arrow (red) monster
+1 | 16 | 20 | 5 | Arrow (green) human
+1 | 16 | 20 | 5 | Arrow (green) monster
+1 | 16 | 16 | 5 | Stone (slingshot)
+1 | 16 | 15 | 5 | Slingdagger
+1 | 16 | 16 | 5 | Ice ball
+1 | 32 | 16 | 5 | Large stone (falling stone)
+1 | 64 | 32 | 5 | Landslide
+1 | 64 | 32 | 5 | Large waterdrop (landing waterball)
+1 | 16 | 16 | 5 | Blue beam (shooting magic)
+1 | 16 | 16 | 5 | Green beam (shooting magic)
+1 | 32 | 32 | 5 | Red ring
+1 | 16 | 16 | 5 | Paralyze icon
+1 | 16 | 16 | 5 | Poison icon
+1 | 16 | 16 | 5 | Petrify icon
+1 | 16 | 16 | 5 | Disease icon
+1 | 16 | 16 | 5 | Aging icon
+1 | 16 | 16 | 5 | Irritation icon
+1 | 16 | 16 | 5 | Madness icon
+1 | 16 | 16 | 5 | Sleep icon
+1 | 16 | 16 | 5 | Fear icon
+1 | 16 | 16 | 5 | Blind icon
+1 | 16 | 16 | 5 | Drugs icon
+14 | 48 | 59 | 5 | Death pillar (like a fire pillar which is displayed after monster defeat)
+4 | 32 | 32 | 5 | Bloody claw (clawed monster attacks)
+2 | 16 | 32 | 5 | Ice block
+3 | 16 | 43 | 5 | Sword attack
+4 | 32 | 32 | 5 | Blue circle (spell block)
+4 | 16 | 13 | 5 | Throwing crescent
+1 | 32 | 36 | 3 | Sword and mace stylistic UI element
+35 | 16 | 14 | 5 | 35 battle fields character icons (this aren't really 35 animation frames but 35 static character icons for party and monsters)
+
+Note: Only the UI element uses 3 bits per pixel and has a palette offset of 24. All others use 5 bits per pixel.
+
+The UI element can use the current UI palette, the character icons use the same palette as the player graphics or items and the rest uses palette 18.
