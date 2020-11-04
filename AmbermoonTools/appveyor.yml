@@ -21,6 +21,8 @@ after_build:
   - 7z a AmbermoonTools-Windows.zip "%APPVEYOR_BUILD_FOLDER%\AmbermoonTools\AmbermoonPack\bin\Any CPU\Release\netcoreapp3.1\win-x64\publish\AmbermoonPack.exe"
   - dotnet publish -c Release "%APPVEYOR_BUILD_FOLDER%\AmbermoonTools\MonsterValueChanger\MonsterValueChanger.csproj" -p:PublishSingleFile=true -r win-x64 --no-restore
   - 7z a AmbermoonTools-Windows.zip "%APPVEYOR_BUILD_FOLDER%\AmbermoonTools\MonsterValueChanger\bin\Any CPU\Release\netcoreapp3.1\win-x64\publish\MonsterValueChanger.exe"
+  - dotnet publish -c Release "%APPVEYOR_BUILD_FOLDER%\AmbermoonTools\AmbermoonTextImport\AmbermoonTextImport.csproj" -p:PublishSingleFile=true -r win-x64 --no-restore
+  - 7z a AmbermoonTools-Windows.zip "%APPVEYOR_BUILD_FOLDER%\AmbermoonTools\AmbermoonTextImport\bin\Any CPU\Release\netcoreapp3.1\win-x64\publish\AmbermoonTextImport.exe"
 
 test: off
 

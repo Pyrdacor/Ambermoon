@@ -1,7 +1,9 @@
-﻿using Ambermoon.Data.Legacy;
+﻿using Ambermoon.Data.Legacy.Serialization;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text.RegularExpressions;
 
 namespace AmbermoonPack
 {
@@ -30,6 +32,11 @@ namespace AmbermoonPack
             Console.WriteLine();
             Console.WriteLine(" AmbermoonPack LOB \"my\\path\\to\\file\" \"test.amb\"");
             Console.WriteLine(" AmbermoonPack AMNP \"my\\path\\to\\dir\\with\\files\" \"test.amb\"");
+            Console.WriteLine();
+            Console.WriteLine("Note:");
+            Console.WriteLine(" If the files have names like 001, 002, etc this is used as the");
+            Console.WriteLine(" file number inside the resulting container. Otherwise they are");
+            Console.WriteLine(" sorted alphabetically and numbered 1 to n.");
             Console.WriteLine();
             Console.WriteLine("Error codes:");
             Console.WriteLine(" 0: No error");
@@ -132,7 +139,7 @@ namespace AmbermoonPack
                                 WriteFiles(writer, containerType, null, null, container.Files.First().Value.ReadToEnd());
                                 break;
                             default:
-                                WriteFiles(writer, containerType, null, null, container.Files.Select(f => f.Value.ReadToEnd()).ToArray());
+                                WriteFiles(writer, containerType, container.Files.ToDictionary(f => (uint)f.Key, f => f.Value.ReadToEnd()));
                                 break;
                         }
                     }
@@ -180,10 +187,9 @@ namespace AmbermoonPack
                 else
                 {
                     if (File.Exists(args[1]))
-                        WriteFiles(writer, type.Value, null, null, File.ReadAllBytes(args[1]));
+                        WriteFiles(writer, type.Value, GetContainerDataFromFiles(args[1]));
                     else
-                        WriteFiles(writer, type.Value, null, null, Directory.GetFiles(args[1])
-                            .Select(file => File.ReadAllBytes(file)).ToArray());                    
+                        WriteFiles(writer, type.Value, GetContainerDataFromFiles(Directory.GetFiles(args[1])));
                 }
 
                 try
@@ -216,21 +222,62 @@ namespace AmbermoonPack
             }
         }
 
-        static void WriteFiles(DataWriter writer, FileType type, ushort? jhKey, bool? addLob, params byte[][] files)
+        static Dictionary<uint, byte[]> GetContainerDataFromFiles(params string[] files)
+        {
+            if (files == null)
+                return new Dictionary<uint, byte[]>();
+
+            var result = new Dictionary<uint, byte[]>(files.Length);
+            var list = new List<string>(files);
+            list.Sort();
+            var regex = new Regex("^[0-9]+$", RegexOptions.Compiled);
+            uint lastIndex = 0;
+
+            foreach (var file in list)
+            {
+                uint index = lastIndex + 1;
+
+                if (regex.IsMatch(Path.GetFileNameWithoutExtension(file)))
+                {
+                    index = uint.Parse(Path.GetFileNameWithoutExtension(file));
+                }
+
+                result[index] = File.ReadAllBytes(file);
+
+                lastIndex = index;
+            }
+
+            return result;
+        }
+
+        static void WriteFiles(DataWriter writer, FileType type, ushort? jhKey, bool? addLob, byte[] file)
         {
             switch (type)
             {
                 case FileType.JH:
-                    FileWriter.WriteJH(writer, files[0], jhKey.Value, addLob.Value);
+                    FileWriter.WriteJH(writer, file, jhKey.Value, addLob.Value);
                     break;
                 case FileType.LOB:
-                    FileWriter.WriteLob(writer, files[0]);
+                    FileWriter.WriteLob(writer, file);
                     break;
                 case FileType.VOL1:
-                    FileWriter.WriteVol1(writer, files[0]);
+                    FileWriter.WriteVol1(writer, file);
                     break;
                 default:
-                    FileWriter.WriteContainer(writer, files.ToList(), type);
+                    throw new Exception("Invalid call of WriteFiles for container format.");
+            }
+        }
+
+        static void WriteFiles(DataWriter writer, FileType type, Dictionary<uint, byte[]> files)
+        {
+            switch (type)
+            {
+                case FileType.JH:
+                case FileType.LOB:
+                case FileType.VOL1:
+                    throw new Exception("Invalid call of WriteFiles for non-container format.");
+                default:
+                    FileWriter.WriteContainer(writer, files, type);
                     break;
             }
         }

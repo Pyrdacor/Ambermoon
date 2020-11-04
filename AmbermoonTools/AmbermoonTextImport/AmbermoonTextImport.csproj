@@ -6,14 +6,14 @@
     <RepositoryUrl>https://github.com/Pyrdacor/Ambermoon</RepositoryUrl>
     <PackageProjectUrl>https://github.com/Pyrdacor/Ambermoon</PackageProjectUrl>
     <RepositoryType>Github</RepositoryType>
-    <PackageTags>Ambermoon Monster Editor File Amiga</PackageTags>
+    <PackageTags>Ambermoon Text Import Export File Amiga</PackageTags>
     <Authors>Robert Schneckenhaus</Authors>
-    <Description>Command line tool to show and edit monster values of legacy Ambermoon game data.</Description>
+    <Description>Command line tool to export and import texts from/into legacy Ambermoon game data.</Description>
     <RuntimeIdentifiers>win-x64;linux-x64</RuntimeIdentifiers>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Ambermoon.Data.Legacy" Version="2.0.11" />
+    <PackageReference Include="Ambermoon.Data.Legacy" Version="2.0.13" />
   </ItemGroup>
 
 </Project>

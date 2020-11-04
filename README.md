@@ -10,7 +10,12 @@ I will provide some helpful tools too.
 
 ## Tool releases
 
-[v1.0.54 for Windows](https://github.com/Pyrdacor/Ambermoon/releases/download/v1.0.54/AmbermoonTools-Windows.zip): Current release with a command line packer and a command line monster value changer.
+[v1.0.0 for Windows](https://github.com/Pyrdacor/Ambermoon/releases/download/v1.0.0/AmbermoonTools-Windows.zip)
+
+This zip file contains:
+- A tool to pack files into Ambermoon game data files (AmbermoonPack)
+- A tool to change monster values (MonsterValueChanger)
+- A tool to export and import texts from/into Ambermoon game data files (AmbermoonTextImport)
 
 [![Build status](https://ci.appveyor.com/api/projects/status/dn5n21r8m11an48i/branch/master?svg=true)](https://ci.appveyor.com/project/Pyrdacor/ambermoon/branch/master)
 
