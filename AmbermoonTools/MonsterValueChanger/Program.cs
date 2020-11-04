@@ -1,6 +1,8 @@
 ﻿using Ambermoon.Data;
 using Ambermoon.Data.Legacy;
 using Ambermoon.Data.Legacy.Characters;
+using Ambermoon.Data.Legacy.Serialization;
+using Ambermoon.Data.Serialization;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -418,10 +420,12 @@ namespace MonsterValueChanger
 
         static void SetMonsterValue(Dictionary<int, IDataReader> monsterFiles, IDataReader monsterFile, long offset, long size, long value)
         {
-            List<byte[]> files = new List<byte[]>();
+            var files = new Dictionary<uint, byte[]>();
 
-            foreach (var file in monsterFiles.Values)
+            foreach (var entry in monsterFiles)
             {
+                var file = entry.Value;
+
                 file.Position = 0;
 
                 if (file == monsterFile)
@@ -453,11 +457,11 @@ namespace MonsterValueChanger
                     if (offset + size < monsterFile.Size)
                         data.AddRange(monsterFile.ReadToEnd());
 
-                    files.Add(data.ToArray());
+                    files.Add((uint)entry.Key, data.ToArray());
                 }
                 else
                 {
-                    files.Add(file.ReadToEnd());
+                    files.Add((uint)entry.Key, file.ReadToEnd());
                 }
             }
 
