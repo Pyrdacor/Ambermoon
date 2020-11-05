@@ -89,6 +89,27 @@ Offset | Type | Description
 0x0122 | [ItemSlot](Items.md)[9] | Equipment
 0x0158 | [ItemSlot](Items.md)[24] | Inventory items
 
+## Additional monster data
+
+Monsters have additional data at offset 0x01E8.
+
+Offset | Type | Description
+----|----|----
+0x01E8 | AnimationInfo[8] | Monster battle animations
+0x02E8 | byte[8] | Used number of frames for each of the 8 animations (0-32)
+0x02F0 | byte[16] | **Unknown** (looks like the values 0-15 in a sequence)
+0x0300 | byte[32] | Palette to use
+0x0320 | uword | **Unknown**
+0x0322 | uword | Frame width (for graphic loading)
+0x0324 | uword | Frame height (for graphic loading)
+0x0326 | uword | Mapped frame width (for displaying)
+0x0328 | uword | Mapped frame height (for displaying)
+
+### Animation info
+
+Each contains 32 bytes. Each byte gives a frame index (inside the monster graphic).
+0 is the idle frame.
+
 ## Monster groups
 
 Monsters are grouped for fights. The file Monster_groups.amb contains all monster formations in the game. Each file consists of 18 uwords which represent the 18 tiles in combat where a monster can be placed starting at the upper-left and going line by line from left to right.
