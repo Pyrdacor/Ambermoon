@@ -46,7 +46,7 @@ map_event_index = block_data[1];
 
 So a block can mark a wall, an object or the map border (which isn't drawn at all).
 
-A wall uses the wall index to access wall data from the [Labdata](Labdata.md). An object uses the object index to access object data from the [Labdata](Labdata.md).
+A wall uses the wall index to access wall data from the [Labdata](Labdata.md). An object uses the object index to access object data from the [Labdata](Labdata.md). Note that an index might be greater than the amount of walls/objects so always use the modulo operator. For example the Morag airship uses wall index 14 while there are only 9 wall entries inside the labdata (0-8). So you have to use wall index 14 mod 9 (which is 5) instead (module = rest after division).
 
 Note that those indices are 1-based while 0 means "no wall" or "no object". But inside the labdata they might be 0-based so you might have to subtract 1 to get the right data.
 
