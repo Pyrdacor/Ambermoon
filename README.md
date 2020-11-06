@@ -10,7 +10,7 @@ I will provide some helpful tools too.
 
 ## Tool releases
 
-[v1.0.0 for Windows](https://github.com/Pyrdacor/Ambermoon/releases/download/v1.0.0/AmbermoonTools-Windows.zip)
+[v1.0.2 for Windows](https://github.com/Pyrdacor/Ambermoon/releases/download/v1.0.2/AmbermoonTools-Windows.zip)
 
 This zip file contains:
 - A tool to pack files into Ambermoon game data files (AmbermoonPack)
