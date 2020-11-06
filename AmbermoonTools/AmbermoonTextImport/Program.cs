@@ -27,6 +27,13 @@ namespace AmbermoonTextImport
             UnableToWriteData
         }
 
+        enum Option
+        {
+            PreserveWhitespaces,
+            PreserveZeros,
+            HexSubfileNames
+        }
+
         static void Exit(ErrorCode errorCode)
         {
             Environment.Exit((int)errorCode);
@@ -34,8 +41,8 @@ namespace AmbermoonTextImport
 
         static void Usage()
         {
-            Console.WriteLine("USAGE: AmbermoonTextImport -e <gameDataPath> <file> <outPath>");
-            Console.WriteLine("       AmbermoonTextImport -i <gameDataPath> <file> <inPath>");
+            Console.WriteLine("USAGE: AmbermoonTextImport -e <gameDataPath> <file> <outPath> [options]");
+            Console.WriteLine("       AmbermoonTextImport -i <gameDataPath> <file> <inPath> [options]");
             Console.WriteLine("       AmbermoonTextImport --help");
             Console.WriteLine();
             Console.WriteLine("1st version exports all texts of the given file (e.g. 1Map_texts.amb).");
@@ -53,6 +60,13 @@ namespace AmbermoonTextImport
             Console.WriteLine("Examples:");
             Console.WriteLine("-> AmbermoonTextImport -e \"C:\\Ambermoon\\Amberfiles\" 1Map_texts.amb \"C:\\AmbermoonData\\Texts\"");
             Console.WriteLine("-> AmbermoonTextImport -i \"C:\\Ambermoon\\Amberfiles\" 1Map_texts.amb \"C:\\AmbermoonData\\Texts\"");
+            Console.WriteLine("-> AmbermoonTextImport -e \"C:\\Ambermoon\\Amberfiles\" 1Map_texts.amb \"C:\\AmbermoonData\\Texts\" -pzh");
+            Console.WriteLine();
+            Console.WriteLine("Options:");
+            Console.WriteLine(" --preserve-whitespaces / -p :     Preserve whitespaces");
+            Console.WriteLine(" --preserve-zero-bytes / -z  :     Preserve 0-bytes");
+            Console.WriteLine(" --hex-subfile-names / -h    :     Subfile name with hex numbering");
+            Console.WriteLine(" Those can be combined like -pzh or -hz.");
             Console.WriteLine();
         }
 
@@ -87,7 +101,7 @@ namespace AmbermoonTextImport
                 return;
             }
 
-            if (options.Count != 1 || parameters.Count != 3)
+            if (options.Count < 1 || options.Count > 4|| parameters.Count != 3)
             {
                 Console.WriteLine("Invalid arguments.");
                 Console.WriteLine();
@@ -96,13 +110,18 @@ namespace AmbermoonTextImport
                 return;
             }
 
+            var additionalOptions = ParseOptions(options.Skip(1).ToArray());
+
+            if (additionalOptions == null)
+                return;
+
             if (options[0] == "-e")
             {
-                Export(parameters[0], parameters[1], parameters[2]);
+                Export(parameters[0], parameters[1], parameters[2], additionalOptions);
             }
             else if (options[0] == "-i")
             {
-                Import(parameters[0], parameters[1], parameters[2]);
+                Import(parameters[0], parameters[1], parameters[2], additionalOptions);
             }
             else
             {
@@ -114,7 +133,72 @@ namespace AmbermoonTextImport
             }
         }
 
-        static void Export(string gameDataPath, string file, string outputPath)
+        static List<Option> ParseOptions(IEnumerable<string> args)
+        {
+            var options = new List<Option>();
+
+            try
+            {
+                foreach (var arg in args)
+                {
+                    if (arg == "--preserve-whitespaces")
+                        options.Add(Option.PreserveWhitespaces);
+                    else if (arg == "--preserve-zero-bytes")
+                        options.Add(Option.PreserveZeros);
+                    else if (arg == "--hex-subfile-names")
+                        options.Add(Option.HexSubfileNames);
+                    else if (arg.StartsWith("-"))
+                    {
+                        if (arg.Length < 2 || arg.Length > 4)
+                            throw new Exception();
+
+                        for (int i = 1; i < arg.Length; ++i)
+                        {
+                            if (arg[i] == 'p')
+                                options.Add(Option.PreserveWhitespaces);
+                            else if (arg[i] == 'z')
+                                options.Add(Option.PreserveZeros);
+                            else if (arg[i] == 'h')
+                                options.Add(Option.HexSubfileNames);
+                            else
+                                throw new Exception();
+                        }
+                    }
+                    else
+                        throw new Exception();
+                }
+
+                return options;
+            }
+            catch
+            {
+                Console.WriteLine("Invalid arguments.");
+                Console.WriteLine();
+                Usage();
+                Exit(ErrorCode.InvalidArguments);
+                return null;
+            }
+        }
+
+        static char[] TrimCharsFromOptions(List<Option> options)
+        {
+            bool preserveWhitespaces = options.Contains(Option.PreserveWhitespaces);
+            bool preserveZeroBytes = options.Contains(Option.PreserveZeros);
+
+            if (preserveWhitespaces)
+            {
+                if (preserveZeroBytes)
+                    return new char[] { };
+                else
+                    return new char[] { '\0' };
+            }
+            else if (preserveZeroBytes)
+                return new char[] { ' ' };
+            else
+                return new char[] { ' ', '\0' };
+        }
+
+        static void Export(string gameDataPath, string file, string outputPath, List<Option> options)
         {
             var gameData = new GameData(GameData.LoadPreference.PreferExtracted, null, false);
 
@@ -164,7 +248,7 @@ namespace AmbermoonTextImport
 
                 try
                 {
-                    texts = Ambermoon.Data.Legacy.Serialization.TextReader.ReadTexts(textFile.Value);
+                    texts = Ambermoon.Data.Legacy.Serialization.TextReader.ReadTexts(textFile.Value, TrimCharsFromOptions(options));
                 }
                 catch
                 {
@@ -177,7 +261,10 @@ namespace AmbermoonTextImport
 
                 Console.WriteLine("done");
 
-                var fileOutPath = Path.Combine(outPath, textFile.Key.ToString("000"));
+                var filenameCreator = options.Contains(Option.HexSubfileNames)
+                    ? (Func<int, string>)(i => i.ToString("X3"))
+                    : i => i.ToString("000");
+                var fileOutPath = Path.Combine(outPath, filenameCreator(textFile.Key));
 
                 Console.Write($"Writing texts to '{fileOutPath}' ... ");
 
@@ -187,7 +274,7 @@ namespace AmbermoonTextImport
 
                     for (int i = 0; i < texts.Count; ++i)
                     {
-                        File.WriteAllText(Path.Combine(fileOutPath, i.ToString("000") + ".txt"), texts[i], Encoding.UTF8);
+                        File.WriteAllText(Path.Combine(fileOutPath, filenameCreator(i) + ".txt"), texts[i], Encoding.UTF8);
                     }
                 }
                 catch
@@ -211,7 +298,7 @@ namespace AmbermoonTextImport
             return Console.ReadLine().ToLower() == "y";
         }
 
-        static void Import(string gameDataPath, string file, string inputPath)
+        static void Import(string gameDataPath, string file, string inputPath, List<Option> options)
         {
             string inPath = inputPath;
 
@@ -245,8 +332,11 @@ namespace AmbermoonTextImport
             }
 
             var textFiles = new Dictionary<int, List<string>>();
-            var regex = new Regex("^[0-9]{3}$", RegexOptions.Compiled);
+            var regex = new Regex(options.Contains(Option.HexSubfileNames) ? "^[0-9a-fA-F]{3}$" : "^[0-9]{3}$", RegexOptions.Compiled);
             int foundTextCount = 0;
+            var filenameParser = options.Contains(Option.HexSubfileNames)
+                ? (Func<string, int>)(name => int.Parse(name, System.Globalization.NumberStyles.AllowHexSpecifier))
+                : name => int.Parse(name);
 
             foreach (var subDir in subDirs)
             {
@@ -274,7 +364,7 @@ namespace AmbermoonTextImport
                     foundTextCount += list.Count;
 
                     if (list.Count != 0)
-                        textFiles[int.Parse(dirName)] = list;
+                        textFiles[filenameParser(dirName)] = list;
                 }
             }
 
@@ -304,7 +394,7 @@ namespace AmbermoonTextImport
                 data = textFiles.Select(f =>
                 {
                     var dataWriter = new Ambermoon.Data.Legacy.Serialization.DataWriter();
-                    Ambermoon.Data.Legacy.Serialization.TextWriter.WriteTexts(dataWriter, f.Value);
+                    Ambermoon.Data.Legacy.Serialization.TextWriter.WriteTexts(dataWriter, f.Value, TrimCharsFromOptions(options));
                     return new KeyValuePair<uint, byte[]>((uint)f.Key, dataWriter.ToArray());
                 }).ToDictionary(x => x.Key, x => x.Value);
             }
