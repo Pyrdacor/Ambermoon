@@ -350,7 +350,7 @@ namespace AmbermoonTextImport
 
                     for (int i = 0; i < localTextFiles.Count; ++i)
                     {
-                        if (i != int.Parse(Path.GetFileNameWithoutExtension(localTextFiles[i])))
+                        if (i != filenameParser(Path.GetFileNameWithoutExtension(localTextFiles[i])))
                         {
                             Console.WriteLine($"Text files must be numbered from 0 to n without gaps. Missing number before {i:000}.txt.");
                             Console.WriteLine();
