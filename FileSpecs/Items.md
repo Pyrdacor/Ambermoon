@@ -45,8 +45,7 @@ Offset | Type | Description
 0x0022 | uword | [Classes](Enumerations/Classes.md)
 0x0024 | uword | Price (see price formula below)
 0x0026 | uword | Weight
-0x0028 | byte[19] | Item name (filled with spaces (0x20) if shorter than 18 characters). There is a null byte after the name. This byte comes before the spaces.
-0x003B | byte | End of item (= 0)
+0x0028 | byte[20] | Item name (There is a null byte after the name. Rest can be filled with 0x00 or 0x20 bytes.)
 
 
 ### Item flags
