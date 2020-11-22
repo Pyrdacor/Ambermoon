@@ -10,7 +10,7 @@ Bit | Property
 1 | Psychic element, immune to MonsterKnowledge, Fear, Sleep, Irritation and Madness
 2 | Ghost element, immune to DissolveVictim, Blindness, GhostWeapon, MagicProjectile and MagicArrows.
 3 | Undead element (all undead), immune to LP-Stealer.
-4 | Stone/earth element (golems), immune to Poison, Paralyze and Disease.
+4 | Stone/earth element (golems), immune to Poison, Paralyze, Disease and LP-Stealer.
 5 | Wind element (Gargoyle and imp but not minor demon), no effect found.
 6 | Fire element (Demons and fire monsters), no effect found.
 7 | Water element (only the pond lizard), no effect found.
