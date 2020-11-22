@@ -202,6 +202,7 @@ Value | Type
 7 | Use item (from inventory)
 9 | Success (is chained after other events like battles or treasures and is something like "battle won" or "treasure fully looted")
 14 | Hand cursor interaction
+20 | Eye cursor interaction
 
 Research: There might be the following condition types:
 - Eye cursor
