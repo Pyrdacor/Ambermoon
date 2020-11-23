@@ -43,7 +43,7 @@ Offset | Type | Description
 --- | --- | ---
 0x00 | ubyte | Lock flags (0x00: open, 0x01: locked but can be opened by lockpick, 0x64 locked with special key, other values too)
 0x01 | ubyte | **Unknown** (always 0 except for one chest with 20 blue discs which has 0x32 and lock flags of 0x00)
-0x02 | ubyte | **Unknown** (0xff for unlocked chests)
+0x02 | ubyte | Optional index of a map text to display (0xff means no text)
 0x03 | ubyte | Chest data index
 0x04 | ubyte | Remove if empty (0 or 1)
 0x05 | uword | Key index if locked
