@@ -98,7 +98,7 @@ Offset | Type | Description
 0x01E8 | AnimationInfo[8] | Monster battle animations
 0x02E8 | byte[8] | Used number of frames for each of the 8 animations (0-32)
 0x02F0 | byte[16] | **Unknown** (looks like the values 0-15 in a sequence)
-0x0300 | byte[32] | Palette to use
+0x0300 | byte[32] | Palette index mapping
 0x0320 | uword | **Unknown**
 0x0322 | uword | Frame width (for graphic loading)
 0x0324 | uword | Frame height (for graphic loading)
@@ -108,7 +108,16 @@ Offset | Type | Description
 ### Animation info
 
 Each contains 32 bytes. Each byte gives a frame index (inside the monster graphic).
-0 is the idle frame.
+
+There is an animation info for 8 different actions:
+- 0: Move (also used for the random idle animation, frame 0 of this is the monster idle frame!)
+- 1: Attack
+- 2: Cast
+- 3: Unknown1
+- 4: Hurt (receive damage)
+- 5: Unknown2
+- 6: Start animation (like transformation of Nera, are played once at start)
+- 7: Unknown3
 
 ## Monster groups
 
