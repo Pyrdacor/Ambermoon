@@ -66,10 +66,10 @@ Offset | Type | Description
 0x00D0 | uword | Current spell points
 0x00D2 | uword | Max spell points
 0x00D4 | uword | Bonus spell points
-0x00D6 | word | Combat defense
-0x00D8 | word | Displayed defense
-0x00DA | word | Combat attack damage
-0x00DC | word | Displayed attack damage
+0x00D6 | word | Variable defense
+0x00D8 | word | Base defense (party members only use this, monsters use base defense + rand(0, variable defense))
+0x00DA | word | Variable attack damage
+0x00DC | word | Base attack damage (party members only use this, monsters use base attack damage + rand(0, variable attack damage))
 0x00DE | uword | Magic attack damage
 0x00E0 | uword | Magic defense
 0x00E2 | uword | APR per level
