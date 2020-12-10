@@ -1,14 +1,15 @@
 environment:
   matrix:
     - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2019
-      CONFIG: Release
       RID: win-x64
+      job_name: Windows build
+      configuration: Release
     - APPVEYOR_BUILD_WORKER_IMAGE: Ubuntu
-      CONFIG: ReleaseLinux
       RID: linux-x64
+      job_name: Linux build
+      configuration: ReleaseLinux
 
 platform: Any CPU
-configuration: $(CONFIG)
 
 before_build:
   - dotnet restore AmbermoonTools/AmbermoonTools.sln --verbosity normal
@@ -24,9 +25,9 @@ artifacts:
     name: AmbermoonTools-Linux
 
 after_build:
-  - ps: dotnet publish -c $env:CONFIG "./AmbermoonTools/AmbermoonPack/AmbermoonPack.csproj" -p:PublishSingleFile=true -r $env:RID --no-restore
-  - ps: dotnet publish -c $env:CONFIG "./AmbermoonTools/MonsterValueChanger/MonsterValueChanger.csproj" -p:PublishSingleFile=true -r $env:RID --no-restore
-  - ps: dotnet publish -c $env:CONFIG "./AmbermoonTools/AmbermoonTextImport/AmbermoonTextImport.csproj" -p:PublishSingleFile=true -r $env:RID --no-restore
+  - ps: dotnet publish -c $env:CONFIGURATION "./AmbermoonTools/AmbermoonPack/AmbermoonPack.csproj" -p:PublishSingleFile=true -r $env:RID --no-restore
+  - ps: dotnet publish -c $env:CONFIGURATION "./AmbermoonTools/MonsterValueChanger/MonsterValueChanger.csproj" -p:PublishSingleFile=true -r $env:RID --no-restore
+  - ps: dotnet publish -c $env:CONFIGURATION "./AmbermoonTools/AmbermoonTextImport/AmbermoonTextImport.csproj" -p:PublishSingleFile=true -r $env:RID --no-restore
   - ps: ./AmbermoonTools/pack.ps1
 
 test: off
