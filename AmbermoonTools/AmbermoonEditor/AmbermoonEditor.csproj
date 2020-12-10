@@ -5,6 +5,7 @@
     <TargetFramework>netcoreapp3.1</TargetFramework>
     <UseWindowsForms>true</UseWindowsForms>
     <RuntimeIdentifiers>win-x64;linux-x64</RuntimeIdentifiers>
+    <Configurations>Debug;Release;ReleaseLinux</Configurations>
   </PropertyGroup>
 
   <ItemGroup>
