@@ -22,7 +22,7 @@ Offset | Type | Description
 0x000B | uword | Combat graphic index (only used for monsters)
 0x000D | ubyte | **Unknown** (only used for monsters, looks likes percent values like 70, 90, 100, etc. -> max value is 100), most likely a kind of parry/dodge chance as low monsters have 0. but many have 100 (maybe it's reduced by party member ATT ability?)
 0x000E | ubyte | **Unknown** (only used for monsters, 0-5, maybe critical strike chance for monsters?)
-0x000F | ubyte | Monster attack hit chance (monsters only)
+0x000F | ubyte | **Unknown** (only used for monsters, looks like percent values)
 0x0010 | ubyte | Immunity to [spell types](Enumerations/SpellTypes.md)
 0x0011 | ubyte | Attacks per round (APR)
 0x0012 | ubyte | [Monster flags](Enumerations/MonsterFlags.md) (monsters only)
@@ -31,7 +31,7 @@ Offset | Type | Description
 0x0016 | uword | Training points (TP)
 0x0018 | uword | Gold
 0x001A | uword | Food
-0x001C | uword | **Unknown** (0xffff for all monsters, NPCs and most party members except for Selena (0x22c2), Sabine (0x23a0), Valdyn (0x2400) and Gryban (0x0000)). The values do not make sense as they are so I guess those are bit flags.
+0x001C | uword | **Unknown** (0xffff for all monsters, NPCs and most party members except for Selena (0x22c2), Sabine (0x23a0), Valdyn (0x2400) and Gryban (0x0000)). The values do not make sense as they are so I guess those are bit flags. They seem to change during game. The given values are from the initial savegame.
 0x001E | uword | [Ailments](Enumerations/Ailments.md)
 0x0020 | uword | Monster experience (gained when defeating it)
 0x0022 | ubyte[2] | **Unknown** (always 0?)
@@ -125,9 +125,10 @@ Monsters are grouped for fights. The file Monster_groups.amb contains all monste
 
 Each uword can contain a monster index starting at 1 (0 = no monster).
 
-## NPCs
+## NPCs and party members
 
 NPCs have no equipment nor inventory items (no data for it). After the name there is an event section (same format as map events).
+Party members have a similar event section but behind inventory and equipment data. The hero has no events of course as you can't talk to him.
 
 NPC conversations are implemented in the following way:
 
