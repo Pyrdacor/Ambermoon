@@ -25,7 +25,7 @@ after_build:
   - ps: dotnet publish -c Release "./AmbermoonTools/AmbermoonPack/AmbermoonPack.csproj" -p:PublishSingleFile=true -r $env:RID --no-restore
   - ps: dotnet publish -c Release "./AmbermoonTools/MonsterValueChanger/MonsterValueChanger.csproj" -p:PublishSingleFile=true -r $env:RID --no-restore
   - ps: dotnet publish -c Release "./AmbermoonTools/AmbermoonTextImport/AmbermoonTextImport.csproj" -p:PublishSingleFile=true -r $env:RID --no-restore
-  - ps: ./pack.ps1
+  - ps: ./AmbermoonTools/pack.ps1
 
 test: off
 
