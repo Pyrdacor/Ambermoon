@@ -7,7 +7,8 @@ if ($isWindows) {
   copy "AmbermoonTools\MonsterValueChanger\bin\Any CPU\Release\netcoreapp3.1\win-x64\publish\MonsterValueChanger.exe" "dist\"
   copy "AmbermoonTools\AmbermoonTextImport\bin\Any CPU\Release\netcoreapp3.1\win-x64\publish\AmbermoonTextImport.exe" "dist\"
   cd dist
-  7z a AmbermoonTools-Windows.zip *.*
+  7z a ..\AmbermoonTools-Windows.zip *.*
+  cd ..
   rm -r dist
 } else {
   Write-Host Pack tar.gz for Linux
