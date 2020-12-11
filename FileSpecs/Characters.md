@@ -135,7 +135,7 @@ If the combined monster hp (maybe of the same kind) in percent of the max combin
 
 If the combined monster hp is `h` and the max combined monster hp is `m` a possible formula for the retreat chance might be something like this:
 
-`chance = 100 - h * 100 / round(m * (100 - morale) / 100)`
+`chance = 100 - h * 100 / (m * (100 - morale) / 100)`
 
 Note that this will lead to a division by zero if morale is 100 so better check if hp is lower than (100 - morale) beforehand.
 
