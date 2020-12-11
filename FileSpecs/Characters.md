@@ -22,7 +22,7 @@ Offset | Type | Description
 0x000B | uword | Combat graphic index (only used for monsters)
 0x000D | ubyte | **Unknown** (only used for monsters, looks likes percent values like 70, 90, 100, etc. -> max value is 100), most likely a kind of parry/dodge chance as low monsters have 0. but many have 100 (maybe it's reduced by party member ATT ability?)
 0x000E | ubyte | **Unknown** (only used for monsters, 0-5, maybe critical strike chance for monsters?)
-0x000F | ubyte | **Unknown** (only used for monsters, looks like percent values)
+0x000F | ubyte | Monster morale (0-100)
 0x0010 | ubyte | Immunity to [spell types](Enumerations/SpellTypes.md)
 0x0011 | ubyte | Attacks per round (APR)
 0x0012 | ubyte | [Monster flags](Enumerations/MonsterFlags.md) (monsters only)
@@ -124,6 +124,18 @@ There is an animation info for 8 different actions:
 Monsters are grouped for fights. The file Monster_groups.amb contains all monster formations in the game. Each file consists of 18 uwords which represent the 18 tiles in combat where a monster can be placed starting at the upper-left and going line by line from left to right.
 
 Each uword can contain a monster index starting at 1 (0 = no monster).
+
+## Monster morale
+
+This isn't tested enough yet but a value of 100 will ensure that the monster will never flee. Therefore all bosses have a value of 100. The lower the value the higher the propability that the monster will flee.
+
+Some tests suggest that the value means something like this:
+
+If the combined monster hp (maybe of the same kind) in percent of the max combined monster hp is lower than the given value, the monster will start to flee. But likely with a lower propability if near that value and higher propability if near to 0% hp.
+
+If the combined monster hp is `h` and the max combined monster hp is `m` a possible formula for the retreat chance might be something like this:
+
+`chance = 100 - h * 100 / round(m * morale / 100)`
 
 ## NPCs and party members
 
