@@ -131,11 +131,13 @@ This isn't tested enough yet but a value of 100 will ensure that the monster wil
 
 Some tests suggest that the value means something like this:
 
-If the combined monster hp (maybe of the same kind) in percent of the max combined monster hp is lower than the given value, the monster will start to flee. But likely with a lower propability if near that value and higher propability if near to 0% hp.
+If the combined monster hp (maybe of the same kind) in percent of the max combined monster hp is lower than 100 minus the given value, the monster will start to flee. But likely with a lower propability if near that value and higher propability if near to 0% hp.
 
 If the combined monster hp is `h` and the max combined monster hp is `m` a possible formula for the retreat chance might be something like this:
 
-`chance = 100 - h * 100 / round(m * morale / 100)`
+`chance = 100 - h * 100 / round(m * (100 - morale) / 100)`
+
+Note that this will lead to a division by zero if morale is 100 so better check if hp is lower than (100 - morale) beforehand.
 
 ## NPCs and party members
 
