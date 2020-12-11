@@ -139,6 +139,10 @@ If the combined monster hp is `h` and the max combined monster hp is `m` a possi
 
 Note that this will lead to a division by zero if morale is 100 so better check if hp is lower than (100 - morale) beforehand.
 
+Normalized this could be expressed as:
+
+`1 - h / (m * (1 - value/100))`
+
 ## NPCs and party members
 
 NPCs have no equipment nor inventory items (no data for it). After the name there is an event section (same format as map events).
