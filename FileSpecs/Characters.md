@@ -155,3 +155,7 @@ NPC conversations are implemented in the following way:
 - The text is added by the PrintText event.
 
 There might be condition events which force jumps to different PrintText or Conversation events based on global variables and such things.
+
+## Learned spells
+
+Note that learned spells are stored a bit strange (with 1 bit offset). The lowest bit is always 0 (not used). Bit 1 is then used for spell 1, bit 2 for spell 2, etc. I guess the spell index 0 was also a valid value in the original (namely "no spell") and could theoretically be stored as bit 0.
