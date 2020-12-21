@@ -2,38 +2,38 @@
 
 ## Healing spells
 
-Index | Name | Description
---- | --- | ---
-1 | Healing hand | 
-2 | Remove fear | 
-3 | Remove panic | 
-4 | Remove shadows | 
-5 | Remove blindness | 
-6 | Remove pain | 
-7 | Remove disease | 
-8 | Small healing | 
-9 | Remove poison | 
-10 | Neutralize poison | 
-11 | Medium healing | 
-12 | Dispell undead | 
-13 | Destroy undead | 
-14 | Holy word | 
-15 | Wake the dead | 
-16 | Change ashes | 
-17 | Change dust | 
-18 | Great healing | 
-19 | Mass healing | 
-20 | Resurrection | 
-21 | Remove rigidness | 
-22 | Remove lamedness | 
-23 | Heal aging | 
-24 | Stop aging | 
-25 | Stone to flesh | 
-26 | Wake up | 
-27 | Remove irritation | 
-28 | Remove drugged | 
-29 | Remove madness | 
-30 | Restore stamina | 
+Index | Name | SP | SLP | Area | Target | Description
+--- | --- | --- | --- | --- | --- | ---
+1 | Healing hand | 3 | 1 | Everywhere | Friend | Heals 10% of MaxHP
+2 | Remove fear | 5 | 2 | Battle | Friend | Removes status Panic
+3 | Remove panic | 15 | 5 | Battle | All friends | Removes status Panic
+4 | Remove shadows | 8 | 3 | Everywhere | Friend | Removes status Blind
+5 | Remove blindness | 20 | 8 | Everywhere | All friends | Removes status Blind
+6 | Remove pain | 15 | 5 | Everywhere | Friend | Removes status Disease
+7 | Remove disease | 20 | 10 | Everywhere | All friends | Removes status Disease
+8 | Small healing | 15 | 5 | Everywhere | Friend | Heals 25% of MaxHP
+9 | Remove poison | 15 | 10 | Everywhere | Friend | Removes status Poisoned
+10 | Neutralize poison | 25 | 12 | Everywhere | All friends | Removes status Poisoned
+11 | Medium healing | 50 | 15 | Everywhere | Friend | Heals 50% of MaxHP
+12 | Dispell undead | 15 | 10 | Battle | Enemy | Instantly kills an undead non-boss monster
+13 | Destroy undead | 50 | 15 | Battle | Enemy row | Instantly kills undead non-boss monsters
+14 | Holy word | 100 | 20 | Battle | All enemies | Instantly kills undead non-boss monsters
+15 | Wake the dead | 100 | 15 | Camp | Friend | Revives a dead party member
+16 | Change ashes | 150 | 20 | Camp | Friend | Transforms ashes to flesh
+17 | Change dust | 250 | 25 | Camp | Friend | Transforms dust remains to ashes
+18 | Great healing | 100 | 30 | Everywhere | Friend | Heals 75% of MaxHP
+19 | Mass healing | 150 | 20 | Everywhere | All friends | Heals 25% of MaxHP
+20 | Resurrection | 250 | 30 | Camp | Friend | Revives all dead party members
+21 | Remove rigidness | 15 | 5 | Everywhere | Friend | Removes status Lamed
+22 | Remove lamedness | 30 | 10 | Everywhere | All friends | Removes status Lamed
+23 | Heal aging | 50 | 12 | Outside battle | Friend | Removes status Aging
+24 | Stop aging | 100 | 15 | Outside battle | All friends | Removes status Aging
+25 | Stone to flesh | 250 | 20 | Camp | Friend | Removes status Petrified
+26 | Wake up | 10 | 5 | Battle | Friend | Removes status Sleeping
+27 | Remove irritation | 10 | 5 | Battle | Friend | Removes status Irritated
+28 | Remove drugged | 25 | 10 | Outside battle | Friend | Removes status Drugged
+29 | Remove madness | 100 | 15 | Outside battle | Friend | Removes status Crazy
+30 | Restore stamina | 50 | 15 | Everywhere | Friend | Removes status Exhausted (Note: It will come back in an hour if you won't rest)
 
 ## Alchemistic spells
 
