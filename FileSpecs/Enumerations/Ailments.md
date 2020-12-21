@@ -4,22 +4,24 @@ These are bit flags. So combininig them with bitwise OR will allow multiple ailm
 
 For example the value 0x11 (which is 0x01 OR 0x10) would mean that the character is both irritated and blind.
 
-Value | Name
-----|----
-0x0000 | No ailment
-0x0001 | Irritated
-0x0002 | Crazy
-0x0004 | Sleep
-0x0008 | Panic
-0x0010 | Blind
-0x0020 | Stoned (drugs)
-0x0040 | Exhausted
-0x0080 | - (unused?)
-0x0100 | Paralyzed
-0x0200 | Poisoned
-0x0400 | Petrified
-0x0800 | Diseased
-0x1000 | Artificial aging
-0x2000 | Dead (corpse)
-0x4000 | Dead (ashes)
-0x8000 | Dead (dust)
+Value | Name | Effect
+--- | --- | ---
+0x0000 | No ailment | None
+0x0001 | Irritated | Not able to cast spells (battle-only status)
+0x0002 | Crazy | Not able to access inventory or give orders, will pick random battle actions
+0x0004 | Sleep | Not able to give orders, status ends when receiving damage (battle-only status)
+0x0008 | Panic | Not able to access inventory or give orders, will retreat and flee automatically (battle-only status)
+0x0010 | Blind | Map view is black if selected, reduced hit chance
+0x0020 | Stoned (drugs) | Fancy colors and moving mouse cursor if selected
+0x0040 | Exhausted | All values (attributes and abilities) are halved (the STR reduction will also decrease the max weight and may cause Overweight status as well). Moreover the party member is damaged every ingame hour.
+0x0080 | - (unused?) | None
+0x0100 | Paralyzed | Not able to move or attack.
+0x0200 | Poisoned | Receives damage every battle round or ingame hour when outside battles.
+0x0400 | Petrified | Not able to give orders or do anything at all. Inventory not accessible. Can't be damaged by attacks or damage spells.
+0x0800 | Diseased | ?
+0x1000 | Artificial aging | Age is increased every day.
+0x2000 | Dead (corpse) | Not able to give orders. Won't receive Exp.
+0x4000 | Dead (ashes) | Not able to give orders. Won't receive Exp. Can only be revived by transforming the ashes first.
+0x8000 | Dead (dust) | Not able to give orders. Won't receive Exp. Can only be revived by transforming the dust first.
+
+There is also an Overweight status which is active if the carried weight exceeds the max weight (which is Strength in kilogram). It has no own ailment flag as it can be determined by the weight.
