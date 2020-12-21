@@ -13,7 +13,7 @@ Value | Name | Effect
 0x0008 | Panic | Not able to access inventory or give orders, will retreat and flee automatically (battle-only status)
 0x0010 | Blind | Map view is black if selected, reduced hit chance
 0x0020 | Stoned (drugs) | Fancy colors and moving mouse cursor if selected
-0x0040 | Exhausted | All values (attributes and abilities) are halved (the STR reduction will also decrease the max weight and may cause Overweight status as well). Moreover the party member is damaged every ingame hour.
+0x0040 | Exhausted | All values (attributes and abilities) are halved (the STR reduction will also decrease the max weight and may cause Overweight status as well). Moreover the party member is damaged every ingame hour but not in battles. Can not parry in battles.
 0x0080 | - (unused?) | None
 0x0100 | Paralyzed | Not able to move or attack.
 0x0200 | Poisoned | Receives damage every battle round or ingame hour when outside battles.
