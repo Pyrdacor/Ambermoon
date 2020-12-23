@@ -127,7 +127,7 @@ Index | Name | SP | SLP | Area | Target | Description
 16 | Rockfall | 15 | 5 | Battle | Enemy | Deals 10-25 damage
 17 | Earthslide | 20 | 10 | Battle | Enemy row | Deals 8-16 damage
 18 | Earthquake | 30 | 15 | Battle | All enemies | Deals 8-22 damage
-19 | Winddevil | 12 | 5 | Battle | Enemy | Deals 8-16 damage damage
+19 | Winddevil | 12 | 5 | Battle | Enemy | Deals 8-16 damage
 20 | Windhowler | 25 | 10 | Battle | Enemy | Deals 16-48 damage
 21 | Thunderbolt | 35 | 15 | Battle | Enemy row | Deals 20-32 damage
 22 | Whirlwind | 50 | 20 | Battle | All enemies | Deals 20-35 damage
