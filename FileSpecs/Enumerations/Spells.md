@@ -107,35 +107,35 @@ Index | Name | Description
 
 ## Destruction spells
 
-Index | Name | Description
---- | --- | ---
-1 | Magical projectile | 
-2 | Magical arrows | 
-3 | Lame | 
-4 | Poison | 
-5 | Petrify | 
-6 | Cause disease | 
-7 | Cause aging | 
-8 | Irritate | 
-9 | Cause madness | 
-10 | Sleep | 
-11 | Fear | 
-12 | Blind | 
-13 | Drug | 
-14 | Dissolve victim | 
-15 | Mudsling | 
-16 | Rockfall | 
-17 | Earthslide | 
-18 | Earthquake | 
-19 | Winddevil | 
-20 | Windhowler | 
-21 | Thunderbolt | 
-22 | Whirlwind | 
-23 | Firebeam | 
-24 | Fireball | 
-25 | Firestorm | 
-26 | Firepillar | 
-27 | Waterfall | 
-28 | Iceball | 
-29 | Icestorm | 
-30 | Iceshower | 
+Index | Name | SP | SLP | Area | Target | Description
+--- | --- | --- | --- | --- | --- | ---
+1 | Magical projectile | 5 | 5 | Battle | Enemy | Deals half the caster level as damage
+2 | Magical arrows | 15 | 10 | Battle | Enemy row | Deals half the caster level as damage
+3 | Lame | 10 | 5 | Battle | Enemy | Inflicts the Lamed [ailment](Ailments.md)
+4 | Poison | 15 | 5 | Battle | Enemy | Inflicts the Poisoned [ailment](Ailments.md)
+5 | Petrify | 60 | 5 | Battle | Enemy | Inflicts the Petrified [ailment](Ailments.md)
+6 | Cause disease | 15 | 5 | Battle | Enemy | Inflicts the Diseased [ailment](Ailments.md)
+7 | Cause aging | 15 | 5 | Battle | Enemy | Inflicts the Aging [ailment](Ailments.md)
+8 | Irritate | 10 | 5 | Battle | Enemy | Inflicts the Irritated [ailment](Ailments.md)
+9 | Cause madness | 30 | 10 | Battle | Enemy | Inflicts the Crazy [ailment](Ailments.md)
+10 | Sleep | 15 | 10 | Battle | Enemy | Inflicts the Sleep [ailment](Ailments.md)
+11 | Fear | 50 | 10 | Battle | Enemy | Inflicts the Panic [ailment](Ailments.md)
+12 | Blind | 15 | 10 | Battle | Enemy | Inflicts the Blind [ailment](Ailments.md)
+13 | Drug | 15 | 10 | Battle | Enemy | Inflicts the Drugged [ailment](Ailments.md)
+14 | Dissolve victim | 250 | 25 | Battle | Enemy | Instantly destroys the enemy and also his items
+15 | Mudsling | 8 | 1 | Battle | Enemy | Deals 4-8 damage
+16 | Rockfall | 15 | 5 | Battle | Enemy | Deals 10-25 damage
+17 | Earthslide | 20 | 10 | Battle | Enemy row | Deals 8-16 damage
+18 | Earthquake | 30 | 15 | Battle | All enemies | Deals 8-22 damage
+19 | Winddevil | 12 | 5 | Battle | Enemy | Deals 8-16 damage damage
+20 | Windhowler | 25 | 10 | Battle | Enemy | Deals 16-48 damage
+21 | Thunderbolt | 35 | 15 | Battle | Enemy row | Deals 20-32 damage
+22 | Whirlwind | 50 | 20 | Battle | All enemies | Deals 20-35 damage
+23 | Firebeam | 25 | 10 | Battle | Enemy | Deals 20-30 damage
+24 | Fireball | 60 | 15 | Battle | Enemy | Deals 40-85 damage
+25 | Firestorm | 80 | 20 | Battle | Enemy row | Deals 35-65 damage
+26 | Firepillar | 120 | 25 | Battle | All enemies | Deals 40-70 damage
+27 | Waterfall | 50 | 15 | Battle | Enemy | Deals 32-60 damage
+28 | Iceball | 100 | 20 | Battle | Enemy | Deals 90-180 damage
+29 | Icestorm | 150 | 25 | Battle | Enemy row | Deals 64-128 damage
+30 | Iceshower | 200 | 30 | Battle | All enemies | Deals 128-256 damage
