@@ -86,6 +86,14 @@ Offset | Type | Description
 0x03 | ubyte | **Unknown** (most of the time 3, the big vortex has 150 and a value of 0)
 0x04 | ubyte[5] | Unused
 
+## Remove buffs event (0x07 / 7)
+
+Found in Lebab's tower 4. There are 17 spots which will remove at least Mystic Map and Clairvoyance when entering.
+
+Offset | Type | Description
+--- | --- | ---
+0x00 | ubyte[9] | **Unknown**
+
 ## Riddlemouth event (0x08 / 8)
 
 Offset | Type | Description
