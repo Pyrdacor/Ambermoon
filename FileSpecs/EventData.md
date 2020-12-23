@@ -88,7 +88,7 @@ Offset | Type | Description
 
 ## Remove buffs event (0x07 / 7)
 
-Found in Lebab's tower 4. There are 17 spots which will remove at least Mystic Map and Clairvoyance when entering.
+Found in Lebab's tower 4. There are 17 spots which will remove at least Mystic Map, Light and Clairvoyance when entering.
 
 Offset | Type | Description
 --- | --- | ---
