@@ -93,13 +93,13 @@ Offset | Type | Description
 
 Each attribute (including the character's age) and ability stores 4 values:
 - Current value (without bonus)
-- Max value (can be exceeded by current value + bonus)
+- Max value (can be exceeded by current value + bonus and only limits the current value)
 - Bonus value (granted by equipment etc)
 - Backup value
 
 The actual effective and also displayed value is the current value plus the bonus value.
 
-The backup value stores the current value if a temporary effect is active which affects the current value. A good example is the exhaustion ailment. If cuts all attribute current values in half. So the backup value will then store the current value before reduction and the new current value is cut in half. When the effect ends the backup value is assigned to the current value. 
+The backup value stores the current value if a temporary effect is active which affects the current value. A good example is the exhaustion ailment. It cuts all attributes' current values in half. So the backup value will then store the current value before reduction and the new current value is cut in half. When the effect ends the backup value is assigned to the current value and therefore restores the old value. 
 
 ## Additional monster data
 
