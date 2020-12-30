@@ -1,6 +1,6 @@
 Ambermoon had some bugs. Beside bad translations or typos we will show real bugs here which lead to crashes or caused things to malfunction.
 
-Note: This is list is not complete and will be updated from time to time.
+Note: This list is not complete and will be updated from time to time.
 
 ## Disease reduces wrong values
 
