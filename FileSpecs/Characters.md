@@ -49,7 +49,7 @@ Offset | Type | Description
 0x006A | uword | Current age
 0x006C | uword | Max age
 0x006E | uword[2] | Looks like age has a bonus and 4th value as well but they are always 0.
-0x0072 | uword[4] | **Unknown**. This looks like a hidden attribute/ability cause it uses most likely 4 uwords as well. The current and max value is always 0. The bonus is 25 for Chris and 5 for Gryban. The last value is 0 as well. With this there are 10 attributes. I guess this was a reserve and matches the amount of abilities.
+0x0072 | uword[4] | **Unknown**. This looks like a hidden or unused attribute/ability cause it uses most likely 4 uwords as well. The current and max value is always 0. The bonus is 25 for Chris and 5 for Gryban. The last value is 0 as well. With this there are 10 attributes. I guess this was a reserve and matches the amount of abilities.
 0x007A | uword[4] | ATT (see [Abilities](Enumerations/Abilities.md))
 0x0082 | uword[4] | PAR (see [Abilities](Enumerations/Abilities.md))
 0x008A | uword[4] | SWI (see [Abilities](Enumerations/Abilities.md))
@@ -88,6 +88,18 @@ Offset | Type | Description
 0x0112 | byte[16] | Name (encoding DOS-Latin-1, codepage 850 or 437)
 0x0122 | [ItemSlot](Items.md)[9] | Equipment
 0x0158 | [ItemSlot](Items.md)[24] | Inventory items
+
+## Attributes and abilities
+
+Each attribute (including the character's age) and ability stores 4 values:
+- Current value (without bonus)
+- Max value (can be exceeded by current value + bonus)
+- Bonus value (granted by equipment etc)
+- Backup value
+
+The actual effective and also displayed value is the current value plus the bonus value.
+
+The backup value stores the current value if a temporary effect is active which affects the current value. A good example is the exhaustion ailment. If cuts all attribute current values in half. So the backup value will then store the current value before reduction and the new current value is cut in half. When the effect ends the backup value is assigned to the current value. 
 
 ## Additional monster data
 
