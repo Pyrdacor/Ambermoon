@@ -18,7 +18,7 @@ Value | Name | Effect
 0x0100 | Paralyzed | Not able to move or attack.
 0x0200 | Poisoned | Receives damage every battle round or ingame hour when outside battles.
 0x0400 | Petrified | Not able to give orders or do anything at all. Inventory not accessible. Can't be damaged by attacks or damage spells.
-0x0800 | Diseased | Every day a random attribute is decreased by 1. Bugged in Ambermoon as it used the wrong offset and decreases wrong values.
+0x0800 | Diseased | Every day a random attribute is decreased by 1. Bugged in Ambermoon as it uses the wrong data offset and decreases wrong values.
 0x1000 | Artificial aging | Age is increased every day.
 0x2000 | Dead (corpse) | Not able to give orders. Won't receive Exp.
 0x4000 | Dead (ashes) | Not able to give orders. Won't receive Exp. Can only be revived by transforming the ashes first.
@@ -26,4 +26,4 @@ Value | Name | Effect
 
 There is also an Overweight status which is active if the carried weight exceeds the max weight (which is Strength in kilogram). It has no own ailment flag as it can be determined by the weight.
 
-Every character ages each year. Dependent on race there are max values (e.g. 80 for humans). If reaching the max age, a character dies. Some ailments will prevent aging: dead (all types), petrify and the unknown ailment 0x80.
+Every character ages each year (with artificial aging every day). Dependent on race there are max values for the age (e.g. 80 for humans). If reaching the max age, a character dies. Some ailments will prevent aging: dead (all types), petrify and the unknown ailment 0x80. One of these ailments must be active on the year (or day) transition to prevent the age increase.
