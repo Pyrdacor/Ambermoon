@@ -14,14 +14,16 @@ Value | Name | Effect
 0x0010 | Blind | Map view is black if selected, reduced hit chance
 0x0020 | Stoned (drugs) | Fancy colors and moving mouse cursor if selected
 0x0040 | Exhausted | All values (attributes and abilities) are halved (the STR reduction will also decrease the max weight and may cause Overweight status as well). Moreover the party member is damaged every ingame hour but not in battles. Can not parry in battles.
-0x0080 | - (unused?) | None
+0x0080 | - (unused?) | None (in code it is checked, if this ailment is active a character is not affected by aging)
 0x0100 | Paralyzed | Not able to move or attack.
 0x0200 | Poisoned | Receives damage every battle round or ingame hour when outside battles.
 0x0400 | Petrified | Not able to give orders or do anything at all. Inventory not accessible. Can't be damaged by attacks or damage spells.
-0x0800 | Diseased | ?
+0x0800 | Diseased | Every day a random attribute is decreased by 1. Bugged in Ambermoon as it used the wrong offset and decreases wrong values.
 0x1000 | Artificial aging | Age is increased every day.
 0x2000 | Dead (corpse) | Not able to give orders. Won't receive Exp.
 0x4000 | Dead (ashes) | Not able to give orders. Won't receive Exp. Can only be revived by transforming the ashes first.
 0x8000 | Dead (dust) | Not able to give orders. Won't receive Exp. Can only be revived by transforming the dust first.
 
 There is also an Overweight status which is active if the carried weight exceeds the max weight (which is Strength in kilogram). It has no own ailment flag as it can be determined by the weight.
+
+Every character ages each year. Dependent on race there are max values (e.g. 80 for humans). If reaching the max age, a character dies. Some ailments will prevent aging: dead (all types), petrify and the unknown ailment 0x80.
