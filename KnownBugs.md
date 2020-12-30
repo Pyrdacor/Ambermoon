@@ -4,7 +4,7 @@ Note: This list is not complete and will be updated from time to time.
 
 ## Disease reduces wrong values
 
-The disease status should reduce a random attribute by 1 every day. Each attribute uses 4 values which all are 2 bytes in size. So to get from the current value from one attribute to the current value of the next attribute you have to increase the data address by 8 (=4*2bytes). Unfortunately Ambermoon increases the address by only 6. I guess the 4th value was added later. Therefore instead of deceasing current intelligence, the backup value of strength is reduced. Instead of dexterity the max intelligence value is reduced and so on.
+The disease status should reduce a random attribute by 1 every day. Each attribute uses 4 values which all are 2 bytes in size. So to get from the current value of one attribute to the current value of the next attribute you have to increase the data address by 8 (=4*2bytes). Unfortunately Ambermoon increases the address by only 6. I guess the 4th value was added later. Therefore instead of deceasing current intelligence, the backup value of strength is reduced. Instead of dexterity the max intelligence value is reduced and so on.
 
 ## Parry logic inversed
 
