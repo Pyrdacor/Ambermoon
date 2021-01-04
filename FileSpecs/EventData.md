@@ -15,14 +15,18 @@ Offset | Type | Description
 0x01 | ubyte | New y coordinate (1-based)
 0x02 | ubyte | New direction (0: up, 1: right, 2: down, 3: left)
 0x03 | ubyte | **Unknown**
-0x04 | unite | Transition type
+0x04 | ubyte | Transition type
 0x05 | uword | New map index
 0x07 | ubyte[2] | **Unknown**
 
 ## Transition types
 
-- 0: Normal
-- 5: Falling
+- 0: Normal (black fading)
+- 1: Teleporter (no black fading)
+- 2: Wind gate (only teleports if the wind chain is active otherwise a message is displayed)
+- 3: Climbing up/levitating (plays a levitation animation while transitioning)
+- 4: Outro (after the endboss a map change event will 'teleport' you to the outro sequence)
+- 5: Climbing down/falling (plays a falling animation while transitioning)
 
 ## Door event (0x02 / 2)
 
