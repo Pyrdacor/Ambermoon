@@ -40,10 +40,10 @@ Index | Name | SP | SLP | Area | Target | Description
 Index | Name | Description
 --- | --- | ---
 1 | Charge item | 
-2 | Light | 
-3 | Magical torch | 
-4 | Magical lantern | 
-5 | Magical sun | 
+2 | Light | Adds 1 light radius for 150 ingame minutes (2:30)
+3 | Magical torch | Adds 1 light radius for 300 ingame minutes (5:00)
+4 | Magical lantern | Adds 2 light radius for 600 ingame minutes (10:00)
+5 | Magical sun | Adds 3 light radius for 900 ingame minutes (15:00)
 6 | Ghost weapon | 
 7 | Create food | 
 8 | Remove curses | 
@@ -52,16 +52,16 @@ Index | Name | Description
 11 | Flight | 
 12 | Word of marking | 
 13 | Word of returning | 
-14 | Magical shield | 
-15 | Magical wall | 
-16 | Magical barrier | 
-17 | Magical weapon | 
-18 | Magical assault | 
-19 | Magical attack | 
+14 | Magical shield | Increases all party members' defense by 10% for 150 ingame minutes (2:30h)
+15 | Magical wall | Increases all party members' defense by 20% for 450 ingame minutes (7:30h)
+16 | Magical barrier | Increases all party members' defense by 30% for 900 ingame minutes (15:00h)
+17 | Magical weapon | Increases all party members' attack damage by 10% for 150 ingame minutes (2:30h)
+18 | Magical assault | Increases all party members' attack damage by 20% for 450 ingame minutes (7:30h)
+19 | Magical attack | Increases all party members' attack damage by 30% for 900 ingame minutes (15:00h)
 20 | Levitation | 
-21 | Anti-magic wall | 
-22 | Anti-magic sphere | 
-23 | Alchemistic globe | 
+21 | Anti-magic wall | Increase the chance to deflect spells for all party members by 15% for 150 ingame minutes (2:30h)
+22 | Anti-magic sphere | Increase the chance to deflect spells for all party members by 25% for 900 ingame minutes (15:00h)
+23 | Alchemistic globe | Combines the effects of 'Magical sun', 'Magical barrier', 'Magical attack' and 'Anti-magic sphere'
 24 | Hurry | 
 25 | Mass hurry | 
 26 | Repair item | 
