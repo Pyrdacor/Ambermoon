@@ -32,7 +32,7 @@ The relative positions are relative to the map block from the 3D map.
 
 A block's dimension seems to be 512x512x512 so values of 255 are used to center objects. Note that the given position is the center of the object.
 
-The object section contains 130 bytes per object.
+The object section contains 66 bytes per object.
 
 Note that the object info index is 1-based and 0 means "no object". The latter is used to mark unused/empty sub object entries. When you load the object infos below they might be 0-based so you have to subtract 1 to get the right object info for non-empty sub objects.
 
