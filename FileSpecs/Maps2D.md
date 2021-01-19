@@ -55,6 +55,7 @@ So if you have icon graphic index 1 and 3 animation tiles the icons 1, 2 and 3 a
   - 4 -> sit and look left
   - 5 -> sleep (always face down)
 - Bit 26: Hide player (e.g. used by doors)
+- Bit 28-31 (most significant nibble) contains the combat background index when an encounter happens on that tile.
 
 Note: If there is an overlay tile, its flags are used and if not, the underlay tile flags are used.
 
