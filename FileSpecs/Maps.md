@@ -59,8 +59,7 @@ Offset | Type | Description
 0x02 | ubyte | Type and flags
 0x03 | ubyte | Event index
 0x04 | uword | Graphic index
-0x06 | ubyte | Upper 4 bits are the combat background index, lower 4 bits are **unknown**
-0x07 | ubyte[3] | **Unknown**
+0x06 | udword | Tile flags (will override the map tile flags if the character is on the tile, 3D only). Upper 4 bits are the combat background index for monsters.
 
 The graphic index is:
 - an object index inside the labdata for 3D maps
