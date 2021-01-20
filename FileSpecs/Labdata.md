@@ -104,12 +104,14 @@ An overlay data entry consists of 6 bytes:
 
 Offset | Type | Description
 ----|----|----
-0x0000 | ubyte | Number of animation frames
+0x0000 | ubyte | Blending (0: off, 1: on)
 0x0001 | ubyte | Texture index (taken from XOverlay3D.amb)
 0x0002 | ubyte | Relative X offset in pixels
 0x0003 | ubyte | Relative Y offset in pixels
 0x0004 | ubyte | Texture width (as the texture file uses)
 0x0005 | ubyte | Texture height (as the texture file uses)
+
+If blending is off the overlay will just override the wall data. This means that even transparent pixels are integrated into the wall. If blending is on, transparent pixels will be discarded from the overlay or more precisely the overlay pixels are blended over the wall.
 
 
 ## Notes
