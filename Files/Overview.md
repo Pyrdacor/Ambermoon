@@ -6,6 +6,8 @@ File | Disk | Format
 ---- | ---- | ----
 AM2_BLIT | A | [Hunk file](Hunks.md) (might be [imploded](Imploding.md))
 AM2_CPU | A | [Hunk file](Hunks.md) (might be [imploded](Imploding.md))
+Ambermoon_intro | B | [Hunk file](Hunks.md) (might be [imploded](Imploding.md))
+Ambermoon_extro | I | [Hunk file](Hunks.md) (might be [imploded](Imploding.md))
 
 ## Graphics
 
@@ -78,13 +80,6 @@ File | Disk | Content
 Extro_music | I | Sonic Arranger with code
 Intro_music | B | Sonic Arranger with code
 Music.amb | I | Sonic Arranger without code
-
-## Video
-
-File | Disk | Content
----- | ---- | ----
-Ambermoon_intro | B | ?
-Ambermoon_extro | I | ?
 
 ## Savegames
 
