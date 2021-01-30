@@ -24,15 +24,15 @@ Offset | Type | Description
 ----|----|----
 0x0000 | udword | Magic -> 0x000003F3
 0x0004 | udword | Number of library strings (should be 0)
-0x0008 | udword | Number of hunks (note that neither RELOC32 nor END chunks are counted in here)
+0x0008 | udword | Number of hunks (note that neither RELOC32 nor END hunks are counted in here)
 0x000C | udword | First hunk index (should be 0)
-0x0010 | udword | Last hunk index (should be number of chunks minus 1)
+0x0010 | udword | Last hunk index (should be number of hunks minus 1)
 
 Note: If the number of library strings is not 0 you would have to do some more reading but we take 0 for granted here as the Ambermoon files don't use this.
 
 ## Hunk sizes
 
-After the header there are n hunk sizes where n is the number of hunks given in the header. As mentioned only CODE, DATA and BSS chunks are considered here. When loading you should skip RELOC32 and END hunks if you don't need them. The imploded file should not contain RELOC32 hunks at all.
+After the header there are n hunk sizes where n is the number of hunks given in the header. As mentioned only CODE, DATA and BSS hunks are considered here. When loading you should skip RELOC32 and END hunks if you don't need them. The imploded file should not contain RELOC32 hunks at all.
 
 Each hunk size is an unsigned dword again. But it is encoded.
 
@@ -44,10 +44,10 @@ Here is how you would read the hunk size in bytes (pseudo code):
 
 ```
 uint32 hunkHeader = readUint32();
-uint32 hunkMemFlags = hunkHeader >> 29;
+uint32 hunkMemFlags = hunkHeader >> 30;
 
-if (hunkMemFlags == 3) // skip extended mem flags byte
-    seek(4); // skip another dword
+if (hunkMemFlags == 3)
+    seek(4); // skip extended mem flags dword
 
 uint32 hunkSizeInBytes = (hunkHeader & 0x3FFFFFFF) * 4; // 4 bytes per dword
 ```
@@ -60,13 +60,15 @@ After the hunk sizes there are the real hunks with their data.
 
 Each hunk starts with a dword header which must be the identifier from the first table above. You can use it to identify the hunk types.
 
+Note that only the 29 least significant bits are used so use `hunkIdentifier = hunkHeader & 0x1fffffff`.
+
 ### Code and data hunks
 
 These hunks have another dword following the header which gives the number of dwords that will follow. Multiply this value by 4 and you will get the number of code or data bytes.
 
 ### BSS hunks
 
-These hunks don't have any data. They only contain a single dword which specifies the number of dword to allocate.
+These hunks don't have any data. They only contain a single dword which specifies the number of dwords to allocate.
 
 Note that the size given in the hunk size section is exactly this value and not the real hunk data size which would be 4 as there is only this one dword.
 
@@ -88,4 +90,4 @@ The deploded AM2_CPU contains a DATA hunk with many text strings and the item da
 
 If you plan to reverse-engineer the original code the CODE hunk would be interesting too.
 
-When trying do deplode the imploded AM2_CPU there are several BSS hunks, the last CODE hunk and the DATA hunk which are important to deplode the file.
+When trying to deplode the imploded AM2_CPU there are several BSS hunks, the last CODE hunk and the DATA hunk which are important to deplode the file.
