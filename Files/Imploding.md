@@ -30,7 +30,7 @@ BSS | Allocation of decompression buffer
 
 The imploder uses a variant of the [LZ77](https://en.wikipedia.org/wiki/LZ77_and_LZ78) algorithm. A deploder is able to decompress the DATA hunk mentioned above.
 
-Deploding uses a **bit buffer** which contains bits that the deploder reads to determine what to do next. The **bit buffer** is a single 8-bit value and it's initial value has to be given beforehand. You can find it at offset 0x1E8 in the decompression CODE hunk (I am not sure if this is always the case but it is for AM2_CPU).
+Deploding uses a **bit buffer** which contains bits that the deploder reads to determine what to do next. The **bit buffer** is a single 8-bit value and its initial value has to be given beforehand. You can find it at offset 0x1E8 in the decompression CODE hunk (I am not sure if this is always the case but it is for AM2_CPU).
 
 Another thing the deploder needs is a so called **explosion table**. It contains 8 16-bit values which represent match offset base values and 12 8-bit values which represent number of bits which are read to add to the offset. They can be found at offset 0x188 in the decompression CODE hunk (again I am not sure if this is always the case but it is for AM2_CPU).
 
@@ -57,7 +57,7 @@ The general process is a loop which runs until all data is decompressed. And it 
 4. Read the next match offset.
 5. Copy the match inside the output.
 
-Note that the imploder stores the compressed data in reverse order so the first byte comes last. So to read the input correctly you have to read from the end of the stream to the beginning. Moreover there seem to be 3 extra bytes at the end (at the beginning of the input) that have to be skipped. Not sure if this is always true but I hope so.
+Note that the imploder stores the compressed data in reverse order so the first byte comes last. So to read the input correctly you have to read from the end of the stream to the beginning.
 
 #### 1. Copy the literals
 
