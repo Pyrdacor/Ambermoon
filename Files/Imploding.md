@@ -242,9 +242,11 @@ else // code 0
 
 The algorithm described above can be used to decompress the DATA hunk of the imploded file. The deploded data will contain the data of all hunks in the resulting file.
 
-The hunk sizes can be taken from the BSS hunks in the imploded file. I don't know how to distribute the decompressed data to the destination hunks correctly as I didn't bother with it yet. I only needed this to read the item data and other stuff from AM2_CPU and I can also read it from the undistributed decompressed data. So if you have any input, feel free to add this info.
+The hunk sizes can be taken from the BSS hunks in the imploded file.
 
-Another point is the total size of the uncompressed data which is required to stop decompressing. There is a 24-bit big-endian value at offset 0x1D in the decompress CODE hunk which seems to be about right. But I am not sure if this is 100% correct as my testing revealed that a bunch of bytes (around 50) remain in the input untouched. Counting together the sizes of the BSS hunk sizes seem to be wrong as well (maybe there is some stuff in-between that is not decoded?). I don't know but you can add this information if you want.
+For a full implementation you can have a look here:
+- [Deploder.cs](https://github.com/Pyrdacor/Ambermoon.net/blob/master/Ambermoon.Data.Legacy/Serialization/Deploder.cs)
+- [AmigaExecutable.cs](https://github.com/Pyrdacor/Ambermoon.net/blob/master/Ambermoon.Data.Legacy/Serialization/AmigaExecutable.cs)
 
 ## C# example code
 
