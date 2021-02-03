@@ -179,7 +179,7 @@ Read | Bit value | New bit buffer after left-shift
 6th | 0 | 10000000
 7th | 0 | 00000000 <- next byte is read, new bit buffer is 00001001
 
-You see that on the 7th read (bit 6) the content becomes 0 and so the buffer is immediately replaced by the next input byte (which is 0x04). The resulting bit value is the most significant bit of the new byte (which is 0). So the 7th read does not return 1 but 0 and what is more important: the last 3 bits of the initial bit buffer are not read as data at all. The last 1-bit of the initial bit buffer is a marker and no real data. Every bit behind this marker bit is discarded in the initial bit buffer.
+You see that on the 7th read (bit 6) the content becomes 0 and so the buffer is immediately replaced by the next input byte (which is 0x04). The resulting bit value is the most significant bit of the new byte (which is 0). So the 7th read does not return 1 but 0 and what is more important: the last 2 bits of the initial bit buffer are not read as data at all. The last 1-bit of the initial bit buffer is a marker and no real data. Every bit behind this marker bit is discarded in the initial bit buffer.
 
 Note that in the example the next byte (0x04) is left-shifted immediately too after reading the first bit and then the 1 from the previous read is added. So the new bit buffer content becomes `(0x04 << 1) + 1` which is 00001001 in binary.
 
@@ -210,7 +210,7 @@ for (i = 0; i < numBits; ++i)
 
 I won't go into details about huffman trees here. If you are interested you might look [here](https://en.wikipedia.org/wiki/Huffman_coding).
 
-Basically speaking the huffman tree encodes data with fewer bits. A static huffman tree provides static bit sequences with an associated meaning. In our context it is basically a dictionary of bit sequences like the tables above.
+Basically speaking the huffman tree encodes frequently used data with fewer bits and less used data with more bits. A static huffman tree provides static bit sequences with an associated meaning. In our context it is basically a dictionary of bit sequences like the tables above.
 
 When you read a huffman value you have to read it bit by bit. After each read it is clear if the read bit sequence represents a huffman code or more bits are needed.
 
