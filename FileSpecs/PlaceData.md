@@ -4,7 +4,9 @@ The file Place_data.amb contains only 1 sub-file which contains the data for all
 
 The file starts with an uword which gives the amount of places. There are 65 places in Ambermoon so the file should start with 00 41.
 
-Then for each place there are 32 bytes (16 words). Their meaning differs for each place type.
+Then for each place there are 32 bytes (16 words). Their meaning differs for each place type (see below).
+
+After the place data for each place there will be the display name (30 bytes). So the total file size is 2 + placeCount * 62.
 
 ## Trainer
 
