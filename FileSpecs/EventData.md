@@ -204,6 +204,23 @@ Offset | Type | Description
 0x05 | uword | Place data index (1-based index inside the Place_data file)
 0x07 | ubyte[2] | **Unknown**
 
+### Place types
+
+Value | Type
+--- | ---
+0 | Trainer (all kinds)
+1 | Healer
+2 | Sage (identify items)
+3 | Enchanter
+4 | Inn / Sleeping room
+5 | Merchant (goods)
+6 | Food dealer
+7 | Library (spell scroll dealer)
+8 | **Unknown** (not used in Ambermoon, maybe Guild from Amberstar?)
+9 | Ship dealer
+10 | Horse dealer
+11 | Blacksmith (item repair)
+
 ## Condition event (0x0D / 13)
 
 Condition events represent conditions that control if following events (in the list) are executed or not. Multiple conditions can be chained which equals a logical AND conjunction.
