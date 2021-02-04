@@ -6,16 +6,19 @@ The file starts with an uword which gives the amount of places. There are 65 pla
 
 Then for each place there are 32 bytes (16 words). Their meaning differs for each place type (see below).
 
-After the place data for each place there will be the display name (30 bytes). So the total file size is 2 + placeCount * 62.
+After the place data, for each place there will be the display name (30 bytes). So the total file size is 2 + placeCount * 62.
 
-## Trainer
+
+## Data
+
+### Trainer
 
 Offset | Meaning
 --- | ---
 0 | [Ability](Enumerations/Abilities.md) to train
 2 | Cost per training
 
-## Healer
+### Healer
 
 **TODO**
 
@@ -23,19 +26,19 @@ Most likely the first 11 words are the prices to heal all non-combat-only ailmen
 Then 1 word for the price to heal 1 LP.
 Then 1 word for the price to remove a curse.
 
-## Sage
+### Sage
 
 Offset | Meaning
 --- | ---
 0 | Cost to identify an item
 
-## Enchanter
+### Enchanter
 
 Offset | Meaning
 --- | ---
 0 | Cost to fill 1 (?) charge
 
-## Inn
+### Inn
 
 Offset | Meaning
 --- | ---
@@ -45,21 +48,21 @@ Offset | Meaning
 6 | **Unknown**
 8 | LP healing in percent
 
-## Merchant
+### Merchant
 
 No data. It is provided by Merchant_data.amb.
 
-## Food dealer
+### Food dealer
 
 Offset | Meaning
 --- | ---
 0 | Price per food unit
 
-## Library
+### Library
 
 No data. It is provided by Merchant_data.amb.
 
-## Ship dealer
+### Ship dealer
 
 Offset | Meaning
 --- | ---
@@ -69,7 +72,7 @@ Offset | Meaning
 6 | Spawn location map index
 8 | Stationary image bit value (= 4 -> bit 2 set)
 
-## Horse dealer
+### Horse dealer
 
 Offset | Meaning
 --- | ---
@@ -79,7 +82,7 @@ Offset | Meaning
 6 | Spawn location map index
 8 | Stationary image bit value (= 1 -> bit 0 set)
 
-## Blacksmith
+### Blacksmith
 
 Offset | Meaning
 --- | ---
