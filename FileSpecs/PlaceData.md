@@ -10,7 +10,7 @@ Then for each place there are 32 bytes (16 words). Their meaning differs for eac
 
 Offset | Meaning
 --- | ---
-0 | [Ability](Enumerations/Abilites.md) to train
+0 | [Ability](Enumerations/Abilities.md) to train
 2 | Cost per training
 
 ## Healer
