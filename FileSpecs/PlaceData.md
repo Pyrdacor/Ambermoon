@@ -11,6 +11,8 @@ After the place data, for each place there will be the display name (30 bytes). 
 
 ## Data
 
+Note that all places use only words as data so the data type is always uword in the following tables.
+
 ### Trainer
 
 Offset | Meaning
