@@ -43,6 +43,7 @@ Section | Description
   - [Labdata](FileSpecs/Labdata.md) (labyrinth data for 3D maps)
   - [EventData](FileSpecs/EventData.md) (data structure of specific events)
 - [Savegames](FileSpecs/Savegame.md)
+- [Place data](FileSpecs/PlaceData.md) (trainer, healer, inns, etc)
 - Enumerations (values of game enumerations)
   - [Abilities](FileSpecs/Enumerations/Abilities.md)
   - [Ailments](FileSpecs/Enumerations/Ailments.md)
