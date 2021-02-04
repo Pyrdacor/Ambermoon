@@ -1,3 +1,5 @@
+# Place data
+
 The file Place_data.amb contains only 1 sub-file which contains the data for all the places in the game (trainer, healer, inns, etc).
 
 The file starts with an uword which gives the amount of places. There are 65 places in Ambermoon so the file should start with 00 41.
