@@ -15,41 +15,41 @@ Offset | Type | Description
 
 ## Objects
 
-After the header there are the objects. The section starts with an uword which is the number of objects. Objects are referenced from [3D map blocks](Maps3D.md).
+After the header there are the object groups. The section starts with an uword which is the number of object groups. Object groups are referenced from [3D map blocks](Maps3D.md).
 
-Each object consists of a header (uword) which is **unknown** yet. And then 8 sub objects follow for this object. Objects consists of 1 to 8 sub objects. For example the meat and sausages in grandfather's cellar are two textures/billboards (sub objects) which form one real map object.
+Each object group consists of a header (uword) which is **unknown** yet. And then 8 objects follow for this object group. Object groups consists of 1 to 8 objects. For example the meat and sausages in grandfather's cellar are two textures/billboards (objects) which form one real map object.
 
-Each sub object consists of 4 uwords.
+Each object consists of 4 uwords.
 
 Offset | Type | Description
 ----|----|----
 0x0000 | uword | Relative X
 0x0002 | uword | Relative Y
 0x0004 | uword | Relative Z
-0x0006 | uword | Object info index (see below)
+0x0006 | uword | Object data index (see below)
 
 The relative positions are relative to the map block from the 3D map.
 
 A block's dimension seems to be 512x512x512 so values of 255 are used to center objects. Note that the given position is the center of the object.
 
-The object section contains 66 bytes per object.
+The object group section contains 66 bytes per object group.
 
-Note that the object info index is 1-based and 0 means "no object". The latter is used to mark unused/empty sub object entries. When you load the object infos below they might be 0-based so you have to subtract 1 to get the right object info for non-empty sub objects.
+Note that the object data index is 1-based and 0 means "no object". The latter is used to mark unused/empty object entries. When you load the object data below they might be 0-based so you have to subtract 1 to get the right object data for non-empty objects.
 
-## Object infos
+## Object data
 
-After the objects the object infos follow which contain the real information of objects/sub objects like texture information.
+After the object groups the object data entries follow which contain the real information of objects like texture information.
 
-This section again starts with an uword which is the number of object infos.
+This section again starts with an uword which is the number of object data entries.
 
-Each object info consists of 14 bytes:
+Each object data consists of 14 bytes:
 
 Offset | Type | Description
 ----|----|----
 0x0000 | ubyte[3] | Header/Collision info? (**Unknown** yet)
 0x0003 | ubyte | Object flags (see below)
 0x0004 | uword | Texture index (taken from XObject3D.amb)
-0x0006 | ubyte | Num animation frames
+0x0006 | ubyte | Number of animation frames
 0x0007 | ubyte | **Unknown**
 0x0008 | ubyte | Texture width (as the texture file uses)
 0x0009 | ubyte | Texture height (as the texture file uses)
@@ -68,7 +68,7 @@ Rest | **Unknown**
 
 ## Walls
 
-After objects and object infos the wall data is located. It again starts with an uword that gives the amount of wall data entries.
+After object groups and object data, the wall data is located. It again starts with an uword that gives the amount of wall data entries.
 
 Each wall data entry consists of a header and optional overlay data.
 
@@ -92,7 +92,7 @@ If the number of overlays is greater than zero then there will be this amount of
 Bit | Property
 ----|----
 1 | Block sight (not 100% sure but beside walls this is used by doors or exits)
-3 | Transparency (e.g. spider webs)
+3 | Texture transparency (e.g. spider webs)
 7 | Block movement (e.g. normal solid walls)
 Rest | **Unknown**
 
@@ -116,4 +116,4 @@ If blending is off the overlay will just override the wall data. This means that
 
 ## Notes
 
-As the texture dimensions are given by the labdata it is best to read object and overlay graphics through labdata loading. Wall texture on the other hand are always 128x80 pixels and floor textures are always 64x64 pixels in size.
+As the texture dimensions are given by the labdata it is best to read object and overlay graphics through labdata loading. Wall textures on the other hand are always 128x80 pixels and floor textures are always 64x64 pixels in size.
