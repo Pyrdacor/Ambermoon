@@ -46,7 +46,7 @@ After the object groups the object data entries follow which contain the real in
 
 This section again starts with an uword which is the number of object data entries.
 
-Each object data consists of 14 bytes:
+Each object data entry consists of 14 bytes:
 
 Offset | Type | Description
 ----|----|----
