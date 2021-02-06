@@ -21,6 +21,8 @@ The section starts with an uword which is the number of object groups. Object gr
 
 Each object group consists of a header (uword) which is **unknown** yet and 8 object entries. As stated before, object groups consists of 1 to 8 objects. For example the meat and sausages in grandfather's cellar are two textures/billboards (objects) which form one real map object.
 
+Note that there will always be all 8 object entries even if not all are used!
+
 Each object entry inside the group consists of 4 uwords.
 
 Offset | Type | Description
