@@ -15,11 +15,13 @@ Offset | Type | Description
 
 ## Objects
 
-After the header there are the object groups. The section starts with an uword which is the number of object groups. Object groups are referenced from [3D map blocks](Maps3D.md).
+After the header there are the objects. Objects are really object groups. So they can be created out of 1 to 8 single objects.
 
-Each object group consists of a header (uword) which is **unknown** yet. And then 8 objects follow for this object group. Object groups consists of 1 to 8 objects. For example the meat and sausages in grandfather's cellar are two textures/billboards (objects) which form one real map object.
+The section starts with an uword which is the number of object groups. Object groups are referenced from [3D map blocks](Maps3D.md).
 
-Each object consists of 4 uwords.
+Each object group consists of a header (uword) which is **unknown** yet. And then 8 object entries follow for this object group. As stated before, object groups consists of 1 to 8 objects. For example the meat and sausages in grandfather's cellar are two textures/billboards (objects) which form one real map object.
+
+Each object entry inside the group consists of 4 uwords.
 
 Offset | Type | Description
 ----|----|----
