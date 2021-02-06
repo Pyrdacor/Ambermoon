@@ -19,7 +19,7 @@ After the header there are the objects. Objects are really object groups. So the
 
 The section starts with an uword which is the number of object groups. Object groups are referenced from [3D map blocks](Maps3D.md).
 
-Each object group consists of a header (uword) which is **unknown** yet. And then 8 object entries follow for this object group. As stated before, object groups consists of 1 to 8 objects. For example the meat and sausages in grandfather's cellar are two textures/billboards (objects) which form one real map object.
+Each object group consists of a header (uword) which is **unknown** yet and 8 object entries. As stated before, object groups consists of 1 to 8 objects. For example the meat and sausages in grandfather's cellar are two textures/billboards (objects) which form one real map object.
 
 Each object entry inside the group consists of 4 uwords.
 
