@@ -202,7 +202,7 @@ Offset | Type | Description
 0x03 | ubyte | Closing hour (0-23)
 0x04 | ubyte | Text index when you use the place (text taken from map texts, 0xff = no message). Using a place means buy a horse/ship, buy goods, heal, train, etc.
 0x05 | uword | Place data index (1-based index inside the Place_data file)
-0x07 | ubyte[2] | **Unknown**
+0x07 | uword | Index (merchant data index)
 
 ### Place types
 
