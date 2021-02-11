@@ -1,6 +1,6 @@
 Tile flags are used in 2D and 3D. They provide 32 bits (4 bytes) and are stored at the beginning of each [IconData entry](../Maps2D.md), [Wall entry](../Labdata.md) and [ObjectInfo entry](../Labdata.md).
 
-Moreover each [character reference](../Maps.md) stored tile flags in the last 4 bytes. If a character is on a tile, it may override the flags of that tile. For example the upper 4 bits of the flags can store the combat background index for monsters. The character itself could provide another one instead.
+Moreover each [character reference](../Maps.md) stores tile flags in the last 4 bytes. If a character is on a tile, it may override the flags of that tile. For example the upper 4 bits of the flags can store the combat background index for monsters. The character itself could provide another one instead.
 
 Note: Bits are numbered from least significant bit to most significant bit. As the flags are stored in big-endian, bit 0 means the least significant bit of the 4th byte and bit 31 means the most significant bit of the first byte:
 `[bit31..bit24] [bit23..bit16] [bit15..bit8] [bit7..bit0]`
@@ -15,15 +15,15 @@ Bits | As hex value | Meaning
 5 | 0x00000020 | Use background tile flags (only used in 2D?)
 6 | 0x00000040 | Bring to front
 7 | 0x00000080 | Block all movement
-8..23 | 0x000000100..0x00800000 | Allowed travel types
-24 | 0x01000000 | **Unknown**
-25 | 0x02000000 | **Unknown**
+8..18 | 0x000000100..0x00040000 | Allowed travel types
+19 | 0x00080000 | **Unknown**
+20 | 0x00100000 | **Unknown**
+21 | 0x00200000 | **Unknown**
+22 | 0x00400000 | **Unknown**
+23..25| 0x00800000 | Sit/sleep value
 26 | 0x04000000 | Player invisible
 27 | 0x08000000 | **Unknown**
-28 | 0x10000000 | **Unknown**
-29 | 0x20000000 | **Unknown**
-30 | 0x40000000 | **Unknown**
-31 | 0x80000000 | **Unknown**
+28..31 | 0x10000000..0x80000000 | Combat background index
 
 
 ## Block sight
@@ -58,10 +58,27 @@ If this bit is set, all movement is blocked by the tile. In 3D this is often use
 
 In 3D the "allow movement for walking" bit is also considered. So if bit 8 is 0, the player is also blocked by the tile in 3D.
 
+
 ## Allowed travel types
 
 Allows movement for each [travel type](TravelType.md). These are 16 bits (but Ambermoon has only 11 travel types). First bit (bit 8 of the tile flags) allows normal walking if set. Second bit (bit 1 of the tile flags) allows traveling by horse, and so on.
 
+
+## Sit/sleep value
+
+  - 0 -> no sitting nor sleeping
+  - 1 -> sit and look up
+  - 2 -> sit and look right
+  - 3 -> sit and look down
+  - 4 -> sit and look left
+  - 5 -> sleep (always face down)
+
+
 ## Player invisible
 
 In 2D the player is not drawn if on this tile. This is used by doors in 2D indoor maps. The player is invisible so that it looks like he is behind the door.
+
+
+## Combat background index
+
+When an event on that tile triggers a battle event, this combat background will be used.
