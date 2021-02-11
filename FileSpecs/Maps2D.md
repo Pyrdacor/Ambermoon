@@ -71,11 +71,13 @@ Offset | Type | Description
 A tile data entry (TileData) consists of 4 ubytes.
 
 ```
-underlay_tile_index = ((tile_data[1] & 0xe0) << 3) | tile_data[0];
-overlay_tile_index = ((tile_data[2] & 0x07) << 8) | tile_data[3];
-map_event_index = tile_data[1] & 0x1f;
+underlay_tile_index = tile_data[0];
+overlay_tile_index = (tile_data[2] << 8) | tile_data[3];
+map_event_index = tile_data[1];
 ```
 
 Underlay is the background tile graphic and overlay an optional graphic on top of the background.
 
 The indices refer to an IconData from the given tileset. Index 0 means 'nothing' or 'empty'.
+
+Note: As underlay tiles are limited to 1 byte, they can only use the first 255 entries of the icon data (tileset).
