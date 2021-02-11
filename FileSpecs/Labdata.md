@@ -34,7 +34,7 @@ Offset | Type | Description
 0x0004 | uword | Relative Z
 0x0006 | uword | Object data index (see below)
 
-The relative positions are relative to the map block from the 3D map.
+The relative positions are relative to the map block from the 3D map. Note that x and y are related to the x and y of the map and z is the height above the ground with z=0 is ground level.
 
 A block's dimension is 512x512x341 so values of 255 for x and y are used to center objects. Note that the given position is the center of the object.
 
