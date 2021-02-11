@@ -9,8 +9,8 @@ Bits | As hex value | Meaning
 --- | --- | ---
 0 | 0x00000001 | **Unknown**
 1 | 0x00000002 | Block sight?
-2 | 0x00000004 | Floor / Transparency
-3 | 0x00000008 | **Unknown**
+2 | 0x00000004 | Background
+3 | 0x00000008 | Floor / Transparency
 4 | 0x00000010 | **Unknown**
 5 | 0x00000020 | Use background tile flags (only used in 2D?)
 6 | 0x00000040 | Bring to front
@@ -31,11 +31,15 @@ Bits | As hex value | Meaning
 Not 100% sure about this, but this is set for normal walls and non-blocking walls which block sight (e.g. doors, fake walls, etc).
 
 
+## Background
+
+In 2D this is used for foreground tiles that should appear in the background (behind the player). An example are border parts of a carpet where the background tile is also visible and so the foreground tile must be used as a second layer but in the background.
+
+
 ## Floor / Transparency
 
 - In 3D objects are drawn on the floor like a hole in the ground.
 - In 3D walls use transparency (e.g. spider webs).
-- In 2D this is used for foreground tiles that should appear in the background (behind the player). An example are border parts of a carpet where the background tile is also visible and so the foreground tile must be used as a second layer but in the background.
 
 
 ## Use background tile flags
