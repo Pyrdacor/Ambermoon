@@ -18,7 +18,7 @@ Bits | As hex value | Meaning
 8..23 | 0x000000100..0x00800000 | Allowed travel types
 24 | 0x01000000 | **Unknown**
 25 | 0x02000000 | **Unknown**
-26 | 0x04000000 | Invisible
+26 | 0x04000000 | Player invisible
 27 | 0x08000000 | **Unknown**
 28 | 0x10000000 | **Unknown**
 29 | 0x20000000 | **Unknown**
@@ -58,6 +58,6 @@ In 3D the "allow movement for walking" bit is also considered. So if bit 8 is 0,
 
 Allows movement for each [travel type](TravelType.md). These are 16 bits (but Ambermoon has only 11 travel types). First bit (bit 8 of the tile flags) allows normal walking if set. Second bit (bit 1 of the tile flags) allows traveling by horse, and so on.
 
-## Invisible
+## Player invisible
 
-In 2D the player is not drawn if on this tile. This is used by doors in 2D indoor maps. They player is invisible so that it looks like he is behind the door.
+In 2D the player is not drawn if on this tile. This is used by doors in 2D indoor maps. The player is invisible so that it looks like he is behind the door.
