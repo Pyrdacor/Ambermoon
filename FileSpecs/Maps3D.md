@@ -22,7 +22,13 @@ Offset | Type | Description
 A block data entry (BlockData) consists of 2 ubytes.
 
 ```
-if (block_data[0] <= 100)
+if (block_data[0] == 0)
+{
+    // empty block
+    object_index = 0;
+    wall_index = 0;
+}
+else if (block_data[0] <= 100)
 {
     // it's an object
     object_index = block_data[0];
@@ -44,9 +50,9 @@ else // block_data[0] == 255
 map_event_index = block_data[1];
 ```
 
-So a block can mark a wall, an object or the map border (which isn't drawn at all).
+So a block can mark an empty block, a wall, an object or the map border (which isn't drawn at all). The map border will always block all movement.
 
-A wall uses the wall index to access wall data from the [Labdata](Labdata.md). An object uses the object index to access object data from the [Labdata](Labdata.md). Note that an index might be greater than the amount of walls/objects so always use the modulo operator. For example the Morag airship uses wall index 14 while there are only 9 wall entries inside the labdata (0-8). So you have to use wall index 14 mod 9 (which is 5) instead (module = rest after division).
+A wall uses the wall index to access wall data from the [Labdata](Labdata.md). An object uses the object index to access object group data from the [Labdata](Labdata.md). Note that an index might be greater than the amount of walls/objects so always use the modulo operator. For example the Morag airship uses wall index 14 while there are only 9 wall entries inside the labdata (0-8). So you have to use wall index 14 mod 9 (which is 5) instead (mod = rest after division).
 
 Note that those indices are 1-based while 0 means "no wall" or "no object". But inside the labdata they might be 0-based so you might have to subtract 1 to get the right data.
 
@@ -78,7 +84,7 @@ The correctly ordered bit sequence for the exploration example above would look 
 
 On the automap there are symbols for specific objects on the map like doors, riddlemouths, levers, teleporters, etc.
 
-The following list only contains those where the associated value is verified inside the data. If the graphic indices match these values is not verified yet.
+The following list only contains those that are used for walls in the Ambermoon data files. For a complete list see [AutomapTypes](AutomapTypes.md).
 
 Value | Name
 ----|----
