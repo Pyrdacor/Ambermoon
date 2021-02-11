@@ -7,20 +7,34 @@ Note: Bits are numbered from least significant bit to most significant bit. As t
 
 Bits | As hex value | Meaning
 --- | --- | ---
-0 | 0x01 | **Unknown**
-1 | 0x02 | **Unknown**
-2 | 0x04 | Floor
-3 | 0x08 | **Unknown**
-4 | 0x10 | **Unknown**
-5 | 0x20 | Use background tile flags (only used in 2D?)
-6 | 0x40 | Bring to front
-7 | 0x80 | Block all movement
-8..23 | 0x0100..0x8000 | Allowed travel types
+0 | 0x00000001 | **Unknown**
+1 | 0x00000002 | Block sight?
+2 | 0x00000004 | Floor / Transparency
+3 | 0x00000008 | **Unknown**
+4 | 0x00000010 | **Unknown**
+5 | 0x00000020 | Use background tile flags (only used in 2D?)
+6 | 0x00000040 | Bring to front
+7 | 0x00000080 | Block all movement
+8..23 | 0x000000100..0x00800000 | Allowed travel types
+24 | 0x01000000 | **Unknown**
+25 | 0x02000000 | **Unknown**
+26 | 0x04000000 | Invisible
+27 | 0x08000000 | **Unknown**
+28 | 0x10000000 | **Unknown**
+29 | 0x20000000 | **Unknown**
+30 | 0x40000000 | **Unknown**
+31 | 0x80000000 | **Unknown**
 
 
-## Floor
+## Block sight
 
-- In 3D such objects are drawn on the floor like a hole in the ground. It is only used for 3D objects.
+Not 100% sure about this, but this is set for normal walls and non-blocking walls which block sight (e.g. doors, fake walls, etc).
+
+
+## Floor / Transparency
+
+- In 3D objects are drawn on the floor like a hole in the ground.
+- In 3D walls use transparency (e.g. spider webs).
 - In 2D this is used for foreground tiles that should appear in the background (behind the player). An example are border parts of a carpet where the background tile is also visible and so the foreground tile must be used as a second layer but in the background.
 
 
@@ -43,3 +57,7 @@ In 3D the "allow movement for walking" bit is also considered. So if bit 8 is 0,
 ## Allowed travel types
 
 Allows movement for each [travel type](TravelType.md). These are 16 bits (but Ambermoon has only 11 travel types). First bit (bit 8 of the tile flags) allows normal walking if set. Second bit (bit 1 of the tile flags) allows traveling by horse, and so on.
+
+## Invisible
+
+In 2D the player is not drawn if on this tile. This is used by doors in 2D indoor maps. They player is invisible so that it looks like he is behind the door.
