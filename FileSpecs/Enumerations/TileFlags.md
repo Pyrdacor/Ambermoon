@@ -9,11 +9,11 @@ Bits | As hex value | Meaning
 --- | --- | ---
 0 | 0x00000001 | **Unknown**
 1 | 0x00000002 | Block sight?
-2 | 0x00000004 | Background
+2 | 0x00000004 | Render order
 3 | 0x00000008 | Floor / Transparency
 4 | 0x00000010 | **Unknown**
 5 | 0x00000020 | Use background tile flags (only used in 2D?)
-6 | 0x00000040 | Bring to front
+6 | 0x00000040 | Custom render order
 7 | 0x00000080 | Block all movement
 8..18 | 0x000000100..0x00040000 | Allowed travel types
 19 | 0x00080000 | **Unknown**
@@ -31,9 +31,11 @@ Bits | As hex value | Meaning
 Not 100% sure about this, but this is set for normal walls and non-blocking walls which block sight (e.g. doors, fake walls, etc).
 
 
-## Background
+## Render order
 
-In 2D this is used for foreground tiles that should appear in the background (behind the player). An example are border parts of a carpet where the background tile is also visible and so the foreground tile must be used as a second layer but in the background.
+In 2D this is used to switch between baseline render order (0) and custom render order (1). See bit 6 for more details.
+
+Baseline rendering uses the y coordinate of the tile to determine the render order. So the player's upper half is drawn above tiles and his lower part is drawn behind foreground tiles but above background tiles. Custom render order can change that.
 
 
 ## Floor / Transparency
@@ -47,9 +49,13 @@ In 2D this is used for foreground tiles that should appear in the background (be
 If this is set for a 2D foreground tile, the collision detection is based on the background tile's flags.
 
 
-## Bring to front
+## Custom render order
 
-Not 100% sure about this, but it seems to override the "floor" bit and forces drawing above the player in 2D. It is used by tree tops, etc.
+This bit is only considered if bit 2 is set to 1 (custom render order).
+
+If the bit is 0, the foreground tile is drawn behind the player. It's a "bring to back". Usage example: carpet.
+
+If the bit is 1, the foreground tile is drawn above the player (even above the top half). It's a "bring to front". Usage example: large tree tops.
 
 
 ## Block all movement
