@@ -65,7 +65,7 @@ Bit | Description
 
 Each item has a fixed cost that is used when you buy items. This is independent of your charisma.
 
-But the sell price is charisma dependent. Every 10 charisma points you get a bonus of "item cost / 100".
+But the sell price is charisma dependent. Every 10 charisma points you get a bonus of 1% the item cost.
 
 The total sell price is calculated like this:
 
