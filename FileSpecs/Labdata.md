@@ -19,7 +19,9 @@ After the header there are the objects. Objects are really object groups. So the
 
 The section starts with an uword which is the number of object groups. Object groups are referenced from [3D map blocks](Maps3D.md).
 
-Each object group consists of a header (uword) which is **unknown** yet and 8 object entries. As stated before, object groups consists of 1 to 8 objects. For example the meat and sausages in grandfather's cellar are two textures/billboards (objects) which form one real map object.
+Each object group consists of a header (uword) which is **unknown** yet and 8 object entries. As stated before, object groups consists of 1 to 8 objects. For example burning torches are two textures/billboards (objects) which form one real map object. One object is the torch and the other one the flame.
+
+Note that the objects are rendered in reverse order so that the first object is drawn above later objects. In modern rendering terms that means that the depth value is lowest for the first object and highest for the last object. Using the burning torch example, the flame is the first object and the torch the second one. Therefore the flame is shown in front of the torch.
 
 Note that there will always be all 8 object entries even if not all are used!
 
