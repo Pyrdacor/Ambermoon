@@ -34,7 +34,7 @@ Offset | Type | Description
 
 The relative positions are relative to the map block from the 3D map.
 
-A block's dimension seems to be 512x512x512 so values of 255 are used to center objects. Note that the given position is the center of the object.
+A block's dimension is 512x512x341 so values of 255 for x and y are used to center objects. Note that the given position is the center of the object.
 
 The object group section contains 66 bytes per object group.
 
