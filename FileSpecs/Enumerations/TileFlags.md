@@ -65,7 +65,7 @@ In 3D the "allow movement for walking" bit is also considered. So if bit 8 is 0,
 
 Allows movement for each [travel type](TravelType.md). These are 15 bits (but Ambermoon has only 11 travel types). First bit (bit 8 of the tile flags) allows normal walking if set. Second bit (bit 1 of the tile flags) allows traveling by horse, and so on.
 
-I think Ambermoon uses the travel type "None" as index 0 and walking as index 1. Therefore there are really 16 travel allow bits and bit 8 means "allow travel type None". If this is set None is allowed and hence this means that no movement is allowed.
+I think Ambermoon uses the travel type "None" as index 0 and walking as index 1. Therefore there are really 16 travel allow bits and bit 7 means "allow travel type None". If this is set None is allowed and hence this means that no movement is allowed.
 
 
 ## Sit/sleep value
