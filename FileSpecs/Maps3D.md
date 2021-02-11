@@ -84,7 +84,7 @@ The correctly ordered bit sequence for the exploration example above would look 
 
 On the automap there are symbols for specific objects on the map like doors, riddlemouths, levers, teleporters, etc.
 
-The following list only contains those that are used for walls in the Ambermoon data files. For a complete list see [AutomapTypes](AutomapType.md).
+The following list only contains those that are used for walls in the Ambermoon data files. For a complete list see [AutomapTypes](Enumerations/AutomapType.md).
 
 Value | Name
 ----|----
@@ -94,3 +94,27 @@ Value | Name
 9 | Closed door
 10 | Open door
 14 | Exit
+
+
+## Collision detection
+
+In 3D the center of the player (= current location) is always on a specific tile. This tile is checked first. If your movement target is on that tile and the tile is blocking, you won't move. If it's not blocking 1 of the 8 surrounding tiles may also be checked.
+
+If your x position inside the block is < 120 then the left column is checked, if x is < 392 the middle column is checked and the right column otherwise. Same is done with y.
+
+```
+[0] [1] [2]
+[3] [4] [5]
+[6] [7] [8]
+```
+
+So based on the relative x and y inside block 4, another adjacent block might be checked for collision.
+
+120 is 128-8 while 128 is 512/4 (1/4 the block size). \
+392 is 384+8 while 384 is 3*512/4 (3/4 the block size).
+
+So basically the collision body radius of the player is 120/512 of block size which is about 0.234 * block size.
+
+Walls have a collision radius of 0.5 * block size of course. Objects use their mapped texture width as the diameter and therefore half that value as radius.
+
+If an object has a mapped texture width of 320, the collision radius would be 160. Expressed in block sizes this are 160/512 block sizes which is 0.3125 * block size.
