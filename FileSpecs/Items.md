@@ -63,11 +63,26 @@ Bit | Description
 
 ### Price formula
 
-Each item has a fixed price value. But the charisma of the character can influence the real price.
+Each item has a fixed cost that is used when you buy items. This is independent of your charisma.
 
-The general price formula is:
+But the sell price is charisma dependent. Every 10 charisma points you get a bonus of "item cost / 100".
 
-    real price = item price / a value between 2.92 and 3.08
+The total sell price is calculated like this:
+
+    bonus = floor(floor(charisma / 10) * (cost / 100))
+    price = floor(cost / 3) + bonus
+    
+#### Examples
+
+Item cost: 500, Charisma 35 (e.g. a spell scroll)
+
+    bonus = floor(floor(35 / 10) * (500 / 100)) = floor(3 * 5) = floor(15) = 15
+    price = floor(500 / 3) + 15 = 166 + 15 = 181
+    
+Item cost: 25, Charisma 99 (e.g. a hat)
+
+    bonus = floor(floor(99 / 10) * (25 / 100)) = floor(9 * 0.25) = floor(2.25) = 2
+    price = floor(25 / 3) + 2 = 8 + 2 = 10
 
 
 ### Signed bytes
