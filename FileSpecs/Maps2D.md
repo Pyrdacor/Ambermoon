@@ -33,7 +33,7 @@ A data entry (IconData) looks like this:
 
 Offset | Type | Description
 ----|----|----
-0x0000 | udword | Tile flags (see below)
+0x0000 | udword | [Tile flags](Enumerations/TileFlags.md)
 0x0004 | uword | Icon graphic index
 0x0006 | ubyte | Number of animation tiles
 0x0007 | ubyte | **Unknown**
@@ -41,23 +41,6 @@ Offset | Type | Description
 The icon graphic index refers to an icon graphic. The index starts with 1 (index 1 is the first icon graphic). The number of animation tiles specifies the number of icon graphics belonging to the tile's animation (e.g. water uses multiple tiles for animation). Non-animated tiles have a value of 1.
 
 So if you have icon graphic index 1 and 3 animation tiles the icons 1, 2 and 3 are used for the animation.
-
-### Tile flags
-
-- Bit 2: 0: Baseline rendering (lower baseline is drawn above), 1: Custom ordered rendering (not sure about this)
-- Bit 6: 0: Draw behind player, 1: Draw above player (only if bit 2 is set, not sure about this)
-- Bit 8-18: Allowed [travel types](Enumerations/TravelType.md) (lsb = walk, msb = sand ship), if a bit is set you can pass the tile with the travel type (this will not block horses from water or building entrances though!)
-- Bit 23-25: Sit/sleep value
-  - 0 -> no sitting nor sleeping
-  - 1 -> sit and look up
-  - 2 -> sit and look right
-  - 3 -> sit and look down
-  - 4 -> sit and look left
-  - 5 -> sleep (always face down)
-- Bit 26: Hide player (e.g. used by doors)
-- Bit 28-31 (most significant nibble) contains the combat background index when an encounter happens on that tile.
-
-Note: If there is an overlay tile, its flags are used and if not, the underlay tile flags are used.
 
 ## Map data
 
