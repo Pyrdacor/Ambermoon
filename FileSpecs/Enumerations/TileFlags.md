@@ -15,11 +15,7 @@ Bits | As hex value | Meaning
 5 | 0x00000020 | Use background tile flags (only used in 2D?)
 6 | 0x00000040 | Custom render order
 7 | 0x00000080 | Block all movement
-8..18 | 0x000000100..0x00040000 | Allowed travel types
-19 | 0x00080000 | **Unknown**
-20 | 0x00100000 | **Unknown**
-21 | 0x00200000 | **Unknown**
-22 | 0x00400000 | **Unknown**
+8..22 | 0x000000100..0x00400000 | Allowed travel types
 23..25| 0x00800000 | Sit/sleep value
 26 | 0x04000000 | Player invisible
 27 | 0x08000000 | **Unknown**
@@ -67,7 +63,9 @@ In 3D the "allow movement for walking" bit is also considered. So if bit 8 is 0,
 
 ## Allowed travel types
 
-Allows movement for each [travel type](TravelType.md). These are 16 bits (but Ambermoon has only 11 travel types). First bit (bit 8 of the tile flags) allows normal walking if set. Second bit (bit 1 of the tile flags) allows traveling by horse, and so on.
+Allows movement for each [travel type](TravelType.md). These are 15 bits (but Ambermoon has only 11 travel types). First bit (bit 8 of the tile flags) allows normal walking if set. Second bit (bit 1 of the tile flags) allows traveling by horse, and so on.
+
+I think Ambermoon uses the travel type "None" as index 0 and walking as index 1. Therefore there are really 16 travel allow bits and bit 8 means "allow travel type None". If this is set None is allowed and hence this means that no movement is allowed.
 
 
 ## Sit/sleep value
