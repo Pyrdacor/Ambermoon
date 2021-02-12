@@ -58,6 +58,8 @@ Row31Plane0 Row31Plane1 Row31Plane2 Row31Plane3
 
 In the 16 pixel wide example each plane has 16 bits (= 2 bytes). The most significant bit of the first byte is always for the first pixel and the least significant bit of the last byte is for the last pixel.
 
+Note: If the graphic width is not a multiple of 8 there are additional unused bits per scan line that must be skipped on loading.
+
 ### Textures
 
 There is a special format for wall, object and overlay textures mentioned above as **4 bit packed texture graphics**. Instead of having planes for each pixel row it has planes for every 8 pixels (I call these a chunk below). So if for example you have a 16x32 pixel texture like mentioned above you would have two plane iterations per pixel row:
