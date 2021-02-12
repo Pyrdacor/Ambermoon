@@ -73,6 +73,8 @@ I guess this was done to achieve better compression for large textures. The 4 pl
 
 Note: Floor textures don't use this format. They use the normal 4 bit palette format without the 8 pixel packing.
 
+Note: If the graphic width is not a multiple of 8 there are additional unused bits per scan line that must be skipped on loading. There is at least one object graphic where this is true in Ambermoon (texture index 90 has a width of 47 and therefore 1 additional unused bit per row).
+
 ### Example data (not packed)
 
 The first pixel line (4 bytes, each digit/letter is a bit):
