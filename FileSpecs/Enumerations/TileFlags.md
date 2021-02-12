@@ -12,7 +12,7 @@ Bits | As hex value | Meaning
 2 | 0x00000004 | Render order
 3 | 0x00000008 | Floor / Transparency
 4 | 0x00000010 | **Unknown**
-5 | 0x00000020 | Use background tile flags (only used in 2D?)
+5 | 0x00000020 | Use background tile flags
 6 | 0x00000040 | Custom render order
 7 | 0x00000080 | Block all movement
 8..22 | 0x000000100..0x00400000 | Allowed travel types
@@ -29,9 +29,9 @@ Not 100% sure about this, but this is set for normal walls and non-blocking wall
 
 ## Render order
 
-In 2D this is used to switch between baseline render order (0) and custom render order (1). See bit 6 for more details.
+In 2D this is used to switch between normal render order (0) and custom render order (1). See bit 6 for more details.
 
-Baseline rendering uses the y coordinate of the tile to determine the render order. So the player's upper half is drawn above tiles and his lower part is drawn behind foreground tiles but above background tiles. Custom render order can change that.
+Normal rendering draws the player's upper half above tiles and his lower part is drawn behind foreground tiles but above background tiles. Custom render order can change that.
 
 
 ## Floor / Transparency
@@ -70,12 +70,12 @@ I think Ambermoon uses the travel type "None" as index 0 and walking as index 1.
 
 ## Sit/sleep value
 
-  - 0 -> no sitting nor sleeping
-  - 1 -> sit and look up
-  - 2 -> sit and look right
-  - 3 -> sit and look down
-  - 4 -> sit and look left
-  - 5 -> sleep (always face down)
+  - 0: no sitting nor sleeping
+  - 1: sit and look up
+  - 2: sit and look right
+  - 3: sit and look down
+  - 4: sit and look left
+  - 5: sleep (always face down)
 
 
 ## Player invisible
