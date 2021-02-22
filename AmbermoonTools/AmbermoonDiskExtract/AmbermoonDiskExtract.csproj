@@ -1,0 +1,18 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <Authors>Robert Schneckenhaus</Authors>
+    <Description>Command line tool to extract Ambermoon data files from the ADF disk images.</Description>
+    <PackageProjectUrl>https://github.com/Pyrdacor/Ambermoon</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/Pyrdacor/Ambermoon</RepositoryUrl>
+    <RepositoryType>Github</RepositoryType>
+    <PackageTags>Ambermoon ADF Extract File Legacy Amiga Disk</PackageTags>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Ambermoon.Data.Legacy" Version="2.0.31" />
+  </ItemGroup>
+
+</Project>

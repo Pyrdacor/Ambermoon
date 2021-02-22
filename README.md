@@ -86,6 +86,7 @@ Section | Description
 - [NPCs](Graphics/NPCs)
 - [Combat graphics](Graphics/CombatGraphics)
 - [Monster graphics](Graphics/Monsters)
+- [Automap graphics](Graphics/AutomapGfx)
 - [Palettes](Graphics/Palettes.jpg)
 
 

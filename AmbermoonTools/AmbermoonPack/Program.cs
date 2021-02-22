@@ -131,15 +131,15 @@ namespace AmbermoonPack
                                     tempReader = new DataReader(containerData);
                                     header = tempReader.ReadDword(); // read potential LOB/VOL1 header
                                     bool lob = header == (uint)FileType.LOB || header == (uint)FileType.VOL1;
-                                    WriteFiles(writer, containerType, key, lob, container.Files.First().Value.ReadToEnd());
+                                    WriteFiles(writer, containerType, key, lob, container.Files.First().Value.ToArray());
                                     break;
                                 }
                             case FileType.LOB:
                             case FileType.VOL1:
-                                WriteFiles(writer, containerType, null, null, container.Files.First().Value.ReadToEnd());
+                                WriteFiles(writer, containerType, null, null, container.Files.First().Value.ToArray());
                                 break;
                             default:
-                                WriteFiles(writer, containerType, container.Files.ToDictionary(f => (uint)f.Key, f => f.Value.ReadToEnd()));
+                                WriteFiles(writer, containerType, container.Files.ToDictionary(f => (uint)f.Key, f => f.Value.ToArray()));
                                 break;
                         }
                     }
