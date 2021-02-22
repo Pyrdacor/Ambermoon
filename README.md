@@ -87,6 +87,9 @@ Section | Description
 - [Combat graphics](Graphics/CombatGraphics)
 - [Monster graphics](Graphics/Monsters)
 - [Automap graphics](Graphics/AutomapGfx)
+- [UI graphics](Graphics/UIGfx)
+- [UI button graphics](Graphics/Buttons)
+- [Font graphics](Graphics/Font)
 - [Palettes](Graphics/Palettes.jpg)
 
 
