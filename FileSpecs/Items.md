@@ -53,13 +53,33 @@ Offset | Type | Description
 Bit | Description
 ----|----
 0 | Cursed
-1 | Sellable
+1 | NotImportant
 2 | Stackable
-3 | **Unknown**
+3 | Can be equipped during battle
 4 | Destroy after usage
 5 | Readable
-6 | **Unknown**
+6 | Clonable
 7 | Unused
+
+Item stacks can hold up to 99 items. Merchant item slots can stack all items even without that flag
+and they can provide unlimited amounts if the item amount is set to 255.
+
+Trivia: Note that the item grid which stores your bought items can't stack all items in contrast to
+the merchant itself. So the merchant can offer more items than you can store in your shopping basket.
+If you do so and store more than the 24 possible items in the basket the original game will crash.
+
+The flag to control equipping during battles works in both directions. So you can't equip nor unequip
+the item during battle.
+
+Items which are flagged with NotImportant can be dropped, sold and left at merchants.
+Without this flag items are considered important and therefore can't be dropped, sold
+or left at merchants or in conversations.
+
+Trivia: In original there is a bug which still can destroy important items. If an item-targeted
+spell (Repair, Duplicate, Charge) fails, it destroys the targeted item. The fail-check is done first
+so this can also happen to items that couldn't be targeted by the spell (i.e. repair non-broken items).
+This way you can cast Repair on an important item and if it fails due to a low magic ability the
+important item can be destroyed.
 
 ### Price formula
 
