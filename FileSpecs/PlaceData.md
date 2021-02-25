@@ -22,11 +22,21 @@ Offset | Meaning
 
 ### Healer
 
-**TODO**
-
-Most likely the first 11 words are the prices to heal all non-combat-only ailments.
-Then 1 word for the price to heal 1 LP.
-Then 1 word for the price to remove a curse.
+Offset | Meaning
+--- | ---
+0 | Cost to heal the Lamed condition
+2 | Cost to heal the Poisoned condition
+4 | Cost to heal the Petrified condition
+6 | Cost to heal the Diseased condition
+8 | Cost to heal the Aging condition
+10 | Cost to revive a dead body
+12 | Cost to revive someone from his ashes
+14 | Cost to revive someone from dust
+16 | Cost to heal the Mad condition
+18 | Cost to heal the Blind condition
+20 | Cost to heal the Drugged condition
+22 | Cost to heal 1 LP
+24 | Cost to remove a curse from an item
 
 ### Sage
 
@@ -45,9 +55,9 @@ Offset | Meaning
 Offset | Meaning
 --- | ---
 0 | Cost to rest
-2 | **Unknown**
-4 | **Unknown**
-6 | **Unknown**
+2 | Bedroom X
+4 | Bedroom Y
+6 | Bedroom map index
 8 | LP healing in percent
 
 ### Merchant
