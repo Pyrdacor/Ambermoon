@@ -74,6 +74,16 @@ Offset | Meaning
 
 No data. It is provided by Merchant_data.amb.
 
+### Raft dealer
+
+Offset | Meaning
+--- | ---
+0 | Price of a raft
+2 | Spawn location X (1-based)
+4 | Spawn location Y (1-based)
+6 | Spawn location map index
+8 | Stationary image bit value (= 2 -> bit 1 set)
+
 ### Ship dealer
 
 Offset | Meaning

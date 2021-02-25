@@ -216,7 +216,7 @@ Value | Type
 5 | Merchant (goods)
 6 | Food dealer
 7 | Library (spell scroll dealer)
-8 | **Unknown** (not used in Ambermoon, maybe Guild from Amberstar?)
+8 | Raft dealer (not used in Ambermoon)
 9 | Ship dealer
 10 | Horse dealer
 11 | Blacksmith (item repair)
