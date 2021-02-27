@@ -1,8 +1,8 @@
-# Map event data
+# Event data
 
-Data for map events is stored in the map data files. See [Maps](Maps.md) for more details.
+Data for map events is stored in the map data files. See [Maps](Maps.md) for more details. Moreover NPCs and party members also store events of the same format for conversations.
 
-Here the data format for specific map events is shown. Each map event can use up to 9 bytes for the event data.
+Here the data format for specific events is shown. Each event can use up to 9 bytes for the event data.
 
 
 ## Teleport event (0x01 / 1)
@@ -38,8 +38,10 @@ Assumption of data inside the unknown data:
 
 Offset | Type | Description
 --- | --- | ---
-0x00 | ubyte | Lock flags (0x00: open, 0x01: locked but can be opened by lockpick, 0x64 locked with special key, other values too)
-0x01 | ubyte[4] | **Unknown**
+0x00 | ubyte | Lockpicking chance reduction (0-100, see chest event data)
+0x01 | ubyte | **Unknown** (seems like an index)
+0x02 | ubyte | Optional index of a map text to display (0xff means no text)
+0x03 | ubyte[2] | **Unknown**
 0x05 | uword | Key index if locked
 0x07 | uword | Unlock fail event index (0-based)
 
@@ -53,13 +55,16 @@ Assumption of data inside the unknown data:
 
 Offset | Type | Description
 --- | --- | ---
-0x00 | ubyte | Lock flags (0x00: open, 0x01: locked but can be opened by lockpick, 0x64 locked with special key, other values too)
-0x01 | ubyte | **Unknown** (always 0 except for one chest with 20 blue discs which has 0x32 and lock flags of 0x00)
+0x00 | ubyte | Lockpicking chance reduction (0-100)
+0x01 | ubyte | **Unknown** (only one chests uses this)
 0x02 | ubyte | Optional index of a map text to display (0xff means no text)
 0x03 | ubyte | Chest data index
 0x04 | ubyte | Remove if empty (0 or 1)
 0x05 | uword | Key index if locked
 0x07 | uword | Unlock fail event index (0-based)
+
+If the Lockpicking chance reduction is 0, the chest is always open. A value of 100 means that the chest can't be lockpicked at all. Many chests have a value of 1 which is a chest that can't be lockpicked in a normal way.
+If the key index is not 0, the chest can't be lockpicked.
 
 ## Text popup event (0x04 / 4)
 
