@@ -73,7 +73,8 @@ Offset | Type | Description
 0x0504 | EventBits[1024] | Event active state bits. This provides 64 event bits for maps 1 to 1024. But used are only maps 1 to 528. For event bit structure see below.
 0x2504 | CharacterBits[1024] | Controls if map characters are present on the map.
 0x3504 | ubyte[15] | Dictionary words (see below). Maybe there are some more bytes/bits here but in original game there are only 115 possible dictionary entries. 15 bytes are enough for 115 entries.
-0x35A4 | ubyte[64] | Chest locked states (512 bits for chest 0-511). See below.
+0x35A4 | ubyte[32] | Chest locked states (256 bits for chest 0-255). See below.
+0x35C4 | ubyte[32] | Door locked states (256 bits for door 0-255). See below.
 0x35E4 | ubyte[6] | Battle positions for all 6 party members (each can be 0 to 11)
 0x35EB | \* | Events (see below).
 
@@ -165,7 +166,8 @@ A set bit means "unlocked" and an unset one means "not unlocked yet".
 
 ### Chest locked states
 
-There are only 185 chests (1-131 and 203-256). But it seems possible that there can be up to 512 chests (including chest index 0).
+There are only 185 chests (1-131 and 203-256). In total there can be 256 chests.
+Chests in events are 1-based. But chest 1 uses bit1 and not bit0. So either this is a bug or chest index 0 is also valid in theory.
 
 Each bit has the following meaning:
 - 0: Chest is locked
@@ -173,6 +175,21 @@ Each bit has the following meaning:
 
 The order of the bits is this (where each digit is a chest index in hex). \
 76543210 FEDCBA98 ...
+
+Note: There is a chest sub-file with index 256 inside Chest_data.amb. It is completely empty and is not used at all in the game.
+It can't be used because the chest index is stored as a byte and a byte can only store values up to 255.
+
+
+### Door locked states
+
+There can be up to 256 doors. Each one has a bit similar to the chest ones. Door index 0 uses the first bit (lsb of the first byte) and so on.
+The door events specify a door index from 0 to 38.
+
+Note: The door to Kire's treasure room uses the same door index as one of the doors in Crook's cellar. I guess this is a bug as
+doors on the forest moon have higher door indices in general and this is chest index 0. So opening one of them should open the other one as well.
+The one in Crook's cellar can be opened by a lockpick or using the ability lockpicking. But in some tests the door in Kire's residence was
+still locked even when the other door was opened. So maybe it is reset by some event? Would be interesting if the door in Crook's cellar is
+locked again after returning from forest moon without opening the door to Kire's treasure room.
 
 
 ### Game options

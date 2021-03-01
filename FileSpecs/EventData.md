@@ -32,36 +32,29 @@ Offset | Type | Description
 
 Used for locked doors.
 
-Assumption of data inside the unknown data:
-- Ability to disarm the trap
-- Ability to lockpick the door
-
 Offset | Type | Description
 --- | --- | ---
 0x00 | ubyte | Lockpicking chance reduction (0-100, see chest event data)
-0x01 | ubyte | **Unknown** (seems like an index)
-0x02 | ubyte | Optional index of a map text to display (0xff means no text)
-0x03 | ubyte[2] | **Unknown**
+0x01 | ubyte | Door index (used in savegame to determine if a door was unlocked)
+0x02 | ubyte | Optional index of a map text to display when showing door window (0xff means no text)
+0x03 | ubyte | Optional index of a map text to display when unlocked (0xff means no text)
+0x04 | ubyte | **Unknown** (always 0)
 0x05 | uword | Key index if locked
-0x07 | uword | Unlock fail event index (0-based)
+0x07 | uword | Unlock fail event index (0-based, 0xffff means none, this is basically the trap event chain)
 
 ## Chest event (0x03 / 3)
 
 Used for chests, piles, lootable map objects etc.
 
-Assumption of data inside the unknown data:
-- Ability to disarm the trap
-- Ability to lockpick the chest
-
 Offset | Type | Description
 --- | --- | ---
 0x00 | ubyte | Lockpicking chance reduction (0-100)
 0x01 | ubyte | **Unknown** (only one chests uses this)
-0x02 | ubyte | Optional index of a map text to display (0xff means no text)
-0x03 | ubyte | Chest data index
+0x02 | ubyte | Optional index of a map text to display when showing the opened chest (0xff means no text)
+0x03 | ubyte | Chest data index (also used for locked state in savegame)
 0x04 | ubyte | Remove if empty (0 or 1)
 0x05 | uword | Key index if locked
-0x07 | uword | Unlock fail event index (0-based)
+0x07 | uword | Unlock fail event index (0-based, 0xffff means none, this is basically the trap event chain)
 
 If the Lockpicking chance reduction is 0, the chest is always open. A value of 100 means that the chest can't be lockpicked at all. Many chests have a value of 1 which is a chest that can't be lockpicked in a normal way.
 If the key index is not 0, the chest can't be lockpicked.
