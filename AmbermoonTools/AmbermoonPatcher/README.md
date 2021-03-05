@@ -43,11 +43,11 @@ You can use line-comments by using `//`. Everything after this in the same
 line is treated as a comment and won't be considered by the interpreter.
 
 If you want to comment multiple lines you can use `/*` and `*/`. Everything
-between will be treated as a comment. But note that ib contrast to languages
-like C a block comment must start at the beginning of a line and end at the
+between will be treated as a comment. But note that in contrast to languages
+like C, a block comment must start at the beginning of a line and end at the
 end of a line. You can't comment parts of a line with it!
 
-Line comments can comment parts of lines though.
+Line comments can still comment parts of lines though.
 
 #### Examples
 
@@ -56,18 +56,19 @@ Line comments can comment parts of lines though.
 /*
 This is a block comment
 */
+This /*is not*/ allowed
 ```
 
 
 ### Destinations
 
-Destinations has 3 parts:
+Destinations have 3 parts:
 - Filename
 - Subfile index
 - Offset
 
 The format is: `Filename[SubfileIndex]:Offset`. The offset can be given in decimal or hex.
-If given in hex it must be prefixed by either $ or 0x so both are valid:
+If given in hex it must be prefixed by either $ or 0x so both of the following are valid:
 
 - `Party_char.amb[15]:0x1C`
 - `Party_char.amb[15]:$1C`
@@ -76,10 +77,11 @@ The sub file index can be given in decimal and hex as well:
 
 - `Party_char.amb[15]:0x1C`
 - `Party_char.amb[0xf]:0x1C`
+- `Party_char.amb[$f]:0x1C`
 
-Note that sub-file indices start with 1. So the index 0 is not valid!
+Note that sub-file indices start at 1. So the index 0 is not valid!
 
-If the sub file index is omitted it always default to 1. This may be
+If the sub file index is omitted it always defaults to 1. This may be
 useful when working with non-container files which have no real sub files.
 In this case specifying the sub file index explicitely with 1 is valid too.
 
@@ -88,14 +90,15 @@ In this case specifying the sub file index explicitely with 1 is valid too.
 
 The data to insert can be specified in 2 different ways:
 - As a constant expression
-- As a source expression (basically a destination with length)
+- As a source expression (basically a destination with a length)
 
 #### Constant expressions
 
-The easiest way is a constant expression. You can just specify the byte values
+The easiest way to specify data is a constant expression. You can just specify the byte values
 to insert. Those can be given as hex values or hex byte sequences:
 
 - 0x1234
+- $1234
 - '12 34'
 
 Note that hex values are always in the big-endian format so the more significant bytes
@@ -103,7 +106,7 @@ come first. So the bytes you write first in the patch file will also be written 
 
 The length in bytes of the constant expression is determined by the number of digits:
 
-Expression | Length (bytes) | Data (hex)
+Expression | Length (bytes) | Data bytes (hex)
 --- | --- | ---
 0x1 | 1 | 01
 0x12 | 1 | 12
@@ -114,7 +117,7 @@ Expression | Length (bytes) | Data (hex)
 
 So 0x1 is the same as 0x01. You can't specify half-bytes etc.
 But you can specify more bytes like 0x0001 (2 bytes -> 00 01).
-This will only work with hex numbers though. Integers will only
+This will only work with hex numbers though. Decimal integers will only
 occupy 1, 2 or 4 bytes dependent on the smallest number of bytes
 they fit into. So in general try to avoid decimal integers at all.
 
@@ -124,6 +127,9 @@ the following byte sequence: `00 00 00 01`. To avoid mistakes
 the following will generate an error: `0x1234,1` as the length
 is smaller than the given value.
 
+When you used decimal integers you should always
+explicitly add the length like `5,2` which is 00 05.
+
 Byte sequences must be enclosed in single quotes and must always
 be 2-digit hex values.
 
@@ -131,9 +137,11 @@ be 2-digit hex values.
 
 Source expressions are useful to copy data from somewhere else.
 A source expression is basically a destination with a length.
-So the format is: `Filename:Offset,Length`.
+So the format is: `Filename[SubFileIndex]:Offset,Length`.
 
 The length can be given in decimal or hex (with prefix).
+
+The sub file index can again be omitted and would default to 1.
 
 ##### Example
 
