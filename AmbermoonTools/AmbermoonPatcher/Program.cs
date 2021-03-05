@@ -50,7 +50,12 @@ namespace AmbermoonPatcher
                     action.Run(fileManager);
 
                 Console.WriteLine();
-                Console.WriteLine("Patch was applied successfully.");
+
+                if (fileManager.Save(dataPath))
+                {
+                    Console.WriteLine();
+                    Console.WriteLine("Patch was applied successfully.");
+                }
             }
             catch (Exception ex)
             {
