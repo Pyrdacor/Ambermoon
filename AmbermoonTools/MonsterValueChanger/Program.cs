@@ -41,6 +41,24 @@ namespace MonsterValueChanger
         }
 
         static string DataPath = Path.GetDirectoryName(Assembly.GetEntryAssembly().Location);
+        static GameData gameData = null;
+        static GraphicProvider graphicProvider = null;
+        static GameData GameData
+        {
+            get
+            {
+                if (gameData == null)
+                {
+                    gameData = LoadGameData();
+
+                    var hunks = AmigaExecutable.Read(gameData.Files["AM2_CPU"].Files[1]);
+                    graphicProvider = new GraphicProvider(gameData,
+                        new Ambermoon.Data.Legacy.ExecutableData.ExecutableData(hunks), null);
+                }
+
+                return gameData;
+            }
+        }
 
         enum ErrorCode
         {
@@ -60,7 +78,7 @@ namespace MonsterValueChanger
             Environment.Exit((int)errorCode);
         }
 
-        static Dictionary<int, IDataReader> LoadMonsterFiles()
+        static GameData LoadGameData()
         {
             var gameData = new GameData();
 
@@ -96,9 +114,16 @@ namespace MonsterValueChanger
                 return null;
             }
 
+            return gameData;
+        }
+
+        static Dictionary<int, IDataReader> LoadMonsterFiles()
+        {
+            var gameData = GameData;
+
             try
             {
-                return gameData.Files["Monster_char_data.amb"].Files;
+                return gameData == null ? null : gameData.Files["Monster_char_data.amb"].Files;
             }
             catch
             {
@@ -110,7 +135,7 @@ namespace MonsterValueChanger
 
         static Dictionary<int, Monster> LoadMonsters()
         {
-            var monsterReader = new MonsterReader();
+            var monsterReader = new MonsterReader(GameData, graphicProvider);
 
             try
             {
@@ -119,7 +144,7 @@ namespace MonsterValueChanger
                 if (files == null)
                     return null;
 
-                return files.Select(f => new { i = f.Key, m = Monster.Load(monsterReader, f.Value) }).ToDictionary(x => x.i, x => x.m);
+                return files.Select(f => new { i = f.Key, m = Monster.Load((uint)f.Key, monsterReader, f.Value) }).ToDictionary(x => x.i, x => x.m);
             }
             catch
             {
@@ -131,7 +156,7 @@ namespace MonsterValueChanger
 
         static Dictionary<int, Monster> LoadMonsters(out Dictionary<int, IDataReader> files)
         {
-            var monsterReader = new MonsterReader();
+            var monsterReader = new MonsterReader(GameData, graphicProvider);
             files = null;
 
             try
@@ -141,7 +166,7 @@ namespace MonsterValueChanger
                 if (files == null)
                     return null;
 
-                return files.Select(f => new { i = f.Key, m = Monster.Load(monsterReader, f.Value) }).ToDictionary(x => x.i, x => x.m);
+                return files.Select(f => new { i = f.Key, m = Monster.Load((uint)f.Key, monsterReader, f.Value) }).ToDictionary(x => x.i, x => x.m);
             }
             catch
             {
