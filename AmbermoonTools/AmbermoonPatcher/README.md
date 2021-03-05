@@ -19,7 +19,7 @@ The order of patch execution is from top of the script to the bottom.
 
 ```
 # Fix 123: Gryban waiting location
-- Replace Party_char.amb[15]:0x1C '00 00'
+- Replace Party_char.amb[15]:0x1C 'ff ff'
 ```
 
 Every fix starts with a description line which starts with a #.
