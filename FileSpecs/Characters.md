@@ -14,7 +14,7 @@ Offset | Type | Description
 0x0002 | ubyte | [Race](Enumerations/Races.md)
 0x0003 | ubyte | [Class](Enumerations/Classes.md)
 0x0004 | ubyte | [Usable spell types](Enumerations/SpellTypes.md)
-0x0005 | ubyte | Level (1-99)
+0x0005 | ubyte | Level (1-50)
 0x0006 | ubyte | Number of free hands (0-2, Alkem has 255 which might be a bug)
 0x0007 | ubyte | Number of free fingers (0-2)
 0x0008 | ubyte | [Spoken languages](Enumerations/Languages.md)
