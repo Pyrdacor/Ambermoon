@@ -72,7 +72,7 @@ Offset | Type | Description
 0x00DC | word | Base attack damage (party members only use this, monsters use base attack damage + rand(0, variable attack damage))
 0x00DE | uword | Magic attack damage
 0x00E0 | uword | Magic defense
-0x00E2 | uword | APR per level
+0x00E2 | uword | APR increase levels (see below)
 0x00E4 | uword | HP per level
 0x00E6 | uword | SP per level
 0x00E8 | uword | SLP per level
@@ -99,7 +99,15 @@ Each attribute (including the character's age) and ability stores 4 values:
 
 The actual effective and also displayed value is the current value plus the bonus value.
 
-The backup value stores the current value if a temporary effect is active which affects the current value. A good example is the exhaustion ailment. It cuts all attributes' current values in half. So the backup value will then store the current value before reduction and the new current value is cut in half. When the effect ends the backup value is assigned to the current value and therefore restores the old value. 
+The backup value stores the current value if a temporary effect is active which affects the current value. A good example is the exhaustion ailment. It cuts all attributes' current values in half. So the backup value will then store the current value before reduction and the new current value is cut in half. When the effect ends the backup value is assigned to the current value and therefore restores the old value.
+
+## Level up
+
+There is a value which determines when the number of attacks per round increases. It's called APRIncreaseLevels here.
+
+The number of attacks per round is 1 if APRIncreaseLevels is 0. Otherwise it is `max(1, floor(Level / APRIncreaseLevels))`.
+
+Hit points and training points are increased on each level up by the given "per level" value. Spell points and spell learning points are increased by their "per level" value plus `floor(INT/25)`. Note that Ambermoon only uses the base INT value without bonus. This might be a bug. Spell points and spell learning points are only increased for magical classes which can have SP. So not for warriors, thieves or animals.
 
 ## Additional monster data
 
