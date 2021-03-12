@@ -43,8 +43,9 @@ The Party_data.sav contains things like:
 - Location of transports like boats or horses
 - Global variables (quest states, game progress, etc)
 - Flags if monsters or characters are on a map or not
-- Information if chests are locked
+- Information if chests or doors are locked
 - Learned dictionary words for conversations
+- Activated go-to points
 - Information about map tile changes (like pressed buttons, moved walls, etc)
 - Even the game options are part of the savegame and therefore distinct to other savegames
 
@@ -73,6 +74,8 @@ Offset | Type | Description
 0x0504 | EventBits[1024] | Event active state bits. This provides 64 event bits for maps 1 to 1024. But used are only maps 1 to 528. For event bit structure see below.
 0x2504 | CharacterBits[1024] | Controls if map characters are present on the map.
 0x3504 | ubyte[15] | Dictionary words (see below). Maybe there are some more bytes/bits here but in original game there are only 115 possible dictionary entries. 15 bytes are enough for 115 entries.
+0x3513 | ubyte[113] | **Unknown** (I guess some are used for more dictionary words)
+0x3584 | ubyte[32] | Activated go-to points (256 bits, each go-to point has an index in the range 0-255). If a bit is set, the point is active. Order of bits is like for chests etc.
 0x35A4 | ubyte[32] | Chest locked states (256 bits for chest 0-255). See below.
 0x35C4 | ubyte[32] | Door locked states (256 bits for door 0-255). See below.
 0x35E4 | ubyte[6] | Battle positions for all 6 party members (each can be 0 to 11)
