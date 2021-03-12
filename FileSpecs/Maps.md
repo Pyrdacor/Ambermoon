@@ -160,6 +160,22 @@ Each position is for a 5 minute ingame duration starting at 00:00. So there is a
 for every timeslot of a day. This is also used for static characters. They will have
 288 identical positions.
 
+### Go-to points
+
+After the character positions the go-to points follow. I guess only for 3D dungeons and cities (outdoor flag) but maybe for all maps.
+
+The section starts with an uword which gives the number of go-to points.
+
+Then for each of them there are 20 bytes:
+
+Offset | Type | Description
+--- | --- | ---
+0x00 | ubyte | X (1-based)
+0x01 | ubyte | Y (1-based)
+0x02 | ubyte | **Unknown**
+0x03 | ubyte | Index (see [Savegame](Savegame.md))
+0x04 | ubyte[16] | Name / tooltip text
+
 ## Maps
 
 The first 256 maps (1 to 256) build the Lyramion world map. Each is 50x50 tiles in size.
