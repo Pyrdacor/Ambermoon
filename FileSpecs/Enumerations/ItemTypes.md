@@ -2,24 +2,25 @@
 
 Value | Name
 ----|----
-0 | Armor
-1 | Headgear
-2 | Footgear
-3 | Shield
-4 | Close-ranged weapon
-5 | Long-ranged weapon
-6 | Ammunition
-7 | Text scroll
-8 | Spell scroll
-9 | Potion
-10 | Amulet
-11 | Brooch
-12 | Ring
-13 | Gem
-14 | Tool
-15 | Key
-16 | Normal item
-17 | Magical item
-18 | Special item
-19 | Transportation
+0 | None
+1 | Armor
+2 | Headgear
+3 | Footgear
+4 | Shield
+5 | Close-ranged weapon
+6 | Long-ranged weapon
+7 | Ammunition
+8 | Text scroll
+9 | Spell scroll
+10 | Potion
+11 | Amulet
+12 | Brooch
+13 | Ring
+14 | Gem
+15 | Tool
+16 | Key
+17 | Normal item
+18 | Magical item
+19 | Special item
+20 | Transportation
 21 | Ailment
