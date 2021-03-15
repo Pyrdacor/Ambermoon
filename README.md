@@ -11,7 +11,7 @@ I will provide some helpful tools too.
 ## Tool releases
 
 Version | Windows 64bit | Linux 64bit | Windows 32bit
---- | --- | ---
+--- | --- | --- | ---
 1.0.5 | [Download](https://github.com/Pyrdacor/Ambermoon/releases/download/v1.0.5/AmbermoonTools-Windows.zip) | [Download](https://github.com/Pyrdacor/Ambermoon/releases/download/v1.0.5/AmbermoonTools-Linux.tar.gz) | [Download](https://github.com/Pyrdacor/Ambermoon/releases/download/v1.0.5/AmbermoonTools-Windows32Bit.zip)
 
 This zip file contains:
