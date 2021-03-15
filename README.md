@@ -10,14 +10,15 @@ I will provide some helpful tools too.
 
 ## Tool releases
 
-Version | Windows 64bit | Linux 64bit
+Version | Windows 64bit | Linux 64bit | Windows 32bit
 --- | --- | ---
-1.0.4 | [Download](https://github.com/Pyrdacor/Ambermoon/releases/download/v1.0.4/AmbermoonTools-Windows.zip) | [Download](https://github.com/Pyrdacor/Ambermoon/releases/download/v1.0.4/AmbermoonTools-Linux.tar.gz)
+1.0.5 | [Download](https://github.com/Pyrdacor/Ambermoon/releases/download/v1.0.5/AmbermoonTools-Windows.zip) | [Download](https://github.com/Pyrdacor/Ambermoon/releases/download/v1.0.5/AmbermoonTools-Linux.tar.gz) | [Download](https://github.com/Pyrdacor/Ambermoon/releases/download/v1.0.5/AmbermoonTools-Windows32Bit.zip)
 
 This zip file contains:
 - A tool to pack files into Ambermoon game data files (AmbermoonPack)
 - A tool to change monster values (MonsterValueChanger)
 - A tool to export and import texts from/into Ambermoon game data files (AmbermoonTextImport)
+- A tool to extract ADF disk files (AmbermoonDiskExtract)
 
 [![Build status](https://ci.appveyor.com/api/projects/status/dn5n21r8m11an48i/branch/master?svg=true)](https://ci.appveyor.com/project/Pyrdacor/ambermoon/branch/master)
 
