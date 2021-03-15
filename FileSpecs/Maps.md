@@ -172,7 +172,7 @@ Offset | Type | Description
 --- | --- | ---
 0x00 | ubyte | X (1-based)
 0x01 | ubyte | Y (1-based)
-0x02 | ubyte | **Unknown**
+0x02 | ubyte | [Direction](Enumerations/Directions.md)
 0x03 | ubyte | Index (see [Savegame](Savegame.md))
 0x04 | ubyte[16] | Name / tooltip text
 
