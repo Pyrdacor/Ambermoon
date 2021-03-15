@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
@@ -9,6 +9,7 @@
     <RepositoryUrl>https://github.com/Pyrdacor/Ambermoon</RepositoryUrl>
     <RepositoryType>Github</RepositoryType>
     <PackageTags>Ambermoon ADF Extract File Legacy Amiga Disk</PackageTags>
+    <Version>1.0.5</Version>
   </PropertyGroup>
 
   <ItemGroup>

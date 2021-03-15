@@ -23,7 +23,7 @@ artifacts:
     name: AmbermoonTools-Linux
 
 after_build:
-  - ps: ./AmbermoonTools/pubish.ps1
+  - ps: ./AmbermoonTools/publish.ps1
 
 test: off
 
