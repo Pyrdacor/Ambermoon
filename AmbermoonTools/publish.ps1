@@ -19,6 +19,14 @@ if ($isWindows) {
   cd dist
   7z a ..\AmbermoonTools-Windows.zip *.*
   cd ..
+  rm -r dist\*.*
+  copy "AmbermoonTools\AmbermoonPack\bin\Any CPU\Release\netcoreapp3.1\win-x86\publish\AmbermoonPack.exe" "dist\"
+  copy "AmbermoonTools\MonsterValueChanger\bin\Any CPU\Release\netcoreapp3.1\win-x86\publish\MonsterValueChanger.exe" "dist\"
+  copy "AmbermoonTools\AmbermoonTextImport\bin\Any CPU\Release\netcoreapp3.1\win-x86\publish\AmbermoonTextImport.exe" "dist\"
+  copy "AmbermoonTools\AmbermoonDiskExtract\bin\Any CPU\Release\netcoreapp3.1\win-x86\publish\AmbermoonDiskExtract.exe" "dist\"
+  cd dist
+  7z a ..\AmbermoonTools-Windows32Bit.zip *.*
+  cd ..
   rm -r dist
 } else {
   Write-Host Publish Linux executable
