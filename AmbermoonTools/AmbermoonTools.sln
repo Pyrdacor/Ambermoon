@@ -6,7 +6,7 @@ MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{50F239F2-6D78-48C3-A4AB-824CE4EBC078}"
 	ProjectSection(SolutionItems) = preProject
 		appveyor.yml = appveyor.yml
-		pack.ps1 = pack.ps1
+		publish.ps1 = publish.ps1
 	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AmbermoonEditor", "AmbermoonEditor\AmbermoonEditor.csproj", "{590149D8-C736-46EA-A5E1-189AF81EE0C2}"
@@ -19,7 +19,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AmbermoonTextImport", "Ambe
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AmbermoonDiskExtract", "AmbermoonDiskExtract\AmbermoonDiskExtract.csproj", "{01631570-E32D-4AC4-9091-79F79F86DBE9}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AmbermoonPatcher", "AmbermoonPatcher\AmbermoonPatcher.csproj", "{B99E0FF0-47D0-4405-87BA-B2334D373D2B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AmbermoonPatcher", "AmbermoonPatcher\AmbermoonPatcher.csproj", "{B99E0FF0-47D0-4405-87BA-B2334D373D2B}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

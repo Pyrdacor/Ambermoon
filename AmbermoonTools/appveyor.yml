@@ -1,12 +1,8 @@
 environment:
   matrix:
     - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2019
-      RID: win-x64
-      job_name: Windows build
       configuration: Release
     - APPVEYOR_BUILD_WORKER_IMAGE: Ubuntu
-      RID: linux-x64
-      job_name: Linux build
       configuration: ReleaseLinux
 
 platform: Any CPU
@@ -21,14 +17,13 @@ build:
 artifacts:
   - path: AmbermoonTools-Windows.zip
     name: AmbermoonTools-Windows
+  - path: AmbermoonTools-Windows32Bit.zip
+    name: AmbermoonTools-Windows32Bit
   - path: AmbermoonTools-Linux.tar.gz
     name: AmbermoonTools-Linux
 
 after_build:
-  - ps: dotnet publish -c $env:CONFIGURATION "./AmbermoonTools/AmbermoonPack/AmbermoonPack.csproj" -p:PublishSingleFile=true -r $env:RID --no-restore
-  - ps: dotnet publish -c $env:CONFIGURATION "./AmbermoonTools/MonsterValueChanger/MonsterValueChanger.csproj" -p:PublishSingleFile=true -r $env:RID --no-restore
-  - ps: dotnet publish -c $env:CONFIGURATION "./AmbermoonTools/AmbermoonTextImport/AmbermoonTextImport.csproj" -p:PublishSingleFile=true -r $env:RID --no-restore
-  - ps: ./AmbermoonTools/pack.ps1
+  - ps: ./AmbermoonTools/pubish.ps1
 
 test: off
 
@@ -36,6 +31,19 @@ deploy:
   - provider: GitHub
     name: AmbermoonTools-Windows
     artifact: AmbermoonTools-Windows
+    tag: $(APPVEYOR_REPO_TAG_NAME)
+    release: $(APPVEYOR_REPO_TAG_NAME)
+    description: 'Release $(APPVEYOR_REPO_TAG_NAME)'
+    auth_token:
+      secure: CP6qsCjIlyJrYsuHs4tzdrYUWOO83Jlx6/U0Gqtl/SicGmBaN1hrYUEk6RSL6D8j
+    draft: true
+    prerelease: false
+    force_update: true
+    on:
+      APPVEYOR_REPO_TAG: true
+  - provider: GitHub
+    name: AmbermoonTools-Windows32Bit
+    artifact: AmbermoonTools-Windows32Bit
     tag: $(APPVEYOR_REPO_TAG_NAME)
     release: $(APPVEYOR_REPO_TAG_NAME)
     description: 'Release $(APPVEYOR_REPO_TAG_NAME)'
