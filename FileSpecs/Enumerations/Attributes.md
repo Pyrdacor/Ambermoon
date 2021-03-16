@@ -10,12 +10,18 @@ There are 8 attributes:
 - Luck (LUK)
 - Anti-Magic (A-M)
 
+In the character data there are actually 10. The character's age is also stored as an attribute and there is one unused attribute.
+
 The attribute values are stored as 4 uwords:
 
 - uword[0]: Current value
 - uword[1]: Max value
 - uword[2]: Bonus from equipment etc
-- uword[3]: Unknown
+- uword[3]: Backup value
+
+The backup value is used when the player is exhausted. In that case all attributes are halved (CurrentValue). The previous CurrentValue is stored as the backup value.
+
+If your previous value was not exactly dividable by 2 this way it can be restored safely to the correct value.
 
 ## On items
 
