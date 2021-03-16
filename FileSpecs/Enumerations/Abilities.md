@@ -17,7 +17,7 @@ The ability values are stored as 4 uwords:
 - uword[0]: Current value
 - uword[1]: Max value
 - uword[2]: Bonus from equipment etc
-- uword[3]: Unknown
+- uword[3]: Backup value (same as for [Attributes](Attributes.md))
 
 ## On items
 
