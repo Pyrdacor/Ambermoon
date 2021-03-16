@@ -19,7 +19,7 @@ After the header there are the objects. Objects are really object groups. So the
 
 The section starts with an uword which is the number of object groups. Object groups are referenced from [3D map blocks](Maps3D.md).
 
-Each object group consists of a header (uword) which is **unknown** yet and 8 object entries. As stated before, object groups consists of 1 to 8 objects. For example burning torches are two textures/billboards (objects) which form one real map object. One object is the torch and the other one the flame.
+Each object group consists of a header (uword) which gives the [AutomapType](Enumerations/AutomapType.md) the object uses and 8 object entries. As stated before, object groups consists of 1 to 8 objects. For example burning torches are two textures/billboards (objects) which form one real map object. One object is the torch and the other one is the flame.
 
 Note that the objects are rendered in reverse order so that the first object is drawn above later objects. In modern rendering terms that means that the depth value is lowest for the first object and highest for the last object. Using the burning torch example, the flame is the first object and the torch the second one. Therefore the flame is shown in front of the torch.
 
@@ -38,7 +38,7 @@ The relative positions are relative to the map block from the 3D map. Note that 
 
 A block's dimension is 512x512x341 so values of 255 for x and y are used to center objects. Note that the given position is the center of the object.
 
-The object group section contains 66 bytes per object group.
+The object group section contains 66 bytes per object group. 2 byte header, and 8 objects with 8 bytes each.
 
 Note that the object data index is 1-based and 0 means "no object". The latter is used to mark unused/empty object entries. When you load the object data below they might be 0-based so you have to subtract 1 to get the right object data for non-empty objects.
 
