@@ -1,7 +1,7 @@
 # Automap types
 
 Value | Name | Additional info | Frames of animation (1 = no animation)
---- | --- | ---
+--- | --- | --- | ---
 0 | None | Not in legend / no text, empty blocks | -
 1 | Wall | Not in legend / no text, used by walls | -
 2 | Riddlemouth | Used by walls | 4
