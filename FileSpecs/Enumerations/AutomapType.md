@@ -17,7 +17,7 @@ Value | Name | Additional info
 12 | Tavern | 
 13 | Chest | 
 14 | Exit | X symbol
-15 | **Unknown** | Not in legend / no text. Not used in Ambermoon I guess.
+15 | ChestOpen | Not in legend / no text
 16 | Pile | 
 17 | Person | Green sphere symbol
 18 | GotoPoint | White blinking point you can return to
