@@ -38,3 +38,17 @@ Value | Name
 6 | Luck
 7 | Anti-Magic
 8 | Age
+
+
+## Effects
+
+- Strength: Increases the max weight by 1kg per point.
+- Intelligence: Adds INT/25 (rounded down) SP and SLP on level up.
+- Dexterity: Chance in percent to not trigger lock traps.
+- Speed: Higher values can act earlier in battle.
+- Stamina: Increases LP? Exact values **unknown**.
+- Charisma: Increases the sell price by 1% every full 10 points.
+- Luck: Chance in percent to avoid the effect of a triggered trap.
+- Anti-Magic: Chance in percent to block enemy spells.
+
+Note: While the alchemistic Anti-Magic barrier spells won't increase A-M, they still add a hidden percentage bonus.
