@@ -56,7 +56,27 @@ A wall uses the wall index to access wall data from the [Labdata](Labdata.md). A
 
 Note that those indices are 1-based while 0 means "no wall" or "no object". But inside the labdata they might be 0-based so you might have to subtract 1 to get the right data.
 
-## Automap
+## Go-to points
+
+After the character positions the go-to points follow.
+
+The section starts with an uword which gives the number of go-to points.
+
+Then for each of them there are 20 bytes:
+
+Offset | Type | Description
+--- | --- | ---
+0x00 | ubyte | X (1-based)
+0x01 | ubyte | Y (1-based)
+0x02 | ubyte | [Direction](Enumerations/Directions.md)
+0x03 | ubyte | Index (see [Savegame](Savegame.md))
+0x04 | ubyte[16] | Name / tooltip text
+
+## Automap types for events
+
+For 3D maps after the go-to points there will be n bytes where n is the amount of map event list entries (not the total amout of events!). See [AutomapType](Enumerations/AutomapType.md] for possible values. If this is not 0 (None) and the event is available, the automap will show this automap icon on the map. Otherwise the automap type of the wall or object on that tile is used. If no wall or object is on that tile, no automap icon is shown.
+
+## Automap / map exploration
 
 The automap is used to track the exploration of 3D maps. Each tile is represented by a bit. The file Automap.amb contains a sub-file for each 3D map with the same index/name as the map. The size of the automap is `ceil(MAP_WIDTH * MAP_HEIGHT / 8)`.
 
@@ -64,7 +84,7 @@ Example: The map 259 has a size of 19x19 tiles. So in total this are 361 tiles. 
 
 If a bit is set to 0 it is not explored, if set to 1 it is explored.
 
-Note that the initial maps seem to be fully explored but if a map is entered and the map should not be explored at this state, the automap is adjusted to represent an unexplored map.
+Note that the initial maps seem to be fully explored but if a map is entered and the map should not be explored at this state, the automap is adjusted to represent an unexplored map. Maybe there is some bit in the savegame which states if a map was already entered or not or all maps are marked as fully unexplored when starting a new game.
 
 ### Bit order
 
@@ -94,6 +114,8 @@ Value | Name
 9 | Closed door
 10 | Open door
 14 | Exit
+
+As mentioned above the events can only provide some automap type which will have higher priority if not set to None. Objects can also provide automap types of course.
 
 
 ## Collision detection
