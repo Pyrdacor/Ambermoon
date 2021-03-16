@@ -74,7 +74,7 @@ Offset | Type | Description
 
 ## Automap types for events
 
-For 3D maps after the go-to points there will be n bytes where n is the amount of map event list entries (not the total amout of events!). See [AutomapType](Enumerations/AutomapType.md] for possible values. If this is not 0 (None) and the event is available, the automap will show this automap icon on the map. Otherwise the automap type of the wall or object on that tile is used. If no wall or object is on that tile, no automap icon is shown.
+For 3D maps after the go-to points there will be n bytes where n is the amount of map event list entries (not the total amout of events!). See [AutomapType](Enumerations/AutomapType.md) for possible values. If this is not 0 (None) and the event is available, the automap will show this automap icon on the map. Otherwise the automap type of the wall or object on that tile is used. If no wall or object is on that tile, no automap icon is shown.
 
 ## Automap / map exploration
 
