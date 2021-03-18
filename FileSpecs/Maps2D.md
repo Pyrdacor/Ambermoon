@@ -18,7 +18,7 @@ Tilesets | Palette
 4,5,6,7 | 7
 8 | 10
 
-## Icon data
+## Icon data (tilesets)
 
 Icon data files represent tilesets. There are 8 icon data files (tilesets).
 
@@ -36,11 +36,13 @@ Offset | Type | Description
 0x0000 | udword | [Tile flags](Enumerations/TileFlags.md)
 0x0004 | uword | Icon graphic index
 0x0006 | ubyte | Number of animation tiles
-0x0007 | ubyte | **Unknown**
+0x0007 | ubyte | Color index
 
 The icon graphic index refers to an icon graphic. The index starts with 1 (index 1 is the first icon graphic). The number of animation tiles specifies the number of icon graphics belonging to the tile's animation (e.g. water uses multiple tiles for animation). Non-animated tiles have a value of 1.
 
 So if you have icon graphic index 1 and 3 animation tiles the icons 1, 2 and 3 are used for the animation.
+
+The color index is used for the mini map (spell Magic Map View). There each tile is represented by a 2x2 pixel area with the given color. The color index is the 0-based index into the map's palette. Background tiles just fill the 2x2 area while foreground tiles will draw the lower-left and upper-right pixel only (only if the foreground tile index is not 0 of course).
 
 ## Map data
 
