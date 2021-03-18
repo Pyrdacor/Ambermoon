@@ -78,10 +78,14 @@ Offset | Type | Description
 0x0000 | udword | [Flags](Enumerations/TileFlags.md)
 0x0004 | ubyte | Texture index (taken from XWall3D.amb)
 0x0005 | ubyte | Automap type (see [Maps3D](Maps3D.md))
-0x0006 | ubyte | **Unknown**
+0x0006 | ubyte | Color index
 0x0007 | ubyte | Number of overlays
 
 If the number of overlays is greater than zero then there will be this amount of overlay data entries for this wall.
+
+The color index is used for the mini map (spell Magic Map View). There each wall is represented by a 2x2 pixel area with the given color. The color index is the 0-based index into the map's palette.
+
+The map border (object/wall index = 255) seems to be drawn with color index 2. Empty areas (no map border or wall) are drawn with color index 0.
 
 ### Overlay data entry
 
