@@ -40,7 +40,7 @@ Each row represents the mapping for a specific map type:
 
 The values represent indices into the map's palette. The column is the color index.
 
-For example on a world map a grass tile might use color index 10. Then you have to use the second mapping with index 10:
+For example on a world map a grass tile might use color index 10. Then you have to use the second mapping with index 10 (0-based):
 
 <code>00 01 1F 12 1C 14 15 06 08 0A **04** 02 0E 0C 13 10</code>
 
