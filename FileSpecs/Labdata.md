@@ -55,13 +55,15 @@ Offset | Type | Description
 0x0000 | udword | [Flags](Enumerations/TileFlags.md)
 0x0004 | uword | Texture index (taken from XObject3D.amb)
 0x0006 | ubyte | Number of animation frames
-0x0007 | ubyte | **Unknown**
+0x0007 | ubyte | Color index (see [Color](Enumerations/Color.md))
 0x0008 | ubyte | Texture width (as the texture file uses)
 0x0009 | ubyte | Texture height (as the texture file uses)
 0x000A | uword | Mapped texture width (used in rendering)
 0x000C | uword | Mapped texture height (used in rendering)
 
 The mapped texture dimensions are used to resize the texture (stretch or shrink). For example if the mapped texture width is twice the normal texture size, the object appears wider.
+
+I am not 100% sure about the color index here as it is always 0 in Ambermoon. But according to wall data it makes the most sense.
 
 ## Walls
 
@@ -78,14 +80,12 @@ Offset | Type | Description
 0x0000 | udword | [Flags](Enumerations/TileFlags.md)
 0x0004 | ubyte | Texture index (taken from XWall3D.amb)
 0x0005 | ubyte | Automap type (see [Maps3D](Maps3D.md))
-0x0006 | ubyte | Color index
+0x0006 | ubyte | Color index (see [Color](Enumerations/Color.md))
 0x0007 | ubyte | Number of overlays
 
 If the number of overlays is greater than zero then there will be this amount of overlay data entries for this wall.
 
-The color index is used for the mini map (spell Magic Map View). There each wall is represented by a 2x2 pixel area with the given color. The color index is the 0-based index into the map's palette.
-
-The map border (object/wall index = 255) seems to be drawn with color index 2. Empty areas (no map border or wall) are drawn with color index 0.
+The color index is used for the mini map (spell Magic Map View). There each wall is represented by a 2x2 pixel area with the given color. The map border (object/wall index = 255) seems to be drawn with color index 2. Empty areas (no map border or wall) are drawn with color index 0. As the mapping from color index to palette color index for 3D maps is a 1:1 mapping, this also is the palette color index in the original game data.
 
 ### Overlay data entry
 
