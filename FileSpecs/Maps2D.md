@@ -42,7 +42,7 @@ The icon graphic index refers to an icon graphic. The index starts with 1 (index
 
 So if you have icon graphic index 1 and 3 animation tiles the icons 1, 2 and 3 are used for the animation.
 
-The color index is used for the mini map (spell Magic Map View). There each tile is represented by a 2x2 pixel area with the given color. The color index is the 0-based index into the map's palette. Background tiles just fill the 2x2 area while foreground tiles will draw the lower-left and upper-right pixel only (only if the foreground tile index is not 0 of course).
+The color index is used for the mini map (spell Magic Map View). There each tile is represented by a 2x2 pixel area with the given color. Background tiles just fill the 2x2 area while foreground tiles will draw the lower-left and upper-right pixel of this area only (only if the foreground tile index is not 0 of course).
 
 ## Map data
 
