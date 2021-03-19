@@ -36,7 +36,7 @@ Offset | Type | Description
 0x0000 | udword | [Tile flags](Enumerations/TileFlags.md)
 0x0004 | uword | Icon graphic index
 0x0006 | ubyte | Number of animation tiles
-0x0007 | ubyte | Color index
+0x0007 | ubyte | Color index (see [Color](Enumerations/Color.md))
 
 The icon graphic index refers to an icon graphic. The index starts with 1 (index 1 is the first icon graphic). The number of animation tiles specifies the number of icon graphics belonging to the tile's animation (e.g. water uses multiple tiles for animation). Non-animated tiles have a value of 1.
 
