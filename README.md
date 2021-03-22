@@ -77,6 +77,7 @@ Section | Description
   - [Lyramion world map](Graphics/Maps/001.png)
   - [Forest moon map](Graphics/Maps/300.png)
   - [Morag map](Graphics/Maps/513.png)
+- [Map tiles](Graphics/Mapicons)
 - [80x80](Graphics/80x80)
 - [EventPics](Graphics/EventPics)
 - [Objects3D](Graphics/Objects3D)
