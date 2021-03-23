@@ -39,33 +39,33 @@ Index | Name | SP | SLP | Area | Target | Description
 
 Index | Name | Description
 --- | --- | ---
-1 | Charge item | 
+1 | Charge item | Adds a charge to a magic item
 2 | Light | Adds 1 light radius for 150 ingame minutes (2:30)
 3 | Magical torch | Adds 1 light radius for 300 ingame minutes (5:00)
 4 | Magical lantern | Adds 2 light radius for 600 ingame minutes (10:00)
 5 | Magical sun | Adds 3 light radius for 900 ingame minutes (15:00)
-6 | Ghost weapon | 
-7 | Create food | 
-8 | Remove curses | 
-9 | Blink | 
-10 | Jump | 
-11 | Flight | 
-12 | Word of marking | 
-13 | Word of returning | 
+6 | Ghost weapon | Deals 25 damage to a single enemy
+7 | Create food | Creates 1 food for each living party member
+8 | Remove curses | Removes a curse from an equipped item and destroys the item
+9 | Blink | Teleports an ally in a fight
+10 | Jump | Teleports the party 2 blocks forward (3D only)
+11 | Flight | Let the whole party flee a fight immediately
+12 | Word of marking | Marks a position to return to later
+13 | Word of returning | Returns to the previously marked position
 14 | Magical shield | Increases all party members' defense by 10% for 150 ingame minutes (2:30h)
 15 | Magical wall | Increases all party members' defense by 20% for 450 ingame minutes (7:30h)
 16 | Magical barrier | Increases all party members' defense by 30% for 900 ingame minutes (15:00h)
 17 | Magical weapon | Increases all party members' attack damage by 10% for 150 ingame minutes (2:30h)
 18 | Magical assault | Increases all party members' attack damage by 20% for 450 ingame minutes (7:30h)
 19 | Magical attack | Increases all party members' attack damage by 30% for 900 ingame minutes (15:00h)
-20 | Levitation | 
+20 | Levitation | Levitates (if there is an exit in the ceiling it can be entered)
 21 | Anti-magic wall | Increase the chance to deflect spells for all party members by 15% for 150 ingame minutes (2:30h)
 22 | Anti-magic sphere | Increase the chance to deflect spells for all party members by 25% for 900 ingame minutes (15:00h)
 23 | Alchemistic globe | Combines the effects of 'Magical sun', 'Magical barrier', 'Magical attack' and 'Anti-magic sphere'
 24 | Hurry | 
 25 | Mass hurry | 
-26 | Repair item | 
-27 | Duplicate item | 
+26 | Repair item | Repairs an item (destroys the item on spell fail)
+27 | Duplicate item | Duplicates an item (destroys the item on spell fail, not every item can be duplicated)
 28 | LP-stealer | 
 29 | SP-stealer | 
 30 | Unused (called Alchemie Spruch -30 internal) | 
@@ -74,23 +74,23 @@ Index | Name | Description
 
 Index | Name | Description
 --- | --- | ---
-1 | Monster knowledge | 
-2 | Identification | 
-3 | Knowledge | 
-4 | Clairvoyance | 
-5 | See the truth | 
-6 | Map view | 
-7 | Magical compass | 
-8 | Find traps | 
-9 | Find monsters | 
-10 | Find persons | 
-11 | Find secret doors | 
-12 | Mystical mapping | 
-13 | Mystical map I | 
-14 | Mystical map II | 
-15 | Mystical map III | 
-16 | Mystical globe | 
-17 | Show monster LP | 
+1 | Monster knowledge | Show the stats of a monster
+2 | Identification | Identifies an item
+3 | Knowledge | Grants Clairvoyance for 160 ingame minutes (2:40). While Clairvoyance is active, traps and spinners are detected automatically when nearby.
+4 | Clairvoyance | Grants Clairvoyance for 450 ingame minutes (7:30)
+5 | See the truth | Grants Clairvoyance for 900 ingame minutes (15:00)
+6 | Map view | Shows a minimap
+7 | Magical compass | Shows a compass
+8 | Find traps | Opens the dungeon map and reveals all traps, spinners and trap doors
+9 | Find monsters | Opens the dungeon map and reveals all monsters
+10 | Find persons | Opens the dungeon map and reveals all persons
+11 | Find secret doors | Opens the dungeon map and reveals all secret doors (fake walls)
+12 | Mystical mapping | Opens the dungeon map and reveals everything on it
+13 | Mystical map I | Grants Mystical Map for 150 ingame minutes (2:30). While Mystical Map is active you can see everything on the dungeon map.
+14 | Mystical map II | Grants Mystical Map for 450 ingame minutes (7:30)
+15 | Mystical map III | Grants Mystical Map for 900 ingame minutes (15:00)
+16 | Mystical globe | Combines "See the truth" and "Mystical Map III"
+17 | Show monster LP | Afterwards the LP of all monsters is visible in battle
 18 | Unused (called Mystik Spruch -18 internal) | 
 19 | Unused (called Mystik Spruch -19 internal) | 
 20 | Unused (called Mystik Spruch -20 internal) | 
