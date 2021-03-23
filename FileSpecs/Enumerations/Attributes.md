@@ -42,13 +42,15 @@ Value | Name
 
 ## Effects
 
-- Strength: Increases the max weight by 1kg per point.
+- Strength: Increases the max weight by 1kg per point. Actually the max weight formula seems to be 999 + STR * 1000 in grams.
 - Intelligence: Adds INT/25 (rounded down) SP and SLP on level up.
 - Dexterity: Chance in percent to not trigger lock traps.
 - Speed: Characters with higher values can act earlier in battle.
-- Stamina: Increases LP? Exact values **unknown**.
+- Stamina: Increases Def by 1 every 25 points.
 - Charisma: Increases the sell price by 1% every full 10 points.
 - Luck: Chance in percent to avoid the effect of a triggered trap.
 - Anti-Magic: Chance in percent to block enemy spells.
 
 Note: While the alchemistic Anti-Magic barrier spells won't increase A-M, they still add a hidden percentage bonus.
+
+The chance to avoid a fight is DEX+LUK out of 150.
