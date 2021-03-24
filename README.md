@@ -102,10 +102,11 @@ I am developing Ambermoon from scratch with C#. Have a look [here](https://githu
 
 ## Special thanks
 
-Most of the work was done by a bunch of good fellas.
+Much work was done by a bunch of good fellas.
 - Oliver Gantert and others of project [Amberworld](http://amberworld.sourceforge.net/)
 - Daniel Schulz from [Slothsoft](http://slothsoft.net/Ambermoon/) with his savegame editor
 - Nico Bendlin and his [ambermoon research project](https://gitlab.com/ambermoon/research)
+- kermitfrog did a lot reverse engineering (see [here](https://github.com/Pyrdacor/Ambermoon.net/issues/64))
 - Metibor helped a lot in decoding the savegame data (see [here](https://github.com/Pyrdacor/Ambermoon.net/issues/45))
 
  And others provide information about Thalion and Ambermoon for ages now.
@@ -117,17 +118,6 @@ Moreover there are some Albion reworks and reverse engineering projects. The dat
 - [freealbion](https://github.com/freealbion/freealbion) by Florian Ziesche
 - [ualbion](https://github.com/csinkers/ualbion) by Cam Sinclair
 
-I just want to gather the whole findings at a central place and provide it on a save storage for the future.
-
-At least some contributions will come from me as well like some file specs and the formatting of all the data. :)
-
-My latest contributions are decoding of map events, 3D map and lab formats and packed texture formats. Moreover I reverse engineered the imploder algorithm so the file AM2_CPU can be deploded and read on PCs.
+I want to gather the whole findings at a central place and provide it on a safe storage for the future.
 
 I marked unknown values in the specs as **Unknown**. Would be nice if some of those values' meaning could be revealed by someone.
-
-## Language
-
-I will document everything in english so most people will understand. But I only played the german version and translated some things to my best knowledge. So there might be differences between the names and values given here and the names used in the original english game.
-
-If you know the english version or have some other translation improvements, just let me know. You can use the issue tracker for that for example.
-
