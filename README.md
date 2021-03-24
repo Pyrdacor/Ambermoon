@@ -108,6 +108,7 @@ Much work was done by a bunch of good fellas.
 - Nico Bendlin and his [ambermoon research project](https://gitlab.com/ambermoon/research)
 - kermitfrog did a lot reverse engineering (see [here](https://github.com/Pyrdacor/Ambermoon.net/issues/64))
 - Metibor helped a lot in decoding the savegame data (see [here](https://github.com/Pyrdacor/Ambermoon.net/issues/45))
+- Thallyrion did a lot game testing to confirm or identify some mechanics or data values.
 
  And others provide information about Thalion and Ambermoon for ages now.
 - Alex Holland from the [Thalion Webshrine](http://thalion.exotica.org.uk/)
