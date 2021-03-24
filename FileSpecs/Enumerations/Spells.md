@@ -49,7 +49,7 @@ Index | Name | Description
 8 | Remove curses | Removes a curse from an equipped item and destroys the item
 9 | Blink | Teleports an ally in a fight
 10 | Jump | Teleports the party 2 blocks forward (3D only)
-11 | Flight | Let the whole party flee a fight immediately
+11 | Escape | Let the whole party flee a fight immediately
 12 | Word of marking | Marks a position to return to later
 13 | Word of returning | Returns to the previously marked position
 14 | Magical shield | Increases all party members' defense by 10% for 150 ingame minutes (2:30h)
@@ -139,3 +139,8 @@ Index | Name | SP | SLP | Area | Target | Description
 28 | Iceball | 100 | 20 | Battle | Enemy | Deals 90-180 damage
 29 | Icestorm | 150 | 25 | Battle | Enemy row | Deals 64-128 damage
 30 | Iceshower | 200 | 30 | Battle | All enemies | Deals 128-256 damage
+
+
+## Bugs
+
+The spell Escape is bugged in Ambermoon. It is marked as "out of battle" but the spell code is only available in battles. So the spell has no effect at all. Even the real code has many bugs as it seems to target monsters instead of the party. From observations and the spell descripton it is assumed that the spell should let the whole party flee in a battle.
