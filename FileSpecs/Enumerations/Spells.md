@@ -39,7 +39,7 @@ Index | Name | SP | SLP | Area | Target | Description
 
 Index | Name | Description
 --- | --- | ---
-1 | Charge item | Adds a charge to a magic item
+1 | Charge item | Adds n charges to a magic item where n is a random number between 1 and the minimum of caster level and max possible charges
 2 | Light | Adds 1 light radius for 150 ingame minutes (2:30)
 3 | Magical torch | Adds 1 light radius for 300 ingame minutes (5:00)
 4 | Magical lantern | Adds 2 light radius for 600 ingame minutes (10:00)
