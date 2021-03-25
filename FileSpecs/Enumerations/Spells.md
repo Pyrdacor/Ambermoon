@@ -37,38 +37,38 @@ Index | Name | SP | SLP | Area | Target | Description
 
 ## Alchemistic spells
 
-Index | Name | Description
+Index | Name | SP | SLP | Area | Target | Description
 --- | --- | ---
-1 | Charge item | Adds n charges to a magic item where n is a random number between 1 and the minimum of caster level and max possible charges
-2 | Light | Adds 1 light radius for 150 ingame minutes (2:30)
-3 | Magical torch | Adds 1 light radius for 300 ingame minutes (5:00)
-4 | Magical lantern | Adds 2 light radius for 600 ingame minutes (10:00)
-5 | Magical sun | Adds 3 light radius for 900 ingame minutes (15:00)
-6 | Ghost weapon | Deals 25 damage to a single enemy
-7 | Create food | Creates 1 food for each living party member
-8 | Remove curses | Removes a curse from an equipped item and destroys the item
-9 | Blink | Teleports an ally in a fight
-10 | Jump | Teleports the party 2 blocks forward (3D only)
-11 | Escape | Let the whole party flee a fight immediately
-12 | Word of marking | Marks a position to return to later
-13 | Word of returning | Returns to the previously marked position
-14 | Magical shield | Increases all party members' defense by 10% for 150 ingame minutes (2:30h)
-15 | Magical wall | Increases all party members' defense by 20% for 450 ingame minutes (7:30h)
-16 | Magical barrier | Increases all party members' defense by 30% for 900 ingame minutes (15:00h)
-17 | Magical weapon | Increases all party members' attack damage by 10% for 150 ingame minutes (2:30h)
-18 | Magical assault | Increases all party members' attack damage by 20% for 450 ingame minutes (7:30h)
-19 | Magical attack | Increases all party members' attack damage by 30% for 900 ingame minutes (15:00h)
-20 | Levitation | Levitates (if there is an exit in the ceiling it can be entered)
-21 | Anti-magic wall | Increase the chance to deflect spells for all party members by 15% for 150 ingame minutes (2:30h)
-22 | Anti-magic sphere | Increase the chance to deflect spells for all party members by 25% for 900 ingame minutes (15:00h)
-23 | Alchemistic globe | Combines the effects of 'Magical sun', 'Magical barrier', 'Magical attack' and 'Anti-magic sphere'
-24 | Hurry | 
-25 | Mass hurry | 
-26 | Repair item | Repairs an item (destroys the item on spell fail)
-27 | Duplicate item | Duplicates an item (destroys the item on spell fail, not every item can be duplicated)
-28 | LP-stealer | 
-29 | SP-stealer | 
-30 | Unused (called Alchemie Spruch -30 internal) | 
+1 | Charge item | 250 | 20 | Camp | Item | Adds n charges to a magic item where n is a random number between 1 and the minimum of caster level and max possible charges
+2 | Light | 5 | 2 | Everywhere | None | Adds 1 light radius for 150 ingame minutes (2:30)
+3 | Magical torch | 10 | 5 | Everywhere | None | Adds 1 light radius for 300 ingame minutes (5:00)
+4 | Magical lantern | 25 | 10 | Everywhere | None | Adds 2 light radius for 600 ingame minutes (10:00)
+5 | Magical sun | 50 | 15 | Everywhere | None | Adds 3 light radius for 900 ingame minutes (15:00)
+6 | Ghost weapon | 10 | 5 | Battle | Enemy | Deals 25 damage to a single enemy
+7 | Create food | 25 | 10 | Everywhere | All friends | Creates 1 food for each living party member
+8 | Remove curses | 100 | 20 | Camp | Item | Removes a curse from an equipped item and destroys the item
+9 | Blink | 20 | 5 | Battle | Friend | Teleports an ally in a fight
+10 | Jump | 50 | 10 | 3D map | None | Teleports the party 2 blocks forward (3D only)
+11 | Escape | 50 | 15 | Battle | None | Let the whole party flee a fight immediately
+12 | Word of marking | 150 | 20 | Any map | None | Marks a position to return to later
+13 | Word of returning | 250 | 20 | Outside battle | None | Returns to the previously marked position
+14 | Magical shield | 15 | 10 | Everywhere | None | Increases all party members' defense by 10% for 150 ingame minutes (2:30h)
+15 | Magical wall | 30 | 15 | Everywhere | None | Increases all party members' defense by 20% for 450 ingame minutes (7:30h)
+16 | Magical barrier | 50 | 20 | Everywhere | None | Increases all party members' defense by 30% for 900 ingame minutes (15:00h)
+17 | Magical weapon | 15 | 10 | Everywhere | None | Increases all party members' attack damage by 10% for 150 ingame minutes (2:30h)
+18 | Magical assault | 30 | 15 | Everywhere | None | Increases all party members' attack damage by 20% for 450 ingame minutes (7:30h)
+19 | Magical attack | 50 | 20 | Everywhere | None | Increases all party members' attack damage by 30% for 900 ingame minutes (15:00h)
+20 | Levitation | 25 | 10 | Dungeon | None | Levitates (if there is an exit in the ceiling it can be entered)
+21 | Anti-magic wall | 25 | 5 | Everywhere | None | Increase the chance to deflect spells for all party members by 15% for 150 ingame minutes (2:30h)
+22 | Anti-magic sphere | 50 | 15 | Everywhere | None | Increase the chance to deflect spells for all party members by 25% for 900 ingame minutes (15:00h)
+23 | Alchemistic globe | 250 | 25 | Everywhere | None | Combines the effects of 'Magical sun', 'Magical barrier', 'Magical attack' and 'Anti-magic sphere'
+24 | Hurry | 25 | 5 | Battle | Friend | 
+25 | Mass hurry | 50 | 10 | Battle | All friends | 
+26 | Repair item | 100 | 15 | Camp | Item | Repairs an item (destroys the item on spell fail)
+27 | Duplicate item | 250 | 25 | Camp | Item | Duplicates an item (destroys the item on spell fail, not every item can be duplicated)
+28 | LP-stealer | 25 | 5 | Battle | Enemy | 
+29 | SP-stealer | 25 | 5 | Battle | Enemy | 
+30 | Unused (called Alchemie Spruch -30 internal) | 0 | 0 | None | None | Unused
 
 ## Mystic spells
 
