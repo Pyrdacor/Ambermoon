@@ -38,7 +38,7 @@ Index | Name | SP | SLP | Area | Target | Description
 ## Alchemistic spells
 
 Index | Name | SP | SLP | Area | Target | Description
---- | --- | ---
+--- | --- | --- | --- | --- | --- | ---
 1 | Charge item | 250 | 20 | Camp | Item | Adds n charges to a magic item where n is a random number between 1 and the minimum of caster level and max possible charges
 2 | Light | 5 | 2 | Everywhere | None | Adds 1 light radius for 150 ingame minutes (2:30)
 3 | Magical torch | 10 | 5 | Everywhere | None | Adds 1 light radius for 300 ingame minutes (5:00)
