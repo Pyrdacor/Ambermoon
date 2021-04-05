@@ -236,11 +236,11 @@ Offset | Type | Description
 
 Value | Type
 --- | ---
-0 | Global variable (game variable)
-1 | Event bit
+0 | Global variable (game variable, 0-1023)
+1 | Event bit (64 bits per map, 0-32767)
 2 | Door open
 3 | Chest open
-4 | Character bit
+4 | Character bit (32 bits per map, 0-16383)
 5 | Party member present
 6 | Item owned (item in inventory)
 7 | Use item (from inventory)
@@ -260,7 +260,7 @@ Research: There might be the following condition types:
 
 Note: In conversations the global variable 0 is checked to be value 0 before executing a PrintText event that
 should be executed in any case. I guess PrintText events always need a preceding Condition event and the global
-variable 0 is always 0.
+variable 0 is always 0. So this is like a "always true condition".
 
 ## Action event (0x0E / 14)
 
@@ -274,9 +274,6 @@ Offset | Type | Description
 0x03 | ubyte[2] | **Unknown**
 0x05 | uword | Object index (depends on action's type, e.g. variable index)
 0x07 | ubyte[2] | **Unknown**
-
-For the change event bit action, only the lower 6 bits of the object index gives the event index.
-The highest 2 bits can have some value as well so you have to mask it to get the right event index.
 
 ### Action types
 
