@@ -87,15 +87,33 @@ Offset | Type | Description
 
 ## Trap event (0x06 / 6)
 
-Damages the player (fireplaces, traps, etc).
+Damages the player and/or add ailments (fireplaces, traps, etc).
+
+This is used for normal map traps and also for traps on doors and chests.
 
 Offset | Type | Description
 --- | --- | ---
-0x00 | ubyte | Trap type (0 = damage, there are other **unknown** values like 5)
+0x00 | ubyte | Ailment
 0x01 | ubyte | Trap target (0 = active player, 1 = all party members)
-0x02 | ubyte | Value (damage, maybe in percentage of max health? may depent on trap type?)
-0x03 | ubyte | **Unknown** (most of the time 3, the big vortex has 150 and a value of 0)
+0x02 | ubyte | Affected genders (0 or 3: both, 1: male only, 2: female only)
+0x03 | ubyte | Base damage
 0x04 | ubyte[5] | Unused
+
+The real damage is `BaseDmg + rand(0, (BaseDmg / 2) - 1)`.
+Base damage can be 0 in which case only the ailment is inflicted.
+
+### Trap ailments
+
+- 0: none
+- 1: crazy
+- 2: blind
+- 3: stoned
+- 4: paralyzed
+- 5: poisoned
+- 6: petrified
+- 7: diseased
+- 8: artificial aging
+- 9: dead (corpse)
 
 ## Remove buffs event (0x07 / 7)
 
