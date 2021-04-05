@@ -99,11 +99,22 @@ Offset | Type | Description
 
 ## Remove buffs event (0x07 / 7)
 
-Found in Lebab's tower 4. There are 17 spots which will remove at least Mystic Map, Light and Clairvoyance when entering.
+Removes/stops active buffs.
 
 Offset | Type | Description
 --- | --- | ---
-0x00 | ubyte[9] | **Unknown**
+0x00 | ubyte | Buff to stop
+0x01 | ubyte[8] | Unused
+
+### Buffs
+
+- 0: All
+- 1: Light
+- 2: Magic attack
+- 3: Magic protection
+- 4: Anti-magic barrier
+- 5: Clairvoyance
+- 6: Mystic map
 
 ## Riddlemouth event (0x08 / 8)
 
@@ -125,7 +136,7 @@ Offset | Type | Description
 0x02 | ubyte | Random (0 or 1)
 0x03 | ubyte | Award target
 0x04 | ubyte | **Unknown**
-0x05 | uword | Award type value (like which attribute)
+0x05 | uword | Award type value (e.g. which attribute)
 0x07 | uword | Value
 
 If "Random" is set, the real value is a random value between 0 and "Value".
@@ -150,10 +161,14 @@ Value | Meaning
 
 Value | Meaning
 --- | ---
-0 | Increase / add
+0 | Increase
+1 | Decrease
+2 | Increase by percentage
+3 | Decrease by percentage
 4 | Fill
-
-There may be other operations like decrease.
+5 | Clear bit/remove (e.g. language)
+6 | Set bit/add (e.g. language)
+7 | Toggle bit (e.g. language)
 
 ### Award target
 
