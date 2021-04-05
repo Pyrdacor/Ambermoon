@@ -226,8 +226,9 @@ Condition events represent conditions that control if following events (in the l
 Offset | Type | Description
 --- | --- | ---
 0x00 | ubyte | Condition type
-0x01 | ubyte | Condition value (e.g. variable value)
-0x02 | ubyte[3] | **Unknown**
+0x01 | ubyte | Condition value (e.g. variable value, always a boolean 0 or 1, can invert the meaning like 1="has"/0="has not")
+0x02 | ubyte | Count (item count, etc)
+0x03 | ubyte[2] | **Unknown**
 0x05 | uword | Object index (depends on condition's type, e.g. variable or item index)
 0x07 | uword | Map event index to continue with if condition was not fulfilled or 0xffff to stop the event list in this case.
 
@@ -268,8 +269,9 @@ Actions are related to conditions. For example they can change variable values w
 Offset | Type | Description
 --- | --- | ---
 0x00 | ubyte | Action type
-0x01 | ubyte | Action value (e.g. variable value to set, seems to be a boolean 0 or 1)
-0x02 | ubyte[3] | **Unknown**
+0x01 | ubyte | Action value (e.g. variable value to set, always a boolean 0 or 1, can invert the meaning like 0="remove"/1="add")
+0x02 | ubyte | Count (item count, etc)
+0x03 | ubyte[2] | **Unknown**
 0x05 | uword | Object index (depends on action's type, e.g. variable index)
 0x07 | ubyte[2] | **Unknown**
 
