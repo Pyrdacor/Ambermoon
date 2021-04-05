@@ -4,6 +4,7 @@ Data for map events is stored in the map data files. See [Maps](Maps.md) for mor
 
 Here the data format for specific events is shown. Each event can use up to 9 bytes for the event data.
 
+Note that actually 12 bytes are stored for each event. The first byte is the event type you see in parentheses below and the last 2 bytes always store the index of the following event or 0xffff of none follows. So here only the middle 9 bytes are listed which differ for each event type.
 
 ## Teleport event (0x01 / 1)
 
