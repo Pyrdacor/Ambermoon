@@ -237,20 +237,25 @@ Value | Type
 --- | ---
 0 | Global variable (game variable)
 1 | Event bit
-4 | Map variable
+2 | Door open
+3 | Chest open
+4 | Character bit
 5 | Party member present
 6 | Item owned (item in inventory)
 7 | Use item (from inventory)
-9 | Success (is chained after other events like battles or treasures and is something like "battle won" or "treasure fully looted")
+8 | Keyword known
+9 | Success (is chained after other events like battles, riddlemouths or treasures and is something like "battle won", "riddle solved" or "treasure fully looted")
 14 | Hand cursor interaction
+15 | Say word (mouth + enter keyword)
+16 | Enter number
+17 | Levitating
 20 | Eye cursor interaction
 
 Research: There might be the following condition types:
-- Eye cursor
-- Mouth cursor
 - Has item equipped
 - Has level
-- Drop items (stones into the well)
+- Has ailment (possibly 13)
+- Buff active (possibly 12)
 
 Note: In conversations the global variable 0 is checked to be value 0 before executing a PrintText event that
 should be executed in any case. I guess PrintText events always need a preceding Condition event and the global
@@ -277,9 +282,16 @@ Value | Type
 --- | ---
 0 | Set global variable (game variable)
 1 | Change event bit
-4 | Set map variable
-6 | Set inventory item
-8 | Set keyword
+2 | Change open door flag
+3 | Change open chest flag
+4 | Change character bit
+5 | Unused
+6 | Add/remove items
+7 | Unused
+8 | Add keyword
+9 | Unused
+14-17 | Unused
+20 | Unused
 
 ## Dice 100 event (0x0F / 15)
 
