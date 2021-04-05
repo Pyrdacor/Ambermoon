@@ -58,7 +58,7 @@ Offset | Type | Description
 0x07 | uword | Unlock fail event index (0-based, 0xffff means none, this is basically the trap event chain)
 
 If the lockpicking chance reduction is 0, the chest is always open. A value of 100 means that the chest can't be lockpicked at all. Many chests have a value of 1 which is a chest that is locked and lockpicking it succeeds nearly with the lockpicking ability in percent as chance.
-If the key index is not 0, the chest can't be lockpicked.
+If the key index is not 0, the chest can't be opened with a lockpick.
 
 ## Text popup event (0x04 / 4)
 
