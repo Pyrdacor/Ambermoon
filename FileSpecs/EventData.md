@@ -19,7 +19,7 @@ Offset | Type | Description
 0x05 | uword | New map index
 0x07 | ubyte[2] | **Unknown**
 
-## Transition types
+### Transition types
 
 - 0: Normal (black fading)
 - 1: Teleporter (no black fading)
