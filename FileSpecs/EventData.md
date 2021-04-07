@@ -445,8 +445,24 @@ Offset | Type | Description
 --- | --- | ---
 0x00 | ubyte[9] | **Unknown**
 
-## Nop event (0x17 / 23)
+## Interact event (0x17 / 23)
+
+This event is only used in conversations. It performs the associated action to a chosen interaction type.
+
+This means it will do the following things:
+- If player had chosen "Give Item" it will remove that item.
+- If player had chosen "Give Gold" it will remove that gold.
+- If player had chosen "Give Food" it will remove that food.
+- If player had chosen "Ask To Join" it will add the person to the party.
+- If player had chosen "Ask To Leave" it will remove the person from the party.
+- For all other interaction types (Keyword, Show Item, Talk, Leave) this has no effect at all.
+
+The event has no data. It uses the chosen interaction type from the previous conversation event.
 
 Offset | Type | Description
 --- | --- | ---
-0x00 | ubyte[9] | **Unknown**
+0x00 | ubyte[9] | Unused
+
+### Example usage
+
+This event is necessary for quests where you need to bring more than 1 item. If the conversation event that is triggered by the "Give Item" button would immediately remove the item you have given, this would be fatal if you don't have the other required item. Therefore the associated action like removing the item is only performed with this extra event. This event can then be chained after some condition events so that it only removes the item if some conditions are met.
