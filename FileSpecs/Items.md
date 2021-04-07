@@ -31,7 +31,10 @@ Offset | Type | Description
 0x000E | sbyte | Damage
 0x000F | ubyte | [Ammunition type](Enumerations/AmmunitionTypes.md) if this is ammunition
 0x0010 | ubyte | [Ammunition type](Enumerations/AmmunitionTypes.md) if this is a long-ranged weapon
-0x0011 | ubyte[4] | **Unknown**
+0x0011 | ubyte | First reduced ability (see below)
+0x0012 | ubyte | Second reduced ability (see below)
+0x0013 | ubyte | First reduced ability amount (see below)
+0x0014 | ubyte | Second reduced ability amount (see below)
 0x0015 | ubyte | Index for either [special item purpose](Enumerations/SpecialItemPurpose.md), [transportation](Enumerations/Transportation.md) or text of a text scroll
 0x0016 | ubyte | Text sub-index (used only for text scrolls)
 0x0017 | ubyte | [Spell type](Enumerations/SpellTypes.md)
@@ -47,6 +50,19 @@ Offset | Type | Description
 0x0026 | uword | Weight
 0x0028 | byte[20] | Item name (There is a null byte after the name. Rest can be filled with 0x00 or 0x20 bytes.)
 
+### Ability reductions
+
+There can be two ability reductions associated with an item. Each is given by 2 bytes.
+
+The first in bytes 0x11 and 0x13, the second in bytes 0x12 and 0x14.
+
+The first byte of each gives the ability to reduce (0 = none, 1 to 10 are abilities ATT to U-M).
+
+If this byte is not 0 the second byte gives the amount to reduce that ability when the item is equipped.
+
+Note: In contrast to bytes 0x0b/0x0c this is a hidden stat. So you can't see it in-game like in the item view. It is used to reflect difficulties to hit or parry with a specific item. In Ambermoon it is only used for the Whip which will decrease the ATT ability by 10 and thus makes it harder to hit with it by 10%. This reflects the difficulty to attack someone with a whip I guess. :)
+
+This feature can theoretically be used with any ability but I guess it is only meant to be used with ATT and PAR. The original code uses wrong offsets so that only the ATT ability will work correctly. As it is the only one used, this will not lead to strange behavior.
 
 ### Item flags
 
