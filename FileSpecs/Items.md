@@ -64,6 +64,15 @@ Note: In contrast to bytes 0x0b/0x0c this is a hidden stat. So you can't see it 
 
 This feature can theoretically be used with any ability but I guess it is only meant to be used with ATT and PAR. The original code uses wrong offsets so that only the ATT ability will work correctly. As it is the only one used, this will not lead to strange behavior.
 
+Besides the original implementation I would suggest to interpret these 4 bytes like this:
+
+Byte | Meaning
+--- | ---
+0x11 | Attack reduction active (boolean, 0/1)
+0x12 | Parry reduction active (boolean, 0/1)
+0x13 | Attack reduction in percent
+0x14 | Parry reduction in percent
+
 ### Item flags
 
 Bit | Description
