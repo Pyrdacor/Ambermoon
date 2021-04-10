@@ -149,6 +149,8 @@ Each uword can contain a monster index starting at 1 (0 = no monster).
 
 A value of 100 will ensure that the monster will never flee. Therefore all bosses have a value of 100. The lower the value the higher the propability that the monster will flee.
 
+Note that even with a morale lower than 100 the boss flag would avoid fleeing in any case.
+
 There are 3 values in addition to the morale that influence the flee chance.
 
 - RDE (relative damage efficiency)
