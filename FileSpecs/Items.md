@@ -17,7 +17,7 @@ Offset | Type | Description
 0x0000 | ubyte | Item graphic index
 0x0001 | ubyte | [Item type](Enumerations/ItemTypes.md)
 0x0002 | ubyte | [Equipment slot](Enumerations/EquipmentSlots.md)
-0x0003 | ubyte | Break chance (0-100, used for some equip types like weapons or armor)
+0x0003 | ubyte | Break chance in 0.1% (0-1000, used for weapons, shields, tools and normal items)
 0x0004 | ubyte | [Gender](Enumerations/Gender.md)
 0x0005 | ubyte | Number of hands
 0x0006 | ubyte | Number of fingers
@@ -49,6 +49,16 @@ Offset | Type | Description
 0x0024 | uword | Price (see price formula below)
 0x0026 | uword | Weight
 0x0028 | byte[20] | Item name (There is a null byte after the name. Rest can be filled with 0x00 or 0x20 bytes.)
+
+### Durability
+
+In battles equipment might break.
+
+Every attack checks for the weapon break of the attacker.
+
+If the attacker deals damage, the target armor is also checked.
+
+If the attack is parried instead of the armor check the defenders weapon and shield are checked.
 
 ### Ability reductions
 
