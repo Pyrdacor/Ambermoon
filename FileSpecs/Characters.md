@@ -147,21 +147,21 @@ Each uword can contain a monster index starting at 1 (0 = no monster).
 
 ## Monster morale
 
-This isn't tested enough yet but a value of 100 will ensure that the monster will never flee. Therefore all bosses have a value of 100. The lower the value the higher the propability that the monster will flee.
+A value of 100 will ensure that the monster will never flee. Therefore all bosses have a value of 100. The lower the value the higher the propability that the monster will flee.
 
-Some tests suggest that the value means something like this:
+There are 3 values in addition to the morale that influence the flee chance.
 
-If the combined monster hp (maybe of the same kind) in percent of the max combined monster hp is lower than 100 minus the given value, the monster will start to flee. But likely with a lower propability if near that value and higher propability if near to 0% hp.
+- RDE (relative damage efficiency)
+- LLP (lost own LP)
+- AC (ally count)
 
-If the combined monster hp is `h` and the max combined monster hp is `m` a possible formula for the retreat chance might be something like this:
+The RDE is a relation between average party damage and average monster group damage. It's influence can range from -12 to +12.
 
-`chance = 100 - h * 100 / (m * (100 - morale) / 100)`
+The LLP influence can range from 0 to +75 and therefore has the biggest impact.
 
-Note that this will lead to a division by zero if morale is 100 so better check if hp is lower than (100 - morale) beforehand.
+The AC influence can range from -15 to +25.
 
-Normalized this could be expressed as:
-
-`1 - h / (m * (1 - value/100))`
+If a random value from 0 to the sum of these 3 values is greater than the morale, the monster will try to flee.
 
 ## NPCs and party members
 
