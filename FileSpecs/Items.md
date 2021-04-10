@@ -17,7 +17,7 @@ Offset | Type | Description
 0x0000 | ubyte | Item graphic index
 0x0001 | ubyte | [Item type](Enumerations/ItemTypes.md)
 0x0002 | ubyte | [Equipment slot](Enumerations/EquipmentSlots.md)
-0x0003 | ubyte | Break chance in 0.1% (0-1000, used for weapons, shields, tools and normal items)
+0x0003 | ubyte | Break chance in 0.1% (0 to 255 -> 0.0% to 25.5%, used for weapons, shields, tools and normal items)
 0x0004 | ubyte | [Gender](Enumerations/Gender.md)
 0x0005 | ubyte | Number of hands
 0x0006 | ubyte | Number of fingers
