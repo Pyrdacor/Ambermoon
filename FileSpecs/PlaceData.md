@@ -48,7 +48,7 @@ Offset | Meaning
 
 Offset | Meaning
 --- | ---
-0 | Cost to fill 1 (?) charge
+0 | Cost to fill 1 charge
 
 ### Inn
 
