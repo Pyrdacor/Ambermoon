@@ -281,10 +281,16 @@ Value | Type
 7 | Use item (from inventory)
 8 | Keyword known
 9 | Success (is chained after other events like battles, riddlemouths or treasures and is something like "battle won", "riddle solved" or "treasure fully looted")
+10 | Game option set
+11 | Can see (not blind etc)
+12 | Player direction
+13 | Has ailment
 14 | Hand cursor interaction
 15 | Say word (mouth + enter keyword)
 16 | Enter number
 17 | Levitating
+18 | Has gold amount
+19 | Has food amount
 20 | Eye cursor interaction
 
 Research: There might be the following condition types:
@@ -324,7 +330,13 @@ Value | Type
 7 | Unused
 8 | Add keyword
 9 | Unused
+10 | Set game option
+11 | Unused
+12 | Set direction
+13 | Add/remove ailment
 14-17 | Unused
+18 | Add/remove gold
+19 | Add/remove food
 20 | Unused
 
 ## Dice 100 event (0x0F / 15)
