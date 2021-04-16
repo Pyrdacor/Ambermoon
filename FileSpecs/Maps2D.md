@@ -57,8 +57,8 @@ A tile data entry (TileData) consists of 4 ubytes.
 
 ```
 underlay_tile_index = tile_data[0];
-overlay_tile_index = (tile_data[2] << 8) | tile_data[3];
 map_event_index = tile_data[1];
+overlay_tile_index = (tile_data[2] << 8) | tile_data[3];
 ```
 
 Underlay is the background tile graphic and overlay an optional graphic on top of the background.
