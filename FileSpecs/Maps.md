@@ -27,15 +27,15 @@ Bit | Meaning
 0 | Indoor
 1 | Outdoor
 2 | Dungeon
-3 | Automapper (if active the map has to be explored)
-4 | Unknown1
+3 | Automapper (if active the dungeon map is available and the map has to be explored)
+4 | CanRest
 5 | WorldSurface
-6 | SecondaryUI3D
+6 | Sky
 7 | NoSleepUntilDawn (if active sleep time is always 8 hours)
-8 | StationaryGraphics
-9 | Unknown2
-10 | SecondaryUI2D
-11 | Unknown3 (only 0 in map 269 which is the house of the baron of Spannenberg, also in map 148 but this is a bug)
+8 | StationaryGraphics (transport graphics like horse or ship)
+9 | Unknown2 (never set in Ambermoon)
+10 | **Unknown**
+11 | CanUseSpells
 12-15 | Unknown / unused
 
 ### Map data
