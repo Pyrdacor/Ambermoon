@@ -72,7 +72,7 @@ Offset | Type | Description
 --- | --- | ---
 0x00 | ubyte | Event picture index (0-based) or 0xff if no image
 0x01 | ubyte | Popup trigger (0: none, 1: move, 2: hand/eye cursor, 3: both)
-0x02 | ubyte | **Unknown**
+0x02 | ubyte | **Unknown** (only 0 or 1)
 0x03 | uword | Map text index
 0x05 | ubyte[4] | **Unknown**
 
@@ -140,8 +140,9 @@ Offset | Type | Description
 --- | --- | ---
 0x00 | ubyte | Riddle text index
 0x01 | ubyte | Solution text index (used when riddle was solved)
-0x02 | ubyte[5] | **Unknown**
-0x07 | uword | Correct answer index in word dictionary
+0x02 | ubyte[3] | **Unknown**
+0x05 | uword | Correct answer 1 index in word dictionary
+0x07 | uword | Correct answer 2 index in word dictionary (can be equal to the first if only 1 word is possible)
 
 ## Award (0x09 / 9)
 
