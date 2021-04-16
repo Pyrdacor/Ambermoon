@@ -210,9 +210,9 @@ The tile data is in the same format as for 2D maps. It is compatible to 3D maps 
 
 ```cs
 underlay_tile_index = tile_data[0];
-overlay_tile_index = (tile_data[2] << 8) | tile_data[3];
 map_event_index = tile_data[1];
-// overlay_tile_index is used for 3D as object index (1..100), wall index (101..254) or empty (0).
+overlay_tile_index = (tile_data[2] << 8) | tile_data[3];
+// underlay_tile_index is used for 3D as object index (1..100), wall index (101..254) or empty (0).
 ```
 
 In 2D mostly the overlay index is used. If it is not 0 and the underlay index is 0, this means that the back tile is removed. If both
