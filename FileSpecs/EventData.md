@@ -469,7 +469,12 @@ Spawns a horse, raft or ship.
 
 Offset | Type | Description
 --- | --- | ---
-0x00 | ubyte[9] | **Unknown**
+0x00 | ubyte | X coordinate (1-based)
+0x01 | ubyte | Y coordinate (1-based)
+0x02 | ubyte | [Travel type](Enumerations/TravelType.md)
+0x03 | ubyte[2] | **Unknown**
+0x05 | uword | Map index
+0x07 | ubyte[2] | **Unknown**
 
 ## Interact event (0x17 / 23)
 
