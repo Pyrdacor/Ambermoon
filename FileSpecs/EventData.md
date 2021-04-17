@@ -209,6 +209,8 @@ Value | Meaning
 0 | Active player
 1 | Whole party
 
+Note: Operation 'Fill' makes only sense for LP and SP. Not sure if it also works for attributes and abilities. The 3 bit operations are only used for languages, ailments and spell schools. The percentage is in relation to the max value and also only used for LP and SP I guess.
+
 ## Change tile event (0x0A / 10)
 
 Offset | Type | Description
