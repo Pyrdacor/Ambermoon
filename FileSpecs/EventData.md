@@ -476,6 +476,8 @@ Offset | Type | Description
 0x05 | uword | Map index
 0x07 | ubyte[2] | **Unknown**
 
+Note: Only travel types 1 (horse), 2 (raft), 3 (ship), 9 (sand lizard) and 10 (sand ship) should be used I guess.
+
 ## Interact event (0x17 / 23)
 
 This event is only used in conversations. It performs the associated action to a chosen interaction type.
