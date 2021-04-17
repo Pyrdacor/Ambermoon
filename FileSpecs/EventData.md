@@ -50,7 +50,7 @@ Used for chests, piles, lootable map objects etc.
 Offset | Type | Description
 --- | --- | ---
 0x00 | ubyte | Lockpicking chance reduction (0-100)
-0x01 | ubyte | Minimum search ability value to detect/open it (only 1 chest has a value above 0)
+0x01 | ubyte | Chest flags (see below, only 1 chest has a value other than 0)
 0x02 | ubyte | Optional index of a map text to display when showing the opened chest (0xff means no text)
 0x03 | ubyte | Chest data index (also used for locked state in savegame)
 0x04 | ubyte | Remove if empty (0 or 1)
@@ -59,6 +59,16 @@ Offset | Type | Description
 
 If the lockpicking chance reduction is 0, the chest is always open. A value of 100 means that the chest can't be lockpicked at all. Many chests have a value of 1 which is a chest that is locked and lockpicking it succeeds nearly with the lockpicking ability in percent as chance.
 If the key index is not 0, the chest can't be opened with a lockpick.
+
+### Chest flags
+
+- Bit0: **Unknown**
+- Bit1: If set a search ability check is performed and only if successfully the chest is shown.
+- Bit2-7: **Unknown**
+
+Only one chest in Ambermoon uses the flags. It is a skull in the Antique Area which contains the Antique Weapon. You will only find it when your search ability is high enough cause Bit1 is set. The chest uses value 50 (hex 32).
+
+So in addition two other bits are set as well. But the meaning is unknown.
 
 ## Text popup event (0x04 / 4)
 
