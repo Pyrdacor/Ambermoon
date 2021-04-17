@@ -12,12 +12,12 @@ Used for map transitions, teleporters, holes in the ground and so on.
 
 Offset | Type | Description
 --- | --- | ---
-0x00 | ubyte | New x coordinate (1-based)
-0x01 | ubyte | New y coordinate (1-based)
+0x00 | ubyte | New x coordinate (1-based, 0 means keep x)
+0x01 | ubyte | New y coordinate (1-based, 0 means keep y)
 0x02 | ubyte | New direction (0: up, 1: right, 2: down, 3: left)
 0x03 | ubyte | **Unknown**
 0x04 | ubyte | Transition type
-0x05 | uword | New map index
+0x05 | uword | New map index (0 means same map)
 0x07 | ubyte[2] | **Unknown**
 
 ### Transition types
