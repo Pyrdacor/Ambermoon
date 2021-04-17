@@ -309,12 +309,6 @@ Value | Type
 19 | Has food amount
 20 | Eye cursor interaction
 
-Research: There might be the following condition types:
-- Has item equipped
-- Has level
-- Has ailment (possibly 13)
-- Buff active (possibly 12)
-
 Note: In conversations the global variable 0 is checked to be value 0 before executing a PrintText event that
 should be executed in any case. I guess PrintText events always need a preceding Condition event and the global
 variable 0 is always 0. So this is like a "always true condition".
@@ -387,17 +381,18 @@ Value | Type
 0 | Keyword
 1 | Show item
 2 | Give item
+3 | Give gold
+4 | Give food
 5 | Join party
 6 | Leave party
 7 | Talk (mouth cursor), initial text
 8 | Leave (exit conversation)
 
-Most likely there is "ask to join" and "ask to leave" somewhere between 3 and 6.
-As well as "give gold" and "give food".
-
 Note: When examining someone, always the first text of the NPC
 or party member is used (text index 0). This is not done through
 events. Characters which won't open a conversation window can't be examined.
+
+Note: This event starts an event chain but will not perform any action. The real action (remove given item/gold/food etc) is done by an Interaction event later.
 
 ## Print text event (0x11 / 17)
 
@@ -416,12 +411,15 @@ variable 0 is always 0.
 
 ## Create event (0x12 / 18)
 
-Create items etc. It is stored in the item view of conversation window for example.
+Create items, gold or food. Items arw stored in the item view of the conversation window, gold and food is directly added to the active party member.
+
+The event chain proceeds immediately so the item has not to be taken to do so.
 
 Offset | Type | Description
 --- | --- | ---
-0x00 | ubyte[6] | **Unknown**
-0x06 | ubyte | Amount
+0x00 | 0: Item, 1: Gold, 2 or above: Food
+0x01 | ubyte[4] | Unused
+0x05 | uword | Amount
 0x07 | uword | Item index
 
 ## Question popup event (0x13 / 19)
@@ -459,7 +457,7 @@ Offset | Type | Description
 Used to exit a conversation or other window immediately.
 It is used if a conversation should not be continued
 and the window should close after the first text is
-displayed.
+displayed (e.g. first talk to Antonius).
 
 Offset | Type | Description
 --- | --- | ---
@@ -467,7 +465,7 @@ Offset | Type | Description
 
 ## Spawn event (0x16 / 22)
 
-Spawn monsters etc.
+Spawns a horse, raft or ship.
 
 Offset | Type | Description
 --- | --- | ---
