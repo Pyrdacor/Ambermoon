@@ -183,10 +183,11 @@ Value | Meaning
 2 | LP
 3 | SP
 4 | SLP
-5 | TP
-6 | **Unknown**
+5 | Ailments
+6 | Usable spell types (spell school)
 7 | Language
 8 | EP
+9 | TP
 
 ### Award operation
 
