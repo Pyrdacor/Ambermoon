@@ -92,8 +92,9 @@ Section | Description
 - [Automap graphics](Graphics/AutomapGfx)
 - [UI graphics](Graphics/UIGfx)
 - [UI button graphics](Graphics/Buttons)
+- [Sky gradients](Graphics/SkyGradients)
 - [Font graphics](Graphics/Font)
-- [Palettes](Graphics/Palettes.jpg)
+- [Palettes](Graphics/Palettes.png)
 
 
 ## Ambermoon.net
