@@ -78,6 +78,7 @@ Section | Description
   - [Forest moon map](Graphics/Maps/300.png)
   - [Morag map](Graphics/Maps/513.png)
 - [Map tiles](Graphics/Mapicons)
+- [Layouts](Graphics/Layouts)
 - [80x80](Graphics/80x80)
 - [EventPics](Graphics/EventPics)
 - [Objects3D](Graphics/Objects3D)
