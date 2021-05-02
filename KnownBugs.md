@@ -10,5 +10,8 @@ The disease status should reduce a random attribute by 1 every day. Each attribu
 
 Parry is an active action during battles. The success depends only on the character's Parry ability. But Ambermoon accidentally used the inverse logic. So if parrying fails due to dice roll, it actually succeeds and vice versa. Therefore characters with high parry values will fail to parry very often.
 
+## Aging is broken
+
+Each year the character age is increased by 2 instead of 1. So a character also dies twice as fast of age. Moreover when a character does of age the screen drawing is messed up. In general dying of age shouldn't have happened much as even one year is very long in Ambermoon and artificial aging isn't applied too often.
 
 *To be continued ...*
