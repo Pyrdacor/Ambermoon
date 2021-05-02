@@ -64,7 +64,7 @@ Offset | Type | Description
 0x002A | uword | Number of party members (1-6)
 0x002C | uword | Active party member index (1-based -> 1-6)
 0x002E | uword[6] | Character index of all the 6 party member slots
-0x003A | uword | **Unknown**
+0x003A | uword | Years passed (since 978)
 0x003C | uword | Current [travel type](Enumerations/TravelType.md)
 0x003E | uword | Currently active [special items](Enumerations/SpecialItemPurpose.md)
 0x0040 | uword | Current game options (see below)
