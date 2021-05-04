@@ -7,8 +7,7 @@ Labdata (labyrinth data) contains information about objects, walls, floor and ce
 Offset | Type | Description
 ----|----|----
 0x0000 | uword | Wall height (mostly near the range 300~400).
-0x0002 | ubyte | **Unknown**
-0x0003 | ubyte | Combat background index (only in the lower 4 bits), not sure if the upper 4 bits have some meaning.
+0x0002 | uword | Default combat background index (only in the lower 4 bits). The rest seems to be unused even in original code. Is ignored for walls and can be overridden by map characters.
 0x0004 | ubyte | Ceiling color index (see [Color](Enumerations/Color.md))
 0x0005 | ubyte | Floor color index (see [Color](Enumerations/Color.md))
 0x0006 | ubyte | Ceiling texture index (taken from Floors.amb)
