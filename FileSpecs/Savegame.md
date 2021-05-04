@@ -78,7 +78,7 @@ Offset | Type | Description
 0x35A4 | ubyte[32] | Chest locked states (256 bits for chest 0-255). See below.
 0x35C4 | ubyte[32] | Door locked states (256 bits for door 0-255). See below.
 0x35E4 | ubyte[6] | Battle positions for all 6 party members (each can be 0 to 11)
-0x35EB | \* | Events (see below).
+0x35EB | \* | Tile change events (see below).
 
 ### Active spells
 
@@ -235,13 +235,9 @@ Sand ship | 4
 Flying is not really used in the game but seeing those values assumes that it is either an unknown cheat or was used by the developers to explore the map quickly.
 
 
-### Events
+### Tile change events
 
-There can be an arbitrary amount of events. Each is encoded as 6 bytes. The end of events is encoded as a 0-uword (end marker).
-
-Not every event is decoded yet.
-
-The only 100% decoded event is the change tile event:
+There can be up to 750 tile change events. Each is encoded as 6 bytes. The end of the events is encoded as a 0-uword (end marker).
 
 Offset | Type | Description
 --- | --- | ---
@@ -250,6 +246,8 @@ Offset | Type | Description
 0x03 | ubyte | Y in tiles
 0x04 | uword | New front tile index (for 3D it is the new block index)
 
-As all map-related events seem to start with the map index other events must start with a word that is greater than the highest map index (I guess >= 0x0300, maybe even >= 0x0800).
+These events store changes in the world (e.g. moved walls or destroyed cobwebs).
 
-There are map-related events that use a new front tile index >= 0x0800. But they can be 0x07ff (11 bits) at max. I guess this is used to decode some other map-related event.
+Note: While normal map events have 12 bytes, here are only 6 bytes stored.
+
+Note: While normal tile change events can use map index 0 as "same map", this is of course not possible in the savegame. So if such event occurs in game the real map index has to be stored instead of 0.
