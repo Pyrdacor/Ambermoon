@@ -73,8 +73,7 @@ Offset | Type | Description
 0x0104 | ubyte[1024] | Global variables (8192 bits). At 0x112 the wind gate active states seem to be located (1 bit for each gate, 1 = active, 0 = broken). Order is 76543210 FEDCBA98 ...
 0x0504 | EventBits[1024] | Event active state bits. This provides 64 event bits for maps 1 to 1024. But used are only maps 1 to 528. For event bit structure see below.
 0x2504 | CharacterBits[1024] | Controls if map characters are present on the map.
-0x3504 | ubyte[15] | Dictionary words (see below). Maybe there are some more bytes/bits here but in original game there are only 115 possible dictionary entries. 15 bytes are enough for 115 entries.
-0x3513 | ubyte[113] | **Unknown** (I guess some are used for more dictionary words)
+0x3504 | ubyte[128] | Dictionary words (see below). This allows 1024 dictionary words in theory. In the original game there are only 115 possible dictionary entries. 15 bytes are enough for those 115 entries so only these 15 bytes are used.
 0x3584 | ubyte[32] | Activated go-to points (256 bits, each go-to point has an index in the range 0-255). If a bit is set, the point is active. Order of bits is like for chests etc.
 0x35A4 | ubyte[32] | Chest locked states (256 bits for chest 0-255). See below.
 0x35C4 | ubyte[32] | Door locked states (256 bits for door 0-255). See below.
