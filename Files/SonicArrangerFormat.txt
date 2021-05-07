@@ -1,0 +1,88 @@
+|============================================================================|
+| [AMoRE] - Sonic Arranger <SONIC.*/SAPCD.*>   <jaegermeister.markus@gmx.de> |
+|           document version 1.00                                            |
+|----------------------------------------------------------------------------|
+| This document is part of the AMoRE (Amiga Module Ripping Encyclopedia)     |
+| package. It is released under the OpenContent license.                     |
+| The OpenContent license can be found at ........... http://opencontent.org |
+| The latest AMoRE package can be found at .... http://amore68k.netfirms.com |
+|----------------------------------------------------------------------------|
+
+
+  NOTE: This file format is different from the format described by
+        Laurent Clevy. This format is the packed and replayer including
+        format, not the editable format
+
+
+  FORMAT DESCRIPTION
+  --------------------------------------------------------------------------
+
+     0000       dword   songtable pointer (always $00000028)
+     0004       dword   overtable pointer
+     0008       dword   notetable pointer
+     000c       dword   instrument pointer
+     0010       dword   synth waveforms pointer
+     0018       dword   synth arrangements pointer
+     001c       dword   sampledata pointer
+     0020       word    ????
+     0022       word    $ffff
+     ....       song, overtable, notes, instruments, synth, sampledata
+     ....       ID      "deadbeef"+$00000000
+     ....       data    productowner text, "NOT" (not NOT ;)) encoded
+
+     ... for further information on the block structures take Laurent
+         Clevy's format description
+
+
+  SAMPLE BLOCK DESCRIPTION
+  --------------------------------------------------------------------------
+
+     0000       dword   number of samples
+     0004       dwords  samplesizes for each sample
+     ....       data    sampledata
+     
+
+  RIPPING INSTRUCTIONS
+  --------------------------------------------------------------------------
+
+     1. Check the first dword for being $00000028.
+     2. Get all the table/block pointers
+     3. Go to the sample block, read number of samples
+     4. Add all sample sizes together (result is full sampledata size)
+     5. Check the 8-byte string behind the whole sample data for
+          being set to "deadbeef". The dword behind the dead beef must be
+          $00000000
+     6. Go through the bytes after the dword $00000000 and stop when a
+          nullbyte is found. This nullbyte is the last byte to be saved, set
+          the endaddress to the position of the nullbyte plus one
+     7. If you want to save the replayer take the module address and walk
+          backwards till you find a pattern like this (hex)
+            a0+00 : 4e .. .. .. 4e .. .. .. 4e .. .. .. 4e .. .. ..
+            a0+10 : 4e .. .. .. 4e .. .. .. 4e .. .. .. .. .. .. ..
+          The replayer starts then starts at a0. Save from a0 to the null-
+          byte you found before and you got a replayable .pc module
+
+
+  DOCUMENT HISTORY
+  --------------------------------------------------------------------------
+
+     * v1.00 - first officially released version
+             - ripping method is more accurate than the one of Exotic Ripper
+
+
+  CREDITS
+  --------------------------------------------------------------------------
+
+     * Document and amore.pas/amore.exe implementation done by
+         Jaegermeister Markus <jaegermeister.markus@gmx.de>
+
+     * Ripping method (regarding to the replayer only) taken from the
+       sourcecode of
+         Exotic Ripper v3.2 by Turbo and Marley of Infect
+
+     * Used Sonic Arranger Editable file format description for tech info by
+         Laurent Clevy <laurent.clevy@club-internet.fr)
+
+     * Everything done with the help of the following sites
+         http://exotica.fix.no         (lots of exotic modules to test with)
+         http://www.multimania.com/asle        (amiga mod packers described)
