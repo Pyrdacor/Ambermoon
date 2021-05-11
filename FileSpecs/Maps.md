@@ -24,9 +24,9 @@ Stored as 16 bits. 1 means true/active, 0 means false/inactive. Most significant
 
 Bit | Meaning
 --- | ---
-0 | Indoor
-1 | Outdoor
-2 | Dungeon
+0 | Indoor (always full light)
+1 | Outdoor (light depends on daytime and own light sources)
+2 | Dungeon (light depends only on own light sources)
 3 | Automapper (if active the dungeon map is available and the map has to be explored)
 4 | CanRest
 5 | WorldSurface
