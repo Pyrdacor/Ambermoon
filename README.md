@@ -97,6 +97,10 @@ Section | Description
 - [Font graphics](Graphics/Font)
 - [Palettes](Graphics/Palettes.png)
 
+### Music
+
+- [Music](Files/Music.md)
+
 
 ## Ambermoon.net
 
