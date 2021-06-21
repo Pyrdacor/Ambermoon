@@ -7,10 +7,10 @@ Note: Bits are numbered from least significant bit to most significant bit. As t
 
 Bits | As hex value | Meaning
 --- | --- | ---
-0 | 0x00000001 | **Unknown**
+0 | 0x00000001 | Alternate animation (animations go back and forth)
 1 | 0x00000002 | Block sight?
 2 | 0x00000004 | Render order
-3 | 0x00000008 | Floor / Transparency
+3 | 0x00000008 | Floor (3D object) / Transparency (3D wall)
 4 | 0x00000010 | **Unknown**
 5 | 0x00000020 | Use background tile flags
 6 | 0x00000040 | Custom render order
@@ -24,7 +24,7 @@ Bits | As hex value | Meaning
 
 ## Block sight
 
-Not 100% sure about this, but this is set for normal walls and non-blocking walls which block sight (e.g. doors, fake walls, etc).
+Blocks the sight. Monsters can't see you through this. Is set for walls, doors and secret doors (fake walls).
 
 
 ## Render order
@@ -64,6 +64,8 @@ In 3D the "allow movement for walking" bit is also considered. So if bit 8 is 0,
 ## Allowed travel types
 
 Allows movement for each [travel type](TravelType.md). These are 15 bits (but Ambermoon has only 11 travel types). First bit (bit 8 of the tile flags) allows normal walking if set. Second bit (bit 9 of the tile flags) allows traveling by horse, and so on.
+
+**Note:** In 3D (and most likely in 2D indoor maps as well) the second bit (horse) is used as "allow monsters to pass".
 
 I think Ambermoon uses the travel type "None" as index 0 and walking as index 1. Therefore there are really 16 travel allow bits and bit 7 means "allow travel type None". If this is set None is allowed and hence this means that no movement is allowed.
 
