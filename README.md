@@ -12,7 +12,7 @@ I will provide some helpful tools too.
 
 Version | Windows 64bit | Linux 64bit | Windows 32bit
 --- | --- | --- | ---
-1.0.5 | [Download](https://github.com/Pyrdacor/Ambermoon/releases/download/v1.0.5/AmbermoonTools-Windows.zip) | [Download](https://github.com/Pyrdacor/Ambermoon/releases/download/v1.0.5/AmbermoonTools-Linux.tar.gz) | [Download](https://github.com/Pyrdacor/Ambermoon/releases/download/v1.0.5/AmbermoonTools-Windows32Bit.zip)
+1.0.6 | [Download](https://github.com/Pyrdacor/Ambermoon/releases/download/v1.0.6/AmbermoonTools-Windows.zip) | [Download](https://github.com/Pyrdacor/Ambermoon/releases/download/v1.0.6/AmbermoonTools-Linux.tar.gz) | [Download](https://github.com/Pyrdacor/Ambermoon/releases/download/v1.0.6/AmbermoonTools-Windows32Bit.zip)
 
 This zip file contains:
 - A tool to pack files into Ambermoon game data files (AmbermoonPack)
