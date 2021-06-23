@@ -60,13 +60,13 @@ namespace AmbermoonTextImport
             Console.WriteLine("Examples:");
             Console.WriteLine("-> AmbermoonTextImport -e \"C:\\Ambermoon\\Amberfiles\" 1Map_texts.amb \"C:\\AmbermoonData\\Texts\"");
             Console.WriteLine("-> AmbermoonTextImport -i \"C:\\Ambermoon\\Amberfiles\" 1Map_texts.amb \"C:\\AmbermoonData\\Texts\"");
-            Console.WriteLine("-> AmbermoonTextImport -e \"C:\\Ambermoon\\Amberfiles\" 1Map_texts.amb \"C:\\AmbermoonData\\Texts\" -pzh");
+            Console.WriteLine("-> AmbermoonTextImport -e \"C:\\Ambermoon\\Amberfiles\" 1Map_texts.amb \"C:\\AmbermoonData\\Texts\" -pzx");
             Console.WriteLine();
             Console.WriteLine("Options:");
             Console.WriteLine(" --preserve-whitespaces / -p :     Preserve whitespaces");
             Console.WriteLine(" --preserve-zero-bytes / -z  :     Preserve 0-bytes");
-            Console.WriteLine(" --hex-subfile-names / -h    :     Subfile name with hex numbering");
-            Console.WriteLine(" Those can be combined like -pzh or -hz.");
+            Console.WriteLine(" --hex-subfile-names / -x    :     Subfile name with hex numbering");
+            Console.WriteLine(" Those can be combined like -pzx or -xz.");
             Console.WriteLine();
         }
 
@@ -158,7 +158,7 @@ namespace AmbermoonTextImport
                                 options.Add(Option.PreserveWhitespaces);
                             else if (arg[i] == 'z')
                                 options.Add(Option.PreserveZeros);
-                            else if (arg[i] == 'h')
+                            else if (arg[i] == 'x')
                                 options.Add(Option.HexSubfileNames);
                             else
                                 throw new Exception();
