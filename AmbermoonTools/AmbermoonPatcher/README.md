@@ -37,6 +37,52 @@ Each fix can contain any number and combination of those actions.
 You can also use the shortcuts r, i and d as well as rep, ins and del.
 The case does not matter so you can also use R, I, D or replace, etc.
 
+
+### Imports
+
+Scripts can import other scripts so that parts can be loaded dynamically.
+This might be especially useful for multi-language patches where the
+language independent parts can be imported by each language dependent
+patch script.
+
+There are 2 kinds of imports. Fix lists and patch scripts.
+
+Fix lists must only contain 1 enumeration of fixes. They can only be imported
+inside a fix (after a fix description) and will then become part of a fix.
+Fix lists are imported or run by the command `Run`.
+
+Patch scripts are full script files. They can't be imported inside a fix
+enumeration but can be imported between fix descriptions. They need to
+start with a fix description. Importing complete patch scripts is done
+by using the ampersand prefix.
+
+```
+# MyFix
+- Replace ...
+- Run OtherScript.afl // Run some additional fixes from a fix list
+
+& MyOtherPatchFile.amp // Import fixes from other patch file
+```
+
+```
+// This is MyOtherPatchFile.amp
+# MyOtherFix
+- Replace ...
+```
+
+```
+// This is OtherScript.afl
+- Delete ...
+// We could also run another fix list here
+```
+
+Import loops will be detected and an error is generated. For example if
+a patch file is included which itself imports the current patch script,
+this will generate an error and won't execute anything.
+
+Fix lists can also produce such loops and therefore are also checked.
+Note that fix lists can only import other fix lists.
+
 ### Comments
 
 You can use line-comments by using `//`. Everything after this in the same

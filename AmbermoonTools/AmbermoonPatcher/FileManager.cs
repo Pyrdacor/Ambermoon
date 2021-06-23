@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using TextReader = Ambermoon.Data.Legacy.Serialization.TextReader;
 
 namespace AmbermoonPatcher
 {
@@ -11,6 +12,7 @@ namespace AmbermoonPatcher
     {
         readonly GameData gameData;
         readonly Dictionary<string, Dictionary<int, byte[]>> subFileData = new Dictionary<string, Dictionary<int, byte[]>>();
+        readonly Dictionary<string, Dictionary<int, List<string>>> texts = new Dictionary<string, Dictionary<int, List<string>>>();
 
         public FileManager(GameData gameData)
         {
@@ -42,6 +44,26 @@ namespace AmbermoonPatcher
             }
 
             subFileData[file][subFileIndex] = data;
+        }
+
+        public List<string> GetTexts(string file, int subFileIndex)
+        {
+            if (!file.ToLower().Contains("_text"))
+                return null;
+
+            if (!texts.ContainsKey(file))
+            {
+                if (!gameData.Files.ContainsKey(file))
+                    return null;
+
+                var texts = gameData.Files[file].Files.ToDictionary(f => f.Key, f => TextReader.ReadTexts(f.Value));
+                texts.Add(file, texts);
+
+                if (subFileIndex < 1 || subFileIndex > 0xffff || !gameData.Files[file].Files.ContainsKey(subFileIndex))
+                    return null;
+
+                texts.Add( TextReader.ReadTexts(gameData.Files[file].Files[subFileIndex]));
+            }
         }
 
         public bool Save(string dataPath)

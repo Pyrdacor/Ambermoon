@@ -90,6 +90,24 @@ namespace AmbermoonPatcher
                 VerifyRemainingTokensEmpty(tokenIndex);
                 return deleteAction;
             }
+            if (command == "rt" || command == "reptext" || command == "replacetext")
+            {
+                var replaceTextAction = new ReplaceTextAction(ParseDestination(tokenLine, ref tokenIndex), ParseRValue(tokenLine, ref tokenIndex));
+                VerifyRemainingTokensEmpty(tokenIndex);
+                return replaceTextAction;
+            }
+            else if (command == "it" || command == "ins" || command == "inserttext")
+            {
+                var insertTextAction = new InsertTextAction(ParseDestination(tokenLine, ref tokenIndex), ParseRValue(tokenLine, ref tokenIndex));
+                VerifyRemainingTokensEmpty(tokenIndex);
+                return insertTextAction;
+            }
+            else if (command == "dt" || command == "deltext" || command == "deletetext")
+            {
+                var deleteTextAction = new DeleteTextAction(ParseDestination(tokenLine, ref tokenIndex), ParseInteger(tokenLine, tokenIndex++));
+                VerifyRemainingTokensEmpty(tokenIndex);
+                return deleteTextAction;
+            }
             else
             {
                 throw new FormatException($"Error (at {tokenLine.LineNumber},{commandToken.CharacterIndex}): Unknown command '{commandToken.Value}'");
@@ -279,6 +297,15 @@ namespace AmbermoonPatcher
             public int Length { get; set; }
         }
 
+        class TextDestination
+        {
+            public string File { get; set; }
+            public int SubFileIndex { get; set; }
+            public int TextIndex { get; set; }
+            public int? Offset { get; set; }
+            public int? Length { get; set; }
+        }
+
         static byte[] GetRValueData(RValue rValue, FileManager fileManager)
         {
             if (rValue.Source != null)
@@ -416,6 +443,141 @@ namespace AmbermoonPatcher
             readonly int length;
 
             internal DeleteAction(Destination destination, int length)
+            {
+                this.destination = destination;
+                this.length = length;
+            }
+
+            public void Run(FileManager fileManager)
+            {
+                Console.Write($"- Deleting {length} bytes in '{destination.File}[{destination.SubFileIndex}]' at offset 0x{destination.Offset:x4} ... ");
+
+                try
+                {
+                    var data = fileManager.GetFileData(destination.File, destination.SubFileIndex);
+
+                    if (data == null)
+                        throw new Exception($"File '{destination.File}' is not present in game data.");
+
+                    if (destination.Offset < 0 || destination.Offset + length > data.Length)
+                        throw new Exception($"Tried to delete outside of '{destination.File}[{destination.SubFileIndex}]'.");
+
+                    byte[] result = new byte[data.Length - length];
+
+                    if (result.Length != 0)
+                    {
+                        if (destination.Offset > 0)
+                            Array.Copy(data, result, destination.Offset);
+                        if (destination.Offset + length < data.Length)
+                            Array.Copy(data, destination.Offset + length, result, destination.Offset, data.Length - (destination.Offset + length));
+                    }
+
+                    fileManager.SetFileData(destination.File, destination.SubFileIndex, result);
+
+                    Console.WriteLine("done");
+                }
+                catch
+                {
+                    Console.WriteLine("failed");
+                    throw;
+                }
+            }
+        }
+
+        class ReplaceTextAction : IAction
+        {
+            readonly TextDestination destination;
+            readonly string text;
+
+            internal ReplaceTextAction(TextDestination destination, string text)
+            {
+                this.destination = destination;
+                this.text = text;
+            }
+
+            public void Run(FileManager fileManager)
+            {
+                if (destination.Length == null)
+                    Console.Write($"- Replacing text '{destination.File}[{destination.SubFileIndex}.{destination.TextIndex}]' ... ");
+                else
+                    Console.Write($"- Replacing partial text in '{destination.File}[{destination.SubFileIndex}.{destination.TextIndex}]' at offset 0x{destination.Offset:x4} with length {destination.Length} ... ");
+
+                try
+                {
+                    var data = fileManager.GetFileData(destination.File, destination.SubFileIndex);
+
+                    if (data == null)
+                        throw new Exception($"File '{destination.File}' is not present in game data.");
+
+                    if (destination.Offset < 0 || destination.Offset + rValue.Length > data.Length)
+                        throw new Exception($"Tried to replace more bytes than the size of '{destination.File}[{destination.SubFileIndex}]'.");
+
+                    var rValueData = GetRValueData(rValue, fileManager);
+
+                    for (int i = 0; i < rValue.Length; ++i)
+                        data[destination.Offset + i] = rValueData[i];
+
+                    fileManager.SetFileData(destination.File, destination.SubFileIndex, data);
+
+                    Console.WriteLine("done");
+                }
+                catch
+                {
+                    Console.WriteLine("failed");
+                    throw;
+                }
+            }
+        }
+
+        class InsertTextAction : IAction
+        {
+            readonly TextDestination destination;
+            readonly string text;
+
+            internal InsertTextAction(TextDestination destination, string text)
+            {
+                this.destination = destination;
+                this.text = text;
+            }
+
+            public void Run(FileManager fileManager)
+            {
+                Console.Write($"- Inserting {text.Length} bytes in '{destination.File}[{destination.SubFileIndex}]' at offset 0x{destination.Offset:x4} ... ");
+
+                try
+                {
+                    var data = fileManager.GetFileData(destination.File, destination.SubFileIndex);
+
+                    if (data == null)
+                        throw new Exception($"File '{destination.File}' is not present in game data.");
+
+                    if (destination.Offset < 0 || destination.Offset > data.Length)
+                        throw new Exception($"Tried to insert outside of '{destination.File}[{destination.SubFileIndex}]'.");
+
+                    var rValueData = GetRValueData(text, fileManager);
+                    var bytes = new List<byte>(data);
+
+                    for (int i = 0; i < text.Length; ++i)
+                        bytes.Insert(destination.Offset + i, rValueData[i]);
+
+                    fileManager.SetFileData(destination.File, destination.SubFileIndex, bytes.ToArray());
+
+                    Console.WriteLine("done");
+                }
+                catch
+                {
+                    Console.WriteLine("failed");
+                    throw;
+                }
+            }
+        }
+
+        class DeleteTextAction : IAction
+        {
+            readonly TextDestination destination;
+            readonly int length;
+
+            internal DeleteTextAction(TextDestination destination, int length)
             {
                 this.destination = destination;
                 this.length = length;
