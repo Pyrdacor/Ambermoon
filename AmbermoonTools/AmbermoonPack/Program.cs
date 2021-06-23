@@ -22,6 +22,7 @@ namespace AmbermoonPack
             Console.WriteLine();
             Console.WriteLine("Usage: AmbermoonPack <type> <source> <dest> [key]");
             Console.WriteLine("       AmbermoonPack REPACK <source> <dest>");
+            Console.WriteLine("       AmbermoonPack UNPACK <source> <dest>");
             Console.WriteLine();
             Console.WriteLine(" <type>     JH, LOB, VOL1, AMNC, AMNP, AMBR, AMPC or JH+LOB");
             Console.WriteLine(" <source>   Source file or directory path");
@@ -65,6 +66,11 @@ namespace AmbermoonPack
             if (args[0].ToUpper() == "REPACK")
             {
                 type = null;
+            }
+            else if (args[0].ToUpper() == "UNPACK")
+            {
+                Unpack(args);
+                return;
             }
             else if (args[0].ToUpper() == "JH+LOB")
             {
@@ -219,6 +225,68 @@ namespace AmbermoonPack
             {
                 Console.WriteLine("Internal error: " + ex.Message);
                 Environment.Exit(ERROR_EXECUTION);
+            }
+        }
+
+        static void Unpack(string[] args)
+        {
+            if (args.Length != 3)
+            {
+                Usage();
+                Environment.Exit(ERROR_INVALID_USAGE);
+                return;
+            }
+
+            if (!File.Exists(args[1]))
+            {
+                Console.WriteLine($"Source file '{args[1]}' not found.");
+                Usage();
+                Environment.Exit(ERROR_SOURCE_FOUND);
+                return;
+            }
+
+            var reader = new FileReader();
+            Ambermoon.Data.IFileContainer file;
+
+            try
+            {
+                file = reader.ReadFile("", File.ReadAllBytes(args[1]));
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Error loading file: " + ex.Message);
+                Environment.Exit(ERROR_INVALID_SOURCE_FILE);
+                return;
+            }
+
+            string outDir = args[2];
+
+            if (File.Exists(outDir))
+                outDir = Path.GetDirectoryName(outDir);
+
+            try
+            {
+                Directory.CreateDirectory(outDir);
+            }
+            catch
+            {
+                Console.WriteLine("Failed to create output directory");
+                Environment.Exit(ERROR_WRITING_TO_DESTINATION);
+                return;
+            }
+
+            try
+            {
+                foreach (var subfile in file.Files)
+                {
+                    File.WriteAllBytes(Path.Combine(outDir, subfile.Key.ToString("000")), subfile.Value.ReadToEnd());
+                }
+            }
+            catch
+            {
+                Console.WriteLine("Failed to write output files");
+                Environment.Exit(ERROR_WRITING_TO_DESTINATION);
+                return;
             }
         }
 
