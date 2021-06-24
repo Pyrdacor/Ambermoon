@@ -14,6 +14,10 @@
 - 59
 - 60
 
+### Sheet 2
+
+- 6 and 7
+
 ### Misc
 
 - Changed type of golem from partymember to monster in gala's temple

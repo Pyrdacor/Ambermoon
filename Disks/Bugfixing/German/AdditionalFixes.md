@@ -6,3 +6,4 @@
 - Fixed Reg hill giant boss flag
 - Fixed two world maps (00D and 094) with wrong flags
 - Fixed Gryban spawn location
+- Fixed two corrupted wind gates
