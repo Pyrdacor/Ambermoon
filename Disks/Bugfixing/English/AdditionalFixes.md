@@ -6,6 +6,13 @@
 - 8: Fixed in subfile 006
 - 13: Fixed in map 424 in 2Map_data.amb
 - 49: Fixed in subfile 008
+- 51: Fixed in subfile 010
+- 55: Fixed in subfile 005
+- 56: Fixed in subfile 014
+- 57: Fixed in subfile 007
+- 58
+- 59
+- 60
 
 ### Misc
 
