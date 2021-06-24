@@ -9,3 +9,29 @@
 - Fixed two corrupted wind gates
 - Added a new teleport event form map 362 to map 361 (9,11) facing north. So the stairs to the lowest level in gadlon work now.
 - Fixed button in bandit's cellar
+- Fixed every single plant on Kire's moon (values are in decimal)
+    - Map 308: Event 012
+    - Map 309: Event 012
+    - Map 310: Event 012
+    - Map 312: Event 012
+    - Map 313: Event 012 and 017
+    - Map 315: Event 012 and 017
+    - Map 316: Event 012 and 017
+    - Map 317: Event 017
+    - Map 318: Event 012 and 017
+    - Map 319: Event 012 and 017
+    - Map 320: Event 012 and 017
+    - Map 321: Event 012 and 017
+    - Map 323: Event 012, 017, 022 and 027
+    - Map 324: Event 012, 017, 022 and 027
+    - Map 325: Event 014, 019, 024 and 029
+    - Map 326: Event 014, 019, 024 and 029
+    - Map 327: Event 014, 019, 024 and 029
+    - Map 328: Event 014, 019, 024 and 029
+    - Map 329: Event 014, 019, 024 and 029
+    - Map 330: Event 014, 019, 024 and 029
+    - Map 331: Event 014, 019, 024 and 029
+    - Map 332: Event 014, 019, 024 and 029
+    - Map 333: Event 014, 019, 024 and 029
+    - Map 334: Event 014, 019, 024 and 029
+    - Map 335: Event 014, 019, 024 and 029
