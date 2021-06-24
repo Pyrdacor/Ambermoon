@@ -17,6 +17,7 @@
 ### Sheet 2
 
 - 6 and 7
+- 24: added a new teleport event form map 362 to map 361 (9,11) facing north
 
 ### Misc
 
@@ -39,3 +40,4 @@
     - Changed HE to ~SEX1~ in 2Map_texts.amb file 115 (subfile 012)
     - Changed HE to ~SEX1~ in 2Map_texts.amb file 16A (subfile 001)
     - Changed HE to ~SEX1~ in 2Map_texts.amb file 170 (subfile 002)
+- Renamed monster "ENERGIEGLOBE" to "ENERGY GLOBE"

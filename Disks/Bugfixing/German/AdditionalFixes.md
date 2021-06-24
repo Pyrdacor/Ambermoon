@@ -7,3 +7,4 @@
 - Fixed two world maps (00D and 094) with wrong flags
 - Fixed Gryban spawn location
 - Fixed two corrupted wind gates
+- Added a new teleport event form map 362 to map 361 (9,11) facing north. So the stairs to the lowest level in gadlon work now.
