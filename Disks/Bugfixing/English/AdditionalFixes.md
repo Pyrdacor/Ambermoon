@@ -19,6 +19,7 @@
 - 6 and 7
 - 24: added a new teleport event form map 362 to map 361 (9,11) facing north
 - 26: fixed button target coordinates
+- 39: lot of fixes in many maps in the range 300 to 335
 
 ### Misc
 
