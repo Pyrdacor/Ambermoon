@@ -44,3 +44,4 @@
     - Changed HE to ~SEX1~ in 2Map_texts.amb file 170 (subfile 002)
 - Renamed monster "ENERGIEGLOBE" to "ENERGY GLOBE"
 - Fixed wrong text index in Nalven's magical school
+- Added 2 text popups to Thalion office map (see german file for details)
