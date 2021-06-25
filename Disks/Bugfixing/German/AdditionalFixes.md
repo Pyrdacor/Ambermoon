@@ -35,3 +35,4 @@
     - Map 333: Event 014, 019, 024 and 029
     - Map 334: Event 014, 019, 024 and 029
     - Map 335: Event 014, 019, 024 and 029
+- Fixed wrong text index in Nalven's magical school
