@@ -42,7 +42,7 @@ Value | Name
 
 ## Effects
 
-- Strength: Increases the max weight by 1kg per point. Actually the max weight formula seems to be 999 + STR * 1000 in grams.
+- Strength: Increases the max weight by 1kg per point. Actually the max weight formula seems to be 999 + STR * 1000 in grams. Also increased Dmg by 1 every 25 points.
 - Intelligence: Adds INT/25 (rounded down) SP and SLP on level up.
 - Dexterity: Chance in percent to not trigger lock traps.
 - Speed: Characters with higher values can act earlier in battle.
