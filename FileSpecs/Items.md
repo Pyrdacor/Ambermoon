@@ -35,7 +35,7 @@ Offset | Type | Description
 0x0012 | ubyte | Second reduced ability (see below)
 0x0013 | ubyte | First reduced ability amount (see below)
 0x0014 | ubyte | Second reduced ability amount (see below)
-0x0015 | ubyte | Index for either [special item purpose](Enumerations/SpecialItemPurpose.md), [transportation](Enumerations/Transportation.md) or text of a text scroll
+0x0015 | ubyte | Index for either [special item purpose](Enumerations/SpecialItemPurpose.md), [transportation](Enumerations/TravelType.md) or text of a text scroll
 0x0016 | ubyte | Text sub-index (used only for text scrolls)
 0x0017 | ubyte | [Spell type](Enumerations/SpellTypes.md)
 0x0018 | ubyte | [Spell index](Enumerations/Spells.md)
