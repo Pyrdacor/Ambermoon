@@ -7,6 +7,8 @@ This format is used for the following files:
 
 Offsets are given in hex. Sizes/lengths in dec. 16 and 32 bit values are stored in big endian format. So the most significant bytes come first. Example: The value 0x1234 is stored as 0x12 0x34 and the value 0x12345678 is stored as 0x12 0x34 0x56 0x78.
 
+ubyte means unsigned 8-bit value, uword means unsigned 16-bit value and ulong means unsigned 32-bit value.
+
 Offset | Type | Description
 ----|----|----
 0x0000 | ubyte | [Character type](Enumerations/CharacterTypes.md)
