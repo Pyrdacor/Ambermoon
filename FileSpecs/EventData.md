@@ -40,7 +40,7 @@ Offset | Type | Description
 0x02 | ubyte | Optional index of a map text to display when showing door window (0xff means no text)
 0x03 | ubyte | Optional index of a map text to display when unlocked (0xff means no text)
 0x04 | ubyte | **Unknown** (always 0)
-0x05 | uword | Key index if locked
+0x05 | uword | Key index
 0x07 | uword | Unlock fail event index (0-based, 0xffff means none, this is basically the trap event chain)
 
 ## Chest event (0x03 / 3)
@@ -63,12 +63,12 @@ If the key index is not 0, the chest can't be opened with a lockpick.
 ### Chest flags
 
 - Bit0: **Unknown**
-- Bit1: If set a search ability check is performed and only if successfully the chest is shown.
+- Bit1: If set a search ability check is performed and only if successful the chest is shown.
 - Bit2-7: **Unknown**
 
 Only one chest in Ambermoon uses the flags. It is a skull in the Antique Area which contains the Antique Weapon. You will only find it when your search ability is high enough cause Bit1 is set. The chest uses value 50 (hex 32).
 
-So in addition two other bits are set as well. But the meaning is unknown.
+In binary this is 0011 0010. So in addition two other bits are set as well. But the meaning is unknown.
 
 ## Text popup event (0x04 / 4)
 
