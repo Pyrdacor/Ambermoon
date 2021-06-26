@@ -394,6 +394,8 @@ events. Characters which won't open a conversation window can't be examined.
 
 Note: This event starts an event chain but will not perform any action. The real action (remove given item/gold/food etc) is done by an Interaction event later.
 
+Talking to an NPC triggers the conversation event chains of interaction type Talk (7).
+
 ## Print text event (0x11 / 17)
 
 This is used to define the text to display in conversations.
@@ -411,13 +413,13 @@ variable 0 is always 0.
 
 ## Create event (0x12 / 18)
 
-Create items, gold or food. Items arw stored in the item view of the conversation window, gold and food is directly added to the active party member.
+Create items, gold or food. Items are stored in the item view of the conversation window, gold and food is directly added to the active party member.
 
 The event chain proceeds immediately so the item has not to be taken to do so.
 
 Offset | Type | Description
 --- | --- | ---
-0x00 | 0: Item, 1: Gold, 2 or above: Food
+0x00 | ubyte | 0: Item, 1: Gold, 2 or above: Food
 0x01 | ubyte[4] | Unused
 0x05 | uword | Amount
 0x07 | uword | Item index
