@@ -42,11 +42,11 @@ Value | Name
 
 ## Effects
 
-- Strength: Increases the max weight by 1kg per point. Actually the max weight formula seems to be 999 + STR * 1000 in grams. Also increased Dmg by 1 every 25 points.
+- Strength: Increases the max weight by 1kg per point. Actually the max weight formula seems to be 999 + STR * 1000 in grams. Also increases damage by 1 every 25 points.
 - Intelligence: Adds INT/25 (rounded down) SP and SLP on level up.
 - Dexterity: Chance in percent to not trigger lock traps.
 - Speed: Characters with higher values can act earlier in battle.
-- Stamina: Increases Def by 1 every 25 points.
+- Stamina: Increases defense by 1 every 25 points.
 - Charisma: Increases the sell price by 1% every full 10 points.
 - Luck: Chance in percent to avoid the effect of a triggered trap.
 - Anti-Magic: Chance in percent to block enemy spells.
