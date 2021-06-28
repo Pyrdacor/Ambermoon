@@ -37,6 +37,7 @@
     - Map 335: Event 014, 019, 024 and 029
 - Fixed wrong text index in Nalven's magical school
 - Added 2 text popups to Thalion office map
+- Fixed wind gate at around x=271 y=564 (no longer usable when broken)
 
 
 ## Thalion office
