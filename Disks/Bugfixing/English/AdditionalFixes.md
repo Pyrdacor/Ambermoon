@@ -46,3 +46,4 @@
 - Fixed wrong text index in Nalven's magical school
 - Added 2 text popups to Thalion office map (see german file for details)
 - Fixed wind gate at around x=271 y=564 (no longer usable when broken)
+- Added floor texture to S'Angrila
