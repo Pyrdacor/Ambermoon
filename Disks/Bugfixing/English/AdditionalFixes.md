@@ -47,3 +47,4 @@
 - Added 2 text popups to Thalion office map (see german file for details)
 - Fixed wind gate at around x=271 y=564 (no longer usable when broken)
 - Added floor texture to S'Angrila
+- Fixed wrong direction when teleporting from Luminor's tower 4 to 3
