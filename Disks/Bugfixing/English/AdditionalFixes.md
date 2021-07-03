@@ -48,3 +48,4 @@
 - Fixed wind gate at around x=271 y=564 (no longer usable when broken)
 - Added floor texture to S'Angrila
 - Fixed wrong direction when teleporting from Luminor's tower 4 to 3
+- Changed Gryban start Exp from 114250 (previous fixed value) to 113400 (like in german fix) as this is exactly the exp needed for level 35.
