@@ -20,6 +20,8 @@
 - 24: added a new teleport event form map 362 to map 361 (9,11) facing north
 - 26: fixed button target coordinates
 - 39: lot of fixes in many maps in the range 300 to 335
+- 50: Removed " |END.." in NPC_texts.amb (subfile 03A, text 007)
+- 52: removed " |END.."
 
 ### Misc
 
