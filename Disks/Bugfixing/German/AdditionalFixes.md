@@ -39,7 +39,7 @@
 - Added 2 text popups to Thalion office map
 - Fixed wind gate at around x=271 y=564 (no longer usable when broken)
 - Added floor texture to S'Angrila (change byte 0x07 from 00 to 09 in labdata file 034 (0x22) in 2Lab_data.amb).
- Fixed wrong direction when teleporting from Luminor's tower 4 to 3 (change byte 0x32F from 01 to 03 in map file 297 (0x129) in 2Map_data.amb).
+- Fixed wrong direction when teleporting from Luminor's tower 4 to 3 (change byte 0x32F from 01 to 03 in map file 297 (0x129) in 2Map_data.amb).
 
 
 ## Thalion office
