@@ -200,11 +200,15 @@ locked again after returning from forest moon without opening the door to Kire's
 
 Value | Name
 ----|----
-0x01 | Music (0 = on, 1 = off)
-0x02 | Fast battle mode
-0x04 | Justified text
-0x08 | 3D floor texture
-0x10 | 3D ceiling texture
+0x0001 | Music (0 = on, 1 = off)
+0x0002 | Fast battle mode
+0x0004 | Justified text
+0x0008 | 3D floor texture
+0x0010 | 3D ceiling texture
+0x8000 | Found the yellow sphere
+
+The last option is not changeable by the user but will be set via an NPC event. If the Moranian gives you the yellow sphere this option is set.
+It is then used to decide which outro will be shown at the end of the game.
 
 
 ### Time and date
