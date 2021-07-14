@@ -349,7 +349,7 @@ Value | Type
 19 | Add/remove food
 20 | Unused
 
-Note: The set game option can theoretically do things like turn on or off music or event activate the fast battle mode. In Ambermoon though it is only used once.
+Note: The set game option can theoretically do things like turn on or off music or even activate the fast battle mode. In Ambermoon though it is only used once.
 There is a special option which is not visible nor changable in the game but which is set by an NPC event. It is a bit which indicates if you got the yellow sphere
 from the Moranian. It is then used to determine which version of the outro should be shown at the end.
 
