@@ -8,6 +8,23 @@ You can use the issue tracker or pull requests to contribute as well.
 
 I will provide some helpful tools too.
 
+## Amiga versions
+
+### Full versions
+
+Version | Language | Download | Release date
+--- | --- | --- | ---
+1.08 | English | [zip](https://github.com/Pyrdacor/Ambermoon/raw/master/Disks/English/ambermoon_english_1.08_extracted.zip) [lha](https://github.com/Pyrdacor/Ambermoon/raw/master/Disks/English/ambermoon_english_1.08_extracted.lha) | 03-07-2021
+1.07 | German | [zip](https://github.com/Pyrdacor/Ambermoon/raw/master/Disks/English/ambermoon_german_1.07_extracted.zip) [lha](https://github.com/Pyrdacor/Ambermoon/raw/master/Disks/English/ambermoon_german_1.07_extracted.lha) | 03-07-2021
+
+### Patches
+
+Version | Language | Download | Release date
+--- | --- | --- | ---
+1.08 | English | [zip](https://github.com/Pyrdacor/Ambermoon/raw/master/Disks/Patches/PyrdacorFixEnglish1.08.zip) [lha](https://github.com/Pyrdacor/Ambermoon/raw/master/Disks/Patches/PyrdacorFixEnglish1.08.lha) | 03-07-2021
+1.07 | German | [zip](https://github.com/Pyrdacor/Ambermoon/raw/master/Disks/Patches/PyrdacorFixGerman1.07.zip) [lha](https://github.com/Pyrdacor/Ambermoon/raw/master/Disks/Patches/PyrdacorFixGerman1.07.lha) | 03-07-2021
+
+
 ## Tool releases
 
 Version | Windows 64bit | Linux 64bit | Windows 32bit
