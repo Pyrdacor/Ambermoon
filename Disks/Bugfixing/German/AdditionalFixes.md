@@ -9,6 +9,8 @@ Based on 1.07.
   popup said that you returned to Dor Grestin. This was
   fixed in 3Map_texts.amb (subfile 0x161, text index 0x9)
 - Set initial charges of several chest items (forest moon plants) from 0 to 1
+- Anti-Magic Sphere spell scroll now has the correct weight value
+- Murder Blade and Dagger Sling now correctly use 1 hand
 
 ## Version 1.07
 

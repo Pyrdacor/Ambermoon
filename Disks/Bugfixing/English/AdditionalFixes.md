@@ -13,7 +13,13 @@ Based on 1.08.
 - 44: Changed "WIND CALLS" to "WIND SHRINE".
 - 45: Improved riddlemouth texts in grandfather's cellar
 - 46: Set initial charges of several chest items (forest moon plants) from 0 to 1
-- 55b: Both map versions (of both maps) no use the same translation
+- 55b: Both map versions (of both maps) now use the same translation
+- 59: Anti-Magic Sphere spell scroll now has the correct weight value
+- 60: Murder Blade and Dagger Sling now correctly use 1 hand
+
+### Misc
+
+- Improved riddlemouth in Illien (sub text file 0x009 in map 0x01A)
 
 ## Version 1.08
 
