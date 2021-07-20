@@ -1,4 +1,24 @@
-## Fixed in relation to the excel sheet from Alex Holland
+## Version 1.09
+
+Based on 1.08.
+
+### Sheet 2
+
+- 24b: Fixed stair texture in Sansrie's temple 1.
+  - Map 422 (x=14, y=11)
+  - Changed byte 0x3D2 from 0x72 to 0x73
+- When returning with Dorina to Dor Kiredon the text
+  popup said that you returned to Dor Grestin. This was
+  fixed in 3Map_texts.amb (subfile 0x161, text index 0x9)
+- 44: Changed "WIND CALLS" to "WIND SHRINE".
+- 45: Improved riddlemouth texts in grandfather's cellar
+- 46: Set initial charges of several chest items (forest moon plants) from 0 to 1
+- 55b: Both map versions (of both maps) no use the same translation
+
+## Version 1.08
+
+Fixed in relation to the excel sheet from Alex Holland.
+Based on the Meynaf patch.
 
 ### Sheet 1
 

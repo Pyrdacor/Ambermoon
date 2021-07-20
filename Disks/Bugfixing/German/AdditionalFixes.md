@@ -1,4 +1,18 @@
-## Fixes on top of the AMINET and Slothsoft patches
+## Version 1.08
+
+Based on 1.07.
+
+- Fixed stair texture in Sansrie's temple 1.
+  - Map 422 (x=14, y=11)
+  - Changed byte 0x3D2 from 0x72 to 0x73
+- When returning with Dorina to Dor Kiredon the text
+  popup said that you returned to Dor Grestin. This was
+  fixed in 3Map_texts.amb (subfile 0x161, text index 0x9)
+- Set initial charges of several chest items (forest moon plants) from 0 to 1
+
+## Version 1.07
+
+Fixes on top of the AMINET and Slothsoft patches
 
 - Fixed Sansrie's key usage (map file 424 in 2Map_data.amb, changed word at offset 0x0346 from 0000 to 0165).
 - Removed unused character data from map 258 (set the following bytes to 0: 0x4A to 0x51).
@@ -42,7 +56,7 @@
 - Fixed wrong direction when teleporting from Luminor's tower 4 to 3 (change byte 0x32F from 01 to 03 in map file 297 (0x129) in 2Map_data.amb).
 
 
-## Thalion office
+### Thalion office
 
 This is map 257 (hex 101). I added two text popup events:
 - Lift event should be triggered at 23,17 and 24,17 (text index 2)
