@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "AmbermoonEventEditor": {
+      "commandName": "Project",
+      "commandLineArgs": "\"D:\\Programmierung\\C#\\Projects\\Ambermoon\\GitHub\\Ambermoon\\Disks\\Bugfixing\\English\\Amberfiles\\3Map_data\\352\" 0"
+    }
+  }
+}
