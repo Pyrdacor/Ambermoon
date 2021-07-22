@@ -11,6 +11,7 @@ Based on 1.07.
 - Set initial charges of several chest items (forest moon plants) from 0 to 1
 - Anti-Magic Sphere spell scroll now has the correct weight value
 - Murder Blade and Dagger Sling now correctly use 1 hand
+- Changed many occures of "ER" or "SEINE" to "~SEX1~" and "~SEX2~"
 
 ## Version 1.07
 
