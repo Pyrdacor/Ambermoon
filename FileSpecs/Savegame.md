@@ -96,7 +96,7 @@ Each of the 6 spells are stored as 2 uwords:
 Offset | Type | Description
 --- | --- | ---
 0x00 | uword | Duration in 5 minute chunks (e.g. 120 = 120 * 5 minutes = 600 minutes = 10 ingame hours)
-0x02 | uword | Level of the spell (e.g. for light: 1 = magic torch, 2 = magic lantern, 3 = magic sun, etc)
+0x02 | uword | Value of the spell (e.g. for light: 1 = magic torch, 2 = magic lantern, 3 = magic sun, etc otherwise it is the percentage value of the buff or not used for Clairvoyance and Mystic Map)
 
 If the duration is 0, the spell is not active at the moment, otherwise it is.
 
