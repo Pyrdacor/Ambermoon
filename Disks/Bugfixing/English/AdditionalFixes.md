@@ -20,6 +20,7 @@ Based on 1.08.
 ### Misc
 
 - Improved riddlemouth in Illien (sub text file 0x009 in map 0x01A)
+- Fixed the text of magic spring 4 in Illien
 
 ## Version 1.08
 
