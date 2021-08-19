@@ -12,6 +12,9 @@ I will provide some helpful tools too.
 
 ### Full versions
 
+**Note:** The downloads only contain the initial save state (Save.00). To be able to save games you have to provide the other save slots (Save.01 up to Save.10).
+ You can do so by copying the Save.00 folder to Save.01 etc.
+
 Version | Language | Download | Release date
 --- | --- | --- | ---
 1.08 | English | [zip](https://github.com/Pyrdacor/Ambermoon/raw/master/Disks/English/ambermoon_english_1.08_extracted.zip) [lha](https://github.com/Pyrdacor/Ambermoon/raw/master/Disks/English/ambermoon_english_1.08_extracted.lha) | 03-07-2021
