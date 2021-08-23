@@ -12,6 +12,14 @@ Based on 1.07.
 - Anti-Magic Sphere spell scroll now has the correct weight value
 - Murder Blade and Dagger Sling now correctly use 1 hand
 - Changed many occures of "ER" or "SEINE" to "~SEX1~" and "~SEX2~"
+- Changed item names:
+  - "MYSTISCHER GLOBE" -> "MYSTISCHER GLOBUS"
+  - "ALCHEMIST. GLOBE" -> "ALCHEMIST. GLOBUS"
+  - "VALDYNS LEDERSCHUHE" -> "VALDYN'S SCHUHE" (consistent with english version)
+  - "MAGISCHE FLUGSCHEIB" -> "MAG. FLUGSCHEIBE"
+  - "SANSRIES HALSBAND" -> "SANSRIE'S HALSBAND"
+- Changed Nelvin text "... EDLER <held>" to "... <held>" to fit for female heros
+- A lot of party char, NPC and map text fixes
 
 ## Version 1.07
 
