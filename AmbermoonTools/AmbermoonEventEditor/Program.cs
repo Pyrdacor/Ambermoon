@@ -174,6 +174,9 @@ namespace AmbermoonEventEditor
                 case "edit":
                     EditEvent(eventList, events, map);
                     break;
+                case "remove":
+                    RemoveEvent(eventList, events, map);
+                    break;
                 case "connect":
                     ConnectEvent(eventList, events);
                     break;
@@ -279,6 +282,127 @@ namespace AmbermoonEventEditor
             {
                 return false;
             }
+        }
+
+        static void RemoveEvent(List<Event> eventList, List<Event> events, bool map)
+        {
+            ListEvents(events);
+            Console.WriteLine();
+            Console.Write("Which event to remove: ");
+            var index = ReadInt(true);
+
+            if (index == null)
+            {
+                Console.WriteLine("Invalid event index");
+                Console.WriteLine();
+                return;
+            }
+
+            var @event = events[index.Value];
+
+            int listIndex = eventList.IndexOf(@event);
+
+            if (listIndex != -1)
+            {
+                bool canMoveSuccessorToBegin = true;
+
+                if (@event.Next != null)
+                {
+                    if (!EventDescriptions.Events[@event.Next.Type].AllowAsFirst)
+                        canMoveSuccessorToBegin = false;
+                }
+
+                Console.WriteLine("The event starts an event chain. What do you want to do?");
+                var options = new List<string> { "Abort", "Remove chain (keep events)", "Remove chain (and events)" };
+                if (canMoveSuccessorToBegin)
+                    options.Add("Make the successor the new chain start");
+                var option = ReadOption(0, options.ToArray()) ?? 0;
+
+                switch (option)
+                {
+                    case 0:
+                        Console.WriteLine("Aborted");
+                        Console.WriteLine();
+                        return;
+                    case 1:
+                        eventList.Remove(@event);
+                        Console.WriteLine("Chain removed. Events kept.");
+                        Console.WriteLine();
+                        break;
+                    case 2:
+                        Console.WriteLine("Are you sure to remove the whole chain?");
+                        option = ReadOption(0, "No", "Yes") ?? 0;
+                        if (option == 0)
+                        {
+                            Console.WriteLine("Aborted");
+                            Console.WriteLine();
+                            return;
+                        }
+                        eventList.Remove(@event);
+                        // TODO: remove all events
+                        Console.WriteLine("Chain removed. Events too.");
+                        Console.WriteLine();
+                        break;
+                    case 3:
+                        eventList[listIndex] = @event.Next;
+                        Console.WriteLine("Chain now starts with successor.");
+                        Console.WriteLine();
+                        break;
+                }
+            }
+
+            if (@event.Next != null)
+            {
+                var prevs = events.Where(e => e.Next == @event).ToList();
+                var conds = events.Where(e => e is ConditionEvent c && c.ContinueIfFalseWithMapEventIndex == index.Value).Cast<ConditionEvent>().ToList();
+                var doors = events.Where(e => e is DoorEvent d && d.UnlockFailedEventIndex == index.Value).Cast<DoorEvent>().ToList();
+                var chests = events.Where(e => e is ChestEvent c && c.UnlockFailedEventIndex == index.Value).Cast<ChestEvent>().ToList();
+                var dices = events.Where(e => e is Dice100RollEvent r && r.ContinueIfFalseWithMapEventIndex == index.Value).Cast<Dice100RollEvent>().ToList();
+
+                if (prevs.Count != 0 || conds.Count != 0 || doors.Count != 0 || chests.Count != 0 || dices.Count != 0)
+                {
+                    Console.WriteLine("The event has a successor. How to handle it?");
+                    var option = ReadOption(0, "Connect predecessors with successor", "Disconnect") ?? 0;
+                    Event successor = option == 0 ? @event.Next : null;
+                    uint successorIndex = successor == null ? 0xffff : (uint)events.IndexOf(successor);
+
+                    if (successorIndex != 0xffff && successorIndex > index.Value)
+                        --successorIndex;
+
+                    foreach (var prev in prevs)
+                        prev.Next = successor;
+                    foreach (var cond in conds)
+                        cond.ContinueIfFalseWithMapEventIndex = successorIndex;
+                    foreach (var door in doors)
+                        door.UnlockFailedEventIndex = successorIndex;
+                    foreach (var chest in chests)
+                        chest.UnlockFailedEventIndex = successorIndex;
+                    foreach (var dice in dices)
+                        dice.ContinueIfFalseWithMapEventIndex = successorIndex;
+                }
+
+                @event.Next = null;
+            }
+
+            for (int i = index.Value + 1; i < events.Count; ++i)
+            {
+                var ev = events[i];
+                var conds = events.Where(e => e is ConditionEvent c && c.ContinueIfFalseWithMapEventIndex == i).Cast<ConditionEvent>().ToList();
+                var doors = events.Where(e => e is DoorEvent d && d.UnlockFailedEventIndex == i).Cast<DoorEvent>().ToList();
+                var chests = events.Where(e => e is ChestEvent c && c.UnlockFailedEventIndex == i).Cast<ChestEvent>().ToList();
+                var dices = events.Where(e => e is Dice100RollEvent r && r.ContinueIfFalseWithMapEventIndex == i).Cast<Dice100RollEvent>().ToList();
+
+                foreach (var cond in conds)
+                    --cond.ContinueIfFalseWithMapEventIndex;
+                foreach (var door in doors)
+                    --door.UnlockFailedEventIndex;
+                foreach (var chest in chests)
+                    --chest.UnlockFailedEventIndex;
+                foreach (var dice in dices)
+                    --dice.ContinueIfFalseWithMapEventIndex;
+            }
+
+            events.Remove(@event);
         }
 
         static void EditEvent(List<Event> eventList, List<Event> events, bool map)
