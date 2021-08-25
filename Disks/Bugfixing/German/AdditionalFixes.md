@@ -24,6 +24,7 @@ Based on 1.07.
   - You need the elf harp to get the crystal harp
   - You can now also show/give the elf harp instead of the strings
 - When entering Dor Kiredon for the first time all party members will learn the dwarf language.
+- The lava pool in Luminor's torture chamber now blocks movement
 
 ## Version 1.07
 
