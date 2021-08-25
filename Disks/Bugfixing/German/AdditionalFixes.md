@@ -20,6 +20,9 @@ Based on 1.07.
   - "SANSRIES HALSBAND" -> "SANSRIE'S HALSBAND"
 - Changed Nelvin text "... EDLER <held>" to "... <held>" to fit for female heros
 - A lot of party char, NPC and map text fixes
+- Fixed harp quest
+  - You need the elf harp to get the crystal harp
+  - You can now also show/give the elf harp instead of the strings
 
 ## Version 1.07
 

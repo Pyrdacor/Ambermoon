@@ -16,6 +16,9 @@ Based on 1.08.
 - 55b: Both map versions (of both maps) now use the same translation
 - 59: Anti-Magic Sphere spell scroll now has the correct weight value
 - 60: Murder Blade and Dagger Sling now correctly use 1 hand
+- 58: Fixed harp quest
+  - You need the elf harp to get the crystal harp
+  - You can now also show/give the elf harp instead of the strings
 
 ### Misc
 
