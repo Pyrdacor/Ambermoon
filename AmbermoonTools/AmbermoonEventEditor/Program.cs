@@ -175,10 +175,13 @@ namespace AmbermoonEventEditor
                     EditEvent(eventList, events, map);
                     break;
                 case "remove":
-                    RemoveEvent(eventList, events, map);
+                    RemoveEvent(eventList, events);
                     break;
                 case "connect":
                     ConnectEvent(eventList, events);
+                    break;
+                case "disconnect":
+                    DisconnectEvent(eventList, events);
                     break;
                 case "save":
                     Save(out save, out saveFileName);
@@ -284,7 +287,7 @@ namespace AmbermoonEventEditor
             }
         }
 
-        static void RemoveEvent(List<Event> eventList, List<Event> events, bool map)
+        static void RemoveEvent(List<Event> eventList, List<Event> events)
         {
             ListEvents(events);
             Console.WriteLine();
@@ -351,46 +354,49 @@ namespace AmbermoonEventEditor
                 }
             }
 
-            if (@event.Next != null)
-            {
-                var prevs = events.Where(e => e.Next == @event).ToList();
-                var conds = events.Where(e => e is ConditionEvent c && c.ContinueIfFalseWithMapEventIndex == index.Value).Cast<ConditionEvent>().ToList();
-                var doors = events.Where(e => e is DoorEvent d && d.UnlockFailedEventIndex == index.Value).Cast<DoorEvent>().ToList();
-                var chests = events.Where(e => e is ChestEvent c && c.UnlockFailedEventIndex == index.Value).Cast<ChestEvent>().ToList();
-                var dices = events.Where(e => e is Dice100RollEvent r && r.ContinueIfFalseWithMapEventIndex == index.Value).Cast<Dice100RollEvent>().ToList();
+            var prevs = events.Where(e => e.Next == @event).ToList();
+            var conds = events.Where(e => e is ConditionEvent c && c.ContinueIfFalseWithMapEventIndex == index.Value).Cast<ConditionEvent>().ToList();
+            var doors = events.Where(e => e is DoorEvent d && d.UnlockFailedEventIndex == index.Value).Cast<DoorEvent>().ToList();
+            var chests = events.Where(e => e is ChestEvent c && c.UnlockFailedEventIndex == index.Value).Cast<ChestEvent>().ToList();
+            var dices = events.Where(e => e is Dice100RollEvent r && r.ContinueIfFalseWithMapEventIndex == index.Value).Cast<Dice100RollEvent>().ToList();
 
-                if (prevs.Count != 0 || conds.Count != 0 || doors.Count != 0 || chests.Count != 0 || dices.Count != 0)
+            if (prevs.Count != 0 || conds.Count != 0 || doors.Count != 0 || chests.Count != 0 || dices.Count != 0)
+            {
+                Event successor = null;
+
+                if (@event.Next != null)
                 {
                     Console.WriteLine("The event has a successor. How to handle it?");
                     var option = ReadOption(0, "Connect predecessors with successor", "Disconnect") ?? 0;
-                    Event successor = option == 0 ? @event.Next : null;
-                    uint successorIndex = successor == null ? 0xffff : (uint)events.IndexOf(successor);
-
-                    if (successorIndex != 0xffff && successorIndex > index.Value)
-                        --successorIndex;
-
-                    foreach (var prev in prevs)
-                        prev.Next = successor;
-                    foreach (var cond in conds)
-                        cond.ContinueIfFalseWithMapEventIndex = successorIndex;
-                    foreach (var door in doors)
-                        door.UnlockFailedEventIndex = successorIndex;
-                    foreach (var chest in chests)
-                        chest.UnlockFailedEventIndex = successorIndex;
-                    foreach (var dice in dices)
-                        dice.ContinueIfFalseWithMapEventIndex = successorIndex;
+                    successor = option == 0 ? @event.Next : null;
                 }
 
-                @event.Next = null;
+                uint successorIndex = successor == null ? 0xffff : (uint)events.IndexOf(successor);
+
+                if (successorIndex != 0xffff && successorIndex > index.Value)
+                    --successorIndex;
+
+                foreach (var prev in prevs)
+                    prev.Next = successor;
+                foreach (var cond in conds)
+                    cond.ContinueIfFalseWithMapEventIndex = successorIndex;
+                foreach (var door in doors)
+                    door.UnlockFailedEventIndex = successorIndex;
+                foreach (var chest in chests)
+                    chest.UnlockFailedEventIndex = successorIndex;
+                foreach (var dice in dices)
+                    dice.ContinueIfFalseWithMapEventIndex = successorIndex;
             }
+
+            @event.Next = null;
 
             for (int i = index.Value + 1; i < events.Count; ++i)
             {
                 var ev = events[i];
-                var conds = events.Where(e => e is ConditionEvent c && c.ContinueIfFalseWithMapEventIndex == i).Cast<ConditionEvent>().ToList();
-                var doors = events.Where(e => e is DoorEvent d && d.UnlockFailedEventIndex == i).Cast<DoorEvent>().ToList();
-                var chests = events.Where(e => e is ChestEvent c && c.UnlockFailedEventIndex == i).Cast<ChestEvent>().ToList();
-                var dices = events.Where(e => e is Dice100RollEvent r && r.ContinueIfFalseWithMapEventIndex == i).Cast<Dice100RollEvent>().ToList();
+                conds = events.Where(e => e is ConditionEvent c && c.ContinueIfFalseWithMapEventIndex == i).Cast<ConditionEvent>().ToList();
+                doors = events.Where(e => e is DoorEvent d && d.UnlockFailedEventIndex == i).Cast<DoorEvent>().ToList();
+                chests = events.Where(e => e is ChestEvent c && c.UnlockFailedEventIndex == i).Cast<ChestEvent>().ToList();
+                dices = events.Where(e => e is Dice100RollEvent r && r.ContinueIfFalseWithMapEventIndex == i).Cast<Dice100RollEvent>().ToList();
 
                 foreach (var cond in conds)
                     --cond.ContinueIfFalseWithMapEventIndex;
@@ -510,6 +516,58 @@ namespace AmbermoonEventEditor
                 Console.WriteLine("Event was changed successfully.");
                 Console.WriteLine();
             }
+        }
+
+        static void DisconnectEvent(List<Event> eventList, List<Event> events)
+        {
+            ListEvents(events);
+            Console.WriteLine();
+            Console.Write("Which event to disconnect: ");
+
+            var index = ReadInt(true);
+
+            if (index == null)
+            {
+                Console.WriteLine("Invalid event index");
+                Console.WriteLine();
+                return;
+            }
+
+            var @event = events[index.Value];
+
+            var prevs = events.Where(e => e.Next == @event).ToList();
+            var conds = events.Where(e => e is ConditionEvent c && c.ContinueIfFalseWithMapEventIndex == index.Value).Cast<ConditionEvent>().ToList();
+            var doors = events.Where(e => e is DoorEvent d && d.UnlockFailedEventIndex == index.Value).Cast<DoorEvent>().ToList();
+            var chests = events.Where(e => e is ChestEvent c && c.UnlockFailedEventIndex == index.Value).Cast<ChestEvent>().ToList();
+            var dices = events.Where(e => e is Dice100RollEvent r && r.ContinueIfFalseWithMapEventIndex == index.Value).Cast<Dice100RollEvent>().ToList();
+
+            foreach (var prev in prevs)
+                prev.Next = null;
+
+            if (conds.Count != 0 || doors.Count != 0 || chests.Count != 0 || dices.Count != 0)
+            {
+                Console.WriteLine("There are events that chain the event through a failed condition. Should these also be disconnected?");
+                ListEvents(conds, 0, ev => events.IndexOf(ev), false, true);
+                ListEvents(doors, 0, ev => events.IndexOf(ev), true, true);
+                ListEvents(chests, 0, ev => events.IndexOf(ev), true, true);
+                ListEvents(dices, 0, ev => events.IndexOf(ev), true, false);
+                int option = ReadOption(0, "No", "Yes") ?? 0;
+
+                if (option == 1)
+                {
+                    foreach (var cond in conds)
+                        cond.ContinueIfFalseWithMapEventIndex = 0xffff;
+                    foreach (var door in doors)
+                        door.UnlockFailedEventIndex = 0xffff;
+                    foreach (var chest in chests)
+                        chest.UnlockFailedEventIndex = 0xffff;
+                    foreach (var dice in dices)
+                        dice.ContinueIfFalseWithMapEventIndex = 0xffff;
+                }
+            }
+
+            Console.WriteLine("Successfully disconnected the event.");
+            Console.WriteLine();
         }
 
         static void ConnectEvent(List<Event> eventList, List<Event> events)
@@ -852,6 +910,9 @@ namespace AmbermoonEventEditor
                 case "connect":
                     Console.WriteLine("Connects existing events.");
                     break;
+                case "disconnect":
+                    Console.WriteLine("Disconnects existing events.");
+                    break;
                 case "save":
                     Console.WriteLine("Save all current changes.");
                     Console.WriteLine("You will be ask to overwrite the current file");
@@ -878,11 +939,14 @@ namespace AmbermoonEventEditor
             Console.WriteLine();
         }
 
-        static void ListEvents(List<Event> events, int startIndex = 0, Func<Event, int> customIndexer = null)
+        static void ListEvents<T>(List<T> events, int startIndex = 0, Func<Event, int> customIndexer = null, bool noHeader = false, bool noFooter = false) where T : Event
         {
-            Console.WriteLine();
-            Console.WriteLine("ID | Description");
-            Console.WriteLine("---|" + new string('-', 75));
+            if (!noHeader)
+            {
+                Console.WriteLine();
+                Console.WriteLine("ID | Description");
+                Console.WriteLine("---|" + new string('-', 75));
+            }
 
             int index = startIndex;
             foreach (var @event in events)
@@ -892,7 +956,8 @@ namespace AmbermoonEventEditor
                 ++index;
             }
 
-            Console.WriteLine();
+            if (!noFooter)
+                Console.WriteLine();
         }
 
         static void ShowChain(List<Event> eventList, List<Event> events, int index)
