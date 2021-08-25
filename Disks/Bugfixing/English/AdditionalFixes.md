@@ -20,6 +20,7 @@ Based on 1.08.
   - You need the elf harp to get the crystal harp
   - You can now also show/give the elf harp instead of the strings
 - 75: ORKS -> ORCS
+- 77: When entering Dor Kiredon for the first time all party members will learn the dwarf language.
 
 ### Misc
 

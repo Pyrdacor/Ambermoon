@@ -23,6 +23,7 @@ Based on 1.07.
 - Fixed harp quest
   - You need the elf harp to get the crystal harp
   - You can now also show/give the elf harp instead of the strings
+- When entering Dor Kiredon for the first time all party members will learn the dwarf language.
 
 ## Version 1.07
 
