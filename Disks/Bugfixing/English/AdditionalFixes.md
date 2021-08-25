@@ -19,6 +19,7 @@ Based on 1.08.
 - 58: Fixed harp quest
   - You need the elf harp to get the crystal harp
   - You can now also show/give the elf harp instead of the strings
+- 75: ORKS -> ORCS
 
 ### Misc
 
