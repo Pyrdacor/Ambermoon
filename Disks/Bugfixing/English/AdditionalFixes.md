@@ -22,12 +22,15 @@ Based on 1.08.
 - 75: ORKS -> ORCS
 - 77: When entering Dor Kiredon for the first time all party members will learn the dwarf language.
 - 74: The lava pool in Luminor's torture chamber now blocks movement
-- 25 (partial): Killed Tornaks in dwarf mine will no longer re-appear when you have the egg
+- 25: Killed Tornaks in dwarf mine will no longer re-appear when you have the egg
+- 25: Killed Tornaks in the Tornak cave (below Ferrin's forge) will no longer re-appear when you have the egg
 
 ### Misc
 
 - Improved riddlemouth in Illien (sub text file 0x009 in map 0x01A)
 - Fixed the text of magic spring 4 in Illien
+- Destroyed walls in the Tornak cave will not re-appear when you enter the map again with or without egg
+- Pick-axe text popup in the Tornak cave will not trigger when the wall is gone anymore (while you have the egg)
 
 ## Version 1.08
 

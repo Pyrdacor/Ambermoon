@@ -27,6 +27,9 @@ Based on 1.07.
 - The lava pool in Luminor's torture chamber now blocks movement
 - Killed Tornaks in dwarf mine will no longer re-appear when you have the egg
 - Small text fix when finding Ferrin's daughter. Changed "ES" to "SIE".
+- Killed Tornaks in the Tornak cave (below Ferrin's forge) will no longer re-appear when you have the egg
+- Destroyed walls in the Tornak cave will not re-appear when you enter the map again with or without egg
+- Pick-axe text popup in the Tornak cave will not trigger when the wall is gone anymore (while you have the egg)
 
 ## Version 1.07
 
