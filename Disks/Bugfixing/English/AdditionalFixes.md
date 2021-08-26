@@ -22,6 +22,7 @@ Based on 1.08.
 - 75: ORKS -> ORCS
 - 77: When entering Dor Kiredon for the first time all party members will learn the dwarf language.
 - 74: The lava pool in Luminor's torture chamber now blocks movement
+- 25 (partial): Killed Tornaks in dwarf mine will no longer re-appear when you have the egg
 
 ### Misc
 
