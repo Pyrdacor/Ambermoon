@@ -11,7 +11,7 @@ Based on 1.08.
   popup said that you returned to Dor Grestin. This was
   fixed in 3Map_texts.amb (subfile 0x161, text index 0x9)
 - 44: Changed "WIND CALLS" to "WIND SHRINE".
-- 45: Improved riddlemouth texts in grandfather's cellar
+- 45: Improved riddlemouth texts in grandfather's cellar and Illien
 - 46: Set initial charges of several chest items (forest moon plants) from 0 to 1
 - 55b: Both map versions (of both maps) now use the same translation
 - 59: Anti-Magic Sphere spell scroll now has the correct weight value
