@@ -443,7 +443,8 @@ namespace AmbermoonEventEditor
                 EventWriter.SaveEvent(writer, @event);
                 var eventData = new byte[12];
                 eventData[0] = (byte)@event.Type;
-                var nextIndex = (ushort)(@event.Next == null ? 0xffff : events.IndexOf(@event.Next));
+                var next = @event.Next;
+                var nextIndex = (ushort)(next == null ? 0xffff : events.IndexOf(next));
                 eventData[10] = (byte)((nextIndex >> 8) & 0xff);
                 eventData[11] = (byte)(nextIndex & 0xff);
                 Array.Copy(writer.ToArray(), 0, eventData, 1, 9);
@@ -505,6 +506,7 @@ namespace AmbermoonEventEditor
                 // re-create event from filled data
                 var eventReader = new DataReader(eventData);
                 events[index.Value] = EventReader.ParseEvent(eventReader);
+                events[index.Value].Next = next;
 
                 unsavedChanges = true;
 
