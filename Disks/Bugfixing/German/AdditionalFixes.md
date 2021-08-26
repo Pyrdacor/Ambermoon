@@ -26,6 +26,7 @@ Based on 1.07.
 - When entering Dor Kiredon for the first time all party members will learn the dwarf language.
 - The lava pool in Luminor's torture chamber now blocks movement
 - Killed Tornaks in dwarf mine will no longer re-appear when you have the egg
+- Small text fix when finding Ferrin's daughter. Changed "ES" to "SIE".
 
 ## Version 1.07
 
