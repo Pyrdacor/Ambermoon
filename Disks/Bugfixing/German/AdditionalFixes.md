@@ -17,7 +17,7 @@ Based on 1.07.
   - "ALCHEMIST. GLOBE" -> "ALCHEMIST. GLOBUS"
   - "VALDYNS LEDERSCHUHE" -> "VALDYN'S SCHUHE" (consistent with english version)
   - "MAGISCHE FLUGSCHEIB" -> "MAG. FLUGSCHEIBE"
-  - "SANSRIES HALSBAND" -> "SANSRIE'S HALSBAND"
+  - "SANSRIES HALSBAND" -> "SANSRI'S HALSBAND"
 - Changed Nelvin text "... EDLER <held>" to "... <held>" to fit for female heros
 - A lot of party char, NPC and map text fixes
 - Fixed harp quest
@@ -30,6 +30,10 @@ Based on 1.07.
 - Killed Tornaks in the Tornak cave (below Ferrin's forge) will no longer re-appear when you have the egg
 - Destroyed walls in the Tornak cave will not re-appear when you enter the map again with or without egg
 - Pick-axe text popup in the Tornak cave will not trigger when the wall is gone anymore (while you have the egg)
+- Sansrie is renamed to Sansri to be conform with the printed map and Amberstar
+  - 4 items
+  - Monster name
+  - Many map and NPC texts
 
 ## Version 1.07
 

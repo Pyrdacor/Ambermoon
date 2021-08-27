@@ -24,6 +24,10 @@ Based on 1.08.
 - 74: The lava pool in Luminor's torture chamber now blocks movement
 - 25: Killed Tornaks in dwarf mine will no longer re-appear when you have the egg
 - 25: Killed Tornaks in the Tornak cave (below Ferrin's forge) will no longer re-appear when you have the egg
+- Sansrie is renamed to Sansri to be conform with the printed map and Amberstar
+  - 4 items
+  - Monster name
+  - Many map and NPC texts
 
 ### Misc
 
