@@ -2,7 +2,7 @@
 
 Based on 1.07.
 
-- Fixed stair texture in Sansrie's temple 1.
+- Fixed stair texture in Sansri's temple 1.
   - Map 422 (x=14, y=11)
   - Changed byte 0x3D2 from 0x72 to 0x73
 - When returning with Dorina to Dor Kiredon the text
