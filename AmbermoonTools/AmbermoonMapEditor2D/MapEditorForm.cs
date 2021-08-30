@@ -240,6 +240,7 @@ namespace AmbermoonMapEditor2D
                 int x = 0;
                 int y = 0;
                 using var border = new Pen(Color.Black, 1.0f);
+                using var selectedBorder = new Pen(Color.Yellow, 2.0f);
                 using var errorBrush = new SolidBrush(Color.Red);
 
                 foreach (var tile in tileset.Tiles)
@@ -274,6 +275,11 @@ namespace AmbermoonMapEditor2D
                         ++y;
                     }
                 }
+
+                int selectedColumn = selectedTilesetTile % TilesetTilesPerRow;
+                int selectedRow = selectedTilesetTile / TilesetTilesPerRow;
+                e.Graphics.DrawRectangle(selectedBorder, new Rectangle(panelTileset.AutoScrollPosition.X + selectedColumn * 16,
+                    panelTileset.AutoScrollPosition.Y + selectedRow * 16, 16, 16));
             }
         }
 
@@ -347,6 +353,29 @@ namespace AmbermoonMapEditor2D
             showGrid = !showGrid;
             buttonToggleGrid.Image = showGrid ? Properties.Resources.round_grid_off_black_24 : Properties.Resources.round_grid_on_black_24;
             panelMap.Refresh();
+        }
+
+        private void panelTileset_MouseDown(object sender, MouseEventArgs e)
+        {
+            int tx = (e.X - panelTileset.AutoScrollPosition.X) / 16;
+            int ty = (e.Y - panelTileset.AutoScrollPosition.Y) / 16;
+            int selectedIndex = tx + ty * TilesetTilesPerRow;
+
+            if (selectedIndex < tilesets[map.TilesetOrLabdataIndex].Tiles.Length)
+            {
+                selectedTilesetTile = selectedIndex;
+                panelTileset.Refresh();
+
+                try
+                {
+                    var tile = tilesets[map.TilesetOrLabdataIndex].Tiles[selectedIndex];
+                    toolStripStatusLabelCurrentTile.Image = imageCache.GetImage(map.TilesetOrLabdataIndex, tile.GraphicIndex - 1, map.PaletteIndex);
+                }
+                catch
+                {
+                    toolStripStatusLabelCurrentTile.Image = null;
+                }
+            }
         }
     }
 }
