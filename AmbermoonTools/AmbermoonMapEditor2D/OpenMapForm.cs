@@ -118,7 +118,7 @@ namespace AmbermoonMapEditor2D
 
             if (MessageBox.Show(this, "Do you want to load the map from the already loaded game data?", "Where to load the map from?", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
             {
-                if (!AskForMapIndex(out var mapIndex, mapManager.Maps.OrderBy(map => map.Index).ToDictionary(map => map.Index, map => map.Name)))
+                if (!AskForMapIndex(out var mapIndex, mapManager.Maps.Where(map => map.Type == MapType.Map2D).OrderBy(map => map.Index).ToDictionary(map => map.Index, map => map.Name)))
                     return;
                 
                 Map = mapManager.GetMap(mapIndex);
@@ -144,7 +144,15 @@ namespace AmbermoonMapEditor2D
             }
 
             if (Map != null)
-                DialogResult = DialogResult.OK;
+            {
+                if (Map.Type == MapType.Map3D)
+                {
+                    Map = null;
+                    MessageBox.Show(this, "The chosen map is 3D and cannot be loaded with this editor.", "Wrong map type", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+                else
+                    DialogResult = DialogResult.OK;
+            }
         }
 
         Map LoadFromFile(string filename)

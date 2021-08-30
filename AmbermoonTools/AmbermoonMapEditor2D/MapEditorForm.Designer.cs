@@ -30,12 +30,12 @@ namespace AmbermoonMapEditor2D
         private void InitializeComponent()
         {
             this.components = new System.ComponentModel.Container();
-            this.panelMap = new System.Windows.Forms.Panel();
-            this.menuStrip1 = new System.Windows.Forms.MenuStrip();
+            this.panelMap = new System.Windows.Forms.DrawPanel();
+            this.menuStrip = new System.Windows.Forms.MenuStrip();
             this.groupBoxTileset = new System.Windows.Forms.GroupBox();
             this.comboBoxTilesets = new System.Windows.Forms.ComboBox();
             this.buttonAddTileset = new System.Windows.Forms.Button();
-            this.panelTileset = new System.Windows.Forms.Panel();
+            this.panelTileset = new System.Windows.Forms.DrawPanel();
             this.groupBoxProperties = new System.Windows.Forms.GroupBox();
             this.comboBoxWorld = new System.Windows.Forms.ComboBox();
             this.labelSizeCross = new System.Windows.Forms.Label();
@@ -71,12 +71,29 @@ namespace AmbermoonMapEditor2D
             this.buttonEditCharacter = new System.Windows.Forms.Button();
             this.buttonDeleteCharacter = new System.Windows.Forms.Button();
             this.comboBoxCharacters = new System.Windows.Forms.ComboBox();
+            this.buttonToolBrush = new System.Windows.Forms.Button();
+            this.buttonToolColorPicker = new System.Windows.Forms.Button();
+            this.buttonToolLayers = new System.Windows.Forms.Button();
+            this.contextMenuStripLayers = new System.Windows.Forms.ContextMenuStrip(this.components);
+            this.toolStripMenuItemBackLayer = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripMenuItemFrontLayer = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripSeparatorLayers1 = new System.Windows.Forms.ToolStripSeparator();
+            this.toolStripMenuItemShowBackLayer = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripMenuItemShowFrontLayer = new System.Windows.Forms.ToolStripMenuItem();
+            this.statusStrip = new System.Windows.Forms.StatusStrip();
+            this.buttonToolBlocks = new System.Windows.Forms.Button();
+            this.buttonToolFill = new System.Windows.Forms.Button();
+            this.buttonToggleGrid = new System.Windows.Forms.Button();
+            this.toolStripStatusLabelTool = new System.Windows.Forms.ToolStripStatusLabel();
+            this.toolStripStatusLabelLayer = new System.Windows.Forms.ToolStripStatusLabel();
             this.groupBoxTileset.SuspendLayout();
             this.groupBoxProperties.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDownHeight)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDownWidth)).BeginInit();
             this.groupBoxCharacters.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBoxCharacterImage)).BeginInit();
+            this.contextMenuStripLayers.SuspendLayout();
+            this.statusStrip.SuspendLayout();
             this.SuspendLayout();
             // 
             // panelMap
@@ -86,17 +103,18 @@ namespace AmbermoonMapEditor2D
             this.panelMap.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
             this.panelMap.Location = new System.Drawing.Point(0, 27);
             this.panelMap.Name = "panelMap";
-            this.panelMap.Size = new System.Drawing.Size(804, 484);
+            this.panelMap.Size = new System.Drawing.Size(772, 484);
             this.panelMap.TabIndex = 0;
+            this.panelMap.Scroll += new System.Windows.Forms.ScrollEventHandler(this.panelMap_Scroll);
             this.panelMap.Paint += new System.Windows.Forms.PaintEventHandler(this.panelMap_Paint);
             // 
-            // menuStrip1
+            // menuStrip
             // 
-            this.menuStrip1.Location = new System.Drawing.Point(0, 0);
-            this.menuStrip1.Name = "menuStrip1";
-            this.menuStrip1.Size = new System.Drawing.Size(1152, 24);
-            this.menuStrip1.TabIndex = 1;
-            this.menuStrip1.Text = "menuStrip1";
+            this.menuStrip.Location = new System.Drawing.Point(0, 0);
+            this.menuStrip.Name = "menuStrip";
+            this.menuStrip.Size = new System.Drawing.Size(1152, 24);
+            this.menuStrip.TabIndex = 1;
+            this.menuStrip.Text = "menuStrip1";
             // 
             // groupBoxTileset
             // 
@@ -105,7 +123,7 @@ namespace AmbermoonMapEditor2D
             this.groupBoxTileset.Controls.Add(this.panelTileset);
             this.groupBoxTileset.Location = new System.Drawing.Point(2, 510);
             this.groupBoxTileset.Name = "groupBoxTileset";
-            this.groupBoxTileset.Size = new System.Drawing.Size(802, 200);
+            this.groupBoxTileset.Size = new System.Drawing.Size(802, 177);
             this.groupBoxTileset.TabIndex = 2;
             this.groupBoxTileset.TabStop = false;
             this.groupBoxTileset.Text = "Tileset";
@@ -118,6 +136,7 @@ namespace AmbermoonMapEditor2D
             this.comboBoxTilesets.Name = "comboBoxTilesets";
             this.comboBoxTilesets.Size = new System.Drawing.Size(89, 23);
             this.comboBoxTilesets.TabIndex = 2;
+            this.comboBoxTilesets.SelectedIndexChanged += new System.EventHandler(this.comboBoxTilesets_SelectedIndexChanged);
             // 
             // buttonAddTileset
             // 
@@ -134,7 +153,7 @@ namespace AmbermoonMapEditor2D
             this.panelTileset.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
             this.panelTileset.Location = new System.Drawing.Point(10, 22);
             this.panelTileset.Name = "panelTileset";
-            this.panelTileset.Size = new System.Drawing.Size(691, 168);
+            this.panelTileset.Size = new System.Drawing.Size(691, 149);
             this.panelTileset.TabIndex = 0;
             this.panelTileset.Paint += new System.Windows.Forms.PaintEventHandler(this.panelTileset_Paint);
             // 
@@ -483,18 +502,166 @@ namespace AmbermoonMapEditor2D
             this.comboBoxCharacters.TabIndex = 0;
             this.comboBoxCharacters.SelectedIndexChanged += new System.EventHandler(this.comboBoxCharacters_SelectedIndexChanged);
             // 
+            // buttonToolBrush
+            // 
+            this.buttonToolBrush.ForeColor = System.Drawing.SystemColors.ControlText;
+            this.buttonToolBrush.Image = global::AmbermoonMapEditor2D.Properties.Resources.round_brush_black_24;
+            this.buttonToolBrush.Location = new System.Drawing.Point(773, 27);
+            this.buttonToolBrush.Name = "buttonToolBrush";
+            this.buttonToolBrush.Size = new System.Drawing.Size(32, 32);
+            this.buttonToolBrush.TabIndex = 5;
+            this.buttonToolBrush.UseVisualStyleBackColor = true;
+            this.buttonToolBrush.Click += new System.EventHandler(this.buttonToolBrush_Click);
+            // 
+            // buttonToolColorPicker
+            // 
+            this.buttonToolColorPicker.Image = global::AmbermoonMapEditor2D.Properties.Resources.round_colorize_black_24;
+            this.buttonToolColorPicker.Location = new System.Drawing.Point(772, 141);
+            this.buttonToolColorPicker.Name = "buttonToolColorPicker";
+            this.buttonToolColorPicker.Size = new System.Drawing.Size(32, 32);
+            this.buttonToolColorPicker.TabIndex = 6;
+            this.buttonToolColorPicker.UseVisualStyleBackColor = true;
+            this.buttonToolColorPicker.Click += new System.EventHandler(this.buttonToolColorPicker_Click);
+            // 
+            // buttonToolLayers
+            // 
+            this.buttonToolLayers.Image = global::AmbermoonMapEditor2D.Properties.Resources.round_layers_black_24;
+            this.buttonToolLayers.Location = new System.Drawing.Point(773, 179);
+            this.buttonToolLayers.Name = "buttonToolLayers";
+            this.buttonToolLayers.Size = new System.Drawing.Size(32, 32);
+            this.buttonToolLayers.TabIndex = 7;
+            this.buttonToolLayers.UseVisualStyleBackColor = true;
+            this.buttonToolLayers.Click += new System.EventHandler(this.buttonToolLayers_Click);
+            // 
+            // contextMenuStripLayers
+            // 
+            this.contextMenuStripLayers.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.toolStripMenuItemBackLayer,
+            this.toolStripMenuItemFrontLayer,
+            this.toolStripSeparatorLayers1,
+            this.toolStripMenuItemShowBackLayer,
+            this.toolStripMenuItemShowFrontLayer});
+            this.contextMenuStripLayers.Name = "contextMenuStripLayers";
+            this.contextMenuStripLayers.Size = new System.Drawing.Size(166, 98);
+            // 
+            // toolStripMenuItemBackLayer
+            // 
+            this.toolStripMenuItemBackLayer.Checked = true;
+            this.toolStripMenuItemBackLayer.CheckOnClick = true;
+            this.toolStripMenuItemBackLayer.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.toolStripMenuItemBackLayer.Name = "toolStripMenuItemBackLayer";
+            this.toolStripMenuItemBackLayer.Size = new System.Drawing.Size(165, 22);
+            this.toolStripMenuItemBackLayer.Text = "Back Layer";
+            this.toolStripMenuItemBackLayer.Click += new System.EventHandler(this.toolStripMenuItemBackLayer_Click);
+            // 
+            // toolStripMenuItemFrontLayer
+            // 
+            this.toolStripMenuItemFrontLayer.CheckOnClick = true;
+            this.toolStripMenuItemFrontLayer.Name = "toolStripMenuItemFrontLayer";
+            this.toolStripMenuItemFrontLayer.Size = new System.Drawing.Size(165, 22);
+            this.toolStripMenuItemFrontLayer.Text = "Front Layer";
+            this.toolStripMenuItemFrontLayer.Click += new System.EventHandler(this.toolStripMenuItemFrontLayer_Click);
+            // 
+            // toolStripSeparatorLayers1
+            // 
+            this.toolStripSeparatorLayers1.Name = "toolStripSeparatorLayers1";
+            this.toolStripSeparatorLayers1.Size = new System.Drawing.Size(162, 6);
+            // 
+            // toolStripMenuItemShowBackLayer
+            // 
+            this.toolStripMenuItemShowBackLayer.Checked = true;
+            this.toolStripMenuItemShowBackLayer.CheckOnClick = true;
+            this.toolStripMenuItemShowBackLayer.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.toolStripMenuItemShowBackLayer.Name = "toolStripMenuItemShowBackLayer";
+            this.toolStripMenuItemShowBackLayer.Size = new System.Drawing.Size(165, 22);
+            this.toolStripMenuItemShowBackLayer.Text = "Show Back Layer";
+            this.toolStripMenuItemShowBackLayer.Click += new System.EventHandler(this.toolStripMenuItemShowBackLayer_Click);
+            // 
+            // toolStripMenuItemShowFrontLayer
+            // 
+            this.toolStripMenuItemShowFrontLayer.Checked = true;
+            this.toolStripMenuItemShowFrontLayer.CheckOnClick = true;
+            this.toolStripMenuItemShowFrontLayer.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.toolStripMenuItemShowFrontLayer.Name = "toolStripMenuItemShowFrontLayer";
+            this.toolStripMenuItemShowFrontLayer.Size = new System.Drawing.Size(165, 22);
+            this.toolStripMenuItemShowFrontLayer.Text = "Show Front Layer";
+            this.toolStripMenuItemShowFrontLayer.Click += new System.EventHandler(this.toolStripMenuItemShowFrontLayer_Click);
+            // 
+            // statusStrip
+            // 
+            this.statusStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.toolStripStatusLabelTool,
+            this.toolStripStatusLabelLayer});
+            this.statusStrip.Location = new System.Drawing.Point(0, 690);
+            this.statusStrip.Name = "statusStrip";
+            this.statusStrip.Size = new System.Drawing.Size(1152, 22);
+            this.statusStrip.TabIndex = 8;
+            this.statusStrip.Text = "statusStrip1";
+            // 
+            // buttonToolBlocks
+            // 
+            this.buttonToolBlocks.ForeColor = System.Drawing.SystemColors.ControlText;
+            this.buttonToolBlocks.Image = global::AmbermoonMapEditor2D.Properties.Resources.round_grid_view_black_24;
+            this.buttonToolBlocks.Location = new System.Drawing.Point(773, 65);
+            this.buttonToolBlocks.Name = "buttonToolBlocks";
+            this.buttonToolBlocks.Size = new System.Drawing.Size(32, 32);
+            this.buttonToolBlocks.TabIndex = 9;
+            this.buttonToolBlocks.UseVisualStyleBackColor = true;
+            this.buttonToolBlocks.Click += new System.EventHandler(this.buttonToolBlocks_Click);
+            // 
+            // buttonToolFill
+            // 
+            this.buttonToolFill.ForeColor = System.Drawing.SystemColors.ControlText;
+            this.buttonToolFill.Image = global::AmbermoonMapEditor2D.Properties.Resources.round_format_color_fill_black_24;
+            this.buttonToolFill.Location = new System.Drawing.Point(773, 103);
+            this.buttonToolFill.Name = "buttonToolFill";
+            this.buttonToolFill.Size = new System.Drawing.Size(32, 32);
+            this.buttonToolFill.TabIndex = 10;
+            this.buttonToolFill.UseVisualStyleBackColor = true;
+            this.buttonToolFill.Click += new System.EventHandler(this.buttonToolFill_Click);
+            // 
+            // buttonToggleGrid
+            // 
+            this.buttonToggleGrid.ForeColor = System.Drawing.SystemColors.ControlText;
+            this.buttonToggleGrid.Image = global::AmbermoonMapEditor2D.Properties.Resources.round_grid_on_black_24;
+            this.buttonToggleGrid.Location = new System.Drawing.Point(773, 217);
+            this.buttonToggleGrid.Name = "buttonToggleGrid";
+            this.buttonToggleGrid.Size = new System.Drawing.Size(32, 32);
+            this.buttonToggleGrid.TabIndex = 11;
+            this.buttonToggleGrid.UseVisualStyleBackColor = true;
+            this.buttonToggleGrid.Click += new System.EventHandler(this.buttonToggleGrid_Click);
+            // 
+            // toolStripStatusLabelTool
+            // 
+            this.toolStripStatusLabelTool.Image = global::AmbermoonMapEditor2D.Properties.Resources.round_brush_black_24;
+            this.toolStripStatusLabelTool.Name = "toolStripStatusLabelTool";
+            this.toolStripStatusLabelTool.Size = new System.Drawing.Size(16, 17);
+            // 
+            // toolStripStatusLabelLayer
+            // 
+            this.toolStripStatusLabelLayer.Name = "toolStripStatusLabelLayer";
+            this.toolStripStatusLabelLayer.Size = new System.Drawing.Size(63, 17);
+            this.toolStripStatusLabelLayer.Text = "Back Layer";
+            // 
             // MapEditorForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1152, 712);
+            this.Controls.Add(this.buttonToggleGrid);
+            this.Controls.Add(this.buttonToolFill);
+            this.Controls.Add(this.buttonToolBlocks);
+            this.Controls.Add(this.statusStrip);
+            this.Controls.Add(this.buttonToolLayers);
+            this.Controls.Add(this.buttonToolColorPicker);
+            this.Controls.Add(this.buttonToolBrush);
             this.Controls.Add(this.groupBoxCharacters);
             this.Controls.Add(this.groupBoxProperties);
             this.Controls.Add(this.groupBoxTileset);
             this.Controls.Add(this.panelMap);
-            this.Controls.Add(this.menuStrip1);
+            this.Controls.Add(this.menuStrip);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
-            this.MainMenuStrip = this.menuStrip1;
+            this.MainMenuStrip = this.menuStrip;
             this.MaximizeBox = false;
             this.Name = "MapEditorForm";
             this.Text = "Ambermoon Map Editor 2D";
@@ -508,6 +675,9 @@ namespace AmbermoonMapEditor2D
             this.groupBoxCharacters.ResumeLayout(false);
             this.groupBoxCharacters.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBoxCharacterImage)).EndInit();
+            this.contextMenuStripLayers.ResumeLayout(false);
+            this.statusStrip.ResumeLayout(false);
+            this.statusStrip.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -515,11 +685,11 @@ namespace AmbermoonMapEditor2D
 
         #endregion
 
-        private System.Windows.Forms.Panel panelMap;
-        private System.Windows.Forms.MenuStrip menuStrip1;
+        private System.Windows.Forms.DrawPanel panelMap;
+        private System.Windows.Forms.MenuStrip menuStrip;
         private System.Windows.Forms.GroupBox groupBoxTileset;
         private System.Windows.Forms.Button buttonAddTileset;
-        private System.Windows.Forms.Panel panelTileset;
+        private System.Windows.Forms.DrawPanel panelTileset;
         private System.Windows.Forms.ComboBox comboBoxTilesets;
         private System.Windows.Forms.GroupBox groupBoxProperties;
         private System.Windows.Forms.RadioButton radioButtonOutdoor;
@@ -556,6 +726,21 @@ namespace AmbermoonMapEditor2D
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.Button buttonShowCharacterOnMap;
         private System.Windows.Forms.ComboBox comboBoxWorld;
+        private System.Windows.Forms.Button buttonToolBrush;
+        private System.Windows.Forms.Button buttonToolColorPicker;
+        private System.Windows.Forms.Button buttonToolLayers;
+        private System.Windows.Forms.ContextMenuStrip contextMenuStripLayers;
+        private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemBackLayer;
+        private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemFrontLayer;
+        private System.Windows.Forms.ToolStripSeparator toolStripSeparatorLayers1;
+        private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemShowBackLayer;
+        private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemShowFrontLayer;
+        private System.Windows.Forms.StatusStrip statusStrip;
+        private System.Windows.Forms.Button buttonToolBlocks;
+        private System.Windows.Forms.Button buttonToolFill;
+        private System.Windows.Forms.Button buttonToggleGrid;
+        private System.Windows.Forms.ToolStripStatusLabel toolStripStatusLabelTool;
+        private System.Windows.Forms.ToolStripStatusLabel toolStripStatusLabelLayer;
     }
 }
 

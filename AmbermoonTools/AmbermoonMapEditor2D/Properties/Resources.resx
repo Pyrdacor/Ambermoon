@@ -118,10 +118,34 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <assembly alias="System.Windows.Forms" name="System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
+  <data name="round_control_camera_black_24" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\round_control_camera_black_24.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="round_colorize_black_24" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\round_colorize_black_24.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="round_layers_black_24" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\round_layers_black_24.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="round_grid_view_black_24" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\round_grid_view_black_24.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="round_stop_black_24" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\round_stop_black_24.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="round_brush_black_24" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\round_brush_black_24.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="round_format_color_fill_black_24" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\round_format_color_fill_black_24.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
   <data name="round_play_arrow_black_24" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\round_play_arrow_black_24.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
-  <data name="round_control_camera_black_24" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\round_control_camera_black_24.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  <data name="round_grid_on_black_24" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\round_grid_on_black_24.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="round_grid_off_black_24" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\round_grid_off_black_24.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
 </root>

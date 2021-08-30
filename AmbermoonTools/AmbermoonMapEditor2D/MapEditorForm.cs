@@ -165,29 +165,66 @@ namespace AmbermoonMapEditor2D
 
         private void panelMap_Paint(object sender, PaintEventArgs e)
         {
+            e.Graphics.Clear(panelMap.BackColor);
+
             if (map != null)
             {
                 var tileset = tilesets[map.TilesetOrLabdataIndex];
+                using var grid = new Pen(Color.Black, 1.0f);
 
                 for (int y = 0; y < MapHeight; ++y)
                 {
+                    int drawY = panelMap.AutoScrollPosition.Y + y * 16;
+
+                    if (drawY + 16 <= 0)
+                        continue;
+
+                    if (drawY >= panelMap.Height)
+                        break;
+
                     for (int x = 0; x < MapWidth; ++x)
                     {
+                        int drawX = panelMap.AutoScrollPosition.X + x * 16;
+
+                        if (drawX + 16 <= 0)
+                            continue;
+
+                        if (drawX >= panelMap.Width)
+                            break;
+
                         var tile = map.Tiles[x, y];
-                        var backgroundTile = tile.BackTileIndex == 0 ? null : tileset.Tiles[tile.BackTileIndex - 1];
-                        var foregroundTile = tile.FrontTileIndex == 0 ? null : tileset.Tiles[tile.FrontTileIndex - 1];
+                        var backgroundTile = tile.BackTileIndex == 0 ? null : tile.BackTileIndex >= tileset.Tiles.Length ? null : tileset.Tiles[tile.BackTileIndex - 1];
+                        var foregroundTile = tile.FrontTileIndex == 0 ? null : tile.FrontTileIndex >= tileset.Tiles.Length ? null :  tileset.Tiles[tile.FrontTileIndex - 1];
+                        var rect = new Rectangle(drawX, drawY, 16, 16);
 
-                        if (backgroundTile != null)
+                        if (toolStripMenuItemShowBackLayer.Checked && backgroundTile != null)
                         {
-                            var backgroundImage = imageCache.GetImage(map.TilesetOrLabdataIndex, backgroundTile.GraphicIndex - 1, map.PaletteIndex);
-                            e.Graphics.DrawImageUnscaledAndClipped(backgroundImage, new Rectangle(x * 16, y * 16, 16, 16));
+                            try
+                            {
+                                var backgroundImage = imageCache.GetImage(map.TilesetOrLabdataIndex, backgroundTile.GraphicIndex - 1, map.PaletteIndex);
+                                e.Graphics.DrawImageUnscaledAndClipped(backgroundImage, rect);
+                            }
+                            catch
+                            {
+                                // ignore
+                            }
                         }
 
-                        if (foregroundTile != null)
+                        if (toolStripMenuItemShowFrontLayer.Checked && foregroundTile != null)
                         {
-                            var foregroundImage = imageCache.GetImage(map.TilesetOrLabdataIndex, foregroundTile.GraphicIndex - 1, map.PaletteIndex);
-                            e.Graphics.DrawImageUnscaledAndClipped(foregroundImage, new Rectangle(x * 16, y * 16, 16, 16));
+                            try
+                            {
+                                var foregroundImage = imageCache.GetImage(map.TilesetOrLabdataIndex, foregroundTile.GraphicIndex - 1, map.PaletteIndex);
+                                e.Graphics.DrawImageUnscaledAndClipped(foregroundImage, rect);
+                            }
+                            catch
+                            {
+                                // ignore
+                            }
                         }
+
+                        if (showGrid)
+                            e.Graphics.DrawRectangle(grid, rect);
                     }
                 }
             }
@@ -195,31 +232,43 @@ namespace AmbermoonMapEditor2D
 
         private void panelTileset_Paint(object sender, PaintEventArgs e)
         {
-            const int tilesPerRow = 43;
+            e.Graphics.Clear(panelTileset.BackColor);
 
             if (map != null)
             {
                 var tileset = tilesets[map.TilesetOrLabdataIndex];
                 int x = 0;
                 int y = 0;
-
                 using var border = new Pen(Color.Black, 1.0f);
+                using var errorBrush = new SolidBrush(Color.Red);
 
                 foreach (var tile in tileset.Tiles)
                 {
-                    var rect = new Rectangle(x * 16, y * 16, 16, 16);
-                    try
+                    int drawY = panelTileset.AutoScrollPosition.Y + y * 16;
+
+                    if (drawY >= panelTileset.Height)
+                        break;
+
+                    int drawX = panelTileset.AutoScrollPosition.X + x * 16;
+
+                    if (drawY + 16 > 0 && drawX + 16 > 0 && drawX < panelMap.Width)
                     {
-                        var image = imageCache.GetImage(map.TilesetOrLabdataIndex, tile.GraphicIndex - 1, map.PaletteIndex);
-                        e.Graphics.DrawImageUnscaledAndClipped(image, rect);
-                        e.Graphics.DrawRectangle(border, rect);
-                    }
-                    catch
-                    {
-                        // ignore, there seem to be invalid tiles/graphic indices, just skip them
+                        var rect = new Rectangle(drawX, drawY, 16, 16);
+
+                        try
+                        {
+                            var image = imageCache.GetImage(map.TilesetOrLabdataIndex, tile.GraphicIndex - 1, map.PaletteIndex);
+                            e.Graphics.DrawImageUnscaledAndClipped(image, rect);
+                            e.Graphics.DrawRectangle(border, rect);
+                        }
+                        catch
+                        {
+                            e.Graphics.FillRectangle(errorBrush, rect);
+                            // ignore, there seem to be invalid tiles/graphic indices, just skip them
+                        }
                     }
 
-                    if (++x == tilesPerRow)
+                    if (++x == TilesetTilesPerRow)
                     {
                         x = 0;
                         ++y;
@@ -231,6 +280,73 @@ namespace AmbermoonMapEditor2D
         private void MapEditorForm_FormClosed(object sender, FormClosedEventArgs e)
         {
             CleanUp();
+        }
+
+        private void panelMap_Scroll(object sender, ScrollEventArgs e)
+        {
+            panelMap.Refresh();
+        }
+
+        private void comboBoxTilesets_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            map.TilesetOrLabdataIndex = (uint)(1 + comboBoxTilesets.SelectedIndex);
+            currentTilesetTiles = tilesets[map.TilesetOrLabdataIndex].Tiles.Length;
+            panelMap.Refresh();
+            TilesetChanged();
+        }
+
+        private void buttonToolLayers_Click(object sender, EventArgs e)
+        {
+            var point = new Point(buttonToolLayers.Right, buttonToolLayers.Bottom);
+            point = PointToScreen(point);
+            contextMenuStripLayers.Show(point);
+        }
+
+        private void toolStripMenuItemBackLayer_Click(object sender, EventArgs e)
+        {
+            toolStripMenuItemFrontLayer.Checked = !toolStripMenuItemBackLayer.Checked;
+        }
+
+        private void toolStripMenuItemFrontLayer_Click(object sender, EventArgs e)
+        {
+            toolStripMenuItemBackLayer.Checked = !toolStripMenuItemFrontLayer.Checked;
+        }
+
+        private void toolStripMenuItemShowBackLayer_Click(object sender, EventArgs e)
+        {
+            panelMap.Refresh();
+        }
+
+        private void toolStripMenuItemShowFrontLayer_Click(object sender, EventArgs e)
+        {
+            panelMap.Refresh();
+        }
+
+        private void buttonToolBrush_Click(object sender, EventArgs e)
+        {
+            SelectTool(Tool.Brush);
+        }
+
+        private void buttonToolBlocks_Click(object sender, EventArgs e)
+        {
+            SelectTool(Tool.Blocks);
+        }
+
+        private void buttonToolFill_Click(object sender, EventArgs e)
+        {
+            SelectTool(Tool.Fill);
+        }
+
+        private void buttonToolColorPicker_Click(object sender, EventArgs e)
+        {
+            SelectTool(Tool.ColorPicker);
+        }
+
+        private void buttonToggleGrid_Click(object sender, EventArgs e)
+        {
+            showGrid = !showGrid;
+            buttonToggleGrid.Image = showGrid ? Properties.Resources.round_grid_off_black_24 : Properties.Resources.round_grid_on_black_24;
+            panelMap.Refresh();
         }
     }
 }

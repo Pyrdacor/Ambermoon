@@ -5,6 +5,7 @@ using Ambermoon.Data.Legacy.ExecutableData;
 using Ambermoon.Data.Legacy.Serialization;
 using NAudio.Wave;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Linq;
 using System.Windows.Forms;
 
@@ -12,12 +13,26 @@ namespace AmbermoonMapEditor2D
 {
     partial class MapEditorForm
     {
+        enum Tool
+        {
+            Brush,
+            Blocks,
+            Fill,
+            ColorPicker
+        }
+
         IGameData gameData;
         Dictionary<uint, Tileset> tilesets;
         IReadOnlyDictionary<Song, string> songNames;
         ImageCache imageCache;
         Dictionary<Song, WaveStream> musicCache = new Dictionary<Song, WaveStream>();
         IWavePlayer wavePlayer = new WaveOut();
+        Panel mapScrollIndicator = new Panel();
+        Panel tilesetScrollIndicator = new Panel();
+        const int TilesetTilesPerRow = 43;
+        int currentTilesetTiles = 0;
+        Tool currentTool = Tool.Brush;
+        bool showGrid = false;
 
         Map map;
         int MapWidth => (int)numericUpDownWidth.Value;
@@ -54,6 +69,11 @@ namespace AmbermoonMapEditor2D
                 comboBoxTilesets.Items.Add($"Tileset {i}");
 
             imageCache = new ImageCache(gameData);
+
+            mapScrollIndicator.Size = new System.Drawing.Size(1, 1);
+            tilesetScrollIndicator.Size = new System.Drawing.Size(1, 1);
+            panelMap.Controls.Add(mapScrollIndicator);
+            panelTileset.Controls.Add(tilesetScrollIndicator);
         }
 
         void CleanUp()
@@ -88,6 +108,9 @@ namespace AmbermoonMapEditor2D
             comboBoxWorld.SelectedIndex = (int)map.World % 3;
             comboBoxMusic.SelectedIndex = map.MusicIndex == 0 ? (int)Song.PloddingAlong - 1 : (int)map.MusicIndex - 1;
             comboBoxTilesets.SelectedIndex = map.TilesetOrLabdataIndex == 0 ? 0 : (int)map.TilesetOrLabdataIndex - 1;
+
+            MapSizeChanged();
+            TilesetChanged();
         }
 
         void ToggleMusic()
@@ -106,6 +129,7 @@ namespace AmbermoonMapEditor2D
                 waveStream.Position = 0;
             wavePlayer.Init(waveStream);
             wavePlayer.Play();
+            buttonToggleMusic.Image = Properties.Resources.round_stop_black_24;
         }
 
         void StopMusic()
@@ -113,6 +137,7 @@ namespace AmbermoonMapEditor2D
             lastSong = playingSong;
             playingSong = null;
             wavePlayer.Stop();
+            buttonToggleMusic.Image = Properties.Resources.round_play_arrow_black_24;
         }
 
         WaveStream LoadSong(Song song)
@@ -138,7 +163,7 @@ namespace AmbermoonMapEditor2D
 
         void MapSizeChanged()
         {
-
+            mapScrollIndicator.Location = new System.Drawing.Point(map.Width * 16, map.Height * 16);
         }
 
         void MapTypeChanged()
@@ -154,14 +179,39 @@ namespace AmbermoonMapEditor2D
             }
         }
 
-        void FillMusicList()
+        void TilesetChanged()
         {
+            panelTileset.Refresh();
+            tilesetScrollIndicator.Location = new System.Drawing.Point((currentTilesetTiles % TilesetTilesPerRow) * 16, (currentTilesetTiles / TilesetTilesPerRow) * 16);
+        }
 
+        Bitmap ImageFromTool(Tool tool)
+        {
+            switch (tool)
+            {
+                case Tool.Brush:
+                    return Properties.Resources.round_brush_black_24;
+                case Tool.Blocks:
+                    return Properties.Resources.round_grid_view_black_24;
+                case Tool.Fill:
+                    return Properties.Resources.round_format_color_fill_black_24;
+                case Tool.ColorPicker:
+                    return Properties.Resources.round_colorize_black_24;
+                default:
+                    return null;
+            }
+            
+        }
+
+        void SelectTool(Tool tool)
+        {
+            currentTool = tool;
+            toolStripStatusLabelTool.Image = ImageFromTool(tool);
         }
 
         void FillCharacters()
         {
 
-        }
+        }        
     }
 }
