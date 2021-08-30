@@ -33,6 +33,7 @@ namespace AmbermoonMapEditor2D
         int currentTilesetTiles = 0;
         Tool currentTool = Tool.Brush;
         bool showGrid = false;
+        int selectedTilesetTile = 0;
 
         Map map;
         int MapWidth => (int)numericUpDownWidth.Value;
