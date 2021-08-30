@@ -3,6 +3,7 @@ using Ambermoon.Data;
 using Ambermoon.Data.Enumerations;
 using Ambermoon.Data.Legacy.ExecutableData;
 using Ambermoon.Data.Legacy.Serialization;
+using NAudio.Wave;
 using System.Collections.Generic;
 using System.Linq;
 using System.Windows.Forms;
@@ -15,11 +16,14 @@ namespace AmbermoonMapEditor2D
         Dictionary<uint, Tileset> tilesets;
         IReadOnlyDictionary<Song, string> songNames;
         ImageCache imageCache;
+        Dictionary<Song, WaveStream> musicCache = new Dictionary<Song, WaveStream>();
+        IWavePlayer wavePlayer = new WaveOut();
 
         Map map;
         int MapWidth => (int)numericUpDownWidth.Value;
         int MapHeight => (int)numericUpDownHeight.Value;
-        bool musicPlaying = false;
+        Song? playingSong = null;
+        Song? lastSong = null;
 
         void Initialize()
         {
@@ -43,11 +47,22 @@ namespace AmbermoonMapEditor2D
             }
 
             foreach (var song in songNames)
-            {
                 comboBoxMusic.Items.Add(song.Value);
-            }
+
+            // TODO: what if we add one later?
+            for (int i = 1; i <= 8; ++i)
+                comboBoxTilesets.Items.Add($"Tileset {i}");
 
             imageCache = new ImageCache(gameData);
+        }
+
+        void CleanUp()
+        {
+            playingSong = null;
+            wavePlayer?.Stop();
+            wavePlayer?.Dispose();
+            wavePlayer = null;
+            musicCache.Clear();
         }
 
         void InitializeMap(Map map)
@@ -71,12 +86,13 @@ namespace AmbermoonMapEditor2D
             checkBoxTravelGraphics.Checked = map.Flags.HasFlag(MapFlags.StationaryGraphics);
             checkBoxWorldSurface.Checked = map.Flags.HasFlag(MapFlags.WorldSurface);
             comboBoxWorld.SelectedIndex = (int)map.World % 3;
-            comboBoxMusic.SelectedIndex = map.MusicIndex == 0 ? 0 : (int)map.MusicIndex - 1;
+            comboBoxMusic.SelectedIndex = map.MusicIndex == 0 ? (int)Song.PloddingAlong - 1 : (int)map.MusicIndex - 1;
+            comboBoxTilesets.SelectedIndex = map.TilesetOrLabdataIndex == 0 ? 0 : (int)map.TilesetOrLabdataIndex - 1;
         }
 
         void ToggleMusic()
         {
-            if (musicPlaying)
+            if (playingSong != null)
                 StopMusic();
             else
                 StartMusic();
@@ -84,14 +100,35 @@ namespace AmbermoonMapEditor2D
 
         void StartMusic()
         {
-            musicPlaying = true;
-            // TODO
+            playingSong = (Song)(comboBoxMusic.SelectedIndex + 1);
+            var waveStream = LoadSong(playingSong.Value);
+            if (playingSong != lastSong)
+                waveStream.Position = 0;
+            wavePlayer.Init(waveStream);
+            wavePlayer.Play();
         }
 
         void StopMusic()
         {
-            musicPlaying = false;
-            // TODO
+            lastSong = playingSong;
+            playingSong = null;
+            wavePlayer.Stop();
+        }
+
+        WaveStream LoadSong(Song song)
+        {
+            if (musicCache.TryGetValue(song, out var waveStream))
+                return waveStream;
+
+            var sonicArrangerFile = new SonicArranger.SonicArrangerFile(gameData.Files["Music.amb"].Files[(int)song] as DataReader);
+            var sonicArrangerSong = new SonicArranger.Stream(sonicArrangerFile, 0, 44100, SonicArranger.Stream.ChannelMode.Mono);
+            var stream = new System.IO.MemoryStream();
+            sonicArrangerSong.WriteUnsignedTo(stream);
+            stream.Position = 0;
+            waveStream = new RawSourceWaveStream(stream, WaveFormat.CreateCustomFormat(WaveFormatEncoding.Pcm, 44100, 1, 44100, 1, 8));
+            musicCache.Add(song, waveStream);
+
+            return waveStream;
         }
 
         bool AskYesNo(string question)

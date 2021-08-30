@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Drawing;
 using System.Windows.Forms;
 
 namespace AmbermoonMapEditor2D
@@ -179,17 +180,57 @@ namespace AmbermoonMapEditor2D
                         if (backgroundTile != null)
                         {
                             var backgroundImage = imageCache.GetImage(map.TilesetOrLabdataIndex, backgroundTile.GraphicIndex - 1, map.PaletteIndex);
-                            e.Graphics.DrawImageUnscaledAndClipped(backgroundImage, new System.Drawing.Rectangle(x * 16, y * 16, 16, 16));
+                            e.Graphics.DrawImageUnscaledAndClipped(backgroundImage, new Rectangle(x * 16, y * 16, 16, 16));
                         }
 
                         if (foregroundTile != null)
                         {
                             var foregroundImage = imageCache.GetImage(map.TilesetOrLabdataIndex, foregroundTile.GraphicIndex - 1, map.PaletteIndex);
-                            e.Graphics.DrawImageUnscaledAndClipped(foregroundImage, new System.Drawing.Rectangle(x * 16, y * 16, 16, 16));
+                            e.Graphics.DrawImageUnscaledAndClipped(foregroundImage, new Rectangle(x * 16, y * 16, 16, 16));
                         }
                     }
                 }
             }
+        }
+
+        private void panelTileset_Paint(object sender, PaintEventArgs e)
+        {
+            const int tilesPerRow = 43;
+
+            if (map != null)
+            {
+                var tileset = tilesets[map.TilesetOrLabdataIndex];
+                int x = 0;
+                int y = 0;
+
+                using var border = new Pen(Color.Black, 1.0f);
+
+                foreach (var tile in tileset.Tiles)
+                {
+                    var rect = new Rectangle(x * 16, y * 16, 16, 16);
+                    try
+                    {
+                        var image = imageCache.GetImage(map.TilesetOrLabdataIndex, tile.GraphicIndex - 1, map.PaletteIndex);
+                        e.Graphics.DrawImageUnscaledAndClipped(image, rect);
+                        e.Graphics.DrawRectangle(border, rect);
+                    }
+                    catch
+                    {
+                        // ignore, there seem to be invalid tiles/graphic indices, just skip them
+                    }
+
+                    if (++x == tilesPerRow)
+                    {
+                        x = 0;
+                        ++y;
+                    }
+                }
+            }
+        }
+
+        private void MapEditorForm_FormClosed(object sender, FormClosedEventArgs e)
+        {
+            CleanUp();
         }
     }
 }

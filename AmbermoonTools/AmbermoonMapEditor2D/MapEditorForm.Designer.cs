@@ -130,11 +130,13 @@ namespace AmbermoonMapEditor2D
             // 
             // panelTileset
             // 
+            this.panelTileset.AutoScroll = true;
             this.panelTileset.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
             this.panelTileset.Location = new System.Drawing.Point(10, 22);
             this.panelTileset.Name = "panelTileset";
             this.panelTileset.Size = new System.Drawing.Size(691, 168);
             this.panelTileset.TabIndex = 0;
+            this.panelTileset.Paint += new System.Windows.Forms.PaintEventHandler(this.panelTileset_Paint);
             // 
             // groupBoxProperties
             // 
@@ -192,7 +194,7 @@ namespace AmbermoonMapEditor2D
             this.numericUpDownHeight.Enabled = false;
             this.numericUpDownHeight.Location = new System.Drawing.Point(104, 21);
             this.numericUpDownHeight.Maximum = new decimal(new int[] {
-            50,
+            200,
             0,
             0,
             0});
@@ -224,7 +226,7 @@ namespace AmbermoonMapEditor2D
             this.numericUpDownWidth.Enabled = false;
             this.numericUpDownWidth.Location = new System.Drawing.Point(43, 20);
             this.numericUpDownWidth.Maximum = new decimal(new int[] {
-            50,
+            200,
             0,
             0,
             0});
@@ -285,7 +287,7 @@ namespace AmbermoonMapEditor2D
             // 
             this.checkBoxWorldSurface.AutoSize = true;
             this.checkBoxWorldSurface.Enabled = false;
-            this.checkBoxWorldSurface.Location = new System.Drawing.Point(6, 71);
+            this.checkBoxWorldSurface.Location = new System.Drawing.Point(7, 71);
             this.checkBoxWorldSurface.Name = "checkBoxWorldSurface";
             this.checkBoxWorldSurface.Size = new System.Drawing.Size(85, 19);
             this.checkBoxWorldSurface.TabIndex = 12;
@@ -491,9 +493,12 @@ namespace AmbermoonMapEditor2D
             this.Controls.Add(this.groupBoxTileset);
             this.Controls.Add(this.panelMap);
             this.Controls.Add(this.menuStrip1);
+            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
             this.MainMenuStrip = this.menuStrip1;
+            this.MaximizeBox = false;
             this.Name = "MapEditorForm";
             this.Text = "Ambermoon Map Editor 2D";
+            this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.MapEditorForm_FormClosed);
             this.Load += new System.EventHandler(this.MapEditorForm_Load);
             this.groupBoxTileset.ResumeLayout(false);
             this.groupBoxProperties.ResumeLayout(false);
