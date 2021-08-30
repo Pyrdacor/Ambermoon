@@ -19,7 +19,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AmbermoonTextImport", "Ambe
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AmbermoonDiskExtract", "AmbermoonDiskExtract\AmbermoonDiskExtract.csproj", "{01631570-E32D-4AC4-9091-79F79F86DBE9}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AmbermoonEventEditor", "AmbermoonEventEditor\AmbermoonEventEditor.csproj", "{BA986E4A-0D74-4D22-BB11-C94708F7FB95}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AmbermoonEventEditor", "AmbermoonEventEditor\AmbermoonEventEditor.csproj", "{BA986E4A-0D74-4D22-BB11-C94708F7FB95}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AmbermoonMapEditor2D", "AmbermoonMapEditor2D\AmbermoonMapEditor2D.csproj", "{A94BB28D-EBD5-487A-9EA6-695970863836}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -63,6 +65,12 @@ Global
 		{BA986E4A-0D74-4D22-BB11-C94708F7FB95}.Release|Any CPU.Build.0 = Release|Any CPU
 		{BA986E4A-0D74-4D22-BB11-C94708F7FB95}.ReleaseLinux|Any CPU.ActiveCfg = Release|Any CPU
 		{BA986E4A-0D74-4D22-BB11-C94708F7FB95}.ReleaseLinux|Any CPU.Build.0 = Release|Any CPU
+		{A94BB28D-EBD5-487A-9EA6-695970863836}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A94BB28D-EBD5-487A-9EA6-695970863836}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A94BB28D-EBD5-487A-9EA6-695970863836}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A94BB28D-EBD5-487A-9EA6-695970863836}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A94BB28D-EBD5-487A-9EA6-695970863836}.ReleaseLinux|Any CPU.ActiveCfg = Release|Any CPU
+		{A94BB28D-EBD5-487A-9EA6-695970863836}.ReleaseLinux|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
