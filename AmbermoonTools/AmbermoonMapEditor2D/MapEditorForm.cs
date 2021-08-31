@@ -227,6 +227,33 @@ namespace AmbermoonMapEditor2D
                             e.Graphics.DrawRectangle(grid, rect);
                     }
                 }
+
+                if (hoveredMapTile != -1 && tileMarkerWidth > 0 && tileMarkerHeight > 0)
+                {
+                    int visibleColumns = panelMap.Width / 16;
+                    int visibleRows = panelMap.Height / 16;
+                    int hoveredX = hoveredMapTile % visibleColumns;
+                    int hoveredY = hoveredMapTile / visibleColumns;
+
+                    if (hoveredX + tileMarkerWidth < visibleColumns &&
+                        hoveredY + tileMarkerHeight < visibleRows)
+                    {
+                        int startX = panelMap.AutoScrollPosition.X % 16 + hoveredX * 16;
+                        int startY = panelMap.AutoScrollPosition.Y % 16 + hoveredY * 16;
+                        using var marker = new SolidBrush(Color.FromArgb(0x30, 0x77, 0xff, 0x66));
+                        using var border = new Pen(Color.FromArgb(0xa0, 0xff, 0xff, 0x00), 1);
+
+                        for (int y = 0; y < tileMarkerHeight; ++y)
+                        {
+                            for (int x = 0; x < tileMarkerWidth; ++x)
+                            {
+                                e.Graphics.FillRectangle(marker, new Rectangle(startX + x * 16 + 1, startY + y * 16 + 1, 14, 14));
+                                e.Graphics.DrawRectangle(border, new Rectangle(startX + x * 16, startY + y * 16, 15, 15));
+                            }
+                        }
+                    }
+                }
+                // TODO: fill marker
             }
         }
 
@@ -335,7 +362,7 @@ namespace AmbermoonMapEditor2D
 
         private void buttonToolBlocks_Click(object sender, EventArgs e)
         {
-            SelectTool(Tool.Blocks);
+            SelectTool(blocksTool);
         }
 
         private void buttonToolFill_Click(object sender, EventArgs e)
@@ -376,6 +403,44 @@ namespace AmbermoonMapEditor2D
                     toolStripStatusLabelCurrentTile.Image = null;
                 }
             }
+        }
+
+        private void toolStripMenuItemBlocks2x2_Click(object sender, EventArgs e)
+        {
+            blocksTool = Tool.Blocks2x2;
+            SelectTool(blocksTool);
+        }
+
+        private void toolStripMenuItemBlocks3x2_Click(object sender, EventArgs e)
+        {
+            blocksTool = Tool.Blocks3x2;
+            SelectTool(blocksTool);
+        }
+
+        private void toolStripMenuItemBlocks3x3_Click(object sender, EventArgs e)
+        {
+            blocksTool = Tool.Blocks3x3;
+            SelectTool(blocksTool);
+        }
+
+        private void panelMap_MouseMove(object sender, MouseEventArgs e)
+        {
+            int visibleColumns = panelMap.Width / 16;
+            int hoveredColumn = e.X / 16;
+            int hoveredRow = e.Y / 16;
+            int newHoveredTile = hoveredColumn + hoveredRow * visibleColumns;
+
+            if (newHoveredTile != hoveredMapTile)
+            {
+                hoveredMapTile = newHoveredTile;
+                panelMap.Refresh();
+            }
+        }
+
+        private void panelMap_MouseLeave(object sender, EventArgs e)
+        {
+            hoveredMapTile = -1;
+            panelMap.Refresh();
         }
     }
 }

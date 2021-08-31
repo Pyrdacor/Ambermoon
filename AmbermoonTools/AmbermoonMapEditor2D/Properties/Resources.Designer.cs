@@ -61,6 +61,36 @@ namespace AmbermoonMapEditor2D.Properties {
         }
         
         /// <summary>
+        ///   Sucht eine lokalisierte Ressource vom Typ System.Byte[].
+        /// </summary>
+        internal static byte[] color_picker {
+            get {
+                object obj = ResourceManager.GetObject("color_picker", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Ressource vom Typ System.Byte[].
+        /// </summary>
+        internal static byte[] pointer {
+            get {
+                object obj = ResourceManager.GetObject("pointer", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Ressource vom Typ System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap round_apps_black_24 {
+            get {
+                object obj = ResourceManager.GetObject("round_apps_black_24", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
         ///   Sucht eine lokalisierte Ressource vom Typ System.Drawing.Bitmap.
         /// </summary>
         internal static System.Drawing.Bitmap round_brush_black_24 {
@@ -156,6 +186,16 @@ namespace AmbermoonMapEditor2D.Properties {
         internal static System.Drawing.Bitmap round_stop_black_24 {
             get {
                 object obj = ResourceManager.GetObject("round_stop_black_24", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Ressource vom Typ System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap round_view_module_black_24 {
+            get {
+                object obj = ResourceManager.GetObject("round_view_module_black_24", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
