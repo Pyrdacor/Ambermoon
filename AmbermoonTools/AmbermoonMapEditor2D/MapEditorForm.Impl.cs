@@ -1,13 +1,17 @@
-﻿using Ambermoon;
-using Ambermoon.Data;
+﻿using Ambermoon.Data;
 using Ambermoon.Data.Enumerations;
 using Ambermoon.Data.Legacy.ExecutableData;
 using Ambermoon.Data.Legacy.Serialization;
 using NAudio.Wave;
+using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Windows.Forms;
+using Color = System.Drawing.Color;
+using Cursor = System.Windows.Forms.Cursor;
+using Cursors = System.Windows.Forms.Cursors;
 
 namespace AmbermoonMapEditor2D
 {
@@ -16,7 +20,9 @@ namespace AmbermoonMapEditor2D
         enum Tool
         {
             Brush,
-            Blocks,
+            Blocks2x2,
+            Blocks3x2,
+            Blocks3x3,
             Fill,
             ColorPicker
         }
@@ -32,8 +38,14 @@ namespace AmbermoonMapEditor2D
         const int TilesetTilesPerRow = 43;
         int currentTilesetTiles = 0;
         Tool currentTool = Tool.Brush;
+        Tool blocksTool = Tool.Blocks2x2;
         bool showGrid = false;
         int selectedTilesetTile = 0;
+        Cursor cursorPointer;
+        Cursor cursorColorPicker;
+        int tileMarkerWidth = 0;
+        int tileMarkerHeight = 0;
+        int hoveredMapTile = -1;
 
         Map map;
         int MapWidth => (int)numericUpDownWidth.Value;
@@ -41,8 +53,14 @@ namespace AmbermoonMapEditor2D
         Song? playingSong = null;
         Song? lastSong = null;
 
+        [DllImport("user32.dll")]
+        public static extern IntPtr LoadCursorFromFile(string filename);
+
         void Initialize()
         {
+            cursorPointer = CursorResourceLoader.LoadEmbeddedCursor(Properties.Resources.pointer);
+            cursorColorPicker = CursorResourceLoader.LoadEmbeddedCursor(Properties.Resources.color_picker);
+
             toolTipIndoor.SetToolTip(radioButtonIndoor, "Indoor maps are always fully lighted.");
             toolTipOutdoor.SetToolTip(radioButtonOutdoor, "Outdoor maps are affected by the day-night-cycle.");
             toolTipDungeon.SetToolTip(radioButtonDungeon, "Dungeons are dark. You'll need your own light source.");
@@ -59,7 +77,7 @@ namespace AmbermoonMapEditor2D
             }
             else
             {
-                songNames = Enum.GetValues<Song>().Skip(1).Take(32).ToDictionary(song => song, song => song.ToString());
+                songNames = Ambermoon.Enum.GetValues<Song>().Skip(1).Take(32).ToDictionary(song => song, song => song.ToString());
             }
 
             foreach (var song in songNames)
@@ -75,6 +93,7 @@ namespace AmbermoonMapEditor2D
             tilesetScrollIndicator.Size = new System.Drawing.Size(1, 1);
             panelMap.Controls.Add(mapScrollIndicator);
             panelTileset.Controls.Add(tilesetScrollIndicator);
+            SelectTool(Tool.Brush);
         }
 
         void CleanUp()
@@ -192,27 +211,132 @@ namespace AmbermoonMapEditor2D
             {
                 case Tool.Brush:
                     return Properties.Resources.round_brush_black_24;
-                case Tool.Blocks:
+                case Tool.Blocks2x2:
                     return Properties.Resources.round_grid_view_black_24;
+                case Tool.Blocks3x2:
+                    return Properties.Resources.round_view_module_black_24;
+                case Tool.Blocks3x3:
+                    return Properties.Resources.round_apps_black_24;
                 case Tool.Fill:
                     return Properties.Resources.round_format_color_fill_black_24;
                 case Tool.ColorPicker:
                     return Properties.Resources.round_colorize_black_24;
                 default:
                     return null;
+            }            
+        }
+
+        Button ButtonFromTool(Tool tool)
+        {
+            switch (tool)
+            {
+                case Tool.Brush:
+                    return buttonToolBrush;
+                case Tool.Blocks2x2:
+                case Tool.Blocks3x2:
+                case Tool.Blocks3x3:
+                    return buttonToolBlocks;
+                case Tool.Fill:
+                    return buttonToolFill;
+                case Tool.ColorPicker:
+                    return buttonToolColorPicker;
+                default:
+                    return null;
             }
-            
+        }
+
+        Cursor CursorFromTool(Tool tool)
+        {
+            switch (tool)
+            {
+                case Tool.Brush:
+                    return cursorPointer;
+                case Tool.Blocks2x2:
+                case Tool.Blocks3x2:
+                case Tool.Blocks3x3:
+                    return cursorPointer;
+                case Tool.Fill:
+                    return cursorPointer;
+                case Tool.ColorPicker:
+                    return cursorColorPicker;
+                default:
+                    return null;
+            }
+        }
+
+        int TileMarkerWidthFromTool(Tool tool)
+        {
+            switch (tool)
+            {
+                case Tool.Brush:
+                    return 1;
+                case Tool.Blocks2x2:
+                    return 2;
+                case Tool.Blocks3x2:
+                case Tool.Blocks3x3:
+                    return 3;
+                case Tool.Fill:
+                    return -1;
+                case Tool.ColorPicker:
+                    return 1;
+                default:
+                    return 0;
+            }
+        }
+
+        int TileMarkerHeightFromTool(Tool tool)
+        {
+            switch (tool)
+            {
+                case Tool.Brush:
+                    return 1;
+                case Tool.Blocks2x2:
+                case Tool.Blocks3x2:
+                    return 2;                
+                case Tool.Blocks3x3:
+                    return 3;
+                case Tool.Fill:
+                    return -1;
+                case Tool.ColorPicker:
+                    return 1;
+                default:
+                    return 0;
+            }
         }
 
         void SelectTool(Tool tool)
         {
+            if (currentTool == tool)
+                return;
+
+            var button = ButtonFromTool(currentTool);
+
+            if (button != null)
+                SetButtonActive(button, false);
+
             currentTool = tool;
             toolStripStatusLabelTool.Image = ImageFromTool(tool);
+            button = ButtonFromTool(currentTool);
+            var cursor = CursorFromTool(currentTool);
+            tileMarkerWidth = TileMarkerWidthFromTool(currentTool);
+            tileMarkerHeight = TileMarkerHeightFromTool(currentTool);
+            panelMap.Refresh();
+
+            if (button != null)
+                SetButtonActive(button, true);
+
+            panelMap.Cursor = cursor == null ? Cursors.Arrow : cursor;
+        }
+
+        void SetButtonActive(Button button, bool active)
+        {
+            button.UseVisualStyleBackColor = false;
+            button.BackColor = Color.FromArgb(0x30, active ? Color.Lime : SystemColors.Control);
         }
 
         void FillCharacters()
         {
 
-        }        
+        }
     }
 }
