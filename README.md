@@ -16,7 +16,7 @@ I will provide some helpful tools too.
  You can do so by copying the Save.00 folder to Save.01 etc.
 
 Version | Language | Type | Download | Release date
---- | --- | --- | ---
+--- | --- | --- | --- | ---
 1.09 | English | Extracted Files | [zip](https://github.com/Pyrdacor/Ambermoon/raw/master/Disks/English/ambermoon_english_1.09_extracted.zip) [lha](https://github.com/Pyrdacor/Ambermoon/raw/master/Disks/English/ambermoon_english_1.09_extracted.lha) [tar.gz](https://github.com/Pyrdacor/Ambermoon/raw/master/Disks/English/ambermoon_english_1.09_extracted.tar.gz) | 27-08-2021
 1.09 | English | ADF Disk Images | [zip](https://github.com/Pyrdacor/Ambermoon/raw/master/Disks/English/ambermoon_english_1.09_adf.zip) [lha](https://github.com/Pyrdacor/Ambermoon/raw/master/Disks/English/ambermoon_english_1.09_adf.lha) [tar.gz](https://github.com/Pyrdacor/Ambermoon/raw/master/Disks/English/ambermoon_english_1.09_adf.tar.gz) | 27-08-2021
 1.08 | German | Extracted Files | [zip](https://github.com/Pyrdacor/Ambermoon/raw/master/Disks/German/ambermoon_german_1.08_extracted.zip) [lha](https://github.com/Pyrdacor/Ambermoon/raw/master/Disks/German/ambermoon_german_1.08_extracted.lha) [tar.gz](https://github.com/Pyrdacor/Ambermoon/raw/master/Disks/German/ambermoon_german_1.08_extracted.tar.gz) | 27-08-2021
