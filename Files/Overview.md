@@ -17,8 +17,12 @@ File | Disk | Format
 ---- | ---- | ----
 [1Icon_gfx.amb](../FileSpecs/Maps2D.md) | C | GFX (16x16, 5 planes)
 [2Icon_gfx.amb](../FileSpecs/Maps2D.md) | D | GFX (16x16, 5 planes)
+2Object3D.amb | D | 3D object billboard graphics
+2Overlay3D.amb | E | Wall overlay graphics
 2Wall3D.amb | E | GFX 128x80, 4 bit texture)
 [3Icon_gfx.amb](../FileSpecs/Maps2D.md) | F | GFX (16x16, 5 planes)
+3Object3D.amb | D | 3D object billboard graphics
+3Overlay3D.amb | E | Wall overlay graphics
 3Wall3D.amb | F | GFX (128x80, 4 bit texture)
 Automap_graphics | G | GFX
 Combat_background.amb | H | GFX (320x95, 5 planes)
@@ -55,14 +59,10 @@ Party_texts.amb | G | TXT (mostly strings, header unknown)
 File | Disk | Content
 ---- | ---- | ----
 [1Map_data.amb](../FileSpecs/Maps.md) | C | Map data
-2Lab_data.amb | D | Labyrinth data?
+2Lab_data.amb | D | Labyrinth data
 [2Map_data.amb](../FileSpecs/Maps.md) | D | Map data
-2Object3D.amb | D | 3D object data (floats?)
-2Overlay3D.amb | E | 3D object data (floats?)
-3Lab_data.amb | F | Labyrinth data?
+3Lab_data.amb | F | Labyrinth data
 [3Map_data.amb](../FileSpecs/Maps.md) | F | Map data
-3Object3D.amb | F | 3D object data (floats?)
-3Overlay3D.amb | F | 3D object data (floats?)
 [Icon_data.amb](../FileSpecs/Maps.md) | G | Tilesets / Animation information
 [Automap.amb](../FileSpecs/Maps.md) | J | Exploration state of 3D dungeons
 Chest_data.amb | J | Data of all chests
