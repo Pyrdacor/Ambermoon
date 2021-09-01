@@ -16,8 +16,23 @@ namespace AmbermoonEventEditor
         {
             if (error != null)
                 Error(error);
+
             Console.WriteLine();
-            // TODO ...
+            Console.WriteLine("Usage: AmbermoonEventEditor <path> <type>");
+            Console.WriteLine();
+            Console.WriteLine(" <path>  Path to an extracted single map_data/NPC_char/party_char");
+            Console.WriteLine("         file (= sub-file of an .amb container)");
+            Console.WriteLine(" <type>  0: Map, 1: NPC, 2: Party member");
+            Console.WriteLine();
+            Console.WriteLine("Note: This version can not handle loading directly from container");
+            Console.WriteLine("      files like 2Map_data.amb etc.");
+            Console.WriteLine();
+            Console.WriteLine("Examples:");
+            Console.WriteLine();
+            Console.WriteLine(" AmbermoonEventEditor \"1Map_data\\extracted\\001\" 0");
+            Console.WriteLine(" AmbermoonEventEditor \"Party_char\\extracted\\001\" 1");
+            Console.WriteLine(" AmbermoonEventEditor \"NPC_char\\extracted\\001\" 2");
+            Console.WriteLine();
         }
 
         static void Error(string error)
@@ -87,6 +102,11 @@ namespace AmbermoonEventEditor
             }
         }
 
+        static void DrawLine()
+        {
+            Console.WriteLine("+" + new string('-', 78) + "+");
+        }
+
         static void ProcessEvents(List<Event> eventList, List<Event> events, byte[] head, byte[] tail, string inputFileName, bool map)
         {
             Console.WriteLine();
@@ -94,10 +114,16 @@ namespace AmbermoonEventEditor
             Console.WriteLine("+--------+");
             ListEvents(eventList, 1);
 
+            Console.WriteLine();
+            Console.WriteLine("For help just enter the command 'help'");
+            Console.WriteLine();
+
             while (true)
             {
+                DrawLine();
                 Console.Write("Enter command: ");
                 string command = Console.ReadLine();
+                DrawLine();
 
                 ProcessCommand(command, eventList, events, map, out bool save, out string saveFileName);
 
@@ -188,6 +214,9 @@ namespace AmbermoonEventEditor
                     break;
                 case "help":
                     ShowHelp(args.Length == 1 ? "" : args[1].ToLower());
+                    break;
+                case "usage":
+                    Usage();
                     break;
                 default:
                     ShowHelp();
@@ -923,16 +952,18 @@ namespace AmbermoonEventEditor
                 default:
                     Console.WriteLine("Available commands");
                     Console.WriteLine("+----------------+");
-                    Console.WriteLine("list   -> Shows the list of event chains");
-                    Console.WriteLine("events -> Shows the list of all single events");
-                    Console.WriteLine("chain  -> Shows all events of a given event chain");
-                    Console.WriteLine("add    -> Adds a new event to the end of the list");
-                    Console.WriteLine("remove -> Removes an event by its index");
-                    Console.WriteLine("edit   -> Edits an existing event");
-                    Console.WriteLine("connect-> Connects an existing event");
-                    Console.WriteLine("save   -> Saves all changes");
-                    Console.WriteLine("exit   -> Exits the application");
-                    Console.WriteLine("help   -> Shows this help");
+                    Console.WriteLine("list       -> Shows the list of event chains");
+                    Console.WriteLine("events     -> Shows the list of all single events");
+                    Console.WriteLine("chain      -> Shows all events of a given event chain");
+                    Console.WriteLine("add        -> Adds a new event to the end of the list");
+                    Console.WriteLine("remove     -> Removes an event by its index");
+                    Console.WriteLine("edit       -> Edits an existing event");
+                    Console.WriteLine("connect    -> Connects an existing event");
+                    Console.WriteLine("disconnect -> Disconnects an existing event");
+                    Console.WriteLine("save       -> Saves all changes");
+                    Console.WriteLine("exit       -> Exits the application");
+                    Console.WriteLine("help       -> Shows this help");
+                    Console.WriteLine("usage      -> Shows tool usage");
                     Console.WriteLine();
                     Console.WriteLine("To get more information use: help <command>");
                     break;
