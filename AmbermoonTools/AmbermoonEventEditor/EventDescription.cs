@@ -372,7 +372,7 @@ namespace AmbermoonEventEditor
                 Use.Enum<ChestEvent.ChestFlags>("Flags", false),
                 Use.Byte("TextIndex", false, 0xff, 0x00, 0xff),
                 Use.Byte("ChestIndex", true),
-                Use.Bool("RemoveWhenEmpty", false),
+                Use.Enum<ChestEvent.ChestLootFlags>("LootFlags", false),
                 Use.Word("KeyIndex", false),
                 Use.EventIndex("UnlockFailedEventIndex", false)
             )},

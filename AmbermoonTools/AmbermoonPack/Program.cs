@@ -24,6 +24,10 @@ namespace AmbermoonPack
             Console.WriteLine("       AmbermoonPack REPACK <source> <dest>");
             Console.WriteLine("       AmbermoonPack UNPACK <source> <dest>");
             Console.WriteLine();
+            Console.WriteLine("The first version packs a directory of single files into a container.");
+            Console.WriteLine("UNPACK unpacks a container to a directory of single files.");
+            Console.WriteLine("REPACK packs a container to a different format.");
+            Console.WriteLine();
             Console.WriteLine(" <type>     JH, LOB, VOL1, AMNC, AMNP, AMBR, AMPC or JH+LOB");
             Console.WriteLine(" <source>   Source file or directory path");
             Console.WriteLine(" <dest>     Destination file path");

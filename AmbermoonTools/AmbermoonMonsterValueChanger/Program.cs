@@ -9,17 +9,17 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 
-namespace MonsterValueChanger
+namespace AmbermoonMonsterValueChanger
 {
     class Program
     {
         static void Usage()
         {
-            Console.WriteLine("USAGE: MonsterValueChanger --list");
-            Console.WriteLine("       MonsterValueChanger <monsterIdOrName> <offset> <size>");
-            Console.WriteLine("       MonsterValueChanger <monsterIdOrName> <offset> <size> <value>");
-            Console.WriteLine("       MonsterValueChanger --all <offset> <size>");
-            Console.WriteLine("       MonsterValueChanger --all-not-0 <offset> <size>");
+            Console.WriteLine("USAGE: AmbermoonMonsterValueChanger --list");
+            Console.WriteLine("       AmbermoonMonsterValueChanger <monsterIdOrName> <offset> <size>");
+            Console.WriteLine("       AmbermoonMonsterValueChanger <monsterIdOrName> <offset> <size> <value>");
+            Console.WriteLine("       AmbermoonMonsterValueChanger --all <offset> <size>");
+            Console.WriteLine("       AmbermoonMonsterValueChanger --all-not-0 <offset> <size>");
             Console.WriteLine();
             Console.WriteLine("1st version shows all monsters with their id and name.");
             Console.WriteLine("2nd version shows a value at the given offset with a given size.");
@@ -32,11 +32,11 @@ namespace MonsterValueChanger
             Console.WriteLine("The <value> param can be decimal or hex (add the prefix 0x then).");
             Console.WriteLine();
             Console.WriteLine("Example 1: Show portrait index of spider");
-            Console.WriteLine("-> MonsterValueChanger Spider 9 2");
+            Console.WriteLine("-> AmbermoonMonsterValueChanger Spider 9 2");
             Console.WriteLine("Example 2: Set gold amount of zombie master to 1000");
-            Console.WriteLine("-> MonsterValueChanger \"ZOMBIE MASTER\" 0x18 2 1000");
+            Console.WriteLine("-> AmbermoonMonsterValueChanger \"ZOMBIE MASTER\" 0x18 2 1000");
             Console.WriteLine("Example 3: Set combat attack damage of bandit to 32");
-            Console.WriteLine("-> MonsterValueChanger bandit 0xda 2 0x20");
+            Console.WriteLine("-> AmbermoonMonsterValueChanger bandit 0xda 2 0x20");
             Console.WriteLine();
         }
 
@@ -53,7 +53,7 @@ namespace MonsterValueChanger
 
                     var hunks = AmigaExecutable.Read(gameData.Files["AM2_CPU"].Files[1]);
                     graphicProvider = new GraphicProvider(gameData,
-                        new Ambermoon.Data.Legacy.ExecutableData.ExecutableData(hunks), null);
+                        new Ambermoon.Data.Legacy.ExecutableData.ExecutableData(hunks), null, null);
                 }
 
                 return gameData;

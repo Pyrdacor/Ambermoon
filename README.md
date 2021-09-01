@@ -24,6 +24,9 @@ Version | Language | Type | Download | Release date
 
 ### Patches
 
+Over all the years Alex Holland has carefully tracked all bug reports and fixes in an [excel sheet](https://docs.google.com/spreadsheets/d/1as5W8gibm-MTb9VEqpkfgtwWviqjQx96A3NmcvzX98A). Kudos to him!
+There you can see the progress of bugfixes.
+
 Version | Language | Download | Release date
 --- | --- | --- | ---
 1.09 | English | [zip](https://github.com/Pyrdacor/Ambermoon/raw/master/Disks/Patches/PyrdacorFixEnglish1.09.zip) [lha](https://github.com/Pyrdacor/Ambermoon/raw/master/Disks/Patches/PyrdacorFixEnglish1.09.lha) [tar.gz](https://github.com/Pyrdacor/Ambermoon/raw/master/Disks/Patches/PyrdacorFixEnglish1.09.tar.gz) | 27-08-2021
@@ -34,13 +37,14 @@ Version | Language | Download | Release date
 
 Version | Windows 64bit | Linux 64bit | Windows 32bit
 --- | --- | --- | ---
-1.0.6 | [Download](https://github.com/Pyrdacor/Ambermoon/releases/download/v1.0.6/AmbermoonTools-Windows.zip) | [Download](https://github.com/Pyrdacor/Ambermoon/releases/download/v1.0.6/AmbermoonTools-Linux.tar.gz) | [Download](https://github.com/Pyrdacor/Ambermoon/releases/download/v1.0.6/AmbermoonTools-Windows32Bit.zip)
+1.0.7 | [Download](https://github.com/Pyrdacor/Ambermoon/releases/download/v1.0.7/AmbermoonTools-Windows.zip) | [Download](https://github.com/Pyrdacor/Ambermoon/releases/download/v1.0.7/AmbermoonTools-Linux.tar.gz) | [Download](https://github.com/Pyrdacor/Ambermoon/releases/download/v1.0.7/AmbermoonTools-Windows32Bit.zip)
 
 This zip file contains:
 - A tool to pack files into Ambermoon game data files (AmbermoonPack)
-- A tool to change monster values (MonsterValueChanger)
+- A tool to change monster values (AmbermoonMonsterValueChanger)
 - A tool to export and import texts from/into Ambermoon game data files (AmbermoonTextImport)
 - A tool to extract ADF disk files (AmbermoonDiskExtract)
+- A tool to view and edit map/NPC/partychar events (AmbermoonEventEditor)
 
 [![Build status](https://ci.appveyor.com/api/projects/status/dn5n21r8m11an48i/branch/master?svg=true)](https://ci.appveyor.com/project/Pyrdacor/ambermoon/branch/master)
 
