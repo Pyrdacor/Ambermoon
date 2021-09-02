@@ -35,6 +35,7 @@ namespace AmbermoonMapEditor2D
         IWavePlayer wavePlayer = new WaveOut();
         Panel mapScrollIndicator = new Panel();
         Panel tilesetScrollIndicator = new Panel();
+        // Note: Every tileset seems to have exactly 2500 tile slots (but many are unused).
         const int TilesetTilesPerRow = 42;
         int currentTilesetTiles = 0;
         Tool currentTool = Tool.Brush;
@@ -99,6 +100,9 @@ namespace AmbermoonMapEditor2D
 
             imageCache = new ImageCache(gameData);
 
+            for (int i = 1; i <= imageCache.PaletteCount; ++i)
+                comboBoxPalettes.Items.Add($"Palette {i}");
+
             mapScrollIndicator.Size = new Size(1, 1);
             tilesetScrollIndicator.Size = new Size(1, 1);
             panelMap.Controls.Add(mapScrollIndicator);
@@ -139,6 +143,7 @@ namespace AmbermoonMapEditor2D
             comboBoxWorld.SelectedIndex = (int)map.World % 3;
             comboBoxMusic.SelectedIndex = map.MusicIndex == 0 ? (int)Song.PloddingAlong - 1 : (int)map.MusicIndex - 1;
             comboBoxTilesets.SelectedIndex = map.TilesetOrLabdataIndex == 0 ? 0 : (int)map.TilesetOrLabdataIndex - 1;
+            comboBoxPalettes.SelectedIndex = map.PaletteIndex == 0 ? 0 : (int)map.PaletteIndex - 1;
 
             MapSizeChanged();
             TilesetChanged();
@@ -213,7 +218,7 @@ namespace AmbermoonMapEditor2D
         void TilesetChanged()
         {
             panelTileset.Refresh();
-            tilesetScrollIndicator.Location = new Point(TilesetTilesPerRow * 16, (currentTilesetTiles / TilesetTilesPerRow) * 16);
+            tilesetScrollIndicator.Location = new Point(TilesetTilesPerRow * 16, ((currentTilesetTiles + TilesetTilesPerRow - 1) / TilesetTilesPerRow) * 16);
         }
 
         Bitmap ImageFromTool(Tool tool, bool withArrowIfAvailable)

@@ -101,6 +101,8 @@ namespace AmbermoonMapEditor2D
             this.buttonToggleTileMarker = new System.Windows.Forms.Button();
             this.toolTipTileMarker = new System.Windows.Forms.ToolTip(this.components);
             this.labelDivider = new System.Windows.Forms.Label();
+            this.comboBoxPalettes = new System.Windows.Forms.ComboBox();
+            this.buttonEditTile = new System.Windows.Forms.Button();
             this.groupBoxTileset.SuspendLayout();
             this.groupBoxProperties.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDownHeight)).BeginInit();
@@ -136,6 +138,8 @@ namespace AmbermoonMapEditor2D
             // 
             // groupBoxTileset
             // 
+            this.groupBoxTileset.Controls.Add(this.buttonEditTile);
+            this.groupBoxTileset.Controls.Add(this.comboBoxPalettes);
             this.groupBoxTileset.Controls.Add(this.comboBoxTilesets);
             this.groupBoxTileset.Controls.Add(this.buttonAddTileset);
             this.groupBoxTileset.Controls.Add(this.panelTileset);
@@ -158,11 +162,11 @@ namespace AmbermoonMapEditor2D
             // 
             // buttonAddTileset
             // 
-            this.buttonAddTileset.Location = new System.Drawing.Point(707, 51);
+            this.buttonAddTileset.Location = new System.Drawing.Point(707, 148);
             this.buttonAddTileset.Name = "buttonAddTileset";
             this.buttonAddTileset.Size = new System.Drawing.Size(89, 23);
             this.buttonAddTileset.TabIndex = 1;
-            this.buttonAddTileset.Text = "Add ...";
+            this.buttonAddTileset.Text = "New tileset ...";
             this.buttonAddTileset.UseVisualStyleBackColor = true;
             // 
             // panelTileset
@@ -740,6 +744,25 @@ namespace AmbermoonMapEditor2D
             this.labelDivider.Size = new System.Drawing.Size(32, 2);
             this.labelDivider.TabIndex = 13;
             // 
+            // comboBoxPalettes
+            // 
+            this.comboBoxPalettes.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.comboBoxPalettes.FormattingEnabled = true;
+            this.comboBoxPalettes.Location = new System.Drawing.Point(707, 51);
+            this.comboBoxPalettes.Name = "comboBoxPalettes";
+            this.comboBoxPalettes.Size = new System.Drawing.Size(89, 23);
+            this.comboBoxPalettes.TabIndex = 3;
+            this.comboBoxPalettes.SelectedIndexChanged += new System.EventHandler(this.comboBoxPalettes_SelectedIndexChanged);
+            // 
+            // buttonEditTile
+            // 
+            this.buttonEditTile.Location = new System.Drawing.Point(707, 119);
+            this.buttonEditTile.Name = "buttonEditTile";
+            this.buttonEditTile.Size = new System.Drawing.Size(89, 23);
+            this.buttonEditTile.TabIndex = 4;
+            this.buttonEditTile.Text = "Edit tile ...";
+            this.buttonEditTile.UseVisualStyleBackColor = true;
+            // 
             // MapEditorForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
@@ -856,6 +879,8 @@ namespace AmbermoonMapEditor2D
         private System.Windows.Forms.ToolTip toolTipTileMarker;
         private System.Windows.Forms.Label labelDivider;
         private System.Windows.Forms.ToolStripStatusLabel toolStripStatusLabelCurrentTilesetTile;
+        private System.Windows.Forms.Button buttonEditTile;
+        private System.Windows.Forms.ComboBox comboBoxPalettes;
     }
 }
 

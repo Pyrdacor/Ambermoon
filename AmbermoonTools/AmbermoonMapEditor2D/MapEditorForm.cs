@@ -295,8 +295,8 @@ namespace AmbermoonMapEditor2D
                         catch
                         {
                             e.Graphics.FillRectangle(errorBrush, rect);
-                            e.Graphics.DrawString("X", errorFont, errorFontBrush, rect);
-                            // ignore, there seem to be invalid tiles/graphic indices, just skip them
+                            e.Graphics.DrawString("X", errorFont, errorFontBrush, rect.X + 3, rect.Y);
+                            // ignore, there are many unused tiles without valid graphic indices, just skip them and mark them as unused/invalid
                         }
                     }
 
@@ -499,14 +499,37 @@ namespace AmbermoonMapEditor2D
 
             int x = scrolledXTile + hoveredColumn;
             int y = scrolledYTile + hoveredRow;
-            toolStripStatusLabelCurrentTilesetTile.Text = $"{1 + x}, {1 + y} [Index: {x + y * TilesetTilesPerRow}]";
-            toolStripStatusLabelCurrentTilesetTile.Visible = true;
+            int index = x + y * TilesetTilesPerRow;
 
-            if (newHoveredTile != hoveredTilesetTile)
+            if (index >= 2500)
             {
-                hoveredTilesetTile = newHoveredTile;
-                panelTileset.Refresh();
+                toolStripStatusLabelCurrentTilesetTile.Visible = false;
+
+                if (hoveredTilesetTile != -1)
+                {
+                    hoveredTilesetTile = -1;
+                    panelTileset.Refresh();
+                }
             }
+            else
+            {
+                toolStripStatusLabelCurrentTilesetTile.Text = $"{1 + x}, {1 + y} [Index: {index}]";
+                toolStripStatusLabelCurrentTilesetTile.Visible = true;
+
+                if (newHoveredTile != hoveredTilesetTile)
+                {
+                    hoveredTilesetTile = newHoveredTile;
+                    panelTileset.Refresh();
+                }
+            }
+        }
+
+        private void comboBoxPalettes_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            map.PaletteIndex = (uint)(1 + comboBoxPalettes.SelectedIndex);
+
+            panelTileset.Refresh();
+            panelMap.Refresh();
         }
     }
 }
