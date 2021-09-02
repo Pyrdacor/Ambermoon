@@ -167,7 +167,8 @@ namespace AmbermoonMapEditor2D
             // toolStripMenuItemMapNew
             // 
             this.toolStripMenuItemMapNew.Name = "toolStripMenuItemMapNew";
-            this.toolStripMenuItemMapNew.Size = new System.Drawing.Size(141, 22);
+            this.toolStripMenuItemMapNew.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.O)));
+            this.toolStripMenuItemMapNew.Size = new System.Drawing.Size(186, 22);
             this.toolStripMenuItemMapNew.Text = "New/Load ...";
             this.toolStripMenuItemMapNew.Click += new System.EventHandler(this.toolStripMenuItemMapNew_Click);
             // 
@@ -175,26 +176,30 @@ namespace AmbermoonMapEditor2D
             // 
             this.toolStripMenuItemMapSave.Enabled = false;
             this.toolStripMenuItemMapSave.Name = "toolStripMenuItemMapSave";
-            this.toolStripMenuItemMapSave.Size = new System.Drawing.Size(141, 22);
+            this.toolStripMenuItemMapSave.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.S)));
+            this.toolStripMenuItemMapSave.Size = new System.Drawing.Size(186, 22);
             this.toolStripMenuItemMapSave.Text = "Save";
             this.toolStripMenuItemMapSave.Click += new System.EventHandler(this.toolStripMenuItemMapSave_Click);
             // 
             // toolStripMenuItemMapSaveAs
             // 
             this.toolStripMenuItemMapSaveAs.Name = "toolStripMenuItemMapSaveAs";
-            this.toolStripMenuItemMapSaveAs.Size = new System.Drawing.Size(141, 22);
+            this.toolStripMenuItemMapSaveAs.ShortcutKeys = ((System.Windows.Forms.Keys)(((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.Shift) 
+            | System.Windows.Forms.Keys.S)));
+            this.toolStripMenuItemMapSaveAs.Size = new System.Drawing.Size(249, 22);
             this.toolStripMenuItemMapSaveAs.Text = "Save as ...";
             this.toolStripMenuItemMapSaveAs.Click += new System.EventHandler(this.toolStripMenuItemMapSaveAs_Click);
             // 
             // toolStripSeparatorMap1
             // 
             this.toolStripSeparatorMap1.Name = "toolStripSeparatorMap1";
-            this.toolStripSeparatorMap1.Size = new System.Drawing.Size(138, 6);
+            this.toolStripSeparatorMap1.Size = new System.Drawing.Size(183, 6);
             // 
             // toolStripMenuItemMapQuit
             // 
             this.toolStripMenuItemMapQuit.Name = "toolStripMenuItemMapQuit";
-            this.toolStripMenuItemMapQuit.Size = new System.Drawing.Size(141, 22);
+            this.toolStripMenuItemMapQuit.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Alt | System.Windows.Forms.Keys.F4)));
+            this.toolStripMenuItemMapQuit.Size = new System.Drawing.Size(249, 22);
             this.toolStripMenuItemMapQuit.Text = "Quit";
             this.toolStripMenuItemMapQuit.Click += new System.EventHandler(this.toolStripMenuItemMapQuit_Click);
             // 
