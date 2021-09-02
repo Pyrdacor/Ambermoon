@@ -131,7 +131,7 @@ namespace AmbermoonMapEditor2D
             panelMap.Controls.Add(mapScrollIndicator);
             panelTileset.Controls.Add(tilesetScrollIndicator);
             SelectTool(Tool.Brush, true);
-            panelTileset.Cursor = CursorFromTool(Tool.Brush);        
+            panelTileset.Cursor = CursorFromTool(Tool.Brush);
         }
 
         void CleanUp()
@@ -225,6 +225,37 @@ namespace AmbermoonMapEditor2D
         void MapSizeChanged()
         {
             mapScrollIndicator.Location = new Point(map.Width * 16, map.Height * 16);
+
+            int visibleColumns = panelMap.Width / 16;
+            int visibleRows = panelMap.Height / 16;
+
+            panelMap.HorizontalScroll.Visible = false;
+            panelMap.VerticalScroll.Visible = false;
+
+            if (map.Width <= visibleColumns)
+            {
+                panelMap.HorizontalScroll.Enabled = false;
+            }
+            else
+            {
+                panelMap.HorizontalScroll.Maximum = mapScrollIndicator.Location.X;
+                panelMap.HorizontalScroll.Enabled = true;
+            }
+
+            if (map.Height <= visibleRows)
+            {
+                panelMap.VerticalScroll.Enabled = false;
+            }
+            else
+            {
+                panelMap.VerticalScroll.Maximum = mapScrollIndicator.Location.Y;
+                panelMap.VerticalScroll.Enabled = true;
+            }
+
+            panelMap.HorizontalScroll.Visible = true;
+            panelMap.VerticalScroll.Visible = true;
+
+            panelMap.Refresh();
         }
 
         void MapTypeChanged()
