@@ -32,7 +32,12 @@ namespace AmbermoonMapEditor2D
             this.components = new System.ComponentModel.Container();
             this.panelMap = new System.Windows.Forms.DrawPanel();
             this.menuStrip = new System.Windows.Forms.MenuStrip();
-            this.toolStripMenuItemFile = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripMenuItemMap = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripMenuItemMapNew = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripMenuItemMapSave = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripMenuItemMapSaveAs = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripSeparatorMap1 = new System.Windows.Forms.ToolStripSeparator();
+            this.toolStripMenuItemMapQuit = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripMenuItemEdit = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripMenuItemEditUndo = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripMenuItemEditRedo = new System.Windows.Forms.ToolStripMenuItem();
@@ -140,7 +145,7 @@ namespace AmbermoonMapEditor2D
             // menuStrip
             // 
             this.menuStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.toolStripMenuItemFile,
+            this.toolStripMenuItemMap,
             this.toolStripMenuItemEdit});
             this.menuStrip.Location = new System.Drawing.Point(0, 0);
             this.menuStrip.Name = "menuStrip";
@@ -148,11 +153,51 @@ namespace AmbermoonMapEditor2D
             this.menuStrip.TabIndex = 1;
             this.menuStrip.Text = "menuStrip1";
             // 
-            // toolStripMenuItemFile
+            // toolStripMenuItemMap
             // 
-            this.toolStripMenuItemFile.Name = "toolStripMenuItemFile";
-            this.toolStripMenuItemFile.Size = new System.Drawing.Size(37, 20);
-            this.toolStripMenuItemFile.Text = "&File";
+            this.toolStripMenuItemMap.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.toolStripMenuItemMapNew,
+            this.toolStripMenuItemMapSave,
+            this.toolStripMenuItemMapSaveAs,
+            this.toolStripSeparatorMap1,
+            this.toolStripMenuItemMapQuit});
+            this.toolStripMenuItemMap.Name = "toolStripMenuItemMap";
+            this.toolStripMenuItemMap.Size = new System.Drawing.Size(43, 20);
+            this.toolStripMenuItemMap.Text = "&Map";
+            // 
+            // toolStripMenuItemMapNew
+            // 
+            this.toolStripMenuItemMapNew.Name = "toolStripMenuItemMapNew";
+            this.toolStripMenuItemMapNew.Size = new System.Drawing.Size(180, 22);
+            this.toolStripMenuItemMapNew.Text = "New/Load ...";
+            this.toolStripMenuItemMapNew.Click += new System.EventHandler(this.toolStripMenuItemMapNew_Click);
+            // 
+            // toolStripMenuItemMapSave
+            // 
+            this.toolStripMenuItemMapSave.Enabled = false;
+            this.toolStripMenuItemMapSave.Name = "toolStripMenuItemMapSave";
+            this.toolStripMenuItemMapSave.Size = new System.Drawing.Size(180, 22);
+            this.toolStripMenuItemMapSave.Text = "Save";
+            this.toolStripMenuItemMapSave.Click += new System.EventHandler(this.toolStripMenuItemMapSave_Click);
+            // 
+            // toolStripMenuItemMapSaveAs
+            // 
+            this.toolStripMenuItemMapSaveAs.Name = "toolStripMenuItemMapSaveAs";
+            this.toolStripMenuItemMapSaveAs.Size = new System.Drawing.Size(180, 22);
+            this.toolStripMenuItemMapSaveAs.Text = "Save as ...";
+            this.toolStripMenuItemMapSaveAs.Click += new System.EventHandler(this.toolStripMenuItemMapSaveAs_Click);
+            // 
+            // toolStripSeparatorMap1
+            // 
+            this.toolStripSeparatorMap1.Name = "toolStripSeparatorMap1";
+            this.toolStripSeparatorMap1.Size = new System.Drawing.Size(177, 6);
+            // 
+            // toolStripMenuItemMapQuit
+            // 
+            this.toolStripMenuItemMapQuit.Name = "toolStripMenuItemMapQuit";
+            this.toolStripMenuItemMapQuit.Size = new System.Drawing.Size(180, 22);
+            this.toolStripMenuItemMapQuit.Text = "Quit";
+            this.toolStripMenuItemMapQuit.Click += new System.EventHandler(this.toolStripMenuItemMapQuit_Click);
             // 
             // toolStripMenuItemEdit
             // 
@@ -169,7 +214,7 @@ namespace AmbermoonMapEditor2D
             this.toolStripMenuItemEditUndo.Enabled = false;
             this.toolStripMenuItemEditUndo.Name = "toolStripMenuItemEditUndo";
             this.toolStripMenuItemEditUndo.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.Z)));
-            this.toolStripMenuItemEditUndo.Size = new System.Drawing.Size(180, 22);
+            this.toolStripMenuItemEditUndo.Size = new System.Drawing.Size(146, 22);
             this.toolStripMenuItemEditUndo.Text = "Undo";
             this.toolStripMenuItemEditUndo.Click += new System.EventHandler(this.toolStripMenuItemEditUndo_Click);
             // 
@@ -178,14 +223,14 @@ namespace AmbermoonMapEditor2D
             this.toolStripMenuItemEditRedo.Enabled = false;
             this.toolStripMenuItemEditRedo.Name = "toolStripMenuItemEditRedo";
             this.toolStripMenuItemEditRedo.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.Y)));
-            this.toolStripMenuItemEditRedo.Size = new System.Drawing.Size(180, 22);
+            this.toolStripMenuItemEditRedo.Size = new System.Drawing.Size(146, 22);
             this.toolStripMenuItemEditRedo.Text = "Redo";
             this.toolStripMenuItemEditRedo.Click += new System.EventHandler(this.toolStripMenuItemEditRedo_Click);
             // 
             // toolStripSeparatorEdit1
             // 
             this.toolStripSeparatorEdit1.Name = "toolStripSeparatorEdit1";
-            this.toolStripSeparatorEdit1.Size = new System.Drawing.Size(177, 6);
+            this.toolStripSeparatorEdit1.Size = new System.Drawing.Size(143, 6);
             // 
             // groupBoxTileset
             // 
@@ -849,6 +894,7 @@ namespace AmbermoonMapEditor2D
             this.MaximizeBox = false;
             this.Name = "MapEditorForm";
             this.Text = "Ambermoon Map Editor 2D";
+            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.MapEditorForm_FormClosing);
             this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.MapEditorForm_FormClosed);
             this.Load += new System.EventHandler(this.MapEditorForm_Load);
             this.menuStrip.ResumeLayout(false);
@@ -947,11 +993,16 @@ namespace AmbermoonMapEditor2D
         private System.Windows.Forms.ComboBox comboBoxPalettes;
         private System.Windows.Forms.Button buttonToolRemoveFrontLayer;
         private System.Windows.Forms.ToolTip toolTipRemoveFrontLayer;
-        private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemFile;
+        private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemMap;
         private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemEdit;
         private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemEditUndo;
         private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemEditRedo;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparatorEdit1;
+        private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemMapNew;
+        private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemMapSave;
+        private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemMapSaveAs;
+        private System.Windows.Forms.ToolStripSeparator toolStripSeparatorMap1;
+        private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemMapQuit;
     }
 }
 

@@ -1,5 +1,6 @@
 ﻿using Ambermoon.Data;
 using Ambermoon.Data.Enumerations;
+using Ambermoon.Data.Legacy;
 using Ambermoon.Data.Legacy.ExecutableData;
 using Ambermoon.Data.Legacy.Serialization;
 using NAudio.Wave;
@@ -36,6 +37,7 @@ namespace AmbermoonMapEditor2D
 
         IGameData gameData;
         Dictionary<uint, Tileset> tilesets;
+        MapManager mapManager;
         IReadOnlyDictionary<Song, string> songNames;
         ImageCache imageCache;
         Dictionary<Song, WaveStream> musicCache = new Dictionary<Song, WaveStream>();
@@ -58,6 +60,10 @@ namespace AmbermoonMapEditor2D
         int hoveredTilesetTile = -1;
         bool showTileMarker = true;
         int currentLayer = 0;
+        bool initialized = false;
+        bool unsavedChanges = false;
+        bool saveIntoGameData = false;
+        string saveFileName = null;
 
         History history = new History();
         Map map;
@@ -71,6 +77,11 @@ namespace AmbermoonMapEditor2D
 
         void Initialize()
         {
+            if (initialized)
+                return;
+
+            initialized = true;
+
             cursorPointer = CursorResourceLoader.LoadEmbeddedCursor(Properties.Resources.pointer);
             cursorColorPicker = CursorResourceLoader.LoadEmbeddedCursor(Properties.Resources.color_picker);
             cursorEraser = CursorResourceLoader.LoadEmbeddedCursor(Properties.Resources.eraser);
@@ -134,6 +145,7 @@ namespace AmbermoonMapEditor2D
 
         void InitializeMap(Map map)
         {
+            unsavedChanges = false;
             history.Clear();
             this.map = map;
 
@@ -574,5 +586,74 @@ namespace AmbermoonMapEditor2D
         }
 
         void NotImplemented() => MessageBox.Show(this, "Not implemented yet", "Not implemented", MessageBoxButtons.OK, MessageBoxIcon.Information);
+
+        bool Save()
+        {
+            if (saveFileName == null)
+                return SaveAs();
+
+            if (saveIntoGameData)
+                return SaveToGameData();
+            else
+                return SaveToFile(saveFileName);
+        }
+
+        bool SaveAs()
+        {
+            if (MessageBox.Show(this, "Do you want to save back to the game data (Yes) or to an external file (No)?",
+                "Save target", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.No)
+            {
+                return SaveToFile(null, saveFileName);
+            }
+            else
+            {
+                return SaveToGameData();
+            }
+        }
+
+        bool SaveToFile(string fileName, string suggestedFileName = null)
+        {
+            if (string.IsNullOrWhiteSpace(fileName))
+            {
+                var dialog = new SaveFileDialog();
+                dialog.AddExtension = false;
+                dialog.AutoUpgradeEnabled = true;
+                dialog.CheckFileExists = false;
+                dialog.CheckPathExists = false;
+                dialog.CreatePrompt = false;
+                dialog.FileName = suggestedFileName ?? "";
+                dialog.Filter = "All files (*.*)|*.*";
+                dialog.OverwritePrompt = true;
+                dialog.RestoreDirectory = true;
+                dialog.Title = "Save map";
+
+                if (dialog.ShowDialog() != DialogResult.OK)
+                    return false;
+
+                fileName = dialog.FileName;
+            }
+
+            var mapWriter = new MapWriter();
+            var dataWriter = new DataWriter();
+            mapWriter.WriteMap(map, dataWriter);
+
+            try
+            {
+                System.IO.File.WriteAllBytes(fileName, dataWriter.ToArray());
+                saveFileName = fileName;
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        bool SaveToGameData()
+        {
+            // TODO
+            NotImplemented();
+            return false;
+        }
     }
 }

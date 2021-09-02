@@ -13,17 +13,18 @@ namespace AmbermoonMapEditor2D
 {
     public partial class OpenMapForm : Form
     {
-        public OpenMapForm(IGameData gameData, Dictionary<uint, Tileset> tilesets)
+        public OpenMapForm(IGameData gameData, Dictionary<uint, Tileset> tilesets, MapManager mapManager)
         {
             GameData = gameData;
             Tilesets = tilesets;
+            MapManager = mapManager;
             InitializeComponent();
         }
 
         internal IGameData GameData { get; private set; }
         internal Dictionary<uint, Tileset> Tilesets { get; private set; }
         internal Map Map { get; private set; }
-        MapManager mapManager;
+        internal MapManager MapManager { get; private set; }
 
         IGameData LoadGameData()
         {
@@ -66,8 +67,6 @@ namespace AmbermoonMapEditor2D
                 if (!CheckFile("Palettes.amb", "palettes"))
                     return null;
 
-                mapManager = new MapManager(gameData, new MapReader(), new TilesetReader(), new LabdataReader());
-
                 BringToFront();
                 return gameData;
             }
@@ -82,13 +81,32 @@ namespace AmbermoonMapEditor2D
         {
             Map = new Map();
 
+            const int initialWidth = 50;
+            const int initialHeight = 50;
+
             Map.Type = MapType.Map2D;
-            Map.Width = 50;
-            Map.Height = 50;
-            Map.InitialTiles = new Map.Tile[50, 50];
-            Map.Tiles = new Map.Tile[50, 50];
+            Map.Width = initialWidth;
+            Map.Height = initialHeight;
+            Map.InitialTiles = new Map.Tile[initialWidth, initialHeight];
+            Map.Tiles = new Map.Tile[initialWidth, initialHeight];
             Map.TilesetOrLabdataIndex = 1;
+            Map.PaletteIndex = 1;
             Map.World = (World)comboBoxWorld.SelectedIndex;
+
+            for (int y = 0; y < initialHeight; ++y)
+            {
+                for (int x = 0; x < initialWidth; ++x)
+                {
+                    Map.InitialTiles[x, y] = new Map.Tile
+                    {
+                        BackTileIndex = 1
+                    };
+                    Map.Tiles[x, y] = new Map.Tile
+                    {
+                        BackTileIndex = 1
+                    };
+                }
+            }
 
             if (radioButtonIndoor.Checked)
             {
@@ -118,10 +136,10 @@ namespace AmbermoonMapEditor2D
 
             if (MessageBox.Show(this, "Do you want to load the map from the already loaded game data?", "Where to load the map from?", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
             {
-                if (!AskForMapIndex(out var mapIndex, mapManager.Maps.Where(map => map.Type == MapType.Map2D).OrderBy(map => map.Index).ToDictionary(map => map.Index, map => map.Name)))
+                if (!AskForMapIndex(out var mapIndex, MapManager.Maps.Where(map => map.Type == MapType.Map2D).OrderBy(map => map.Index).ToDictionary(map => map.Index, map => map.Name)))
                     return;
                 
-                Map = mapManager.GetMap(mapIndex);
+                Map = MapManager.GetMap(mapIndex);
 
                 if (Map == null)
                     MessageBox.Show(this, $"Map {mapIndex} does not exist.", "Map not found", MessageBoxButtons.OK, MessageBoxIcon.Error);
@@ -177,7 +195,7 @@ namespace AmbermoonMapEditor2D
                 }
 
                 if (!AskForMapTexts(mapIndex, out var textDataReader, out var texts))
-                    return null;
+                    texts = null;
 
                 if (textDataReader != null)
                     return Map.Load(mapIndex, new MapReader(), container.Files[(int)mapIndex], textDataReader, Tilesets);
@@ -185,7 +203,8 @@ namespace AmbermoonMapEditor2D
                 {
                     var map = Map.LoadWithoutTexts(mapIndex, new MapReader(), container.Files[(int)mapIndex], Tilesets);
                     map.Texts.Clear();
-                    map.Texts.AddRange(texts);
+                    if (texts != null)
+                        map.Texts.AddRange(texts);
                     return map;
                 }
             }
@@ -198,7 +217,7 @@ namespace AmbermoonMapEditor2D
                     return null;
 
                 if (!AskForMapTexts(mapIndex, out var textDataReader, out var texts))
-                    return null;
+                    texts = null;
 
                 if (textDataReader != null)
                     return Map.Load(mapIndex, new MapReader(), container.Files[1], textDataReader, Tilesets);
@@ -206,7 +225,8 @@ namespace AmbermoonMapEditor2D
                 {
                     var map = Map.LoadWithoutTexts(mapIndex, new MapReader(), container.Files[1], Tilesets);
                     map.Texts.Clear();
-                    map.Texts.AddRange(texts);
+                    if (texts != null)
+                        map.Texts.AddRange(texts);
                     return map;
                 }
             }
@@ -216,7 +236,7 @@ namespace AmbermoonMapEditor2D
                     return null;
 
                 if (!AskForMapTexts(mapIndex, out var textDataReader, out var texts))
-                    return null;
+                    texts = null;
 
                 if (textDataReader != null)
                     return Map.Load(mapIndex, new MapReader(), reader, textDataReader, Tilesets);
@@ -224,7 +244,8 @@ namespace AmbermoonMapEditor2D
                 {
                     var map = Map.LoadWithoutTexts(mapIndex, new MapReader(), reader, Tilesets);
                     map.Texts.Clear();
-                    map.Texts.AddRange(texts);
+                    if (texts != null)
+                        map.Texts.AddRange(texts);
                     return map;
                 }
             }
@@ -233,7 +254,7 @@ namespace AmbermoonMapEditor2D
             {
                 textDataReader = null;
                 texts = null;
-                var map = mapManager.GetMap(mapIndex);
+                var map = MapManager.GetMap(mapIndex);
 
                 if (map != null)
                 {
@@ -324,6 +345,9 @@ namespace AmbermoonMapEditor2D
 
             if (GameData != null)
             {
+                if (MapManager == null)
+                    MapManager = new MapManager(GameData, new MapReader(), new TilesetReader(), new LabdataReader());
+
                 if (Tilesets == null)
                 {
                     Tilesets = new Dictionary<uint, Tileset>();

@@ -7,7 +7,7 @@ namespace AmbermoonMapEditor2D
     public partial class MapIndexForm : Form
     {
         readonly Dictionary<uint, string> tooltips;
-        internal uint MapIndex => numericUpDownMapIndex.Visible ? (uint)numericUpDownMapIndex.Value : (uint)comboBoxMapIndices.Items[comboBoxMapIndices.SelectedIndex];
+        internal uint MapIndex { get; private set; } = 1;
 
         public MapIndexForm(Dictionary<uint, string> mapIndices)
         {
@@ -37,8 +37,13 @@ namespace AmbermoonMapEditor2D
             if (e.CloseReason == CloseReason.UserClosing)
             {
                 if (MessageBox.Show("Do you really want to cancel map loading?", "Cancel map loading", MessageBoxButtons.YesNo, MessageBoxIcon.Warning) == DialogResult.No)
+                {
                     e.Cancel = true;
+                    return;
+                }
             }
+
+            MapIndex = numericUpDownMapIndex.Visible ? (uint)numericUpDownMapIndex.Value : (uint)comboBoxMapIndices.Items[comboBoxMapIndices.SelectedIndex];
         }
 
         private void comboBoxMapIndices_DrawItem(object sender, DrawItemEventArgs e)

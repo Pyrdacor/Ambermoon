@@ -13,20 +13,10 @@ namespace AmbermoonMapEditor2D
 
         private void MapEditorForm_Load(object sender, EventArgs e)
         {
-            BringToFront();
-            var openMapForm = new OpenMapForm(gameData, tilesets);
+            BringToFront();            
 
-            if (openMapForm.ShowDialog(this) == DialogResult.OK)
+            if (OpenMap())
             {
-                BringToFront();
-                Refresh();
-                gameData = openMapForm.GameData;
-                tilesets = openMapForm.Tilesets;
-                currentTilesetTiles = tilesets[openMapForm.Map.TilesetOrLabdataIndex].Tiles.Length;
-                Initialize();
-                InitializeMap(openMapForm.Map);
-
-                history.Clear();
                 history.UndoGotFilled += () => toolStripMenuItemEditUndo.Enabled = true;
                 history.UndoGotEmpty += () => toolStripMenuItemEditUndo.Enabled = false;
                 history.RedoGotFilled += () => toolStripMenuItemEditRedo.Enabled = true;
@@ -36,6 +26,28 @@ namespace AmbermoonMapEditor2D
             {
                 Close();
             }
+        }
+
+        bool OpenMap()
+        {
+            var openMapForm = new OpenMapForm(gameData, tilesets, mapManager);
+            if (openMapForm.ShowDialog(this) == DialogResult.OK)
+            {
+                BringToFront();
+                Refresh();
+                gameData = openMapForm.GameData;
+                tilesets = openMapForm.Tilesets;
+                mapManager = openMapForm.MapManager;
+                currentTilesetTiles = tilesets[openMapForm.Map.TilesetOrLabdataIndex].Tiles.Length;
+                Initialize();
+                InitializeMap(openMapForm.Map);
+                history.Clear();
+                toolStripMenuItemEditUndo.Enabled = false;
+                toolStripMenuItemEditRedo.Enabled = false;
+                return true;
+            }
+
+            return false;
         }
 
         private void buttonWorldMapDefaults_Click(object sender, EventArgs e)
@@ -630,6 +642,73 @@ namespace AmbermoonMapEditor2D
         private void toolStripMenuItemEditRedo_Click(object sender, EventArgs e)
         {
             history.Redo();
+        }
+
+        private void toolStripMenuItemMapNew_Click(object sender, EventArgs e)
+        {
+            if (unsavedChanges)
+            {
+                var result = MessageBox.Show(this, "There are unsaved changes. Do you want to save them now?",
+                    "Unsaved changes", MessageBoxButtons.YesNoCancel, MessageBoxIcon.Question);
+
+                if (result == DialogResult.Cancel)
+                    return;
+
+                if (result == DialogResult.Yes)
+                {
+                    if (!Save())
+                    {
+                        if (MessageBox.Show(this, "Error saving the map. Do you want to abort and return to your current map?",
+                            "Unable to save map", MessageBoxButtons.YesNo, MessageBoxIcon.Error) == DialogResult.Yes)
+                            return;
+                    }
+                }
+            }
+
+            OpenMap();            
+        }
+
+        private void toolStripMenuItemMapSave_Click(object sender, EventArgs e)
+        {
+            Save();
+        }
+
+        private void toolStripMenuItemMapSaveAs_Click(object sender, EventArgs e)
+        {
+            SaveAs();
+        }
+
+        private void toolStripMenuItemMapQuit_Click(object sender, EventArgs e)
+        {
+            Close();
+        }
+
+        private void MapEditorForm_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            if (unsavedChanges)
+            {
+                var result = MessageBox.Show(this, "There are unsaved changes. Do you want to save them now?",
+                    "Unsaved changes", MessageBoxButtons.YesNoCancel, MessageBoxIcon.Question);
+
+                if (result == DialogResult.Cancel)
+                {
+                    e.Cancel = true;
+                    return;
+                }
+
+                if (result == DialogResult.Yes)
+                {
+                    if (!Save())
+                    {
+                        if (MessageBox.Show(this, "Error saving the map. Do you want to abort and return to your current map?",
+                            "Unable to save map", MessageBoxButtons.YesNo, MessageBoxIcon.Error) == DialogResult.Yes)
+                        {
+                            e.Cancel = true;
+                            return;
+                        }
+                    }
+                }
+            }
         }
     }
 }
