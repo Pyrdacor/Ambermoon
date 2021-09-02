@@ -73,6 +73,16 @@ namespace AmbermoonMapEditor2D.Properties {
         /// <summary>
         ///   Sucht eine lokalisierte Ressource vom Typ System.Byte[].
         /// </summary>
+        internal static byte[] eraser {
+            get {
+                object obj = ResourceManager.GetObject("eraser", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Ressource vom Typ System.Byte[].
+        /// </summary>
         internal static byte[] pointer {
             get {
                 object obj = ResourceManager.GetObject("pointer", resourceCulture);
@@ -186,6 +196,16 @@ namespace AmbermoonMapEditor2D.Properties {
         internal static System.Drawing.Bitmap round_layers_black_24 {
             get {
                 object obj = ResourceManager.GetObject("round_layers_black_24", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Ressource vom Typ System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap round_layers_clear_black_24 {
+            get {
+                object obj = ResourceManager.GetObject("round_layers_clear_black_24", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }

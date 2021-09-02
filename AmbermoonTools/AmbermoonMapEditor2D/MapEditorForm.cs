@@ -25,6 +25,12 @@ namespace AmbermoonMapEditor2D
                 currentTilesetTiles = tilesets[openMapForm.Map.TilesetOrLabdataIndex].Tiles.Length;
                 Initialize();
                 InitializeMap(openMapForm.Map);
+
+                history.Clear();
+                history.UndoGotFilled += () => toolStripMenuItemEditUndo.Enabled = true;
+                history.UndoGotEmpty += () => toolStripMenuItemEditUndo.Enabled = false;
+                history.RedoGotFilled += () => toolStripMenuItemEditRedo.Enabled = true;
+                history.RedoGotEmpty += () => toolStripMenuItemEditRedo.Enabled = false;                
             }
             else
             {
@@ -342,10 +348,26 @@ namespace AmbermoonMapEditor2D
 
         private void comboBoxTilesets_SelectedIndexChanged(object sender, EventArgs e)
         {
-            map.TilesetOrLabdataIndex = (uint)(1 + comboBoxTilesets.SelectedIndex);
-            currentTilesetTiles = tilesets[map.TilesetOrLabdataIndex].Tiles.Length;
-            panelMap.Refresh();
-            TilesetChanged();
+            uint oldTilesetIndex = map.TilesetOrLabdataIndex;
+            uint newTilesetIndex = (uint)(1 + comboBoxTilesets.SelectedIndex);
+
+            void UpdateTileset(uint index, bool updateIndex)
+            {
+                map.TilesetOrLabdataIndex = index;
+                currentTilesetTiles = tilesets[map.TilesetOrLabdataIndex].Tiles.Length;
+                panelMap.Refresh();
+                TilesetChanged();
+
+                if (updateIndex)
+                {
+                    comboBoxTilesets.SelectedIndexChanged -= comboBoxTilesets_SelectedIndexChanged;
+                    comboBoxTilesets.SelectedIndex = (int)index - 1;
+                    comboBoxTilesets.SelectedIndexChanged += comboBoxTilesets_SelectedIndexChanged;
+                }
+            }
+
+            PerformAction($"Change tileset to {newTilesetIndex}", $"Change tileset to {oldTilesetIndex}",
+                redo => UpdateTileset(newTilesetIndex, redo), () => UpdateTileset(oldTilesetIndex, true));
         }
 
         private void buttonToolLayers_Click(object sender, EventArgs e)
@@ -358,11 +380,15 @@ namespace AmbermoonMapEditor2D
         private void toolStripMenuItemBackLayer_Click(object sender, EventArgs e)
         {
             toolStripMenuItemFrontLayer.Checked = !toolStripMenuItemBackLayer.Checked;
+            currentLayer = 0;
+            toolStripStatusLabelLayer.Text = LayerName[0];
         }
 
         private void toolStripMenuItemFrontLayer_Click(object sender, EventArgs e)
         {
             toolStripMenuItemBackLayer.Checked = !toolStripMenuItemFrontLayer.Checked;
+            currentLayer = 1;
+            toolStripStatusLabelLayer.Text = LayerName[1];
         }
 
         private void toolStripMenuItemShowBackLayer_Click(object sender, EventArgs e)
@@ -448,6 +474,17 @@ namespace AmbermoonMapEditor2D
 
         private void panelMap_MouseMove(object sender, MouseEventArgs e)
         {
+            if (!panelMap.ClientRectangle.Contains(e.Location))
+            {
+                if (hoveredMapTile != -1)
+                {
+                    toolStripStatusLabelCurrentTile.Visible = false;
+                    hoveredMapTile = -1;
+                    panelMap.Refresh();
+                }
+                return;
+            }
+
             int visibleColumns = panelMap.Width / 16;
             int hoveredColumn = (e.X - panelMap.AutoScrollPosition.X % 16) / 16;
             int hoveredRow = (e.Y - panelMap.AutoScrollPosition.Y % 16) / 16;
@@ -457,6 +494,7 @@ namespace AmbermoonMapEditor2D
 
             int x = scrolledXTile + hoveredColumn;
             int y = scrolledYTile + hoveredRow;
+
             toolStripStatusLabelCurrentTile.Text = $"{1 + x}, {1 + y} [Index: {x + y * map.Width}]";
             toolStripStatusLabelCurrentTile.Visible = true;
 
@@ -465,6 +503,11 @@ namespace AmbermoonMapEditor2D
                 hoveredMapTile = newHoveredTile;
                 panelMap.Refresh();
             }
+
+            if (e.Button == MouseButtons.Left)
+                UseTool(x, y, false);
+            else if (e.Button == MouseButtons.Right)
+                UseTool(x, y, true);
         }
 
         private void panelMap_MouseLeave(object sender, EventArgs e)
@@ -490,6 +533,17 @@ namespace AmbermoonMapEditor2D
 
         private void panelTileset_MouseMove(object sender, MouseEventArgs e)
         {
+            if (!panelTileset.ClientRectangle.Contains(e.Location))
+            {
+                if (hoveredTilesetTile != -1)
+                {
+                    toolStripStatusLabelCurrentTilesetTile.Visible = false;
+                    hoveredTilesetTile = -1;
+                    panelTileset.Refresh();
+                }
+                return;
+            }
+
             int visibleColumns = panelTileset.Width / 16;
             int hoveredColumn = (e.X - panelTileset.AutoScrollPosition.X % 16) / 16;
             int hoveredRow = (e.Y - panelTileset.AutoScrollPosition.Y % 16) / 16;
@@ -526,10 +580,56 @@ namespace AmbermoonMapEditor2D
 
         private void comboBoxPalettes_SelectedIndexChanged(object sender, EventArgs e)
         {
-            map.PaletteIndex = (uint)(1 + comboBoxPalettes.SelectedIndex);
+            uint oldPaletteIndex = map.PaletteIndex;
+            uint newPaletteIndex = (uint)(1 + comboBoxPalettes.SelectedIndex);
 
-            panelTileset.Refresh();
-            panelMap.Refresh();
+            void UpdatePalette(uint index, bool updateIndex)
+            {
+                map.PaletteIndex = index;
+                panelTileset.Refresh();
+                panelMap.Refresh();
+
+                if (updateIndex)
+                {
+                    comboBoxPalettes.SelectedIndexChanged -= comboBoxPalettes_SelectedIndexChanged;
+                    comboBoxPalettes.SelectedIndex = (int)index - 1;
+                    comboBoxPalettes.SelectedIndexChanged += comboBoxPalettes_SelectedIndexChanged;
+                }
+            }
+
+            PerformAction($"Change palette to {newPaletteIndex}", $"Change palette to {oldPaletteIndex}",
+                redo => UpdatePalette(newPaletteIndex, redo), () => UpdatePalette(oldPaletteIndex, true));
+        }
+
+        private void panelMap_MouseDown(object sender, MouseEventArgs e)
+        {
+            if (e.Button == MouseButtons.Left || e.Button == MouseButtons.Right)
+            {
+                int hoveredColumn = (e.X - panelMap.AutoScrollPosition.X % 16) / 16;
+                int hoveredRow = (e.Y - panelMap.AutoScrollPosition.Y % 16) / 16;
+                int scrolledXTile = -panelMap.AutoScrollPosition.X / 16;
+                int scrolledYTile = -panelMap.AutoScrollPosition.Y / 16;
+
+                int x = scrolledXTile + hoveredColumn;
+                int y = scrolledYTile + hoveredRow;
+
+                UseTool(x, y, e.Button == MouseButtons.Right);
+            }
+        }
+
+        private void buttonToolRemoveFrontLayer_Click(object sender, EventArgs e)
+        {
+            SelectTool(Tool.RemoveFrontLayer);
+        }
+
+        private void toolStripMenuItemEditUndo_Click(object sender, EventArgs e)
+        {
+            history.Undo();
+        }
+
+        private void toolStripMenuItemEditRedo_Click(object sender, EventArgs e)
+        {
+            history.Redo();
         }
     }
 }
