@@ -22,6 +22,7 @@ namespace AmbermoonMapEditor2D
                 Refresh();
                 gameData = openMapForm.GameData;
                 tilesets = openMapForm.Tilesets;
+                currentTilesetTiles = tilesets[openMapForm.Map.TilesetOrLabdataIndex].Tiles.Length;
                 Initialize();
                 InitializeMap(openMapForm.Map);
             }
@@ -228,7 +229,7 @@ namespace AmbermoonMapEditor2D
                     }
                 }
 
-                if (showTileMarker && hoveredMapTile != -1 && tileMarkerWidth > 0 && tileMarkerHeight > 0)
+                if (showTileMarker &&hoveredMapTile != -1 && tileMarkerWidth > 0 && tileMarkerHeight > 0)
                 {
                     int visibleColumns = panelMap.Width / 16;
                     int visibleRows = panelMap.Height / 16;
@@ -268,7 +269,9 @@ namespace AmbermoonMapEditor2D
                 int y = 0;
                 using var border = new Pen(Color.Black, 1.0f);
                 using var selectedBorder = new Pen(Color.Yellow, 2.0f);
-                using var errorBrush = new SolidBrush(Color.Red);
+                using var errorBrush = new SolidBrush(Color.White);
+                using var errorFont = new Font(FontFamily.GenericMonospace, 8.0f);
+                using var errorFontBrush = new SolidBrush(Color.Red);
 
                 foreach (var tile in tileset.Tiles)
                 {
@@ -292,6 +295,7 @@ namespace AmbermoonMapEditor2D
                         catch
                         {
                             e.Graphics.FillRectangle(errorBrush, rect);
+                            e.Graphics.DrawString("X", errorFont, errorFontBrush, rect);
                             // ignore, there seem to be invalid tiles/graphic indices, just skip them
                         }
                     }
@@ -307,6 +311,22 @@ namespace AmbermoonMapEditor2D
                 int selectedRow = selectedTilesetTile / TilesetTilesPerRow;
                 e.Graphics.DrawRectangle(selectedBorder, new Rectangle(panelTileset.AutoScrollPosition.X + selectedColumn * 16,
                     panelTileset.AutoScrollPosition.Y + selectedRow * 16, 16, 16));
+
+                if (showTileMarker && hoveredTilesetTile != -1)
+                {
+                    int visibleColumns = panelTileset.Width / 16;
+                    int visibleRows = panelTileset.Height / 16;
+                    int hoveredX = hoveredTilesetTile % visibleColumns;
+                    int hoveredY = hoveredTilesetTile / visibleColumns;
+
+                    int startX = panelTileset.AutoScrollPosition.X % 16 + hoveredX * 16;
+                    int startY = panelTileset.AutoScrollPosition.Y % 16 + hoveredY * 16;
+                    using var marker = new SolidBrush(Color.FromArgb(0x40, 0x77, 0xff, 0x66));
+                    using var markedBorder = new Pen(Color.FromArgb(0x80, 0xff, 0xff, 0x00), 1);
+
+                    e.Graphics.FillRectangle(marker, new Rectangle(startX + 1, startY + 1, 14, 14));
+                    e.Graphics.DrawRectangle(markedBorder, new Rectangle(startX, startY, 15, 15));
+                }
             }
         }
 
@@ -429,13 +449,15 @@ namespace AmbermoonMapEditor2D
         private void panelMap_MouseMove(object sender, MouseEventArgs e)
         {
             int visibleColumns = panelMap.Width / 16;
-            int hoveredColumn = e.X / 16;
-            int hoveredRow = e.Y / 16;
+            int hoveredColumn = (e.X - panelMap.AutoScrollPosition.X % 16) / 16;
+            int hoveredRow = (e.Y - panelMap.AutoScrollPosition.Y % 16) / 16;
             int scrolledXTile = -panelMap.AutoScrollPosition.X / 16;
             int scrolledYTile = -panelMap.AutoScrollPosition.Y / 16;
             int newHoveredTile = hoveredColumn + hoveredRow * visibleColumns;
 
-            toolStripStatusLabelCurrentTile.Text = $"{1 + scrolledXTile + hoveredColumn}, {1 + scrolledYTile + hoveredRow}";
+            int x = scrolledXTile + hoveredColumn;
+            int y = scrolledYTile + hoveredRow;
+            toolStripStatusLabelCurrentTile.Text = $"{1 + x}, {1 + y} [Index: {x + y * map.Width}]";
             toolStripStatusLabelCurrentTile.Visible = true;
 
             if (newHoveredTile != hoveredMapTile)
@@ -457,6 +479,34 @@ namespace AmbermoonMapEditor2D
             showTileMarker = !showTileMarker;
             buttonToggleTileMarker.Image = showTileMarker ? Properties.Resources.round_select_all_black_24 : Properties.Resources.round_select_all_black_24_off;
             panelMap.Refresh();
+        }
+
+        private void panelTileset_MouseLeave(object sender, EventArgs e)
+        {
+            toolStripStatusLabelCurrentTilesetTile.Visible = false;
+            hoveredTilesetTile = -1;
+            panelTileset.Refresh();
+        }
+
+        private void panelTileset_MouseMove(object sender, MouseEventArgs e)
+        {
+            int visibleColumns = panelTileset.Width / 16;
+            int hoveredColumn = (e.X - panelTileset.AutoScrollPosition.X % 16) / 16;
+            int hoveredRow = (e.Y - panelTileset.AutoScrollPosition.Y % 16) / 16;
+            int scrolledXTile = -panelTileset.AutoScrollPosition.X / 16;
+            int scrolledYTile = -panelTileset.AutoScrollPosition.Y / 16;
+            int newHoveredTile = hoveredColumn + hoveredRow * visibleColumns;
+
+            int x = scrolledXTile + hoveredColumn;
+            int y = scrolledYTile + hoveredRow;
+            toolStripStatusLabelCurrentTilesetTile.Text = $"{1 + x}, {1 + y} [Index: {x + y * TilesetTilesPerRow}]";
+            toolStripStatusLabelCurrentTilesetTile.Visible = true;
+
+            if (newHoveredTile != hoveredTilesetTile)
+            {
+                hoveredTilesetTile = newHoveredTile;
+                panelTileset.Refresh();
+            }
         }
     }
 }

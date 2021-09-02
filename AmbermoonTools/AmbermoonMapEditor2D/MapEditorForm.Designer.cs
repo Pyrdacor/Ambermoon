@@ -84,6 +84,7 @@ namespace AmbermoonMapEditor2D
             this.toolStripStatusLabelTool = new System.Windows.Forms.ToolStripStatusLabel();
             this.toolStripStatusLabelLayer = new System.Windows.Forms.ToolStripStatusLabel();
             this.toolStripStatusLabelCurrentTile = new System.Windows.Forms.ToolStripStatusLabel();
+            this.toolStripStatusLabelCurrentTilesetTile = new System.Windows.Forms.ToolStripStatusLabel();
             this.buttonToolBlocks = new System.Windows.Forms.Button();
             this.contextMenuStripBlockModes = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.toolStripMenuItemBlocks2x2 = new System.Windows.Forms.ToolStripMenuItem();
@@ -110,9 +111,9 @@ namespace AmbermoonMapEditor2D
             this.statusStrip.SuspendLayout();
             this.contextMenuStripBlockModes.SuspendLayout();
             this.SuspendLayout();
-            //
+            // 
             // panelMap
-            //
+            // 
             this.panelMap.AutoScroll = true;
             this.panelMap.BackColor = System.Drawing.Color.Black;
             this.panelMap.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
@@ -165,16 +166,18 @@ namespace AmbermoonMapEditor2D
             this.buttonAddTileset.UseVisualStyleBackColor = true;
             // 
             // panelTileset
-            //
+            // 
             this.panelTileset.AutoScroll = true;
             this.panelTileset.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
             this.panelTileset.Location = new System.Drawing.Point(10, 22);
             this.panelTileset.Name = "panelTileset";
-            this.panelTileset.Size = new System.Drawing.Size(691, 149);
+            this.panelTileset.Size = new System.Drawing.Size(694, 149);
             this.panelTileset.TabIndex = 0;
             this.panelTileset.Paint += new System.Windows.Forms.PaintEventHandler(this.panelTileset_Paint);
             this.panelTileset.MouseDown += new System.Windows.Forms.MouseEventHandler(this.panelTileset_MouseDown);
-            //
+            this.panelTileset.MouseLeave += new System.EventHandler(this.panelTileset_MouseLeave);
+            this.panelTileset.MouseMove += new System.Windows.Forms.MouseEventHandler(this.panelTileset_MouseMove);
+            // 
             // groupBoxProperties
             // 
             this.groupBoxProperties.Controls.Add(this.comboBoxWorld);
@@ -610,7 +613,8 @@ namespace AmbermoonMapEditor2D
             this.statusStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.toolStripStatusLabelTool,
             this.toolStripStatusLabelLayer,
-            this.toolStripStatusLabelCurrentTile});
+            this.toolStripStatusLabelCurrentTile,
+            this.toolStripStatusLabelCurrentTilesetTile});
             this.statusStrip.Location = new System.Drawing.Point(0, 688);
             this.statusStrip.Name = "statusStrip";
             this.statusStrip.Size = new System.Drawing.Size(1152, 24);
@@ -639,6 +643,16 @@ namespace AmbermoonMapEditor2D
             this.toolStripStatusLabelCurrentTile.Name = "toolStripStatusLabelCurrentTile";
             this.toolStripStatusLabelCurrentTile.Size = new System.Drawing.Size(29, 19);
             this.toolStripStatusLabelCurrentTile.Text = "0, 0";
+            this.toolStripStatusLabelCurrentTile.Visible = false;
+            // 
+            // toolStripStatusLabelCurrentTilesetTile
+            // 
+            this.toolStripStatusLabelCurrentTilesetTile.BorderSides = System.Windows.Forms.ToolStripStatusLabelBorderSides.Left;
+            this.toolStripStatusLabelCurrentTilesetTile.BorderStyle = System.Windows.Forms.Border3DStyle.Etched;
+            this.toolStripStatusLabelCurrentTilesetTile.Name = "toolStripStatusLabelCurrentTilesetTile";
+            this.toolStripStatusLabelCurrentTilesetTile.Size = new System.Drawing.Size(29, 19);
+            this.toolStripStatusLabelCurrentTilesetTile.Text = "0, 0";
+            this.toolStripStatusLabelCurrentTilesetTile.Visible = false;
             // 
             // buttonToolBlocks
             // 
@@ -841,6 +855,7 @@ namespace AmbermoonMapEditor2D
         private System.Windows.Forms.Button buttonToggleTileMarker;
         private System.Windows.Forms.ToolTip toolTipTileMarker;
         private System.Windows.Forms.Label labelDivider;
+        private System.Windows.Forms.ToolStripStatusLabel toolStripStatusLabelCurrentTilesetTile;
     }
 }
 

@@ -35,7 +35,7 @@ namespace AmbermoonMapEditor2D
         IWavePlayer wavePlayer = new WaveOut();
         Panel mapScrollIndicator = new Panel();
         Panel tilesetScrollIndicator = new Panel();
-        const int TilesetTilesPerRow = 43;
+        const int TilesetTilesPerRow = 42;
         int currentTilesetTiles = 0;
         Tool currentTool = Tool.Brush;
         Tool blocksTool = Tool.Blocks2x2;
@@ -46,6 +46,7 @@ namespace AmbermoonMapEditor2D
         int tileMarkerWidth = 0;
         int tileMarkerHeight = 0;
         int hoveredMapTile = -1;
+        int hoveredTilesetTile = -1;
         bool showTileMarker = true;
 
         Map map;
@@ -98,11 +99,12 @@ namespace AmbermoonMapEditor2D
 
             imageCache = new ImageCache(gameData);
 
-            mapScrollIndicator.Size = new System.Drawing.Size(1, 1);
-            tilesetScrollIndicator.Size = new System.Drawing.Size(1, 1);
+            mapScrollIndicator.Size = new Size(1, 1);
+            tilesetScrollIndicator.Size = new Size(1, 1);
             panelMap.Controls.Add(mapScrollIndicator);
             panelTileset.Controls.Add(tilesetScrollIndicator);
             SelectTool(Tool.Brush, true);
+            panelTileset.Cursor = CursorFromTool(Tool.Brush);
         }
 
         void CleanUp()
@@ -192,7 +194,7 @@ namespace AmbermoonMapEditor2D
 
         void MapSizeChanged()
         {
-            mapScrollIndicator.Location = new System.Drawing.Point(map.Width * 16, map.Height * 16);
+            mapScrollIndicator.Location = new Point(map.Width * 16, map.Height * 16);
         }
 
         void MapTypeChanged()
@@ -211,7 +213,7 @@ namespace AmbermoonMapEditor2D
         void TilesetChanged()
         {
             panelTileset.Refresh();
-            tilesetScrollIndicator.Location = new System.Drawing.Point((currentTilesetTiles % TilesetTilesPerRow) * 16, (currentTilesetTiles / TilesetTilesPerRow) * 16);
+            tilesetScrollIndicator.Location = new Point(TilesetTilesPerRow * 16, (currentTilesetTiles / TilesetTilesPerRow) * 16);
         }
 
         Bitmap ImageFromTool(Tool tool, bool withArrowIfAvailable)
