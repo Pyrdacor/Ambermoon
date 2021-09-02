@@ -34,6 +34,9 @@ namespace AmbermoonMapEditor2D
         // Third key: Palette index
         Dictionary<uint, Dictionary<uint, Dictionary<uint, Bitmap>>> images = new Dictionary<uint, Dictionary<uint, Dictionary<uint, Bitmap>>>();
 
+        // TODO: Maybe allow adding new palettes later
+        public int PaletteCount => palettes.Count;
+
         public ImageCache(IGameData gameData)
         {
             var icons1 = gameData.Files["1Icon_gfx.amb"];
