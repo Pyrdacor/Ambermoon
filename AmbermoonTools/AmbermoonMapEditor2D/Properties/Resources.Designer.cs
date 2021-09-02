@@ -93,6 +93,16 @@ namespace AmbermoonMapEditor2D.Properties {
         /// <summary>
         ///   Sucht eine lokalisierte Ressource vom Typ System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap round_apps_black_24_with_arrow {
+            get {
+                object obj = ResourceManager.GetObject("round_apps_black_24_with_arrow", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Ressource vom Typ System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap round_brush_black_24 {
             get {
                 object obj = ResourceManager.GetObject("round_brush_black_24", resourceCulture);
@@ -163,6 +173,16 @@ namespace AmbermoonMapEditor2D.Properties {
         /// <summary>
         ///   Sucht eine lokalisierte Ressource vom Typ System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap round_grid_view_black_24_with_arrow {
+            get {
+                object obj = ResourceManager.GetObject("round_grid_view_black_24_with_arrow", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Ressource vom Typ System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap round_layers_black_24 {
             get {
                 object obj = ResourceManager.GetObject("round_layers_black_24", resourceCulture);
@@ -183,6 +203,26 @@ namespace AmbermoonMapEditor2D.Properties {
         /// <summary>
         ///   Sucht eine lokalisierte Ressource vom Typ System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap round_select_all_black_24 {
+            get {
+                object obj = ResourceManager.GetObject("round_select_all_black_24", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Ressource vom Typ System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap round_select_all_black_24_off {
+            get {
+                object obj = ResourceManager.GetObject("round_select_all_black_24_off", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Ressource vom Typ System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap round_stop_black_24 {
             get {
                 object obj = ResourceManager.GetObject("round_stop_black_24", resourceCulture);
@@ -196,6 +236,16 @@ namespace AmbermoonMapEditor2D.Properties {
         internal static System.Drawing.Bitmap round_view_module_black_24 {
             get {
                 object obj = ResourceManager.GetObject("round_view_module_black_24", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Ressource vom Typ System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap round_view_module_black_24_with_arrow {
+            get {
+                object obj = ResourceManager.GetObject("round_view_module_black_24_with_arrow", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }

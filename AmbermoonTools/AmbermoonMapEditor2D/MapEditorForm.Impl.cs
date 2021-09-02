@@ -46,6 +46,7 @@ namespace AmbermoonMapEditor2D
         int tileMarkerWidth = 0;
         int tileMarkerHeight = 0;
         int hoveredMapTile = -1;
+        bool showTileMarker = true;
 
         Map map;
         int MapWidth => (int)numericUpDownWidth.Value;
@@ -70,6 +71,14 @@ namespace AmbermoonMapEditor2D
             toolTipNoSleepUntilDawn.SetToolTip(checkBoxNoSleepUntilDawn, "If set you will always sleep for 8 hours.");
             toolTipMagic.SetToolTip(checkBoxMagic, "Enables the use of spells on the map.");
 
+            toolTipBrush.SetToolTip(buttonToolBrush, "Draws single tiles onto the map.");
+            toolTipBlocks.SetToolTip(buttonToolBlocks, "Draws blocks of tiles onto the map.\r\n\r\nUse right click on the button to choose a block size.\r\n\r\nUse with right click to use the same tile multiple times. Otherwise it picks adjacent tiles from the tileset.");
+            toolTipFill.SetToolTip(buttonToolFill, "Fills all tiles of the same type with a tile from the tileset.\r\n\r\nUse with right click to limit it to an enclosed area.");
+            toolTipColorPicker.SetToolTip(buttonToolColorPicker, "Selects a map tile inside the tileset and locks it in for further drawing.");
+            toolTipLayers.SetToolTip(buttonToolLayers, "Opens the layers context menu where you can choose which layer to draw to and which layers to show.");
+            toolTipGrid.SetToolTip(buttonToggleGrid, "Toggles the tile grid overlay.");
+            toolTipTileMarker.SetToolTip(buttonToggleTileMarker, "Toggles the tile selection marker.");
+
             if (gameData.Files.TryGetValue("AM2_CPU", out var asmReader))
             {
                 var executableData = new ExecutableData(AmigaExecutable.Read(asmReader.Files[1]));
@@ -93,7 +102,7 @@ namespace AmbermoonMapEditor2D
             tilesetScrollIndicator.Size = new System.Drawing.Size(1, 1);
             panelMap.Controls.Add(mapScrollIndicator);
             panelTileset.Controls.Add(tilesetScrollIndicator);
-            SelectTool(Tool.Brush);
+            SelectTool(Tool.Brush, true);
         }
 
         void CleanUp()
@@ -205,18 +214,24 @@ namespace AmbermoonMapEditor2D
             tilesetScrollIndicator.Location = new System.Drawing.Point((currentTilesetTiles % TilesetTilesPerRow) * 16, (currentTilesetTiles / TilesetTilesPerRow) * 16);
         }
 
-        Bitmap ImageFromTool(Tool tool)
+        Bitmap ImageFromTool(Tool tool, bool withArrowIfAvailable)
         {
             switch (tool)
             {
                 case Tool.Brush:
                     return Properties.Resources.round_brush_black_24;
                 case Tool.Blocks2x2:
-                    return Properties.Resources.round_grid_view_black_24;
+                    return withArrowIfAvailable
+                        ? Properties.Resources.round_grid_view_black_24_with_arrow
+                        : Properties.Resources.round_grid_view_black_24;
                 case Tool.Blocks3x2:
-                    return Properties.Resources.round_view_module_black_24;
+                    return withArrowIfAvailable
+                        ? Properties.Resources.round_view_module_black_24_with_arrow
+                        : Properties.Resources.round_view_module_black_24;
                 case Tool.Blocks3x3:
-                    return Properties.Resources.round_apps_black_24;
+                    return withArrowIfAvailable
+                        ? Properties.Resources.round_apps_black_24_with_arrow
+                        : Properties.Resources.round_apps_black_24;
                 case Tool.Fill:
                     return Properties.Resources.round_format_color_fill_black_24;
                 case Tool.ColorPicker:
@@ -304,9 +319,9 @@ namespace AmbermoonMapEditor2D
             }
         }
 
-        void SelectTool(Tool tool)
+        void SelectTool(Tool tool, bool force = false)
         {
-            if (currentTool == tool)
+            if (!force && currentTool == tool)
                 return;
 
             var button = ButtonFromTool(currentTool);
@@ -315,7 +330,7 @@ namespace AmbermoonMapEditor2D
                 SetButtonActive(button, false);
 
             currentTool = tool;
-            toolStripStatusLabelTool.Image = ImageFromTool(tool);
+            toolStripStatusLabelTool.Image = ImageFromTool(tool, false);
             button = ButtonFromTool(currentTool);
             var cursor = CursorFromTool(currentTool);
             tileMarkerWidth = TileMarkerWidthFromTool(currentTool);

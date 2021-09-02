@@ -224,11 +224,11 @@ namespace AmbermoonMapEditor2D
                         }
 
                         if (showGrid)
-                            e.Graphics.DrawRectangle(grid, rect);
+                            e.Graphics.DrawRectangle(grid, new Rectangle(drawX, drawY, 15, 15));
                     }
                 }
 
-                if (hoveredMapTile != -1 && tileMarkerWidth > 0 && tileMarkerHeight > 0)
+                if (showTileMarker && hoveredMapTile != -1 && tileMarkerWidth > 0 && tileMarkerHeight > 0)
                 {
                     int visibleColumns = panelMap.Width / 16;
                     int visibleRows = panelMap.Height / 16;
@@ -240,8 +240,8 @@ namespace AmbermoonMapEditor2D
                     {
                         int startX = panelMap.AutoScrollPosition.X % 16 + hoveredX * 16;
                         int startY = panelMap.AutoScrollPosition.Y % 16 + hoveredY * 16;
-                        using var marker = new SolidBrush(Color.FromArgb(0x30, 0x77, 0xff, 0x66));
-                        using var border = new Pen(Color.FromArgb(0xa0, 0xff, 0xff, 0x00), 1);
+                        using var marker = new SolidBrush(Color.FromArgb(0x40, 0x77, 0xff, 0x66));
+                        using var border = new Pen(Color.FromArgb(0x80, 0xff, 0xff, 0x00), 1);
 
                         for (int y = 0; y < tileMarkerHeight; ++y)
                         {
@@ -378,7 +378,7 @@ namespace AmbermoonMapEditor2D
         private void buttonToggleGrid_Click(object sender, EventArgs e)
         {
             showGrid = !showGrid;
-            buttonToggleGrid.Image = showGrid ? Properties.Resources.round_grid_off_black_24 : Properties.Resources.round_grid_on_black_24;
+            buttonToggleGrid.Image = showGrid ? Properties.Resources.round_grid_on_black_24 : Properties.Resources.round_grid_off_black_24;
             panelMap.Refresh();
         }
 
@@ -408,18 +408,21 @@ namespace AmbermoonMapEditor2D
         private void toolStripMenuItemBlocks2x2_Click(object sender, EventArgs e)
         {
             blocksTool = Tool.Blocks2x2;
+            buttonToolBlocks.Image = ImageFromTool(blocksTool, true);
             SelectTool(blocksTool);
         }
 
         private void toolStripMenuItemBlocks3x2_Click(object sender, EventArgs e)
         {
             blocksTool = Tool.Blocks3x2;
+            buttonToolBlocks.Image = ImageFromTool(blocksTool, true);
             SelectTool(blocksTool);
         }
 
         private void toolStripMenuItemBlocks3x3_Click(object sender, EventArgs e)
         {
             blocksTool = Tool.Blocks3x3;
+            buttonToolBlocks.Image = ImageFromTool(blocksTool, true);
             SelectTool(blocksTool);
         }
 
@@ -428,7 +431,12 @@ namespace AmbermoonMapEditor2D
             int visibleColumns = panelMap.Width / 16;
             int hoveredColumn = e.X / 16;
             int hoveredRow = e.Y / 16;
+            int scrolledXTile = -panelMap.AutoScrollPosition.X / 16;
+            int scrolledYTile = -panelMap.AutoScrollPosition.Y / 16;
             int newHoveredTile = hoveredColumn + hoveredRow * visibleColumns;
+
+            toolStripStatusLabelCurrentTile.Text = $"{1 + scrolledXTile + hoveredColumn}, {1 + scrolledYTile + hoveredRow}";
+            toolStripStatusLabelCurrentTile.Visible = true;
 
             if (newHoveredTile != hoveredMapTile)
             {
@@ -439,7 +447,15 @@ namespace AmbermoonMapEditor2D
 
         private void panelMap_MouseLeave(object sender, EventArgs e)
         {
+            toolStripStatusLabelCurrentTile.Visible = false;
             hoveredMapTile = -1;
+            panelMap.Refresh();
+        }
+
+        private void buttonToggleTileMarker_Click(object sender, EventArgs e)
+        {
+            showTileMarker = !showTileMarker;
+            buttonToggleTileMarker.Image = showTileMarker ? Properties.Resources.round_select_all_black_24 : Properties.Resources.round_select_all_black_24_off;
             panelMap.Refresh();
         }
     }
