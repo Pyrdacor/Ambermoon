@@ -3,6 +3,7 @@
 Based on 1.08.
 
 - Temple of gala door can not be skipped via broom or eagle anymore.
+- Crypt door can not be skipped via broom or eagle anymore.
 
 ## Version 1.08
 
