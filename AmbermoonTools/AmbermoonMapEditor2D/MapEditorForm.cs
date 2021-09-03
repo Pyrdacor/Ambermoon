@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Ambermoon.Data;
+using System;
 using System.Drawing;
 using System.Windows.Forms;
 
@@ -190,6 +191,9 @@ namespace AmbermoonMapEditor2D
             {
                 var tileset = tilesets[map.TilesetOrLabdataIndex];
                 using var grid = new Pen(Color.Black, 1.0f);
+                using var textBrush = new SolidBrush(Color.White);
+                using var textBackground = new SolidBrush(Color.FromArgb(0x40, 0x80, 0x80, 0x80));
+                using var font = new Font(FontFamily.GenericMonospace, 8.0f);
 
                 for (int y = 0; y < MapHeight; ++y)
                 {
@@ -211,7 +215,7 @@ namespace AmbermoonMapEditor2D
                         if (drawX >= panelMap.Width)
                             break;
 
-                        var tile = map.Tiles[x, y];
+                        var tile = map.InitialTiles[x, y];
                         var backgroundTile = tile.BackTileIndex == 0 ? null : tile.BackTileIndex >= tileset.Tiles.Length ? null : tileset.Tiles[tile.BackTileIndex - 1];
                         var foregroundTile = tile.FrontTileIndex == 0 ? null : tile.FrontTileIndex >= tileset.Tiles.Length ? null :  tileset.Tiles[tile.FrontTileIndex - 1];
                         var rect = new Rectangle(drawX, drawY, 16, 16);
@@ -244,6 +248,12 @@ namespace AmbermoonMapEditor2D
 
                         if (showGrid)
                             e.Graphics.DrawRectangle(grid, new Rectangle(drawX, drawY, 15, 15));
+
+                        if (showEvents && tile.MapEventId != 0)
+                        {
+                            e.Graphics.FillRectangle(textBackground, new Rectangle(drawX + 1, drawY + 1, 13, 13));
+                            e.Graphics.DrawString(tile.MapEventId.ToString("x2"), font, textBrush, drawX, drawY);
+                        }
                     }
                 }
 
@@ -507,6 +517,17 @@ namespace AmbermoonMapEditor2D
             int x = scrolledXTile + hoveredColumn;
             int y = scrolledYTile + hoveredRow;
 
+            if (x >= map.Width || y >= map.Height)
+            {
+                if (hoveredMapTile != -1)
+                {
+                    toolStripStatusLabelCurrentTile.Visible = false;
+                    hoveredMapTile = -1;
+                    panelMap.Refresh();
+                }
+                return;
+            }
+
             toolStripStatusLabelCurrentTile.Text = $"{1 + x}, {1 + y} [Index: {x + y * map.Width}]";
             toolStripStatusLabelCurrentTile.Visible = true;
 
@@ -707,6 +728,83 @@ namespace AmbermoonMapEditor2D
                             return;
                         }
                     }
+                }
+            }
+        }
+
+        private void numericUpDownWidth_ValueChanged(object sender, EventArgs e)
+        {
+            int oldWidth = map.Width;
+            map.Width = (int)numericUpDownWidth.Value;
+            var backup = new Map.Tile[map.Width, map.Height];
+            var initialBackup = new Map.Tile[map.Width, map.Height];
+            for (int y = 0; y < map.Height; ++y)
+            {
+                for (int x = 0; x < map.Width; ++x)
+                {
+                    initialBackup[x, y] = x >= oldWidth
+                        ? new Map.Tile { BackTileIndex = 1 }
+                        : map.InitialTiles[x, y];
+                    backup[x, y] = x >= oldWidth
+                        ? new Map.Tile { BackTileIndex = 1 }
+                        : map.InitialTiles[x, y];
+                }
+            }
+            map.InitialTiles = initialBackup;
+            map.InitialTiles = backup;
+            MapSizeChanged();
+        }
+
+        private void numericUpDownHeight_ValueChanged(object sender, EventArgs e)
+        {
+            int oldHeight = map.Height;
+            map.Height = (int)numericUpDownHeight.Value;
+            var backup = new Map.Tile[map.Width, map.Height];
+            var initialBackup = new Map.Tile[map.Width, map.Height];
+            for (int y = 0; y < map.Height; ++y)
+            {
+                for (int x = 0; x < map.Width; ++x)
+                {
+                    initialBackup[x, y] = y >= oldHeight
+                        ? new Map.Tile { BackTileIndex = 1 }
+                        : map.InitialTiles[x, y];
+                    backup[x, y] = y >= oldHeight
+                        ? new Map.Tile { BackTileIndex = 1 }
+                        : map.InitialTiles[x, y];
+                }
+            }
+            map.InitialTiles = initialBackup;
+            map.InitialTiles = backup;
+            MapSizeChanged();
+        }
+
+        private void buttonToggleEvents_Click(object sender, EventArgs e)
+        {
+            showEvents = !showEvents;
+            buttonToggleEvents.Image = showEvents ? Properties.Resources.round_vpn_key_black_24 : Properties.Resources.round_vpn_key_black_24_off;
+            panelMap.Refresh();
+        }
+
+        private void panelMap_MouseDoubleClick(object sender, MouseEventArgs e)
+        {
+            int hoveredColumn = (e.X - panelMap.AutoScrollPosition.X % 16) / 16;
+            int hoveredRow = (e.Y - panelMap.AutoScrollPosition.Y % 16) / 16;
+            int scrolledXTile = -panelMap.AutoScrollPosition.X / 16;
+            int scrolledYTile = -panelMap.AutoScrollPosition.Y / 16;
+
+            int x = scrolledXTile + hoveredColumn;
+            int y = scrolledYTile + hoveredRow;
+
+            var eventIdSelector = new EventIdSelectionForm(map, map.InitialTiles[x, y].MapEventId);
+
+            if (eventIdSelector.ShowDialog() == DialogResult.OK)
+            {
+                uint newId = eventIdSelector.EventId;
+
+                if (map.InitialTiles[x, y].MapEventId != newId)
+                {
+                    map.InitialTiles[x, y].MapEventId = newId;
+                    panelMap.Refresh();
                 }
             }
         }

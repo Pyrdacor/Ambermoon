@@ -3,6 +3,9 @@
 Based on 1.09.
 
 - Temple of gala door can not be skipped via broom or eagle anymore.
+- Crypt door can not be skipped via broom or eagle anymore.
+- Fixed double text-popup in Burnville when you look at the healer's sign.
+- Fixed chest opening when you got hit by the spikes in the palace of S'Endar.
 
 ## Version 1.09
 

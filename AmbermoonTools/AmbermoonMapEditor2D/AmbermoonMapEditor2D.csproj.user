@@ -4,6 +4,9 @@
     <Compile Update="DrawPanel.cs">
       <SubType>Component</SubType>
     </Compile>
+    <Compile Update="EventIdSelectionForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
     <Compile Update="MapEditorForm.cs">
       <SubType>Form</SubType>
     </Compile>
