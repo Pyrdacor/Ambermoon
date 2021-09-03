@@ -269,5 +269,25 @@ namespace AmbermoonMapEditor2D.Properties {
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Ressource vom Typ System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap round_vpn_key_black_24 {
+            get {
+                object obj = ResourceManager.GetObject("round_vpn_key_black_24", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Ressource vom Typ System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap round_vpn_key_black_24_off {
+            get {
+                object obj = ResourceManager.GetObject("round_vpn_key_black_24_off", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
     }
 }

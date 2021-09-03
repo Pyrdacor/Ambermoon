@@ -7,6 +7,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Windows.Forms;
 
 namespace AmbermoonMapEditor2D
@@ -88,7 +89,6 @@ namespace AmbermoonMapEditor2D
             Map.Width = initialWidth;
             Map.Height = initialHeight;
             Map.InitialTiles = new Map.Tile[initialWidth, initialHeight];
-            Map.Tiles = new Map.Tile[initialWidth, initialHeight];
             Map.TilesetOrLabdataIndex = 1;
             Map.PaletteIndex = 1;
             Map.World = (World)comboBoxWorld.SelectedIndex;
@@ -98,10 +98,6 @@ namespace AmbermoonMapEditor2D
                 for (int x = 0; x < initialWidth; ++x)
                 {
                     Map.InitialTiles[x, y] = new Map.Tile
-                    {
-                        BackTileIndex = 1
-                    };
-                    Map.Tiles[x, y] = new Map.Tile
                     {
                         BackTileIndex = 1
                     };
@@ -179,13 +175,25 @@ namespace AmbermoonMapEditor2D
 
             var header = reader.PeekDword();
 
+            uint mapIndex = 0;
+            var filenameMatch = Regex.Match(Path.GetFileName(filename), "^([0-9]+)($|\\.).*");
+
+            if (filenameMatch.Success)
+            {
+                mapIndex = uint.Parse(filenameMatch.Groups[1].Value);
+
+                if (mapIndex != 0 && MessageBox.Show(this, $"Map index was automatically guessed as {mapIndex}. Is that correct?",
+                    "Map index suggestion", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.No)
+                    mapIndex = 0;
+            }
+
             // AMNP, AMBR, AMNC, AMPC
             if (header == 0x414D4E50 || header == 0x414D4252 ||
                 header == 0x414d4e43 || header == 0x414d5043)
             {
                 var container = new FileReader().ReadFile(Path.GetFileName(filename), reader.ReadToEnd());
 
-                if (!AskForMapIndex(out var mapIndex, container.Files.Keys.ToDictionary(k => (uint)k, _ => (string)null)))
+                if (mapIndex == 0 && !AskForMapIndex(out mapIndex, container.Files.Keys.ToDictionary(k => (uint)k, _ => (string)null)))
                     return null;                
 
                 if (!container.Files.ContainsKey((int)mapIndex))
@@ -213,7 +221,7 @@ namespace AmbermoonMapEditor2D
             {
                 var container = new FileReader().ReadFile(Path.GetFileName(filename), reader.ReadToEnd());
 
-                if (!AskForMapIndex(out var mapIndex))
+                if (mapIndex == 0 && !AskForMapIndex(out mapIndex))
                     return null;
 
                 if (!AskForMapTexts(mapIndex, out var textDataReader, out var texts))
@@ -232,7 +240,7 @@ namespace AmbermoonMapEditor2D
             }
             else // Raw map file
             {
-                if (!AskForMapIndex(out var mapIndex))
+                if (mapIndex == 0 && !AskForMapIndex(out mapIndex))
                     return null;
 
                 if (!AskForMapTexts(mapIndex, out var textDataReader, out var texts))

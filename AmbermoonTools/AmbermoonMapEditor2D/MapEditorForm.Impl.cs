@@ -64,6 +64,7 @@ namespace AmbermoonMapEditor2D
         bool unsavedChanges = false;
         bool saveIntoGameData = false;
         string saveFileName = null;
+        bool showEvents = false;
 
         History history = new History();
         Map map;
@@ -169,6 +170,14 @@ namespace AmbermoonMapEditor2D
             comboBoxMusic.SelectedIndex = map.MusicIndex == 0 ? (int)Song.PloddingAlong - 1 : (int)map.MusicIndex - 1;
             comboBoxTilesets.SelectedIndex = map.TilesetOrLabdataIndex == 0 ? 0 : (int)map.TilesetOrLabdataIndex - 1;
             comboBoxPalettes.SelectedIndex = map.PaletteIndex == 0 ? 0 : (int)map.PaletteIndex - 1;
+
+            listViewEvents.Items.Clear();
+            int index = 1;
+            foreach (var @event in map.EventList)
+            {
+                var item = listViewEvents.Items.Add(index++.ToString("x2"));
+                item.SubItems.Add(@event.ToString());
+            }
 
             MapSizeChanged();
             TilesetChanged();
@@ -489,7 +498,7 @@ namespace AmbermoonMapEditor2D
                     if (totalX >= map.Width)
                         continue;
 
-                    var mapTile = map.Tiles[totalX, totalY];
+                    var mapTile = map.InitialTiles[totalX, totalY];
                     uint tileIndex = layer == 0 ? mapTile.BackTileIndex : mapTile.FrontTileIndex;
                     currentTiles.Add(tileIndex);
 
@@ -533,7 +542,7 @@ namespace AmbermoonMapEditor2D
                             if (totalX >= map.Width)
                                 continue;
 
-                            var mapTile = map.Tiles[totalX, totalY];
+                            var mapTile = map.InitialTiles[totalX, totalY];
 
                             if (layer == 0)
                                 mapTile.BackTileIndex = (uint)tile;
@@ -564,7 +573,7 @@ namespace AmbermoonMapEditor2D
                             if (totalX >= map.Width)
                                 continue;
 
-                            var mapTile = map.Tiles[totalX, totalY];
+                            var mapTile = map.InitialTiles[totalX, totalY];
 
                             if (layer == 0)
                                 mapTile.BackTileIndex = currentTiles[listIndex++];
@@ -586,7 +595,7 @@ namespace AmbermoonMapEditor2D
 
         void PickTile(int x, int y, int layer)
         {
-            var tile = map.Tiles[x, y];
+            var tile = map.InitialTiles[x, y];
             uint tileIndex = layer == 0 ? tile.BackTileIndex : tile.FrontTileIndex;
 
             if (tileIndex == 0)
@@ -601,14 +610,14 @@ namespace AmbermoonMapEditor2D
 
         void RemoveFrontTile(int x, int y)
         {
-            if (map.Tiles[x, y].FrontTileIndex == 0)
+            if (map.InitialTiles[x, y].FrontTileIndex == 0)
                 return;
 
-            uint oldTileIndex = map.Tiles[x, y].FrontTileIndex;
+            uint oldTileIndex = map.InitialTiles[x, y].FrontTileIndex;
 
             void SetTile(uint tileIndex)
             {
-                map.Tiles[x, y].FrontTileIndex = tileIndex;
+                map.InitialTiles[x, y].FrontTileIndex = tileIndex;
                 panelMap.Refresh();
             }
 
