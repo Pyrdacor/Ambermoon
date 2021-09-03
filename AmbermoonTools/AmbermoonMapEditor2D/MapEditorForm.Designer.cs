@@ -30,9 +30,21 @@ namespace AmbermoonMapEditor2D
         private void InitializeComponent()
         {
             this.components = new System.ComponentModel.Container();
-            this.panelMap = new System.Windows.Forms.DrawPanel();
+            this.panelMap = new System.Windows.Forms.MapDrawPanel();
             this.menuStrip = new System.Windows.Forms.MenuStrip();
+            this.toolStripMenuItemMap = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripMenuItemMapNew = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripMenuItemMapSave = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripMenuItemMapSaveAs = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripSeparatorMap1 = new System.Windows.Forms.ToolStripSeparator();
+            this.toolStripMenuItemMapQuit = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripMenuItemEdit = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripMenuItemEditUndo = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripMenuItemEditRedo = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripSeparatorEdit1 = new System.Windows.Forms.ToolStripSeparator();
             this.groupBoxTileset = new System.Windows.Forms.GroupBox();
+            this.buttonEditTile = new System.Windows.Forms.Button();
+            this.comboBoxPalettes = new System.Windows.Forms.ComboBox();
             this.comboBoxTilesets = new System.Windows.Forms.ComboBox();
             this.buttonAddTileset = new System.Windows.Forms.Button();
             this.panelTileset = new System.Windows.Forms.DrawPanel();
@@ -101,8 +113,9 @@ namespace AmbermoonMapEditor2D
             this.buttonToggleTileMarker = new System.Windows.Forms.Button();
             this.toolTipTileMarker = new System.Windows.Forms.ToolTip(this.components);
             this.labelDivider = new System.Windows.Forms.Label();
-            this.comboBoxPalettes = new System.Windows.Forms.ComboBox();
-            this.buttonEditTile = new System.Windows.Forms.Button();
+            this.buttonToolRemoveFrontLayer = new System.Windows.Forms.Button();
+            this.toolTipRemoveFrontLayer = new System.Windows.Forms.ToolTip(this.components);
+            this.menuStrip.SuspendLayout();
             this.groupBoxTileset.SuspendLayout();
             this.groupBoxProperties.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDownHeight)).BeginInit();
@@ -116,7 +129,6 @@ namespace AmbermoonMapEditor2D
             // 
             // panelMap
             // 
-            this.panelMap.AutoScroll = true;
             this.panelMap.BackColor = System.Drawing.Color.Black;
             this.panelMap.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
             this.panelMap.Location = new System.Drawing.Point(0, 27);
@@ -125,16 +137,104 @@ namespace AmbermoonMapEditor2D
             this.panelMap.TabIndex = 0;
             this.panelMap.Scroll += new System.Windows.Forms.ScrollEventHandler(this.panelMap_Scroll);
             this.panelMap.Paint += new System.Windows.Forms.PaintEventHandler(this.panelMap_Paint);
+            this.panelMap.MouseDown += new System.Windows.Forms.MouseEventHandler(this.panelMap_MouseDown);
             this.panelMap.MouseLeave += new System.EventHandler(this.panelMap_MouseLeave);
             this.panelMap.MouseMove += new System.Windows.Forms.MouseEventHandler(this.panelMap_MouseMove);
             // 
             // menuStrip
             // 
+            this.menuStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.toolStripMenuItemMap,
+            this.toolStripMenuItemEdit});
             this.menuStrip.Location = new System.Drawing.Point(0, 0);
             this.menuStrip.Name = "menuStrip";
             this.menuStrip.Size = new System.Drawing.Size(1152, 24);
             this.menuStrip.TabIndex = 1;
             this.menuStrip.Text = "menuStrip1";
+            // 
+            // toolStripMenuItemMap
+            // 
+            this.toolStripMenuItemMap.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.toolStripMenuItemMapNew,
+            this.toolStripMenuItemMapSave,
+            this.toolStripMenuItemMapSaveAs,
+            this.toolStripSeparatorMap1,
+            this.toolStripMenuItemMapQuit});
+            this.toolStripMenuItemMap.Name = "toolStripMenuItemMap";
+            this.toolStripMenuItemMap.Size = new System.Drawing.Size(43, 20);
+            this.toolStripMenuItemMap.Text = "&Map";
+            // 
+            // toolStripMenuItemMapNew
+            // 
+            this.toolStripMenuItemMapNew.Name = "toolStripMenuItemMapNew";
+            this.toolStripMenuItemMapNew.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.O)));
+            this.toolStripMenuItemMapNew.Size = new System.Drawing.Size(186, 22);
+            this.toolStripMenuItemMapNew.Text = "New/Load ...";
+            this.toolStripMenuItemMapNew.Click += new System.EventHandler(this.toolStripMenuItemMapNew_Click);
+            // 
+            // toolStripMenuItemMapSave
+            // 
+            this.toolStripMenuItemMapSave.Enabled = false;
+            this.toolStripMenuItemMapSave.Name = "toolStripMenuItemMapSave";
+            this.toolStripMenuItemMapSave.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.S)));
+            this.toolStripMenuItemMapSave.Size = new System.Drawing.Size(186, 22);
+            this.toolStripMenuItemMapSave.Text = "Save";
+            this.toolStripMenuItemMapSave.Click += new System.EventHandler(this.toolStripMenuItemMapSave_Click);
+            // 
+            // toolStripMenuItemMapSaveAs
+            // 
+            this.toolStripMenuItemMapSaveAs.Name = "toolStripMenuItemMapSaveAs";
+            this.toolStripMenuItemMapSaveAs.ShortcutKeys = ((System.Windows.Forms.Keys)(((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.Shift) 
+            | System.Windows.Forms.Keys.S)));
+            this.toolStripMenuItemMapSaveAs.Size = new System.Drawing.Size(249, 22);
+            this.toolStripMenuItemMapSaveAs.Text = "Save as ...";
+            this.toolStripMenuItemMapSaveAs.Click += new System.EventHandler(this.toolStripMenuItemMapSaveAs_Click);
+            // 
+            // toolStripSeparatorMap1
+            // 
+            this.toolStripSeparatorMap1.Name = "toolStripSeparatorMap1";
+            this.toolStripSeparatorMap1.Size = new System.Drawing.Size(183, 6);
+            // 
+            // toolStripMenuItemMapQuit
+            // 
+            this.toolStripMenuItemMapQuit.Name = "toolStripMenuItemMapQuit";
+            this.toolStripMenuItemMapQuit.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Alt | System.Windows.Forms.Keys.F4)));
+            this.toolStripMenuItemMapQuit.Size = new System.Drawing.Size(249, 22);
+            this.toolStripMenuItemMapQuit.Text = "Quit";
+            this.toolStripMenuItemMapQuit.Click += new System.EventHandler(this.toolStripMenuItemMapQuit_Click);
+            // 
+            // toolStripMenuItemEdit
+            // 
+            this.toolStripMenuItemEdit.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.toolStripMenuItemEditUndo,
+            this.toolStripMenuItemEditRedo,
+            this.toolStripSeparatorEdit1});
+            this.toolStripMenuItemEdit.Name = "toolStripMenuItemEdit";
+            this.toolStripMenuItemEdit.Size = new System.Drawing.Size(39, 20);
+            this.toolStripMenuItemEdit.Text = "&Edit";
+            // 
+            // toolStripMenuItemEditUndo
+            // 
+            this.toolStripMenuItemEditUndo.Enabled = false;
+            this.toolStripMenuItemEditUndo.Name = "toolStripMenuItemEditUndo";
+            this.toolStripMenuItemEditUndo.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.Z)));
+            this.toolStripMenuItemEditUndo.Size = new System.Drawing.Size(146, 22);
+            this.toolStripMenuItemEditUndo.Text = "Undo";
+            this.toolStripMenuItemEditUndo.Click += new System.EventHandler(this.toolStripMenuItemEditUndo_Click);
+            // 
+            // toolStripMenuItemEditRedo
+            // 
+            this.toolStripMenuItemEditRedo.Enabled = false;
+            this.toolStripMenuItemEditRedo.Name = "toolStripMenuItemEditRedo";
+            this.toolStripMenuItemEditRedo.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.Y)));
+            this.toolStripMenuItemEditRedo.Size = new System.Drawing.Size(146, 22);
+            this.toolStripMenuItemEditRedo.Text = "Redo";
+            this.toolStripMenuItemEditRedo.Click += new System.EventHandler(this.toolStripMenuItemEditRedo_Click);
+            // 
+            // toolStripSeparatorEdit1
+            // 
+            this.toolStripSeparatorEdit1.Name = "toolStripSeparatorEdit1";
+            this.toolStripSeparatorEdit1.Size = new System.Drawing.Size(143, 6);
             // 
             // groupBoxTileset
             // 
@@ -149,6 +249,25 @@ namespace AmbermoonMapEditor2D
             this.groupBoxTileset.TabIndex = 2;
             this.groupBoxTileset.TabStop = false;
             this.groupBoxTileset.Text = "Tileset";
+            // 
+            // buttonEditTile
+            // 
+            this.buttonEditTile.Location = new System.Drawing.Point(707, 119);
+            this.buttonEditTile.Name = "buttonEditTile";
+            this.buttonEditTile.Size = new System.Drawing.Size(89, 23);
+            this.buttonEditTile.TabIndex = 4;
+            this.buttonEditTile.Text = "Edit tile ...";
+            this.buttonEditTile.UseVisualStyleBackColor = true;
+            // 
+            // comboBoxPalettes
+            // 
+            this.comboBoxPalettes.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.comboBoxPalettes.FormattingEnabled = true;
+            this.comboBoxPalettes.Location = new System.Drawing.Point(707, 51);
+            this.comboBoxPalettes.Name = "comboBoxPalettes";
+            this.comboBoxPalettes.Size = new System.Drawing.Size(89, 23);
+            this.comboBoxPalettes.TabIndex = 3;
+            this.comboBoxPalettes.SelectedIndexChanged += new System.EventHandler(this.comboBoxPalettes_SelectedIndexChanged);
             // 
             // comboBoxTilesets
             // 
@@ -541,7 +660,7 @@ namespace AmbermoonMapEditor2D
             // buttonToolColorPicker
             // 
             this.buttonToolColorPicker.Image = global::AmbermoonMapEditor2D.Properties.Resources.round_colorize_black_24;
-            this.buttonToolColorPicker.Location = new System.Drawing.Point(772, 141);
+            this.buttonToolColorPicker.Location = new System.Drawing.Point(773, 179);
             this.buttonToolColorPicker.Name = "buttonToolColorPicker";
             this.buttonToolColorPicker.Size = new System.Drawing.Size(32, 32);
             this.buttonToolColorPicker.TabIndex = 6;
@@ -551,7 +670,7 @@ namespace AmbermoonMapEditor2D
             // buttonToolLayers
             // 
             this.buttonToolLayers.Image = global::AmbermoonMapEditor2D.Properties.Resources.round_layers_black_24;
-            this.buttonToolLayers.Location = new System.Drawing.Point(773, 191);
+            this.buttonToolLayers.Location = new System.Drawing.Point(773, 229);
             this.buttonToolLayers.Name = "buttonToolLayers";
             this.buttonToolLayers.Size = new System.Drawing.Size(32, 32);
             this.buttonToolLayers.TabIndex = 7;
@@ -718,7 +837,7 @@ namespace AmbermoonMapEditor2D
             // 
             this.buttonToggleGrid.ForeColor = System.Drawing.SystemColors.ControlText;
             this.buttonToggleGrid.Image = global::AmbermoonMapEditor2D.Properties.Resources.round_grid_off_black_24;
-            this.buttonToggleGrid.Location = new System.Drawing.Point(773, 229);
+            this.buttonToggleGrid.Location = new System.Drawing.Point(773, 267);
             this.buttonToggleGrid.Name = "buttonToggleGrid";
             this.buttonToggleGrid.Size = new System.Drawing.Size(32, 32);
             this.buttonToggleGrid.TabIndex = 11;
@@ -729,7 +848,7 @@ namespace AmbermoonMapEditor2D
             // 
             this.buttonToggleTileMarker.ForeColor = System.Drawing.SystemColors.ControlText;
             this.buttonToggleTileMarker.Image = global::AmbermoonMapEditor2D.Properties.Resources.round_select_all_black_24;
-            this.buttonToggleTileMarker.Location = new System.Drawing.Point(773, 267);
+            this.buttonToggleTileMarker.Location = new System.Drawing.Point(773, 305);
             this.buttonToggleTileMarker.Name = "buttonToggleTileMarker";
             this.buttonToggleTileMarker.Size = new System.Drawing.Size(32, 32);
             this.buttonToggleTileMarker.TabIndex = 12;
@@ -739,35 +858,27 @@ namespace AmbermoonMapEditor2D
             // labelDivider
             // 
             this.labelDivider.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
-            this.labelDivider.Location = new System.Drawing.Point(773, 182);
+            this.labelDivider.Location = new System.Drawing.Point(773, 220);
             this.labelDivider.Name = "labelDivider";
             this.labelDivider.Size = new System.Drawing.Size(32, 2);
             this.labelDivider.TabIndex = 13;
             // 
-            // comboBoxPalettes
+            // buttonToolRemoveFrontLayer
             // 
-            this.comboBoxPalettes.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            this.comboBoxPalettes.FormattingEnabled = true;
-            this.comboBoxPalettes.Location = new System.Drawing.Point(707, 51);
-            this.comboBoxPalettes.Name = "comboBoxPalettes";
-            this.comboBoxPalettes.Size = new System.Drawing.Size(89, 23);
-            this.comboBoxPalettes.TabIndex = 3;
-            this.comboBoxPalettes.SelectedIndexChanged += new System.EventHandler(this.comboBoxPalettes_SelectedIndexChanged);
-            // 
-            // buttonEditTile
-            // 
-            this.buttonEditTile.Location = new System.Drawing.Point(707, 119);
-            this.buttonEditTile.Name = "buttonEditTile";
-            this.buttonEditTile.Size = new System.Drawing.Size(89, 23);
-            this.buttonEditTile.TabIndex = 4;
-            this.buttonEditTile.Text = "Edit tile ...";
-            this.buttonEditTile.UseVisualStyleBackColor = true;
+            this.buttonToolRemoveFrontLayer.Image = global::AmbermoonMapEditor2D.Properties.Resources.round_layers_clear_black_24;
+            this.buttonToolRemoveFrontLayer.Location = new System.Drawing.Point(773, 141);
+            this.buttonToolRemoveFrontLayer.Name = "buttonToolRemoveFrontLayer";
+            this.buttonToolRemoveFrontLayer.Size = new System.Drawing.Size(32, 32);
+            this.buttonToolRemoveFrontLayer.TabIndex = 14;
+            this.buttonToolRemoveFrontLayer.UseVisualStyleBackColor = true;
+            this.buttonToolRemoveFrontLayer.Click += new System.EventHandler(this.buttonToolRemoveFrontLayer_Click);
             // 
             // MapEditorForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1152, 712);
+            this.Controls.Add(this.buttonToolRemoveFrontLayer);
             this.Controls.Add(this.labelDivider);
             this.Controls.Add(this.buttonToggleTileMarker);
             this.Controls.Add(this.buttonToggleGrid);
@@ -787,8 +898,11 @@ namespace AmbermoonMapEditor2D
             this.MaximizeBox = false;
             this.Name = "MapEditorForm";
             this.Text = "Ambermoon Map Editor 2D";
+            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.MapEditorForm_FormClosing);
             this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.MapEditorForm_FormClosed);
             this.Load += new System.EventHandler(this.MapEditorForm_Load);
+            this.menuStrip.ResumeLayout(false);
+            this.menuStrip.PerformLayout();
             this.groupBoxTileset.ResumeLayout(false);
             this.groupBoxProperties.ResumeLayout(false);
             this.groupBoxProperties.PerformLayout();
@@ -808,7 +922,7 @@ namespace AmbermoonMapEditor2D
 
         #endregion
 
-        private System.Windows.Forms.DrawPanel panelMap;
+        private System.Windows.Forms.MapDrawPanel panelMap;
         private System.Windows.Forms.MenuStrip menuStrip;
         private System.Windows.Forms.GroupBox groupBoxTileset;
         private System.Windows.Forms.Button buttonAddTileset;
@@ -881,6 +995,18 @@ namespace AmbermoonMapEditor2D
         private System.Windows.Forms.ToolStripStatusLabel toolStripStatusLabelCurrentTilesetTile;
         private System.Windows.Forms.Button buttonEditTile;
         private System.Windows.Forms.ComboBox comboBoxPalettes;
+        private System.Windows.Forms.Button buttonToolRemoveFrontLayer;
+        private System.Windows.Forms.ToolTip toolTipRemoveFrontLayer;
+        private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemMap;
+        private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemEdit;
+        private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemEditUndo;
+        private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemEditRedo;
+        private System.Windows.Forms.ToolStripSeparator toolStripSeparatorEdit1;
+        private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemMapNew;
+        private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemMapSave;
+        private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemMapSaveAs;
+        private System.Windows.Forms.ToolStripSeparator toolStripSeparatorMap1;
+        private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemMapQuit;
     }
 }
 

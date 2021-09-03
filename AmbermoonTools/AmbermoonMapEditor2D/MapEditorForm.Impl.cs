@@ -1,5 +1,6 @@
 ﻿using Ambermoon.Data;
 using Ambermoon.Data.Enumerations;
+using Ambermoon.Data.Legacy;
 using Ambermoon.Data.Legacy.ExecutableData;
 using Ambermoon.Data.Legacy.Serialization;
 using NAudio.Wave;
@@ -24,11 +25,19 @@ namespace AmbermoonMapEditor2D
             Blocks3x2,
             Blocks3x3,
             Fill,
-            ColorPicker
+            ColorPicker,
+            RemoveFrontLayer
         }
+
+        static readonly string[] LayerName = new string[2]
+        {
+            "Back Layer",
+            "Front Layer"
+        };
 
         IGameData gameData;
         Dictionary<uint, Tileset> tilesets;
+        MapManager mapManager;
         IReadOnlyDictionary<Song, string> songNames;
         ImageCache imageCache;
         Dictionary<Song, WaveStream> musicCache = new Dictionary<Song, WaveStream>();
@@ -44,12 +53,19 @@ namespace AmbermoonMapEditor2D
         int selectedTilesetTile = 0;
         Cursor cursorPointer;
         Cursor cursorColorPicker;
+        Cursor cursorEraser;
         int tileMarkerWidth = 0;
         int tileMarkerHeight = 0;
         int hoveredMapTile = -1;
         int hoveredTilesetTile = -1;
         bool showTileMarker = true;
+        int currentLayer = 0;
+        bool initialized = false;
+        bool unsavedChanges = false;
+        bool saveIntoGameData = false;
+        string saveFileName = null;
 
+        History history = new History();
         Map map;
         int MapWidth => (int)numericUpDownWidth.Value;
         int MapHeight => (int)numericUpDownHeight.Value;
@@ -61,8 +77,14 @@ namespace AmbermoonMapEditor2D
 
         void Initialize()
         {
+            if (initialized)
+                return;
+
+            initialized = true;
+
             cursorPointer = CursorResourceLoader.LoadEmbeddedCursor(Properties.Resources.pointer);
             cursorColorPicker = CursorResourceLoader.LoadEmbeddedCursor(Properties.Resources.color_picker);
+            cursorEraser = CursorResourceLoader.LoadEmbeddedCursor(Properties.Resources.eraser);
 
             toolTipIndoor.SetToolTip(radioButtonIndoor, "Indoor maps are always fully lighted.");
             toolTipOutdoor.SetToolTip(radioButtonOutdoor, "Outdoor maps are affected by the day-night-cycle.");
@@ -73,10 +95,11 @@ namespace AmbermoonMapEditor2D
             toolTipNoSleepUntilDawn.SetToolTip(checkBoxNoSleepUntilDawn, "If set you will always sleep for 8 hours.");
             toolTipMagic.SetToolTip(checkBoxMagic, "Enables the use of spells on the map.");
 
-            toolTipBrush.SetToolTip(buttonToolBrush, "Draws single tiles onto the map.");
+            toolTipBrush.SetToolTip(buttonToolBrush, "Draws single tiles onto the map.\r\n\r\nUse with right click to draw to the non-selected layer.");
             toolTipBlocks.SetToolTip(buttonToolBlocks, "Draws blocks of tiles onto the map.\r\n\r\nUse right click on the button to choose a block size.\r\n\r\nUse with right click to use the same tile multiple times. Otherwise it picks adjacent tiles from the tileset.");
             toolTipFill.SetToolTip(buttonToolFill, "Fills all tiles of the same type with a tile from the tileset.\r\n\r\nUse with right click to limit it to an enclosed area.");
-            toolTipColorPicker.SetToolTip(buttonToolColorPicker, "Selects a map tile inside the tileset and locks it in for further drawing.");
+            toolTipColorPicker.SetToolTip(buttonToolColorPicker, "Selects a map tile inside the tileset and locks it in for further drawing.\r\n\r\nUse with right click to pick from the non-selected layer instead.");
+            toolTipColorPicker.SetToolTip(buttonToolRemoveFrontLayer, "Removes the front layer tile.");
             toolTipLayers.SetToolTip(buttonToolLayers, "Opens the layers context menu where you can choose which layer to draw to and which layers to show.");
             toolTipGrid.SetToolTip(buttonToggleGrid, "Toggles the tile grid overlay.");
             toolTipTileMarker.SetToolTip(buttonToggleTileMarker, "Toggles the tile selection marker.");
@@ -122,6 +145,8 @@ namespace AmbermoonMapEditor2D
 
         void InitializeMap(Map map)
         {
+            unsavedChanges = false;
+            history.Clear();
             this.map = map;
 
             numericUpDownWidth.Value = map.Width;
@@ -200,6 +225,37 @@ namespace AmbermoonMapEditor2D
         void MapSizeChanged()
         {
             mapScrollIndicator.Location = new Point(map.Width * 16, map.Height * 16);
+
+            int visibleColumns = panelMap.Width / 16;
+            int visibleRows = panelMap.Height / 16;
+
+            panelMap.HorizontalScroll.Visible = false;
+            panelMap.VerticalScroll.Visible = false;
+
+            if (map.Width <= visibleColumns)
+            {
+                panelMap.HorizontalScroll.Enabled = false;
+            }
+            else
+            {
+                panelMap.HorizontalScroll.Maximum = mapScrollIndicator.Location.X;
+                panelMap.HorizontalScroll.Enabled = true;
+            }
+
+            if (map.Height <= visibleRows)
+            {
+                panelMap.VerticalScroll.Enabled = false;
+            }
+            else
+            {
+                panelMap.VerticalScroll.Maximum = mapScrollIndicator.Location.Y;
+                panelMap.VerticalScroll.Enabled = true;
+            }
+
+            panelMap.HorizontalScroll.Visible = true;
+            panelMap.VerticalScroll.Visible = true;
+
+            panelMap.Refresh();
         }
 
         void MapTypeChanged()
@@ -243,6 +299,8 @@ namespace AmbermoonMapEditor2D
                     return Properties.Resources.round_format_color_fill_black_24;
                 case Tool.ColorPicker:
                     return Properties.Resources.round_colorize_black_24;
+                case Tool.RemoveFrontLayer:
+                    return Properties.Resources.round_layers_clear_black_24;
                 default:
                     return null;
             }            
@@ -262,6 +320,8 @@ namespace AmbermoonMapEditor2D
                     return buttonToolFill;
                 case Tool.ColorPicker:
                     return buttonToolColorPicker;
+                case Tool.RemoveFrontLayer:
+                    return buttonToolRemoveFrontLayer;
                 default:
                     return null;
             }
@@ -281,6 +341,8 @@ namespace AmbermoonMapEditor2D
                     return cursorPointer;
                 case Tool.ColorPicker:
                     return cursorColorPicker;
+                case Tool.RemoveFrontLayer:
+                    return cursorEraser;
                 default:
                     return null;
             }
@@ -301,6 +363,8 @@ namespace AmbermoonMapEditor2D
                     return -1;
                 case Tool.ColorPicker:
                     return 1;
+                case Tool.RemoveFrontLayer:
+                    return 1;
                 default:
                     return 0;
             }
@@ -320,6 +384,8 @@ namespace AmbermoonMapEditor2D
                 case Tool.Fill:
                     return -1;
                 case Tool.ColorPicker:
+                    return 1;
+                case Tool.RemoveFrontLayer:
                     return 1;
                 default:
                     return 0;
@@ -359,6 +425,266 @@ namespace AmbermoonMapEditor2D
         void FillCharacters()
         {
 
+        }
+
+        void UseTool(int x, int y, bool secondaryFunction)
+        {
+            switch (currentTool)
+            {
+                case Tool.Brush:
+                    SetTiles(x, y, 1, 1, secondaryFunction ? 1 - currentLayer : currentLayer);
+                    break;
+                case Tool.Blocks2x2:
+                    SetTiles(x, y, 2, 2, currentLayer, secondaryFunction);
+                    break;
+                case Tool.Blocks3x2:
+                    SetTiles(x, y, 3, 2, currentLayer, secondaryFunction);
+                    break;
+                case Tool.Blocks3x3:
+                    SetTiles(x, y, 3, 3, currentLayer, secondaryFunction);
+                    break;
+                case Tool.ColorPicker:
+                    PickTile(x, y, secondaryFunction ? 1 - currentLayer : currentLayer);
+                    break;
+                case Tool.Fill:
+                    FillTiles(x, y, secondaryFunction);
+                    break;
+                case Tool.RemoveFrontLayer:
+                    RemoveFrontTile(x, y);
+                    break;
+            }
+        }
+
+        void PerformAction(string displayName, string undoDisplayName, Action<bool> doAction, Action undoAction)
+        {
+            history.DoAction(new History.DefaultAction(displayName, undoDisplayName, doAction, undoAction));
+        }
+
+        void SetTiles(int x, int y, int w, int h, int layer, bool useSameTile = false)
+        {
+            if (w < 1)
+                w = 1;
+            if (h < 1)
+                h = 1;
+            if (layer < 0)
+                layer = 0;
+            else if (layer > 1)
+                layer = 1;
+
+            var currentTiles = new List<uint>(9);
+            bool hasChange = false;
+            int tile = 1 + selectedTilesetTile;
+            int checkTile = tile;
+            for (int ty = 0; ty < h; ++ty)
+            {
+                int totalY = y + ty;
+
+                if (totalY >= map.Height)
+                    break;
+
+                for (int tx = 0; tx < w; ++tx)
+                {
+                    int totalX = x + tx;
+
+                    if (totalX >= map.Width)
+                        continue;
+
+                    var mapTile = map.Tiles[totalX, totalY];
+                    uint tileIndex = layer == 0 ? mapTile.BackTileIndex : mapTile.FrontTileIndex;
+                    currentTiles.Add(tileIndex);
+
+                    if (tileIndex != checkTile)
+                        hasChange = true;
+
+                    if (!useSameTile)
+                        ++checkTile;
+                }
+            }
+
+            if (!hasChange)
+                return;
+
+            string doText = w == 1 && h == 1
+                ? $"Change tile at {x},{y} on {LayerName[layer]} to tile {tile}"
+                : useSameTile
+                    ? $"Change tiles from {x},{y} to {x + w - 1},{y + h - 1} on {LayerName[layer]} to tile {tile}"
+                    : $"Change tiles from {x},{y} to {x + w - 1},{y + h - 1} on {LayerName[layer]} to tiles {tile} to {tile + (w-1)*(h-1)}";
+            bool sameUndoTile = currentTiles.GroupBy(t => t).Count() == 1;
+            string undoText = w == 1 && h == 1
+                ? $"Change tile at {x},{y} on {LayerName[layer]} to tile {(currentTiles[0] == 0 ? "empty" : (currentTiles[0] - 1).ToString())}"
+                : sameUndoTile
+                    ? $"Change tiles from {x},{y} to {x + w - 1},{y + h - 1} on {LayerName[layer]} to tile {(currentTiles[0] == 0 ? "empty" : (currentTiles[0] - 1).ToString())}"
+                    : $"Change tiles from {x},{y} to {x + w - 1},{y + h - 1} on {LayerName[layer]} to tiles [{string.Join(",", currentTiles.Select(t => t == 0 ? "empty" : (t - 1).ToString()))}]";
+
+            PerformAction(doText, undoText,
+                _ =>
+                {
+                    for (int ty = 0; ty < h; ++ty)
+                    {
+                        int totalY = y + ty;
+
+                        if (totalY >= map.Height)
+                            break;
+
+                        for (int tx = 0; tx < w; ++tx)
+                        {
+                            int totalX = x + tx;
+
+                            if (totalX >= map.Width)
+                                continue;
+
+                            var mapTile = map.Tiles[totalX, totalY];
+
+                            if (layer == 0)
+                                mapTile.BackTileIndex = (uint)tile;
+                            else
+                                mapTile.FrontTileIndex = (uint)tile;
+
+                            if (!useSameTile)
+                                ++tile;
+                        }
+                    }
+
+                    panelMap.Refresh();
+                },
+                () =>
+                {
+                    int listIndex = 0;
+                    for (int ty = 0; ty < h; ++ty)
+                    {
+                        int totalY = y + ty;
+
+                        if (totalY >= map.Height)
+                            break;
+
+                        for (int tx = 0; tx < w; ++tx)
+                        {
+                            int totalX = x + tx;
+
+                            if (totalX >= map.Width)
+                                continue;
+
+                            var mapTile = map.Tiles[totalX, totalY];
+
+                            if (layer == 0)
+                                mapTile.BackTileIndex = currentTiles[listIndex++];
+                            else
+                                mapTile.FrontTileIndex = currentTiles[listIndex++];
+                        }
+                    }
+
+                    panelMap.Refresh();
+                }
+            );
+        }
+
+        void FillTiles(int x, int y, bool areaOnly)
+        {
+            // TODO
+            NotImplemented();
+        }
+
+        void PickTile(int x, int y, int layer)
+        {
+            var tile = map.Tiles[x, y];
+            uint tileIndex = layer == 0 ? tile.BackTileIndex : tile.FrontTileIndex;
+
+            if (tileIndex == 0)
+                SelectTool(Tool.RemoveFrontLayer);
+            else
+            {
+                selectedTilesetTile = (int)tileIndex - 1;
+                panelTileset.Refresh();
+                SelectTool(Tool.Brush);
+            }
+        }
+
+        void RemoveFrontTile(int x, int y)
+        {
+            if (map.Tiles[x, y].FrontTileIndex == 0)
+                return;
+
+            uint oldTileIndex = map.Tiles[x, y].FrontTileIndex;
+
+            void SetTile(uint tileIndex)
+            {
+                map.Tiles[x, y].FrontTileIndex = tileIndex;
+                panelMap.Refresh();
+            }
+
+            PerformAction($"Delete front tile at {x},{y}", $"Set front tile at {x},{y} to {oldTileIndex}",
+                _ => SetTile(0), () => SetTile(oldTileIndex));
+        }
+
+        void NotImplemented() => MessageBox.Show(this, "Not implemented yet", "Not implemented", MessageBoxButtons.OK, MessageBoxIcon.Information);
+
+        bool Save()
+        {
+            if (saveFileName == null)
+                return SaveAs();
+
+            if (saveIntoGameData)
+                return SaveToGameData();
+            else
+                return SaveToFile(saveFileName);
+        }
+
+        bool SaveAs()
+        {
+            if (MessageBox.Show(this, "Do you want to save back to the game data (Yes) or to an external file (No)?",
+                "Save target", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.No)
+            {
+                return SaveToFile(null, saveFileName);
+            }
+            else
+            {
+                return SaveToGameData();
+            }
+        }
+
+        bool SaveToFile(string fileName, string suggestedFileName = null)
+        {
+            if (string.IsNullOrWhiteSpace(fileName))
+            {
+                var dialog = new SaveFileDialog();
+                dialog.AddExtension = false;
+                dialog.AutoUpgradeEnabled = true;
+                dialog.CheckFileExists = false;
+                dialog.CheckPathExists = false;
+                dialog.CreatePrompt = false;
+                dialog.FileName = suggestedFileName ?? "";
+                dialog.Filter = "All files (*.*)|*.*";
+                dialog.OverwritePrompt = true;
+                dialog.RestoreDirectory = true;
+                dialog.Title = "Save map";
+
+                if (dialog.ShowDialog() != DialogResult.OK)
+                    return false;
+
+                fileName = dialog.FileName;
+            }
+
+            var mapWriter = new MapWriter();
+            var dataWriter = new DataWriter();
+            mapWriter.WriteMap(map, dataWriter);
+
+            try
+            {
+                System.IO.File.WriteAllBytes(fileName, dataWriter.ToArray());
+                saveFileName = fileName;
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        bool SaveToGameData()
+        {
+            // TODO
+            NotImplemented();
+            return false;
         }
     }
 }
