@@ -360,7 +360,7 @@ namespace AmbermoonEventEditor
                         eventList.Remove(@event);
                         Console.WriteLine("Chain removed. Events kept.");
                         Console.WriteLine();
-                        break;
+                        return;
                     case 2:
                         Console.WriteLine("Are you sure to remove the whole chain?");
                         option = ReadOption(0, "No", "Yes") ?? 0;
@@ -371,7 +371,13 @@ namespace AmbermoonEventEditor
                             return;
                         }
                         eventList.Remove(@event);
-                        // TODO: remove all events
+                        var eventsToRemove = new List<Event>();
+                        var eventToRemove = @event;
+                        while (eventToRemove != null)
+                        {
+                            eventsToRemove.Add(eventToRemove);
+                            eventToRemove = eventToRemove.Next;
+                        }
                         Console.WriteLine("Chain removed. Events too.");
                         Console.WriteLine();
                         break;
@@ -379,7 +385,7 @@ namespace AmbermoonEventEditor
                         eventList[listIndex] = @event.Next;
                         Console.WriteLine("Chain now starts with successor.");
                         Console.WriteLine();
-                        break;
+                        return;
                 }
             }
 
@@ -597,6 +603,7 @@ namespace AmbermoonEventEditor
                 }
             }
 
+            unsavedChanges = true;
             Console.WriteLine("Successfully disconnected the event.");
             Console.WriteLine();
         }
