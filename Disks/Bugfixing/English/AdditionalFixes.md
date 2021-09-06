@@ -9,6 +9,7 @@ Based on 1.09.
 - Fixed double text-popup in Burnville when you look at the healer's sign.
 - Fixed chest opening when you got hit by the spikes in the palace of S'Endar.
 - The blacksmith in Newlake has now the correct name and repair cost.
+- Fixed ship dealer in Spannenberg. Ships will now correctly be spawned.
 
 ## Version 1.09
 
