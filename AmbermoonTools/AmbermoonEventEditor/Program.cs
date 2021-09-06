@@ -545,10 +545,17 @@ namespace AmbermoonEventEditor
 
                 unsavedChanges = true;
 
+                var newEvent = events[index.Value];
                 int eventListIndex = eventList.IndexOf(@event);
 
                 if (eventListIndex != -1)
-                    eventList[eventListIndex] = events[index.Value];
+                    eventList[eventListIndex] = newEvent;
+
+                foreach (var ev in events)
+                {
+                    if (ev.Next == @event)
+                        ev.Next = newEvent;
+                }
 
                 Console.WriteLine("Event was changed successfully.");
                 Console.WriteLine();
@@ -571,6 +578,20 @@ namespace AmbermoonEventEditor
             }
 
             var @event = events[index.Value];
+
+            int listIndex = eventList.IndexOf(@event);
+
+            if (listIndex != -1)
+            {
+                Console.WriteLine("The event starts an event chain. Do you want to remove this chain?");
+                int option = ReadOption(0, "No", "Yes") ?? 0;
+
+                if (option != 0)
+                {
+                    Console.WriteLine("Event chain removed. Note that event chain indices inside maps can't be adjusted automatically.");
+                    eventList.RemoveAt(listIndex);
+                }
+            }
 
             var prevs = events.Where(e => e.Next == @event).ToList();
             var conds = events.Where(e => e is ConditionEvent c && c.ContinueIfFalseWithMapEventIndex == index.Value).Cast<ConditionEvent>().ToList();
