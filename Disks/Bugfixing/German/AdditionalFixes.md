@@ -8,6 +8,7 @@ Based on 1.08.
   Moreover you can't skip the gargoyle fight at the door by fleeing.
 - Fixed double text-popup in Burnville when you look at the healer's sign.
 - Fixed chest opening when you got hit by the spikes in the palace of S'Endar.
+- The blacksmith in Newlake has now the correct name and repair cost.
 
 ## Version 1.08
 
