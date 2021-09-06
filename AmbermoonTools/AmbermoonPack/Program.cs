@@ -211,6 +211,7 @@ namespace AmbermoonPack
 
                     var destinationStream = File.Create(args[2]);
                     writer.CopyTo(destinationStream);
+                    destinationStream.Flush();
                 }
                 catch (Exception ex)
                 {
