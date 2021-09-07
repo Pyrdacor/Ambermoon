@@ -5,6 +5,8 @@
     <TargetFramework>netcoreapp3.1</TargetFramework>
     <UseWindowsForms>true</UseWindowsForms>
     <Configurations>Debug;Release;ReleaseLinux</Configurations>
+    <Version>1.0.8</Version>
+    <Authors>Robert Schneckenhaus</Authors>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
@@ -24,7 +26,7 @@
 
   <ItemGroup>
     <PackageReference Include="Ambermoon.Data.Common" Version="10.0.3" />
-    <PackageReference Include="Ambermoon.Data.Legacy" Version="10.0.1" />
+    <PackageReference Include="Ambermoon.Data.Legacy" Version="10.0.2" />
     <PackageReference Include="NAudio" Version="2.0.1" />
     <PackageReference Include="SonicArranger" Version="1.0.7" />
   </ItemGroup>

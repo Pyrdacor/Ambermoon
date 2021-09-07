@@ -65,6 +65,7 @@ namespace AmbermoonMapEditor2D
         bool saveIntoGameData = false;
         string saveFileName = null;
         bool showEvents = false;
+        bool mapLoading = false;
 
         History history = new History();
         Map map;
@@ -149,6 +150,7 @@ namespace AmbermoonMapEditor2D
             unsavedChanges = false;
             history.Clear();
             this.map = map;
+            mapLoading = true;
 
             numericUpDownWidth.Value = map.Width;
             numericUpDownHeight.Value = map.Height;
@@ -181,6 +183,8 @@ namespace AmbermoonMapEditor2D
 
             MapSizeChanged();
             TilesetChanged();
+
+            mapLoading = false;
         }
 
         void ToggleMusic()
@@ -267,6 +271,34 @@ namespace AmbermoonMapEditor2D
             panelMap.Refresh();
         }
 
+        void UpdateMapFlags()
+        {
+            if (mapLoading)
+                return;
+
+            map.Flags &= MapFlags.Unknown2; // keep this unknown flag if present
+
+            if (radioButtonIndoor.Checked)
+                map.Flags |= MapFlags.Indoor;
+            else if (radioButtonOutdoor.Checked)
+                map.Flags |= MapFlags.Outdoor;
+            else if (radioButtonDungeon.Checked)
+                map.Flags |= MapFlags.Dungeon;
+
+            if (checkBoxMagic.Checked)
+                map.Flags |= MapFlags.CanUseMagic;
+            if (checkBoxResting.Checked)
+                map.Flags |= MapFlags.CanRest;
+            if (checkBoxUnknown1.Checked)
+                map.Flags |= MapFlags.Unknown1;
+            if (checkBoxTravelGraphics.Checked)
+                map.Flags |= MapFlags.StationaryGraphics;
+            if (checkBoxNoSleepUntilDawn.Checked)
+                map.Flags |= MapFlags.NoSleepUntilDawn;
+            if (checkBoxWorldSurface.Checked)
+                map.Flags |= MapFlags.WorldSurface;
+        }
+
         void MapTypeChanged()
         {
             if (radioButtonIndoor.Checked || radioButtonDungeon.Checked)
@@ -278,6 +310,8 @@ namespace AmbermoonMapEditor2D
             {
                 checkBoxWorldSurface.Enabled = true;
             }
+
+            UpdateMapFlags();
         }
 
         void TilesetChanged()

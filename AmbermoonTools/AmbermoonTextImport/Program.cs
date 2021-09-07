@@ -457,7 +457,7 @@ namespace AmbermoonTextImport
 
             try
             {
-                Ambermoon.Data.Legacy.Serialization.FileWriter.WriteContainer(containerWriter, data, Ambermoon.Data.Legacy.Serialization.FileType.AMNP);
+                Ambermoon.Data.Legacy.Serialization.FileWriter.WriteContainer(containerWriter, data, Ambermoon.Data.Legacy.Serialization.FileType.AMNP, 528);
 
                 using var stream = File.Create(outPath);
                 containerWriter.CopyTo(stream);

@@ -479,6 +479,7 @@ namespace AmbermoonMapEditor2D
             this.checkBoxMagic.TabIndex = 11;
             this.checkBoxMagic.Text = "Allow Magic";
             this.checkBoxMagic.UseVisualStyleBackColor = true;
+            this.checkBoxMagic.CheckedChanged += new System.EventHandler(this.checkBoxMagic_CheckedChanged);
             // 
             // buttonIndoorDefaults
             // 
@@ -510,6 +511,7 @@ namespace AmbermoonMapEditor2D
             this.checkBoxTravelGraphics.TabIndex = 7;
             this.checkBoxTravelGraphics.Text = "Travel Graphics";
             this.checkBoxTravelGraphics.UseVisualStyleBackColor = true;
+            this.checkBoxTravelGraphics.CheckedChanged += new System.EventHandler(this.checkBoxTravelGraphics_CheckedChanged);
             // 
             // checkBoxNoSleepUntilDawn
             // 
@@ -520,6 +522,7 @@ namespace AmbermoonMapEditor2D
             this.checkBoxNoSleepUntilDawn.TabIndex = 6;
             this.checkBoxNoSleepUntilDawn.Text = "No Sleep Until Dawn";
             this.checkBoxNoSleepUntilDawn.UseVisualStyleBackColor = true;
+            this.checkBoxNoSleepUntilDawn.CheckedChanged += new System.EventHandler(this.checkBoxNoSleepUntilDawn_CheckedChanged);
             // 
             // checkBoxUnknown1
             // 
@@ -531,6 +534,7 @@ namespace AmbermoonMapEditor2D
             this.checkBoxUnknown1.TabIndex = 5;
             this.checkBoxUnknown1.Text = "Unknown";
             this.checkBoxUnknown1.UseVisualStyleBackColor = true;
+            this.checkBoxUnknown1.CheckedChanged += new System.EventHandler(this.checkBoxUnknown1_CheckedChanged);
             // 
             // checkBoxResting
             // 

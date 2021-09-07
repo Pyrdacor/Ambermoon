@@ -122,6 +122,8 @@ namespace AmbermoonMapEditor2D
 
             checkBoxUnknown1.Checked = checkBoxTravelGraphics.Checked = checkBoxWorldSurface.Checked;
             groupBoxCharacters.Enabled = !checkBoxWorldSurface.Checked;
+
+            UpdateMapFlags();
         }
 
         private void comboBoxMusic_SelectedIndexChanged(object sender, EventArgs e)
@@ -138,6 +140,8 @@ namespace AmbermoonMapEditor2D
             }
 
             checkBoxNoSleepUntilDawn.Enabled = checkBoxResting.Checked;
+
+            UpdateMapFlags();
         }
 
         private void radioButtonIndoor_CheckedChanged(object sender, EventArgs e)
@@ -807,6 +811,26 @@ namespace AmbermoonMapEditor2D
                     panelMap.Refresh();
                 }
             }
+        }
+
+        private void checkBoxTravelGraphics_CheckedChanged(object sender, EventArgs e)
+        {
+            UpdateMapFlags();
+        }
+
+        private void checkBoxMagic_CheckedChanged(object sender, EventArgs e)
+        {
+            UpdateMapFlags();
+        }
+
+        private void checkBoxNoSleepUntilDawn_CheckedChanged(object sender, EventArgs e)
+        {
+            UpdateMapFlags();
+        }
+
+        private void checkBoxUnknown1_CheckedChanged(object sender, EventArgs e)
+        {
+            UpdateMapFlags();
         }
     }
 }

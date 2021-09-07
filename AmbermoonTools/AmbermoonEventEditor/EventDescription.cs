@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 
 namespace AmbermoonEventEditor
 {
@@ -126,7 +127,14 @@ namespace AmbermoonEventEditor
             return System.Enum.GetValues(typeof(TEnum)).OfType<TEnum>().Select(e => (ushort)Convert.ChangeType(e, typeof(ushort))).Contains(input);
         }
 
-        public override string DefaultValueText => ((TEnum)(object)(int)DefaultValue).ToString();
+        public override string DefaultValueText
+        {
+            get
+            {
+                int value = DefaultValue;
+                return Unsafe.As<int, TEnum>(ref value).ToString();
+            }
+        }
     }
 
     // Shortcut for description creation -> Use.Byte(...) etc
