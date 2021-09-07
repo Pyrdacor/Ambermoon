@@ -11,6 +11,13 @@ Based on 1.09.
 - The blacksmith in Newlake has now the correct name and repair cost.
 - Fixed ship dealer in Spannenberg. Ships will now correctly be spawned.
 - Spawn location of Gryban was again wrong. Now it is really fixed!
+- When you try to bring the broom or magical disc to Morag it will
+  be burned. This was done when you first entered the Morag hangar but
+  not when you come back later. This is now fixed.
+- When you come back to the S'Angrila prison after S'Riel has died you
+  will now also see his bones and not only a popup on an empty floor.
+- When you try really hard to smuggle the broom or magical disc onto
+  Morag you will experience a surprise. Make sure to save beforehand!
 
 ## Version 1.09
 
