@@ -1,0 +1,5 @@
+dotnet publish -c Release "./AmbermoonTools/AmbermoonPack/AmbermoonPack.csproj" -p:PublishSingleFile=true -r win-x64 --no-restore --no-self-contained --nologo
+dotnet publish -c Release "./AmbermoonTools/AmbermoonMonsterValueChanger/AmbermoonMonsterValueChanger.csproj" -p:PublishSingleFile=true -r win-x64 --no-restore --no-self-contained --nologo
+dotnet publish -c Release "./AmbermoonTools/AmbermoonTextImport/AmbermoonTextImport.csproj" -p:PublishSingleFile=true -r win-x64 --no-restore --no-self-contained --nologo
+dotnet publish -c Release "./AmbermoonTools/AmbermoonDiskExtract/AmbermoonDiskExtract.csproj" -p:PublishSingleFile=true  -r win-x64 --no-restore --no-self-contained --nologo
+dotnet publish -c Release "./AmbermoonTools/AmbermoonEventEditor/AmbermoonEventEditor.csproj" -p:PublishSingleFile=true  -r win-x64 --no-restore --no-self-contained --nologo
