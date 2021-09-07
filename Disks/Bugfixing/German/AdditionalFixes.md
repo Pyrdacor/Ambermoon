@@ -10,6 +10,7 @@ Based on 1.08.
 - Fixed chest opening when you got hit by the spikes in the palace of S'Endar.
 - The blacksmith in Newlake has now the correct name and repair cost.
 - Fixed ship dealer in Spannenberg. Ships will now correctly be spawned.
+- Spawn location of Gryban was again wrong. Now it is really fixed!
 
 ## Version 1.08
 
