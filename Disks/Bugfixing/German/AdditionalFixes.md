@@ -4,8 +4,12 @@ Based on 1.08.
 
 - Temple of gala door can not be skipped via broom or eagle anymore.
 - Crypt door can not be skipped via broom or eagle anymore.
+- Lebab's tower door can not be skipped via broom or eagle anymore.
+  Moreover you can't skip the gargoyle fight at the door by fleeing.
 - Fixed double text-popup in Burnville when you look at the healer's sign.
 - Fixed chest opening when you got hit by the spikes in the palace of S'Endar.
+- The blacksmith in Newlake has now the correct name and repair cost.
+- Fixed ship dealer in Spannenberg. Ships will now correctly be spawned.
 
 ## Version 1.08
 
