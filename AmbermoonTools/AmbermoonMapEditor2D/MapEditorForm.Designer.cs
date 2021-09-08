@@ -121,6 +121,7 @@ namespace AmbermoonMapEditor2D
             this.columnHeaderEventDescription = new System.Windows.Forms.ColumnHeader();
             this.buttonToggleEvents = new System.Windows.Forms.Button();
             this.timerAnimation = new System.Windows.Forms.Timer(this.components);
+            this.buttonExportTileset = new System.Windows.Forms.Button();
             this.menuStrip.SuspendLayout();
             this.groupBoxTileset.SuspendLayout();
             this.groupBoxProperties.SuspendLayout();
@@ -246,6 +247,7 @@ namespace AmbermoonMapEditor2D
             // 
             // groupBoxTileset
             // 
+            this.groupBoxTileset.Controls.Add(this.buttonExportTileset);
             this.groupBoxTileset.Controls.Add(this.buttonEditTile);
             this.groupBoxTileset.Controls.Add(this.comboBoxPalettes);
             this.groupBoxTileset.Controls.Add(this.comboBoxTilesets);
@@ -260,7 +262,7 @@ namespace AmbermoonMapEditor2D
             // 
             // buttonEditTile
             // 
-            this.buttonEditTile.Location = new System.Drawing.Point(707, 119);
+            this.buttonEditTile.Location = new System.Drawing.Point(707, 93);
             this.buttonEditTile.Name = "buttonEditTile";
             this.buttonEditTile.Size = new System.Drawing.Size(89, 23);
             this.buttonEditTile.TabIndex = 4;
@@ -290,12 +292,13 @@ namespace AmbermoonMapEditor2D
             // 
             // buttonAddTileset
             // 
-            this.buttonAddTileset.Location = new System.Drawing.Point(707, 148);
+            this.buttonAddTileset.Location = new System.Drawing.Point(707, 120);
             this.buttonAddTileset.Name = "buttonAddTileset";
             this.buttonAddTileset.Size = new System.Drawing.Size(89, 23);
             this.buttonAddTileset.TabIndex = 1;
             this.buttonAddTileset.Text = "New tileset ...";
             this.buttonAddTileset.UseVisualStyleBackColor = true;
+            this.buttonAddTileset.Click += new System.EventHandler(this.buttonAddTileset_Click);
             // 
             // panelTileset
             // 
@@ -941,6 +944,16 @@ namespace AmbermoonMapEditor2D
             this.timerAnimation.Interval = 166;
             this.timerAnimation.Tick += new System.EventHandler(this.timerAnimation_Tick);
             // 
+            // buttonExportTileset
+            // 
+            this.buttonExportTileset.Location = new System.Drawing.Point(707, 148);
+            this.buttonExportTileset.Name = "buttonExportTileset";
+            this.buttonExportTileset.Size = new System.Drawing.Size(89, 23);
+            this.buttonExportTileset.TabIndex = 5;
+            this.buttonExportTileset.Text = "Export tileset ...";
+            this.buttonExportTileset.UseVisualStyleBackColor = true;
+            this.buttonExportTileset.Click += new System.EventHandler(this.buttonExportTileset_Click);
+            // 
             // MapEditorForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
@@ -1084,6 +1097,7 @@ namespace AmbermoonMapEditor2D
         private System.Windows.Forms.ColumnHeader columnHeaderEventId;
         private System.Windows.Forms.ColumnHeader columnHeaderEventDescription;
         private System.Windows.Forms.Timer timerAnimation;
+        private System.Windows.Forms.Button buttonExportTileset;
     }
 }
 

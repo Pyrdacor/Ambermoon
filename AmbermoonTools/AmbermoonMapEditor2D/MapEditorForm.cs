@@ -1,6 +1,7 @@
 ﻿using Ambermoon.Data;
 using System;
 using System.Drawing;
+using System.Linq;
 using System.Windows.Forms;
 
 namespace AmbermoonMapEditor2D
@@ -857,6 +858,30 @@ namespace AmbermoonMapEditor2D
             ++frame;
             panelTileset.Refresh();
             panelMap.Refresh();
+        }
+
+        private void buttonExportTileset_Click(object sender, EventArgs e)
+        {
+            // TODO
+        }
+
+        private void buttonAddTileset_Click(object sender, EventArgs e)
+        {
+            // TODO: we also have to add a new icon file
+            /*uint index = 1 + (uint)tilesets.Count;
+
+            var tileset = new Tileset()
+            {
+                Index = index,
+                Tiles = new Tileset.Tile[2500]
+            };
+
+            for (int i = 0; i < 2500; ++i)
+                tileset.Tiles[i] = new Tileset.Tile();
+
+            tilesets.Add(index, tileset);
+
+            comboBoxTilesets.SelectedIndex = (int)index - 1;*/
         }
     }
 }
