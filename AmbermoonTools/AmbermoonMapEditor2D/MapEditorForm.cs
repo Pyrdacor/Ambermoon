@@ -21,7 +21,7 @@ namespace AmbermoonMapEditor2D
                 history.UndoGotFilled += () => toolStripMenuItemEditUndo.Enabled = true;
                 history.UndoGotEmpty += () => toolStripMenuItemEditUndo.Enabled = false;
                 history.RedoGotFilled += () => toolStripMenuItemEditRedo.Enabled = true;
-                history.RedoGotEmpty += () => toolStripMenuItemEditRedo.Enabled = false;                
+                history.RedoGotEmpty += () => toolStripMenuItemEditRedo.Enabled = false;
             }
             else
             {
@@ -228,7 +228,8 @@ namespace AmbermoonMapEditor2D
                         {
                             try
                             {
-                                var backgroundImage = imageCache.GetImage(map.TilesetOrLabdataIndex, backgroundTile.GraphicIndex - 1, map.PaletteIndex);
+                                uint frame = backgroundTile.NumAnimationFrames <= 1 ? 0 : (uint)(this.frame % (ulong)backgroundTile.NumAnimationFrames);
+                                var backgroundImage = imageCache.GetImage(map.TilesetOrLabdataIndex, backgroundTile.GraphicIndex + frame - 1, map.PaletteIndex);
                                 e.Graphics.DrawImageUnscaledAndClipped(backgroundImage, rect);
                             }
                             catch
@@ -241,7 +242,8 @@ namespace AmbermoonMapEditor2D
                         {
                             try
                             {
-                                var foregroundImage = imageCache.GetImage(map.TilesetOrLabdataIndex, foregroundTile.GraphicIndex - 1, map.PaletteIndex);
+                                uint frame = foregroundTile.NumAnimationFrames <= 1 ? 0 : (uint)(this.frame % (ulong)foregroundTile.NumAnimationFrames);
+                                var foregroundImage = imageCache.GetImage(map.TilesetOrLabdataIndex, foregroundTile.GraphicIndex + frame - 1, map.PaletteIndex);
                                 e.Graphics.DrawImageUnscaledAndClipped(foregroundImage, rect);
                             }
                             catch
@@ -320,7 +322,8 @@ namespace AmbermoonMapEditor2D
 
                         try
                         {
-                            var image = imageCache.GetImage(map.TilesetOrLabdataIndex, tile.GraphicIndex - 1, map.PaletteIndex);
+                            uint frame = tile.NumAnimationFrames <= 1 ? 0 : (uint)(this.frame % (ulong)tile.NumAnimationFrames);
+                            var image = imageCache.GetImage(map.TilesetOrLabdataIndex, tile.GraphicIndex + frame - 1, map.PaletteIndex);
                             e.Graphics.DrawImageUnscaledAndClipped(image, rect);
                             e.Graphics.DrawRectangle(border, rect);
                         }
@@ -831,6 +834,29 @@ namespace AmbermoonMapEditor2D
         private void checkBoxUnknown1_CheckedChanged(object sender, EventArgs e)
         {
             UpdateMapFlags();
+        }
+
+        private void buttonEditTile_Click(object sender, EventArgs e)
+        {
+            var tileset = tilesets[map.TilesetOrLabdataIndex];
+
+            var form = new EditTileForm(tileset.Tiles[selectedTilesetTile], tileset, imageCache, map.PaletteIndex, combatBackgrounds);
+
+            if (form.ShowDialog() == DialogResult.OK)
+            {
+                tileset.Tiles[selectedTilesetTile].Fill(form.Tile);
+                panelTileset.Refresh();
+            }
+        }
+
+        private void timerAnimation_Tick(object sender, EventArgs e)
+        {
+            if (mapLoading)
+                return;
+
+            ++frame;
+            panelTileset.Refresh();
+            panelMap.Refresh();
         }
     }
 }

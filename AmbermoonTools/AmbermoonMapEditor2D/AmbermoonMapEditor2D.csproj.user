@@ -4,7 +4,13 @@
     <Compile Update="DrawPanel.cs">
       <SubType>Component</SubType>
     </Compile>
+    <Compile Update="EditTileForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
     <Compile Update="EventIdSelectionForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="ImageDisplayForm.cs">
       <SubType>Form</SubType>
     </Compile>
     <Compile Update="MapEditorForm.cs">

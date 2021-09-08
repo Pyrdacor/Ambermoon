@@ -30,7 +30,7 @@ namespace AmbermoonMapEditor2D
         private void InitializeComponent()
         {
             this.components = new System.ComponentModel.Container();
-            this.label1 = new System.Windows.Forms.Label();
+            this.labelMapIndex = new System.Windows.Forms.Label();
             this.numericUpDownMapIndex = new System.Windows.Forms.NumericUpDown();
             this.buttonOK = new System.Windows.Forms.Button();
             this.comboBoxMapIndices = new System.Windows.Forms.ComboBox();
@@ -38,14 +38,14 @@ namespace AmbermoonMapEditor2D
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDownMapIndex)).BeginInit();
             this.SuspendLayout();
             // 
-            // label1
+            // labelMapIndex
             // 
-            this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(13, 13);
-            this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(65, 15);
-            this.label1.TabIndex = 0;
-            this.label1.Text = "Map index:";
+            this.labelMapIndex.AutoSize = true;
+            this.labelMapIndex.Location = new System.Drawing.Point(13, 13);
+            this.labelMapIndex.Name = "labelMapIndex";
+            this.labelMapIndex.Size = new System.Drawing.Size(65, 15);
+            this.labelMapIndex.TabIndex = 0;
+            this.labelMapIndex.Text = "Map index:";
             // 
             // numericUpDownMapIndex
             // 
@@ -101,7 +101,7 @@ namespace AmbermoonMapEditor2D
             this.Controls.Add(this.comboBoxMapIndices);
             this.Controls.Add(this.buttonOK);
             this.Controls.Add(this.numericUpDownMapIndex);
-            this.Controls.Add(this.label1);
+            this.Controls.Add(this.labelMapIndex);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedToolWindow;
             this.Name = "MapIndexForm";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
@@ -116,7 +116,7 @@ namespace AmbermoonMapEditor2D
 
         #endregion
 
-        private System.Windows.Forms.Label label1;
+        private System.Windows.Forms.Label labelMapIndex;
         private System.Windows.Forms.NumericUpDown numericUpDownMapIndex;
         private System.Windows.Forms.Button buttonOK;
         private System.Windows.Forms.ComboBox comboBoxMapIndices;

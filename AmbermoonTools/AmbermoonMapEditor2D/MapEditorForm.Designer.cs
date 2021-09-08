@@ -47,7 +47,7 @@ namespace AmbermoonMapEditor2D
             this.comboBoxPalettes = new System.Windows.Forms.ComboBox();
             this.comboBoxTilesets = new System.Windows.Forms.ComboBox();
             this.buttonAddTileset = new System.Windows.Forms.Button();
-            this.panelTileset = new System.Windows.Forms.DrawPanel();
+            this.panelTileset = new System.Windows.Forms.ScrollDrawPanel();
             this.groupBoxProperties = new System.Windows.Forms.GroupBox();
             this.comboBoxWorld = new System.Windows.Forms.ComboBox();
             this.labelSizeCross = new System.Windows.Forms.Label();
@@ -120,6 +120,7 @@ namespace AmbermoonMapEditor2D
             this.columnHeaderEventId = new System.Windows.Forms.ColumnHeader();
             this.columnHeaderEventDescription = new System.Windows.Forms.ColumnHeader();
             this.buttonToggleEvents = new System.Windows.Forms.Button();
+            this.timerAnimation = new System.Windows.Forms.Timer(this.components);
             this.menuStrip.SuspendLayout();
             this.groupBoxTileset.SuspendLayout();
             this.groupBoxProperties.SuspendLayout();
@@ -265,6 +266,7 @@ namespace AmbermoonMapEditor2D
             this.buttonEditTile.TabIndex = 4;
             this.buttonEditTile.Text = "Edit tile ...";
             this.buttonEditTile.UseVisualStyleBackColor = true;
+            this.buttonEditTile.Click += new System.EventHandler(this.buttonEditTile_Click);
             // 
             // comboBoxPalettes
             // 
@@ -934,6 +936,11 @@ namespace AmbermoonMapEditor2D
             this.buttonToggleEvents.UseVisualStyleBackColor = true;
             this.buttonToggleEvents.Click += new System.EventHandler(this.buttonToggleEvents_Click);
             // 
+            // timerAnimation
+            // 
+            this.timerAnimation.Interval = 166;
+            this.timerAnimation.Tick += new System.EventHandler(this.timerAnimation_Tick);
+            // 
             // MapEditorForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
@@ -990,7 +997,7 @@ namespace AmbermoonMapEditor2D
         private System.Windows.Forms.MenuStrip menuStrip;
         private System.Windows.Forms.GroupBox groupBoxTileset;
         private System.Windows.Forms.Button buttonAddTileset;
-        private System.Windows.Forms.DrawPanel panelTileset;
+        private System.Windows.Forms.ScrollDrawPanel panelTileset;
         private System.Windows.Forms.ComboBox comboBoxTilesets;
         private System.Windows.Forms.GroupBox groupBoxProperties;
         private System.Windows.Forms.RadioButton radioButtonOutdoor;
@@ -1076,6 +1083,7 @@ namespace AmbermoonMapEditor2D
         private System.Windows.Forms.ListView listViewEvents;
         private System.Windows.Forms.ColumnHeader columnHeaderEventId;
         private System.Windows.Forms.ColumnHeader columnHeaderEventDescription;
+        private System.Windows.Forms.Timer timerAnimation;
     }
 }
 

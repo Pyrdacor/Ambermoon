@@ -6,7 +6,14 @@
         {
             SetStyle(ControlStyles.UserPaint | ControlStyles.AllPaintingInWmPaint | ControlStyles.OptimizedDoubleBuffer, true);
         }
+    }
 
+    class ScrollDrawPanel : DrawPanel
+    {
+        public ScrollDrawPanel()
+        {
+
+        }
 
         protected override CreateParams CreateParams
         {
@@ -19,7 +26,7 @@
         }
     }
 
-    class MapDrawPanel : DrawPanel
+    class MapDrawPanel : ScrollDrawPanel
     {
         protected override CreateParams CreateParams
         {

@@ -37,6 +37,7 @@ namespace AmbermoonMapEditor2D
 
         IGameData gameData;
         Dictionary<uint, Tileset> tilesets;
+        Dictionary<uint, Bitmap> combatBackgrounds = new Dictionary<uint, Bitmap>(16);
         MapManager mapManager;
         IReadOnlyDictionary<Song, string> songNames;
         ImageCache imageCache;
@@ -66,6 +67,7 @@ namespace AmbermoonMapEditor2D
         string saveFileName = null;
         bool showEvents = false;
         bool mapLoading = false;
+        ulong frame = 0;
 
         History history = new History();
         Map map;
@@ -108,7 +110,9 @@ namespace AmbermoonMapEditor2D
 
             if (gameData.Files.TryGetValue("AM2_CPU", out var asmReader))
             {
-                var executableData = new ExecutableData(AmigaExecutable.Read(asmReader.Files[1]));
+                var stream = asmReader.Files[1];
+                stream.Position = 0;
+                var executableData = new ExecutableData(AmigaExecutable.Read(stream));
                 songNames = executableData.SongNames.Entries;
             }
             else
@@ -128,12 +132,30 @@ namespace AmbermoonMapEditor2D
             for (int i = 1; i <= imageCache.PaletteCount; ++i)
                 comboBoxPalettes.Items.Add($"Palette {i}");
 
+            // TODO: ensure this file
+            var combatBackgroundImageFiles = gameData.Files["Combat_background.amb"].Files;
+            var combatGraphicInfo = new GraphicInfo
+            {
+                Alpha = false,
+                GraphicFormat = GraphicFormat.Palette5Bit,
+                Width = 320,
+                Height = 95
+            };
+            for (int i = 0; i < 16; ++i)
+            {
+                var combatBackgroundInfo = CombatBackgrounds.Info2D[i];
+                var reader = combatBackgroundImageFiles[(int)combatBackgroundInfo.GraphicIndex];
+                reader.Position = 0;
+                combatBackgrounds.Add((uint)i, imageCache.LoadImage(reader, combatBackgroundInfo.Palettes[0], combatGraphicInfo));
+            }
+
             mapScrollIndicator.Size = new Size(1, 1);
             tilesetScrollIndicator.Size = new Size(1, 1);
             panelMap.Controls.Add(mapScrollIndicator);
             panelTileset.Controls.Add(tilesetScrollIndicator);
             SelectTool(Tool.Brush, true);
             panelTileset.Cursor = CursorFromTool(Tool.Brush);
+            timerAnimation.Interval = Globals.TimePerFrame;
         }
 
         void CleanUp()
@@ -147,6 +169,7 @@ namespace AmbermoonMapEditor2D
 
         void InitializeMap(Map map)
         {
+            timerAnimation.Stop();
             unsavedChanges = false;
             history.Clear();
             this.map = map;
@@ -183,6 +206,7 @@ namespace AmbermoonMapEditor2D
 
             MapSizeChanged();
             TilesetChanged();
+            timerAnimation.Start();
 
             mapLoading = false;
         }

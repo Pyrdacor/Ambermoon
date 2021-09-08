@@ -56,6 +56,17 @@ namespace AmbermoonMapEditor2D
             AddTilesets(icons3);
         }
 
+        internal Color GetPaletteColor(uint paletteIndex, uint colorIndex)
+        {
+            colorIndex %= 32;
+
+            int r = palettes[paletteIndex].Data[colorIndex * 4 + 0];
+            int g = palettes[paletteIndex].Data[colorIndex * 4 + 1];
+            int b = palettes[paletteIndex].Data[colorIndex * 4 + 2];
+
+            return Color.FromArgb(r, g, b);
+        }
+
         public Bitmap GetImage(uint tilesetIndex, uint graphicIndex, uint paletteIndex)
         {
             if (!images.TryGetValue(tilesetIndex, out var tileset))
@@ -92,6 +103,20 @@ namespace AmbermoonMapEditor2D
             var graphic = new Graphic();
             graphicReader.ReadGraphic(graphic, dataReader, PaletteGraphicInfo);
             return graphic;
+        }
+
+        internal Bitmap LoadImage(IDataReader dataReader, uint paletteIndex, GraphicInfo graphicInfo)
+        {
+            var graphic = new Graphic();
+            graphicReader.ReadGraphic(graphic, dataReader, graphicInfo);
+
+            var bitmap = new Bitmap(graphicInfo.Width, graphicInfo.Height);
+            var imageData = bitmap.LockBits(new Rectangle(0, 0, graphicInfo.Width, graphicInfo.Height), ImageLockMode.WriteOnly, PixelFormat.Format32bppArgb);
+            var pixelData = GetPixelData(graphic, palettes[paletteIndex]);
+            Marshal.Copy(pixelData, 0, imageData.Scan0, pixelData.Length);
+            bitmap.UnlockBits(imageData);
+
+            return bitmap;
         }
 
         Bitmap LoadImage(IDataReader dataReader, uint graphicIndex, Graphic palette)
