@@ -9,8 +9,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Ambermoon.Data.Common" Version="10.0.4" />
-    <PackageReference Include="Ambermoon.Data.Legacy" Version="10.0.2" />
+    <PackageReference Include="Ambermoon.Data.Common" Version="10.0.5" />
+    <PackageReference Include="Ambermoon.Data.Legacy" Version="10.0.5" />
   </ItemGroup>
 
 </Project>
