@@ -10,6 +10,10 @@ namespace AmbermoonMapEditor2D
             target.GraphicIndex = source.GraphicIndex;
             target.NumAnimationFrames = source.NumAnimationFrames;
             target.ColorIndex = source.ColorIndex;
+            target.CombatBackgroundIndex = source.CombatBackgroundIndex;
+            target.SitDirection = source.SitDirection;
+            target.Sleep = source.Sleep;
+            target.AllowedTravelTypes = source.AllowedTravelTypes;
         }
     }
 }

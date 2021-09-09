@@ -60,13 +60,15 @@ namespace AmbermoonMapEditor2D
             checkBoxFloor.Checked = tile.Flags.HasFlag(TileFlags.Floor);
             checkBoxHidePlayer.Checked = tile.Flags.HasFlag(TileFlags.PlayerInvisible);
 
-            if (radioButtonBackground.Checked)
-                tile.Flags |= TileFlags.Background;
-            else if (radioButtonForeground.Checked)
+            if (tile.Flags.HasFlag(TileFlags.Background))
             {
-                tile.Flags |= TileFlags.Background;
-                tile.Flags |= TileFlags.BringToFront;
+                if (tile.Flags.HasFlag(TileFlags.BringToFront))
+                    radioButtonForeground.Checked = true;
+                else
+                    radioButtonBackground.Checked = true;            
             }
+            else
+                radioButtonNormal.Checked = true;
 
             if (tile.Sleep)
                 comboBoxSitSleep.SelectedIndex = 5;

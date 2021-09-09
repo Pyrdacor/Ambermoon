@@ -1,4 +1,5 @@
 ﻿using Ambermoon.Data;
+using Ambermoon.Data.Legacy.Serialization;
 using System;
 using System.Drawing;
 using System.Linq;
@@ -840,7 +841,6 @@ namespace AmbermoonMapEditor2D
         private void buttonEditTile_Click(object sender, EventArgs e)
         {
             var tileset = tilesets[map.TilesetOrLabdataIndex];
-
             var form = new EditTileForm(tileset.Tiles[selectedTilesetTile], tileset, imageCache, map.PaletteIndex, combatBackgrounds);
 
             if (form.ShowDialog() == DialogResult.OK)
@@ -862,7 +862,26 @@ namespace AmbermoonMapEditor2D
 
         private void buttonExportTileset_Click(object sender, EventArgs e)
         {
-            // TODO
+            var dialog = new SaveFileDialog();
+
+            dialog.AddExtension = false;
+            dialog.AutoUpgradeEnabled = true;
+            dialog.CheckFileExists = false;
+            dialog.CheckPathExists = false;
+            dialog.CreatePrompt = false;
+            dialog.Filter = "All files (*.*)|*.*";
+            dialog.OverwritePrompt = true;
+            dialog.RestoreDirectory = true;
+            dialog.Title = "Save tileset";
+
+            if (dialog.ShowDialog() == DialogResult.OK)
+            {
+                var tileset = tilesets[map.TilesetOrLabdataIndex];
+                var tilesetWriter = new TilesetWriter();
+                var dataWriter = new DataWriter();
+                tilesetWriter.WriteTileset(tileset, dataWriter);
+                System.IO.File.WriteAllBytes(dialog.FileName, dataWriter.ToArray());
+            }
         }
 
         private void buttonAddTileset_Click(object sender, EventArgs e)

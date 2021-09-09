@@ -71,8 +71,8 @@ namespace AmbermoonMapEditor2D
 
         History history = new History();
         Map map;
-        int MapWidth => (int)numericUpDownWidth.Value;
-        int MapHeight => (int)numericUpDownHeight.Value;
+        int MapWidth => map?.Width ?? (int)numericUpDownWidth.Value;
+        int MapHeight => map?.Height ?? (int)numericUpDownHeight.Value;
         Song? playingSong = null;
         Song? lastSong = null;
 
