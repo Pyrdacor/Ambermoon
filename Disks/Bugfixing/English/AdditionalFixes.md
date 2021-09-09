@@ -18,12 +18,15 @@ Based on 1.09.
   will now also see his bones and not only a popup on an empty floor.
 - When you try really hard to smuggle the broom or magical disc onto
   Morag you will experience a surprise. Make sure to save beforehand!
+- You can no longer pass Lebab's tower with the broom.
+- Fixed a display bug in the S'Angrila prison.
+- You will no longer get stucked inside the wall in Nera's cellar.
 
 ## Version 1.09
 
 Based on 1.08.
 
-- Fixed stair texture in Sansrie's temple 1.
+- Fixed stair texture in Sansri's temple 1.
   - Map 422 (x=14, y=11)
   - Changed byte 0x3D2 from 0x72 to 0x73
 - When returning with Dorina to Dor Kiredon the text
