@@ -21,6 +21,10 @@ Based on 1.08.
 - You can no longer pass Lebab's tower with the broom.
 - Fixed a display bug in the S'Angrila prison.
 - You will no longer get stucked inside the wall in Nera's cellar.
+- You will no longer get stucked inside the wall in the mines of Dor Kiredon.
+- Fixed disease attribute crippling.
+- Fixed SP stealer amount.
+- Fixed merchant issue with more than 32767 gold.
 
 ## Version 1.08
 
