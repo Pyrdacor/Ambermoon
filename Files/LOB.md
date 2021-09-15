@@ -6,6 +6,8 @@ There was a piece of C code in the Amberworld project which could decompress LOB
 
 After looking at this code for a while I understood how LOB works and that the algorithm for decompression is actually much simpler. See my C# code example below.
 
+Nico Bendlin researched this even better. Have a look here: https://gitlab.com/ambermoon/research/-/wikis/compression.
+
 ## LOB decompression
 
 LOB data consists of chunks. Each chunk starts with an 8 bit header. Each bit of the header gives information about the following data. A 0 means "match data" and a 1 means a normal byte.
