@@ -394,7 +394,7 @@ namespace AmbermoonTextImport
                 data = textFiles.Select(f =>
                 {
                     var dataWriter = new Ambermoon.Data.Legacy.Serialization.DataWriter();
-                    Ambermoon.Data.Legacy.Serialization.TextWriter.WriteTexts(dataWriter, f.Value, TrimCharsFromOptions(options));
+                    Ambermoon.Data.Legacy.Serialization.TextWriter.WriteTexts(dataWriter, f.Value, TrimCharsFromOptions(options), true);
                     return new KeyValuePair<uint, byte[]>((uint)f.Key, dataWriter.ToArray());
                 }).ToDictionary(x => x.Key, x => x.Value);
             }

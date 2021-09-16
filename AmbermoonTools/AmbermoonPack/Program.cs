@@ -153,9 +153,10 @@ namespace AmbermoonPack
                                 break;
                         }
                     }
-                    catch
+                    catch (Exception ex)
                     {
                         Console.WriteLine("Invalid source file for REPACK.");
+                        Console.WriteLine("Error: " + ex.Message);
                         Environment.Exit(ERROR_INVALID_SOURCE_FILE);
                         return;
                     }
