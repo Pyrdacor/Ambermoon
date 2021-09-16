@@ -1,0 +1,121 @@
+echo "Ambermoon Dos2.0 Install                   von Patrick Hammes"
+echo "-------------------------------------------------------------"
+echo ""
+echo "Achten Sie darauf, daß Sie Ihr Kickstart-ROM V2.0 oder höher"
+echo "installiert haben und von die Workbench2.0 gebootet haben."
+ask "Weitermachen ? "
+if WARN
+  echo ""
+  echo "Kopiere OS-Befehle..."
+else
+  echo ""
+  echo "...und Tschüß !"
+  endcli
+endif
+cd AMBER_A:
+copy system/format to RAM:
+cd C
+copy copy|addbuffers|assign|delete|cls|install|relabel|endcli to RAM:c
+assign c: RAM:c
+cd RAM:
+addbuffers DF0: 50
+addbuffers DF1: 50
+echo ""
+echo "Legen Sie eine Diskette in Drive 0 und 1 zum formatieren ein !"
+ask "Fertig ?"
+echo ""
+echo "Formatiere Drive 0...  Name: Ambermoon A"
+format DRIVE DF0: NAME AMBER1 FFS NOICONS
+echo ""
+echo "Formatiere Drive 1...  Name: Ambermoon B"
+format DRIVE DF1: NAME AMBER2 FFS NOICONS
+echo ""
+echo "Installiere Bootblock 2.0 FFS..."
+install DF0: FFS
+cls
+echo "Legen Sie eine Diskette in Drive 0 und 1 zum formatieren ein !"
+ask "Fertig ?"
+echo ""
+echo "Formatiere Drive 0... Name: Ambermoon C"
+format DRIVE DF0: NAME AMBER3 FFS NOICONS
+echo ""
+echo "Formatiere Drive 1... Name: Ambermoon D"
+format DRIVE DF1: NAME AMBER4 FFS NOICONS
+echo ""
+cls
+echo "Legen Sie eine Diskette in Drive 0 und 1 zum formatieren ein !"
+ask "Fertig ?"
+echo ""
+echo "Formatiere Drive 0... Name: Ambermoon E"
+format DRIVE DF0: NAME AMBER5 FFS NOICONS
+echo ""
+echo "Formatiere Drive 1... Name: Ambermoon F"
+format DRIVE DF1: NAME AMBER6 FFS NOICONS
+echo ""
+cls
+echo "Legen Sie eine Diskette in Drive 0 und 1 zum formatieren ein !"
+ask "Fertig ?"
+echo ""
+echo "Formatiere Drive 0... Name: Ambermoon G"
+format DRIVE DF0: NAME AMBER7 FFS NOICONS
+echo ""
+echo "Formatiere Drive 1... Name: Ambermoon H"
+format DRIVE DF1: NAME AMBER8 FFS NOICONS
+echo ""
+cls
+echo "Puh! Das ist jetzt aber der letzte Formatierungsvorgang !"
+echo "Legen Sie eine Diskette in Drive 0 und 1 zum formatieren ein !"
+ask "Fertig ?"
+echo ""
+echo "Formatiere Drive 0... Name: Ambermoon I"
+format DRIVE DF0: NAME AMBER9 FFS NOICONS
+echo ""
+echo "Formatiere Drive 1... Name: Ambermoon J"
+format DRIVE DF1: NAME AMBERS FFS NOICONS
+echo ""
+cls
+echo "Okay! Jetzt werden die Dateien der Spieldisketten auf die"
+echo "vorbereiteten Disketten kopiert. Legen Sie dazu am besten"
+echo "die Spieldiskette ins Laufwerk 0 und die Leerdiskette ins"
+echo "Laufwerk 1!"
+echo ""
+echo "Laufwerk 0: Ambermoon A Original"
+echo "Laufwerk 1: Ambermoon A FFS"
+copy AMBER_A: ALL to AMBER1:
+relabel AMBER1: AMBER_A:
+cls
+copy AMBER_B: ALL to AMBER2:
+relabel AMBER2: AMBER_B:
+cls
+copy AMBER_C: ALL to AMBER3:
+relabel AMBER3: AMBER_C:
+cls
+copy AMBER_D: ALL to AMBER4:
+relabel AMBER4: AMBER_D:
+cls
+copy AMBER_E: ALL to AMBER5:
+relabel AMBER5: AMBER_E:
+cls
+copy AMBER_F: ALL to AMBER6:
+relabel AMBER6: AMBER_F:
+cls
+copy AMBER_G: ALL to AMBER7:
+relabel AMBER7: AMBER_G:
+cls
+copy AMBER_H: ALL to AMBER8:
+relabel AMBER8: AMBER_H:
+cls
+copy AMBER_I: ALL to AMBER9:
+relabel AMBER9: AMBER_I:
+cls
+copy AMBER_J: ALL to AMBERS:
+relabel AMBERS: AMBER_J
+cls
+echo "Fertig ! Booten Sie jetzt von Diskette A um Ambermoon zu spielen !"
+echo "....und Tschüß !!"
+delete RAM:c ALL QUIET
+delete RAM:system ALL QUIET
+endcli
+
+
+

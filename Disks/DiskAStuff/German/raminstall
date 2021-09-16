@@ -1,0 +1,31 @@
+ram:
+
+echo Installing 7 disks to RAM...
+
+makedir ambermoon
+
+copy amber_c: all to ram:ambermoon
+copy amber_d: all to ram:ambermoon
+copy amber_e: all to ram:ambermoon
+copy amber_f: all to ram:ambermoon
+copy amber_g: all to ram:ambermoon
+copy amber_h: all to ram:ambermoon
+copy amber_i: all to ram:ambermoon
+ask "Remove all disks now ! Except Amber_A, Amber_B and Amber_J (Put them in)"
+
+assign amber_c: ram:ambermoon
+assign amber_d: ram:ambermoon
+assign amber_e: ram:ambermoon
+assign amber_f: ram:ambermoon
+assign amber_g: ram:ambermoon
+assign amber_h: ram:ambermoon
+assign amber_i: ram:ambermoon
+
+ask "Ready."
+echo Running now...
+execute s/startup-original
+
+
+
+
+
