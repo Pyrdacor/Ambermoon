@@ -29,12 +29,12 @@ Bit | Meaning
 2 | Dungeon (light depends only on own light sources)
 3 | Automapper (if active the dungeon map is available and the map has to be explored)
 4 | CanRest
-5 | WorldSurface
+5 | **Unknown** (all world maps have this set)
 6 | Sky (3D maps only)
 7 | NoSleepUntilDawn (if active sleep time is always 8 hours)
 8 | StationaryGraphics (transport graphics like horse or ship)
 9 | **Unknown** (never set in Ambermoon)
-10 | Small player (player is drawn as 16x16 instead of 16x32, 2D maps only)
+10 | WorldSurface
 11 | CanUseSpells
 12-15 | Unknown / unused
 
