@@ -15,12 +15,12 @@ build:
   project: AmbermoonTools/AmbermoonTools.sln
 
 artifacts:
-  - path: AmbermoonTools-Windows.zip
-    name: AmbermoonTools-Windows
-  - path: AmbermoonTools-Windows32Bit.zip
-    name: AmbermoonTools-Windows32Bit
-  - path: AmbermoonTools-Linux.tar.gz
-    name: AmbermoonTools-Linux
+  - path: AmbermoonTools-Windows-Native.zip
+    name: AmbermoonTools-Windows-Native
+  - path: AmbermoonTools-Windows32Bit-Native.zip
+    name: AmbermoonTools-Windows32Bit-Native
+  - path: AmbermoonTools-Linux-Native.tar.gz
+    name: AmbermoonTools-Linux-Native
 
 after_build:
   - ps: ./AmbermoonTools/publish.ps1
@@ -29,8 +29,8 @@ test: off
 
 deploy:
   - provider: GitHub
-    name: AmbermoonTools-Windows
-    artifact: AmbermoonTools-Windows
+    name: AmbermoonTools-Windows-Native
+    artifact: AmbermoonTools-Windows-Native
     tag: $(APPVEYOR_REPO_TAG_NAME)
     release: $(APPVEYOR_REPO_TAG_NAME)
     description: 'Release $(APPVEYOR_REPO_TAG_NAME)'
@@ -42,8 +42,8 @@ deploy:
     on:
       APPVEYOR_REPO_TAG: true
   - provider: GitHub
-    name: AmbermoonTools-Windows32Bit
-    artifact: AmbermoonTools-Windows32Bit
+    name: AmbermoonTools-Windows32Bit-Native
+    artifact: AmbermoonTools-Windows32Bit-Native
     tag: $(APPVEYOR_REPO_TAG_NAME)
     release: $(APPVEYOR_REPO_TAG_NAME)
     description: 'Release $(APPVEYOR_REPO_TAG_NAME)'
@@ -55,8 +55,8 @@ deploy:
     on:
       APPVEYOR_REPO_TAG: true
   - provider: GitHub
-    name: AmbermoonTools-Linux
-    artifact: AmbermoonTools-Linux
+    name: AmbermoonTools-Linux-Native
+    artifact: AmbermoonTools-Linux-Native
     tag: $(APPVEYOR_REPO_TAG_NAME)
     release: $(APPVEYOR_REPO_TAG_NAME)
     description: 'Release $(APPVEYOR_REPO_TAG_NAME)'
