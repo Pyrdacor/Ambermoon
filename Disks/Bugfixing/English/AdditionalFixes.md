@@ -2,8 +2,9 @@
 
 Based on 1.10.
 
-- Fixed "remove curse" spell.
+- Fixed "remove curse" spell. (Replace 3C 1F 41 E8 01 22 with 3C 1F 41 E9 01 22 in unimploded AM2_CPU and AM2_BLIT)
 - Windshrine door can not be skipped via broom or eagle anymore.
+- Fixed wrong spawn location when leaving the windshrine. (Change teleport event X from 17 to 16)
 
 ## Version 1.10
 
