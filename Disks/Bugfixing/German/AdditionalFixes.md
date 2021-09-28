@@ -4,7 +4,10 @@ Based on 1.09.
 
 - Fixed "remove curse" spell. (Replace 3C 1F 41 E8 01 22 with 3C 1F 41 E9 01 22 in unimploded AM2_CPU and AM2_BLIT)
 - Windshrine door can not be skipped via broom or eagle anymore.
-- Fixed wrong spawn location when leaving the windshrine. (Change teleport event X from 17 to 16)s
+- Fixed wrong spawn location when leaving the windshrine. (Change teleport event X from 17 to 16)
+- Reverted max swim values from 99 to 95
+- Reverted current swim value of Tar from 99 back to 90
+- Reverted Nelvin's and Tar's max U-M and R-M skills from 99 back to 95
 
 ## Version 1.09
 

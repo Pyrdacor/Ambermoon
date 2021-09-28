@@ -5,6 +5,30 @@ Based on 1.10.
 - Fixed "remove curse" spell. (Replace 3C 1F 41 E8 01 22 with 3C 1F 41 E9 01 22 in unimploded AM2_CPU and AM2_BLIT)
 - Windshrine door can not be skipped via broom or eagle anymore.
 - Fixed wrong spawn location when leaving the windshrine. (Change teleport event X from 17 to 16)
+- Adjusted Selena's max crit from 2 to 5 (Mando also has 5 so this is most likely the correct value)
+- Adjusted Netsrak's initial magic attack level from 0 to 1 (Scimitar grants this)
+- Fixed Netsrak's max R-M and U-M skill to 99
+- Adjusted Erik's initial magic attack level from 0 to 1 (Scimitar grants this)
+- Fixed Erik's initial attack skill value from -6 to 0
+- Adjusted Chris' strength bonus value from 0 to 5 (he starts with Morag Dart which grants 5 strength)
+- Adjusted Chris' dexterity bonus value from 30 to 0 (he has no equip which grants dexterity bonus, twisted with speed)
+- Adjusted Chris' speed bonus value from 0 to 30 (magician boots grant 25 speed, Mitrhil Mail grants 5 speed)
+- Adjusted Chris' luck bonus value from 10 to 0 (he has no equip which grants luck bonus, twister with anti-magic)
+- Adjusted Chris' anti-magic bonus value from 0 to 10 (his anti-magic ring grants that bonus)
+- Adjusted Chris' attack skill bonus value from 30 to 25 (only the Morag Dart grants 25 attack)
+- Adjusted Chris' parry skill bonus value from 0 to 30 (Parry Ring grants 25 and Mitrhil Mail grants another 5)
+- Swapped Chris' bonus values of R-M and U-M which were twisted before. Now 0 R-M and 25 U-M. The latter given by the Magician Boots.
+- Adjusted Chris' SP bonus from 30 to 25 (Magician Boots only grant 25)
+- Adjusted Valdyn's speed bonus from 15 to 25 (his shoes grant 15, armor another 10)
+- Adjusted Targor's attack skill bonus from 0 to 10 (throwing sickle grants this bonus)
+- Adjusted Leonaria's intelligence bonus value from 5 to 0 (there is no equip which grants INT, most likely confused with anti-magic)
+- Adjusted Leonaria's anti-magic bonus value from 0 to 5 (Robe of the Mage grants this bonus)
+- Adjusted Gryban's strength bonus value from 0 to 5 (the holy sword grant this)
+- Adjusted Gryban's luck and anti-magic bonus values, which were twisted. Now luck +0 and anti-magic +5, knight's armour grants the 5 anti-magic)
+- Adjusted Gryban's attack skill bonus value from 0 to 5 (holy sword bonus)
+- Adjusted Gryban's R-M bonus value from 25 to 0 (no equip grants that)
+- Adjusted Gryban's U-M bonus value from 0 to 25 (most likely twisted with R-M, knight's armour bonus)
+- Adjusted Gryban's SP bonus value from 10 to 5 (knight's armour grants only 5)
 
 ## Version 1.10
 
