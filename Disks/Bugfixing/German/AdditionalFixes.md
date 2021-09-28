@@ -3,6 +3,7 @@
 Based on 1.09.
 
 - Fixed "remove curse" spell.
+- Windshrine door can not be skipped via broom or eagle anymore.
 
 ## Version 1.09
 
