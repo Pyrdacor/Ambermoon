@@ -1,3 +1,9 @@
+## Version 1.10
+
+Based on 1.09.
+
+- Fixed "remove curse" spell.
+
 ## Version 1.09
 
 Based on 1.08.
