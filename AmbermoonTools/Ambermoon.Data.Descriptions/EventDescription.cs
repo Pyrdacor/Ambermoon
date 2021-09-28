@@ -1,89 +1,10 @@
-﻿using Ambermoon;
-using Ambermoon.Data;
-using Ambermoon.Data.Enumerations;
+﻿using Ambermoon.Data.Enumerations;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
-using System.Runtime.CompilerServices;
 
-namespace AmbermoonEventEditor
+namespace Ambermoon.Data.Descriptions
 {
-    public enum ValueType
-    {
-        Byte,
-        Word,
-        Bool,
-        Enum,
-        Flag8,
-        Flag16,
-        EventIndex
-    }
-
-    class ValueDescription
-    {
-        public ValueType Type { get; set; } = ValueType.Byte;
-        public ushort DefaultValue { get; set; } = 0;
-        public string Name { get; set; }
-        /// <summary>
-        /// Must be set by the user in any case.
-        /// </summary>
-        public bool Required { get; set; }
-        /// <summary>
-        /// Hidden properties are always set to the default value
-        /// and are not shown.
-        /// </summary>
-        public bool Hidden { get; set; }
-        public bool ShowAsHex { get; set; }
-        public ushort MinValue { get; set; } = 0;
-        public ushort MaxValue { get; set; }
-        public int FlagDescriptionOffset { get; set; } = 0;
-        public string[] FlagDescriptions { get; set; } = null;
-        public virtual string GetPossibleValues()
-        {
-            switch (Type)
-            {
-                case ValueType.Byte:
-                    if (MinValue > 0xff)
-                        throw new Exception("Invalid min value for type byte");
-                    return $"0x{MinValue:x2} ~ 0x{Math.Min(0xff, (int)MaxValue):x2}";
-                case ValueType.Word:
-                    return $"0x{MinValue:x4} ~ 0x{MaxValue:x4}";
-                case ValueType.Bool:
-                    return "0 or 1";
-                case ValueType.Flag8:
-                    if (FlagDescriptions != null)
-                        return string.Join("\r\n", FlagDescriptions.Select((d, i) => $"{1 << (FlagDescriptionOffset + i):x2}: {d}"));
-                    return "0x00 ~ 0xff";
-                case ValueType.Flag16:
-                    if (FlagDescriptions != null)
-                        return string.Join("\r\n", FlagDescriptions.Select((d, i) => $"{1 << (FlagDescriptionOffset + i):x4}: {d}"));
-                    return "0x0000 ~ 0xffff";
-                default:
-                    throw new Exception();
-            }
-        }
-        public virtual bool Check(ushort input)
-        {
-            switch (Type)
-            {
-                case ValueType.Bool:
-                    return input == 0 || input == 1;
-                case ValueType.Byte:
-                case ValueType.Flag8:
-                    return input >= MinValue && input <= MaxValue && input <= 0xff;
-                case ValueType.Word:
-                case ValueType.Flag16:
-                case ValueType.EventIndex:
-                    return input >= MinValue && input <= MaxValue;
-            }
-
-            return false;
-        }
-        public virtual string DefaultValueText => DefaultValue.ToString();
-    }
-
-    class EventIndexDescription : ValueDescription
+    public class EventIndexDescription : ValueDescription
     {
         public EventIndexDescription(string name, bool required)
         {
@@ -96,162 +17,9 @@ namespace AmbermoonEventEditor
             Hidden = false;
             ShowAsHex = true;
         }
-    }
+    }    
 
-    class EnumValueDescription<TEnum> : ValueDescription where TEnum : System.Enum
-    {
-        public TEnum[] AllowedValues { get; }
-
-        public EnumValueDescription(string name, bool required, bool hidden, TEnum defaultValue, TEnum[] allowedValues)
-        {
-            Name = name;
-            Required = required;
-            Hidden = !required && hidden;
-            var values = System.Enum.GetValues(typeof(TEnum)).OfType<TEnum>();
-            MinValue = (ushort)Convert.ChangeType(values.Min(), typeof(ushort));
-            MaxValue = (ushort)Convert.ChangeType(values.Max(), typeof(ushort));
-            DefaultValue = (ushort)Convert.ChangeType(defaultValue, typeof(ushort));
-            AllowedValues = allowedValues;
-        }
-
-        public override string GetPossibleValues()
-        {
-            if (AllowedValues != null && AllowedValues.Length != 0)
-                return string.Join("\r\n", AllowedValues);
-
-            return string.Join("\r\n", System.Enum.GetValues(typeof(TEnum)));
-        }
-
-        public override bool Check(ushort input)
-        {
-            return System.Enum.GetValues(typeof(TEnum)).OfType<TEnum>().Select(e => (ushort)Convert.ChangeType(e, typeof(ushort))).Contains(input);
-        }
-
-        public override string DefaultValueText
-        {
-            get
-            {
-                int value = DefaultValue;
-                return Unsafe.As<int, TEnum>(ref value).ToString();
-            }
-        }
-    }
-
-    // Shortcut for description creation -> Use.Byte(...) etc
-    static class Use
-    {
-        public static ValueDescription EventIndex(string name, bool required) => new EventIndexDescription(name, required);
-
-        public static ValueDescription Byte(string name, bool required, byte maxValue = 255, byte minValue = 0, byte defaultValue = 0, bool showAsHex = false) => new ValueDescription
-        {
-            Type = ValueType.Byte,
-            Name = name,
-            MinValue = minValue,
-            MaxValue = maxValue,
-            DefaultValue = defaultValue,
-            Required = required,
-            ShowAsHex = showAsHex
-        };
-
-        public static ValueDescription HiddenByte(byte defaultValue = 0) => new ValueDescription
-        {
-            Type = ValueType.Byte,
-            Name = "Unknown",
-            DefaultValue = defaultValue,
-            Required = false,
-            Hidden = true
-        };
-
-        public static ValueDescription Word(string name, bool required, ushort maxValue = 65535, ushort minValue = 0, ushort defaultValue = 0, bool showAsHex = false) => new ValueDescription
-        {
-            Type = ValueType.Word,
-            Name = name,
-            MinValue = minValue,
-            MaxValue = maxValue,
-            DefaultValue = defaultValue,
-            Required = required,
-            ShowAsHex = showAsHex
-        };
-
-        public static ValueDescription HiddenWord(ushort defaultValue = 0) => new ValueDescription
-        {
-            Type = ValueType.Word,
-            Name = "Unknown",
-            DefaultValue = defaultValue,
-            Required = false,
-            Hidden = true
-        };
-
-        public static ValueDescription Bool(string name, bool required, bool defaultValue = false) => new ValueDescription
-        {
-            Type = ValueType.Bool,
-            Name = name,
-            MinValue = 0,
-            MaxValue = 1,
-            DefaultValue = (ushort)(defaultValue ? 1 : 0),
-            Required = required
-        };
-
-        public static ValueDescription HiddenBool(byte defaultValue = 0) => new ValueDescription
-        {
-            Type = ValueType.Bool,
-            Name = "Unknown",
-            DefaultValue = defaultValue,
-            Required = false,
-            Hidden = true
-        };
-
-        public static ValueDescription Flag8(string name, bool required, int flagDescriptionOffset, params string[] flagDescriptions) => new ValueDescription
-        {
-            Type = ValueType.Flag8,
-            Name = name,
-            MinValue = 0,
-            MaxValue = 255,
-            DefaultValue = 0,
-            Required = required,
-            FlagDescriptionOffset = flagDescriptionOffset,
-            FlagDescriptions = flagDescriptions
-        };
-
-        public static ValueDescription HiddenFlag8(byte defaultValue = 0) => new ValueDescription
-        {
-            Type = ValueType.Flag8,
-            Name = "Unknown",
-            DefaultValue = defaultValue,
-            Required = false,
-            Hidden = true
-        };
-
-        public static ValueDescription Flag16(string name, bool required, int flagDescriptionOffset, params string[] flagDescriptions) => new ValueDescription
-        {
-            Type = ValueType.Flag16,
-            Name = name,
-            MinValue = 0,
-            MaxValue = 65535,
-            DefaultValue = 0,
-            Required = required,
-            FlagDescriptionOffset = flagDescriptionOffset,
-            FlagDescriptions = flagDescriptions
-        };
-
-        public static ValueDescription HiddenFlag16(ushort defaultValue = 0) => new ValueDescription
-        {
-            Type = ValueType.Flag16,
-            Name = "Unknown",
-            DefaultValue = defaultValue,
-            Required = false,
-            Hidden = true
-        };
-
-        public static EnumValueDescription<TEnum> Enum<TEnum>(string name, bool required, TEnum defaultValue = default(TEnum),
-            params TEnum[] allowedValues)
-            where TEnum : System.Enum => new EnumValueDescription<TEnum>(name, required, false, defaultValue, allowedValues);
-
-        public static EnumValueDescription<TEnum> HiddenEnum<TEnum>(TEnum defaultValue = default(TEnum))
-            where TEnum : System.Enum => new EnumValueDescription<TEnum>("Unknown", false, true, defaultValue, null);
-    }
-
-    class EventDescription
+    public class EventDescription
     {
         public bool AllowMaps { get; }
         public bool AllowNPCs { get; }
@@ -272,7 +40,7 @@ namespace AmbermoonEventEditor
         }
     }
 
-    static class EventDescriptions
+    public static class EventDescriptions
     {
         public static string ToString(Event @event, int identation, string subIdentation = "  ")
         {
@@ -377,10 +145,10 @@ namespace AmbermoonEventEditor
             (
                 true, false, true, true, false,
                 Use.Byte("LockpickingChanceReduction", false, 100),
-                Use.Enum<ChestEvent.ChestFlags>("Flags", false),
+                Use.Flags8<ChestEvent.ChestFlags>("Flags", false),
                 Use.Byte("TextIndex", false, 0xff, 0x00, 0xff),
                 Use.Byte("ChestIndex", true),
-                Use.Enum<ChestEvent.ChestLootFlags>("LootFlags", false),
+                Use.Flags8<ChestEvent.ChestLootFlags>("LootFlags", false),
                 Use.Word("KeyIndex", false),
                 Use.EventIndex("UnlockFailedEventIndex", false)
             )},

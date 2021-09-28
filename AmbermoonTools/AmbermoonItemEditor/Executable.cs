@@ -33,18 +33,31 @@ namespace AmbermoonItemEditor
 
         public void RemoveItem(int index)
         {
+            if (index == 0 || index > items.Count)
+                return;
+
+            --index;
+
             items.RemoveAt(index);
 
             for (int i = index; i < items.Count; ++i)
                 items[i].Index = (uint)(i + 1);
         }
 
+        public int ItemCount => items.Count;
+
+        public void UpdateItem(int index, Func<Item, Item> updater)
+        {
+            items[index] = updater?.Invoke(items[index]) ?? items[index];
+            items[index].Index = (uint)index + 1;
+        }
+
         public void PrintItems()
         {
-            int numRows = (items.Count + 1) / 2;
+            int numRows = (items.Count + 2) / 3;
             var rows = Enumerable.Repeat("", numRows).ToArray();
             int index = 0;
-            int[] trim = new int[2] { 0, 24 };
+            int[] trim = new int[3] { 0, 26, 52 };
 
             foreach (var item in items)
                 rows[index % numRows] = rows[index % numRows].PadRight(trim[index++ / numRows]) + $"{item.Index:000}: {item.Name}";
@@ -62,7 +75,7 @@ namespace AmbermoonItemEditor
             // Search for the old offset and replace it with the new one.
 
             var lastDataHunk = (Hunk)hunks.LastOrDefault(hunk => hunk.Type == HunkType.Data);
-            uint lastTrailingDataOffset = lastDataHunk.Size - TrailingDataSize;
+            uint lastTrailingDataOffset = (uint)lastDataHunk.Data.Length - TrailingDataSize;
             var searchBytes = new byte[6]
             {
                 0x4A, 0x39,
@@ -79,11 +92,11 @@ namespace AmbermoonItemEditor
                 (byte)(newTrailingDataOffset >> 8),
                 (byte)newTrailingDataOffset
             };
-            int newDataSize = (int)(lastDataHunk.Size - lastItemAmount * ItemDataSize + items.Count * ItemDataSize);
+            int newDataSize = (int)(lastDataHunk.Data.Length - lastItemAmount * ItemDataSize + items.Count * ItemDataSize);
             while (newDataSize % 4 != 0)
                 ++newDataSize;
             var newData = new byte[newDataSize];
-            int itemOffset = (int)(lastDataHunk.Size - TrailingDataSize - lastItemAmount * ItemDataSize);
+            int itemOffset = (int)(lastDataHunk.Data.Length - TrailingDataSize - lastItemAmount * ItemDataSize);
             Buffer.BlockCopy(lastDataHunk.Data, 0, newData, 0, itemOffset);
 
             // Adjust item count
@@ -95,25 +108,28 @@ namespace AmbermoonItemEditor
             int n = 0;
             int i = 0;
             int matchLength = 0;
-            while (i < itemOffset && n < 5)
+            var codeHunk = (Hunk)hunks.FirstOrDefault(h => h.Type == HunkType.Code);
+            var codeHunkData = codeHunk.Data;
+            while (i <= codeHunkData.Length - 6 && n < 5)
             {
-                if (newData[i++] == searchBytes[matchLength])
+                if (codeHunkData[i++] == searchBytes[matchLength])
                 {
                     if (++matchLength == 6)
                     {
-                        newData[i - matchLength + 0] = 0x4A;
-                        newData[i - matchLength + 1] = 0x39;
-                        newData[i - matchLength + 2] = replaceBytes[0];
-                        newData[i - matchLength + 3] = replaceBytes[1];
-                        newData[i - matchLength + 4] = replaceBytes[2];
-                        newData[i - matchLength + 5] = replaceBytes[3];
+                        codeHunkData[i - matchLength + 0] = 0x4A;
+                        codeHunkData[i - matchLength + 1] = 0x39;
+                        codeHunkData[i - matchLength + 2] = replaceBytes[0];
+                        codeHunkData[i - matchLength + 3] = replaceBytes[1];
+                        codeHunkData[i - matchLength + 4] = replaceBytes[2];
+                        codeHunkData[i - matchLength + 5] = replaceBytes[3];
                         ++n;
                         matchLength = 0;
                     }
                 }
-                else
+                else if (matchLength != 0)
                 {
                     i -= (matchLength - 1);
+                    matchLength = 0;
                     continue;
                 }
             }
@@ -121,16 +137,16 @@ namespace AmbermoonItemEditor
             if (n != 5)
                 throw new Exception("Not all 5 data references were found.");
 
-            var writer = new DataWriter(newData);
+            var writer = new DataWriter();
             foreach (var item in items)
                 ItemWriter.WriteItem(item, writer);
-            Buffer.BlockCopy(lastDataHunk.Data, lastDataHunk.Data.Length - TrailingDataSize, newData, writer.Position, TrailingDataSize);
+            var itemData = writer.ToArray();
+            Buffer.BlockCopy(itemData, 0, newData, itemOffset, itemData.Length);
+            Buffer.BlockCopy(lastDataHunk.Data, lastDataHunk.Data.Length - TrailingDataSize, newData, itemOffset + itemData.Length, TrailingDataSize);
             int index = hunks.IndexOf(lastDataHunk);
-            hunks[index] = new Hunk(HunkType.Data)
-            {
-                NumEntries = (uint)newDataSize / 4,
-                Data = newData
-            };
+            hunks[index] = new Hunk(HunkType.Data, lastDataHunk.MemoryFlags, newData);
+            index = hunks.IndexOf(codeHunk);
+            hunks[index] = new Hunk(HunkType.Code, codeHunk.MemoryFlags, codeHunkData);
             var executableWriter = new DataWriter();
             Write(executableWriter, hunks);
             executableWriter.CopyTo(stream);

@@ -2,7 +2,7 @@
   "profiles": {
     "AmbermoonItemEditor": {
       "commandName": "Project",
-      "commandLineArgs": "D:\\Programmierung\\C#\\Projects\\Ambermoon\\Ambermoon-Advanced\\german\\Amberfiles"
+      "commandLineArgs": "D:\\Programmierung\\C#\\Projects\\Ambermoon\\Ambermoon-Advanced\\english\\Amberfiles"
     }
   }
 }

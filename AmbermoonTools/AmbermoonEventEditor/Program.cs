@@ -1,10 +1,11 @@
 ﻿using Ambermoon.Data;
+using Ambermoon.Data.Descriptions;
 using Ambermoon.Data.Legacy.Serialization;
-using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using File = System.IO.File;
+using Console = System.Console;
 
 namespace AmbermoonEventEditor
 {
@@ -41,7 +42,7 @@ namespace AmbermoonEventEditor
             Console.WriteLine(error);
         }
 
-        static void Exit(int exitCode = 0) => Environment.Exit(exitCode);
+        static void Exit(int exitCode = 0) => System.Environment.Exit(exitCode);
 
         static void Main(string[] args)
         {
@@ -155,7 +156,7 @@ namespace AmbermoonEventEditor
         {
             save = false;
             saveFileName = null;
-            var args = command.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+            var args = command.Split(' ', System.StringSplitOptions.RemoveEmptyEntries);
 
             if (args.Length == 0)
             {
@@ -482,7 +483,7 @@ namespace AmbermoonEventEditor
                 var nextIndex = (ushort)(next == null ? 0xffff : events.IndexOf(next));
                 eventData[10] = (byte)((nextIndex >> 8) & 0xff);
                 eventData[11] = (byte)(nextIndex & 0xff);
-                Array.Copy(writer.ToArray(), 0, eventData, 1, 9);
+                System.Array.Copy(writer.ToArray(), 0, eventData, 1, 9);
                 int dataIndex = 1;
 
                 void Write(ValueDescription valueDescription, ushort value)
@@ -1000,7 +1001,7 @@ namespace AmbermoonEventEditor
             Console.WriteLine();
         }
 
-        static void ListEvents<T>(List<T> events, int startIndex = 0, Func<Event, int> customIndexer = null, bool noHeader = false, bool noFooter = false) where T : Event
+        static void ListEvents<T>(List<T> events, int startIndex = 0, System.Func<Event, int> customIndexer = null, bool noHeader = false, bool noFooter = false) where T : Event
         {
             if (!noHeader)
             {
