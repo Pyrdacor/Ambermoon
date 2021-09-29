@@ -8,6 +8,7 @@ Based on 1.09.
 - Reverted max swim values from 99 to 95
 - Reverted current swim value of Tar from 99 back to 90
 - Reverted Nelvin's and Tar's max U-M and R-M skills from 99 back to 95
+- Reverted item name "Krummsäbel" in AM2_BLIT to "SCIMITAR"
 
 ## Version 1.09
 

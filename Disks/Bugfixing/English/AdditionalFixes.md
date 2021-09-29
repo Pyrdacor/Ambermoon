@@ -29,6 +29,7 @@ Based on 1.10.
 - Adjusted Gryban's R-M bonus value from 25 to 0 (no equip grants that)
 - Adjusted Gryban's U-M bonus value from 0 to 25 (most likely twisted with R-M, knight's armour bonus)
 - Adjusted Gryban's SP bonus value from 10 to 5 (knight's armour grants only 5)
+- Changed item name "NACRE CHAIN" to "PEARL CHAIN"
 
 ## Version 1.10
 
