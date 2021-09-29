@@ -9,7 +9,6 @@ Based on 1.10.
 - Adjusted Netsrak's initial magic attack level from 0 to 1 (Scimitar grants this)
 - Fixed Netsrak's max R-M and U-M skill to 99
 - Adjusted Erik's initial magic attack level from 0 to 1 (Scimitar grants this)
-- Fixed Erik's initial attack skill value from -6 to 0
 - Adjusted Chris' strength bonus value from 0 to 5 (he starts with Morag Dart which grants 5 strength)
 - Adjusted Chris' dexterity bonus value from 30 to 0 (he has no equip which grants dexterity bonus, twisted with speed)
 - Adjusted Chris' speed bonus value from 0 to 30 (magician boots grant 25 speed, Mitrhil Mail grants 5 speed)
@@ -30,6 +29,11 @@ Based on 1.10.
 - Adjusted Gryban's U-M bonus value from 0 to 25 (most likely twisted with R-M, knight's armour bonus)
 - Adjusted Gryban's SP bonus value from 10 to 5 (knight's armour grants only 5)
 - Changed item name "NACRE CHAIN" to "PEARL CHAIN"
+- Fixed Whip parry penalty (change relative item data byte 0x11 from 01 to 02). It now correctly reduces parry by 10.
+- Fixed Banded Armour attack penalty (change relative item data byte 0x11 from 00 to 01). It now correctly reduces attack by 4.
+- Fixed Plate Armour attack penalty (change relative item data byte 0x11 from 00 to 01). It now correctly reduces attack by 6.
+- Fixed Knight's Armour attack penalty (change relative item data byte 0x11 from 00 to 01). It now correctly reduces attack by 8.
+- Fixed skill penalty code for items (now uses correct offset of 8 instead of 6)
 
 ## Version 1.10
 

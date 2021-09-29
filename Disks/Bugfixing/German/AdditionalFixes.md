@@ -9,6 +9,12 @@ Based on 1.09.
 - Reverted current swim value of Tar from 99 back to 90
 - Reverted Nelvin's and Tar's max U-M and R-M skills from 99 back to 95
 - Reverted item name "Krummsäbel" in AM2_BLIT to "SCIMITAR"
+- Fixed Whip parry penalty (change relative item data byte 0x11 from 01 to 02). It now correctly reduces parry by 10.
+- Fixed Banded Armour attack penalty (change relative item data byte 0x11 from 00 to 01). It now correctly reduces attack by 4.
+- Fixed Plate Armour attack penalty (change relative item data byte 0x11 from 00 to 01). It now correctly reduces attack by 6.
+- Fixed Knight's Armour attack penalty (change relative item data byte 0x11 from 00 to 01). It now correctly reduces attack by 8.
+- Fixed skill penalty code for items (now uses correct offset of 8 instead of 6)
+- Fixed Erik's initial attack skill value from 0 to -6 (his worn Plate Mail has a attack penalty of 6 and penalties now work)
 
 ## Version 1.09
 
