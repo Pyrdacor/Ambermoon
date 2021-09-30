@@ -35,6 +35,7 @@ Based on 1.10.
 - Fixed Knight's Armour attack penalty (change relative item data byte 0x11 from 00 to 01). It now correctly reduces attack by 8.
 - Fixed skill penalty code for items (now uses correct offset of 8 instead of 6)
 - Fixed automap wall display glitch in palace of baron in Newlake (change byte 0x0AA1 in sub-file 005 in 2Lab_data from 0x80 to 0x82)
+- Fixed a bug with NPC Matthias when you give him the 10000 gold for the harp
 
 ## Version 1.10
 
