@@ -17,6 +17,7 @@ Based on 1.09.
 - Fixed Erik's initial attack skill value from 0 to -6 (his worn Plate Mail has a attack penalty of 6 and penalties now work)
 - Fixed automap wall display glitch in palace of baron in Newlake (change byte 0x0AA1 in sub-file 005 in 2Lab_data from 0x80 to 0x82)
 - Fixed a bug with NPC Matthias when you give him the 10000 gold for the harp
+- Added an additional anti-smuggler protection to Morag :)
 
 ## Version 1.09
 
