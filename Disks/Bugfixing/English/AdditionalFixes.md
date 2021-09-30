@@ -37,6 +37,7 @@ Based on 1.10.
 - Fixed automap wall display glitch in palace of baron in Newlake (change byte 0x0AA1 in sub-file 005 in 2Lab_data from 0x80 to 0x82)
 - Fixed a bug with NPC Matthias when you give him the 10000 gold for the harp
 - Added an additional anti-smuggler protection to Morag :)
+- Adjusted previous anti-smuggler protection (text color, item removal)
 
 ## Version 1.10
 
