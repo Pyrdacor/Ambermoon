@@ -210,6 +210,9 @@ namespace AmbermoonEventEditor
                 case "disconnect":
                     DisconnectEvent(eventList, events);
                     break;
+                case "connections":
+                    ShowConnections(eventList, events);
+                    break;
                 case "save":
                     Save(out save, out saveFileName);
                     break;
@@ -563,6 +566,48 @@ namespace AmbermoonEventEditor
             }
         }
 
+        static void ShowConnections(List<Event> eventList, List<Event> events)
+        {
+            ListEvents(events);
+            Console.WriteLine();
+            Console.Write("Which event to show connections for: ");
+
+            var index = ReadInt(true);
+
+            if (index == null)
+            {
+                Console.WriteLine("Invalid event index");
+                Console.WriteLine();
+                return;
+            }
+
+            var @event = events[index.Value];
+            int listIndex = eventList.IndexOf(@event);
+            var prevEvents = events.Where(e => e.Next == @event).Select(e => events.IndexOf(e)).ToList();
+
+            Console.WriteLine();
+
+            if (listIndex == -1 && prevEvents.Count == 0 && @event.Next == null)
+            {
+                Console.WriteLine("This event has no connections.");
+            }
+            else
+            {
+                Console.WriteLine("Connections:");
+
+                if (listIndex != -1)
+                    Console.WriteLine($"Start of event chain {listIndex + 1:x2}");
+
+                if (@event.Next != null)
+                    Console.WriteLine($"Following event is {events.IndexOf(@event.Next):x2}");
+
+                foreach (var prevEvent in prevEvents)
+                    Console.WriteLine($"Event {prevEvent:x2} is a predecessor");
+            }
+
+            Console.WriteLine();
+        }
+
         static void DisconnectEvent(List<Event> eventList, List<Event> events)
         {
             ListEvents(events);
@@ -579,7 +624,6 @@ namespace AmbermoonEventEditor
             }
 
             var @event = events[index.Value];
-
             int listIndex = eventList.IndexOf(@event);
 
             if (listIndex != -1)
@@ -710,10 +754,14 @@ namespace AmbermoonEventEditor
 
             foreach (var startEvent in eventList)
             {
+                var checkedEvents = new HashSet<Event>();
                 var ev = startEvent;
 
                 while (ev != null)
                 {
+                    if (!checkedEvents.Add(ev))
+                        break;
+
                     if (ev == @event)
                         return true;
 
@@ -973,6 +1021,9 @@ namespace AmbermoonEventEditor
                 case "disconnect":
                     Console.WriteLine("Disconnects existing events.");
                     break;
+                case "connections":
+                    Console.WriteLine("Shows the connections of an event.");
+                    break;
                 case "save":
                     Console.WriteLine("Save all current changes.");
                     Console.WriteLine("You will be ask to overwrite the current file");
@@ -981,18 +1032,19 @@ namespace AmbermoonEventEditor
                 default:
                     Console.WriteLine("Available commands");
                     Console.WriteLine("+----------------+");
-                    Console.WriteLine("list       -> Shows the list of event chains");
-                    Console.WriteLine("events     -> Shows the list of all single events");
-                    Console.WriteLine("chain      -> Shows all events of a given event chain");
-                    Console.WriteLine("add        -> Adds a new event to the end of the list");
-                    Console.WriteLine("remove     -> Removes an event by its index");
-                    Console.WriteLine("edit       -> Edits an existing event");
-                    Console.WriteLine("connect    -> Connects an existing event");
-                    Console.WriteLine("disconnect -> Disconnects an existing event");
-                    Console.WriteLine("save       -> Saves all changes");
-                    Console.WriteLine("exit       -> Exits the application");
-                    Console.WriteLine("help       -> Shows this help");
-                    Console.WriteLine("usage      -> Shows tool usage");
+                    Console.WriteLine("list        -> Shows the list of event chains");
+                    Console.WriteLine("events      -> Shows the list of all single events");
+                    Console.WriteLine("chain       -> Shows all events of a given event chain");
+                    Console.WriteLine("add         -> Adds a new event to the end of the list");
+                    Console.WriteLine("remove      -> Removes an event by its index");
+                    Console.WriteLine("edit        -> Edits an existing event");
+                    Console.WriteLine("connect     -> Connects an existing event");
+                    Console.WriteLine("disconnect  -> Disconnects an existing event");
+                    Console.WriteLine("connections -> Shows the connections of an event");
+                    Console.WriteLine("save        -> Saves all changes");
+                    Console.WriteLine("exit        -> Exits the application");
+                    Console.WriteLine("help        -> Shows this help");
+                    Console.WriteLine("usage       -> Shows tool usage");
                     Console.WriteLine();
                     Console.WriteLine("To get more information use: help <command>");
                     break;
