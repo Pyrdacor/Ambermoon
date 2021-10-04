@@ -877,9 +877,8 @@ namespace AmbermoonMapEditor2D
             if (dialog.ShowDialog() == DialogResult.OK)
             {
                 var tileset = tilesets[map.TilesetOrLabdataIndex];
-                var tilesetWriter = new TilesetWriter();
                 var dataWriter = new DataWriter();
-                tilesetWriter.WriteTileset(tileset, dataWriter);
+                TilesetWriter.WriteTileset(tileset, dataWriter);
                 System.IO.File.WriteAllBytes(dialog.FileName, dataWriter.ToArray());
             }
         }

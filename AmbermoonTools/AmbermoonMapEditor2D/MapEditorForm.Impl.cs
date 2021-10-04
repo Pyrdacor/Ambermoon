@@ -731,9 +731,8 @@ namespace AmbermoonMapEditor2D
                 fileName = dialog.FileName;
             }
 
-            var mapWriter = new MapWriter();
             var dataWriter = new DataWriter();
-            mapWriter.WriteMap(map, dataWriter);
+            MapWriter.WriteMap(map, dataWriter);
 
             try
             {
