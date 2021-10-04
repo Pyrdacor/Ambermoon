@@ -363,8 +363,7 @@ namespace AmbermoonTextImport
 
                     foundTextCount += list.Count;
 
-                    if (list.Count != 0)
-                        textFiles[filenameParser(dirName)] = list;
+                    textFiles[filenameParser(dirName)] = list;
                 }
             }
 
@@ -394,7 +393,8 @@ namespace AmbermoonTextImport
                 data = textFiles.Select(f =>
                 {
                     var dataWriter = new Ambermoon.Data.Legacy.Serialization.DataWriter();
-                    Ambermoon.Data.Legacy.Serialization.TextWriter.WriteTexts(dataWriter, f.Value, TrimCharsFromOptions(options), true);
+                    if (f.Value.Count != 0)
+                        Ambermoon.Data.Legacy.Serialization.TextWriter.WriteTexts(dataWriter, f.Value, TrimCharsFromOptions(options), true);
                     return new KeyValuePair<uint, byte[]>((uint)f.Key, dataWriter.ToArray());
                 }).ToDictionary(x => x.Key, x => x.Value);
             }
@@ -457,7 +457,7 @@ namespace AmbermoonTextImport
 
             try
             {
-                Ambermoon.Data.Legacy.Serialization.FileWriter.WriteContainer(containerWriter, data, Ambermoon.Data.Legacy.Serialization.FileType.AMNP, 528);
+                Ambermoon.Data.Legacy.Serialization.FileWriter.WriteContainer(containerWriter, data, Ambermoon.Data.Legacy.Serialization.FileType.AMNP);
 
                 using var stream = File.Create(outPath);
                 containerWriter.CopyTo(stream);
