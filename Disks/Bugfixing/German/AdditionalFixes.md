@@ -1,3 +1,9 @@
+## Version 1.11
+
+Based on 1.10.
+
+- When saying "Tochter" to Sandra you now will also get the chest key and not the tunnel key.
+
 ## Version 1.10
 
 Based on 1.09.
