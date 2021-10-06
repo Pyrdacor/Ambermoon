@@ -3,6 +3,7 @@
 Based on 1.10.
 
 - When saying "Tochter" to Sandra you now will also get the chest key and not the tunnel key.
+- Fixed "ENKEL" to "ENKELKIND" in object text 001.002 (testament).
 
 ## Version 1.10
 
