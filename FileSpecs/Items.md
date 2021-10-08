@@ -153,7 +153,7 @@ Offset | Type | Description
 ----|----|----
 0x00 | ubyte | Amount of items (only stackable items can have a value greater than 1)
 0x01 | ubyte | Number of remaining charges
-0x02 | ubyte | **Unknown**. Maybe flags have 16 bits?
+0x02 | ubyte | Recharge times
 0x03 | ubyte | Flags (see below)
 0x04 | uword | Item index
 
