@@ -80,6 +80,15 @@ namespace AmbermoonMapEditor2D
 
         private void buttonCreateMap_Click(object sender, EventArgs e)
         {
+            if (!AskForMapIndex(out var mapIndex, null))
+                return;
+
+            if (MapManager.Maps.Any(m => m.Index == mapIndex))
+            {
+                MessageBox.Show(this, $"Map {mapIndex} already exists.", "Map already exists", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
+
             Map = new Map();
 
             const int initialWidth = 50;

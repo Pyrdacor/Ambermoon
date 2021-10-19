@@ -43,8 +43,10 @@ namespace AmbermoonMapEditor2D
                 }
             }
 
-            MapIndex = numericUpDownMapIndex.Visible ? (uint)numericUpDownMapIndex.Value : (uint)comboBoxMapIndices.Items[comboBoxMapIndices.SelectedIndex];
+            UpdateMapIndex();
         }
+
+        void UpdateMapIndex() => MapIndex = numericUpDownMapIndex.Visible ? (uint)numericUpDownMapIndex.Value : (uint)comboBoxMapIndices.Items[comboBoxMapIndices.SelectedIndex];
 
         private void comboBoxMapIndices_DrawItem(object sender, DrawItemEventArgs e)
         {
@@ -72,6 +74,7 @@ namespace AmbermoonMapEditor2D
 
         private void comboBoxMapIndices_SelectedIndexChanged(object sender, System.EventArgs e)
         {
+            UpdateMapIndex();
             if (string.IsNullOrWhiteSpace(tooltips[MapIndex]))
                 Text = $"Enter map index - {MapIndex}";
             else
@@ -80,6 +83,7 @@ namespace AmbermoonMapEditor2D
 
         private void numericUpDownMapIndex_ValueChanged(object sender, System.EventArgs e)
         {
+            UpdateMapIndex();
             Text = $"Enter map index - {MapIndex}";
         }
     }

@@ -205,7 +205,7 @@ namespace AmbermoonMapEditor2D
             }
 
             MapSizeChanged();
-            TilesetChanged();
+            UpdateTileset();
             timerAnimation.Start();
 
             mapLoading = false;

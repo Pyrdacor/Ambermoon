@@ -131,7 +131,7 @@ namespace AmbermoonMapEditor2D
         private void comboBoxMusic_SelectedIndexChanged(object sender, EventArgs e)
         {
             StopMusic();
-            // TODO
+            map.MusicIndex = (uint)(comboBoxMusic.SelectedIndex + 1);
         }
 
         private void checkBoxResting_CheckedChanged(object sender, EventArgs e)
@@ -308,8 +308,9 @@ namespace AmbermoonMapEditor2D
                 using var errorBrush = new SolidBrush(Color.White);
                 using var errorFont = new Font(FontFamily.GenericMonospace, 8.0f);
                 using var errorFontBrush = new SolidBrush(Color.Red);
+                var tiles = currentLayer == 0 ? tileset.Tiles.Take(256) : tileset.Tiles;
 
-                foreach (var tile in tileset.Tiles)
+                foreach (var tile in tiles)
                 {
                     int drawY = panelTileset.AutoScrollPosition.Y + y * 16;
 
@@ -343,6 +344,9 @@ namespace AmbermoonMapEditor2D
                         ++y;
                     }
                 }
+
+                if (selectedTilesetTile > tiles.Count())
+                    selectedTilesetTile = 0;
 
                 int selectedColumn = selectedTilesetTile % TilesetTilesPerRow;
                 int selectedRow = selectedTilesetTile / TilesetTilesPerRow;
@@ -413,6 +417,7 @@ namespace AmbermoonMapEditor2D
             toolStripMenuItemFrontLayer.Checked = !toolStripMenuItemBackLayer.Checked;
             currentLayer = 0;
             toolStripStatusLabelLayer.Text = LayerName[0];
+            UpdateTileset();
         }
 
         private void toolStripMenuItemFrontLayer_Click(object sender, EventArgs e)
@@ -420,6 +425,14 @@ namespace AmbermoonMapEditor2D
             toolStripMenuItemBackLayer.Checked = !toolStripMenuItemFrontLayer.Checked;
             currentLayer = 1;
             toolStripStatusLabelLayer.Text = LayerName[1];
+            UpdateTileset();
+        }
+
+        void UpdateTileset()
+        {
+            currentTilesetTiles = currentLayer == 0 ? Math.Min(256, tilesets[map.TilesetOrLabdataIndex].Tiles.Length)
+                : tilesets[map.TilesetOrLabdataIndex].Tiles.Length;
+            TilesetChanged();
         }
 
         private void toolStripMenuItemShowBackLayer_Click(object sender, EventArgs e)
@@ -597,7 +610,7 @@ namespace AmbermoonMapEditor2D
             int y = scrolledYTile + hoveredRow;
             int index = x + y * TilesetTilesPerRow;
 
-            if (index >= 2500)
+            if (index >= (currentLayer == 0 ? 256 : 2500))
             {
                 toolStripStatusLabelCurrentTilesetTile.Visible = false;
 

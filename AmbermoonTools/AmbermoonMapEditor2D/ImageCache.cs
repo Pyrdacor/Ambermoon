@@ -48,7 +48,10 @@ namespace AmbermoonMapEditor2D
             void AddTilesets(IFileContainer container)
             {
                 foreach (var file in container.Files)
-                    tilesets.Add((uint)file.Key, file.Value);
+                {
+                    if (file.Value.Size != 0)
+                        tilesets.Add((uint)file.Key, file.Value);
+                }
             }
 
             AddTilesets(icons1);
