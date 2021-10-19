@@ -6,6 +6,7 @@ using System.Globalization;
 using System.Linq;
 using File = System.IO.File;
 using Console = System.Console;
+using Ambermoon.Data.Enumerations;
 
 namespace AmbermoonEventEditor
 {
@@ -83,7 +84,7 @@ namespace AmbermoonEventEditor
                 var eventList = new List<Event>();
                 EventReader.ReadEvents(dataReader, events, eventList);
                 var tail = dataReader.ReadToEnd();
-                ProcessEvents(eventList, events, head, tail, args[0], true);
+                ProcessEvents(eventList, events, head, tail, args[0], true, eventList.Count, mapType);
             }
             else if (type == 1) // NPC
             {
@@ -108,7 +109,8 @@ namespace AmbermoonEventEditor
             Console.WriteLine("+" + new string('-', 78) + "+");
         }
 
-        static void ProcessEvents(List<Event> eventList, List<Event> events, byte[] head, byte[] tail, string inputFileName, bool map)
+        static void ProcessEvents(List<Event> eventList, List<Event> events, byte[] head, byte[] tail,
+            string inputFileName, bool map, int initialMapEventCount = 0, MapType? mapType = null)
         {
             Console.WriteLine();
             Console.WriteLine("Event list");
@@ -137,7 +139,88 @@ namespace AmbermoonEventEditor
                         var writer = new DataWriter(head);
                         EventWriter.WriteEvents(writer, events, eventList);
                         if (tail != null && tail.Length != 0)
-                            writer.Write(tail);
+                        {
+                            if (map && mapType == MapType.Map3D && eventList.Count != initialMapEventCount)
+                            {
+                                if (eventList.Count < initialMapEventCount)
+                                {
+                                    int removeByteCount = initialMapEventCount - eventList.Count;
+                                    writer.Write(tail.Take(tail.Length - removeByteCount).ToArray());
+                                }
+                                else // >
+                                {
+                                    writer.Write(tail);
+
+                                    for (int i = initialMapEventCount; i < eventList.Count; ++i)
+                                    {
+                                        switch (eventList[i].Type)
+                                        {
+                                            case EventType.Chest:
+                                                writer.Write((byte)AutomapType.Chest);
+                                                break;
+                                            case EventType.Door:
+                                                writer.Write((byte)AutomapType.Door);
+                                                break;
+                                            case EventType.EnterPlace:
+                                            {
+                                                switch ((eventList[i] as EnterPlaceEvent).PlaceType)
+                                                {
+                                                    case PlaceType.FoodDealer:
+                                                    case PlaceType.Library:
+                                                    case PlaceType.Merchant:
+                                                        writer.Write((byte)AutomapType.Merchant);
+                                                        break;
+                                                    case PlaceType.Inn:
+                                                        writer.Write((byte)AutomapType.Tavern);
+                                                        break;
+                                                    default:
+                                                        writer.Write((byte)AutomapType.DoorOpen);
+                                                        break;
+                                                }
+                                                break;
+                                            }
+                                            case EventType.Riddlemouth:
+                                                writer.Write((byte)AutomapType.Riddlemouth);
+                                                break;
+                                            case EventType.Spinner:
+                                                writer.Write((byte)AutomapType.Spinner);
+                                                break;
+                                            case EventType.StartBattle:
+                                                writer.Write((byte)AutomapType.Monster);
+                                                break;
+                                            case EventType.Teleport:
+                                            {
+                                                switch ((eventList[i] as TeleportEvent).Transition)
+                                                {
+                                                    case TeleportEvent.TransitionType.MapChange:
+                                                    case TeleportEvent.TransitionType.Outro:
+                                                        writer.Write((byte)AutomapType.Exit);
+                                                        break;
+                                                    case TeleportEvent.TransitionType.Teleporter:
+                                                        writer.Write((byte)AutomapType.Teleporter);
+                                                        break;
+                                                    case TeleportEvent.TransitionType.Falling:
+                                                        writer.Write((byte)AutomapType.Trapdoor);
+                                                        break;
+                                                    default:
+                                                        writer.Write((byte)AutomapType.None);
+                                                        break;
+                                                }
+                                                break;
+                                            }
+                                            case EventType.Trap:
+                                                writer.Write((byte)AutomapType.Trap);
+                                                break;
+                                            default:
+                                                writer.Write((byte)AutomapType.None);
+                                                break;
+                                        }
+                                    }
+                                }
+                            }
+                            else
+                                writer.Write(tail);
+                        }
                         File.WriteAllBytes(saveFileName, writer.ToArray());
                         Console.WriteLine($"Successfully saved to '{saveFileName}'.");
                     }
@@ -174,8 +257,14 @@ namespace AmbermoonEventEditor
                 case "list":
                     ListEvents(eventList, 1);
                     break;
+                case "short":
+                    ListEventsShort(eventList);
+                    break;
                 case "events":
                     ListEvents(events);
+                    break;
+                case "summary":
+                    ListEventsShort(events);
                     break;
                 case "chain":
                     if (args.Length < 2)
@@ -212,6 +301,9 @@ namespace AmbermoonEventEditor
                     break;
                 case "connections":
                     ShowConnections(eventList, events);
+                    break;
+                case "reorder":
+                    ReorderEvents(eventList, events);
                     break;
                 case "save":
                     Save(out save, out saveFileName);
@@ -398,8 +490,9 @@ namespace AmbermoonEventEditor
             var doors = events.Where(e => e is DoorEvent d && d.UnlockFailedEventIndex == index.Value).Cast<DoorEvent>().ToList();
             var chests = events.Where(e => e is ChestEvent c && c.UnlockFailedEventIndex == index.Value).Cast<ChestEvent>().ToList();
             var dices = events.Where(e => e is Dice100RollEvent r && r.ContinueIfFalseWithMapEventIndex == index.Value).Cast<Dice100RollEvent>().ToList();
+            var decisions = events.Where(e => e is DecisionEvent d && d.NoEventIndex == index.Value).Cast<DecisionEvent>().ToList();
 
-            if (prevs.Count != 0 || conds.Count != 0 || doors.Count != 0 || chests.Count != 0 || dices.Count != 0)
+            if (prevs.Count != 0 || conds.Count != 0 || doors.Count != 0 || chests.Count != 0 || dices.Count != 0 || decisions.Count != 0)
             {
                 Event successor = null;
 
@@ -425,6 +518,8 @@ namespace AmbermoonEventEditor
                     chest.UnlockFailedEventIndex = successorIndex;
                 foreach (var dice in dices)
                     dice.ContinueIfFalseWithMapEventIndex = successorIndex;
+                foreach (var decision in decisions)
+                    decision.NoEventIndex = successorIndex;
             }
 
             @event.Next = null;
@@ -436,6 +531,7 @@ namespace AmbermoonEventEditor
                 doors = events.Where(e => e is DoorEvent d && d.UnlockFailedEventIndex == i).Cast<DoorEvent>().ToList();
                 chests = events.Where(e => e is ChestEvent c && c.UnlockFailedEventIndex == i).Cast<ChestEvent>().ToList();
                 dices = events.Where(e => e is Dice100RollEvent r && r.ContinueIfFalseWithMapEventIndex == i).Cast<Dice100RollEvent>().ToList();
+                decisions = events.Where(e => e is DecisionEvent d && d.NoEventIndex == i).Cast<DecisionEvent>().ToList();
 
                 foreach (var cond in conds)
                     --cond.ContinueIfFalseWithMapEventIndex;
@@ -445,9 +541,28 @@ namespace AmbermoonEventEditor
                     --chest.UnlockFailedEventIndex;
                 foreach (var dice in dices)
                     --dice.ContinueIfFalseWithMapEventIndex;
+                foreach (var decision in decisions)
+                    --decision.NoEventIndex;
             }
 
             events.Remove(@event);
+        }
+
+        static void ReplaceEvent(List<Event> eventList, List<Event> events, Event eventOld, Event eventNew)
+        {
+            int eventListIndex = eventList.IndexOf(eventOld);
+            int eventsIndex = events.IndexOf(eventOld);
+
+            if (eventListIndex != -1)
+                eventList[eventListIndex] = eventNew;
+
+            events[eventsIndex] = eventNew;
+
+            foreach (var @event in events)
+            {
+                if (@event.Next == eventOld)
+                    @event.Next = eventNew;
+            }
         }
 
         static void EditEvent(List<Event> eventList, List<Event> events, bool map)
@@ -471,9 +586,10 @@ namespace AmbermoonEventEditor
             if (option == 1)
             {
                 unsavedChanges = true;
-                events.Remove(@event);
-                eventList.Remove(@event);
-                AddEvent(eventList, events, map, index.Value, true);
+                var tempEventList = new List<Event>();
+                var tempEvents = new List<Event>();
+                AddEvent(tempEventList, tempEvents, map, index.Value, true);
+                ReplaceEvent(eventList, events, @event, tempEvents[0]);
                 return;
             }
             else
@@ -643,9 +759,23 @@ namespace AmbermoonEventEditor
             var doors = events.Where(e => e is DoorEvent d && d.UnlockFailedEventIndex == index.Value).Cast<DoorEvent>().ToList();
             var chests = events.Where(e => e is ChestEvent c && c.UnlockFailedEventIndex == index.Value).Cast<ChestEvent>().ToList();
             var dices = events.Where(e => e is Dice100RollEvent r && r.ContinueIfFalseWithMapEventIndex == index.Value).Cast<Dice100RollEvent>().ToList();
+            var decisions = events.Where(e => e is DecisionEvent d && d.NoEventIndex == index.Value).Cast<DecisionEvent>().ToList();
 
             foreach (var prev in prevs)
                 prev.Next = null;
+
+            @event.Next = null;
+
+            if (@event is ConditionEvent c)
+                c.ContinueIfFalseWithMapEventIndex = 0xffff;
+            else if (@event is DoorEvent d)
+                d.UnlockFailedEventIndex = 0xffff;
+            else if (@event is ChestEvent ch)
+                ch.UnlockFailedEventIndex = 0xffff;
+            else if (@event is Dice100RollEvent dc)
+                dc.ContinueIfFalseWithMapEventIndex = 0xffff;
+            else if (@event is DecisionEvent dec)
+                dec.NoEventIndex = 0xffff;
 
             if (conds.Count != 0 || doors.Count != 0 || chests.Count != 0 || dices.Count != 0)
             {
@@ -654,6 +784,7 @@ namespace AmbermoonEventEditor
                 ListEvents(doors, 0, ev => events.IndexOf(ev), true, true);
                 ListEvents(chests, 0, ev => events.IndexOf(ev), true, true);
                 ListEvents(dices, 0, ev => events.IndexOf(ev), true, false);
+                ListEvents(decisions, 0, ev => events.IndexOf(ev), true, false);
                 int option = ReadOption(0, "No", "Yes") ?? 0;
 
                 if (option == 1)
@@ -666,6 +797,8 @@ namespace AmbermoonEventEditor
                         chest.UnlockFailedEventIndex = 0xffff;
                     foreach (var dice in dices)
                         dice.ContinueIfFalseWithMapEventIndex = 0xffff;
+                    foreach (var decision in decisions)
+                        decision.NoEventIndex = 0xffff;
                 }
             }
 
@@ -806,6 +939,7 @@ namespace AmbermoonEventEditor
             }
 
             var eventDescription = EventDescriptions.Events[(EventType)type];
+
             bool newChain = false;
             int? connectTo = null;
 
@@ -991,11 +1125,19 @@ namespace AmbermoonEventEditor
                     Console.WriteLine("in any command except for chain. These are the");
                     Console.WriteLine("IDs which are referenced from map tiles only.");
                     break;
+                case "short":
+                    Console.WriteLine("Like the list command but only shows the");
+                    Console.WriteLine("names of the events.");
+                    break;
                 case "events":
                     Console.WriteLine("Lists all events of the map or NPC.");
                     Console.WriteLine();
                     Console.WriteLine("The displayed IDs identify the event in all");
                     Console.WriteLine("kind of commands.");
+                    break;
+                case "summary":
+                    Console.WriteLine("Like the events command but only shows the");
+                    Console.WriteLine("names of the events.");
                     break;
                 case "chain":
                     Console.WriteLine("Lists all events of a given event chain.");
@@ -1041,6 +1183,7 @@ namespace AmbermoonEventEditor
                     Console.WriteLine("connect     -> Connects an existing event");
                     Console.WriteLine("disconnect  -> Disconnects an existing event");
                     Console.WriteLine("connections -> Shows the connections of an event");
+                    Console.WriteLine("reorder     -> Reorders events");
                     Console.WriteLine("save        -> Saves all changes");
                     Console.WriteLine("exit        -> Exits the application");
                     Console.WriteLine("help        -> Shows this help");
@@ -1074,6 +1217,22 @@ namespace AmbermoonEventEditor
                 Console.WriteLine();
         }
 
+        static void ListEventsShort<T>(List<T> events) where T : Event
+        {
+            Console.WriteLine();
+            Console.WriteLine("ID | Type");
+            Console.WriteLine("---|" + new string('-', 75));
+
+            int index = 1;
+            foreach (var @event in events)
+            {
+                Console.WriteLine($"{index:x2} | " + @event.Type.ToString());
+                ++index;
+            }
+
+            Console.WriteLine();
+        }
+
         static void ShowChain(List<Event> eventList, List<Event> events, int index)
         {
             if (index < 0 || index >= eventList.Count)
@@ -1094,6 +1253,77 @@ namespace AmbermoonEventEditor
             }
 
             ListEvents(chainEvents, 0, ev => events.IndexOf(ev));
+        }
+
+        static void ReorderEvents(List<Event> eventList, List<Event> events)
+        {
+            var idMapping = new Dictionary<uint, uint>();
+            var visited = new HashSet<int>();
+
+            void ProcessEvents(Event startEvent)
+            {
+                var branches = new Queue<Event>();
+                var @event = startEvent;
+
+                Event Visit(Event ev)
+                {
+                    int eventIndex = events.IndexOf(ev);
+
+                    if (!visited.Add(eventIndex))
+                        return null;
+
+                    idMapping.Add((uint)eventIndex, (uint)idMapping.Count);
+
+                    if (ev is ConditionEvent conditionEvent && conditionEvent.ContinueIfFalseWithMapEventIndex != 0xffff)
+                        branches.Enqueue(events[(int)conditionEvent.ContinueIfFalseWithMapEventIndex]);
+                    else if (ev is Dice100RollEvent diceEvent && diceEvent.ContinueIfFalseWithMapEventIndex != 0xffff)
+                        branches.Enqueue(events[(int)diceEvent.ContinueIfFalseWithMapEventIndex]);
+                    else if (ev is DoorEvent doorEvent && doorEvent.UnlockFailedEventIndex != 0xffff)
+                        branches.Enqueue(events[(int)doorEvent.UnlockFailedEventIndex]);
+                    else if (ev is ChestEvent chestEvent && chestEvent.UnlockFailedEventIndex != 0xffff)
+                        branches.Enqueue(events[(int)chestEvent.UnlockFailedEventIndex]);
+                    else if (ev is DecisionEvent decisionEvent && decisionEvent.NoEventIndex != 0xffff)
+                        branches.Enqueue(events[(int)decisionEvent.NoEventIndex]);
+
+                    return ev.Next;
+                }
+
+                while (@event != null)
+                {
+                    @event = Visit(@event);
+                }
+
+                while (branches.Count != 0)
+                {
+                    @event = branches.Dequeue();
+
+                    ProcessEvents(@event);
+                }
+            }
+          
+            foreach (var chain in eventList)
+            {
+                ProcessEvents(chain);
+            }
+
+            foreach (var ev in events)
+            {
+                if (ev is ConditionEvent conditionEvent && conditionEvent.ContinueIfFalseWithMapEventIndex != 0xffff)
+                    conditionEvent.ContinueIfFalseWithMapEventIndex = idMapping[conditionEvent.ContinueIfFalseWithMapEventIndex];
+                else if (ev is Dice100RollEvent diceEvent && diceEvent.ContinueIfFalseWithMapEventIndex != 0xffff)
+                    diceEvent.ContinueIfFalseWithMapEventIndex = idMapping[diceEvent.ContinueIfFalseWithMapEventIndex];
+                else if (ev is DecisionEvent decisionEvent && decisionEvent.NoEventIndex != 0xffff)
+                    decisionEvent.NoEventIndex = idMapping[decisionEvent.NoEventIndex];
+                else if (ev is DoorEvent doorEvent && doorEvent.UnlockFailedEventIndex != 0xffff)
+                    doorEvent.UnlockFailedEventIndex = idMapping[doorEvent.UnlockFailedEventIndex];
+                else if (ev is ChestEvent chestEvent && chestEvent.UnlockFailedEventIndex != 0xffff)
+                    chestEvent.UnlockFailedEventIndex = idMapping[chestEvent.UnlockFailedEventIndex];
+            }
+
+            var reorderedList = idMapping.Keys.Select(i => events[(int)i]).ToList();
+
+            events.Clear();
+            events.AddRange(reorderedList);
         }
     }
 }
