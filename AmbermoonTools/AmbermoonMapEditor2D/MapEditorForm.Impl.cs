@@ -124,7 +124,7 @@ namespace AmbermoonMapEditor2D
                 comboBoxMusic.Items.Add(song.Value);
 
             // TODO: what if we add one later?
-            for (int i = 1; i <= 8; ++i)
+            for (int i = 1; i <= 9; ++i)
                 comboBoxTilesets.Items.Add($"Tileset {i}");
 
             imageCache = new ImageCache(gameData);
@@ -261,10 +261,13 @@ namespace AmbermoonMapEditor2D
 
         void MapSizeChanged()
         {
-            mapScrollIndicator.Location = new Point(map.Width * 16, map.Height * 16);
+            // TODO: this must be part of the undo/redo chain!
 
-            int visibleColumns = panelMap.Width / 16;
-            int visibleRows = panelMap.Height / 16;
+            int tileSize = (trackBarZoom.Maximum - trackBarZoom.Value + 1) * 16;
+            mapScrollIndicator.Location = new Point(map.Width * tileSize, map.Height * tileSize);
+
+            int visibleColumns = panelMap.Width / tileSize;
+            int visibleRows = panelMap.Height / tileSize;
 
             panelMap.HorizontalScroll.Visible = false;
             panelMap.VerticalScroll.Visible = false;
@@ -496,6 +499,9 @@ namespace AmbermoonMapEditor2D
 
         void UseTool(int x, int y, bool secondaryFunction)
         {
+            if (x < 0 || y < 0 || x >= map.Width || y >= map.Height)
+                return;
+
             switch (currentTool)
             {
                 case Tool.Brush:
@@ -647,8 +653,77 @@ namespace AmbermoonMapEditor2D
 
         void FillTiles(int x, int y, bool areaOnly)
         {
-            // TODO
-            NotImplemented();
+            var oldTile = map.InitialTiles[x, y];
+            uint oldTileIndex = currentLayer == 0 ? oldTile.BackTileIndex : oldTile.FrontTileIndex;
+            uint newTileIndex = 1 + (uint)selectedTilesetTile;
+
+            if (oldTileIndex == newTileIndex)
+                return;
+
+            var changedTiles = new Dictionary<int, uint>();
+            int layer = currentLayer;
+
+            string doText = $"Change tiles from {oldTileIndex} to {newTileIndex} on {LayerName[layer]}";
+            string undoText = $"Change tiles from {newTileIndex} to {oldTileIndex} on {LayerName[layer]}";
+
+            PerformAction(doText, undoText, _ =>
+            {
+                if (areaOnly)
+                {
+                    // TODO
+                    NotImplemented();
+                }
+                else
+                {
+                    int tileIndex = 0;
+                    foreach (var tile in map.InitialTiles)
+                    {
+                        if (layer == 0)
+                        {
+                            if (tile.BackTileIndex == oldTileIndex)
+                            {
+                                changedTiles.Add(tileIndex, tile.BackTileIndex);
+                                tile.BackTileIndex = newTileIndex;
+                            }
+                        }
+                        else
+                        {
+                            if (tile.FrontTileIndex == oldTileIndex)
+                            {
+                                changedTiles.Add(tileIndex, tile.FrontTileIndex);
+                                tile.FrontTileIndex = newTileIndex;
+                            }
+                        }
+
+                        ++tileIndex;
+                    }
+                }
+                panelMap.Refresh();
+            }, () =>
+            {
+                if (areaOnly)
+                {
+                    // TODO
+                    NotImplemented();
+                }
+                else
+                {
+                    foreach (var changedTile in changedTiles)
+                    {
+                        int x = changedTile.Key % map.Width;
+                        int y = changedTile.Key / map.Width;
+                        if (layer == 0)
+                        {
+                            map.InitialTiles[x, y].BackTileIndex = changedTile.Value;
+                        }
+                        else
+                        {
+                            map.InitialTiles[x, y].FrontTileIndex = changedTile.Value;
+                        }
+                    }
+                }
+                panelMap.Refresh();
+            });
         }
 
         void PickTile(int x, int y, int layer)

@@ -29,6 +29,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Ambermoon.Data.Descriptions
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Ambermoon3DMapViewer", "Ambermoon3DMapViewer\Ambermoon3DMapViewer.csproj", "{360CC08E-5F4E-4217-9991-79A7F9AF0503}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AmbermoonImageConverter", "AmbermoonImageConverter\AmbermoonImageConverter.csproj", "{D9C9D825-3DB3-48EB-BAFE-014A39078685}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -94,6 +96,12 @@ Global
 		{360CC08E-5F4E-4217-9991-79A7F9AF0503}.Release|Any CPU.Build.0 = Release|Any CPU
 		{360CC08E-5F4E-4217-9991-79A7F9AF0503}.ReleaseLinux|Any CPU.ActiveCfg = Release|Any CPU
 		{360CC08E-5F4E-4217-9991-79A7F9AF0503}.ReleaseLinux|Any CPU.Build.0 = Release|Any CPU
+		{D9C9D825-3DB3-48EB-BAFE-014A39078685}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D9C9D825-3DB3-48EB-BAFE-014A39078685}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D9C9D825-3DB3-48EB-BAFE-014A39078685}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D9C9D825-3DB3-48EB-BAFE-014A39078685}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D9C9D825-3DB3-48EB-BAFE-014A39078685}.ReleaseLinux|Any CPU.ActiveCfg = Release|Any CPU
+		{D9C9D825-3DB3-48EB-BAFE-014A39078685}.ReleaseLinux|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

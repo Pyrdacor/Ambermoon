@@ -200,12 +200,13 @@ namespace AmbermoonMapEditor2D
                 using var textBrush = new SolidBrush(Color.White);
                 using var textBackground = new SolidBrush(Color.FromArgb(0x40, 0x80, 0x80, 0x80));
                 using var font = new Font(FontFamily.GenericMonospace, 8.0f);
+                int tileSize = (trackBarZoom.Maximum - trackBarZoom.Value + 1) * 16;
 
                 for (int y = 0; y < MapHeight; ++y)
                 {
-                    int drawY = panelMap.AutoScrollPosition.Y + y * 16;
+                    int drawY = panelMap.AutoScrollPosition.Y + y * tileSize;
 
-                    if (drawY + 16 <= 0)
+                    if (drawY + tileSize <= 0)
                         continue;
 
                     if (drawY >= panelMap.Height)
@@ -213,9 +214,9 @@ namespace AmbermoonMapEditor2D
 
                     for (int x = 0; x < MapWidth; ++x)
                     {
-                        int drawX = panelMap.AutoScrollPosition.X + x * 16;
+                        int drawX = panelMap.AutoScrollPosition.X + x * tileSize;
 
-                        if (drawX + 16 <= 0)
+                        if (drawX + tileSize <= 0)
                             continue;
 
                         if (drawX >= panelMap.Width)
@@ -224,7 +225,7 @@ namespace AmbermoonMapEditor2D
                         var tile = map.InitialTiles[x, y];
                         var backgroundTile = tile.BackTileIndex == 0 ? null : tile.BackTileIndex >= tileset.Tiles.Length ? null : tileset.Tiles[tile.BackTileIndex - 1];
                         var foregroundTile = tile.FrontTileIndex == 0 ? null : tile.FrontTileIndex >= tileset.Tiles.Length ? null :  tileset.Tiles[tile.FrontTileIndex - 1];
-                        var rect = new Rectangle(drawX, drawY, 16, 16);
+                        var rect = new Rectangle(drawX, drawY, tileSize + (tileSize / 16 - 1), tileSize + (tileSize / 16 - 1));
 
                         if (toolStripMenuItemShowBackLayer.Checked && backgroundTile != null)
                         {
@@ -232,7 +233,10 @@ namespace AmbermoonMapEditor2D
                             {
                                 uint frame = backgroundTile.NumAnimationFrames <= 1 ? 0 : (uint)(this.frame % (ulong)backgroundTile.NumAnimationFrames);
                                 var backgroundImage = imageCache.GetImage(map.TilesetOrLabdataIndex, backgroundTile.GraphicIndex + frame - 1, map.PaletteIndex);
-                                e.Graphics.DrawImageUnscaledAndClipped(backgroundImage, rect);
+                                var interpolationMode = e.Graphics.InterpolationMode;
+                                e.Graphics.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.NearestNeighbor;
+                                e.Graphics.DrawImage(backgroundImage, rect);
+                                e.Graphics.InterpolationMode = interpolationMode;
                             }
                             catch
                             {
@@ -246,7 +250,10 @@ namespace AmbermoonMapEditor2D
                             {
                                 uint frame = foregroundTile.NumAnimationFrames <= 1 ? 0 : (uint)(this.frame % (ulong)foregroundTile.NumAnimationFrames);
                                 var foregroundImage = imageCache.GetImage(map.TilesetOrLabdataIndex, foregroundTile.GraphicIndex + frame - 1, map.PaletteIndex);
-                                e.Graphics.DrawImageUnscaledAndClipped(foregroundImage, rect);
+                                var interpolationMode = e.Graphics.InterpolationMode;
+                                e.Graphics.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.NearestNeighbor;
+                                e.Graphics.DrawImage(foregroundImage, rect);
+                                e.Graphics.InterpolationMode = interpolationMode;
                             }
                             catch
                             {
@@ -255,28 +262,29 @@ namespace AmbermoonMapEditor2D
                         }
 
                         if (showGrid)
-                            e.Graphics.DrawRectangle(grid, new Rectangle(drawX, drawY, 15, 15));
+                            e.Graphics.DrawRectangle(grid, new Rectangle(drawX, drawY, tileSize - 1, tileSize - 1));
 
                         if (showEvents && tile.MapEventId != 0)
                         {
-                            e.Graphics.FillRectangle(textBackground, new Rectangle(drawX + 1, drawY + 1, 13, 13));
+                            int diff = (tileSize - 16) / 2;
+                            e.Graphics.FillRectangle(textBackground, new Rectangle(drawX + 1 + diff, drawY + 1 + diff, 13, 13));
                             e.Graphics.DrawString(tile.MapEventId.ToString("x2"), font, textBrush, drawX, drawY);
                         }
                     }
                 }
 
-                if (showTileMarker &&hoveredMapTile != -1 && tileMarkerWidth > 0 && tileMarkerHeight > 0)
+                if (showTileMarker && hoveredMapTile != -1 && tileMarkerWidth > 0 && tileMarkerHeight > 0)
                 {
-                    int visibleColumns = panelMap.Width / 16;
-                    int visibleRows = panelMap.Height / 16;
+                    int visibleColumns = panelMap.Width / tileSize;
+                    int visibleRows = panelMap.Height / tileSize;
                     int hoveredX = hoveredMapTile % visibleColumns;
                     int hoveredY = hoveredMapTile / visibleColumns;
 
-                    if (hoveredX + tileMarkerWidth < visibleColumns &&
-                        hoveredY + tileMarkerHeight < visibleRows)
+                    if (hoveredX + tileMarkerWidth <= visibleColumns + 1 &&
+                        hoveredY + tileMarkerHeight <= visibleRows + 1)
                     {
-                        int startX = panelMap.AutoScrollPosition.X % 16 + hoveredX * 16;
-                        int startY = panelMap.AutoScrollPosition.Y % 16 + hoveredY * 16;
+                        int startX = panelMap.AutoScrollPosition.X % tileSize + hoveredX * tileSize;
+                        int startY = panelMap.AutoScrollPosition.Y % tileSize + hoveredY * tileSize;
                         using var marker = new SolidBrush(Color.FromArgb(0x40, 0x77, 0xff, 0x66));
                         using var border = new Pen(Color.FromArgb(0x80, 0xff, 0xff, 0x00), 1);
 
@@ -284,8 +292,8 @@ namespace AmbermoonMapEditor2D
                         {
                             for (int x = 0; x < tileMarkerWidth; ++x)
                             {
-                                e.Graphics.FillRectangle(marker, new Rectangle(startX + x * 16 + 1, startY + y * 16 + 1, 14, 14));
-                                e.Graphics.DrawRectangle(border, new Rectangle(startX + x * 16, startY + y * 16, 15, 15));
+                                e.Graphics.FillRectangle(marker, new Rectangle(startX + x * tileSize + 1, startY + y * tileSize + 1, tileSize - 2, tileSize - 2));
+                                e.Graphics.DrawRectangle(border, new Rectangle(startX + x * tileSize, startY + y * tileSize, tileSize - 1, tileSize - 1));
                             }
                         }
                     }
@@ -529,11 +537,12 @@ namespace AmbermoonMapEditor2D
                 return;
             }
 
-            int visibleColumns = panelMap.Width / 16;
-            int hoveredColumn = (e.X - panelMap.AutoScrollPosition.X % 16) / 16;
-            int hoveredRow = (e.Y - panelMap.AutoScrollPosition.Y % 16) / 16;
-            int scrolledXTile = -panelMap.AutoScrollPosition.X / 16;
-            int scrolledYTile = -panelMap.AutoScrollPosition.Y / 16;
+            int tileSize = (trackBarZoom.Maximum - trackBarZoom.Value + 1) * 16;
+            int visibleColumns = panelMap.Width / tileSize;
+            int hoveredColumn = (e.X - panelMap.AutoScrollPosition.X % tileSize) / tileSize;
+            int hoveredRow = (e.Y - panelMap.AutoScrollPosition.Y % tileSize) / tileSize;
+            int scrolledXTile = -panelMap.AutoScrollPosition.X / tileSize;
+            int scrolledYTile = -panelMap.AutoScrollPosition.Y / tileSize;
             int newHoveredTile = hoveredColumn + hoveredRow * visibleColumns;
 
             int x = scrolledXTile + hoveredColumn;
@@ -660,10 +669,11 @@ namespace AmbermoonMapEditor2D
         {
             if (e.Button == MouseButtons.Left || e.Button == MouseButtons.Right)
             {
-                int hoveredColumn = (e.X - panelMap.AutoScrollPosition.X % 16) / 16;
-                int hoveredRow = (e.Y - panelMap.AutoScrollPosition.Y % 16) / 16;
-                int scrolledXTile = -panelMap.AutoScrollPosition.X / 16;
-                int scrolledYTile = -panelMap.AutoScrollPosition.Y / 16;
+                int tileSize = (trackBarZoom.Maximum - trackBarZoom.Value + 1) * 16;
+                int hoveredColumn = (e.X - panelMap.AutoScrollPosition.X % tileSize) / tileSize;
+                int hoveredRow = (e.Y - panelMap.AutoScrollPosition.Y % tileSize) / tileSize;
+                int scrolledXTile = -panelMap.AutoScrollPosition.X / tileSize;
+                int scrolledYTile = -panelMap.AutoScrollPosition.Y / tileSize;
 
                 int x = scrolledXTile + hoveredColumn;
                 int y = scrolledYTile + hoveredRow;
@@ -809,10 +819,11 @@ namespace AmbermoonMapEditor2D
 
         private void panelMap_MouseDoubleClick(object sender, MouseEventArgs e)
         {
-            int hoveredColumn = (e.X - panelMap.AutoScrollPosition.X % 16) / 16;
-            int hoveredRow = (e.Y - panelMap.AutoScrollPosition.Y % 16) / 16;
-            int scrolledXTile = -panelMap.AutoScrollPosition.X / 16;
-            int scrolledYTile = -panelMap.AutoScrollPosition.Y / 16;
+            int tileSize = (trackBarZoom.Maximum - trackBarZoom.Value + 1) * 16;
+            int hoveredColumn = (e.X - panelMap.AutoScrollPosition.X % tileSize) / tileSize;
+            int hoveredRow = (e.Y - panelMap.AutoScrollPosition.Y % tileSize) / tileSize;
+            int scrolledXTile = -panelMap.AutoScrollPosition.X / tileSize;
+            int scrolledYTile = -panelMap.AutoScrollPosition.Y / tileSize;
 
             int x = scrolledXTile + hoveredColumn;
             int y = scrolledYTile + hoveredRow;
@@ -913,6 +924,16 @@ namespace AmbermoonMapEditor2D
             tilesets.Add(index, tileset);
 
             comboBoxTilesets.SelectedIndex = (int)index - 1;*/
+        }
+
+        private void comboBoxWorld_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            map.World = (World)comboBoxWorld.SelectedIndex;
+        }
+
+        private void trackBarZoom_Scroll(object sender, EventArgs e)
+        {
+            MapSizeChanged();
         }
     }
 }

@@ -43,6 +43,7 @@ namespace AmbermoonMapEditor2D
             this.toolStripMenuItemEditRedo = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparatorEdit1 = new System.Windows.Forms.ToolStripSeparator();
             this.groupBoxTileset = new System.Windows.Forms.GroupBox();
+            this.buttonExportTileset = new System.Windows.Forms.Button();
             this.buttonEditTile = new System.Windows.Forms.Button();
             this.comboBoxPalettes = new System.Windows.Forms.ComboBox();
             this.comboBoxTilesets = new System.Windows.Forms.ComboBox();
@@ -121,7 +122,7 @@ namespace AmbermoonMapEditor2D
             this.columnHeaderEventDescription = new System.Windows.Forms.ColumnHeader();
             this.buttonToggleEvents = new System.Windows.Forms.Button();
             this.timerAnimation = new System.Windows.Forms.Timer(this.components);
-            this.buttonExportTileset = new System.Windows.Forms.Button();
+            this.trackBarZoom = new System.Windows.Forms.TrackBar();
             this.menuStrip.SuspendLayout();
             this.groupBoxTileset.SuspendLayout();
             this.groupBoxProperties.SuspendLayout();
@@ -133,6 +134,7 @@ namespace AmbermoonMapEditor2D
             this.statusStrip.SuspendLayout();
             this.contextMenuStripBlockModes.SuspendLayout();
             this.groupBoxEvents.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.trackBarZoom)).BeginInit();
             this.SuspendLayout();
             // 
             // panelMap
@@ -260,6 +262,16 @@ namespace AmbermoonMapEditor2D
             this.groupBoxTileset.TabStop = false;
             this.groupBoxTileset.Text = "Tileset";
             // 
+            // buttonExportTileset
+            // 
+            this.buttonExportTileset.Location = new System.Drawing.Point(707, 148);
+            this.buttonExportTileset.Name = "buttonExportTileset";
+            this.buttonExportTileset.Size = new System.Drawing.Size(89, 23);
+            this.buttonExportTileset.TabIndex = 5;
+            this.buttonExportTileset.Text = "Export tileset ...";
+            this.buttonExportTileset.UseVisualStyleBackColor = true;
+            this.buttonExportTileset.Click += new System.EventHandler(this.buttonExportTileset_Click);
+            // 
             // buttonEditTile
             // 
             this.buttonEditTile.Location = new System.Drawing.Point(707, 93);
@@ -355,6 +367,7 @@ namespace AmbermoonMapEditor2D
             this.comboBoxWorld.Name = "comboBoxWorld";
             this.comboBoxWorld.Size = new System.Drawing.Size(104, 23);
             this.comboBoxWorld.TabIndex = 21;
+            this.comboBoxWorld.SelectedIndexChanged += new System.EventHandler(this.comboBoxWorld_SelectedIndexChanged);
             // 
             // labelSizeCross
             // 
@@ -944,15 +957,20 @@ namespace AmbermoonMapEditor2D
             this.timerAnimation.Interval = 166;
             this.timerAnimation.Tick += new System.EventHandler(this.timerAnimation_Tick);
             // 
-            // buttonExportTileset
+            // trackBarZoom
             // 
-            this.buttonExportTileset.Location = new System.Drawing.Point(707, 148);
-            this.buttonExportTileset.Name = "buttonExportTileset";
-            this.buttonExportTileset.Size = new System.Drawing.Size(89, 23);
-            this.buttonExportTileset.TabIndex = 5;
-            this.buttonExportTileset.Text = "Export tileset ...";
-            this.buttonExportTileset.UseVisualStyleBackColor = true;
-            this.buttonExportTileset.Click += new System.EventHandler(this.buttonExportTileset_Click);
+            this.trackBarZoom.AutoSize = false;
+            this.trackBarZoom.LargeChange = 1;
+            this.trackBarZoom.Location = new System.Drawing.Point(779, 376);
+            this.trackBarZoom.Maximum = 4;
+            this.trackBarZoom.Minimum = 1;
+            this.trackBarZoom.Name = "trackBarZoom";
+            this.trackBarZoom.Orientation = System.Windows.Forms.Orientation.Vertical;
+            this.trackBarZoom.Size = new System.Drawing.Size(25, 84);
+            this.trackBarZoom.TabIndex = 17;
+            this.trackBarZoom.TickStyle = System.Windows.Forms.TickStyle.None;
+            this.trackBarZoom.Value = 4;
+            this.trackBarZoom.Scroll += new System.EventHandler(this.trackBarZoom_Scroll);
             // 
             // MapEditorForm
             // 
@@ -976,6 +994,7 @@ namespace AmbermoonMapEditor2D
             this.Controls.Add(this.groupBoxTileset);
             this.Controls.Add(this.panelMap);
             this.Controls.Add(this.menuStrip);
+            this.Controls.Add(this.trackBarZoom);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
             this.MainMenuStrip = this.menuStrip;
             this.MaximizeBox = false;
@@ -999,6 +1018,7 @@ namespace AmbermoonMapEditor2D
             this.statusStrip.PerformLayout();
             this.contextMenuStripBlockModes.ResumeLayout(false);
             this.groupBoxEvents.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.trackBarZoom)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -1098,6 +1118,7 @@ namespace AmbermoonMapEditor2D
         private System.Windows.Forms.ColumnHeader columnHeaderEventDescription;
         private System.Windows.Forms.Timer timerAnimation;
         private System.Windows.Forms.Button buttonExportTileset;
+        private System.Windows.Forms.TrackBar trackBarZoom;
     }
 }
 
