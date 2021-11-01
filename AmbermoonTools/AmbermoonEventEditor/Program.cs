@@ -973,7 +973,7 @@ namespace AmbermoonEventEditor
                         Console.WriteLine();
                         Console.WriteLine("Connect to which event");
                         ListEvents(events);
-                        var index = ReadInt();
+                        var index = ReadInt(true);
 
                         if (index == null || index < 0 || index >= events.Count)
                         {
@@ -1082,7 +1082,7 @@ namespace AmbermoonEventEditor
             var eventReader = new DataReader(eventData);
             var @event = EventReader.ParseEvent(eventReader);
 
-            if (insertIndex == -1)
+            if (insertIndex == -1 || insertIndex >= events.Count)
                 events.Add(@event);
             else
                 events.Insert(insertIndex, @event);
@@ -1305,6 +1305,10 @@ namespace AmbermoonEventEditor
             {
                 ProcessEvents(chain);
             }
+
+            // Also add all events that have no connection
+            foreach (var ev in events)
+                ProcessEvents(ev);
 
             foreach (var ev in events)
             {
