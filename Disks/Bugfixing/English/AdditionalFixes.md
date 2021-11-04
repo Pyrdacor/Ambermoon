@@ -1,3 +1,9 @@
+## Version 1.12
+
+Based on 1.11.
+
+- A spider in the bandit's cellar did not move previously. This is fixed now.
+
 ## Version 1.11
 
 Based on 1.10.
