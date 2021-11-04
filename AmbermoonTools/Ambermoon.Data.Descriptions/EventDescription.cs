@@ -121,8 +121,8 @@ namespace Ambermoon.Data.Descriptions
             { EventType.Teleport, new EventDescription
             (
                 true, true, true, true, false,
-                Use.Byte("X", true, 50),
-                Use.Byte("Y", true, 50),
+                Use.Byte("X", true, 200),
+                Use.Byte("Y", true, 200),
                 Use.Enum("Direction", false, CharacterDirection.Random),
                 Use.HiddenByte(0xff),
                 Use.Enum<TeleportEvent.TransitionType>("Transition", false),
