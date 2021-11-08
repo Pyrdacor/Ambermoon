@@ -82,7 +82,7 @@ Offset | Meaning
 2 | Spawn location X (1-based)
 4 | Spawn location Y (1-based)
 6 | Spawn location map index
-8 | Stationary image bit value (= 2 -> bit 1 set)
+8 | [Travel type](Enumerations/TravelType.md) (= 2)
 
 ### Ship dealer
 
@@ -92,7 +92,7 @@ Offset | Meaning
 2 | Spawn location X (1-based)
 4 | Spawn location Y (1-based)
 6 | Spawn location map index
-8 | Stationary image bit value (= 4 -> bit 2 set)
+8 | [Travel type](Enumerations/TravelType.md) (= 3)
 
 ### Horse dealer
 
@@ -102,7 +102,7 @@ Offset | Meaning
 2 | Spawn location X (1-based)
 4 | Spawn location Y (1-based)
 6 | Spawn location map index
-8 | Stationary image bit value (= 1 -> bit 0 set)
+8 | [Travel type](Enumerations/TravelType.md) (= 1)
 
 ### Blacksmith
 
