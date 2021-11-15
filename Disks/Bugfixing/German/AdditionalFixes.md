@@ -5,6 +5,7 @@ Based on 1.10.
 - When saying "Tochter" to Sandra you now will also get the chest key and not the tunnel key.
 - Fixed "ENKEL" to "ENKELKIND" in object text 001.002 (testament).
 - A spider in the bandit's cellar did not move previously. This is fixed now.
+- Fixed automap wall display glitch in hill caves and beast cave (change byte 0x0641 in sub-file 026 in 2Lab_data from 0x80 to 0x82)
 
 ## Version 1.10
 
