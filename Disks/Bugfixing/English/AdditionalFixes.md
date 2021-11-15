@@ -4,6 +4,7 @@ Based on 1.11.
 
 - A spider in the bandit's cellar did not move previously. This is fixed now.
 - Fixed automap wall display glitch in hill caves and beast cave (change byte 0x0641 in sub-file 026 in 2Lab_data from 0x80 to 0x82)
+- Changed "FISHERMEN" to "FISHERMAN" when observing Sally.
 
 ## Version 1.11
 
