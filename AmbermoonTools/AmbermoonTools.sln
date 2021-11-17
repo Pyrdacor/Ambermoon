@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.31702.278
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31903.59
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{50F239F2-6D78-48C3-A4AB-824CE4EBC078}"
 	ProjectSection(SolutionItems) = preProject
@@ -28,8 +28,6 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Ambermoon.Data.Descriptions", "Ambermoon.Data.Descriptions\Ambermoon.Data.Descriptions.csproj", "{C3ACC3FA-DBDD-4B38-B91F-27D2BA723DEF}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Ambermoon3DMapViewer", "Ambermoon3DMapViewer\Ambermoon3DMapViewer.csproj", "{360CC08E-5F4E-4217-9991-79A7F9AF0503}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AmbermoonImageConverter", "AmbermoonImageConverter\AmbermoonImageConverter.csproj", "{D9C9D825-3DB3-48EB-BAFE-014A39078685}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -96,12 +94,6 @@ Global
 		{360CC08E-5F4E-4217-9991-79A7F9AF0503}.Release|Any CPU.Build.0 = Release|Any CPU
 		{360CC08E-5F4E-4217-9991-79A7F9AF0503}.ReleaseLinux|Any CPU.ActiveCfg = Release|Any CPU
 		{360CC08E-5F4E-4217-9991-79A7F9AF0503}.ReleaseLinux|Any CPU.Build.0 = Release|Any CPU
-		{D9C9D825-3DB3-48EB-BAFE-014A39078685}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{D9C9D825-3DB3-48EB-BAFE-014A39078685}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{D9C9D825-3DB3-48EB-BAFE-014A39078685}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{D9C9D825-3DB3-48EB-BAFE-014A39078685}.Release|Any CPU.Build.0 = Release|Any CPU
-		{D9C9D825-3DB3-48EB-BAFE-014A39078685}.ReleaseLinux|Any CPU.ActiveCfg = Release|Any CPU
-		{D9C9D825-3DB3-48EB-BAFE-014A39078685}.ReleaseLinux|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
