@@ -53,7 +53,7 @@ Offset | Type | Description
 0x01 | ubyte | Chest flags (see below, only 1 chest has a value other than 0)
 0x02 | ubyte | Optional index of a map text to display when showing the opened chest (0xff means no text)
 0x03 | ubyte | Chest data index (also used for locked state in savegame)
-0x04 | ubyte | Remove if empty (0 or 1)
+0x04 | ubyte | Chest loot flags
 0x05 | uword | Key index if locked
 0x07 | uword | Unlock fail event index (0-based, 0xffff means none, this is basically the trap event chain)
 
@@ -69,6 +69,16 @@ If the key index is not 0, the chest can't be opened with a lockpick.
 Only one chest in Ambermoon uses the flags. It is a skull in the Antique Area which contains the Antique Weapon. You will only find it when your search ability is high enough cause Bit1 is set. The chest uses value 50 (hex 32).
 
 In binary this is 0011 0010. So in addition two other bits are set as well. But the meaning is unknown.
+
+### Chest loot flags
+
+- Bit0: Remove when empty
+- Bit1: No chest auto remove
+- Bit2-7: **Unknown**
+
+Bit0 will actually close the chest when you have looted all items, gold and food. The chest event (chain) is then deactivated so that you can't access the chest again. This also disallows storing items in that chest.
+
+Bit1 is only used when Bit0 is set as well. If this is set, the event (chain) is not deactivated so that you can access the chest again after fully looting it. This is used for things like the flowers on Lyramion. You can loot them infinitely. Although the chest popup closes after looting and you can't of course store items there.
 
 ## Text popup event (0x04 / 4)
 
