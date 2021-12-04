@@ -21,3 +21,6 @@ Value | Name | Additional info | Frames of animation (1 = no animation)
 16 | Pile | | 1
 17 | Person | Green sphere symbol | 1
 18 | GotoPoint | White blinking point you can return to | 7
+0xffff | Fallback | See below | -
+
+The special automap type 0xffff is used for some 3D map character objects. If this is given, the automap type is determined by the character type. Consider an object that uses the sprite of a magician. In theory it can be used for a NPC or for a monster as well. So the automap type could be "Person" or "Monster" dependent on the usage. A real example from Ambermoon is the Necromancer at the graveyard of Spannenberg. It uses the sprite of an old man but is a monster that attacks you. There are also other old men in Spannenberg with the same sprite but these are normal NPCs. Technically they use the same 3D map object and this object therefore uses the automap type 0xffff to be usable by both.
