@@ -8,6 +8,7 @@ Based on 1.10.
 - Fixed automap wall display glitch in hill caves and beast cave (change byte 0x0641 in sub-file 026 in 2Lab_data.amb from 0x80 to 0x82)
 - The monsters in Gadlon cellar 1 now are active on the map (previously due to a bug they were behind the outside walls)
 - Chris' boots are no longer broken but instead identified (change byte 0x014F in sub-file 005 in Party_char.amb from 0x02 to 0x01)
+- Flying disc is not broken in the chest in the Thalion office (change byte 0x33 in sub-file 125 in Chest_data.amb from 0x02 to 0x00)
 
 ## Version 1.10
 

@@ -7,6 +7,7 @@ Based on 1.11.
 - Changed "FISHERMEN" to "FISHERMAN" when observing Sally.
 - The monsters in Gadlon cellar 1 now are active on the map (previously due to a bug they were behind the outside walls)
 - Chris' boots are no longer broken but instead identified (change byte 0x014F in sub-file 005 in Party_char.amb from 0x02 to 0x01)
+- Flying disc is not broken in the chest in the Thalion office (change byte 0x33 in sub-file 125 in Chest_data.amb from 0x02 to 0x00)
 
 ## Version 1.11
 
