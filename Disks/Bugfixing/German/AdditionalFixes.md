@@ -5,7 +5,9 @@ Based on 1.10.
 - When saying "Tochter" to Sandra you now will also get the chest key and not the tunnel key.
 - Fixed "ENKEL" to "ENKELKIND" in object text 001.002 (testament).
 - A spider in the bandit's cellar did not move previously. This is fixed now.
-- Fixed automap wall display glitch in hill caves and beast cave (change byte 0x0641 in sub-file 026 in 2Lab_data from 0x80 to 0x82)
+- Fixed automap wall display glitch in hill caves and beast cave (change byte 0x0641 in sub-file 026 in 2Lab_data.amb from 0x80 to 0x82)
+- The monsters in Gadlon cellar 1 now are active on the map (previously due to a bug they were behind the outside walls)
+- Chris' boots are no longer broken but instead identified (change byte 0x014F in sub-file 005 in Party_char.amb from 0x02 to 0x01)
 
 ## Version 1.10
 
