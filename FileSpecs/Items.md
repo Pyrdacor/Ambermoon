@@ -166,5 +166,6 @@ Value | Name
 0x00 | None
 0x01 | Identified
 0x02 | Broken
+0x04 | Cursed
 
 Note: Items also store an item slot flags value. I guess it overrides the one from the chest/merchant etc. or is kind of a default value. Maybe useful if the item is given to the party by events (like NPCs).
