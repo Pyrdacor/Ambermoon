@@ -831,14 +831,14 @@ namespace AmbermoonEventEditor
                 return;
             }
 
-            if (eventList.Contains(@event))
+            /*if (eventList.Contains(@event))
             {
                 Console.WriteLine("The event is the first of an event chain. You can't connect it to another event.");
                 Console.WriteLine("If you really want to do this, first disconnect the event with the 'disconnect'");
                 Console.WriteLine("command and then try again to connect it.");
                 Console.WriteLine();
                 return;
-            }
+            }*/
 
             Console.WriteLine();
             Console.Write("Which event to connect to: ");

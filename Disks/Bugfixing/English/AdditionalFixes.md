@@ -9,6 +9,7 @@ Based on 1.11.
 - Chris' boots are no longer broken but instead identified (change byte 0x014F in sub-file 005 in Party_char.amb from 0x02 to 0x01)
 - Flying disc is not broken in the chest in the Thalion office (change byte 0x33 in sub-file 125 in Chest_data.amb from 0x02 to 0x00)
 - Wrong tiles on Morag surface fixed by editing map 516
+- Female Tornak now grants 650 Exp instead of 0 (change bytes 0x20 and 0x21 in sub-file 055 of Monster_char_data from 0x0000 to 0x028A)
 
 ## Version 1.11
 
