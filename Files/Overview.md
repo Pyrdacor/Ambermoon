@@ -97,3 +97,9 @@ There is also a file called "Saves" in the main directory
 which contains the names of the 10 savegames and the information
 which of them is the last played savegame for the continue
 game option.
+
+## Important notes
+
+The original seems to omit loading of some 3D archives if you switch from one 3D map to another one. Even if you change from a map in 2Map_data.amb to one in 3Map_data.amb or vice versa. This only affect the airship in the original and there it is secured that both the 2XX files and the 3XX files contain all graphics and info for those maps. But it might cause problems in mods. Ambermoon Advanced had some issues as I wanted to save space and divided maps to the 2XX and 3XX range.
+
+So it can happen that a map in 3Map_data.amb actually uses data from 2Lab_data.amb, 2Objects3D.amb and 2Overlay3D.amb instead of the 3XX versions. Especially when you teleport from a map in 2Map_data.amb to this map. Then you have to ensure that all used graphics and labdata sub-files are present in the 2XX version as well, otherwise the graphics are messed up or the game crashes.
