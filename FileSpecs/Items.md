@@ -92,7 +92,7 @@ Bit | Description
 2 | Stackable
 3 | Can be equipped during battle
 4 | Destroy after usage
-5 | Readable
+5 | Indestructable
 6 | Clonable
 7 | Unused
 
