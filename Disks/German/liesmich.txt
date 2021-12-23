@@ -1,0 +1,157 @@
+Ambermoon German 1.11 by Pyrdacor (23-12-2021)
+==============================================
+
+Änderungen in 1.11
+==================
+
+- Wenn man "Tochter" zu Sandra sagt, erhält man nun auch den Truhenschlüssel und nicht nur
+  den Burnville Tunnel Schlüssel.
+- Im Testament wurde "Enkel" zu "Enkelkind" geändert um auch für weibliche Hauptcharaktere
+  zu passen.
+- Eine Spinne im Keller der Banditen konnte sich nicht bewegen. Das wurde gefixt.
+- In den Hügelhöhlen und der Biesthöhle wurde ein visueller Fehler auf der Dungeon-Karte behoben.
+- Gadlons Keller 1 hat nun korrekterweise Monster. Vorher waren diese durch einen Bug hinter
+  den Außenwänden gefangen.
+- Chris hat zu Anfang nicht länger zerstörte Stiefel.
+- Die magische Flugscheibe ist nicht länger zerbrochen in der Kiste im Thalion Büro.
+- In der Nähe von Koordinate 0,0 auf Morag wurden visuelle Map-Fehler behoben.
+- Das Tornakweibchen gibt nun 650 statt 0 EP.
+- Tippfehler bei einem Text von Baron Karsten wurde behoben ("ist sind" -> "sind").
+- Das Item Topaz heißt nun Topas, da es der korrekte deutsche Name ist und in Texten auch
+  dieser Name benutzt wird. Topaz ist hingegen der englische Name.
+
+
+Ambermoon German 1.10 by Pyrdacor (30-09-2021)
+==============================================
+
+Änderungen in 1.10
+==================
+
+- Der Zauber "Fluch beseitigen" wurde gefixt
+- Die Tür zum Windschrein kann nicht länger mit Hexenbesen oder Adler übersprungen werden.
+- Beim Verlassen des Windschreins kommt man nun an der richtigen Position raus.
+- Der Maximalwert für die Schwimm-Fähigkeit wurde von 99 auf 95 zurückgeändert.
+- Der aktuelle Schwimm-Wert für Tar wurde von 99 auf 90 zurückgeändert.
+- Die Maximalwerte für Magie benutzen und Spruchrollen lesen wurden für Tar und Nelvin
+  von 99 auf 95 zurückgeändert.
+- Das Item "Krummsäbel" wurde wieder in "Scimitar" umbenannt.
+- Die letzten 4 Punkte waren alles Änderungen von Daniel Schulz in 1.06, die nicht als
+  korrekt eingestuft wurden.
+- Die Fähigkeitsreduktionen für die Items Peitsche (-10 Parade), Bänderpanzer (-4 Attacke),
+  Plattenpanzer (-6 Attacke) und Ritterrüstung (-8 Attacke) wurden korrigiert.
+- Der Code für die Fähigkeitsreduktion von Items wurde gefixt.
+- Eriks initialer Attacke-Bonuswert wurde zurück von 0 auf -6 gesetzt. Da die Fähigkeits-
+  reduktion nun funktioniert, ist dies korrekt. Er trägt einen Plattenpanzer.
+- Ein Anzeigefehler auf der Karte im Palast des Barons in Newlake wurde behoben.
+- Fehler beim Gespräch mit dem NPC Matthias wurden behoben, wenn man die Elfenharfe kauft.
+- Die vorhandene Anti-Schmuggler-Bestrafung auf Morag wurde verbessert (Text-Farbe und
+  Entfernen der Gegenstände).
+- Eine weitere Anti-Schmuggler-Bestrafung wurde hinzugefügt, sodass es nun wirklich unmöglich
+  ist, den Hexenbesen oder die magische Flugscheibe auf Morag zu verwenden.
+
+
+Änderungen in 1.09
+==================
+
+- Viele Texte wurden korrigiert.
+- Die Tür zum Temple der Gala kann nicht länger mit Hexenbesen oder Adler übersprungen werden.
+- Die Tür zur Krypta kann nicht länger mit Hexenbesen oder Adler übersprungen werden.
+- Die Tür zu Lebab's Turm kann nicht länger mit Hexenbesen oder Adler übersprungen werden.
+  Außerdem kann man den Kampf gegen die Gargylen nicht durch Flucht überspringen.
+- Ein doppeltes Text-Popup in Burnville wurde behoben.
+- Ein fälschlicherweise angezeigte Kiste im Palast des S'Endar wurde korrigiert.
+- Der Schmied in Newlake hat nun den richtigen Namen und Preis.
+- Der Schiffshändler in Spannenberg platziert nun korrekt gekaufte Schiffe.
+- Gryban erscheint nun wieder in der Feste Godsbane, nachdem er die Gruppe verlässt.
+- Der Hexenbesen und die Flugscheibe werden nun auch beim zweiten Besuch von Morag zerstört.
+- Nachdem S'Riel gestorben ist und man erneut in seine Zelle geht, findet man nun seine
+  Überreste und nicht nur ein Text-Popup darüber mit einem leeren Fußboden.
+- Wenn man wirklich stark versucht den Hexenbesen oder die Flugscheibe auf Morag zu schmuggeln
+  (denn einen Weg gibt es noch), dann wird man sein blaues Wunder erleben! Vorher speichern!
+- Man kann nicht länger Lebab's Turm mit dem Hexenbesen durchqueren.
+- Anzeigefehler im Gefängnis von S'Angrila behoben.
+- Man wird nicht länger im Keller des Hexenhauses in der Wand steckenbleiben.
+- Man wird nicht länger in der Mine in Dor Kiredon in der Tür steckenbleiben.
+- Der Status "Krankheit" reduziert nun korrekt ein Zufallsattribut von Zeit zu Zeit.
+- Der Zauber "SP-Stehler" entziehnt nun den korrekten SP-Wert.
+- Wenn man durch den Verkauf von Waren beim Händler mehr als 32767 Gold hat, kann man
+  nun dennoch weiter Waren kaufen.
+
+
+Änderungen in 1.08
+==================
+
+- Sansrie wurde in Sansri umbenannt (Items, Monster, Texte)
+- Eine Treppe in Sansri's Tempel wurde optisch korrigiert.
+- Wenn man mit Dorina nach Dor Kiredon zurückkehrt besagte der Text, dass man
+  nach Dor Grestin gereist ist. Das wurde behoben.
+- Alle Waldmond-Pflanzen haben nun korrekterweise 1 Aufladung, sodass sie
+  benutzt werden können.
+- Die Spruchrolle "Anti-Magie Sphäre" hat nun das korrekte Gewicht.
+- Die Items "Mörderklinge" und "Dolchschleuder" zeigen nun die korrekt Anzahl
+  an nötigen Händen.
+- Sehr viele geschlechterspezifische Texte, die sich auf einen männlichen Helden
+  bezogen wurden korrigiert, sodass auch für weibliche Helden die Texte passen.
+- Einige Itemnamen wurden korrigiert:
+  - Mystischer Globe -> Mystischer Globus
+  - Alchemist. Globe -> Alchemist. Globus
+  - Magische Flugscheib -> Mag. Flugscheibe (länger ging leider nicht)
+  - Sansries Halsband -> Sansrie's Halsband (konform zu ähnlichen Items)
+  - Valdyns Lederschuhe -> Valdyn's Schuhe (konform zu ähnlichen Items und der englischen Version).
+- Die Quest für die Kristallharfe wurde korrigiert/verbessert:
+  - Man kann nicht länger die Kristallharfe bekommen, ohne die Elfenharfe zu besitzen.
+  - Man kann nun auch die Elfenharfe zeigen/geben um eine Reaktion zu erhalten.
+- Wenn man Dor Kiredon erstmalig betritt, lernen alle Partymitglieder die zwergische
+  Sprache. Es verhindert, dass man ohne zwergisch sprechende Charaktere auf dem
+  Waldmond festhängt. Außerdem ist es storymäßig nicht unwahrscheinlich, dass einem
+  die Zwerge ihre Sprache beibringen.
+- Das Lava-Becken in Luminor's Folterkammer blockt nun die Spielerbewegung. Man
+  konnte vorher munter in der Lava spazieren und es gab einige visuelle Bugs.
+- Wenn man Tornaks tötet und dann mit einem Tornak-Ei die gleiche Map wieder
+  betritt, sind die Tornaks nun auch verschwunden und nicht plötzlich wieder da.
+  Das betrifft die Mine - 2. Level und die Tornakhöhle unter Ferrin's Schmiede.
+- Außerdem bleiben auch beseitigte Wände (Spitzhacke) in der Tornakhöhle beseitigt,
+  egal ob man mit oder ohne Ei weiderkommt bzw. die Wände entfernt hat.
+- Und wenn man ein Ei dabei hatte konnte man die Spitzhacke in der Tornakhöhle
+  mehrfach an der selben Stelle verwenden. Die Wand war dann zwar weg, aber der
+  Text wurde immer wieder angezeigt. Das ist nun auch behoben.
+
+
+
+Änderungen in 1.07
+==================
+
+- Sansri's Schlüssel funktioniert nun in Sansri's Tunnel.
+- Der mysteriöse Golem im Tempel der Gala, der um 0 Uhr als Partymitglied
+  erscheint ist nun gefixt und erscheint nun als reguläres Monster (4 Golems)
+  auf der Karte.
+- Reg der Hügelriese ist nun korrekt als Boss gekennzeichnet, so dass er immun
+  für Zauber wie Furcht oder Versteinern ist.
+- Zwei Teile der Lyramion Weltkarte wurden gefixt, sodass dort nicht länger
+  merkwürdige Effekte mit dem Nebel des Krieges (fog of war) auftreten.
+- Gryban kehrt nun in die Feste Godsbane zurück, wenn ihr ihn aus der Party
+  entlasst.
+- Zwei verbuggte Windtore wurden korrigiert, deren Grafiken nach dem Reparieren
+  fehlerhaft waren.
+- In Gadlon ist es nun möglich zurück zur ersten Etage zu gelangen.
+- Im Keller des Hauses der Banditen wurde ein falscher Schalten behoben.
+- Alle Pflanzen auf Kire's Mond wurden behoben, sodass man sie nun alle
+  einsammeln kann, wenn man mit Asrub darüber gesprochen hat.
+- Ein Text-Popup in Nalven's Magieschule wurde behoben, sodass es nun
+  erscheint wenn man sich erstmals der rechten Tür nähert.
+- Im geheimen Thalion Büro wurden zwei fehlende Text-Popups hinzugefügt.
+- Das Windtor an Position 271, 564 kann nicht länger benutzt werden, wenn es
+  noch zerstört ist.
+- Der Stadt S'Angrila wurde eine Bodentextur hinzugefügt.
+- Die Blickrichtung wurde korrigiert, wenn man in Luminor's Turm von
+  Ebene 4 auf 3 wechselt.
+- Desweiteren beinhaltet 1.07 alle bis dahin verfügbaren deutschen Patches.
+
+
+Über den Autor
+==============
+
+Fast alle Änderungen wurden von Pyrdacor (trobt@web.de) durchgeführt.
+Du kannst mich auch auf meiner github Seite auf https://github.com/Pyrdacor besuchen.
+
+Einige Verbesserungen der deutschen Texte hat skdubg beigesteuert.
