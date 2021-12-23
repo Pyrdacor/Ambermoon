@@ -11,6 +11,8 @@ Based on 1.10.
 - Flying disc is not broken in the chest in the Thalion office (change byte 0x33 in sub-file 125 in Chest_data.amb from 0x02 to 0x00)
 - Wrong tiles on Morag surface fixed by editing map 516 
 - Female Tornak now grants 650 Exp instead of 0 (change bytes 0x20 and 0x21 in sub-file 055 of Monster_char_data from 0x0000 to 0x028A)
+- Fixed "IST SIND" to "SIND" in NPC_texts.amb sub-file 030 (0x1E), text 010 (0x0A). This is Baron Karsten of Newlake.
+- The item Topaz was renamed to Topas at it's the correct german name and it is also referenced this way in Kire's message.
 
 ## Version 1.10
 
