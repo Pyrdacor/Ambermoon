@@ -7,7 +7,7 @@ Changes in 1.12
 - A spider in the bandit's cellar did not move previously. This is fixed now.
 - Fixed automap wall display glitch in hill caves and beast cave.
 - Changed "FISHERMEN" to "FISHERMAN" when observing Sally.
-- The monsters in Gadlon cellar 1 now are active on the map (previously due to a bug they were   behind the outside walls).
+- The monsters in Gadlon cellar 1 now are active on the map (previously due to a bug they were behind the outside walls).
 - Chris' boots are no longer broken but instead identified at start.
 - Flying disc is not broken anymore in the chest in the Thalion office.
 - Wrong tiles on Morag surface fixed around coordinates 0,0.
