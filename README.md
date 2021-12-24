@@ -12,9 +12,9 @@ I will provide some helpful tools too.
 
 ### Full versions
 
-**Note:** The downloads also contain the save folders so if you just overwrite your own folders you might lose you savegames. So either back them up or don't copy folders Save.00 to Save.10 over.
+**Note:** The downloads also contain the save folders so if you just overwrite your own folders you might lose your savegames. So either back them up or don't copy folders Save.01 to Save.10 over.
 
-**Note:** Some fixed will only work for new games as they are bound to the savegame. This includes all non-text party member fixes, chest fixes and merchant fixes.
+**Note:** Some fixes will only work for new games as they are bound to the savegame. This includes all non-text party member fixes, chest fixes and merchant fixes.
 
 **Note:** From english 1.10 and german 1.09 onwards, the versions will also work with 68000 CPUs (A500 etc).
 
