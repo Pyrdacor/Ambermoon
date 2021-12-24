@@ -30,6 +30,8 @@ Version | Language | Type | Download | Release date
 Over all the years Alex Holland has carefully tracked all bug reports and fixes in an [excel sheet](https://docs.google.com/spreadsheets/d/1as5W8gibm-MTb9VEqpkfgtwWviqjQx96A3NmcvzX98A). Kudos to him!
 There you can see the progress of bugfixes.
 
+In contrast to the main releases, the patches only contain those files which have changed since the original versions. So they can be used to patch an already installed original version.
+
 Version | Language | Download | Release date
 --- | --- | --- | ---
 1.12 | English | [zip](https://github.com/Pyrdacor/Ambermoon/raw/master/Disks/Patches/PyrdacorFixEnglish1.12.zip) [lha](https://github.com/Pyrdacor/Ambermoon/raw/master/Disks/Patches/PyrdacorFixEnglish1.12.lha) [tar.gz](https://github.com/Pyrdacor/Ambermoon/raw/master/Disks/Patches/PyrdacorFixEnglish1.12.tar.gz) | 23-12-2021
