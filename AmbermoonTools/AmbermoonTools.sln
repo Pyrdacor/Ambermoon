@@ -33,6 +33,14 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AmbermoonImageConverter", "
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AmbermoonLabdataEditor", "AmbermoonLabdataEditor\AmbermoonLabdataEditor.csproj", "{E83925E3-5C50-4300-B86B-AC26CD36B904}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ConsoleApp1", "ConsoleApp1\ConsoleApp1.csproj", "{D6631BBF-477B-4450-81C6-BBE73E304920}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Ambermoon.Common", "..\..\..\ambermoon.net\Ambermoon.net\Ambermoon.Common\Ambermoon.Common.csproj", "{9FBB618A-45F4-421B-8B17-EF04DDC6F955}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Ambermoon.Data.Common", "..\..\..\ambermoon.net\Ambermoon.net\Ambermoon.Data.Common\Ambermoon.Data.Common.csproj", "{0006E1D8-5625-492D-8E65-7B66F69B0774}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Ambermoon.Data.Legacy", "..\..\..\ambermoon.net\Ambermoon.net\Ambermoon.Data.Legacy\Ambermoon.Data.Legacy.csproj", "{5AB6B850-732B-47BB-8519-A27E0EE1008D}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -110,6 +118,30 @@ Global
 		{E83925E3-5C50-4300-B86B-AC26CD36B904}.Release|Any CPU.Build.0 = Release|Any CPU
 		{E83925E3-5C50-4300-B86B-AC26CD36B904}.ReleaseLinux|Any CPU.ActiveCfg = Release|Any CPU
 		{E83925E3-5C50-4300-B86B-AC26CD36B904}.ReleaseLinux|Any CPU.Build.0 = Release|Any CPU
+		{D6631BBF-477B-4450-81C6-BBE73E304920}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D6631BBF-477B-4450-81C6-BBE73E304920}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D6631BBF-477B-4450-81C6-BBE73E304920}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D6631BBF-477B-4450-81C6-BBE73E304920}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D6631BBF-477B-4450-81C6-BBE73E304920}.ReleaseLinux|Any CPU.ActiveCfg = Release|Any CPU
+		{D6631BBF-477B-4450-81C6-BBE73E304920}.ReleaseLinux|Any CPU.Build.0 = Release|Any CPU
+		{9FBB618A-45F4-421B-8B17-EF04DDC6F955}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9FBB618A-45F4-421B-8B17-EF04DDC6F955}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9FBB618A-45F4-421B-8B17-EF04DDC6F955}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9FBB618A-45F4-421B-8B17-EF04DDC6F955}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9FBB618A-45F4-421B-8B17-EF04DDC6F955}.ReleaseLinux|Any CPU.ActiveCfg = Release|Any CPU
+		{9FBB618A-45F4-421B-8B17-EF04DDC6F955}.ReleaseLinux|Any CPU.Build.0 = Release|Any CPU
+		{0006E1D8-5625-492D-8E65-7B66F69B0774}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0006E1D8-5625-492D-8E65-7B66F69B0774}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0006E1D8-5625-492D-8E65-7B66F69B0774}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0006E1D8-5625-492D-8E65-7B66F69B0774}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0006E1D8-5625-492D-8E65-7B66F69B0774}.ReleaseLinux|Any CPU.ActiveCfg = Release|Any CPU
+		{0006E1D8-5625-492D-8E65-7B66F69B0774}.ReleaseLinux|Any CPU.Build.0 = Release|Any CPU
+		{5AB6B850-732B-47BB-8519-A27E0EE1008D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5AB6B850-732B-47BB-8519-A27E0EE1008D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5AB6B850-732B-47BB-8519-A27E0EE1008D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5AB6B850-732B-47BB-8519-A27E0EE1008D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5AB6B850-732B-47BB-8519-A27E0EE1008D}.ReleaseLinux|Any CPU.ActiveCfg = Release|Any CPU
+		{5AB6B850-732B-47BB-8519-A27E0EE1008D}.ReleaseLinux|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
