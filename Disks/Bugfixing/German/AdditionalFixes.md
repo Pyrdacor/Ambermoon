@@ -1,6 +1,8 @@
-## Version 1.11
+## Version 1.12
 
-Based on 1.10.
+- Remove "create item" event from Father Anthony as the cupboard key can be found on your table.
+
+## Version 1.11
 
 - When saying "Tochter" to Sandra you now will also get the chest key and not the tunnel key.
 - Fixed "ENKEL" to "ENKELKIND" in object text 001.002 (testament).
@@ -15,8 +17,6 @@ Based on 1.10.
 - The item Topaz was renamed to Topas at it's the correct german name and it is also referenced this way in Kire's message.
 
 ## Version 1.10
-
-Based on 1.09.
 
 - Fixed "remove curse" spell. (Replace 3C 1F 41 E8 01 22 with 3C 1F 41 E9 01 22 in unimploded AM2_CPU and AM2_BLIT)
 - Windshrine door can not be skipped via broom or eagle anymore.
@@ -37,8 +37,6 @@ Based on 1.09.
 - Adjusted previous anti-smuggler protection (text color, item removal)
 
 ## Version 1.09
-
-Based on 1.08.
 
 - Temple of gala door can not be skipped via broom or eagle anymore.
 - Crypt door can not be skipped via broom or eagle anymore.
@@ -65,8 +63,6 @@ Based on 1.08.
 - Fixed merchant issue with more than 32767 gold.
 
 ## Version 1.08
-
-Based on 1.07.
 
 - Fixed stair texture in Sansri's temple 1.
   - Map 422 (x=14, y=11)

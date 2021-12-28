@@ -1,6 +1,8 @@
-## Version 1.12
+## Version 1.13
 
-Based on 1.11.
+- Remove "create item" event from Father Anthony as the cupboard key can be found on your table.
+
+## Version 1.12
 
 - A spider in the bandit's cellar did not move previously. This is fixed now.
 - Fixed automap wall display glitch in hill caves and beast cave (change byte 0x0641 in sub-file 026 in 2Lab_data.amb from 0x80 to 0x82)
@@ -12,8 +14,6 @@ Based on 1.11.
 - Female Tornak now grants 650 Exp instead of 0 (change bytes 0x20 and 0x21 in sub-file 055 of Monster_char_data from 0x0000 to 0x028A)
 
 ## Version 1.11
-
-Based on 1.10.
 
 - Fixed "remove curse" spell. (Replace 3C 1F 41 E8 01 22 with 3C 1F 41 E9 01 22 in unimploded AM2_CPU and AM2_BLIT)
 - Windshrine door can not be skipped via broom or eagle anymore.
@@ -54,8 +54,6 @@ Based on 1.10.
 
 ## Version 1.10
 
-Based on 1.09.
-
 - Temple of gala door can not be skipped via broom or eagle anymore.
 - Crypt door can not be skipped via broom or eagle anymore.
 - Lebab's tower door can not be skipped via broom or eagle anymore.
@@ -81,8 +79,6 @@ Based on 1.09.
 - Fixed merchant issue with more than 32767 gold.
 
 ## Version 1.09
-
-Based on 1.08.
 
 - Fixed stair texture in Sansri's temple 1.
   - Map 422 (x=14, y=11)
