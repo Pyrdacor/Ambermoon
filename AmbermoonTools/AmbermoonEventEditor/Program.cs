@@ -546,6 +546,8 @@ namespace AmbermoonEventEditor
             }
 
             events.Remove(@event);
+
+            unsavedChanges = true;
         }
 
         static void ReplaceEvent(List<Event> eventList, List<Event> events, Event eventOld, Event eventNew)
