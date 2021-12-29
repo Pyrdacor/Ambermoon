@@ -1330,6 +1330,7 @@ namespace AmbermoonEventEditor
 
             events.Clear();
             events.AddRange(reorderedList);
+            unsavedChanges = true;
         }
     }
 }
