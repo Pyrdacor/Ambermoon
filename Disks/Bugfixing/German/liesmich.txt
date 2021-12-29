@@ -1,3 +1,26 @@
+Ambermoon German 1.11 by Pyrdacor (23-12-2021)
+==============================================
+
+ƒnderungen in 1.11
+==================
+
+- Wenn man "Tochter" zu Sandra sagt, erh‰lt man nun auch den Truhenschl¸ssel und nicht nur
+  den Burnville Tunnel Schl¸ssel.
+- Im Testament wurde "Enkel" zu "Enkelkind" ge‰ndert um auch f¸r weibliche Hauptcharaktere
+  zu passen.
+- Eine Spinne im Keller der Banditen konnte sich nicht bewegen. Das wurde gefixt.
+- In den H¸gelhˆhlen und der Biesthˆhle wurde ein visueller Fehler auf der Dungeon-Karte behoben.
+- Gadlons Keller 1 hat nun korrekterweise Monster. Vorher waren diese durch einen Bug hinter
+  den Auﬂenw‰nden gefangen.
+- Chris hat zu Anfang nicht l‰nger zerstˆrte Stiefel.
+- Die magische Flugscheibe ist nicht l‰nger zerbrochen in der Kiste im Thalion B¸ro.
+- In der N‰he von Koordinate 0,0 auf Morag wurden visuelle Map-Fehler behoben.
+- Das Tornakweibchen gibt nun 650 statt 0 EP.
+- Tippfehler bei einem Text von Baron Karsten wurde behoben ("ist sind" -> "sind").
+- Das Item Topaz heiﬂt nun Topas, da es der korrekte deutsche Name ist und in Texten auch
+  dieser Name benutzt wird. Topaz ist hingegen der englische Name.
+
+
 Ambermoon German 1.10 by Pyrdacor (30-09-2021)
 ==============================================
 
