@@ -70,6 +70,8 @@ Only one chest in Ambermoon uses the flags. It is a skull in the Antique Area wh
 
 In binary this is 0011 0010. So in addition two other bits are set as well. But the meaning is unknown.
 
+If I get the 68k assembler right, Ambermoon just checks the whole byte value for "not equal zero". But maybe it has some different meaning in Amberstar?
+
 ### Chest loot flags
 
 - Bit0: Remove when empty
