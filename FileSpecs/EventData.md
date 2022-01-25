@@ -94,11 +94,13 @@ Offset | Type | Description
 --- | --- | ---
 0x00 | ubyte | Event picture index (0-based) or 0xff if no image
 0x01 | ubyte | Popup trigger (0: none, 1: move, 2: eye cursor, 3: both)
-0x02 | ubyte | **Unknown** (only 0 or 1)
+0x02 | ubyte | Also trigger when blind (only 0 or 1)
 0x03 | uword | Map text index
 0x05 | ubyte[4] | **Unknown**
 
 Note: There is no explicit trigger for hand cursor. If this is needed, a condition event can be inserted before. The trigger is ignored if the text event is not the first one in an event chain.
+
+Note: In this context, the status "blind" means either the ailment or the fact that you have no light source in a dungeon.
 
 ## Spinner event (0x05 / 5)
 
