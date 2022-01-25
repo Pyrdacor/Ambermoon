@@ -111,6 +111,8 @@ Offset | Type | Description
 0x00 | ubyte | Post-spin [direction](Enumerations/Directions.md)
 0x01 | ubyte[8] | Unused
 
+Note: If the direction is random, it will never be the same as before.
+
 ## Trap event (0x06 / 6)
 
 Damages the player and/or add ailments (fireplaces, traps, etc).
