@@ -233,21 +233,13 @@ Offset | Type | Description
 --- | --- | ---
 0x00 | ubyte | Tile's x coordinate (1-based)
 0x01 | ubyte | Tile's y coordinate (1-based)
-0x02 | ubyte | **Unknown**
-0x03 | ubyte[4] | Tile data
+0x02 | ubyte[3] | Unused
+0x05 | uword | Tile data
 0x07 | uword | Map index (0 means same map)
 
-The tile data is in the same format as for 2D maps. It is compatible to 3D maps as well (object/wall index). So you can use this:
+The tile data gives the new tile index for 2D maps and the object or wall index for 3D maps.
 
-```cs
-underlay_tile_index = tile_data[0];
-map_event_index = tile_data[1];
-overlay_tile_index = (tile_data[2] << 8) | tile_data[3];
-// underlay_tile_index is used for 3D as object index (1..100), wall index (101..254) or empty (0).
-```
-
-In 2D mostly the overlay index is used. If it is not 0 and the underlay index is 0, this means that the back tile is removed. If both
-values are 0, only the front tile is removed. There must be always at least one tile (front or back) of course.
+In 2D the tile flags of the new tile specifies if the background tile or foreground tile is replaced. If bit 2 of the flags (render order) is set, the foreground tile is replaced, otherwise the background tile. If the new tile index is 0, always the front tile is removed.
 
 ## Start battle event (0x0B / 11)
 
