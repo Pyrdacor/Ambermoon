@@ -203,7 +203,6 @@ Value | Meaning
 6 | Usable spell types (spell school)
 7 | Language
 8 | EP
-9 | TP
 
 ### Reward operation
 
