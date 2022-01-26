@@ -45,7 +45,7 @@ Offset | Type | Description
 0x02 | ubyte | Door index (used in savegame to determine if a door was unlocked)
 0x03 | ubyte | Optional index of a map text to display when showing door window (0xff means no text)
 0x04 | ubyte | Optional index of a map text to display when unlocked (0xff means no text)
-0x05 | ubyte | **Unknown** (always 0)
+0x05 | ubyte | Unused
 0x06 | uword | Key index
 0x08 | uword | Unlock fail event index (0-based, 0xffff means none, this is basically the trap event chain)
 
