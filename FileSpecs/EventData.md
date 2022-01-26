@@ -6,6 +6,8 @@ Here the data format for specific events is shown. Each event can use up to 9 by
 
 Note that actually 12 bytes are stored for each event. The first byte is the event type you see in parentheses below and the last 2 bytes always store the index of the following event or 0xffff if none follows. So here only the middle 9 bytes are listed which differ for each event type.
 
+Not all bytes are used by every event. In general you can assume that unused bytes are at the end of the data but as words are aligned to even offsets there might be also a gap of 1 byte in-between. Note that the shown data omits the leading even type byte so odd offsets below are actually even offsets inside the game data. For example the reward event has an unused byte at offset 0x04 but actually it is offset 0x05 and the following two words are really at offsets 0x06 and 0x08. So this explains the "unused gap" inside the data.
+
 ## Teleport event (0x01 / 1)
 
 Used for map transitions, teleporters, holes in the ground and so on.
@@ -182,7 +184,7 @@ Offset | Type | Description
 0x01 | ubyte | Reward operation
 0x02 | ubyte | Random (0 or 1)
 0x03 | ubyte | Reward target
-0x04 | ubyte | **Unknown**
+0x04 | ubyte | Unused
 0x05 | uword | Reward type value (e.g. which attribute)
 0x07 | uword | Value
 
@@ -224,7 +226,9 @@ Value | Meaning
 0 | Active player
 1 | Whole party
 
-Note: Operation 'Fill' makes only sense for LP and SP. Not sure if it also works for attributes and abilities. The 3 bit operations are only used for languages, ailments and spell schools. The percentage is in relation to the max value and also only used for LP and SP I guess.
+**Note:** Operation 'Fill' just sets the current value to the max value. The 3 bit operations should only be used for languages, ailments and spell schools. The percentage is in relation to the max value and should only be used for LP and SP I guess. Using percentage or fill operations on SLP, languages, ailments or spell schools might have strange effects.
+
+**Note:** There is no reward to add training points in Ambermoon. :(
 
 ## Change tile event (0x0A / 10)
 
