@@ -172,25 +172,25 @@ Offset | Type | Description
 0x05 | uword | Correct answer 1 index in word dictionary
 0x07 | uword | Correct answer 2 index in word dictionary (can be equal to the first if only 1 word is possible)
 
-## Award (0x09 / 9)
+## Reward (0x09 / 9)
 
-This gives some award to the party.
+This gives some reward to the party.
 
 Offset | Type | Description
 --- | --- | ---
-0x00 | ubyte | Award type
-0x01 | ubyte | Award operation
+0x00 | ubyte | Reward type
+0x01 | ubyte | Reward operation
 0x02 | ubyte | Random (0 or 1)
-0x03 | ubyte | Award target
+0x03 | ubyte | Reward target
 0x04 | ubyte | **Unknown**
-0x05 | uword | Award type value (e.g. which attribute)
+0x05 | uword | Reward type value (e.g. which attribute)
 0x07 | uword | Value
 
 If "Random" is set, the real value is a random value between 0 and "Value".
 
 The operation "Fill" will ignore the Value and fully fill. This is used for LP/SP filling.
 
-### Award type
+### Reward type
 
 Value | Meaning
 --- | ---
@@ -205,7 +205,7 @@ Value | Meaning
 8 | EP
 9 | TP
 
-### Award operation
+### Reward operation
 
 Value | Meaning
 --- | ---
@@ -218,7 +218,7 @@ Value | Meaning
 6 | Set bit/add (e.g. language)
 7 | Toggle bit (e.g. language)
 
-### Award target
+### Reward target
 
 Value | Meaning
 --- | ---
