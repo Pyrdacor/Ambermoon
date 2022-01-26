@@ -6,6 +6,7 @@ Value | Name
 1 | Right
 2 | Down
 3 | Left
-4 | Random
+4 | Random or Keep
 
-Random is for example used by spinners or map change events to put the player in a random direction.
+- Spinners use value 4 as a random direction.
+- Map changes interpret 4 as leaving the current direction as it is.
