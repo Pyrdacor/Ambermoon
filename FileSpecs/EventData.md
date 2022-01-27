@@ -270,8 +270,8 @@ In 2D the tile flags of the new tile specifies if the background tile or foregro
 Offset | Type | Description
 --- | --- | ---
 0x00 | ubyte | Event type (= 0x0B)
-0x01 | ubyte[6] | **Unknown**
-0x07 | ubyte | Monster group index
+0x01 | ubyte[5] | **Unknown**
+0x06 | uword | Monster group index
 0x08 | ubyte[2] | **Unknown**
 
 
