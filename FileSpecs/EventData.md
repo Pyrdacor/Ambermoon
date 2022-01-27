@@ -474,7 +474,7 @@ Offset | Type | Description
 0x00 | ubyte | Event type (= 0x12)
 0x01 | ubyte | 0: Item, 1: Gold, 2 or above: Food
 0x02 | ubyte[5] | Unused
-0x07 | ubyte | Amount
+0x06 | uword | Amount (for items only the byte at 0x07 is used)
 0x08 | uword | Item index
 
 
