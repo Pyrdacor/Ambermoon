@@ -272,7 +272,7 @@ Offset | Type | Description
 0x00 | ubyte | Event type (= 0x0B)
 0x01 | ubyte[5] | **Unknown**
 0x06 | uword | Monster group index
-0x08 | uword | Event index to execute if lost battle (fleed)
+0x08 | uword | **Unknown** (maybe an event index to execute if lost the battle (fled))
 
 
 ## Enter place event (0x0C / 12)
@@ -359,7 +359,7 @@ Offset | Type | Description
 --- | --- | ---
 0x00 | ubyte | Event type (= 0x0E)
 0x01 | ubyte | Action type
-0x02 | ubyte | Action value (e.g. variable value to set, always a boolean 0 or 1, can invert the meaning like 0="remove"/1="add")
+0x02 | ubyte | Action value (e.g. variable value to set, 0="reset/remove", 1="set/add", 2="toggle/change/invert")
 0x03 | ubyte | Count (item count, etc)
 0x04 | ubyte[2] | **Unknown**
 0x06 | uword | Object index (depends on action's type, e.g. variable index)
