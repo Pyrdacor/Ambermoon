@@ -272,7 +272,7 @@ Offset | Type | Description
 0x00 | ubyte | Event type (= 0x0B)
 0x01 | ubyte[5] | **Unknown**
 0x06 | uword | Monster group index
-0x08 | ubyte[2] | **Unknown**
+0x08 | uword | Event index to execute if lost battle (fleed)
 
 
 ## Enter place event (0x0C / 12)
