@@ -488,7 +488,7 @@ Offset | Type | Description
 --- | --- | ---
 0x00 | ubyte | Event type (= 0x13)
 0x01 | ubyte | Map text index
-0x02 | ubyte[6] | **Unknown**
+0x02 | ubyte[6] | Unused
 0x08 | uword | Index (0-based) of map event to continue with when 'No' is chosen
 
 
