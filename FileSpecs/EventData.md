@@ -269,7 +269,7 @@ Offset | Type | Description
 0x00 | ubyte | Event type (= 0x0B)
 0x01 | ubyte[5] | **Unknown**
 0x06 | uword | Monster group index
-0x08 | uword | **Unknown** (maybe an event index to execute if lost the battle (fled))
+0x08 | uword | **Unknown**
 
 
 ## Enter place event (0x0C / 12)
@@ -313,7 +313,7 @@ Offset | Type | Description
 0x01 | ubyte | Condition type
 0x02 | ubyte | Condition value (e.g. variable value, always a boolean 0 or 1, can invert the meaning like 1="has"/0="has not")
 0x03 | ubyte | Count (item count, etc)
-0x04 | ubyte[2] | **Unknown**
+0x04 | ubyte[2] | Unused
 0x06 | uword | Object index (depends on condition's type, e.g. variable or item index)
 0x08 | uword | Map event index to continue with if condition was not fulfilled or 0xffff to stop the event list in this case.
 
@@ -321,10 +321,10 @@ Offset | Type | Description
 
 Value | Type
 --- | ---
-0 | Global variable (game variable, 0-1023)
-1 | Event bit (64 bits per map, 0-32767)
-2 | Door open
-3 | Chest open
+0 | Global variable (game variable, 0-8191)
+1 | Event bit (64 bits per map for up to 1024 maps, 0-65535)
+2 | Door open (0-255)
+3 | Chest open (0-255)
 4 | Character bit (32 bits per map, 0-16383)
 5 | Party member present
 6 | Item owned (item in inventory)
