@@ -115,10 +115,10 @@ And then 300 null-terminated texts follow. Those will never have placeholders li
   
 Note that the texts don't need to start at word boundaries. So if you encounter a double zero, this means that there is an empty string in-between!
  
-The whole section is finished by a zero word which has to start on a word boundary.
+The whole section is finished by a zero word which has to start on a word boundary. Maybe it is even a zero long-word. Best skip all zero bytes at the end until you reach a non-zero byte.
   
 ### Automap names
   
-Then the names for the 19 automap types follow which can be seen in the legend of the dungeon map. They are all null-terminated so just a 0 byte means an empty string which is generally used for automap types "None" and "Wall".
+Then the names for the automap types follow which can be seen in the legend of the dungeon map. There is no name for type "None" or "Wall" so it starts with type "Riddlemouth".
   
 ### To be continued ...
