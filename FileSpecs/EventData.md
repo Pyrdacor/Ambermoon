@@ -358,9 +358,9 @@ Offset | Type | Description
 0x01 | ubyte | Action type
 0x02 | ubyte | Action value (e.g. variable value to set, 0="reset/remove", 1="set/add", 2="toggle/change/invert")
 0x03 | ubyte | Count (item count, etc)
-0x04 | ubyte[2] | **Unknown**
+0x04 | ubyte[2] | Unused
 0x06 | uword | Object index (depends on action's type, e.g. variable index)
-0x08 | ubyte[2] | **Unknown**
+0x08 | ubyte[2] | Unused
 
 ### Action types
 
@@ -389,6 +389,9 @@ Note: The set game option can theoretically do things like turn on or off music 
 There is a special option which is not visible nor changable in the game but which is set by an NPC event. It is a bit which indicates if you got the yellow sphere
 from the Moranian. It is then used to determine which version of the outro should be shown at the end.
 
+Setting an event bit to 1 actually disables the event chain.
+
+Setting a character bit to 1 removes that character from the map. Setting it to 0, adds/spawns it. So this event is used to spawn monsters and NPCs.
 
 ## Dice 100 event (0x0F / 15)
 
