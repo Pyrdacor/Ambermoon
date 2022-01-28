@@ -70,9 +70,9 @@ If the key index is not 0, the chest can't be opened with a lockpick.
 
 ### Chest flags
 
-- Bit0: **Unknown**
+- Bit0: Unused
 - Bit1: If set a search ability check is performed and only if successful the chest is shown.
-- Bit2-7: **Unknown**
+- Bit2-7: Unused
 
 Only one chest in Ambermoon uses the flags. It is a skull in the Antique Area which contains the Antique Weapon. You will only find it when your search ability is high enough cause Bit1 is set. The chest uses value 50 (hex 32).
 
@@ -84,7 +84,7 @@ If I get the 68k assembler right, Ambermoon just checks the whole byte value for
 
 - Bit0: Remove when empty
 - Bit1: No chest auto remove
-- Bit2-7: **Unknown**
+- Bit2-7: Unused
 
 Bit0 will actually close the chest when you have looted all items, gold and food. The chest event (chain) is then deactivated so that you can't access the chest again. This also disallows storing items in that chest.
 
