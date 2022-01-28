@@ -528,12 +528,12 @@ Spawns a horse, raft, ship, sand lizard or sand ship.
 Offset | Type | Description
 --- | --- | ---
 0x00 | ubyte | Event type (= 0x16)
-0x00 | ubyte | X coordinate (1-based)
-0x01 | ubyte | Y coordinate (1-based)
-0x02 | ubyte | [Travel type](Enumerations/TravelType.md)
-0x03 | ubyte[2] | **Unknown**
-0x05 | uword | Map index
-0x07 | ubyte[2] | **Unknown**
+0x01 | ubyte | X coordinate (1-based)
+0x02 | ubyte | Y coordinate (1-based)
+0x03 | ubyte | [Travel type](Enumerations/TravelType.md)
+0x04 | ubyte[2] | **Unknown**
+0x06 | uword | Map index
+0x08 | ubyte[2] | **Unknown**
 
 **Note:** Only travel types 1 (horse), 2 (raft), 3 (ship), 9 (sand lizard) and 10 (sand ship) should be used as other travel types can't be spawned.
 
