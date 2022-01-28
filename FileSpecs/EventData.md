@@ -325,7 +325,7 @@ Value | Type
 1 | Event bit (64 bits per map for up to 1024 maps, 0-65535)
 2 | Door open (0-255)
 3 | Chest open (0-255)
-4 | Character bit (32 bits per map, 0-16383)
+4 | Character bit (32 bits per map for up to 1024 maps, 0-32767)
 5 | Party member present
 6 | Item owned (item in inventory)
 7 | Use item (from inventory)
