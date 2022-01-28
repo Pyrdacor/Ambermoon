@@ -31,7 +31,7 @@ The section starts with 44 addresses which point to a filename entry. Those addr
 The following table gives the order in the filename address dictionary:
 
 Index | File | Disk Ids | Disk Letters
---- | --- | ---
+--- | --- | --- | ---
 0 | Party_data.sav | 10 | J
 1 | Party_char.amb | 10 | J
 2 | NPC_char.amb | 7 | G
