@@ -22,7 +22,7 @@ Offset | Type | Description
 0x04 | ubyte | [Travel type](Enumerations/TravelType.md) to set after teleport (-1 or 0xff means no change, which is the default)
 0x05 | ubyte | Transition type
 0x06 | uword | New map index (0 means same map)
-0x08 | ubyte[2] | **Unknown**
+0x08 | ubyte[2] | Unused
 
 ### Transition types
 
