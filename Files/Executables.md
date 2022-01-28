@@ -116,9 +116,37 @@ And then 300 null-terminated texts follow. Those will never have placeholders li
 Note that the texts don't need to start at word boundaries. So if you encounter a double zero, this means that there is an empty string in-between!
  
 The whole section is finished by a zero word which has to start on a word boundary. Maybe it is even a zero long-word. Best skip all zero bytes at the end until you reach a non-zero byte.
-  
+
 ### Automap names
   
-Then the names for the automap types follow which can be seen in the legend of the dungeon map. There is no name for type "None" or "Wall" so it starts with type "Riddlemouth".
-  
+Then the names for the automap types follow which can be seen in the legend of the dungeon map. There is no name for type "None" or "Wall" so it starts with type "Riddlemouth". All the names are null-terminated strings so if you just find a single zero byte, it is really an empty string. Some automap types have no in-game legend name like open doors or chests.
+
+### Game option names
+
+Then the five texts for the in-game options follow.
+
+### Music titles
+
+Then the 32 song titles follow. They do not include the Intro, MainMenu and Outro music but only those which are available ingame through the harp (from music.amb).
+
+### Spell school names
+
+Then the names of the seven spell schools follow. The 5th and 6th spell school are unused and have no name.
+
+### Spell names
+
+Then the 210 spell names follow. 30 spells for each of the 7 schools.
+
+### Language names
+
+Then the 8 language names follow.
+
+### Class names
+
+Then the 11 class names follow. The last two are "Animal" and "Monster" but they have no name (empty string).
+
+### Race names
+
+Then there are 16 race names. Race 13 is animal and 14 is monster. But there seems to be a bug as the animal text is in slot 14. So if you talk to the only animal NPC Necros he has no race name.
+
 ### To be continued ...
