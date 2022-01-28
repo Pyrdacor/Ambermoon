@@ -47,12 +47,41 @@ Index | File | Disk Ids | Disk Letters
 12 | Lab_background.amb | 7 | G
 13 | Pics_80x80.amb | 7 | G
 14 | XMap_texts.amb | 3, 4, 6 | C, D, F
+15 | Chest_data.amb | 10 | J
+16 | Monster_groups.amb | 8 | H
+17 | Merchant_data.amb | 10 | J
+18 | Combat_background.amb | 8 | H
+19 | Monster_gfx.amb | 8 | H
+20 | Automap.amb | 10 | J
+21 | Object_texts.amb | 7 | G
+22 | Event_pix.amb | 7 | G
+23 | Layouts.amb | 7 | G
+24 | Music.amb | 9 | I
+25 | Palettes.amb | 7 | G
+26 | Riddlemouth_graphics | 7 | G
+27 | Dictionary.english (or .german) | 7 | G
+28 | XObjects3D.amb | 4, 6 | D, F
+29 | XOverlay3D.amb | 5, 6 | E, F
+30 | XWall3D.amb | 5, 6 | E, F
+31 | <empty> | - | -
+32 | XObjects3D.amb | 4, 6 | D, F
+33 | Saves | 10 | J
+34 | Party_texts.amb | 7 | G
+35 | NPC_texts.amb | 7 | G
+36 | Automap_graphics | 7 | G
+37 | Place_data | 7 | G
+38 | Combat_graphics | 7 | G
+39 | Floors.amb | 7 | G
+40 | Save.00/Party_char.amb (initial char values) | 10 | J
+41 | Stationary | 7 | G
+43 | Party_gfx.amb | 7 | G
+43 | Object_icons | 7 | G
 
 Each file entry starts with one or more bytes. For normal files without a number prefix, there is only a single byte which gives the disk id (1 to 10) which corresponds to disks A to J. For files with number prefix like 1Map_data.amb, 2Map_data.amb etc, there are multiple disk ids. One for each used number prefix.
 
 For example the filename is given as 0Map_data.amb where 0 is a placeholder. There are 3 of these files in Ambermoon: 1Map_data.amb, 2Map_data.amb and 3Map_data.amb. So you will find 3 disk ids. After that there is another 0 byte, most likely to mark the end of the disk id list.
 
-There are also files with only 2 number prefixes like 2Wall3D.amb and 3Wall3D.amb. They will only have 2 disk ids and the end marker 0 byte.
+There are also files with only 2 number prefixes like 2Wall3D.amb and 3Wall3D.amb. They will still have 3 disk ids and the end marker 0 byte but the unused disk id is just set to 0. So the XWall3D.amb example has a header of 00 05 06 00.
 
 After the disk id(s), there is the filename as shown in the table above. Only the XMap_data.amb names and other similar files are actually stored as 0Map_data.amb and so on as mentioned.
 
@@ -64,4 +93,32 @@ Every string ends with a terminating null (0 byte). This is true for all texts i
 
 After the filename there are the world names. Note that they always start on a word boundary so you might have to skip a byte after the last section to get there.
 
-The world name section also starts with a address dictionary. It has 3 entries, one for each world: Lyramion, Kire's Moon and Morag. So the section
+The world name section also starts with a address dictionary. It has 3 entries, one for each world: Lyramion, Kire's Moon and Morag. So the section starts with 3 long-words (32 bit each) which's offset again can be found in the following RELOC32 hunk.
+  
+Then the 3 world names follow which are used as the map name for world maps. At the end of the section again a zero byte is needed for word boundary.
+  
+### Messages
+  
+After the world name section there are messages that are created out of multiple texts and placeholders. Each entry starts with a few long-words which are addresses to fixed texts. Iterate over the long-words until you find one which doesn't start with a zero byte. This is the first text. The long-words before are addresses or placeholders (given by the invalid address 0x00000000). There is also one zero long-word at the end so don't count it as a placeholder. This marks the end of the format string addresses.
+
+Then the strings follow. In general the addresses are in the same order as the texts but don't count on it!
+  
+The program will print the texts and will insert values or dynamic texts into the placeholder addresses at runtime. So you can interpret them as some kind of format string placeholder if you want to use them.
+  
+If you encounter a non-zero high byte of the first long-word, the text is a normal text and is directly used without placeholders. There is one exception and this is the byte 0xff. It seems like it serves the special purpose of "wait for a click". So don't interpret it as a text character or part of an address! The 0xff is mostly located after a null-terminated string.
+
+As the long-words are word-aligned ensure to add/read a zero byte before each new text section.
+
+At some point (after the string "That" in english), there starts a different section which also contains texts. It starts on a word boundary with a word which gives the total amount of texts that follow. This should be 300 (0x012c).
+  
+And then 300 null-terminated texts follow. Those will never have placeholders like above beside the integrated ones like ~LEAD~, ~SELF~, ~SEX1~ and so on. But those are inside the text and no text parts or addresses are needed.
+  
+Note that the texts don't need to start at word boundaries. So if you encounter a double zero, this means that there is an empty string in-between!
+ 
+The whole section is finished by a zero word which has to start on a word boundary.
+  
+### Automap names
+  
+Then the names for the 19 automap types follow which can be seen in the legend of the dungeon map. They are all null-terminated so just a 0 byte means an empty string which is generally used for automap types "None" and "Wall".
+  
+### To be continued ...
