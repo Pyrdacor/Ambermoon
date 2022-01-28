@@ -63,7 +63,7 @@ Index | File | Disk Ids | Disk Letters
 28 | XObjects3D.amb | 4, 6 | D, F
 29 | XOverlay3D.amb | 5, 6 | E, F
 30 | XWall3D.amb | 5, 6 | E, F
-31 | <empty> | - | -
+31 | - | - | -
 32 | XObjects3D.amb | 4, 6 | D, F
 33 | Saves | 10 | J
 34 | Party_texts.amb | 7 | G
