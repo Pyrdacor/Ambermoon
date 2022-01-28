@@ -95,18 +95,15 @@ Bit1 is only used when Bit0 is set as well. If this is set, the event (chain) is
 
 Show a text popup with an optional image. Note that the following map events in the list are only executed after the popup is closed. This is important e.g. for music change events before and after this event.
 
-Assumption of data inside the unknown data:
-- Border style / appearance
-- Popup size
-
 Offset | Type | Description
 --- | --- | ---
 0x00 | ubyte | Event type (= 0x04)
 0x01 | ubyte | Event picture index (0-based) or 0xff if no image
 0x02 | ubyte | Popup trigger (0: none, 1: move, 2: eye cursor, 3: both)
 0x03 | ubyte | Also trigger when blind (only 0 or 1)
-0x04 | uword | Map text index
-0x06 | ubyte[4] | **Unknown**
+0x04 | ubyte | Unused
+0x05 | ubyte | Map text index
+0x06 | ubyte[4] | Unused
 
 Note: There is no explicit trigger for hand cursor. If this is needed, a condition event can be inserted before. The trigger is ignored if the text event is not the first one in an event chain.
 
