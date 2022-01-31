@@ -39,8 +39,11 @@ Offset | Type | Description
 0x0016 | ubyte | Text sub-index (used only for text scrolls)
 0x0017 | ubyte | [Spell type](Enumerations/SpellTypes.md)
 0x0018 | ubyte | [Spell index](Enumerations/Spells.md)
-0x0019 | ubyte | Spell usage count (255 means unlimited)
-0x001A | ubyte[4] | **Unknown**
+0x0019 | ubyte | Initial spell usage count (255 means unlimited)
+0x001A | ubyte | **Unknown**
+0x001B | ubyte | Max amount of recharging (number of times the enchanter can recharge the item in total)
+0x001C | ubyte | Max spell usage count (can only be recharged to this amount)
+0x001D | ubyte | **Unknown**
 0x001E | sbyte | M-B-R value (magic armor level)
 0x001F | sbyte | M-B-W value (magic attack level)
 0x0020 | ubyte | Item flags (see below)
