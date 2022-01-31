@@ -1,5 +1,6 @@
 ## Version 1.13
 
+- Fixed "out of memory handles" crash when using the eagle multiple times.
 - Remove "create item" event from Father Anthony as the cupboard key can be found on your table.
 - Fixed "GRANDSON" to "GRANDCHILD" in last will.
 

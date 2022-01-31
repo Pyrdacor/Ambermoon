@@ -1,5 +1,14 @@
-Ambermoon English 1.12 by Pyrdacor (23-12-2021)
+Ambermoon English 1.13 by Pyrdacor (31-01-2022)
 ===============================================
+
+Changes in 1.13
+===============
+
+- Fixed "out of memory handles" crash which often occured when using the eagle multiple times.
+- Cleaned up the data of NPC Father Anthony which still included some unused stuff which is
+  only not noticable by coincidence in game.
+- Fixed text in last will: "GRANDSON" -> "GRANDCHILD"
+
 
 Changes in 1.12
 ===============
@@ -7,7 +16,7 @@ Changes in 1.12
 - A spider in the bandit's cellar did not move previously. This is fixed now.
 - Fixed automap wall display glitch in hill caves and beast cave.
 - Changed "FISHERMEN" to "FISHERMAN" when observing Sally.
-- The monsters in Gadlon cellar 1 now are active on the map (previously due to a bug they were behind the outside walls).
+- The monsters in Gadlon cellar 1 now are active on the map (previously due to a bug they were   behind the outside walls).
 - Chris' boots are no longer broken but instead identified at start.
 - Flying disc is not broken anymore in the chest in the Thalion office.
 - Wrong tiles on Morag surface fixed around coordinates 0,0.

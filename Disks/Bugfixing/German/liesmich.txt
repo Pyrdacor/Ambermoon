@@ -1,5 +1,20 @@
-Ambermoon German 1.11 by Pyrdacor (23-12-2021)
+Ambermoon German 1.12 by Pyrdacor (31-01-2022)
 ==============================================
+
+Änderungen in 1.12
+==================
+
+- Ein Absturz "Nicht genügend freie Memory Handles" wurde behoben, der oft in
+  Zusammenhang mit dem Adler auftrat.
+- Textkorrektur für NPC Theresa: "NEHMMT" zu "NEHMT"
+- Textkorrektur in Nalven's Magieschule: "IN IN" zu "IN"
+- Im Gespräch mit Theresa erhält man nun das Wort "REPARATUR" statt "REPERATUR"
+  und sie wird auch auf das korrigierte Wort reagieren.
+- Kleine Bereinigung des NPCs Vater Antonius, der noch ein Event enthielt, welches
+  einem den Schlüssel zur Komode gibt. Dies ist allerdings ein Relikt, da man den
+  Schlüssel nun woanders findet und durch einen Bug sieht man im Spiel auch nicht,
+  dass der Vater einem den Schlüssel gibt.
+
 
 Änderungen in 1.11
 ==================

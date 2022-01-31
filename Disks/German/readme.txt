@@ -1,5 +1,16 @@
-Ambermoon German 1.11 by Pyrdacor (23-12-2021)
+Ambermoon German 1.12 by Pyrdacor (31-01-2022)
 ==============================================
+
+Changes in 1.12
+===============
+
+- Fixed "out of memory handles" crash which often occured when using the eagle multiple times.
+- Cleaned up the data of NPC Father Anthony which still included some unused stuff which is
+  only not noticable by coincidence in game.
+- Fixed text of NPC Theresa: "NEHMMT" -> "NEHMT"
+- Fixed text in Nalven's magical school: "IN IN" -> "IN"
+- Fixed dictionary entry "REPERATUR" to "REPARATUR" (you get this from Theresa)
+
 
 Changes in 1.11
 ===============
@@ -8,13 +19,13 @@ Changes in 1.11
 - Fixed "ENKEL" to "ENKELKIND" in testament to work for female chars as well.
 - A spider in the bandit's cellar did not move previously. This is fixed now.
 - Fixed automap wall display glitch in hill caves and beast cave.
-- The monsters in Gadlon cellar 1 now are active on the map (previously due to a bug they were behind the outside walls).
+- The monsters in Gadlon cellar 1 now are active on the map (previously due to a bug they were   behind the outside walls).
 - Chris' boots are no longer broken but instead identified at start.
 - Flying disc is not broken anymore in the chest in the Thalion office.
 - Wrong tiles on Morag surface fixed around coordinate 0,0.
 - Female Tornak now grants 650 Exp instead of 0.
 - Fixed "IST SIND" to "SIND" for a text of Baron Karsten in Newlake.
-- The item Topaz was renamed to Topas as it's the correct german name and it is also referenced this way in Kire's message.
+- The item Topaz was renamed to Topas at it's the correct german name and it is also referenced   this way in Kire's message.
 
 
 Changes in 1.10
@@ -26,7 +37,7 @@ Changes in 1.10
 - Reverted max swim values from 99 to 95
 - Reverted current swim value of Tar from 99 back to 90
 - Reverted Nelvin's and Tar's max U-M and R-M skills from 99 back to 95
-- Reverted item name "Krumms√§bel" in AM2_BLIT to "SCIMITAR"
+- Reverted item name "Krumms‰bel" in AM2_BLIT to "SCIMITAR"
 - Fixed Whip parry penalty (change relative item data byte 0x11 from 01 to 02). It now correctly reduces parry by 10.
 - Fixed Banded Armour attack penalty (change relative item data byte 0x11 from 00 to 01). It now correctly reduces attack by 4.
 - Fixed Plate Armour attack penalty (change relative item data byte 0x11 from 00 to 01). It now correctly reduces attack by 6.

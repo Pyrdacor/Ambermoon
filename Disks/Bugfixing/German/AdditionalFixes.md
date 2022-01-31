@@ -1,6 +1,10 @@
 ## Version 1.12
 
+- Fixed "out of memory handles" crash when using the eagle multiple times.
 - Remove "create item" event from Father Anthony as the cupboard key can be found on your table.
+- Fixed text of NPC Theresa: "NEHMMT" -> "NEHMT"
+- Fixed text in Nalven's magical school: "IN IN" -> "IN"
+- Fixed dictionary entry "REPERATUR" to "REPARATUR" (you get this from Theresa)
 
 ## Version 1.11
 
