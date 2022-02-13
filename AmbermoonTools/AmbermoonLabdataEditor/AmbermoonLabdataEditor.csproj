@@ -5,10 +5,13 @@
     <TargetFramework>net6.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+	<Version>1.0.11</Version>
+	<Authors>Robert Schneckenhaus</Authors>
+	<RuntimeIdentifiers>win-x64;win-x86;linux-x64</RuntimeIdentifiers>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Ambermoon.Data.Legacy" Version="10.3.3" />
+    <PackageReference Include="Ambermoon.Data.Legacy" Version="10.4.0" />
   </ItemGroup>
 
 </Project>

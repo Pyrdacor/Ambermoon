@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <TargetFramework>net6.0</TargetFramework>
     <Description>Command line tool to pack files into Ambermoon file formats.</Description>
     <Authors>Robert Schneckenhaus</Authors>
     <PackageProjectUrl>https://github.com/Pyrdacor/Ambermoon</PackageProjectUrl>
@@ -10,12 +10,12 @@
     <RepositoryType>Github</RepositoryType>
     <PackageTags>Ambermoon Packer File Legacy Amiga Compression Encryption</PackageTags>
     <RuntimeIdentifiers>win-x64;win-x86;linux-x64</RuntimeIdentifiers>
-    <Version>1.0.10</Version>
+    <Version>1.0.11</Version>
     <Configurations>Debug;Release;ReleaseLinux</Configurations>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Ambermoon.Data.Legacy" Version="10.2.5" />
+    <PackageReference Include="Ambermoon.Data.Legacy" Version="10.4.0" />
   </ItemGroup>
 
 </Project>

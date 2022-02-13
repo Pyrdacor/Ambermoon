@@ -40,7 +40,7 @@ namespace AmbermoonMonsterValueChanger
             Console.WriteLine();
         }
 
-        static string DataPath = Path.GetDirectoryName(Assembly.GetEntryAssembly().Location);
+        static string DataPath = AppContext.BaseDirectory;
         static GameData gameData = null;
         static GraphicProvider graphicProvider = null;
         static GameData GameData
