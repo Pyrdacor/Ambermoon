@@ -30,7 +30,7 @@ Value in byte stream (hex): 08 21
 - G = 2 * 16 = 32
 - B = 1 * 16 = 16
 
-To get better results you can add the value itself to the shifted result. So that color components become 0x11,0x22,0xff,etc instead of 0x10,0x20,0xf0,etc. This reflects the original colors better.
+To get better results you can add the value itself to the shifted result. So that color components become 0x11, 0x22, 0xff,etc instead of 0x10, 0x20, 0xf0,etc. This reflects the original colors even better.
 
 ## Other graphics
 
@@ -38,15 +38,15 @@ All other graphics use colors from a palette. So they only store the palette ind
 
 - 3 bit: 8 possible colors (e.g. used by the user interface)
 - 4 bit: 16 possible colors (e.g. used by 3D textures)
-- 5 bit: 32 possible colors (e.g. used by map tile graphics)
+- 5 bit: 32 possible colors (e.g. used by map tile graphics or items)
 
-But the bits are not packed together for each pixel of the graphic. They are stored in so called "planes".
+But the bits are not packed together for each pixel of the graphic. They are stored in so called "bit planes".
 
 Each plane contains a specific bit (e.g. the first) of each pixel. So a 3 bit graphic has 3 planes, a 4 bit graphic 4 planes and so on.
 
-But it's a bit more complicated. The graphic is divided into pixel lines. For each pixel line there are the mentioned 3 to 5 planes containing bits 0 to 4 of each pixel in the pixel line.
+But it's a bit more complicated. The graphic is divided into pixel rows (or scan lines). For each pixel row there are the mentioned 3 to 5 planes containing bits 0 to 4 of each pixel in the row.
 
-So if you have an 4bit 16x32 pixel graphic you would have 4 planes for every 16 pixel row. As each plane has 1 bit per pixel you would have 16 bits per plane and row:
+So if you have a 4-bit 16x32 pixel graphic you would have 4 planes for every 16 pixel row. As each plane has 1 bit per pixel you would have 16 bits per plane and row:
 
 ```
 Row0Plane0 Row0Plane1 Row0Plane2 Row0Plane3
@@ -71,15 +71,13 @@ Chunk2Plane0 Chunk2Plane1 Chunk2Plane2 Chunk2Plane3 Chunk3Plane0 Chunk3Plane1 Ch
 Chunk62Plane0 Chunk62Plane1 Chunk62Plane2 Chunk62Plane3 Chunk63Plane0 Chunk63Plane1 Chunk63Plane2 Chunk63Plane3
 ```
 
-I guess this was done to achieve better compression for large textures. The 4 planes always form a dword (32 bit value).
-
-Note: Floor textures don't use this format. They use the normal 4 bit palette format without the 8 pixel packing.
+I guess this was done because walls and objects are drawn in slices (raycast rendering) and so they used pieces of 8x1 pixels and stored them this way. This would also explain why ceiling and floors don't use this format. They use the normal 4-bit format instead.
 
 Note: If the graphic width is not a multiple of 8 there are additional unused bits per scan line that must be skipped on loading. There is at least one object graphic where this is true in Ambermoon (texture index 90 has a width of 47 and therefore 1 additional unused bit per row).
 
 ### Example data (not packed)
 
-The first pixel line (4 bytes, each digit/letter is a bit):
+The first pixel row (4 bytes, each digit/letter is a bit):
 
 01234567 ABCDEFGH IJKLMNOP QRSTUVWX
 
