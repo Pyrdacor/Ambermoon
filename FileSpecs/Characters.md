@@ -121,7 +121,8 @@ Offset | Type | Description
 0x02E8 | byte[8] | Used number of frames for each of the 8 animations (0-32)
 0x02F0 | byte[16] | **Unknown** (looks like the values 0-15 in a sequence)
 0x0300 | byte[32] | Palette index mapping
-0x0320 | uword | **Unknown**
+0x0320 | ubyte | 1 bit for each animation (if set, the animation is played backwards after it has finished)
+0x0321 | ubyte | **Unknown** (most likely unused and only for word alignment)
 0x0322 | uword | Frame width (for graphic loading)
 0x0324 | uword | Frame height (for graphic loading)
 0x0326 | uword | Mapped frame width (for displaying)
