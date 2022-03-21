@@ -1,0 +1,44 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:AmbermoonCharEditor.ViewModels"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:styles="clr-namespace:Material.Styles;assembly=Material.Styles"
+		mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+        x:Class="AmbermoonCharEditor.Views.MainWindow"
+        Icon="/Assets/avalonia-logo.ico"
+        Title="AmbermoonCharEditor">
+
+    <Design.DataContext>
+        <vm:MainWindowViewModel/>
+    </Design.DataContext>
+
+	<DockPanel LastChildFill="True">
+		<Menu DockPanel.Dock="Top">
+			<MenuItem Header="_File">
+				<MenuItem Header="_New" Command="{Binding New}"/>
+				<MenuItem Header="_Open..." Command="{Binding Open}"/>
+				<MenuItem Header="_Save..." Command="{Binding Save}"/>
+				<MenuItem Header="Save _as..." Command="{Binding SaveAs}"/>
+				<Separator/>
+				<MenuItem Header="_Exit" Command="{Binding Exit}"/>
+			</MenuItem>
+			<MenuItem Header="_Edit">
+				<MenuItem Header="Copy"/>
+				<MenuItem Header="Paste"/>
+			</MenuItem>
+		</Menu>
+		<StackPanel>
+			<StackPanel Orientation="Horizontal">
+				<RadioButton Content="Party Member" Margin="5"
+				 IsChecked="{Binding PartyMember, Mode=TwoWay}"/>
+				<RadioButton Content="NPC" Margin="5"
+				 IsChecked="{Binding NPC, Mode=TwoWay}"/>
+				<RadioButton Content="Monster" Margin="5"
+				 IsChecked="{Binding Monster, Mode=TwoWay}"/>
+				<TextBlock Text=" Name: " VerticalAlignment="Center"/>
+				<TextBox Text="{Binding Character.Name, Mode=TwoWay}" MaxLength="16" Watermark="Enter Name"/>
+			</StackPanel>
+		</StackPanel>
+	</DockPanel>
+</Window>
