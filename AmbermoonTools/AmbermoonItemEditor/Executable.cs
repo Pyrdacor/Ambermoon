@@ -21,6 +21,11 @@ namespace AmbermoonItemEditor
         {
             hunks = Read(dataReader);
 
+            // There is an issue with the deploder and AM2_BLIT where the second code
+            // hunk is treated as a data hunk instead. Fix this here automatically.
+            if (hunks[5].Type == HunkType.Data)
+                hunks[5] = new Hunk(HunkType.Code, hunks[5].MemoryFlags, ((Hunk)hunks[5]).Data, hunks[5].Size / 4);
+
             var itemManager = new ExecutableData(hunks).ItemManager;
             items = new List<Item>(itemManager.Items);
             lastItemAmount = items.Count;
@@ -74,8 +79,9 @@ namespace AmbermoonItemEditor
             // It can be calculated by data hunk size - 68.
             // Search for the old offset and replace it with the new one.
 
-            var lastDataHunk = (Hunk)hunks.LastOrDefault(hunk => hunk.Type == HunkType.Data);
-            uint lastTrailingDataOffset = (uint)lastDataHunk.Data.Length - TrailingDataSize;
+            var lastHunk = hunks.Last();
+            var itemDataHunk = (Hunk)hunks.LastOrDefault(hunk => hunk != lastHunk && hunk.Type == HunkType.Data);
+            uint lastTrailingDataOffset = (uint)itemDataHunk.Data.Length - TrailingDataSize;
             var searchBytes = new byte[6]
             {
                 0x4A, 0x39,
@@ -92,12 +98,12 @@ namespace AmbermoonItemEditor
                 (byte)(newTrailingDataOffset >> 8),
                 (byte)newTrailingDataOffset
             };
-            int newDataSize = (int)(lastDataHunk.Data.Length - lastItemAmount * ItemDataSize + items.Count * ItemDataSize);
+            int newDataSize = (int)(itemDataHunk.Data.Length - lastItemAmount * ItemDataSize + items.Count * ItemDataSize);
             while (newDataSize % 4 != 0)
                 ++newDataSize;
             var newData = new byte[newDataSize];
-            int itemOffset = (int)(lastDataHunk.Data.Length - TrailingDataSize - lastItemAmount * ItemDataSize);
-            Buffer.BlockCopy(lastDataHunk.Data, 0, newData, 0, itemOffset);
+            int itemOffset = (int)(itemDataHunk.Data.Length - TrailingDataSize - lastItemAmount * ItemDataSize);
+            Buffer.BlockCopy(itemDataHunk.Data, 0, newData, 0, itemOffset);
 
             // Adjust item count
             newData[itemOffset - 4] = (byte)(items.Count >> 8);
@@ -105,46 +111,44 @@ namespace AmbermoonItemEditor
             newData[itemOffset - 2] = newData[itemOffset - 4];
             newData[itemOffset - 1] = newData[itemOffset - 3];
 
-            int n = 0;
-            int i = 0;
-            int matchLength = 0;
-            var codeHunk = (Hunk)hunks.FirstOrDefault(h => h.Type == HunkType.Code);
-            var codeHunkData = codeHunk.Data;
-            while (i <= codeHunkData.Length - 6 && n < 5)
+            static uint ReadDword(byte[] data, int index)
             {
-                if (codeHunkData[i++] == searchBytes[matchLength])
+                return ((uint)data[index] << 24) |
+                    ((uint)data[index + 1] << 16) |
+                    ((uint)data[index + 2] << 8) |
+                    data[index + 3];
+            }
+
+            static void WriteDword(byte[] data, int index, uint value)
+            {
+                for (int i = 3; i >= 0; --i)
                 {
-                    if (++matchLength == 6)
-                    {
-                        codeHunkData[i - matchLength + 0] = 0x4A;
-                        codeHunkData[i - matchLength + 1] = 0x39;
-                        codeHunkData[i - matchLength + 2] = replaceBytes[0];
-                        codeHunkData[i - matchLength + 3] = replaceBytes[1];
-                        codeHunkData[i - matchLength + 4] = replaceBytes[2];
-                        codeHunkData[i - matchLength + 5] = replaceBytes[3];
-                        ++n;
-                        matchLength = 0;
-                    }
-                }
-                else if (matchLength != 0)
-                {
-                    i -= (matchLength - 1);
-                    matchLength = 0;
-                    continue;
+                    data[index + i] = (byte)(value & 0xff);
+                    value >>= 8;
                 }
             }
 
-            if (n != 5)
-                throw new Exception("Not all 5 data references were found.");
+            var codeHunk = (Hunk)hunks.FirstOrDefault(h => h.Type == HunkType.Code);
+            var relocHunk = (Reloc32Hunk)hunks.FirstOrDefault(h => h.Type == HunkType.RELOC32);
+            int itemDataHunkIndex = hunks.Where(h => h.Type == HunkType.Code || h.Type == HunkType.Data || h.Type == HunkType.BSS)
+                .ToList().IndexOf(itemDataHunk);
+            var codeHunkData = codeHunk.Data;
+            int offsetChange = (items.Count - lastItemAmount) * ItemDataSize;
+            var afterItemOffsets = relocHunk.Entries[(uint)itemDataHunkIndex].Where(o => ReadDword(codeHunkData, (int)o) > itemOffset);
+            foreach (var afterItemOffset in afterItemOffsets)
+            {
+                uint offset = ReadDword(codeHunkData, (int)afterItemOffset);
+                WriteDword(codeHunkData, (int)afterItemOffset, (uint)(offset + offsetChange));
+            }
 
             var writer = new DataWriter();
             foreach (var item in items)
                 ItemWriter.WriteItem(item, writer);
             var itemData = writer.ToArray();
             Buffer.BlockCopy(itemData, 0, newData, itemOffset, itemData.Length);
-            Buffer.BlockCopy(lastDataHunk.Data, lastDataHunk.Data.Length - TrailingDataSize, newData, itemOffset + itemData.Length, TrailingDataSize);
-            int index = hunks.IndexOf(lastDataHunk);
-            hunks[index] = new Hunk(HunkType.Data, lastDataHunk.MemoryFlags, newData);
+            Buffer.BlockCopy(itemDataHunk.Data, itemDataHunk.Data.Length - TrailingDataSize, newData, itemOffset + itemData.Length, TrailingDataSize);
+            int index = hunks.IndexOf(itemDataHunk);
+            hunks[index] = new Hunk(HunkType.Data, itemDataHunk.MemoryFlags, newData);
             index = hunks.IndexOf(codeHunk);
             hunks[index] = new Hunk(HunkType.Code, codeHunk.MemoryFlags, codeHunkData);
             var executableWriter = new DataWriter();
