@@ -30,6 +30,9 @@ The first data hunk contains basically 3 things:
 The second hunk contains a lot more stuff:
 - It starts with 8 signed bytes which give the X and Y offsets for adjacent 2D tiles based on the direction values. So 2 bytes for each direction. Basically they contain only the values -1, 0 or 1 of course. Directions are Up, Right, Down and Left in that order.
 - Then the same follows for 3D tiles. Here you can have 8 directions, so you'll find 16 bytes here. Directions are Up, UpRight, Right, DownRight, Down, DownLeft, Left and UpLeft in that order.
+- After that the text "schnism" is stored as a null-terminated string (8 bytes in total).
+- Then a pointer to that schnism test is stored as a relocatable absolute long address (so it is inside the reloc32 table).
+
 
 ## Texts and messages
 
