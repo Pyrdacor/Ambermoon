@@ -20,6 +20,17 @@ Fantasy_intro contains the Thalion intro with the fairy.
 Ambermoon_intro contains the intro sequence and the main menu.
 Ambermoon_extro contains the ending sequence.
 
+There are 2 data hunks which are identical in both AM2_CPU and AM2_BLIT.
+
+The first data hunk contains basically 3 things:
+- First there are 160 bytes which store copper commands that can be used to fill Amiga hardware registers dynamically. There are data words which can be filled by code and then are transferred by the copper automatically.
+- After that there are many UI graphics like window and button frames, damage splash and so on.
+- At the end there are all kind of tables and values for the Sonic Arranger music playback like period and vibrato tables, space for the song pattern indices etc.
+
+The second hunk contains a lot more stuff:
+- It starts with 8 signed bytes which give the X and Y offsets for adjacent 2D tiles based on the direction values. So 2 bytes for each direction. Basically they contain only the values -1, 0 or 1 of course. Directions are Up, Right, Down and Left in that order.
+- Then the same follows for 3D tiles. Here you can have 8 directions, so you'll find 16 bytes here. Directions are Up, UpRight, Right, DownRight, Down, DownLeft, Left and UpLeft in that order.
+
 ## Texts and messages
 
 Inside the second data hunk in all languages (german and english) and in AM2_CPU as well as AM2_BLIT the texts start at offset 0x7D46. As only text lengths differ and not code or other data, this offset can be relied on.
