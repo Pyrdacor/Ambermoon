@@ -140,6 +140,13 @@ Section | Description
 - [Music](Files/Music.md)
 
 
+## Reverse Engineering
+
+There were many who started reverse engineer the original code of the game. Most recently Nico Bendlin started to do so with Ghidra and also created a Ghidra server. He gathered many information over at
+[gitlab](https://gitlab.com/ambermoon/research/-/wikis/ghidra). I, Nico and even the great Jurie Horneman are now working on documenting and decoding the original code of Ambermoon. You can also join the Ghidra server with anonymous read-only access to inspect the code.
+
+Kermitfrog, who was a huge contributor of information for the remake, also did a lot of reverse engineering and even documented the workflow and setup of Ghidra and debugging in fs-uae. Have a look here: https://github.com/kermitfrog/Amiga-Re-Engineering
+
 ## Ambermoon.net
 
 I am developing Ambermoon from scratch with C#. Have a look [here](https://github.com/Pyrdacor/Ambermoon.net).
