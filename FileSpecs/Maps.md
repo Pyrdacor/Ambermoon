@@ -55,7 +55,8 @@ Each entry looks like this:
 Offset | Type | Description
 --- | --- | ---
 0x00 | ubyte | Index (of party member, NPC, monster group or map text)
-0x01 | uword | Type and flags
+0x01 | ubyte | Travel type bit(s) used by the character (mostly 1 for walk/human or 2 for horse/monster)
+0x02 | ubyte | Type and flags
 0x03 | ubyte | Event index
 0x04 | uword | Graphic index
 0x06 | udword | Tile flags (will override the map tile flags if the character is on the tile, 3D only). Upper 4 bits are the combat background index for monsters.
@@ -73,16 +74,13 @@ The lower 2 bits represent the character type:
 - 2: Monster
 - 3: Map object (like non-interactive small spiders, etc)
 
-The upper 14 bits contain the flags:
+The upper 6 bits contain the flags:
 - Bit 2: Random movement
 - Bit 3: Use tileset
 - Bit 4: Text popup
 - Bit 5: **Unknown**
 - Bit 6: **Unknown**
 - Bit 7: **Unknown**
-- Bit 8: Only move when seeing player
-- Bit 9: **Unknown** (Tornaks use it)
-- Rest: **Unknown**
 
 For NPCs if flag "Text popup" is set, the index is a map text index and only a text popup is shown on interaction.
 
