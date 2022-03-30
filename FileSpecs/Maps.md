@@ -84,6 +84,8 @@ The upper 6 bits contain the flags:
 
 For NPCs if flag "Text popup" is set, the index is a map text index and only a text popup is shown on interaction.
 
+Note: In theory any of the 8 lower travel types can be used by monsters. They are used for collision detection. Even flying monsters are possible which can move through anything. But in Ambermoon only 2 types are used. 0x1 for walking or 0x2 for horse. The latter is often used to create objects or doors that block monsters but not the player who has travel type 0x1 in general (beside cheating). If you want some monsters to pass the doors as well you could use travel type 0x1, too.
+
 ### Map events
 
 After the tile data the map events are encoded. Map events are organized as linked lists. A tile can reference such a map event list. Index 0 is reserved and means 'no map event'.
