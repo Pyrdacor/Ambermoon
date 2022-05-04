@@ -1,0 +1,21 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net6.0</TargetFramework>
+    <RepositoryUrl>https://github.com/Pyrdacor/Ambermoon</RepositoryUrl>
+    <PackageProjectUrl>https://github.com/Pyrdacor/Ambermoon</PackageProjectUrl>
+    <RepositoryType>Github</RepositoryType>
+    <PackageTags>Ambermoon Text Import Export File Amiga</PackageTags>
+    <Authors>Robert Schneckenhaus</Authors>
+    <Description>Command line tool to export and import all texts from/into legacy Ambermoon game data.</Description>
+    <RuntimeIdentifiers>win-x64;win-x86;linux-x64</RuntimeIdentifiers>
+    <Version>1.0.0</Version>
+    <Configurations>Debug;Release;ReleaseLinux</Configurations>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Ambermoon.Data.Legacy" Version="10.5.5" />
+  </ItemGroup>
+
+</Project>

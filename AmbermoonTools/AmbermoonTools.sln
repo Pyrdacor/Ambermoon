@@ -34,7 +34,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AmbermoonImageConverter", "
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AmbermoonLabdataEditor", "AmbermoonLabdataEditor\AmbermoonLabdataEditor.csproj", "{E83925E3-5C50-4300-B86B-AC26CD36B904}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AmbermoonCharEditor", "AmbermoonCharEditor\AmbermoonCharEditor.csproj", "{5AF70021-F1C0-4093-9476-C42FA13AA6C7}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AmbermoonCharEditor", "AmbermoonCharEditor\AmbermoonCharEditor.csproj", "{5AF70021-F1C0-4093-9476-C42FA13AA6C7}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AmbermoonTextManager", "AmbermoonTextManager\AmbermoonTextManager.csproj", "{A32F8E6C-F873-412F-A71F-6E6F661592E7}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -140,10 +142,20 @@ Global
 		{E83925E3-5C50-4300-B86B-AC26CD36B904}.ReleaseLinux|Any CPU.Build.0 = Release|Any CPU
 		{5AF70021-F1C0-4093-9476-C42FA13AA6C7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{5AF70021-F1C0-4093-9476-C42FA13AA6C7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5AF70021-F1C0-4093-9476-C42FA13AA6C7}.DebugAndroid|Any CPU.ActiveCfg = Debug|Any CPU
+		{5AF70021-F1C0-4093-9476-C42FA13AA6C7}.DebugAndroid|Any CPU.Build.0 = Debug|Any CPU
 		{5AF70021-F1C0-4093-9476-C42FA13AA6C7}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{5AF70021-F1C0-4093-9476-C42FA13AA6C7}.Release|Any CPU.Build.0 = Release|Any CPU
 		{5AF70021-F1C0-4093-9476-C42FA13AA6C7}.ReleaseLinux|Any CPU.ActiveCfg = Release|Any CPU
 		{5AF70021-F1C0-4093-9476-C42FA13AA6C7}.ReleaseLinux|Any CPU.Build.0 = Release|Any CPU
+		{A32F8E6C-F873-412F-A71F-6E6F661592E7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A32F8E6C-F873-412F-A71F-6E6F661592E7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A32F8E6C-F873-412F-A71F-6E6F661592E7}.DebugAndroid|Any CPU.ActiveCfg = Debug|Any CPU
+		{A32F8E6C-F873-412F-A71F-6E6F661592E7}.DebugAndroid|Any CPU.Build.0 = Debug|Any CPU
+		{A32F8E6C-F873-412F-A71F-6E6F661592E7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A32F8E6C-F873-412F-A71F-6E6F661592E7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A32F8E6C-F873-412F-A71F-6E6F661592E7}.ReleaseLinux|Any CPU.ActiveCfg = ReleaseLinux|Any CPU
+		{A32F8E6C-F873-412F-A71F-6E6F661592E7}.ReleaseLinux|Any CPU.Build.0 = ReleaseLinux|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
