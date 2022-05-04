@@ -101,7 +101,7 @@ namespace AmbermoonTextImport
                 return;
             }
 
-            if (options.Count < 1 || options.Count > 4|| parameters.Count != 3)
+            if (options.Count < 1 || options.Count > 4 || parameters.Count != 3)
             {
                 Console.WriteLine("Invalid arguments.");
                 Console.WriteLine();
