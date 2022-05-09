@@ -18,7 +18,7 @@ Bits | As hex value | Meaning
 8..22 | 0x000000100..0x00400000 | Allowed travel types
 23..25| 0x00800000 | Sit/sleep value
 26 | 0x04000000 | Player invisible
-27 | 0x08000000 | Auto poison (deals
+27 | 0x08000000 | Auto poison (poisons the party if they enter the tile, LUK may avoid it)
 28..31 | 0x10000000..0x80000000 | Combat background index
 
 
