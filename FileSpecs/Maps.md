@@ -128,23 +128,23 @@ Value | Type
 4 | Text popup
 5 | Spinner
 6 | Damage / trap
-7 | **Unknown**
+7 | Remove buffs
 8 | Riddlemouth
-9 | Award
+9 | Reward
 10 | Change tile appearance
 11 | Start battle
-12 | Enter place (like merchants)
+12 | Enter place (like merchants, inns, etc)
 13 | Condition
 14 | Action
-15 | Dice 100 roll (Random)
+15 | Dice 100 roll (random)
 16 | Conversation
-17 | Print text
-18 | Create
-19 | Question popup
+17 | Print text (in conversation)
+18 | Create (items/gold/food in conversation)
+19 | Question popup (yes/no decision box)
 20 | Change music
-21 | Exit
-22 | Spawn
-23 | Nop (empty operation)
+21 | Exit (conversations)
+22 | Spawn (horse, raft, ship)
+23 | Interact (adds/removes party members, remove items, etc in conversations)
 
 The data for those events is described in a separate file [EventData](EventData.md).
 
