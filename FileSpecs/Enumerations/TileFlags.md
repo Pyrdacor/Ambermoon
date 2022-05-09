@@ -11,14 +11,14 @@ Bits | As hex value | Meaning
 1 | 0x00000002 | Block sight?
 2 | 0x00000004 | Render order
 3 | 0x00000008 | Floor (3D object) / Transparency (3D wall)
-4 | 0x00000010 | **Unknown**
+4 | 0x00000010 | Random animation start (random frame offset)
 5 | 0x00000020 | Use background tile flags
 6 | 0x00000040 | Custom render order
 7 | 0x00000080 | Block all movement
 8..22 | 0x000000100..0x00400000 | Allowed travel types
 23..25| 0x00800000 | Sit/sleep value
 26 | 0x04000000 | Player invisible
-27 | 0x08000000 | **Unknown**
+27 | 0x08000000 | Auto poison (deals
 28..31 | 0x10000000..0x80000000 | Combat background index
 
 
