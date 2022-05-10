@@ -108,3 +108,8 @@ If blending is off the overlay will just override the wall data. This means that
 ## Notes
 
 As the texture dimensions are given by the labdata it is best to read object and overlay graphics through labdata loading. Wall textures on the other hand are always 128x80 pixels and floor textures are always 64x64 pixels in size.
+
+
+## Limits
+
+The original code limits the max amount of walls (wall data entries) to 32 and of objects (object data entries) to 64.
