@@ -140,3 +140,8 @@ So basically the collision body radius of the player is 120/512 of block size wh
 Walls have a collision radius of 0.5 * block size of course. Objects use their mapped texture width as the diameter and therefore half that value as radius.
 
 If an object has a mapped texture width of 320, the collision radius would be 160. Expressed in block sizes this are 160/512 block sizes which is 0.3125 * block size.
+
+
+## Limits
+
+The original code can render 200 map objects (including walls) at a time at max.
