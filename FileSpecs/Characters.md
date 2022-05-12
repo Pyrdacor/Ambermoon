@@ -21,7 +21,7 @@ Offset | Type | Description
 0x0007 | ubyte | Number of free fingers (0-2)
 0x0008 | ubyte | [Spoken languages](Enumerations/Languages.md)
 0x0009 | ubyte | **Unknown**
-0x000A | uword | Portrait index
+0x000A | ubyte | Portrait index
 0x000B | uword | Combat graphic index (only used for monsters)
 0x000D | ubyte | **Unknown** (only used for monsters, looks likes percent values like 70, 90, 100, etc. -> max value is 100), most likely a kind of parry/dodge chance as low monsters have 0. but many have 100 (maybe it's reduced by party member ATT ability?)
 0x000E | ubyte | **Unknown** (only used for monsters, 0-5, maybe critical strike chance for monsters?)
