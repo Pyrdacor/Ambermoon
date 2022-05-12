@@ -20,7 +20,7 @@ Offset | Type | Description
 0x0006 | ubyte | Number of free hands (0-2, Alkem has 255 which might be a bug)
 0x0007 | ubyte | Number of free fingers (0-2)
 0x0008 | ubyte | [Spoken languages](Enumerations/Languages.md)
-0x0009 | ubyte | **Unknown**
+0x0009 | ubyte | Inventory inaccessible (0 means accessible, otherwise it's inaccessible)
 0x000A | ubyte | Portrait index
 0x000B | uword | Combat graphic index (only used for monsters)
 0x000D | ubyte | **Unknown** (only used for monsters, looks likes percent values like 70, 90, 100, etc. -> max value is 100), most likely a kind of parry/dodge chance as low monsters have 0. but many have 100 (maybe it's reduced by party member ATT ability?)
