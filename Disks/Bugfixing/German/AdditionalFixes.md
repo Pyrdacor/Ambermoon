@@ -1,5 +1,11 @@
 ## Version 1.13
 
+- Merged AM2_BLIT into AM2_CPU
+- Extracted all in-game texts to Text.amb
+- Extracted all item data to Objects.amb
+- Renamed Monster_char_data.amb to Monster_char.amb
+- Renamed Dictionary.english to Dict.amb
+- Added loader for the extracted files
 - Fixed a typo in Kire's texts ("KONTAKE" -> "KONTAKTE", NPC_texts.amb file 055 sub-file 005)
 
 ## Version 1.12

@@ -1,3 +1,13 @@
+## Version 1.14
+
+- Merged AM2_BLIT into AM2_CPU
+- Extracted all in-game texts to Text.amb
+- Extracted all item data to Objects.amb
+- Renamed Monster_char_data.amb to Monster_char.amb
+- Renamed Dictionary.english to Dict.amb
+- Added loader for the extracted files
+- Renamed spell "Escape" to "Flight" to match the scroll item name
+
 ## Version 1.13
 
 - Fixed "out of memory handles" crash when using the eagle multiple times.
