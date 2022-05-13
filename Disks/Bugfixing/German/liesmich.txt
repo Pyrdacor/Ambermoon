@@ -1,5 +1,22 @@
-Ambermoon German 1.12 by Pyrdacor (31-01-2022)
+Ambermoon German 1.13 by Pyrdacor (13-05-2022)
 ==============================================
+
+Änderungen in 1.13
+==================
+
+- Die Hauptanwendungen von Ambermoon (AM2_CPU und AM2_BLIT)
+  wurden zusammengelegt. Dadurch reduziert sich der nötige
+  Speicherplatz beträchtlich (in Amiga-Speicher :) ).
+  Außerdem sind so Fixes und Updates einfacher zu realisieren.
+- Alle In-Game Texte wurden aus der Exe in die externe Datei Text.amb ausgelagert
+- Die Daten aller Items wurden aus der Exe in die externe Datei Objects.amb ausgelagert
+- Die Grafiken aller Schaltflächen wurden aus der Exe in die externe Datei Button_graphics ausgelagert
+- Für oben genannte Dateien wurden Loader in die Exe integriert. Man kann nun die gleiche Exe (AM2_CPU) für alle Sprachen nutzen.
+- Die Datei Monster_char_data.amb heißt nun Monster_char.amb
+- Die Datei Dictionary.german heißt nun Dict.amb
+- Ein Schreibfehler in den Texten von Kire wurde behoben "KONTAKE" statt "KONTAKTE"
+- In der Werft in Spannenberg kann man nicht länger in die obere Etage gelangen und die Tiles dort wurden aufgehübscht
+
 
 Änderungen in 1.12
 ==================
@@ -35,9 +52,6 @@ Ambermoon German 1.12 by Pyrdacor (31-01-2022)
 - Das Item Topaz heißt nun Topas, da es der korrekte deutsche Name ist und in Texten auch
   dieser Name benutzt wird. Topaz ist hingegen der englische Name.
 
-
-Ambermoon German 1.10 by Pyrdacor (30-09-2021)
-==============================================
 
 Änderungen in 1.10
 ==================

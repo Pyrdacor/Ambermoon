@@ -1,5 +1,32 @@
-Ambermoon English 1.12 by Pyrdacor (23-12-2021)
+Ambermoon English 1.14 by Pyrdacor (13-05-2022)
 ===============================================
+
+Changes in 1.14
+===============
+
+- Merged AM2_BLIT into AM2_CPU
+- Extracted all in-game texts to Text.amb
+- Extracted all item data to Objects.amb
+- Extracted all button graphics to Button_graphics
+- Renamed Monster_char_data.amb to Monster_char.amb
+- Renamed Dictionary.english to Dict.amb
+- Added loader for the extracted files
+- Renamed spell "Escape" to "Flight" to match the scroll item name
+- Fixed "CELLAR" to "CELL" in Clementine's text about the madman
+- Fixed a glitch where it was possible to enter the upper part of the shipyard, also adjusted some tiles there
+
+
+Ambermoon English 1.13 by Pyrdacor (31-01-2022)
+===============================================
+
+Changes in 1.13
+===============
+
+- Fixed "out of memory handles" crash which often occured when using the eagle multiple times.
+- Cleaned up the data of NPC Father Anthony which still included some unused stuff which is
+  only not noticable by coincidence in game.
+- Fixed text in last will: "GRANDSON" -> "GRANDCHILD"
+
 
 Changes in 1.12
 ===============

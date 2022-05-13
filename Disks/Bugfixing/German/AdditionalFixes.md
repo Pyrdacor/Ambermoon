@@ -5,7 +5,7 @@
 - Extracted all item data to Objects.amb
 - Extracted all button graphics to Button_graphics
 - Renamed Monster_char_data.amb to Monster_char.amb
-- Renamed Dictionary.english to Dict.amb
+- Renamed Dictionary.german to Dict.amb
 - Added loader for the extracted files
 - Fixed a typo in Kire's texts ("KONTAKE" -> "KONTAKTE", NPC_texts.amb file 055 sub-file 005)
 - Fixed a glitch where it was possible to enter the upper part of the shipyard, also adjusted some tiles there

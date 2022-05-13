@@ -1,3 +1,20 @@
+Ambermoon German 1.13 by Pyrdacor (13-05-2022)
+==============================================
+
+Changes in 1.13
+===============
+
+- Merged AM2_BLIT into AM2_CPU
+- Extracted all in-game texts to Text.amb
+- Extracted all item data to Objects.amb
+- Extracted all button graphics to Button_graphics
+- Renamed Monster_char_data.amb to Monster_char.amb
+- Renamed Dictionary.german to Dict.amb
+- Added loader for the extracted files
+- Fixed a typo in Kire's texts ("KONTAKE" -> "KONTAKTE")
+- Fixed a glitch where it was possible to enter the upper part of the shipyard, also adjusted some tiles there
+
+
 Ambermoon German 1.12 by Pyrdacor (31-01-2022)
 ==============================================
 
