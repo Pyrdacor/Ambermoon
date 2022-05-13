@@ -7,6 +7,7 @@
 - Renamed Dictionary.english to Dict.amb
 - Added loader for the extracted files
 - Renamed spell "Escape" to "Flight" to match the scroll item name
+- Fixed "CELLAR" to "CELL" in Clementine's text about the madman (NPC_texts.amb file 006, sub-file 006)
 
 ## Version 1.13
 
