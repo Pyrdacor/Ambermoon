@@ -8,6 +8,7 @@
 - Added loader for the extracted files
 - Renamed spell "Escape" to "Flight" to match the scroll item name
 - Fixed "CELLAR" to "CELL" in Clementine's text about the madman (NPC_texts.amb file 006, sub-file 006)
+- Fixed a glitch where it was possible to enter the upper part of the shipyard, also adjusted some tiles there
 
 ## Version 1.13
 
