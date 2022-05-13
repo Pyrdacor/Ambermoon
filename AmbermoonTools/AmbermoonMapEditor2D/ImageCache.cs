@@ -122,6 +122,14 @@ namespace AmbermoonMapEditor2D
             return bitmap;
         }
 
+        public byte[] GetBitplaneData(uint tilesetIndex, uint graphicIndex)
+        {
+            var dataReader = tilesets[tilesetIndex];
+            const int sizePerImage = 16 * 16 * 5 / 8;
+            dataReader.Position = (int)graphicIndex * sizePerImage;
+            return dataReader.ReadBytes(sizePerImage);
+        }
+
         Bitmap LoadImage(IDataReader dataReader, uint graphicIndex, Graphic palette)
         {
             const int sizePerImage = 16 * 16 * 5 / 8;

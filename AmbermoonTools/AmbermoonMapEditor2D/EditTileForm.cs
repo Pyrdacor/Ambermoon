@@ -261,5 +261,43 @@ namespace AmbermoonMapEditor2D
             Tile.GraphicIndex = (uint)numericUpDownImageIndex.Value;
             panelImage.Refresh();
         }
+
+        private void toolStripMenuItemExportImage_Click(object sender, EventArgs e)
+        {
+            var dialog = new SaveFileDialog();
+            dialog.Filter = "Portable Network Graphics (*.png)|*.png|Amiga Bit Planes (*.abp)|*.abp|All Files (*.*)|*.*";
+            dialog.FilterIndex = 0;
+            dialog.Title = "Export tile graphic";
+            dialog.AddExtension = true;
+            dialog.DefaultExt = "png";
+            dialog.FileName = $"{Tile.GraphicIndex:000}";
+            dialog.OverwritePrompt = true;
+            dialog.RestoreDirectory = true;
+            
+            if (dialog.ShowDialog(this) == DialogResult.OK)
+            {
+                try
+                {
+                    if (dialog.FileName.ToLower().EndsWith(".png"))
+                    {
+                        // PNG
+                        var image = imageCache.GetImage(tileset.Index, Tile.GraphicIndex - 1, paletteIndex);
+                        image.Save(dialog.FileName, System.Drawing.Imaging.ImageFormat.Png);
+                    }
+                    else
+                    {
+                        // Amiga Bitplanes
+                        System.IO.File.WriteAllBytes(dialog.FileName, imageCache.GetBitplaneData(tileset.Index, Tile.GraphicIndex - 1));
+                    }
+
+                    MessageBox.Show(this, "Tile graphic was saved.", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show(this, "Error saving file." + Environment.NewLine + "Error: " + ex.Message,
+                        "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+            }
+        }
     }
 }
