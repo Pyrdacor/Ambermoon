@@ -3,6 +3,7 @@
 - Merged AM2_BLIT into AM2_CPU
 - Extracted all in-game texts to Text.amb
 - Extracted all item data to Objects.amb
+- Extracted all button graphics to Button_graphics
 - Renamed Monster_char_data.amb to Monster_char.amb
 - Renamed Dictionary.english to Dict.amb
 - Added loader for the extracted files
