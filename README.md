@@ -18,11 +18,13 @@ I will provide some helpful tools too.
 
 **Note:** From english 1.10 and german 1.09 onwards, the versions will also work with 68000 CPUs (A500 etc).
 
+**Note:** From english 1.14 and german 1.13 onwards, the two main executables have been merged and all ingame texts, item data and button graphics have been moved to external data files. Moreover the language-dependent dictionary files "Dictionary.english" and "Dictionary.german" now are called "Dict.amb" in both languages. The file "Monster_char_data.amb" is now called "Monster_char.amb".
+
 Version | Language | Type | Download | Release date
 --- | --- | --- | --- | ---
-1.13 | English | Extracted Files | [zip](https://github.com/Pyrdacor/Ambermoon/raw/master/Disks/English/ambermoon_english_1.13_extracted.zip) [lha](https://github.com/Pyrdacor/Ambermoon/raw/master/Disks/English/ambermoon_english_1.13_extracted.lha) [tar.gz](https://github.com/Pyrdacor/Ambermoon/raw/master/Disks/English/ambermoon_english_1.13_extracted.tar.gz) | 31-01-2022
+1.14 | English | Extracted Files | [zip](https://github.com/Pyrdacor/Ambermoon/raw/master/Disks/English/ambermoon_english_1.13_extracted.zip) [tar.gz](https://github.com/Pyrdacor/Ambermoon/raw/master/Disks/English/ambermoon_english_1.13_extracted.tar.gz) | 31-01-2022
 1.13 | English | ADF Disk Images | [zip](https://github.com/Pyrdacor/Ambermoon/raw/master/Disks/English/ambermoon_english_1.13_adf.zip) [lha](https://github.com/Pyrdacor/Ambermoon/raw/master/Disks/English/ambermoon_english_1.13_adf.lha) [tar.gz](https://github.com/Pyrdacor/Ambermoon/raw/master/Disks/English/ambermoon_english_1.13_adf.tar.gz) | 31-01-2022
-1.12 | German | Extracted Files | [zip](https://github.com/Pyrdacor/Ambermoon/raw/master/Disks/German/ambermoon_german_1.12_extracted.zip) [lha](https://github.com/Pyrdacor/Ambermoon/raw/master/Disks/German/ambermoon_german_1.12_extracted.lha) [tar.gz](https://github.com/Pyrdacor/Ambermoon/raw/master/Disks/German/ambermoon_german_1.12_extracted.tar.gz) | 31-01-2022
+1.13 | German | Extracted Files | [zip](https://github.com/Pyrdacor/Ambermoon/raw/master/Disks/German/ambermoon_german_1.12_extracted.zip) [tar.gz](https://github.com/Pyrdacor/Ambermoon/raw/master/Disks/German/ambermoon_german_1.12_extracted.tar.gz) | 31-01-2022
 1.12 | German | ADF Disk Images | [zip](https://github.com/Pyrdacor/Ambermoon/raw/master/Disks/German/ambermoon_german_1.12_adf.zip) [lha](https://github.com/Pyrdacor/Ambermoon/raw/master/Disks/German/ambermoon_german_1.12_adf.lha) [tar.gz](https://github.com/Pyrdacor/Ambermoon/raw/master/Disks/German/ambermoon_german_1.12_adf.tar.gz) | 31-01-2022
 
 ### Patches
