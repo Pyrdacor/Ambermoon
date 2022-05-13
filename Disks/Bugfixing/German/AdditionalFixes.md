@@ -1,3 +1,7 @@
+## Version 1.13
+
+- Fixed a typo in Kire's texts ("KONTAKE" -> "KONTAKTE", NPC_texts.amb file 055 sub-file 005)
+
 ## Version 1.12
 
 - Fixed "out of memory handles" crash when using the eagle multiple times.
