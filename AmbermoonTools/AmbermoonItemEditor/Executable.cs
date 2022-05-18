@@ -9,15 +9,20 @@ using static Ambermoon.Data.Legacy.Serialization.AmigaExecutable;
 
 namespace AmbermoonItemEditor
 {
-    internal class Executable
+    internal class Executable : ItemManager
     {
-        readonly List<IHunk> hunks;
-        readonly List<Item> items;
+        List<IHunk> hunks;
         int lastItemAmount = 0;
         const int ItemDataSize = 60;
         const int TrailingDataSize = 68;
         
         public Executable(IDataReader dataReader)
+            : base(dataReader)
+        {
+            
+        }
+
+        protected override List<Item> Load(IDataReader dataReader)
         {
             hunks = Read(dataReader);
 
@@ -27,51 +32,12 @@ namespace AmbermoonItemEditor
                 hunks[5] = new Hunk(HunkType.Code, hunks[5].MemoryFlags, ((Hunk)hunks[5]).Data, hunks[5].Size / 4);
 
             var itemManager = new ExecutableData(hunks).ItemManager;
-            items = new List<Item>(itemManager.Items);
+            var items = new List<Item>(itemManager.Items);
             lastItemAmount = items.Count;
+            return items;
         }
 
-        public void AddItem()
-        {
-            items.Add(new Item { Index = (uint)items.Count });
-        }
-
-        public void RemoveItem(int index)
-        {
-            if (index == 0 || index > items.Count)
-                return;
-
-            --index;
-
-            items.RemoveAt(index);
-
-            for (int i = index; i < items.Count; ++i)
-                items[i].Index = (uint)(i + 1);
-        }
-
-        public int ItemCount => items.Count;
-
-        public void UpdateItem(int index, Func<Item, Item> updater)
-        {
-            items[index] = updater?.Invoke(items[index]) ?? items[index];
-            items[index].Index = (uint)index + 1;
-        }
-
-        public void PrintItems()
-        {
-            int numRows = (items.Count + 2) / 3;
-            var rows = Enumerable.Repeat("", numRows).ToArray();
-            int index = 0;
-            int[] trim = new int[3] { 0, 26, 52 };
-
-            foreach (var item in items)
-                rows[index % numRows] = rows[index % numRows].PadRight(trim[index++ / numRows]) + $"{item.Index:000}: {item.Name}";
-            
-            foreach (var row in rows)
-                Console.WriteLine(row);
-        }
-
-        public void Save(System.IO.Stream stream)
+        public override void Save(System.IO.Stream stream)
         {
             // Note: There are 5 references to the data behind the items. We have to adjust those.
             // They are stored like this: 4A 39 00 01 56 EC

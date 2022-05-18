@@ -36,8 +36,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AmbermoonLabdataEditor", "A
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AmbermoonCharEditor", "AmbermoonCharEditor\AmbermoonCharEditor.csproj", "{5AF70021-F1C0-4093-9476-C42FA13AA6C7}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AmbermoonTextManager", "AmbermoonTextManager\AmbermoonTextManager.csproj", "{A32F8E6C-F873-412F-A71F-6E6F661592E7}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU

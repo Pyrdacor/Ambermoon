@@ -12,26 +12,33 @@ namespace AmbermoonItemEditor
     {
         static void Main(string[] args)
         {
-            var gameData = new GameData(GameData.LoadPreference.ForceExtracted, null, false);
-
-            try
+            if (File.Exists(args[0]))
             {
-                gameData.Load(args[0]);
-
-                if (!gameData.Files.ContainsKey("AM2_CPU") || !gameData.Files.ContainsKey("AM2_BLIT"))
-                    throw new Exception();
+                ProcessExecutables(Path.GetDirectoryName(args[0]), new Items(args[0]), null);
             }
-            catch
+            else
             {
-                Console.WriteLine("Unable to load executables.");
-                Environment.Exit(1);
-                return;
+                var gameData = new GameData(GameData.LoadPreference.ForceExtracted, null, false);
+
+                try
+                {
+                    gameData.Load(args[0]);
+
+                    if (!gameData.Files.ContainsKey("AM2_CPU") || !gameData.Files.ContainsKey("AM2_BLIT"))
+                        throw new Exception();
+                }
+                catch
+                {
+                    Console.WriteLine("Unable to load executables.");
+                    Environment.Exit(1);
+                    return;
+                }
+
+                var exe1 = new Executable(gameData.Files["AM2_CPU"].Files[1]);
+                var exe2 = new Executable(gameData.Files["AM2_BLIT"].Files[1]);
+
+                ProcessExecutables(args[0], exe1, exe2);
             }
-
-            var exe1 = new Executable(gameData.Files["AM2_CPU"].Files[1]);
-            var exe2 = new Executable(gameData.Files["AM2_BLIT"].Files[1]);
-
-            ProcessExecutables(args[0], exe1, exe2);
         }
 
         static void PrintLine()
@@ -51,10 +58,10 @@ namespace AmbermoonItemEditor
                 Console.WriteLine();
         }
 
-        static void ProcessExecutables(string sourcePath, Executable exe1, Executable exe2)
+        static void ProcessExecutables(string sourcePath, ItemManager items1, ItemManager items2)
         {
             PrintHeader("Items");
-            exe1.PrintItems();
+            items1.PrintItems();
 
             while (true)
             {
@@ -78,13 +85,13 @@ namespace AmbermoonItemEditor
                     case "add":
                     case "add item":
                     case "additem":
-                        AddItem(exe1, exe2);
+                        AddItem(items1, items2);
                         break;
                     case "e":
                     case "edit":
                     case "edit item":
                     case "edititem":
-                        EditItem(exe1, exe2);
+                        EditItem(items1, items2);
                         break;
                     case "r":
                     case "remove":
@@ -93,13 +100,13 @@ namespace AmbermoonItemEditor
                     case "delete":
                     case "delete item":
                     case "deleteitem":
-                        RemoveItem(exe1, exe2);
+                        RemoveItem(items1, items2);
                         break;
                     case "s":
                     case "save":
                     case "save items":
                     case "saveitems":
-                        Save(sourcePath, exe1, exe2);
+                        Save(sourcePath, items1, items2);
                         break;
                     case "q":
                     case "quit":
@@ -113,7 +120,7 @@ namespace AmbermoonItemEditor
                     case "i":
                     case "items":
                         PrintHeader("Items");
-                        exe1.PrintItems();
+                        items1.PrintItems();
                         break;
                     default:
                         Console.WriteLine();
@@ -130,14 +137,14 @@ namespace AmbermoonItemEditor
             // TODO
         }
 
-        static void AddItem(Executable exe1, Executable exe2)
+        static void AddItem(ItemManager items1, ItemManager items2)
         {
             PrintHeader("Add item");
 
-            exe1.AddItem();
-            exe2.AddItem();
+            items1.AddItem();
+            items2?.AddItem();
 
-            EditItem(exe1, exe2, true, exe1.ItemCount - 1);
+            EditItem(items1, items2, true, items1.ItemCount - 1);
         }
 
         static int? ReadInt(bool hex = false)
@@ -186,11 +193,11 @@ namespace AmbermoonItemEditor
             return option ?? defaultOption;
         }
 
-        static void EditItem(Executable exe1, Executable exe2, bool adding = false, int? id = null)
+        static void EditItem(ItemManager items1, ItemManager items2, bool adding = false, int? id = null)
         {
             if (!adding)
             {
-                exe1.PrintItems();
+                items1.PrintItems();
 
                 PrintHeader("Edit item");
 
@@ -201,7 +208,7 @@ namespace AmbermoonItemEditor
                     --id;
             }
 
-            if (id == null || id < 0 || id >= exe1.ItemCount)
+            if (id == null || id < 0 || id >= items1.ItemCount)
             {
                 Console.WriteLine();
                 Console.WriteLine("Invalid item index");
@@ -209,7 +216,7 @@ namespace AmbermoonItemEditor
                 return;
             }
 
-            exe1.UpdateItem(id.Value, item =>
+            items1.UpdateItem(id.Value, item =>
             {
                 var writer = new DataWriter();
                 ItemWriter.WriteItem(item, writer);
@@ -338,15 +345,15 @@ namespace AmbermoonItemEditor
                 item = new Ambermoon.Data.Item();
                 itemReader.ReadItem(item, new DataReader(data));
 
-                exe2.UpdateItem(id.Value, _ => item);
+                items2?.UpdateItem(id.Value, _ => item);
 
                 return item;
             });
         }
 
-        static void RemoveItem(Executable exe1, Executable exe2)
+        static void RemoveItem(ItemManager items1, ItemManager items2)
         {
-            exe1.PrintItems();
+            items1.PrintItems();
 
             PrintHeader("Remove item");
 
@@ -361,34 +368,44 @@ namespace AmbermoonItemEditor
                 return;
             }
 
-            exe1.RemoveItem(id.Value);
-            exe2.RemoveItem(id.Value);
+            items1.RemoveItem(id.Value);
+            items2?.RemoveItem(id.Value);
 
             Console.WriteLine();
         }
 
-        static void Save(string sourcePath, Executable exe1, Executable exe2)
+        static void Save(string sourcePath, ItemManager items1, ItemManager items2)
         {
             PrintHeader("Save items");
 
-            int option = ReadOption("Where to save it?", 0, "Back to loaded data", "To custom path") ?? 0;
-
-            if (option == 0)
+            if (items1 is Items)
             {
-                var temp1 = Path.GetTempFileName();
-                var temp2 = Path.GetTempFileName();
-                {
-                    using var am2_cpu = File.Create(temp1);
-                    using var am2_blit = File.Create(temp2);
-                    exe1.Save(am2_cpu);
-                    exe2.Save(am2_blit);
-                }
-                File.Move(temp1, Path.Combine(sourcePath, "AM2_CPU"), true);
-                File.Move(temp2, Path.Combine(sourcePath, "AM2_BLIT"), true);
+                var temp = Path.GetTempFileName();
+                using var stream = File.Create(temp);
+                items1.Save(stream);
+                File.Move(temp, Path.Combine(sourcePath, "Objects.amb"), true);
             }
             else
             {
-                // TODO
+                int option = ReadOption("Where to save it?", 0, "Back to loaded data", "To custom path") ?? 0;
+
+                if (option == 0)
+                {
+                    var temp1 = Path.GetTempFileName();
+                    var temp2 = Path.GetTempFileName();
+                    {
+                        using var am2_cpu = File.Create(temp1);
+                        using var am2_blit = File.Create(temp2);
+                        items1.Save(am2_cpu);
+                        items2.Save(am2_blit);
+                    }
+                    File.Move(temp1, Path.Combine(sourcePath, "AM2_CPU"), true);
+                    File.Move(temp2, Path.Combine(sourcePath, "AM2_BLIT"), true);
+                }
+                else
+                {
+                    // TODO
+                }
             }
         }
     }
