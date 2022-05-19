@@ -86,6 +86,8 @@ For NPCs if flag "Text popup" is set, the index is a map text index and only a t
 
 Note: In theory any of the travel types can be used by monsters. They are used for collision detection. Even flying monsters are possible which can move through anything (travel type 6). But in Ambermoon only 2 types are used: 1 and 2. In 3D you can't interpret those as travel types like horse, raft, etc. They are more like "collision classes". Each wall or object in 3D has a bit associated for collision and the "travel type" of the character is basically the bit index for collision detection. The only exception is travel type 6, which is always some kind of "cheat type". If a character has this travel type set, it won't collide with anything.
 
+Often collision class 1 is used. It is different from the player collision class 0 and objects like doors often only let class 0 pass. So those characters couldn't leave rooms through doors etc.
+
 ### Map events
 
 After the tile data the map events are encoded. Map events are organized as linked lists. A tile can reference such a map event list. Index 0 is reserved and means 'no map event'.
