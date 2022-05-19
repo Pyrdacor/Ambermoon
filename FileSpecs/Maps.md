@@ -55,7 +55,7 @@ Each entry looks like this:
 Offset | Type | Description
 --- | --- | ---
 0x00 | ubyte | Index (of party member, NPC, monster group or map text)
-0x01 | ubyte | [Travel type](Enumerations/TravelType.md) used by the character (mostly 0 for walk/human or 1 for horse/monster)
+0x01 | ubyte | [Travel type](Enumerations/TravelType.md) used by the character
 0x02 | ubyte | Type and flags
 0x03 | ubyte | Event index
 0x04 | uword | Graphic index
@@ -84,7 +84,7 @@ The upper 6 bits contain the flags:
 
 For NPCs if flag "Text popup" is set, the index is a map text index and only a text popup is shown on interaction.
 
-Note: In theory any of the travel types can be used by monsters. They are used for collision detection. Even flying monsters are possible which can move through anything (travel type 6). But in Ambermoon only 2 types are used. 0 for walking or 1 for horse. The latter is often used to create objects or doors that block monsters but not the player who has travel type 0 in general on 3D maps (beside cheating). If you want some monsters to pass the doors as well you could use travel type 0, too.
+Note: In theory any of the travel types can be used by monsters. They are used for collision detection. Even flying monsters are possible which can move through anything (travel type 6). But in Ambermoon only 2 types are used: 1 and 2. In 3D you can't interpret those as travel types like horse, raft, etc. They are more like "collision classes". Each wall or object in 3D has a bit associated for collision and the "travel type" of the character is basically the bit index for collision detection. The only exception is travel type 6, which is always some kind of "cheat type". If a character has this travel type set, it won't collide with anything.
 
 ### Map events
 
