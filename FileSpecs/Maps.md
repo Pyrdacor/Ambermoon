@@ -55,7 +55,7 @@ Each entry looks like this:
 Offset | Type | Description
 --- | --- | ---
 0x00 | ubyte | Index (of party member, NPC, monster group or map text)
-0x01 | ubyte | [Travel type](Enumerations/TravelType.md) used by the character
+0x01 | ubyte | [Travel type](Enumerations/TravelType.md) used by the character (basically the collision class)
 0x02 | ubyte | Type and flags
 0x03 | ubyte | Event index
 0x04 | uword | Graphic index
