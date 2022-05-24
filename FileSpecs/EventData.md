@@ -342,10 +342,17 @@ Value | Type
 18 | Has gold amount
 19 | Has food amount
 20 | Eye cursor interaction
+21 | Mouth cursor interaction (**Ambermoon Advanced only**)
+22 | Transport at current location (**Ambermoon Advanced only**)
+23 | Multiple cursor interaction (hand, eye, mouth) (**Ambermoon Advanced only**)
 
 **Note:** In conversations the global variable 0 is checked to be value 0 before executing a PrintText event that
 should be executed in any case. I guess PrintText events always need a preceding Condition event and the global
 variable 0 is always 0. So this is like a "always true condition".
+
+**Note:** For condition 22, the object index gives the [Enumerations/TravelType.md](transport type). But 0 is special and means "any".
+
+**Note:** For condition 23, the object index gives the cursors as bit flags. Bit 0 is hand, bit 1 is eye and bit 2 is mouth.
 
 
 ## Action event (0x0E / 14)
