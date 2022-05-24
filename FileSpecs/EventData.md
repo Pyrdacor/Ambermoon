@@ -345,6 +345,7 @@ Value | Type
 21 | Mouth cursor interaction (**Ambermoon Advanced only**)
 22 | Transport at current location (**Ambermoon Advanced only**)
 23 | Multiple cursor interaction (hand, eye, mouth) (**Ambermoon Advanced only**)
+24 | Current travel type (**Ambermoon Advanced only**)
 
 **Note:** In conversations the global variable 0 is checked to be value 0 before executing a PrintText event that
 should be executed in any case. I guess PrintText events always need a preceding Condition event and the global
