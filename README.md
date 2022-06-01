@@ -140,7 +140,7 @@ Section | Description
 ### Music
 
 - [Music](Music)
-- [Music info](Music/Music.md)
+- [Music info](Music/README.md)
 
 
 ## Reverse Engineering
