@@ -944,6 +944,7 @@ namespace AmbermoonEventEditor
 
             bool newChain = false;
             int? connectTo = null;
+            bool prepend = false;
 
             if (eventDescription.AllowOnlyAsFirst)
             {
@@ -966,11 +967,11 @@ namespace AmbermoonEventEditor
                 {
                     Console.WriteLine();
                     Console.WriteLine("How should the new event be connected?");
-                    var option = ReadOption(0, "Disconnected event", "New event chain", "Connect to event");
+                    var option = ReadOption(0, "Disconnected event", "New event chain", "Connect to event", "Prepend to event");
 
                     if (option.Value == 1)
                         newChain = true;
-                    else if (option.Value == 2)
+                    else if (option.Value == 2) // append to event
                     {
                         Console.WriteLine();
                         Console.WriteLine("Connect to which event");
@@ -986,6 +987,24 @@ namespace AmbermoonEventEditor
                             connectTo = index;
                         }
                     }
+                    else if (option.Value == 3) // prepend to event
+                    {
+                        Console.WriteLine();
+                        Console.WriteLine("Prepend to which event");
+                        var filteredEvents = events.Where(e => !EventDescriptions.Events[e.Type].AllowOnlyAsFirst).ToList();
+                        ListEvents(filteredEvents, 0, e => events.IndexOf(e));
+                        var index = ReadInt(true);
+
+                        if (index == null || !filteredEvents.Any(e => e.Index == index))
+                        {
+                            Console.WriteLine("Invalid event index. Creating a disconnected event instead.");
+                        }
+                        else
+                        {
+                            connectTo = index;
+                            prepend = true;
+                        }
+                    }
                 }
                 else if (eventList.Count == 0)
                 {
@@ -995,9 +1014,14 @@ namespace AmbermoonEventEditor
                 {
                     Console.WriteLine();
                     Console.WriteLine("How should the new event be connected?");
-                    var option = ReadOption(0, "Disconnected event", "Connect to event");
 
-                    if (option.Value == 1)
+                    List<Event> noChainStartEvents = events.Where(e => !eventList.Contains(e)).ToList();
+
+                    var option = noChainStartEvents.Count != 0
+                        ? ReadOption(0, "Disconnected event", "Connect to event", "Prepend to event")
+                        : ReadOption(0, "Disconnected event", "Connect to event"); ;
+
+                    if (option.Value == 1) // append to event
                     {
                         Console.WriteLine();
                         Console.WriteLine("Connect to which event");
@@ -1011,6 +1035,23 @@ namespace AmbermoonEventEditor
                         else
                         {
                             connectTo = index;
+                        }
+                    }
+                    else if (noChainStartEvents.Count != 0 && option.Value == 2) // prepend to event
+                    {
+                        Console.WriteLine();
+                        Console.WriteLine("Prepend to which event");
+                        ListEvents(noChainStartEvents, 0, e => events.IndexOf(e));
+                        var index = ReadInt(true);
+
+                        if (index == null || !noChainStartEvents.Any(e => e.Index == index))
+                        {
+                            Console.WriteLine("Invalid event index. Creating a disconnected event instead.");
+                        }
+                        else
+                        {
+                            connectTo = index;
+                            prepend = true;
                         }
                     }
                 }
@@ -1046,6 +1087,12 @@ namespace AmbermoonEventEditor
                 {
                     if (value.Required)
                     {
+                        if (value is IEnumValueDescription e)
+                        {
+                            Console.WriteLine("Possible values:");
+                            e.AllowedEntries.ToList().ForEach(v => Console.WriteLine($" {v.Key,3}: {v.Value}"));
+                        }
+
                         Console.Write($"> {value.Name}: ");
                         var input = ReadInt(value.ShowAsHex);
 
@@ -1097,9 +1144,22 @@ namespace AmbermoonEventEditor
             }
             else if (connectTo != null)
             {
-                var prev = events[connectTo.Value];
-                @event.Next = prev.Next;
-                prev.Next = @event;
+                if (prepend)
+                {
+                    var next = events[connectTo.Value];
+                    @event.Next = next;
+
+                    int chainIndex = eventList.IndexOf(next);
+
+                    if (chainIndex != -1)
+                        eventList[chainIndex] = @event;
+                }
+                else // append
+                {
+                    var prev = events[connectTo.Value];
+                    @event.Next = prev.Next;
+                    prev.Next = @event;
+                }
             }
 
             Console.WriteLine($"Event {(fromEdit ? "changed" : "added")} successfully.");

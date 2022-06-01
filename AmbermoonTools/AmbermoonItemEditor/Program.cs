@@ -381,9 +381,11 @@ namespace AmbermoonItemEditor
             if (items1 is Items)
             {
                 var temp = Path.GetTempFileName();
-                using var stream = File.Create(temp);
-                items1.Save(stream);
-                File.Move(temp, Path.Combine(sourcePath, "Objects.amb"), true);
+                {
+                    using var stream = File.Create(temp);
+                    items1.Save(stream);
+                }
+                File.Move(temp, Path.Combine(sourcePath, "001"), true);
             }
             else
             {

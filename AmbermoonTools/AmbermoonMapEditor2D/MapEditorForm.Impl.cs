@@ -124,7 +124,7 @@ namespace AmbermoonMapEditor2D
                 comboBoxMusic.Items.Add(song.Value);
 
             // TODO: what if we add one later?
-            for (int i = 1; i <= 9; ++i)
+            for (int i = 1; i <= 10; ++i)
                 comboBoxTilesets.Items.Add($"Tileset {i}");
 
             imageCache = new ImageCache(gameData);

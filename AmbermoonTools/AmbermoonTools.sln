@@ -146,14 +146,6 @@ Global
 		{5AF70021-F1C0-4093-9476-C42FA13AA6C7}.Release|Any CPU.Build.0 = Release|Any CPU
 		{5AF70021-F1C0-4093-9476-C42FA13AA6C7}.ReleaseLinux|Any CPU.ActiveCfg = Release|Any CPU
 		{5AF70021-F1C0-4093-9476-C42FA13AA6C7}.ReleaseLinux|Any CPU.Build.0 = Release|Any CPU
-		{A32F8E6C-F873-412F-A71F-6E6F661592E7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{A32F8E6C-F873-412F-A71F-6E6F661592E7}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{A32F8E6C-F873-412F-A71F-6E6F661592E7}.DebugAndroid|Any CPU.ActiveCfg = Debug|Any CPU
-		{A32F8E6C-F873-412F-A71F-6E6F661592E7}.DebugAndroid|Any CPU.Build.0 = Debug|Any CPU
-		{A32F8E6C-F873-412F-A71F-6E6F661592E7}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{A32F8E6C-F873-412F-A71F-6E6F661592E7}.Release|Any CPU.Build.0 = Release|Any CPU
-		{A32F8E6C-F873-412F-A71F-6E6F661592E7}.ReleaseLinux|Any CPU.ActiveCfg = ReleaseLinux|Any CPU
-		{A32F8E6C-F873-412F-A71F-6E6F661592E7}.ReleaseLinux|Any CPU.Build.0 = ReleaseLinux|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

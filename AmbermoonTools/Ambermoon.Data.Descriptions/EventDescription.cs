@@ -214,22 +214,22 @@ namespace Ambermoon.Data.Descriptions
                 Use.Word("CorrectAnswerDictionaryIndex1", true),
                 Use.Word("CorrectAnswerDictionaryIndex2", false)
             )},
-            { EventType.Award, new EventDescription
+            { EventType.Reward, new EventDescription
             (
                 true, true, true, true, false,
-                Use.Enum<AwardEvent.AwardType>("TypeOfAward", true),
-                Use.Enum("Operation", true, AwardEvent.AwardOperation.Increase),
+                Use.Enum<RewardEvent.RewardType>("TypeOfReward", true),
+                Use.Enum("Operation", true, RewardEvent.RewardOperation.Increase),
                 Use.Bool("Random", true),
-                Use.Enum("Target", true, AwardEvent.AwardTarget.ActivePlayer),
+                Use.Enum("Target", true, RewardEvent.RewardTarget.ActivePlayer),
                 Use.HiddenByte(),
-                Use.Word("AwardTypeValue", false),
+                Use.Word("RewardTypeValue", false),
                 Use.Word("Value", false)
             )},
             { EventType.ChangeTile, new EventDescription
             (
                 true, true, true, true, false,
-                Use.Byte("X", true, 50),
-                Use.Byte("Y", true, 50),
+                Use.Byte("X", true, 200),
+                Use.Byte("Y", true, 200),
                 Use.HiddenByte(),
                 Use.HiddenByte(),
                 Use.HiddenByte(),
@@ -371,8 +371,8 @@ namespace Ambermoon.Data.Descriptions
             { EventType.Spawn, new EventDescription
             (
                 true, true, true, true, false,
-                Use.Byte("X", true, 50),
-                Use.Byte("Y", true, 50),
+                Use.Byte("X", true, 200),
+                Use.Byte("Y", true, 200),
                 Use.Enum("TravelType", true, TravelType.Horse,
                     TravelType.Horse, TravelType.Raft, TravelType.Ship, TravelType.SandLizard, TravelType.SandShip),
                 Use.HiddenByte(),

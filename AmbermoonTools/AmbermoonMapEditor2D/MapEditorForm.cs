@@ -223,8 +223,8 @@ namespace AmbermoonMapEditor2D
                             break;
 
                         var tile = map.InitialTiles[x, y];
-                        var backgroundTile = tile.BackTileIndex == 0 ? null : tile.BackTileIndex >= tileset.Tiles.Length ? null : tileset.Tiles[tile.BackTileIndex - 1];
-                        var foregroundTile = tile.FrontTileIndex == 0 ? null : tile.FrontTileIndex >= tileset.Tiles.Length ? null :  tileset.Tiles[tile.FrontTileIndex - 1];
+                        var backgroundTile = tile.BackTileIndex == 0 ? null : tile.BackTileIndex > tileset.Tiles.Length ? null : tileset.Tiles[tile.BackTileIndex - 1];
+                        var foregroundTile = tile.FrontTileIndex == 0 ? null : tile.FrontTileIndex > tileset.Tiles.Length ? null :  tileset.Tiles[tile.FrontTileIndex - 1];
                         var rect = new Rectangle(drawX, drawY, tileSize + (tileSize / 16 - 1), tileSize + (tileSize / 16 - 1));
 
                         if (toolStripMenuItemShowBackLayer.Checked && backgroundTile != null)

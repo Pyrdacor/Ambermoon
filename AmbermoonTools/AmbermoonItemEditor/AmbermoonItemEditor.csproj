@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
@@ -14,11 +14,10 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Ambermoon.Data.Legacy" Version="10.5.0" />
+    <PackageReference Include="Ambermoon.Data.Legacy" Version="10.6.8" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\..\..\ambermoon.net\Ambermoon.net\Ambermoon.Data.Legacy\Ambermoon.Data.Legacy.csproj" />
     <ProjectReference Include="..\Ambermoon.Data.Descriptions\Ambermoon.Data.Descriptions.csproj" />
   </ItemGroup>
 
