@@ -1,4 +1,6 @@
-Here you can find all SonicArranger files of the Ambermoon soundtrack.
+# Ambermoon Music
+
+Here you can find all SonicArranger files of the Ambermoon soundtrack which was produced by Matthias Steinwachs.
 
 Files without an extension are the export format which contains the code for the replayer. This is the format used in Ambermoon and can't be opened by SonicArranger.
 
@@ -19,7 +21,7 @@ Some ingame songs also have additional songs stored. Those are alternative versi
 ## Ingame songs
 
 ID | Song name | Ingame usage (example)
---- | --- | --- |---
+--- | --- | ---
 1 | Who Said Hi Ho | Gnome mine
 2 | Mellow Camel Funk | Morag places and sand lizard (riding)
 3 | Close To The Hedge | Dwarfs, forest moon indoor
