@@ -2,22 +2,22 @@ $ErrorActionPreference = 'Stop';
 
 if ($isWindows) {
   Write-Host Publish Windows executables
-  dotnet publish -c $env:CONFIGURATION "./AmbermoonTools/AmbermoonPack/AmbermoonPack.csproj" -p:PublishSingleFile=true -r win-x86 --no-restore --no-self-contained --nologo
-  dotnet publish -c $env:CONFIGURATION "./AmbermoonTools/AmbermoonPack/AmbermoonPack.csproj" -p:PublishSingleFile=true -r win-x64 --no-restore --no-self-contained --nologo
-  dotnet publish -c $env:CONFIGURATION "./AmbermoonTools/AmbermoonMonsterValueChanger/AmbermoonMonsterValueChanger.csproj" -p:PublishSingleFile=true -r win-x86 --no-restore --no-self-contained --nologo
-  dotnet publish -c $env:CONFIGURATION "./AmbermoonTools/AmbermoonMonsterValueChanger/AmbermoonMonsterValueChanger.csproj" -p:PublishSingleFile=true -r win-x64 --no-restore --no-self-contained --nologo
-  dotnet publish -c $env:CONFIGURATION "./AmbermoonTools/AmbermoonTextImport/AmbermoonTextImport.csproj" -p:PublishSingleFile=true -r win-x86 --no-restore --no-self-contained --nologo
-  dotnet publish -c $env:CONFIGURATION "./AmbermoonTools/AmbermoonTextImport/AmbermoonTextImport.csproj" -p:PublishSingleFile=true -r win-x64 --no-restore --no-self-contained --nologo
-  dotnet publish -c $env:CONFIGURATION "./AmbermoonTools/AmbermoonDiskExtract/AmbermoonDiskExtract.csproj" -p:PublishSingleFile=true -r win-x86 --no-restore --no-self-contained --nologo
-  dotnet publish -c $env:CONFIGURATION "./AmbermoonTools/AmbermoonDiskExtract/AmbermoonDiskExtract.csproj" -p:PublishSingleFile=true  -r win-x64 --no-restore --no-self-contained --nologo
-  dotnet publish -c $env:CONFIGURATION "./AmbermoonTools/AmbermoonEventEditor/AmbermoonEventEditor.csproj" -p:PublishSingleFile=true -r win-x86 --no-restore --no-self-contained --nologo
-  dotnet publish -c $env:CONFIGURATION "./AmbermoonTools/AmbermoonEventEditor/AmbermoonEventEditor.csproj" -p:PublishSingleFile=true  -r win-x64 --no-restore --no-self-contained --nologo
-  dotnet publish -c $env:CONFIGURATION "./AmbermoonTools/AmbermoonLabdataEditor/AmbermoonLabdataEditor.csproj" -p:PublishSingleFile=true -r win-x86 --no-restore --no-self-contained --nologo
-  dotnet publish -c $env:CONFIGURATION "./AmbermoonTools/AmbermoonLabdataEditor/AmbermoonLabdataEditor.csproj" -p:PublishSingleFile=true  -r win-x64 --no-restore --no-self-contained --nologo
-  dotnet publish -c $env:CONFIGURATION "./AmbermoonTools/AmbermoonItemEditor/AmbermoonItemEditor.csproj" -p:PublishSingleFile=true -r win-x86 --no-restore --no-self-contained --nologo
-  dotnet publish -c $env:CONFIGURATION "./AmbermoonTools/AmbermoonItemEditor/AmbermoonItemEditor.csproj" -p:PublishSingleFile=true  -r win-x64 --no-restore --no-self-contained --nologo
-  dotnet publish -c $env:CONFIGURATION "./AmbermoonTools/Ambermoon3DMapViewer/Ambermoon3DMapViewer.csproj" -p:PublishSingleFile=true -r win-x86 --no-restore --no-self-contained --nologo
-  dotnet publish -c $env:CONFIGURATION "./AmbermoonTools/Ambermoon3DMapViewer/Ambermoon3DMapViewer.csproj" -p:PublishSingleFile=true  -r win-x64 --no-restore --no-self-contained --nologo
+  dotnet publish -c $env:CONFIGURATION "./AmbermoonTools/AmbermoonPack/AmbermoonPack.csproj" -p:PublishSingleFile=true -p:IncludeAllContentForSelfExtract=true -r win-x86 --no-restore --no-self-contained --nologo
+  dotnet publish -c $env:CONFIGURATION "./AmbermoonTools/AmbermoonPack/AmbermoonPack.csproj" -p:PublishSingleFile=true -p:IncludeAllContentForSelfExtract=true -r win-x64 --no-restore --no-self-contained --nologo
+  dotnet publish -c $env:CONFIGURATION "./AmbermoonTools/AmbermoonMonsterValueChanger/AmbermoonMonsterValueChanger.csproj" -p:PublishSingleFile=true -p:IncludeAllContentForSelfExtract=true -r win-x86 --no-restore --no-self-contained --nologo
+  dotnet publish -c $env:CONFIGURATION "./AmbermoonTools/AmbermoonMonsterValueChanger/AmbermoonMonsterValueChanger.csproj" -p:PublishSingleFile=true -p:IncludeAllContentForSelfExtract=true -r win-x64 --no-restore --no-self-contained --nologo
+  dotnet publish -c $env:CONFIGURATION "./AmbermoonTools/AmbermoonTextImport/AmbermoonTextImport.csproj" -p:PublishSingleFile=true -p:IncludeAllContentForSelfExtract=true -r win-x86 --no-restore --no-self-contained --nologo
+  dotnet publish -c $env:CONFIGURATION "./AmbermoonTools/AmbermoonTextImport/AmbermoonTextImport.csproj" -p:PublishSingleFile=true -p:IncludeAllContentForSelfExtract=true -r win-x64 --no-restore --no-self-contained --nologo
+  dotnet publish -c $env:CONFIGURATION "./AmbermoonTools/AmbermoonDiskExtract/AmbermoonDiskExtract.csproj" -p:PublishSingleFile=true -p:IncludeAllContentForSelfExtract=true -r win-x86 --no-restore --no-self-contained --nologo
+  dotnet publish -c $env:CONFIGURATION "./AmbermoonTools/AmbermoonDiskExtract/AmbermoonDiskExtract.csproj" -p:PublishSingleFile=true -p:IncludeAllContentForSelfExtract=true -r win-x64 --no-restore --no-self-contained --nologo
+  dotnet publish -c $env:CONFIGURATION "./AmbermoonTools/AmbermoonEventEditor/AmbermoonEventEditor.csproj" -p:PublishSingleFile=true -p:IncludeAllContentForSelfExtract=true -r win-x86 --no-restore --no-self-contained --nologo
+  dotnet publish -c $env:CONFIGURATION "./AmbermoonTools/AmbermoonEventEditor/AmbermoonEventEditor.csproj" -p:PublishSingleFile=true -p:IncludeAllContentForSelfExtract=true -r win-x64 --no-restore --no-self-contained --nologo
+  dotnet publish -c $env:CONFIGURATION "./AmbermoonTools/AmbermoonLabdataEditor/AmbermoonLabdataEditor.csproj" -p:PublishSingleFile=true -p:IncludeAllContentForSelfExtract=true -r win-x86 --no-restore --no-self-contained --nologo
+  dotnet publish -c $env:CONFIGURATION "./AmbermoonTools/AmbermoonLabdataEditor/AmbermoonLabdataEditor.csproj" -p:PublishSingleFile=true -p:IncludeAllContentForSelfExtract=true -r win-x64 --no-restore --no-self-contained --nologo
+  dotnet publish -c $env:CONFIGURATION "./AmbermoonTools/AmbermoonItemEditor/AmbermoonItemEditor.csproj" -p:PublishSingleFile=true -p:IncludeAllContentForSelfExtract=true -r win-x86 --no-restore --no-self-contained --nologo
+  dotnet publish -c $env:CONFIGURATION "./AmbermoonTools/AmbermoonItemEditor/AmbermoonItemEditor.csproj" -p:PublishSingleFile=true -p:IncludeAllContentForSelfExtract=true -r win-x64 --no-restore --no-self-contained --nologo
+  dotnet publish -c $env:CONFIGURATION "./AmbermoonTools/Ambermoon3DMapViewer/Ambermoon3DMapViewer.csproj" -p:PublishSingleFile=true -p:IncludeAllContentForSelfExtract=true -r win-x86 --no-restore --no-self-contained --nologo
+  dotnet publish -c $env:CONFIGURATION "./AmbermoonTools/Ambermoon3DMapViewer/Ambermoon3DMapViewer.csproj" -p:PublishSingleFile=true -p:IncludeAllContentForSelfExtract=true -r win-x64 --no-restore --no-self-contained --nologo
   Write-Host Pack zip for Windows
   mkdir dist
   copy "AmbermoonTools\AmbermoonPack\bin\Any CPU\Release\net6.0\win-x64\publish\AmbermoonPack.exe" "dist\"
@@ -28,6 +28,7 @@ if ($isWindows) {
   copy "AmbermoonTools\AmbermoonLabdataEditor\bin\Any CPU\Release\net6.0\win-x64\publish\AmbermoonLabdataEditor.exe" "dist\"
   copy "AmbermoonTools\AmbermoonItemEditor\bin\Any CPU\Release\net6.0\win-x64\publish\AmbermoonItemEditor.exe" "dist\"
   copy "AmbermoonTools\Ambermoon3DMapViewer\bin\Any CPU\Release\net6.0\win-x64\publish\Ambermoon3DMapViewer.exe" "dist\"
+  copy "AmbermoonTools\x64\api-ms-win-core-winrt-l1-1-0.dll" "dist\"
   cd dist
   7z a ..\AmbermoonTools-Windows.zip *.*
   cd ..
@@ -40,20 +41,21 @@ if ($isWindows) {
   copy "AmbermoonTools\AmbermoonLabdataEditor\bin\Any CPU\Release\net6.0\win-x86\publish\AmbermoonLabdataEditor.exe" "dist\"
   copy "AmbermoonTools\AmbermoonItemEditor\bin\Any CPU\Release\net6.0\win-x86\publish\AmbermoonItemEditor.exe" "dist\"
   copy "AmbermoonTools\Ambermoon3DMapViewer\bin\Any CPU\Release\net6.0\win-x86\publish\Ambermoon3DMapViewer.exe" "dist\"
+  copy "AmbermoonTools\x86\api-ms-win-core-winrt-l1-1-0.dll" "dist\"
   cd dist
   7z a ..\AmbermoonTools-Windows32Bit.zip *.*
   cd ..
   rm -r dist
 } else {
   Write-Host Publish Linux executable
-  dotnet publish -c $env:CONFIGURATION "./AmbermoonTools/AmbermoonPack/AmbermoonPack.csproj" -p:PublishSingleFile=true -r linux-x64 --no-restore --no-self-contained --nologo
-  dotnet publish -c $env:CONFIGURATION "./AmbermoonTools/AmbermoonMonsterValueChanger/AmbermoonMonsterValueChanger.csproj" -p:PublishSingleFile=true -r linux-x64 --no-restore --no-self-contained --nologo
-  dotnet publish -c $env:CONFIGURATION "./AmbermoonTools/AmbermoonTextImport/AmbermoonTextImport.csproj" -p:PublishSingleFile=true -r linux-x64 --no-restore --no-self-contained --nologo
-  dotnet publish -c $env:CONFIGURATION "./AmbermoonTools/AmbermoonDiskExtract/AmbermoonDiskExtract.csproj" -p:PublishSingleFile=true -r linux-x64 --no-restore --no-self-contained --nologo
-  dotnet publish -c $env:CONFIGURATION "./AmbermoonTools/AmbermoonEventEditor/AmbermoonEventEditor.csproj" -p:PublishSingleFile=true -r linux-x64 --no-restore --no-self-contained --nologo
-  dotnet publish -c $env:CONFIGURATION "./AmbermoonTools/AmbermoonLabdataEditor/AmbermoonLabdataEditor.csproj" -p:PublishSingleFile=true -r linux-x64 --no-restore --no-self-contained --nologo
-  dotnet publish -c $env:CONFIGURATION "./AmbermoonTools/AmbermoonItemEditor/AmbermoonItemEditor.csproj" -p:PublishSingleFile=true -r linux-x64 --no-restore --no-self-contained --nologo
-  dotnet publish -c $env:CONFIGURATION "./AmbermoonTools/Ambermoon3DMapViewer/Ambermoon3DMapViewer.csproj" -p:PublishSingleFile=true -r linux-x64 --no-restore --no-self-contained --nologo
+  dotnet publish -c $env:CONFIGURATION "./AmbermoonTools/AmbermoonPack/AmbermoonPack.csproj" -p:PublishSingleFile=true -p:IncludeAllContentForSelfExtract=true -r linux-x64 --no-restore --no-self-contained --nologo
+  dotnet publish -c $env:CONFIGURATION "./AmbermoonTools/AmbermoonMonsterValueChanger/AmbermoonMonsterValueChanger.csproj" -p:PublishSingleFile=true -p:IncludeAllContentForSelfExtract=true -r linux-x64 --no-restore --no-self-contained --nologo
+  dotnet publish -c $env:CONFIGURATION "./AmbermoonTools/AmbermoonTextImport/AmbermoonTextImport.csproj" -p:PublishSingleFile=true -p:IncludeAllContentForSelfExtract=true -r linux-x64 --no-restore --no-self-contained --nologo
+  dotnet publish -c $env:CONFIGURATION "./AmbermoonTools/AmbermoonDiskExtract/AmbermoonDiskExtract.csproj" -p:PublishSingleFile=true -p:IncludeAllContentForSelfExtract=true -r linux-x64 --no-restore --no-self-contained --nologo
+  dotnet publish -c $env:CONFIGURATION "./AmbermoonTools/AmbermoonEventEditor/AmbermoonEventEditor.csproj" -p:PublishSingleFile=true -p:IncludeAllContentForSelfExtract=true -r linux-x64 --no-restore --no-self-contained --nologo
+  dotnet publish -c $env:CONFIGURATION "./AmbermoonTools/AmbermoonLabdataEditor/AmbermoonLabdataEditor.csproj" -p:PublishSingleFile=true -p:IncludeAllContentForSelfExtract=true -r linux-x64 --no-restore --no-self-contained --nologo
+  dotnet publish -c $env:CONFIGURATION "./AmbermoonTools/AmbermoonItemEditor/AmbermoonItemEditor.csproj" -p:PublishSingleFile=true -p:IncludeAllContentForSelfExtract=true -r linux-x64 --no-restore --no-self-contained --nologo
+  dotnet publish -c $env:CONFIGURATION "./AmbermoonTools/Ambermoon3DMapViewer/Ambermoon3DMapViewer.csproj" -p:PublishSingleFile=true -p:IncludeAllContentForSelfExtract=true -r linux-x64 --no-restore --no-self-contained --nologo
   Write-Host Pack tar.gz for Linux
   7z a AmbermoonTools-Linux.tar "./AmbermoonTools/AmbermoonPack/bin/Any CPU/ReleaseLinux/net6.0/linux-x64/publish/AmbermoonPack"
   7z a AmbermoonTools-Linux.tar "./AmbermoonTools/AmbermoonMonsterValueChanger/bin/Any CPU/ReleaseLinux/net6.0/linux-x64/publish/AmbermoonMonsterValueChanger"
