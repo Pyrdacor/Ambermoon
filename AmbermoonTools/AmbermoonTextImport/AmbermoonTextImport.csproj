@@ -10,12 +10,12 @@
     <Authors>Robert Schneckenhaus</Authors>
     <Description>Command line tool to export and import texts from/into legacy Ambermoon game data.</Description>
     <RuntimeIdentifiers>win-x64;win-x86;linux-x64</RuntimeIdentifiers>
-    <Version>1.0.11</Version>
+    <Version>1.0.12</Version>
     <Configurations>Debug;Release;ReleaseLinux</Configurations>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Ambermoon.Data.Legacy" Version="10.6.8" />
+    <PackageReference Include="Ambermoon.Data.Legacy" Version="10.6.9" />
   </ItemGroup>
 
 </Project>

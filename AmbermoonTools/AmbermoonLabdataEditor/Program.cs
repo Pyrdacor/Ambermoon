@@ -29,6 +29,16 @@ Dictionary<ObjectFlags, string> AllObjectFlags = new()
     { ObjectFlags.AllowMovementMonster, "Allow Monster Move" }
 };
 
+if (args.Length != 2)
+{
+    Console.WriteLine("Usage: AmbermoonLabdataEditor <labdataFilePath> <gameDataPath>");
+    Console.WriteLine();
+    Console.WriteLine("labdataFilePath: Path to the extracted single labdata file.");
+    Console.WriteLine("gameDataPath:    Path to Ambermoon data (Amberfiles folder).");
+    Console.WriteLine();
+    return;
+}
+
 var gameData = new GameData(GameData.LoadPreference.PreferExtracted, null, false);
 gameData.Load(args[1]);
 
@@ -170,8 +180,8 @@ void PrintWalls(bool brief)
     {
         if (i != 0 && i % 10 == 0)
         {
-            Console.WriteLine("Press key to continue");
-            Console.ReadKey();
+            Console.WriteLine("Press return to continue");
+            Console.ReadLine();
         }
 
         var wall = labdata.Walls[i];
@@ -215,8 +225,8 @@ void PrintObjects(bool brief)
     {
         if (i != 0 && i % 10 == 0)
         {
-            Console.WriteLine("Press key to continue");
-            Console.ReadKey();
+            Console.WriteLine("Press return to continue");
+            Console.ReadLine();
         }
 
         var obj = labdata.Objects[i];
@@ -260,8 +270,8 @@ void PrintObjectInfos(bool brief)
     {
         if (i != 0 && i % 10 == 0)
         {
-            Console.WriteLine("Press key to continue");
-            Console.ReadKey();
+            Console.WriteLine("Press return to continue");
+            Console.ReadLine();
         }
 
         var objectInfo = labdata.ObjectInfos[i];

@@ -21,7 +21,7 @@
     <TrimmableAssembly Include="Avalonia.Themes.Default" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Ambermoon.Data.Legacy" Version="10.6.8" />
+    <PackageReference Include="Ambermoon.Data.Legacy" Version="10.6.9" />
     <PackageReference Include="AutoMapper" Version="11.0.1" />
     <PackageReference Include="Avalonia" Version="0.10.14" />
     <PackageReference Include="Avalonia.Desktop" Version="0.10.14" />

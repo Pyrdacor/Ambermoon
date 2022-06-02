@@ -7,19 +7,18 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Reflection;
 
-namespace AmbermoonMonsterValueChanger
+namespace AmbermoonMonsterEditor
 {
     class Program
     {
         static void Usage()
         {
-            Console.WriteLine("USAGE: AmbermoonMonsterValueChanger --list");
-            Console.WriteLine("       AmbermoonMonsterValueChanger <monsterIdOrName> <offset> <size>");
-            Console.WriteLine("       AmbermoonMonsterValueChanger <monsterIdOrName> <offset> <size> <value>");
-            Console.WriteLine("       AmbermoonMonsterValueChanger --all <offset> <size>");
-            Console.WriteLine("       AmbermoonMonsterValueChanger --all-not-0 <offset> <size>");
+            Console.WriteLine("USAGE: AmbermoonMonsterEditor --list");
+            Console.WriteLine("       AmbermoonMonsterEditor <monsterIdOrName> <offset> <size>");
+            Console.WriteLine("       AmbermoonMonsterEditor <monsterIdOrName> <offset> <size> <value>");
+            Console.WriteLine("       AmbermoonMonsterEditor --all <offset> <size>");
+            Console.WriteLine("       AmbermoonMonsterEditor --all-not-0 <offset> <size>");
             Console.WriteLine();
             Console.WriteLine("1st version shows all monsters with their id and name.");
             Console.WriteLine("2nd version shows a value at the given offset with a given size.");

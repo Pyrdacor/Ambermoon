@@ -1,0 +1,9 @@
+dotnet publish -c Release "./AmbermoonEventEditor/AmbermoonEventEditor.csproj" -p:PublishSingleFile=true -p:IncludeAllContentForSelfExtract=true -r win-x64 --no-restore --self-contained --nologo
+dotnet publish -c Release "./AmbermoonItemEditor/AmbermoonItemEditor.csproj" -p:PublishSingleFile=true -p:IncludeAllContentForSelfExtract=true -r win-x64 --no-restore --self-contained --nologo
+dotnet publish -c Release "./AmbermoonLabdataEditor/AmbermoonLabdataEditor.csproj" -p:PublishSingleFile=true -p:IncludeAllContentForSelfExtract=true -r win-x64 --no-restore --self-contained --nologo
+dotnet publish -c Release "./AmbermoonMonsterEditor/AmbermoonMonsterEditor.csproj" -p:PublishSingleFile=true -p:IncludeAllContentForSelfExtract=true -r win-x64 --no-restore --self-contained --nologo
+dotnet publish -c Release "./AmbermoonTextImport/AmbermoonTextImport.csproj" -p:PublishSingleFile=true -p:IncludeAllContentForSelfExtract=true -r win-x64 --no-restore --self-contained --nologo
+dotnet publish -c Release "./AmbermoonPack/AmbermoonPack.csproj" -p:PublishSingleFile=true -p:IncludeAllContentForSelfExtract=true -r win-x64 --no-restore --self-contained --nologo
+dotnet publish -c Release "./AmbermoonMapEditor2D/AmbermoonMapEditor2D.csproj" -p:PublishSingleFile=true -p:IncludeAllContentForSelfExtract=true -r win-x64 --no-restore --self-contained --nologo
+dotnet publish -c Release "./AmbermoonDiskExtract/AmbermoonDiskExtract.csproj" -p:PublishSingleFile=true -p:IncludeAllContentForSelfExtract=true -r win-x64 --no-restore --self-contained --nologo
+dotnet publish -c Release "./Ambermoon3DMapViewer/Ambermoon3DMapViewer.csproj" -p:PublishSingleFile=true -p:IncludeAllContentForSelfExtract=true -r win-x64 --no-restore --self-contained --nologo
