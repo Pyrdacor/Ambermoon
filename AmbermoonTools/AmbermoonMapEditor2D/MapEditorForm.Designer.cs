@@ -123,6 +123,7 @@ namespace AmbermoonMapEditor2D
             this.buttonToggleEvents = new System.Windows.Forms.Button();
             this.timerAnimation = new System.Windows.Forms.Timer(this.components);
             this.trackBarZoom = new System.Windows.Forms.TrackBar();
+            this.buttonToolEventChanger = new System.Windows.Forms.Button();
             this.menuStrip.SuspendLayout();
             this.groupBoxTileset.SuspendLayout();
             this.groupBoxProperties.SuspendLayout();
@@ -147,7 +148,6 @@ namespace AmbermoonMapEditor2D
             this.panelMap.TabIndex = 0;
             this.panelMap.Scroll += new System.Windows.Forms.ScrollEventHandler(this.panelMap_Scroll);
             this.panelMap.Paint += new System.Windows.Forms.PaintEventHandler(this.panelMap_Paint);
-            this.panelMap.MouseDoubleClick += new System.Windows.Forms.MouseEventHandler(this.panelMap_MouseDoubleClick);
             this.panelMap.MouseDown += new System.Windows.Forms.MouseEventHandler(this.panelMap_MouseDown);
             this.panelMap.MouseLeave += new System.EventHandler(this.panelMap_MouseLeave);
             this.panelMap.MouseMove += new System.Windows.Forms.MouseEventHandler(this.panelMap_MouseMove);
@@ -702,7 +702,7 @@ namespace AmbermoonMapEditor2D
             // buttonToolLayers
             // 
             this.buttonToolLayers.Image = global::AmbermoonMapEditor2D.Properties.Resources.round_layers_black_24;
-            this.buttonToolLayers.Location = new System.Drawing.Point(773, 229);
+            this.buttonToolLayers.Location = new System.Drawing.Point(773, 264);
             this.buttonToolLayers.Name = "buttonToolLayers";
             this.buttonToolLayers.Size = new System.Drawing.Size(32, 32);
             this.buttonToolLayers.TabIndex = 7;
@@ -869,7 +869,7 @@ namespace AmbermoonMapEditor2D
             // 
             this.buttonToggleGrid.ForeColor = System.Drawing.SystemColors.ControlText;
             this.buttonToggleGrid.Image = global::AmbermoonMapEditor2D.Properties.Resources.round_grid_off_black_24;
-            this.buttonToggleGrid.Location = new System.Drawing.Point(773, 267);
+            this.buttonToggleGrid.Location = new System.Drawing.Point(773, 302);
             this.buttonToggleGrid.Name = "buttonToggleGrid";
             this.buttonToggleGrid.Size = new System.Drawing.Size(32, 32);
             this.buttonToggleGrid.TabIndex = 11;
@@ -880,7 +880,7 @@ namespace AmbermoonMapEditor2D
             // 
             this.buttonToggleTileMarker.ForeColor = System.Drawing.SystemColors.ControlText;
             this.buttonToggleTileMarker.Image = global::AmbermoonMapEditor2D.Properties.Resources.round_select_all_black_24;
-            this.buttonToggleTileMarker.Location = new System.Drawing.Point(773, 305);
+            this.buttonToggleTileMarker.Location = new System.Drawing.Point(773, 340);
             this.buttonToggleTileMarker.Name = "buttonToggleTileMarker";
             this.buttonToggleTileMarker.Size = new System.Drawing.Size(32, 32);
             this.buttonToggleTileMarker.TabIndex = 12;
@@ -890,7 +890,7 @@ namespace AmbermoonMapEditor2D
             // labelDivider
             // 
             this.labelDivider.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
-            this.labelDivider.Location = new System.Drawing.Point(773, 220);
+            this.labelDivider.Location = new System.Drawing.Point(773, 255);
             this.labelDivider.Name = "labelDivider";
             this.labelDivider.Size = new System.Drawing.Size(32, 2);
             this.labelDivider.TabIndex = 13;
@@ -923,7 +923,6 @@ namespace AmbermoonMapEditor2D
             this.listViewEvents.FullRowSelect = true;
             this.listViewEvents.GridLines = true;
             this.listViewEvents.HeaderStyle = System.Windows.Forms.ColumnHeaderStyle.Nonclickable;
-            this.listViewEvents.HideSelection = false;
             this.listViewEvents.Location = new System.Drawing.Point(6, 22);
             this.listViewEvents.Name = "listViewEvents";
             this.listViewEvents.Size = new System.Drawing.Size(326, 125);
@@ -945,7 +944,7 @@ namespace AmbermoonMapEditor2D
             // 
             this.buttonToggleEvents.ForeColor = System.Drawing.SystemColors.ControlText;
             this.buttonToggleEvents.Image = global::AmbermoonMapEditor2D.Properties.Resources.round_vpn_key_black_24_off;
-            this.buttonToggleEvents.Location = new System.Drawing.Point(773, 343);
+            this.buttonToggleEvents.Location = new System.Drawing.Point(773, 378);
             this.buttonToggleEvents.Name = "buttonToggleEvents";
             this.buttonToggleEvents.Size = new System.Drawing.Size(32, 32);
             this.buttonToggleEvents.TabIndex = 16;
@@ -961,7 +960,7 @@ namespace AmbermoonMapEditor2D
             // 
             this.trackBarZoom.AutoSize = false;
             this.trackBarZoom.LargeChange = 1;
-            this.trackBarZoom.Location = new System.Drawing.Point(779, 376);
+            this.trackBarZoom.Location = new System.Drawing.Point(779, 411);
             this.trackBarZoom.Maximum = 4;
             this.trackBarZoom.Minimum = 1;
             this.trackBarZoom.Name = "trackBarZoom";
@@ -972,11 +971,22 @@ namespace AmbermoonMapEditor2D
             this.trackBarZoom.Value = 4;
             this.trackBarZoom.Scroll += new System.EventHandler(this.trackBarZoom_Scroll);
             // 
+            // buttonToolEventChanger
+            // 
+            this.buttonToolEventChanger.Image = global::AmbermoonMapEditor2D.Properties.Resources.baseline_grade_black_24dp;
+            this.buttonToolEventChanger.Location = new System.Drawing.Point(773, 216);
+            this.buttonToolEventChanger.Name = "buttonToolEventChanger";
+            this.buttonToolEventChanger.Size = new System.Drawing.Size(32, 32);
+            this.buttonToolEventChanger.TabIndex = 18;
+            this.buttonToolEventChanger.UseVisualStyleBackColor = true;
+            this.buttonToolEventChanger.Click += new System.EventHandler(this.buttonToolEventChanger_Click);
+            // 
             // MapEditorForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1152, 712);
+            this.Controls.Add(this.buttonToolEventChanger);
             this.Controls.Add(this.buttonToggleEvents);
             this.Controls.Add(this.groupBoxEvents);
             this.Controls.Add(this.buttonToolRemoveFrontLayer);
@@ -1119,6 +1129,7 @@ namespace AmbermoonMapEditor2D
         private System.Windows.Forms.Timer timerAnimation;
         private System.Windows.Forms.Button buttonExportTileset;
         private System.Windows.Forms.TrackBar trackBarZoom;
+        private System.Windows.Forms.Button buttonToolEventChanger;
     }
 }
 

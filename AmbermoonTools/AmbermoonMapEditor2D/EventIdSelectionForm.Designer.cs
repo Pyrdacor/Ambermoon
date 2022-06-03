@@ -38,7 +38,7 @@ namespace AmbermoonMapEditor2D
             this.comboBoxEvents.FormattingEnabled = true;
             this.comboBoxEvents.Location = new System.Drawing.Point(12, 12);
             this.comboBoxEvents.Name = "comboBoxEvents";
-            this.comboBoxEvents.Size = new System.Drawing.Size(267, 23);
+            this.comboBoxEvents.Size = new System.Drawing.Size(457, 23);
             this.comboBoxEvents.TabIndex = 0;
             this.comboBoxEvents.SelectedIndexChanged += new System.EventHandler(this.comboBoxEvents_SelectedIndexChanged);
             // 
@@ -46,7 +46,7 @@ namespace AmbermoonMapEditor2D
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(291, 49);
+            this.ClientSize = new System.Drawing.Size(481, 49);
             this.Controls.Add(this.comboBoxEvents);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedToolWindow;
             this.MaximizeBox = false;

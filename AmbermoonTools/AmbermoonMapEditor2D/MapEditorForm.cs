@@ -458,6 +458,14 @@ namespace AmbermoonMapEditor2D
             SelectTool(Tool.Brush);
         }
 
+        private void buttonToolEventChanger_Click(object sender, EventArgs e)
+        {
+            SelectTool(Tool.EventChanger);
+
+            if (!showEvents)
+                ToggleEvents();
+        }
+
         private void buttonToolBlocks_Click(object sender, EventArgs e)
         {
             SelectTool(blocksTool);
@@ -810,36 +818,16 @@ namespace AmbermoonMapEditor2D
             MapSizeChanged();
         }
 
-        private void buttonToggleEvents_Click(object sender, EventArgs e)
+        void ToggleEvents()
         {
             showEvents = !showEvents;
             buttonToggleEvents.Image = showEvents ? Properties.Resources.round_vpn_key_black_24 : Properties.Resources.round_vpn_key_black_24_off;
             panelMap.Refresh();
         }
 
-        private void panelMap_MouseDoubleClick(object sender, MouseEventArgs e)
+        private void buttonToggleEvents_Click(object sender, EventArgs e)
         {
-            int tileSize = (trackBarZoom.Maximum - trackBarZoom.Value + 1) * 16;
-            int hoveredColumn = (e.X - panelMap.AutoScrollPosition.X % tileSize) / tileSize;
-            int hoveredRow = (e.Y - panelMap.AutoScrollPosition.Y % tileSize) / tileSize;
-            int scrolledXTile = -panelMap.AutoScrollPosition.X / tileSize;
-            int scrolledYTile = -panelMap.AutoScrollPosition.Y / tileSize;
-
-            int x = scrolledXTile + hoveredColumn;
-            int y = scrolledYTile + hoveredRow;
-
-            var eventIdSelector = new EventIdSelectionForm(map, map.InitialTiles[x, y].MapEventId);
-
-            if (eventIdSelector.ShowDialog() == DialogResult.OK)
-            {
-                uint newId = eventIdSelector.EventId;
-
-                if (map.InitialTiles[x, y].MapEventId != newId)
-                {
-                    map.InitialTiles[x, y].MapEventId = newId;
-                    panelMap.Refresh();
-                }
-            }
+            ToggleEvents();
         }
 
         private void checkBoxTravelGraphics_CheckedChanged(object sender, EventArgs e)

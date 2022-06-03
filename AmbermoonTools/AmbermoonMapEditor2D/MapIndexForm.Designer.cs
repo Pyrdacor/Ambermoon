@@ -83,7 +83,6 @@ namespace AmbermoonMapEditor2D
             // 
             // comboBoxMapIndices
             // 
-            this.comboBoxMapIndices.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.comboBoxMapIndices.FormattingEnabled = true;
             this.comboBoxMapIndices.Location = new System.Drawing.Point(84, 30);
             this.comboBoxMapIndices.Name = "comboBoxMapIndices";

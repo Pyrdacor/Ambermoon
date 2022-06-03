@@ -26,7 +26,8 @@ namespace AmbermoonMapEditor2D
             Blocks3x3,
             Fill,
             ColorPicker,
-            RemoveFrontLayer
+            RemoveFrontLayer,
+            EventChanger
         }
 
         static readonly string[] LayerName = new string[2]
@@ -104,6 +105,7 @@ namespace AmbermoonMapEditor2D
             toolTipFill.SetToolTip(buttonToolFill, "Fills all tiles of the same type with a tile from the tileset.\r\n\r\nUse with right click to limit it to an enclosed area.");
             toolTipColorPicker.SetToolTip(buttonToolColorPicker, "Selects a map tile inside the tileset and locks it in for further drawing.\r\n\r\nUse with right click to pick from the non-selected layer instead.");
             toolTipColorPicker.SetToolTip(buttonToolRemoveFrontLayer, "Removes the front layer tile.");
+            toolTipColorPicker.SetToolTip(buttonToolEventChanger, "Changes the event on a tile.\r\n\r\nUse with right click to remove the event.");
             toolTipLayers.SetToolTip(buttonToolLayers, "Opens the layers context menu where you can choose which layer to draw to and which layers to show.");
             toolTipGrid.SetToolTip(buttonToggleGrid, "Toggles the tile grid overlay.");
             toolTipTileMarker.SetToolTip(buttonToggleTileMarker, "Toggles the tile selection marker.");
@@ -392,6 +394,8 @@ namespace AmbermoonMapEditor2D
                     return buttonToolColorPicker;
                 case Tool.RemoveFrontLayer:
                     return buttonToolRemoveFrontLayer;
+                case Tool.EventChanger:
+                    return buttonToolEventChanger;
                 default:
                     return null;
             }
@@ -402,6 +406,7 @@ namespace AmbermoonMapEditor2D
             switch (tool)
             {
                 case Tool.Brush:
+                case Tool.EventChanger:
                     return cursorPointer;
                 case Tool.Blocks2x2:
                 case Tool.Blocks3x2:
@@ -435,6 +440,8 @@ namespace AmbermoonMapEditor2D
                     return 1;
                 case Tool.RemoveFrontLayer:
                     return 1;
+                case Tool.EventChanger:
+                    return 1;
                 default:
                     return 0;
             }
@@ -456,6 +463,8 @@ namespace AmbermoonMapEditor2D
                 case Tool.ColorPicker:
                     return 1;
                 case Tool.RemoveFrontLayer:
+                    return 1;
+                case Tool.EventChanger:
                     return 1;
                 default:
                     return 0;
@@ -525,7 +534,41 @@ namespace AmbermoonMapEditor2D
                 case Tool.RemoveFrontLayer:
                     RemoveFrontTile(x, y);
                     break;
+                case Tool.EventChanger:
+                    ChangeEvent(x, y, secondaryFunction);
+                    break;
             }
+        }
+
+        void ChangeEvent(int x, int y, bool remove)
+        {
+            if (remove)
+            {
+                if (map.InitialTiles[x, y].MapEventId != 0)
+                {
+                    map.InitialTiles[x, y].MapEventId = 0;
+
+                    if (showEvents)
+                        panelMap.Refresh();
+                }
+            }
+            else
+            {
+                var eventIdSelector = new EventIdSelectionForm(map, map.InitialTiles[x, y].MapEventId);
+
+                if (eventIdSelector.ShowDialog() == DialogResult.OK)
+                {
+                    uint newId = eventIdSelector.EventId;
+
+                    if (map.InitialTiles[x, y].MapEventId != newId)
+                    {
+                        map.InitialTiles[x, y].MapEventId = newId;
+
+                        if (showEvents)
+                            panelMap.Refresh();
+                    }
+                }
+            }            
         }
 
         void PerformAction(string displayName, string undoDisplayName, Action<bool> doAction, Action undoAction)
