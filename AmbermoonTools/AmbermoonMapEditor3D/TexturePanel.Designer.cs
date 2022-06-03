@@ -50,7 +50,7 @@
             this.tabPageWalls.Location = new System.Drawing.Point(4, 24);
             this.tabPageWalls.Name = "tabPageWalls";
             this.tabPageWalls.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPageWalls.Size = new System.Drawing.Size(732, 122);
+            this.tabPageWalls.Size = new System.Drawing.Size(732, 86);
             this.tabPageWalls.TabIndex = 0;
             this.tabPageWalls.Text = "Walls";
             this.tabPageWalls.UseVisualStyleBackColor = true;
@@ -60,7 +60,7 @@
             this.tabPageObjects.Location = new System.Drawing.Point(4, 24);
             this.tabPageObjects.Name = "tabPageObjects";
             this.tabPageObjects.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPageObjects.Size = new System.Drawing.Size(732, 122);
+            this.tabPageObjects.Size = new System.Drawing.Size(732, 86);
             this.tabPageObjects.TabIndex = 1;
             this.tabPageObjects.Text = "Objects";
             this.tabPageObjects.UseVisualStyleBackColor = true;
