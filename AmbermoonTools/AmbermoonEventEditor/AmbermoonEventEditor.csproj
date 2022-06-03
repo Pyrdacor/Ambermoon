@@ -6,7 +6,7 @@
     <Authors>Robert Schneckenhaus</Authors>
     <Description>Command line tool to edit map or NPC events.</Description>
     <RuntimeIdentifiers>win-x64;win-x86;linux-x64</RuntimeIdentifiers>
-    <Version>1.0.12</Version>
+    <Version>1.0.13</Version>
     <PackageProjectUrl>https://github.com/Pyrdacor/Ambermoon</PackageProjectUrl>
     <RepositoryUrl>https://github.com/Pyrdacor/Ambermoon</RepositoryUrl>
     <RepositoryType>Github</RepositoryType>
@@ -16,7 +16,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Ambermoon.Data.Legacy" Version="10.6.9" />
+    <PackageReference Include="Ambermoon.Data.Legacy" Version="10.6.10" />
   </ItemGroup>
 
   <ItemGroup>

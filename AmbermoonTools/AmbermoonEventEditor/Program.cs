@@ -293,6 +293,12 @@ namespace AmbermoonEventEditor
                 case "remove":
                     RemoveEvent(eventList, events);
                     break;
+                case "copy":
+                    CopyEvent(eventList, events);
+                    break;
+                case "copychain":
+                    CopyEventChain(eventList, events);
+                    break;
                 case "connect":
                     ConnectEvent(eventList, events);
                     break;
@@ -546,6 +552,122 @@ namespace AmbermoonEventEditor
             }
 
             events.Remove(@event);
+
+            unsavedChanges = true;
+        }
+
+        static void CopyEvent(List<Event> eventList, List<Event> events)
+        {
+            ListEvents(events);
+            Console.WriteLine();
+            Console.Write("Which event to copy: ");
+            var index = ReadInt(true);
+
+            if (index == null || index < 0 || index >= events.Count)
+            {
+                Console.WriteLine("Invalid event index");
+                Console.WriteLine();
+                return;
+            }
+
+            var @event = events[index.Value];
+            bool keepNext = false;
+
+            if (@event.Next != null)
+            {
+                Console.WriteLine();
+                Console.WriteLine("You want to create a connection to the original successor?");
+                var option = ReadOption(0, "No, thanks", "Yes, please") ?? 0;
+
+                if (option == 1)
+                    keepNext = true;
+            }
+
+            var clone = @event.Clone(keepNext);
+
+            events.Add(clone);
+
+            int listIndex = eventList.IndexOf(@event);
+
+            if (listIndex != -1)
+            {
+                Console.WriteLine();
+                Console.WriteLine("The event is the start of an event chain.");
+                Console.WriteLine("Do you want to create a new event chain for the copied event?");
+                var option = ReadOption(0, "No, thanks", "Yes, please") ?? 0;
+
+                if (option == 1)
+                    eventList.Add(clone);
+            }
+
+            Console.WriteLine();
+            Console.WriteLine("Event successfully created.");
+            Console.WriteLine();
+
+            unsavedChanges = true;
+        }
+
+        static void CopyEventChain(List<Event> eventList, List<Event> events)
+        {
+            ListEvents(eventList, 1);
+            Console.WriteLine();
+            Console.Write("Which event chain to copy: ");
+            var index = ReadInt(true);
+
+            if (index == null || index <= 0 || index > eventList.Count)
+            {
+                Console.WriteLine("Invalid event chain index");
+                Console.WriteLine();
+                return;
+            }
+
+            Console.WriteLine();
+            Console.WriteLine("You want to copy the whole chain or only some part of it?");
+            var option = ReadOption(0, "Whole chain", "Only a part (cut off the rest)", "Only a part (keep the rest from original)");
+            int? copyCount = null;
+
+            if (option != 0)
+            {
+                ShowChain(eventList, events, index.Value - 1);
+                Console.WriteLine();
+
+                Console.Write("Copy count: ");
+                copyCount = ReadInt();
+
+                if (copyCount == null || copyCount < 1)
+                {
+                    Console.WriteLine("Aborting");
+                    Console.WriteLine();
+                    return;
+                }
+            }
+
+            var @event = eventList[index.Value - 1];
+            var clone = @event.Clone(false);
+            @event = @event.Next;
+
+            eventList.Add(clone);
+            events.Add(clone);
+
+            int numCopies = 1;
+
+            while (@event != null && (copyCount == null || numCopies < copyCount))
+            {
+                var parent = clone;
+                clone = @event.Clone(false);
+                @event = @event.Next;
+
+                parent.Next = clone;
+                events.Add(clone);
+                ++numCopies;
+            }
+
+            if (option == 2)
+                clone.Next = @event;
+
+            Console.WriteLine();
+            Console.WriteLine("Chain successfully created.");
+            Console.WriteLine();
 
             unsavedChanges = true;
         }
@@ -1219,6 +1341,24 @@ namespace AmbermoonEventEditor
                     Console.WriteLine("To (re-)connect events use the commands");
                     Console.WriteLine("'connect' or 'disconnect' instead.");
                     break;
+                case "remove":
+                    Console.WriteLine("Removes an existing event.");
+                    Console.WriteLine("You can change how the remaining");
+                    Console.WriteLine("connections are handled.");
+                    break;
+                case "copy":
+                    Console.WriteLine("Adds a duplicate of the given");
+                    Console.WriteLine("event to the end of the events.");
+                    Console.WriteLine("The copy has no connections.");
+                    break;
+                case "copychain":
+                    Console.WriteLine("Adds a duplicate of the given");
+                    Console.WriteLine("event chain to the end of the event");
+                    Console.WriteLine("chains. References to other events");
+                    Console.WriteLine("that are not given by the Next property");
+                    Console.WriteLine("will be preserved (like negative condition");
+                    Console.WriteLine("event indices and so on).");
+                    break;
                 case "connect":
                     Console.WriteLine("Connects existing events.");
                     break;
@@ -1242,6 +1382,8 @@ namespace AmbermoonEventEditor
                     Console.WriteLine("add         -> Adds a new event to the end of the list");
                     Console.WriteLine("remove      -> Removes an event by its index");
                     Console.WriteLine("edit        -> Edits an existing event");
+                    Console.WriteLine("copy        -> Copies an existing event");
+                    Console.WriteLine("copychain   -> Copies an existing event chain");
                     Console.WriteLine("connect     -> Connects an existing event");
                     Console.WriteLine("disconnect  -> Disconnects an existing event");
                     Console.WriteLine("connections -> Shows the connections of an event");
