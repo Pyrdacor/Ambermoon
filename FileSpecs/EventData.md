@@ -510,11 +510,12 @@ There is a byte that is always 0xff. I guessed that this might be the volume. Bu
 Offset | Type | Description
 --- | --- | ---
 0x00 | ubyte | Event type (= 0x14)
-0x01 | ubyte | **Unknown**
-0x02 | ubyte | Music index (0x00ff = default map music)
+0x01 | ubyte | Sync flag
+0x02 | ubyte | Music index (0x00 = default map music)
 0x03 | ubyte | Volume (always 0xff -> 100%, not sure about this)
 0x04 | ubyte[6] | Unused
 
+**Note**: If the sync flag is set (value is not 0), all pending bus cycles are awaited which effectivly syncs the pipelines. In original code this results just in a NOP instruction on the Amiga. The rest of the data is just ignored then. Maybe this was reserved for some future functionality.
 
 ## Exit event (0x15 / 21)
 
