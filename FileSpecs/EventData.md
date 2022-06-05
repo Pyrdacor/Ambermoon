@@ -511,11 +511,13 @@ Offset | Type | Description
 --- | --- | ---
 0x00 | ubyte | Event type (= 0x14)
 0x01 | ubyte | Sync flag
-0x02 | ubyte | Music index (0x00 = default map music)
-0x03 | ubyte | Volume (always 0xff -> 100%, not sure about this)
+0x02 | ubyte | Music index (0x00 = stop, 0xff = default map music or last song, 1-32 are valid song indices)
+0x03 | ubyte | Volume (always 0xff -> 100%, not used in original)
 0x04 | ubyte[6] | Unused
 
 **Note**: If the sync flag is set (value is not 0), all pending bus cycles are awaited which effectivly syncs the pipelines. In original code this results just in a NOP instruction on the Amiga. The rest of the data is just ignored then. Maybe this was reserved for some future functionality.
+
+**Note**: The volume value is not used in original Ambermoon code. It isn't even read. But I guess this was planned as a volume value.
 
 ## Exit event (0x15 / 21)
 
