@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 
 namespace Ambermoon.Data.Descriptions
 {
@@ -7,6 +6,22 @@ namespace Ambermoon.Data.Descriptions
     internal static class Use
     {
         public static ValueDescription EventIndex(string name, bool required) => new EventIndexDescription(name, required);
+
+        public static ValueDescription Conditional<TEvent>(Func<ValueDescription> provider, Func<TEvent, bool> condition) where TEvent : Event
+        {
+            var description = provider();
+
+            bool CheckCondition(EventDescription eventDescription, Event @event)
+            {
+                if (!(@event is TEvent specificEvent))
+                    return false;
+
+                return condition?.Invoke(specificEvent) ?? true;
+            }
+
+            description.Condition = CheckCondition;
+            return description;
+        }
 
         public static ValueDescription Byte(string name, bool required, byte maxValue = 255, byte minValue = 0, byte defaultValue = 0, bool showAsHex = false) => new ValueDescription
         {

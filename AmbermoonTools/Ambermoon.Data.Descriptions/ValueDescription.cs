@@ -34,6 +34,7 @@ namespace Ambermoon.Data.Descriptions
         public ushort MaxValue { get; set; }
         public int FlagDescriptionOffset { get; set; } = 0;
         public string[] FlagDescriptions { get; set; } = null;
+        public Func<EventDescription, Event, bool> Condition { get; set; } = null;
         public virtual string GetPossibleValues()
         {
             switch (Type)

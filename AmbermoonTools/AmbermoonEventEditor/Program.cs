@@ -328,10 +328,19 @@ namespace AmbermoonEventEditor
 
         static int? ReadInt(bool hex = false)
         {
-            if (hex)
-                return int.TryParse(Console.ReadLine(), NumberStyles.AllowHexSpecifier, null, out int hexValue) ? hexValue : (int?)null;
+            string input = Console.ReadLine().ToLower();
 
-            return int.TryParse(Console.ReadLine(), out int value) ? value : (int?)null;
+            if (hex)
+            {
+                if (input.StartsWith("$"))
+                    input = input[1..];
+                else if (input.StartsWith("0x"))
+                    input = input[2..];
+
+                return int.TryParse(input, NumberStyles.AllowHexSpecifier, null, out int hexValue) ? hexValue : (int?)null;
+            }
+
+            return int.TryParse(input, out int value) ? value : (int?)null;
         }
 
         static int? ReadOption(int? defaultOption, params string[] options)
@@ -750,7 +759,7 @@ namespace AmbermoonEventEditor
 
                 foreach (var value in eventDescription.ValueDescriptions)
                 {
-                    if (value.Hidden)
+                    if (value.Hidden || value.Condition?.Invoke(eventDescription, @event) == false)
                     {
                         if (value.Type == ValueType.Word ||
                             value.Type == ValueType.Flag16 ||
@@ -761,6 +770,15 @@ namespace AmbermoonEventEditor
                     }
                     else
                     {
+                        if (value is IEnumValueDescription e)
+                        {
+                            Console.WriteLine("Possible values:");
+                            if (e.Flags)
+                                e.AllowedEntries.ToList().ForEach(v => Console.WriteLine($" 0x{v.Key:x4}: {v.Value}"));
+                            else
+                                e.AllowedEntries.ToList().ForEach(v => Console.WriteLine($" {v.Key,3}: {v.Value}"));
+                        }
+
                         var property = type.GetProperty(value.Name);
                         var currentValue = property.GetValue(@event);
                         Console.Write($"> {value.Name} ({currentValue}): ");
@@ -1203,7 +1221,7 @@ namespace AmbermoonEventEditor
 
             foreach (var value in eventDescription.ValueDescriptions)
             {
-                if (value.Hidden)
+                if (value.Hidden || value.Condition?.Invoke(eventDescription, EventReader.ParseEvent(new DataReader(eventData))) == false)
                     Write(value, value.DefaultValue);
                 else
                 {
@@ -1212,7 +1230,10 @@ namespace AmbermoonEventEditor
                         if (value is IEnumValueDescription e)
                         {
                             Console.WriteLine("Possible values:");
-                            e.AllowedEntries.ToList().ForEach(v => Console.WriteLine($" {v.Key,3}: {v.Value}"));
+                            if (e.Flags)
+                                e.AllowedEntries.ToList().ForEach(v => Console.WriteLine($" 0x{v.Key:x4}: {v.Value}"));
+                            else
+                                e.AllowedEntries.ToList().ForEach(v => Console.WriteLine($" {v.Key,3}: {v.Value}"));
                         }
 
                         Console.Write($"> {value.Name}: ");
@@ -1235,6 +1256,15 @@ namespace AmbermoonEventEditor
                     }
                     else
                     {
+                        if (value is IEnumValueDescription e)
+                        {
+                            Console.WriteLine("Possible values:");
+                            if (e.Flags)
+                                e.AllowedEntries.ToList().ForEach(v => Console.WriteLine($" 0x{v.Key:x4}: {v.Value}"));
+                            else
+                                e.AllowedEntries.ToList().ForEach(v => Console.WriteLine($" {v.Key,3}: {v.Value}"));
+                        }
+
                         Console.Write($"> {value.Name} ({value.DefaultValueText}): ");
                         var input = ReadInt(value.ShowAsHex) ?? value.DefaultValue;
 

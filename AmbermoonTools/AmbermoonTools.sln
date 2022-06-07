@@ -36,7 +36,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AmbermoonLabdataEditor", "A
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AmbermoonCharEditor", "AmbermoonCharEditor\AmbermoonCharEditor.csproj", "{5AF70021-F1C0-4093-9476-C42FA13AA6C7}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AmbermoonMapEditor3D", "AmbermoonMapEditor3D\AmbermoonMapEditor3D.csproj", "{28AD388D-6A41-4C4F-99D5-C1F1411C69A0}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AmbermoonMapEditor3D", "AmbermoonMapEditor3D\AmbermoonMapEditor3D.csproj", "{28AD388D-6A41-4C4F-99D5-C1F1411C69A0}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

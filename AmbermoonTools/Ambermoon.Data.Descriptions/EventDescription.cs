@@ -51,7 +51,7 @@ namespace Ambermoon.Data.Descriptions
 
                 foreach (var value in description.ValueDescriptions)
                 {
-                    if (value.Hidden)
+                    if (value.Hidden || value.Condition?.Invoke(description, @event) == false)
                         continue;
 
                     var property = type.GetProperty(value.Name).GetValue(@event);
@@ -69,6 +69,10 @@ namespace Ambermoon.Data.Descriptions
                         }
 
                         info = info.TrimEnd('|') + ",";
+                    }
+                    else if (value is IEnumValueDescription enumValueDescription && enumValueDescription.Flags)
+                    {
+                        info += $" {value.Name}=" + Enum.GetFlagNames(value.GetType().GetGenericArguments()[0], property) + ",";
                     }
                     else if (value.ShowAsHex)
                     {
@@ -222,7 +226,11 @@ namespace Ambermoon.Data.Descriptions
                 Use.Bool("Random", true),
                 Use.Enum("Target", true, RewardEvent.RewardTarget.ActivePlayer),
                 Use.HiddenByte(),
-                Use.Word("RewardTypeValue", false),
+                Use.Conditional<RewardEvent>(() => Use.Word("RewardTypeValue", false), rewardEvent =>
+                {
+                    return rewardEvent.TypeOfReward == RewardEvent.RewardType.Attribute ||
+                           rewardEvent.TypeOfReward == RewardEvent.RewardType.Skill;
+                }),
                 Use.Word("Value", false)
             )},
             { EventType.ChangeTile, new EventDescription
@@ -258,17 +266,23 @@ namespace Ambermoon.Data.Descriptions
                 Use.Byte("ClosingHour", true, 23),
                 Use.Byte("UsePlaceTextIndex", false, 0xff, 0, 0xff),
                 Use.Word("PlaceIndex", true),
-                Use.Word("MerchantDataIndex", false)
+                Use.Conditional<EnterPlaceEvent>(() => Use.Word("MerchantDataIndex", false), enterPlaceEvent => enterPlaceEvent.PlaceType == PlaceType.Merchant)
             )},
             { EventType.Condition, new EventDescription
             (
                 true, true, true, false, false,
                 Use.Enum<ConditionEvent.ConditionType>("TypeOfCondition", true),
                 Use.Byte("Value", true),
-                Use.Byte("Count", false),
-                Use.HiddenByte(),
-                Use.HiddenByte(),
-                Use.Word("ObjectIndex", true),
+                Use.Conditional<ConditionEvent>(() => Use.Byte("Count", false), conditionEvent => conditionEvent.TypeOfCondition == ConditionEvent.ConditionType.ItemOwned),
+                Use.Conditional<ConditionEvent>(() => Use.Flags16<Condition>("DisallowedAilments", false), conditionEvent => conditionEvent.TypeOfCondition == ConditionEvent.ConditionType.PartyMember),
+                Use.Conditional<ConditionEvent>(() => Use.Word("ObjectIndex", true), conditionEvent =>
+                    conditionEvent.TypeOfCondition != ConditionEvent.ConditionType.CanSee &&
+                    conditionEvent.TypeOfCondition != ConditionEvent.ConditionType.Eye &&
+                    conditionEvent.TypeOfCondition != ConditionEvent.ConditionType.Hand &&
+                    conditionEvent.TypeOfCondition != ConditionEvent.ConditionType.Mouth &&
+                    conditionEvent.TypeOfCondition != ConditionEvent.ConditionType.LastEventResult &&
+                    conditionEvent.TypeOfCondition != ConditionEvent.ConditionType.Levitating
+                ),
                 Use.EventIndex("ContinueIfFalseWithMapEventIndex", false)
             )},
             { EventType.Action, new EventDescription
@@ -276,7 +290,7 @@ namespace Ambermoon.Data.Descriptions
                 true, true, true, true, false,
                 Use.Enum<ActionEvent.ActionType>("TypeOfAction", true),
                 Use.Byte("Value", true),
-                Use.Byte("Count", false),
+                Use.Conditional<ActionEvent>(() => Use.Byte("Count", false), actionEvent => actionEvent.TypeOfAction == ActionEvent.ActionType.AddItem),
                 Use.HiddenByte(),
                 Use.HiddenByte(),
                 Use.Word("ObjectIndex", true),
