@@ -313,7 +313,7 @@ Offset | Type | Description
 0x01 | ubyte | Condition type
 0x02 | ubyte | Condition value (e.g. variable value, always a boolean 0 or 1, can invert the meaning like 1="has"/0="has not")
 0x03 | ubyte | Count (item count, etc)
-0x04 | ubyte[2] | Unused
+0x04 | uword | Not allowed party member ailments (**Ambermoon Advanced** only)
 0x06 | uword | Object index (depends on condition's type, e.g. variable or item index)
 0x08 | uword | Map event index to continue with if condition was not fulfilled or 0xffff to stop the event list in this case.
 
@@ -346,6 +346,7 @@ Value | Type
 22 | Transport at current location (**Ambermoon Advanced only**)
 23 | Multiple cursor interaction (hand, eye, mouth) (**Ambermoon Advanced only**)
 24 | Current travel type (**Ambermoon Advanced only**)
+25 | Active party member class (**Ambermoon Advanced only**)
 
 **Note:** In conversations the global variable 0 is checked to be value 0 before executing a PrintText event that
 should be executed in any case. I guess PrintText events always need a preceding Condition event and the global
@@ -354,6 +355,8 @@ variable 0 is always 0. So this is like a "always true condition".
 **Note:** For condition 22, the object index gives the [transport type](Enumerations/TravelType.md). But 0 is special and means "any".
 
 **Note:** For condition 23, the object index gives the cursors as bit flags. Bit 0 is hand, bit 1 is eye and bit 2 is mouth.
+
+**Note:** In **Ambermoon Advanced** the word at offset 0x4 specifies which ailments are not allowed for the "Party member present" condition. It is not used for any other condition or in the original. The word specifies a bit for each ailment, see [here](Enumerations/Ailments.md).
 
 
 ## Action event (0x0E / 14)
