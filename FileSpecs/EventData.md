@@ -356,7 +356,7 @@ variable 0 is always 0. So this is like a "always true condition".
 
 **Note:** For condition 23, the object index gives the cursors as bit flags. Bit 0 is hand, bit 1 is eye and bit 2 is mouth.
 
-**Note:** In **Ambermoon Advanced** the word at offset 0x4 specifies which ailments are not allowed for the "Party member present" condition. It is not used for any other condition or in the original. The word specifies a bit for each ailment, see [here](Enumerations/Ailments.md).
+**Note:** In **Ambermoon Advanced** the word at offset 0x4 specifies which ailments are not allowed for the "Party member present" condition. It is not used for any other condition or in the original. The word specifies a bit for each ailment, see [here](Enumerations/Ailments.md). As this condition is mostly used to let a specific character perform some action or let him say something, a good choice for those flags is 0x0e42. This won't allow all dead states, petrify or crazy. You can also add in 0x0010 (paralyzed) if the character has to move, etc.
 
 
 ## Action event (0x0E / 14)
