@@ -32,11 +32,13 @@ Bit | Meaning
 5 | **Unknown** (all world maps have this set)
 6 | Sky (3D maps only)
 7 | NoSleepUntilDawn (if active sleep time is always 8 hours)
-8 | StationaryGraphics (transport graphics like horse or ship)
+8 | Travel (enable transport graphics like horse or ship, play music dependent on your travel type, this is set for all world maps only)
 9 | **Unknown** (never set in Ambermoon)
 10 | WorldSurface
-11 | CanUseSpells
-12-15 | Unknown / unused
+11 | CanUseSpells (**Note** in original you can still use spell scrolls or use spells in battles on that map. It only disables the spell book button on the map screen. In **Ambermoon Advanced** however you won't be able to use spell scrolls but still can use other items with spells like potions or equipment.)
+12 | No travel music (if the Travel bit is set, this will avoid playing music dependent on travel type but will play the map's music instead) (**Ambermoon Advanced** only)
+13 | No marking/returning (won't allow using the spells "Word of marking" or "Word of returning" on the map) (**Ambermoon Advanced** only)
+14-15 | Unused
 
 ### Map data
 
