@@ -221,11 +221,13 @@ Value | Meaning
 7 | Language
 8 | EP
 9 | Max attribute (**Ambermoon Advanced** only)
-10 | Attacks per round (**Ambermoon Advanced** only)
+10 | Attacks per round (**Ambermoon Advanced** only, this is overriden by next level up though!)
 11 | TP (**Ambermoon Advanced** only)
 12 | Level (**Ambermoon Advanced** only)
 13 | Damage (**Ambermoon Advanced** only)
 14 | Defense (**Ambermoon Advanced** only)
+15 | Max LP (**Ambermoon Advanced** only)
+16 | Max SP (**Ambermoon Advanced** only)
 
 ### Reward operation
 
