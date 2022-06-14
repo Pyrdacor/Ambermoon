@@ -6,8 +6,8 @@ Pyrdacor's suite of tools for editing Ambermoon data files.
 
 The most recent version can be found here:
 
-Version | Windows 64bit | Linux 64bit | Windows 32bit
---- | --- | --- | ---
+Version | Release date | Windows 64bit | Linux 64bit | Windows 32bit
+--- | --- | --- | --- | ---
 1.12 | 02-06-2022 | [Download](https://github.com/Pyrdacor/Ambermoon/releases/download/v1.12/AmbermoonTools-Windows.zip) | [Download](https://github.com/Pyrdacor/Ambermoon/releases/download/v1.12/AmbermoonTools-Linux.tar.gz) | [Download](https://github.com/Pyrdacor/Ambermoon/releases/download/v1.12/AmbermoonTools-Windows32Bit.zip)
 
 Most tools have a help. Try to run with command line argument `--help` for further information.
