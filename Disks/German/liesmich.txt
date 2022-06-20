@@ -1,5 +1,15 @@
-Ambermoon German 1.13 by Pyrdacor (13-05-2022)
+Ambermoon German 1.14 by Pyrdacor (20-06-2022)
 ==============================================
+
+Änderungen in 1.14
+==================
+
+- Es fehlten die Texte für die Fähigkeiten "Spruchrollen lesen" und
+  "Magie benutzen", daher wurde das bei Items nicht angezeigt. Nun behoben.
+- Die Datei Fantasy_intro wurde damals gepatch, damit sie auch auf
+  060 CPUs läuft, allerdings ging der Patch in den neuen Versionen
+  verloren. Ist nun wieder eingespielt.
+
 
 Änderungen in 1.13
 ==================

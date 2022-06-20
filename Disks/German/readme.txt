@@ -1,5 +1,13 @@
-Ambermoon German 1.13 by Pyrdacor (13-05-2022)
+Ambermoon German 1.14 by Pyrdacor (20-06-2022)
 ==============================================
+
+Changes in 1.14
+===============
+
+- Added missing skill names for read and use magic so they are now shown
+  in item details
+- Added a fixed version of Fantasy_intro so that it will also work on 060 CPUs
+
 
 Changes in 1.13
 ===============
@@ -14,9 +22,6 @@ Changes in 1.13
 - Fixed a typo in Kire's texts ("KONTAKE" -> "KONTAKTE")
 - Fixed a glitch where it was possible to enter the upper part of the shipyard, also adjusted some tiles there
 
-
-Ambermoon German 1.12 by Pyrdacor (31-01-2022)
-==============================================
 
 Changes in 1.12
 ===============

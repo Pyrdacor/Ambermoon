@@ -1,3 +1,8 @@
+## Version 1.14
+
+- Added fixed Fantasy_intro which should also run on 060 CPUs
+- Added missing skill names for read and use magic
+
 ## Version 1.13
 
 - Merged AM2_BLIT into AM2_CPU
