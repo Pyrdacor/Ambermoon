@@ -6,7 +6,7 @@ Bit | Property
 ----|----
 0 | Undead, can be killed by holy spells
 1 | Demon (used by Luminor, Guard demon and gargoyle type monsters)
-2 | Boss (immune to Fear, Paralyze, Petrify, DissolveVictim, Madness, Drugs, Irritation and won't flee)
+2 | Boss (immune to Fear, Paralyze, Petrify, DissolveVictim, Madness, Drugs, Irritation, critical strikes and won't flee)
 3 | Animal (is set for all spider and lizards except for Gigantula). Moranians don't count as lizards though. :P
 4..7 | Unused
 
