@@ -63,10 +63,12 @@ Offset | Type | Description
 0x04 | uword | Graphic index
 0x06 | udword | Tile flags (will override the map tile flags if the character is on the tile, 3D only). Upper 4 bits are the combat background index for monsters.
 
+If the index is 0, the map character slot is not used. Map objects don't have a meaningful index in general. In this case the index should be set to 1. For monsters the index is always the monster group index. For party members it is always the party member index. For NPCs it is the NPC index if the flag "Text popup" is not set. Otherwise it is the index of the map text.
+
 The graphic index is:
 - an object index inside the labdata for 3D maps
 - a tile index inside the tileset for 2D maps if flag "Use tileset" is set
-- an NPC graphic index for 2D maps if flag "Use tileset" is not set and it's an NPC
+- an NPC graphic index for 2D maps if flag "Use tileset" is not set and it's an NPC or party member
 
 #### Type and flags
 
@@ -85,6 +87,8 @@ The upper 6 bits contain the flags:
 - Bit 7: Stationary / Only move when see player (**Ambermoon Advanced** only)
 
 For NPCs if flag "Text popup" is set, the index is a map text index and only a text popup is shown on interaction.
+
+Map objects are used to trigger some map event on interaction. The index should be 1, the event index should point to a valid map event chain.
 
 Note: In theory any of the travel types can be used by monsters. They are used for collision detection. Even flying monsters are possible which can move through anything (travel type 6). But in Ambermoon only 2 types are used: 1 and 2. In 3D you can't interpret those as travel types like horse, raft, etc. They are more like "collision classes". Each wall or object in 3D has a bit associated for collision and the "travel type" of the character is basically the bit index for collision detection. The only exception is travel type 6, which is always some kind of "cheat type". If a character has this travel type set, it won't collide with anything.
 
