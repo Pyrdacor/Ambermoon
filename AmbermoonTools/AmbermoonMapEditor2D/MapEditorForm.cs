@@ -925,5 +925,10 @@ namespace AmbermoonMapEditor2D
         {
             MapSizeChanged();
         }
+
+        private void mapCharEditorControl_Load(object sender, EventArgs e)
+        {
+
+        }
     }
 }

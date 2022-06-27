@@ -4,6 +4,7 @@ using Ambermoon.Data.Legacy.Characters;
 namespace AmbermoonMapCharEditor
 {
     // TODO: tile flags, combat background index, gfx index, positions
+    // TODO: map load
 
     public partial class MapCharEditorControl : UserControl
     {
@@ -25,7 +26,7 @@ namespace AmbermoonMapCharEditor
         public void Init(Map map, IGameData gameData)
         {
             this.map = map;
-            eventNames = map.EventList.Select(e => TruncString(e.ToString(), 60)).ToList();
+            eventNames = map.EventList.Select(e => TruncString(e.ToString()!, 60)).ToList();
             mapTexts = map.Texts.Select(t => TruncString(t, 60)).ToList();
             var bossMonsters = new List<int>();
 
@@ -50,7 +51,14 @@ namespace AmbermoonMapCharEditor
                 }
             }
 
-            LoadCharacters("Monster_char.amb", monsters, 0, true);
+            try
+            {
+                LoadCharacters("Monster_char.amb", monsters, 0, true);
+            }
+            catch
+            {
+                LoadCharacters("Monster_char_data.amb", monsters, 0, true);
+            }
             LoadCharacters("Save.00/Party_char.amb", partyMembers, 1);
             LoadCharacters("NPC_char.amb", npcs);
 
@@ -59,7 +67,7 @@ namespace AmbermoonMapCharEditor
                 if (str.Length <= maxLength)
                     return str;
 
-                return str.Substring(maxLength - 3) + "...";
+                return str.Substring(0, maxLength - 3) + "...";
             }
 
             foreach (var monsterGroupFile in gameData.Files["Monster_groups.amb"].Files)
@@ -74,13 +82,18 @@ namespace AmbermoonMapCharEditor
                     else
                     {
                         string name = "";
-                        var boss = indices.FirstOrDefault(i => bossMonsters.Contains(i));
+                        var bosses = indices.Where(i => bossMonsters.Contains(i));
 
-                        if (boss != 0)
+                        if (bosses.Count() == 1)
                         {
-                            name = monsters[boss];
-                            group.Remove(name);
-                            name += ",";
+                            var boss = bosses.FirstOrDefault();
+
+                            if (boss != 0)
+                            {
+                                name = monsters[boss];
+                                group.Remove(name);
+                                name += ",";
+                            }
                         }
 
                         name += string.Join(",", group.GroupBy(g => g).Select(g => new { c = g.Count(), n = g.Key }).Select(g => g.c == 1 ? g.n : $"{g.c}x {g.n}"));
@@ -96,9 +109,9 @@ namespace AmbermoonMapCharEditor
             var characterList = new CharacterList((type, textPopup) => type switch
             {
                 CharacterType.PartyMember => partyMembers.Values,
-                CharacterType.NPC => npcs.Values,
+                CharacterType.NPC => textPopup ? mapTexts : npcs.Values,
                 CharacterType.Monster => monsterGroups.Values,
-                CharacterType.MapObject => textPopup ? mapTexts : eventNames,
+                CharacterType.MapObject => eventNames,
                 _ => throw new ArgumentException("Invalid character type")
             }, map);
 
@@ -114,13 +127,15 @@ namespace AmbermoonMapCharEditor
             if (characterList.Count != 0)
                 UpdateCurrentCharacter();
 
+            buttonAdd.Enabled = characterList!.Count < 32;
+            buttonRemove.Enabled = characterList.SelectedIndex != -1 && characterList.Count != 0;
             groupBoxCharProperties.Enabled = characterList.Count != 0;
         }
 
         private void CharacterList_RowCountChanged()
         {
             buttonAdd.Enabled = characterList!.Count < 32;
-            buttonRemove.Enabled = characterList.Count != 0;
+            buttonRemove.Enabled = characterList.SelectedIndex != -1 && characterList.Count != 0;
             groupBoxCharProperties.Enabled = characterList.Count != 0;
         }
 
@@ -128,6 +143,7 @@ namespace AmbermoonMapCharEditor
         {
             UpdateCurrentCharacter();
             SelectionChanged?.Invoke(index);
+            buttonRemove.Enabled = characterList!.SelectedIndex != -1 && characterList.Count != 0;
         }
 
         private void CharacterList_CharacterChanged(CharacterRow row)
@@ -136,6 +152,14 @@ namespace AmbermoonMapCharEditor
 
             character.Type = row.CharacterType;
             character.Index = row.CharacterIndex;
+
+            if (character.Type == CharacterType.PartyMember)
+                ++character.Index;
+            else if (character.Type == CharacterType.MapObject)
+            {
+                character.EventIndex = character.Index;
+                character.Index = 1;
+            }
         }
 
         CharacterList? characterList;
@@ -154,16 +178,17 @@ namespace AmbermoonMapCharEditor
             character ??= map!.CharacterReferences[characterList!.SelectedIndex];
 
             checkBoxRandomMovement.Checked = character.CharacterFlags.HasFlag(Map.CharacterReference.Flags.RandomMovement);
-            checkBoxUseTileset.Checked = (character.Type == CharacterType.NPC || character.Type == CharacterType.MapObject) &&
-                character.CharacterFlags.HasFlag(Map.CharacterReference.Flags.RandomMovement);
-            checkBoxTextPopup.Checked = (character.Type == CharacterType.NPC || character.Type == CharacterType.MapObject) &&
+            checkBoxUseTileset.Checked = character.Type != CharacterType.Monster &&
+                character.CharacterFlags.HasFlag(Map.CharacterReference.Flags.UseTileset);
+            checkBoxTextPopup.Checked = character.Type == CharacterType.NPC &&
                 character.CharacterFlags.HasFlag(Map.CharacterReference.Flags.TextPopup);
             checkBoxStationary.Checked = character.Type != CharacterType.Monster &&
                 character.CharacterFlags.HasFlag(Map.CharacterReference.Flags.Stationary);
             checkBoxOnlyMoveWhenSeePlayer.Checked = character.Type == CharacterType.Monster &&
                 character.CharacterFlags.HasFlag(Map.CharacterReference.Flags.MoveOnlyWhenSeePlayer);
 
-            checkBoxUseTileset.Enabled = checkBoxTextPopup.Enabled = character.Type == CharacterType.NPC || character.Type == CharacterType.MapObject;
+            checkBoxUseTileset.Enabled = character.Type != CharacterType.Monster;
+            checkBoxTextPopup.Enabled = character.Type == CharacterType.NPC;
             checkBoxStationary.Enabled = character.Type != CharacterType.Monster;
             checkBoxOnlyMoveWhenSeePlayer.Enabled = character.Type == CharacterType.Monster;
             ignoreCollisionClassComboBoxChange = true;
@@ -195,7 +220,7 @@ namespace AmbermoonMapCharEditor
 
         private void comboBoxCollisionClasses_SelectedIndexChanged(object sender, EventArgs e)
         {
-            if (ignoreCollisionClassComboBoxChange)
+            if (characterList == null || ignoreCollisionClassComboBoxChange)
                 return;
 
             var character = map!.CharacterReferences[characterList!.SelectedIndex];
@@ -232,6 +257,23 @@ namespace AmbermoonMapCharEditor
             var character = map!.CharacterReferences[characterList!.SelectedIndex];
 
             SetCharacterFlag(character, Map.CharacterReference.Flags.MoveOnlyWhenSeePlayer, checkBoxOnlyMoveWhenSeePlayer.Checked);
+        }
+
+        private void buttonAdd_Click(object sender, EventArgs e)
+        {
+            map!.CharacterReferences[characterList!.Count] ??= new Map.CharacterReference
+            {
+                Index = (uint)characterList.Count,
+                Type = CharacterType.PartyMember,
+                // Positions = new ...
+            };
+            characterList.Add();
+        }
+
+        private void buttonRemove_Click(object sender, EventArgs e)
+        {
+            if (characterList!.SelectedIndex != -1 && characterList.Count != 0)
+                characterList.Remove(characterList.SelectedIndex);
         }
     }
 }

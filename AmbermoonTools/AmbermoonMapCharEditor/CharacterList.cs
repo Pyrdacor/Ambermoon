@@ -32,11 +32,14 @@ namespace AmbermoonMapCharEditor
 
             foreach (var character in characters)
             {
+                if (character == null)
+                    continue;
+
                 bool textPopup = character.Type == CharacterType.NPC && character.CharacterFlags.HasFlag(Map.CharacterReference.Flags.TextPopup);
                 var characterRow = new CharacterRow(index, descriptionProvider, character.Type, character.Index, textPopup);
-                characterRow.Location = new Point(0, characterRow.Height * index);
                 panel1.Controls.Add(characterRow);
                 characterRows.Add(characterRow);
+                characterRow.Location = new Point(panel1.AutoScrollPosition.X, panel1.AutoScrollPosition.Y + characterRow.Height * index);
                 characterRow.CharacterChanged += CharacterRow_CharacterChanged;
                 characterRow.Selected += CharacterRow_Selected;
                 ++index;
@@ -44,13 +47,14 @@ namespace AmbermoonMapCharEditor
 
             if (characterRows.Count != 0)
             {
-                SelectedIndex = 0;
-                SelectedIndexChanged?.Invoke(0);
+                characterRows[0].SelectRow();
             }
         }
 
         private void CharacterRow_Selected(int index)
         {
+            if (SelectedIndex != -1 && SelectedIndex != index)
+                characterRows[SelectedIndex].Unselect();
             SelectedIndex = index;
             SelectedIndexChanged?.Invoke(index);
         }
@@ -64,9 +68,9 @@ namespace AmbermoonMapCharEditor
         {
             int index = characterRows.Count;
             var characterRow = new CharacterRow(index, descriptionProvider);
-            characterRow.Location = new Point(0, characterRow.Height * index);
             panel1.Controls.Add(characterRow);
             characterRows.Add(characterRow);
+            characterRow.Location = new Point(panel1.AutoScrollPosition.X, panel1.AutoScrollPosition.Y + characterRow.Height * index);
             characterRow.CharacterChanged += CharacterRow_CharacterChanged;
             characterRow.Selected += CharacterRow_Selected;
 

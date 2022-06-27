@@ -12,14 +12,21 @@ namespace AmbermoonMapCharEditor
 
         public uint CharacterIndex
         {
-            get => (uint)comboBoxCharacter.SelectedIndex;
-            set => comboBoxCharacter.SelectedIndex = (int)value;
+            get => (uint)comboBoxCharacter.SelectedIndex + 1;
+            set => comboBoxCharacter.SelectedIndex = (int)value - 1;
         }
 
         readonly Func<CharacterType, bool, ICollection<string>> descriptionProvider;
 
         public event Action<CharacterRow>? CharacterChanged;
         public event Action<int>? Selected;
+
+        bool ignoreTypeComboBoxEvent = false;
+
+        public void Unselect()
+        {
+            BackColor = SystemColors.Control;
+        }
 
         public CharacterRow(int index, Func<CharacterType, bool, ICollection<string>> descriptionProvider, CharacterType characterType = CharacterType.PartyMember,
             uint? characterIndex = null, bool textPopup = false)
@@ -33,11 +40,18 @@ namespace AmbermoonMapCharEditor
 
             InitCharacterType();
 
-            CharacterIndex = characterIndex ?? 0;
+            CharacterIndex = characterIndex ?? 1;
+
+            ignoreTypeComboBoxEvent = true;
+            comboBoxType.SelectedIndex = (int)CharacterType;
+            ignoreTypeComboBoxEvent = false;
         }
 
         private void comboBoxType_SelectedIndexChanged(object sender, EventArgs e)
         {
+            if (ignoreTypeComboBoxEvent)
+                return;
+
             CharacterType = (CharacterType)comboBoxType.SelectedIndex;
 
             InitCharacterType();
@@ -63,17 +77,7 @@ namespace AmbermoonMapCharEditor
 
         private void CharacterRow_Click(object sender, EventArgs e)
         {
-            Selected?.Invoke(Index);
-        }
-
-        private void comboBoxType_Click(object sender, EventArgs e)
-        {
-            Selected?.Invoke(Index);
-        }
-
-        private void comboBoxCharacter_Click(object sender, EventArgs e)
-        {
-            Selected?.Invoke(Index);
+            SelectRow();
         }
 
         public void ChangeTextPopupFlag(bool textPopup)
@@ -85,6 +89,25 @@ namespace AmbermoonMapCharEditor
             {
                 InitCharacterType();
             }
+        }
+
+        public void SelectRow()
+        {
+            BackColor = Color.FromArgb(224, 255, 208);
+            Selected?.Invoke(Index);
+        }
+
+        const int WM_PARENTNOTIFY = 0x0210;
+        const int WM_LBUTTONDOWN = 0x0201;
+
+        protected override void WndProc(ref Message m)
+        {
+            if (m.Msg == WM_PARENTNOTIFY && m.WParam.ToInt32() == WM_LBUTTONDOWN)
+            {
+                SelectRow();
+            }
+
+            base.WndProc(ref m);
         }
     }
 }

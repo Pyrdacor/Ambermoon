@@ -36,12 +36,17 @@
             // 
             this.comboBoxType.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.comboBoxType.FormattingEnabled = true;
-            this.comboBoxType.Location = new System.Drawing.Point(3, 3);
+            this.comboBoxType.Items.AddRange(new object[] {
+            "Partymember",
+            "NPC",
+            "Monster",
+            "Map object"});
+            this.comboBoxType.Location = new System.Drawing.Point(2, 2);
+            this.comboBoxType.Margin = new System.Windows.Forms.Padding(4);
             this.comboBoxType.Name = "comboBoxType";
-            this.comboBoxType.Size = new System.Drawing.Size(121, 23);
+            this.comboBoxType.Size = new System.Drawing.Size(154, 29);
             this.comboBoxType.TabIndex = 0;
             this.comboBoxType.SelectedIndexChanged += new System.EventHandler(this.comboBoxType_SelectedIndexChanged);
-            this.comboBoxType.Click += new System.EventHandler(this.comboBoxType_Click);
             // 
             // comboBoxCharacter
             // 
@@ -49,21 +54,22 @@
             | System.Windows.Forms.AnchorStyles.Right)));
             this.comboBoxCharacter.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.comboBoxCharacter.FormattingEnabled = true;
-            this.comboBoxCharacter.Location = new System.Drawing.Point(127, 3);
+            this.comboBoxCharacter.Location = new System.Drawing.Point(161, 2);
+            this.comboBoxCharacter.Margin = new System.Windows.Forms.Padding(4);
             this.comboBoxCharacter.Name = "comboBoxCharacter";
-            this.comboBoxCharacter.Size = new System.Drawing.Size(203, 23);
+            this.comboBoxCharacter.Size = new System.Drawing.Size(265, 29);
             this.comboBoxCharacter.TabIndex = 1;
             this.comboBoxCharacter.SelectedIndexChanged += new System.EventHandler(this.comboBoxCharacter_SelectedIndexChanged);
-            this.comboBoxCharacter.Click += new System.EventHandler(this.comboBoxCharacter_Click);
             // 
             // CharacterRow
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 21F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.Controls.Add(this.comboBoxCharacter);
             this.Controls.Add(this.comboBoxType);
+            this.Margin = new System.Windows.Forms.Padding(4);
             this.Name = "CharacterRow";
-            this.Size = new System.Drawing.Size(333, 31);
+            this.Size = new System.Drawing.Size(428, 32);
             this.Click += new System.EventHandler(this.CharacterRow_Click);
             this.ResumeLayout(false);
 

@@ -10,8 +10,5 @@
     <Compile Update="MapCharEditorControl.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Update="MapCharEditorForm.cs">
-      <SubType>Form</SubType>
-    </Compile>
   </ItemGroup>
 </Project>
