@@ -77,6 +77,12 @@ namespace AmbermoonImageConverter
             if ((color & 0xff000000) == 0) // transparent
                 return 0;
 
+            uint r = (color >> 16) & 0xf0;
+            uint g = (color >> 8) & 0xf0;
+            uint b = color & 0xf0;
+
+            color = 0xff000000 | (r << 16) | (r << 12) | (g << 8) | (g << 4) | b | (b >> 4);
+
             var diffs = new SortedDictionary<int, int>();
 
             for (int i = 0; i <= max; ++i)

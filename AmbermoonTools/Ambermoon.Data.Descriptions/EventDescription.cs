@@ -229,7 +229,8 @@ namespace Ambermoon.Data.Descriptions
                 Use.Conditional<RewardEvent>(() => Use.Word("RewardTypeValue", false), rewardEvent =>
                 {
                     return rewardEvent.TypeOfReward == RewardEvent.RewardType.Attribute ||
-                           rewardEvent.TypeOfReward == RewardEvent.RewardType.Skill;
+                           rewardEvent.TypeOfReward == RewardEvent.RewardType.Skill ||
+                           rewardEvent.TypeOfReward == RewardEvent.RewardType.MaxAttribute;
                 }),
                 Use.Word("Value", false)
             )},

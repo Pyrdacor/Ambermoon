@@ -19,7 +19,7 @@ namespace Ambermoon.Data.Descriptions
         public bool Flags { get; }
         public string[] AllowedValueNames => AllowedEnumValues.Select(v => Enum.GetName(v)).ToArray();
         public object[] AllowedValues => AllowedEnumValues.Select(v => (object)v).ToArray();
-        public Dictionary<long, string> AllowedEntries => AllowedEnumValues.ToDictionary(v => (long)Convert.ChangeType(v, typeof(long)), v => Enum.GetName(v));
+        public Dictionary<long, string> AllowedEntries => AllowedEnumValues.Distinct().ToDictionary(v => (long)Convert.ChangeType(v, typeof(long)), v => Enum.GetName(v));
 
         public EnumValueDescription(string name, bool required, bool hidden, TEnum defaultValue, bool flags, bool word, TEnum[] allowedValues)
         {
