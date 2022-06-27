@@ -24,6 +24,8 @@ namespace AmbermoonMapEditor2D
                 history.UndoGotEmpty += () => toolStripMenuItemEditUndo.Enabled = false;
                 history.RedoGotFilled += () => toolStripMenuItemEditRedo.Enabled = true;
                 history.RedoGotEmpty += () => toolStripMenuItemEditRedo.Enabled = false;
+
+                mapCharEditorControl.Init(map, gameData);
             }
             else
             {

@@ -78,12 +78,10 @@ namespace AmbermoonMapEditor2D
             this.toolTipMagic = new System.Windows.Forms.ToolTip(this.components);
             this.toolTipWorldSurface = new System.Windows.Forms.ToolTip(this.components);
             this.groupBoxCharacters = new System.Windows.Forms.GroupBox();
+            this.mapCharEditorControl = new AmbermoonMapCharEditor.MapCharEditorControl();
             this.buttonShowCharacterOnMap = new System.Windows.Forms.Button();
             this.label1 = new System.Windows.Forms.Label();
             this.pictureBoxCharacterImage = new System.Windows.Forms.PictureBox();
-            this.buttonEditCharacter = new System.Windows.Forms.Button();
-            this.buttonDeleteCharacter = new System.Windows.Forms.Button();
-            this.comboBoxCharacters = new System.Windows.Forms.ComboBox();
             this.buttonToolBrush = new System.Windows.Forms.Button();
             this.buttonToolColorPicker = new System.Windows.Forms.Button();
             this.buttonToolLayers = new System.Windows.Forms.Button();
@@ -604,23 +602,31 @@ namespace AmbermoonMapEditor2D
             // 
             // groupBoxCharacters
             // 
+            this.groupBoxCharacters.Controls.Add(this.mapCharEditorControl);
             this.groupBoxCharacters.Controls.Add(this.buttonShowCharacterOnMap);
             this.groupBoxCharacters.Controls.Add(this.label1);
             this.groupBoxCharacters.Controls.Add(this.pictureBoxCharacterImage);
-            this.groupBoxCharacters.Controls.Add(this.buttonEditCharacter);
-            this.groupBoxCharacters.Controls.Add(this.buttonDeleteCharacter);
-            this.groupBoxCharacters.Controls.Add(this.comboBoxCharacters);
             this.groupBoxCharacters.Location = new System.Drawing.Point(808, 256);
             this.groupBoxCharacters.Name = "groupBoxCharacters";
-            this.groupBoxCharacters.Size = new System.Drawing.Size(338, 96);
+            this.groupBoxCharacters.Size = new System.Drawing.Size(338, 291);
             this.groupBoxCharacters.TabIndex = 4;
             this.groupBoxCharacters.TabStop = false;
             this.groupBoxCharacters.Text = "Monsters && NPCs";
             // 
+            // mapCharEditorControl
+            // 
+            this.mapCharEditorControl.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.mapCharEditorControl.Location = new System.Drawing.Point(7, 22);
+            this.mapCharEditorControl.Name = "mapCharEditorControl";
+            this.mapCharEditorControl.Size = new System.Drawing.Size(285, 233);
+            this.mapCharEditorControl.TabIndex = 0;
+            // 
             // buttonShowCharacterOnMap
             // 
+            this.buttonShowCharacterOnMap.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.buttonShowCharacterOnMap.Image = global::AmbermoonMapEditor2D.Properties.Resources.round_control_camera_black_24;
-            this.buttonShowCharacterOnMap.Location = new System.Drawing.Point(55, 51);
+            this.buttonShowCharacterOnMap.Location = new System.Drawing.Point(215, 262);
             this.buttonShowCharacterOnMap.Name = "buttonShowCharacterOnMap";
             this.buttonShowCharacterOnMap.Size = new System.Drawing.Size(24, 24);
             this.buttonShowCharacterOnMap.TabIndex = 16;
@@ -629,8 +635,9 @@ namespace AmbermoonMapEditor2D
             // 
             // label1
             // 
+            this.label1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(81, 55);
+            this.label1.Location = new System.Drawing.Point(240, 267);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(89, 15);
             this.label1.TabIndex = 4;
@@ -639,44 +646,12 @@ namespace AmbermoonMapEditor2D
             // pictureBoxCharacterImage
             // 
             this.pictureBoxCharacterImage.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
-            this.pictureBoxCharacterImage.Location = new System.Drawing.Point(7, 22);
+            this.pictureBoxCharacterImage.Location = new System.Drawing.Point(291, 24);
             this.pictureBoxCharacterImage.Name = "pictureBoxCharacterImage";
             this.pictureBoxCharacterImage.Size = new System.Drawing.Size(42, 66);
             this.pictureBoxCharacterImage.TabIndex = 3;
             this.pictureBoxCharacterImage.TabStop = false;
             this.pictureBoxCharacterImage.Click += new System.EventHandler(this.pictureBoxCharacterImage_Click);
-            // 
-            // buttonEditCharacter
-            // 
-            this.buttonEditCharacter.Enabled = false;
-            this.buttonEditCharacter.Location = new System.Drawing.Point(176, 51);
-            this.buttonEditCharacter.Name = "buttonEditCharacter";
-            this.buttonEditCharacter.Size = new System.Drawing.Size(75, 23);
-            this.buttonEditCharacter.TabIndex = 2;
-            this.buttonEditCharacter.Text = "Edit ...";
-            this.buttonEditCharacter.UseVisualStyleBackColor = true;
-            this.buttonEditCharacter.Click += new System.EventHandler(this.buttonEditCharacter_Click);
-            // 
-            // buttonDeleteCharacter
-            // 
-            this.buttonDeleteCharacter.Enabled = false;
-            this.buttonDeleteCharacter.Location = new System.Drawing.Point(257, 51);
-            this.buttonDeleteCharacter.Name = "buttonDeleteCharacter";
-            this.buttonDeleteCharacter.Size = new System.Drawing.Size(75, 23);
-            this.buttonDeleteCharacter.TabIndex = 1;
-            this.buttonDeleteCharacter.Text = "Delete";
-            this.buttonDeleteCharacter.UseVisualStyleBackColor = true;
-            this.buttonDeleteCharacter.Click += new System.EventHandler(this.buttonDeleteCharacter_Click);
-            // 
-            // comboBoxCharacters
-            // 
-            this.comboBoxCharacters.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            this.comboBoxCharacters.FormattingEnabled = true;
-            this.comboBoxCharacters.Location = new System.Drawing.Point(55, 22);
-            this.comboBoxCharacters.Name = "comboBoxCharacters";
-            this.comboBoxCharacters.Size = new System.Drawing.Size(277, 23);
-            this.comboBoxCharacters.TabIndex = 0;
-            this.comboBoxCharacters.SelectedIndexChanged += new System.EventHandler(this.comboBoxCharacters_SelectedIndexChanged);
             // 
             // buttonToolBrush
             // 
@@ -908,9 +883,9 @@ namespace AmbermoonMapEditor2D
             // groupBoxEvents
             // 
             this.groupBoxEvents.Controls.Add(this.listViewEvents);
-            this.groupBoxEvents.Location = new System.Drawing.Point(808, 358);
+            this.groupBoxEvents.Location = new System.Drawing.Point(808, 553);
             this.groupBoxEvents.Name = "groupBoxEvents";
-            this.groupBoxEvents.Size = new System.Drawing.Size(338, 153);
+            this.groupBoxEvents.Size = new System.Drawing.Size(338, 128);
             this.groupBoxEvents.TabIndex = 15;
             this.groupBoxEvents.TabStop = false;
             this.groupBoxEvents.Text = "Events";
@@ -1070,9 +1045,6 @@ namespace AmbermoonMapEditor2D
         private System.Windows.Forms.NumericUpDown numericUpDownWidth;
         private System.Windows.Forms.Label labelSizeCross;
         private System.Windows.Forms.GroupBox groupBoxCharacters;
-        private System.Windows.Forms.ComboBox comboBoxCharacters;
-        private System.Windows.Forms.Button buttonDeleteCharacter;
-        private System.Windows.Forms.Button buttonEditCharacter;
         private System.Windows.Forms.PictureBox pictureBoxCharacterImage;
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.Button buttonShowCharacterOnMap;
@@ -1130,6 +1102,7 @@ namespace AmbermoonMapEditor2D
         private System.Windows.Forms.Button buttonExportTileset;
         private System.Windows.Forms.TrackBar trackBarZoom;
         private System.Windows.Forms.Button buttonToolEventChanger;
+        private AmbermoonMapCharEditor.MapCharEditorControl mapCharEditorControl;
     }
 }
 

@@ -26,9 +26,14 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Ambermoon.Data.Legacy" Version="10.6.11" />
+    <PackageReference Include="Ambermoon.Data.Legacy" Version="10.6.20" />
     <PackageReference Include="NAudio" Version="2.1.0" />
-    <PackageReference Include="SonicArranger" Version="1.0.10" />
+    <PackageReference Include="SonicArranger" Version="1.0.12" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\AmbermoonCharEditor\AmbermoonCharEditor.csproj" />
+    <ProjectReference Include="..\AmbermoonMapCharEditor\AmbermoonMapCharEditor.csproj" />
   </ItemGroup>
 
   <ItemGroup>
