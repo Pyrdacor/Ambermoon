@@ -203,3 +203,14 @@ Frames | Width | Height | Bit depth | Description
 Note: Only the UI element uses 3 bits per pixel and has a palette offset of 24. All others use 5 bits per pixel.
 
 The UI element can use the current UI palette, the character icons use the same palette as the player graphics or items and the rest uses palette 18.
+
+
+### 2D NPC graphics
+
+Those are stored inside NPC_gfx.amb. There are two sub-files which can be referenced by the header value "NPC gfx index" inside a map. The first file is used for all Lyramion and Morag NPCs and the second file is used for all forest moon NPCs. The NPCs include the 2D monsters as well. In the original game there are only two 2D monsters: thieves and knights.
+
+Each of the sub-files contain all NPC graphics. The total amount is not given directly so have to read the graphics one by one.
+
+Each graphic begins with a byte which gives the number of frames. This should be 1 or above. If it is 0, it is most likely some fill byte so you reached the end. Then another byte follows which seems to be always 0. I guess this is just a fill byte to ensure a word boundary. Then the given amount of frames follow as 5-bit planar data. Each frame has a size of 16x32.
+
+The original has 18 NPCs in the first sub-file and 16 NPCs in the second sub-file.
