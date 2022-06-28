@@ -211,6 +211,6 @@ Those are stored inside NPC_gfx.amb. There are two sub-files which can be refere
 
 Each of the sub-files contain all NPC graphics. The total amount is not given directly so you have to read the graphics one by one.
 
-Each graphic begins with a byte which gives the number of frames. This should be 1 or above. If it is 0, it is most likely some fill byte so you reached the end. Then another byte follows which seems to be always 0. I guess this is just a fill byte to ensure a word boundary. Then the given amount of frames follow as 5-bit planar data. Each frame has a size of 16x32.
+Each graphic begins with a byte which gives the number of frames. This should be 1 or above. If it is 0, it is most likely some fill byte so you reached the end. Then another byte follows which seems to be always 0. I guess this is just a fill byte to ensure a word boundary. Then the given amount of frames follow as 5-bit planar data. Each frame has a size of 16x32. Read each frame as a single image, then proceed with the next frame and so on.
 
 The original has 18 NPCs in the first sub-file and 16 NPCs in the second sub-file.
