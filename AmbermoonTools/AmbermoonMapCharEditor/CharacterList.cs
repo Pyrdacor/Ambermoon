@@ -35,6 +35,7 @@ namespace AmbermoonMapCharEditor
             characterRows.Clear();
             characters.Clear();
             characters.AddRange(map.CharacterReferences.ToList());
+            SelectedIndex = -1;
 
             int index = 0;
 

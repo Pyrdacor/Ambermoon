@@ -157,11 +157,14 @@ namespace AmbermoonMapCharEditor
             {
                 var item = (IndexedItem)comboBoxCharacter.Items[e.Index];
 
-                if (!string.IsNullOrWhiteSpace(item.Name))
+#pragma warning disable CS0252 
+                if (!string.IsNullOrWhiteSpace(item.Name) && toolTipCharacter.Tag != item)
                 {
                     var bounds = comboBoxCharacter.GetItemBounds(e.Index);
                     toolTipCharacter.Show(item.Name, comboBoxCharacter, bounds.Right, bounds.Bottom);
+                    toolTipCharacter.Tag = item;
                 }
+#pragma warning restore CS0252
             }                
             e.DrawFocusRectangle();
         }

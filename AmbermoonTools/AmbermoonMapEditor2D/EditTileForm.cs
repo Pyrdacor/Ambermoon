@@ -49,13 +49,11 @@ namespace AmbermoonMapEditor2D
             checkBoxAllowUnused2.Checked = tile.Flags.HasFlag(TileFlags.AllowMovementUnused13);
             checkBoxAllowUnused3.Checked = tile.Flags.HasFlag(TileFlags.AllowMovementUnused14);
             checkBoxAllowUnused4.Checked = tile.Flags.HasFlag(TileFlags.AllowMovementUnused15);
-            checkBoxAllowUnused5.Checked = tile.Flags.HasFlag(TileFlags.AllowMovementUnused16);
             checkBoxAllowWalk.Checked = tile.Flags.HasFlag(TileFlags.AllowMovementWalk);
 
             checkBoxBlockAllMovement.Checked = tile.Flags.HasFlag(TileFlags.BlockAllMovement);
             checkBoxAlternate.Checked = tile.Flags.HasFlag(TileFlags.AlternateAnimation);
             checkBoxBackgroundFlags.Checked = tile.Flags.HasFlag(TileFlags.UseBackgroundTileFlags);
-            checkBoxBlockAllMovement.Checked = tile.Flags.HasFlag(TileFlags.BlockAllMovement);
             checkBoxBlockSight.Checked = tile.Flags.HasFlag(TileFlags.BlockSight);
             checkBoxFloor.Checked = tile.Flags.HasFlag(TileFlags.Floor);
             checkBoxHidePlayer.Checked = tile.Flags.HasFlag(TileFlags.PlayerInvisible);
@@ -188,8 +186,6 @@ namespace AmbermoonMapEditor2D
                 Tile.Flags |= TileFlags.AllowMovementUnused14;
             if (checkBoxAllowUnused4.Checked)
                 Tile.Flags |= TileFlags.AllowMovementUnused15;
-            if (checkBoxAllowUnused5.Checked)
-                Tile.Flags |= TileFlags.AllowMovementUnused16;
             if (checkBoxAllowWalk.Checked)
                 Tile.Flags |= TileFlags.AllowMovementWalk;
             if (checkBoxAlternate.Checked)

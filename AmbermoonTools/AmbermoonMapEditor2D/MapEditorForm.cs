@@ -1,6 +1,7 @@
 ﻿using Ambermoon.Data;
 using Ambermoon.Data.Legacy.Serialization;
 using System;
+using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
 using System.Windows.Forms;
@@ -25,7 +26,9 @@ namespace AmbermoonMapEditor2D
                 history.RedoGotFilled += () => toolStripMenuItemEditRedo.Enabled = true;
                 history.RedoGotEmpty += () => toolStripMenuItemEditRedo.Enabled = false;
 
-                mapCharEditorControl.Init(map, gameData);
+                graphicProvider = new GraphicProvider2D(combatBackgrounds, gameData, imageCache, tilesets);
+                graphicProvider.PaletteIndex = map.PaletteIndex;
+                mapCharEditorControl.Init(map, gameData, graphicProvider);
             }
             else
             {
@@ -659,6 +662,8 @@ namespace AmbermoonMapEditor2D
 
             void UpdatePalette(uint index, bool updateIndex)
             {
+                if (graphicProvider != null)
+                    graphicProvider.PaletteIndex = index;
                 map.PaletteIndex = index;
                 panelTileset.Refresh();
                 panelMap.Refresh();
@@ -729,7 +734,10 @@ namespace AmbermoonMapEditor2D
             }
 
             if (OpenMap())
+            {
+                graphicProvider.PaletteIndex = map.PaletteIndex;
                 mapCharEditorControl.Init(map);
+            }
         }
 
         private void toolStripMenuItemMapSave_Click(object sender, EventArgs e)

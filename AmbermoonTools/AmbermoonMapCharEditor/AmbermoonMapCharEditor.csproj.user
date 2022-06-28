@@ -7,8 +7,14 @@
     <Compile Update="CharacterRow.cs">
       <SubType>UserControl</SubType>
     </Compile>
+    <Compile Update="ExtendedPictureBox.cs">
+      <SubType>Component</SubType>
+    </Compile>
     <Compile Update="MapCharEditorControl.cs">
       <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Update="MapCharSettingsForm.cs">
+      <SubType>Form</SubType>
     </Compile>
   </ItemGroup>
 </Project>

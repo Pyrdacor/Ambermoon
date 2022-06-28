@@ -70,6 +70,12 @@ namespace AmbermoonMapEditor2D
             return Color.FromArgb(r, g, b);
         }
 
+        public int GetImageCount(uint tilesetIndex)
+        {
+            const int sizePerImage = 16 * 16 * 5 / 8;
+            return tilesets[tilesetIndex].Size / sizePerImage;
+        }
+
         public Bitmap GetImage(uint tilesetIndex, uint graphicIndex, uint paletteIndex)
         {
             if (!images.TryGetValue(tilesetIndex, out var tileset))
@@ -98,7 +104,7 @@ namespace AmbermoonMapEditor2D
                 return image;
             }
 
-            Bitmap LoadImage() => this.LoadImage(tilesets[tilesetIndex], graphicIndex, palettes[paletteIndex]);
+            Bitmap LoadImage() => this.LoadImage(tilesets[tilesetIndex], graphicIndex, palettes[paletteIndex], true);
         }
 
         static Graphic ReadPalette(IDataReader dataReader)
@@ -113,9 +119,14 @@ namespace AmbermoonMapEditor2D
             var graphic = new Graphic();
             graphicReader.ReadGraphic(graphic, dataReader, graphicInfo);
 
-            var bitmap = new Bitmap(graphicInfo.Width, graphicInfo.Height);
-            var imageData = bitmap.LockBits(new Rectangle(0, 0, graphicInfo.Width, graphicInfo.Height), ImageLockMode.WriteOnly, PixelFormat.Format32bppArgb);
-            var pixelData = GetPixelData(graphic, palettes[paletteIndex]);
+            return GraphicToBitmap(graphic, paletteIndex, graphicInfo.Alpha);
+        }
+
+        public Bitmap GraphicToBitmap(Graphic graphic, uint paletteIndex, bool alpha)
+        {
+            var bitmap = new Bitmap(graphic.Width, graphic.Height);
+            var imageData = bitmap.LockBits(new Rectangle(0, 0, graphic.Width, graphic.Height), ImageLockMode.WriteOnly, PixelFormat.Format32bppArgb);
+            var pixelData = GetPixelData(graphic, palettes[paletteIndex], alpha);
             Marshal.Copy(pixelData, 0, imageData.Scan0, pixelData.Length);
             bitmap.UnlockBits(imageData);
 
@@ -130,7 +141,7 @@ namespace AmbermoonMapEditor2D
             return dataReader.ReadBytes(sizePerImage);
         }
 
-        Bitmap LoadImage(IDataReader dataReader, uint graphicIndex, Graphic palette)
+        Bitmap LoadImage(IDataReader dataReader, uint graphicIndex, Graphic palette, bool alpha)
         {
             const int sizePerImage = 16 * 16 * 5 / 8;
             dataReader.Position = (int)graphicIndex * sizePerImage;
@@ -139,26 +150,26 @@ namespace AmbermoonMapEditor2D
 
             var bitmap = new Bitmap(16, 16);
             var imageData = bitmap.LockBits(new Rectangle(0, 0, 16, 16), ImageLockMode.WriteOnly, PixelFormat.Format32bppArgb);
-            var pixelData = GetPixelData(graphic, palette);
+            var pixelData = GetPixelData(graphic, palette, alpha);
             Marshal.Copy(pixelData, 0, imageData.Scan0, pixelData.Length);
             bitmap.UnlockBits(imageData);
 
             return bitmap;
         }
 
-        byte[] GetPixelData(Graphic graphic, Graphic palette)
+        byte[] GetPixelData(Graphic graphic, Graphic palette, bool alpha)
         {
-            byte[] pixelData = new byte[16 * 16 * 4];
+            byte[] pixelData = new byte[graphic.Width * graphic.Height * 4];
 
-            for (int y = 0; y < 16; ++y)
+            for (int y = 0; y < graphic.Height; ++y)
             {
-                for (int x = 0; x < 16; ++x)
+                for (int x = 0; x < graphic.Width; ++x)
                 {
-                    int index = x + y * 16;
+                    int index = x + y * graphic.Width;
                     int dIndex = index << 2;
                     index = graphic.Data[index] << 2;
 
-                    if (index == 0)
+                    if (alpha && index == 0)
                     {
                         pixelData[dIndex + 0] = 0;
                         pixelData[dIndex + 1] = 0;

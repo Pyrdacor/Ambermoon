@@ -107,10 +107,12 @@ namespace AmbermoonMapEditor2D
             e.DrawBackground();
             using var brush = new SolidBrush(e.ForeColor);
             e.Graphics.DrawString(text, e.Font, brush, e.Bounds);
-            if (comboBoxMapIndices.DroppedDown && (e.State & DrawItemState.Selected) == DrawItemState.Selected && !string.IsNullOrWhiteSpace(tooltips[(uint)comboBoxMapIndices.Items[e.Index]]))
+            if (comboBoxMapIndices.DroppedDown && (e.State & DrawItemState.Selected) == DrawItemState.Selected &&
+                !string.IsNullOrWhiteSpace(tooltips[(uint)comboBoxMapIndices.Items[e.Index]]) && toolTipMapIndex.Tag != (object)e.Index)
             {
                 var bounds = comboBoxMapIndices.GetItemBounds(e.Index);
                 toolTipMapIndex.Show(tooltips[(uint)comboBoxMapIndices.Items[e.Index]], comboBoxMapIndices, bounds.Right, bounds.Bottom);
+                toolTipMapIndex.Tag = e.Index;
             }
             e.DrawFocusRectangle();
         }

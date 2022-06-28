@@ -5,7 +5,6 @@ using System.Text.RegularExpressions;
 namespace AmbermoonMapCharEditor
 {
     // TODO: tile flags, combat background index, gfx index, positions
-    // TODO: map load
 
     public partial class MapCharEditorControl : UserControl
     {
@@ -40,8 +39,9 @@ namespace AmbermoonMapCharEditor
             groupBoxCharProperties.Enabled = characterList.Count != 0;
         }
 
-        public void Init(Map map, IGameData gameData)
+        public void Init(Map map, IGameData gameData, IGraphicProvider graphicProvider)
         {
+            this.graphicProvider = graphicProvider;
             this.map = map;
             eventNames = map.EventList.Select(e => e.ToString()!).ToList();
             mapTexts = map.Texts.Select(t => InkRegex.Replace(t, "")).ToList();
@@ -113,8 +113,6 @@ namespace AmbermoonMapCharEditor
 
             Visible = true;
 
-            comboBoxCollisionClasses.SelectedIndex = 0;
-
             var characterList = new CharacterList((type, textPopup) => type switch
             {
                 CharacterType.PartyMember => partyMembers,
@@ -172,6 +170,7 @@ namespace AmbermoonMapCharEditor
         }
 
         CharacterList? characterList;
+        IGraphicProvider? graphicProvider;
         Map? map;
         readonly Dictionary<int, string> monsters = new();
         readonly Dictionary<int, string> monsterGroups = new();
@@ -200,9 +199,6 @@ namespace AmbermoonMapCharEditor
             checkBoxTextPopup.Enabled = character.Type == CharacterType.NPC;
             checkBoxStationary.Enabled = character.Type != CharacterType.Monster;
             checkBoxOnlyMoveWhenSeePlayer.Enabled = character.Type == CharacterType.Monster;
-            ignoreCollisionClassComboBoxChange = true;
-            comboBoxCollisionClasses.SelectedIndex = character.CollisionClass;
-            ignoreCollisionClassComboBoxChange = false;
         }
 
         private void checkBoxStationary_CheckedChanged(object sender, EventArgs e)
@@ -223,18 +219,6 @@ namespace AmbermoonMapCharEditor
             var character = map!.CharacterReferences[characterList!.SelectedIndex];
 
             SetCharacterFlag(character, Map.CharacterReference.Flags.RandomMovement, checkBoxRandomMovement.Checked);
-        }
-
-        bool ignoreCollisionClassComboBoxChange = false;
-
-        private void comboBoxCollisionClasses_SelectedIndexChanged(object sender, EventArgs e)
-        {
-            if (characterList == null || ignoreCollisionClassComboBoxChange)
-                return;
-
-            var character = map!.CharacterReferences[characterList!.SelectedIndex];
-
-            character.CollisionClass = comboBoxCollisionClasses.SelectedIndex;
         }
 
         void SetCharacterFlag(Map.CharacterReference character, Map.CharacterReference.Flags flag, bool value)
@@ -290,6 +274,41 @@ namespace AmbermoonMapCharEditor
                 for (int i = index; i < count; ++i)
                 {
                     map!.CharacterReferences[i] = i == count - 1 ? null : map!.CharacterReferences[i + 1];
+                }
+            }
+        }
+
+        private void buttonMore_Click(object sender, EventArgs e)
+        {
+            if (characterList!.SelectedIndex != -1)
+            {
+                bool mapIs3D = map!.Type == MapType.Map3D;
+                var character = map.CharacterReferences[characterList.SelectedIndex];
+                var graphicProvider = (uint index) =>
+                {
+                    if (mapIs3D)
+                        return this.graphicProvider!.GetObject3DGraphic(index);
+                    if (character.CharacterFlags.HasFlag(Map.CharacterReference.Flags.UseTileset))
+                        return this.graphicProvider!.GetTileGraphic(map.TilesetOrLabdataIndex, index);
+                    return this.graphicProvider!.GetNPCGraphic(map.NPCGfxIndex, index);
+                };
+                var graphicCountProvider = () =>
+                {
+                    if (mapIs3D)
+                        return this.graphicProvider!.GetObject3DGraphicCount();
+                    if (character.CharacterFlags.HasFlag(Map.CharacterReference.Flags.UseTileset))
+                        return this.graphicProvider!.GetTileGraphicCount(map.TilesetOrLabdataIndex);
+                    return this.graphicProvider!.GetNPCGraphicCount(map.NPCGfxIndex);
+                };
+
+                var settingsForm = new MapCharSettingsForm(mapIs3D, character,
+                    index => this.graphicProvider!.GetCombatBackgroundGraphic(mapIs3D, index),
+                    graphicProvider, graphicCountProvider);
+
+                if (settingsForm.ShowDialog() == DialogResult.OK)
+                {
+                    character.TileFlags = settingsForm.TileFlags;
+                    character.GraphicIndex = settingsForm.GraphicIndex;
                 }
             }
         }
