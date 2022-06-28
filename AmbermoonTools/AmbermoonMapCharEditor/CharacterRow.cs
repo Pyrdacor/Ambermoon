@@ -1,5 +1,7 @@
 ﻿using Ambermoon.Data;
 using System.Linq;
+using System.Runtime.InteropServices;
+using System.Windows.Forms.VisualStyles;
 
 namespace AmbermoonMapCharEditor
 {
@@ -131,6 +133,38 @@ namespace AmbermoonMapCharEditor
 
         const int WM_PARENTNOTIFY = 0x0210;
         const int WM_LBUTTONDOWN = 0x0201;
+
+        private void comboBoxCharacter_DropDownClosed(object sender, EventArgs e)
+        {
+            toolTipCharacter.Hide(comboBoxCharacter);
+        }
+
+        private void CharacterRow_Load(object sender, EventArgs e)
+        {
+            comboBoxCharacter.DrawMode = DrawMode.OwnerDrawFixed;
+        }
+
+        private void comboBoxCharacter_DrawItem(object sender, DrawItemEventArgs e)
+        {
+            if (e.Index < 0)
+                return;
+
+            string text = comboBoxCharacter.GetItemText(comboBoxCharacter.Items[e.Index]);
+            e.DrawBackground();
+            using var brush = new SolidBrush(e.ForeColor);
+            e.Graphics.DrawString(text, e.Font!, brush, e.Bounds);
+            if (comboBoxCharacter.DroppedDown && (e.State & DrawItemState.Selected) == DrawItemState.Selected)
+            {
+                var item = (IndexedItem)comboBoxCharacter.Items[e.Index];
+
+                if (!string.IsNullOrWhiteSpace(item.Name))
+                {
+                    var bounds = comboBoxCharacter.GetItemBounds(e.Index);
+                    toolTipCharacter.Show(item.Name, comboBoxCharacter, bounds.Right, bounds.Bottom);
+                }
+            }                
+            e.DrawFocusRectangle();
+        }
 
         protected override void WndProc(ref Message m)
         {

@@ -28,9 +28,11 @@
         /// </summary>
         private void InitializeComponent()
         {
+            this.components = new System.ComponentModel.Container();
             this.comboBoxType = new System.Windows.Forms.ComboBox();
             this.comboBoxCharacter = new System.Windows.Forms.ComboBox();
             this.label1 = new System.Windows.Forms.Label();
+            this.toolTipCharacter = new System.Windows.Forms.ToolTip(this.components);
             this.SuspendLayout();
             // 
             // comboBoxType
@@ -60,7 +62,9 @@
             this.comboBoxCharacter.Name = "comboBoxCharacter";
             this.comboBoxCharacter.Size = new System.Drawing.Size(236, 29);
             this.comboBoxCharacter.TabIndex = 1;
+            this.comboBoxCharacter.DrawItem += new System.Windows.Forms.DrawItemEventHandler(this.comboBoxCharacter_DrawItem);
             this.comboBoxCharacter.SelectedIndexChanged += new System.EventHandler(this.comboBoxCharacter_SelectedIndexChanged);
+            this.comboBoxCharacter.DropDownClosed += new System.EventHandler(this.comboBoxCharacter_DropDownClosed);
             // 
             // label1
             // 
@@ -72,6 +76,13 @@
             this.label1.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
             this.label1.Click += new System.EventHandler(this.label1_Click);
             // 
+            // toolTipCharacter
+            // 
+            this.toolTipCharacter.AutomaticDelay = 150;
+            this.toolTipCharacter.AutoPopDelay = 99999999;
+            this.toolTipCharacter.InitialDelay = 150;
+            this.toolTipCharacter.ReshowDelay = 30;
+            // 
             // CharacterRow
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 21F);
@@ -82,6 +93,7 @@
             this.Margin = new System.Windows.Forms.Padding(4);
             this.Name = "CharacterRow";
             this.Size = new System.Drawing.Size(392, 32);
+            this.Load += new System.EventHandler(this.CharacterRow_Load);
             this.Click += new System.EventHandler(this.CharacterRow_Click);
             this.ResumeLayout(false);
 
@@ -92,5 +104,6 @@
         private ComboBox comboBoxType;
         private ComboBox comboBoxCharacter;
         private Label label1;
+        private ToolTip toolTipCharacter;
     }
 }

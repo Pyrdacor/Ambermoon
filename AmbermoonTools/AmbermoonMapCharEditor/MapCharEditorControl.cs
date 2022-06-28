@@ -167,6 +167,8 @@ namespace AmbermoonMapCharEditor
                 character.EventIndex = character.Index;
                 character.Index = 1;
             }
+
+            UpdateCurrentCharacter(character);
         }
 
         CharacterList? characterList;
@@ -280,7 +282,16 @@ namespace AmbermoonMapCharEditor
         private void buttonRemove_Click(object sender, EventArgs e)
         {
             if (characterList!.SelectedIndex != -1 && characterList.Count != 0)
-                characterList.Remove(characterList.SelectedIndex);
+            {
+                int index = characterList.SelectedIndex;
+                characterList.Remove(index);
+                int count = map!.CharacterReferences.Length;
+
+                for (int i = index; i < count; ++i)
+                {
+                    map!.CharacterReferences[i] = i == count - 1 ? null : map!.CharacterReferences[i + 1];
+                }
+            }
         }
     }
 }

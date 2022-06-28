@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using AmbermoonMapCharEditor;
+using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
 using System.Windows.Forms;
@@ -107,7 +108,10 @@ namespace AmbermoonMapEditor2D
             using var brush = new SolidBrush(e.ForeColor);
             e.Graphics.DrawString(text, e.Font, brush, e.Bounds);
             if (comboBoxMapIndices.DroppedDown && (e.State & DrawItemState.Selected) == DrawItemState.Selected && !string.IsNullOrWhiteSpace(tooltips[(uint)comboBoxMapIndices.Items[e.Index]]))
-                toolTipMapIndex.Show(tooltips[(uint)comboBoxMapIndices.Items[e.Index]], comboBoxMapIndices, e.Bounds.Right, e.Bounds.Bottom);
+            {
+                var bounds = comboBoxMapIndices.GetItemBounds(e.Index);
+                toolTipMapIndex.Show(tooltips[(uint)comboBoxMapIndices.Items[e.Index]], comboBoxMapIndices, bounds.Right, bounds.Bottom);
+            }
             e.DrawFocusRectangle();
         }
 

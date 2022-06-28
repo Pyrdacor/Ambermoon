@@ -86,7 +86,11 @@ namespace AmbermoonMapCharEditor
 
             RowCountChanged?.Invoke();
 
+            if (SelectedIndex != -1)
+                characterRows[SelectedIndex].Unselect();
+
             SelectedIndex = index;
+            characterRows[SelectedIndex].SelectRow();
             SelectedIndexChanged?.Invoke(index);
         }
 
@@ -111,6 +115,7 @@ namespace AmbermoonMapCharEditor
             if (index == SelectedIndex && characterRows.Count != 0)
             {
                 SelectedIndex = Math.Max(0, index - 1);
+                characterRows[SelectedIndex].SelectRow();
                 SelectedIndexChanged?.Invoke(SelectedIndex);
             }
         }
