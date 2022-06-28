@@ -81,7 +81,6 @@ namespace AmbermoonMapEditor2D
             this.mapCharEditorControl = new AmbermoonMapCharEditor.MapCharEditorControl();
             this.buttonShowCharacterOnMap = new System.Windows.Forms.Button();
             this.label1 = new System.Windows.Forms.Label();
-            this.pictureBoxCharacterImage = new System.Windows.Forms.PictureBox();
             this.buttonToolBrush = new System.Windows.Forms.Button();
             this.buttonToolColorPicker = new System.Windows.Forms.Button();
             this.buttonToolLayers = new System.Windows.Forms.Button();
@@ -128,7 +127,6 @@ namespace AmbermoonMapEditor2D
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDownHeight)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDownWidth)).BeginInit();
             this.groupBoxCharacters.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.pictureBoxCharacterImage)).BeginInit();
             this.contextMenuStripLayers.SuspendLayout();
             this.statusStrip.SuspendLayout();
             this.contextMenuStripBlockModes.SuspendLayout();
@@ -635,7 +633,6 @@ namespace AmbermoonMapEditor2D
             this.groupBoxCharacters.Controls.Add(this.mapCharEditorControl);
             this.groupBoxCharacters.Controls.Add(this.buttonShowCharacterOnMap);
             this.groupBoxCharacters.Controls.Add(this.label1);
-            this.groupBoxCharacters.Controls.Add(this.pictureBoxCharacterImage);
             this.groupBoxCharacters.Location = new System.Drawing.Point(1038, 358);
             this.groupBoxCharacters.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.groupBoxCharacters.Name = "groupBoxCharacters";
@@ -653,7 +650,7 @@ namespace AmbermoonMapEditor2D
             this.mapCharEditorControl.Location = new System.Drawing.Point(9, 30);
             this.mapCharEditorControl.Margin = new System.Windows.Forms.Padding(3, 5, 3, 5);
             this.mapCharEditorControl.Name = "mapCharEditorControl";
-            this.mapCharEditorControl.Size = new System.Drawing.Size(367, 327);
+            this.mapCharEditorControl.Size = new System.Drawing.Size(417, 327);
             this.mapCharEditorControl.TabIndex = 0;
             this.mapCharEditorControl.Visible = false;
             this.mapCharEditorControl.Load += new System.EventHandler(this.mapCharEditorControl_Load);
@@ -679,17 +676,6 @@ namespace AmbermoonMapEditor2D
             this.label1.Size = new System.Drawing.Size(119, 21);
             this.label1.TabIndex = 4;
             this.label1.Text = "Location: 50, 50";
-            // 
-            // pictureBoxCharacterImage
-            // 
-            this.pictureBoxCharacterImage.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
-            this.pictureBoxCharacterImage.Location = new System.Drawing.Point(375, 34);
-            this.pictureBoxCharacterImage.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
-            this.pictureBoxCharacterImage.Name = "pictureBoxCharacterImage";
-            this.pictureBoxCharacterImage.Size = new System.Drawing.Size(52, 91);
-            this.pictureBoxCharacterImage.TabIndex = 3;
-            this.pictureBoxCharacterImage.TabStop = false;
-            this.pictureBoxCharacterImage.Click += new System.EventHandler(this.pictureBoxCharacterImage_Click);
             // 
             // buttonToolBrush
             // 
@@ -1054,7 +1040,6 @@ namespace AmbermoonMapEditor2D
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDownWidth)).EndInit();
             this.groupBoxCharacters.ResumeLayout(false);
             this.groupBoxCharacters.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.pictureBoxCharacterImage)).EndInit();
             this.contextMenuStripLayers.ResumeLayout(false);
             this.statusStrip.ResumeLayout(false);
             this.statusStrip.PerformLayout();
@@ -1102,7 +1087,6 @@ namespace AmbermoonMapEditor2D
         private System.Windows.Forms.NumericUpDown numericUpDownWidth;
         private System.Windows.Forms.Label labelSizeCross;
         private System.Windows.Forms.GroupBox groupBoxCharacters;
-        private System.Windows.Forms.PictureBox pictureBoxCharacterImage;
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.Button buttonShowCharacterOnMap;
         private System.Windows.Forms.ComboBox comboBoxWorld;

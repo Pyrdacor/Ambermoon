@@ -36,17 +36,19 @@
             this.panel1.AutoScroll = true;
             this.panel1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.panel1.Location = new System.Drawing.Point(0, 0);
+            this.panel1.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.panel1.Name = "panel1";
-            this.panel1.Size = new System.Drawing.Size(292, 209);
+            this.panel1.Size = new System.Drawing.Size(312, 293);
             this.panel1.TabIndex = 0;
             // 
             // CharacterList
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 21F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.Controls.Add(this.panel1);
+            this.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.Name = "CharacterList";
-            this.Size = new System.Drawing.Size(292, 209);
+            this.Size = new System.Drawing.Size(312, 293);
             this.ResumeLayout(false);
 
         }

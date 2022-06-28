@@ -1,9 +1,26 @@
 ﻿using Ambermoon.Data;
+using System.Linq;
 
 namespace AmbermoonMapCharEditor
 {
     public partial class CharacterRow : UserControl
     {
+        static string TruncString(string str, int maxLength)
+        {
+            if (str.Length <= maxLength)
+                return str;
+
+            return str.Substring(0, maxLength - 3) + "...";
+        }
+
+        record IndexedItem(int Index, string Name)
+        {
+            public override string ToString()
+            {
+                return TruncString(Name, 28);
+            }
+        }
+
         public int Index { get; set; }
 
         public CharacterType CharacterType { get; set; }
@@ -12,11 +29,15 @@ namespace AmbermoonMapCharEditor
 
         public uint CharacterIndex
         {
-            get => (uint)comboBoxCharacter.SelectedIndex + 1;
-            set => comboBoxCharacter.SelectedIndex = (int)value - 1;
+            get => comboBoxCharacter.Items.Count == 0 ? 0u : (uint)((IndexedItem)comboBoxCharacter.SelectedItem).Index;
+            set
+            {
+                if (comboBoxCharacter.Items.Count != 0) // map texts might be empty
+                    comboBoxCharacter.SelectedIndex = comboBoxCharacter.Items.IndexOf(comboBoxCharacter.Items.OfType<IndexedItem>().FirstOrDefault(i => i.Index == value));
+            }
         }
 
-        readonly Func<CharacterType, bool, ICollection<string>> descriptionProvider;
+        readonly Func<CharacterType, bool, Dictionary<int, string>> descriptionProvider;
 
         public event Action<CharacterRow>? CharacterChanged;
         public event Action<int>? Selected;
@@ -28,7 +49,7 @@ namespace AmbermoonMapCharEditor
             BackColor = SystemColors.Control;
         }
 
-        public CharacterRow(int index, Func<CharacterType, bool, ICollection<string>> descriptionProvider, CharacterType characterType = CharacterType.PartyMember,
+        public CharacterRow(int index, Func<CharacterType, bool, Dictionary<int, string>> descriptionProvider, CharacterType characterType = CharacterType.NPC,
             uint? characterIndex = null, bool textPopup = false)
         {
             InitializeComponent();
@@ -40,7 +61,12 @@ namespace AmbermoonMapCharEditor
 
             InitCharacterType();
 
-            CharacterIndex = characterIndex ?? 1;
+            CharacterIndex = characterIndex ?? (characterType switch
+            {
+                CharacterType.PartyMember => 2u,
+                CharacterType.NPC => TextPopup ? 0u : 1u,
+                _ => 1u
+            });
 
             ignoreTypeComboBoxEvent = true;
             comboBoxType.SelectedIndex = (int)CharacterType;
@@ -65,9 +91,10 @@ namespace AmbermoonMapCharEditor
             comboBoxCharacter.Items.Clear();
 
             foreach (var description in descriptions)
-                comboBoxCharacter.Items.Add(description);
+                comboBoxCharacter.Items.Add(new IndexedItem(description.Key, description.Value));
 
-            comboBoxCharacter.SelectedIndex = 0;
+            if (comboBoxCharacter.Items.Count != 0) // map texts might be empty
+                comboBoxCharacter.SelectedIndex = 0;
         }
 
         private void comboBoxCharacter_SelectedIndexChanged(object sender, EventArgs e)
@@ -93,8 +120,13 @@ namespace AmbermoonMapCharEditor
 
         public void SelectRow()
         {
-            BackColor = Color.FromArgb(224, 255, 208);
+            BackColor = Color.FromArgb(255, 224, 128);
             Selected?.Invoke(Index);
+        }
+
+        private void label1_Click(object sender, EventArgs e)
+        {
+            SelectRow();
         }
 
         const int WM_PARENTNOTIFY = 0x0210;

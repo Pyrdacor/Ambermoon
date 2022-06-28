@@ -728,7 +728,8 @@ namespace AmbermoonMapEditor2D
                 }
             }
 
-            OpenMap();            
+            if (OpenMap())
+                mapCharEditorControl.Init(map);
         }
 
         private void toolStripMenuItemMapSave_Click(object sender, EventArgs e)

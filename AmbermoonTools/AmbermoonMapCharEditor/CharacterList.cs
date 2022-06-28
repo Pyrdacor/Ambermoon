@@ -5,8 +5,8 @@ namespace AmbermoonMapCharEditor
     public partial class CharacterList : UserControl
     {
         readonly List<CharacterRow> characterRows = new List<CharacterRow>();
-        readonly List<Map.CharacterReference> characters= new List<Map.CharacterReference>();
-        readonly Func<CharacterType, bool, ICollection<string>> descriptionProvider;
+        readonly List<Map.CharacterReference> characters = new List<Map.CharacterReference>();
+        Func<CharacterType, bool, Dictionary<int, string>>? descriptionProvider;
 
         public int Count => characterRows.Count;
 
@@ -20,13 +20,21 @@ namespace AmbermoonMapCharEditor
         public event Action<CharacterRow>? CharacterChanged;
         public event Action<int>? SelectedIndexChanged;
 
-        public CharacterList(Func<CharacterType, bool, ICollection<string>> descriptionProvider, Map map)
+        public CharacterList(Func<CharacterType, bool, Dictionary<int, string>> descriptionProvider, Map map)
         {
             InitializeComponent();
 
+            SetMap(descriptionProvider, map);
+        }
+
+        public void SetMap(Func<CharacterType, bool, Dictionary<int, string>> descriptionProvider, Map map)
+        {
             this.descriptionProvider = descriptionProvider;
 
-            characters = map.CharacterReferences.ToList();
+            panel1.Controls.Clear();
+            characterRows.Clear();
+            characters.Clear();
+            characters.AddRange(map.CharacterReferences.ToList());
 
             int index = 0;
 
@@ -67,7 +75,7 @@ namespace AmbermoonMapCharEditor
         public void Add()
         {
             int index = characterRows.Count;
-            var characterRow = new CharacterRow(index, descriptionProvider);
+            var characterRow = new CharacterRow(index, descriptionProvider!);
             panel1.Controls.Add(characterRow);
             characterRows.Add(characterRow);
             characterRow.Location = new Point(panel1.AutoScrollPosition.X, panel1.AutoScrollPosition.Y + characterRow.Height * index);

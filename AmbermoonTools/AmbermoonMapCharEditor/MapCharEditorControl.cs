@@ -1,5 +1,6 @@
 ﻿using Ambermoon.Data;
 using Ambermoon.Data.Legacy.Characters;
+using System.Text.RegularExpressions;
 
 namespace AmbermoonMapCharEditor
 {
@@ -8,14 +9,6 @@ namespace AmbermoonMapCharEditor
 
     public partial class MapCharEditorControl : UserControl
     {
-        static readonly List<string> CharTypes = new List<string>
-        {
-            "Partymember",
-            "NPC",
-            "Monster",
-            "Mapobject"
-        };
-
         public MapCharEditorControl()
         {
             InitializeComponent();
@@ -23,11 +16,35 @@ namespace AmbermoonMapCharEditor
             Visible = false;       
         }
 
+        static readonly Regex InkRegex = new Regex(@"~INK ?[0-9]+~", RegexOptions.Compiled); 
+
+        public void Init(Map map)
+        {
+            this.map = map;
+            mapTexts = map.Texts.Select(t => InkRegex.Replace(t, "")).ToList();
+
+            characterList!.SetMap((type, textPopup) => type switch
+            {
+                CharacterType.PartyMember => partyMembers,
+                CharacterType.NPC => textPopup ? mapTexts.Select((t, i) => new { t, i }).ToDictionary(x => x.i, x => x.t) : npcs,
+                CharacterType.Monster => monsterGroups,
+                CharacterType.MapObject => eventNames.Select((e, i) => new { e, i }).ToDictionary(x => x.i, x => x.e),
+                _ => throw new ArgumentException("Invalid character type")
+            }, map);
+
+            if (characterList.Count != 0)
+                UpdateCurrentCharacter();
+
+            buttonAdd.Enabled = characterList!.Count < 32;
+            buttonRemove.Enabled = characterList.SelectedIndex != -1 && characterList.Count != 0;
+            groupBoxCharProperties.Enabled = characterList.Count != 0;
+        }
+
         public void Init(Map map, IGameData gameData)
         {
             this.map = map;
-            eventNames = map.EventList.Select(e => TruncString(e.ToString()!, 60)).ToList();
-            mapTexts = map.Texts.Select(t => TruncString(t, 60)).ToList();
+            eventNames = map.EventList.Select(e => e.ToString()!).ToList();
+            mapTexts = map.Texts.Select(t => InkRegex.Replace(t, "")).ToList();
             var bossMonsters = new List<int>();
 
             void LoadCharacters(string filename, Dictionary<int, string> targetList, int skipAmount = 0, bool checkBoss = false)
@@ -62,14 +79,6 @@ namespace AmbermoonMapCharEditor
             LoadCharacters("Save.00/Party_char.amb", partyMembers, 1);
             LoadCharacters("NPC_char.amb", npcs);
 
-            static string TruncString(string str, int maxLength)
-            {
-                if (str.Length <= maxLength)
-                    return str;
-
-                return str.Substring(0, maxLength - 3) + "...";
-            }
-
             foreach (var monsterGroupFile in gameData.Files["Monster_groups.amb"].Files)
             {
                 if (monsterGroupFile.Value.Size != 0)
@@ -97,7 +106,7 @@ namespace AmbermoonMapCharEditor
                         }
 
                         name += string.Join(",", group.GroupBy(g => g).Select(g => new { c = g.Count(), n = g.Key }).Select(g => g.c == 1 ? g.n : $"{g.c}x {g.n}"));
-                        monsterGroups.Add(monsterGroupFile.Key, TruncString(name, 60));
+                        monsterGroups.Add(monsterGroupFile.Key, name);
                     }
                 }
             }
@@ -108,10 +117,10 @@ namespace AmbermoonMapCharEditor
 
             var characterList = new CharacterList((type, textPopup) => type switch
             {
-                CharacterType.PartyMember => partyMembers.Values,
-                CharacterType.NPC => textPopup ? mapTexts : npcs.Values,
-                CharacterType.Monster => monsterGroups.Values,
-                CharacterType.MapObject => eventNames,
+                CharacterType.PartyMember => partyMembers,
+                CharacterType.NPC => textPopup ? mapTexts.Select((t, i) => new { t, i }).ToDictionary(x => x.i, x => x.t) : npcs,
+                CharacterType.Monster => monsterGroups,
+                CharacterType.MapObject => eventNames.Select((e, i) => new { e, i }).ToDictionary(x => x.i, x => x.e),
                 _ => throw new ArgumentException("Invalid character type")
             }, map);
 
@@ -153,9 +162,7 @@ namespace AmbermoonMapCharEditor
             character.Type = row.CharacterType;
             character.Index = row.CharacterIndex;
 
-            if (character.Type == CharacterType.PartyMember)
-                ++character.Index;
-            else if (character.Type == CharacterType.MapObject)
+            if (character.Type == CharacterType.MapObject)
             {
                 character.EventIndex = character.Index;
                 character.Index = 1;
@@ -263,8 +270,8 @@ namespace AmbermoonMapCharEditor
         {
             map!.CharacterReferences[characterList!.Count] ??= new Map.CharacterReference
             {
-                Index = (uint)characterList.Count,
-                Type = CharacterType.PartyMember,
+                Index = 1,
+                Type = CharacterType.NPC,
                 // Positions = new ...
             };
             characterList.Add();
