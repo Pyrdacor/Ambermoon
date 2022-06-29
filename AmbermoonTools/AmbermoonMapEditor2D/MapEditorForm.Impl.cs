@@ -138,7 +138,7 @@ namespace AmbermoonMapEditor2D
             }
         }
 
-
+        string gameDataPath;
         IGameData gameData;
         GraphicProvider2D graphicProvider;
         Dictionary<uint, Tileset> tilesets;
@@ -169,7 +169,9 @@ namespace AmbermoonMapEditor2D
         int currentLayer = 0;
         bool initialized = false;
         bool unsavedChanges = false;
+        bool unsavedChangesBesideHistory = false;
         bool saveIntoGameData = false;
+        bool compressGameData = false;
         string saveFileName = null;
         bool showEvents = false;
         bool mapLoading = false;
@@ -279,7 +281,9 @@ namespace AmbermoonMapEditor2D
         void InitializeMap(Map map)
         {
             timerAnimation.Stop();
+            unsavedChangesBesideHistory = false;
             unsavedChanges = false;
+            Text = title;
             history.Clear();
             this.map = map;
             mapLoading = true;
@@ -372,6 +376,8 @@ namespace AmbermoonMapEditor2D
         {
             // TODO: this must be part of the undo/redo chain!
 
+            MarkAsDirty();
+
             int tileSize = (trackBarZoom.Maximum - trackBarZoom.Value + 1) * 16;
             mapScrollIndicator.Location = new Point(map.Width * tileSize, map.Height * tileSize);
 
@@ -433,6 +439,8 @@ namespace AmbermoonMapEditor2D
                 map.Flags |= MapFlags.NoSleepUntilDawn;
             if (checkBoxWorldSurface.Checked)
                 map.Flags |= MapFlags.WorldSurface;
+
+            MarkAsDirty();
         }
 
         void MapTypeChanged()
@@ -447,13 +455,27 @@ namespace AmbermoonMapEditor2D
                 checkBoxWorldSurface.Enabled = true;
             }
 
+            MarkAsDirty();
+
             UpdateMapFlags();
         }
 
         void TilesetChanged()
         {
+            MarkAsDirty();
+
             panelTileset.Refresh();
             tilesetScrollIndicator.Location = new Point(TilesetTilesPerRow * 16, ((currentTilesetTiles + TilesetTilesPerRow - 1) / TilesetTilesPerRow) * 16);
+        }
+
+        void MarkAsDirty(bool fromHistory = false)
+        {
+            if (mapLoading)
+                return;
+
+            Text = title + " *";
+            unsavedChangesBesideHistory = unsavedChangesBesideHistory || !fromHistory;
+            unsavedChanges = true;
         }
 
         Bitmap ImageFromTool(Tool tool, bool withArrowIfAvailable)
@@ -694,6 +716,14 @@ namespace AmbermoonMapEditor2D
         void PerformAction(string displayName, string undoDisplayName, Action<bool> doAction, Action undoAction)
         {
             history.DoAction(new History.DefaultAction(displayName, undoDisplayName, doAction, undoAction));
+
+            if (mapLoading)
+                history.Save();
+
+            unsavedChanges = unsavedChanges || history.Dirty;
+
+            if (unsavedChanges)
+                MarkAsDirty(true);
         }
 
         void SetTiles(int x, int y, int w, int h, int layer, bool useSameTile = false)
@@ -915,28 +945,40 @@ namespace AmbermoonMapEditor2D
 
         void NotImplemented() => MessageBox.Show(this, "Not implemented yet", "Not implemented", MessageBoxButtons.OK, MessageBoxIcon.Information);
 
-        bool Save()
+        enum SaveResult
+        {
+            Success,
+            Error,
+            Cancelled
+        }
+
+        SaveResult Save()
         {
             if (saveFileName == null)
                 return SaveAs();
 
             if (saveIntoGameData)
-                return SaveToGameData();
+                return SaveToGameData() ? SaveResult.Success : SaveResult.Error;
             else
-                return SaveToFile(saveFileName);
+                return SaveToFile(saveFileName) ? SaveResult.Success : SaveResult.Error;
         }
 
-        bool SaveAs()
+        SaveResult SaveAs()
         {
-            if (MessageBox.Show(this, "Do you want to save back to the game data (Yes) or to an external file (No)?",
-                "Save target", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.No)
+            var saveMapForm = new SaveMapForm();
+            var result = saveMapForm.ShowDialog(this);
+
+            if (result == DialogResult.No)
             {
-                return SaveToFile(null, saveFileName);
+                return SaveToFile(null, saveFileName) ? SaveResult.Success : SaveResult.Error;
             }
-            else
+            else if (result == DialogResult.Yes)
             {
-                return SaveToGameData();
+                compressGameData = saveMapForm.Compress;
+                return SaveToGameData() ? SaveResult.Success : SaveResult.Error;
             }
+
+            return SaveResult.Cancelled;
         }
 
         bool SaveToFile(string fileName, string suggestedFileName = null)
@@ -968,6 +1010,11 @@ namespace AmbermoonMapEditor2D
             {
                 System.IO.File.WriteAllBytes(fileName, dataWriter.ToArray());
                 saveFileName = fileName;
+                Text = title;
+                unsavedChangesBesideHistory = false;
+                unsavedChanges = false;
+                history.Save();
+                mapCharEditorControl.Save();
                 return true;
             }
             catch
@@ -978,9 +1025,30 @@ namespace AmbermoonMapEditor2D
 
         bool SaveToGameData()
         {
-            // TODO
-            NotImplemented();
-            return false;
+            int mapContainerIndex = map.Index <= 256 ? 1 : map.Index >= 300 && map.Index < 400 ? 3 : 2;
+            string mapContainerName = $"{mapContainerIndex}Map_data.amb";
+
+            try
+            {
+                var waitForm = new WorkingForm("Saving map back to game data ...");
+                System.Threading.Tasks.Task.Run(() => (gameData as GameData).Save(gameDataPath, writer =>
+                {
+                    var mapDataWriter = new DataWriter();
+                    MapWriter.WriteMap(map, mapDataWriter);
+                    writer.ReplaceFile(mapContainerName, (int)map.Index, mapDataWriter);
+                }, true, waitForm.Finish, !compressGameData));
+                waitForm.ShowDialog(this);
+                Text = title;
+                unsavedChangesBesideHistory = false;
+                unsavedChanges = false;
+                history.Save();
+                mapCharEditorControl.Save();
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
         }
 
         void PickPosition(int x, int y)

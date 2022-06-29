@@ -37,7 +37,10 @@ namespace AmbermoonMapEditor2D
             public void Redo() => doAction?.Invoke(true);
         }
 
+        public bool Dirty => (savedAtAction != null && actions.Count == 0) ||
+            (actions.Count != 0 && savedAtAction != actions.Peek());
         public const int HistorySize = 128;
+        IAction savedAtAction = null;
         readonly DropOutStack<IAction> actions = new DropOutStack<IAction>(HistorySize);
         readonly DropOutStack<IAction> undoneActions = new DropOutStack<IAction>(HistorySize);
         public event Action UndoGotFilled;
@@ -87,7 +90,13 @@ namespace AmbermoonMapEditor2D
                 RedoGotEmpty?.Invoke();
         }
 
-        public void Clear() => actions.Clear();
+        public void Clear()
+        {
+            actions.Clear();
+            savedAtAction = null;
+        }
+
+        public void Save() => savedAtAction = actions.Peek();
 
         public string[] GetUndoNames()
         {

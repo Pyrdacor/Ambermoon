@@ -13,8 +13,25 @@ namespace AmbermoonMapCharEditor
         }
 
         static readonly Regex InkRegex = new Regex(@"~INK ?[0-9]+~", RegexOptions.Compiled);
+        bool dirty = false;
 
         public int Count => characterList!.Count;
+        public bool Dirty
+        {
+            get => dirty;
+            private set
+            {
+                if (dirty != value)
+                {
+                    dirty = value;
+                    DirtyChanged?.Invoke();
+                }
+            }
+        }
+
+        public event Action? DirtyChanged;
+
+        public void Save() => Dirty = false;
 
         public void Init(Map map)
         {
@@ -36,6 +53,7 @@ namespace AmbermoonMapCharEditor
             buttonAdd.Enabled = characterList!.Count < 32;
             buttonRemove.Enabled = characterList.SelectedIndex != -1 && characterList.Count != 0;
             groupBoxCharProperties.Enabled = characterList.Count != 0;
+            Dirty = false;
         }
 
         public void Init(Map map, IGameData gameData, IGraphicProvider graphicProvider)
@@ -136,6 +154,7 @@ namespace AmbermoonMapCharEditor
             buttonAdd.Enabled = characterList!.Count < 32;
             buttonRemove.Enabled = characterList.SelectedIndex != -1 && characterList.Count != 0;
             groupBoxCharProperties.Enabled = characterList.Count != 0;
+            Dirty = false;
         }
 
         private void CharacterList_RowCountChanged()
@@ -146,6 +165,8 @@ namespace AmbermoonMapCharEditor
 
             if (characterList.Count == 0)
                 SelectionChanged?.Invoke(-1);
+
+            Dirty = true;
         }
 
         private void CharacterList_SelectedIndexChanged(int index)
@@ -171,6 +192,8 @@ namespace AmbermoonMapCharEditor
             UpdateCurrentCharacter(character);
 
             CurrentCharacterChanged?.Invoke();
+
+            Dirty = true;
         }
 
         CharacterList? characterList;
@@ -242,6 +265,7 @@ namespace AmbermoonMapCharEditor
                 character.CharacterFlags &= ~flag;
 
             CurrentCharacterChanged?.Invoke();
+            Dirty = true;
         }
 
         private void checkBoxUseTileset_CheckedChanged(object sender, EventArgs e)
@@ -277,6 +301,7 @@ namespace AmbermoonMapCharEditor
             character.Positions.AddRange(Enumerable.Range(0, 288).Select(_ => new Ambermoon.Position(0, 0)));
             CurrentCharacterChanged?.Invoke();
             characterList.Add();
+            Dirty = true;
         }
 
         private void buttonRemove_Click(object sender, EventArgs e)
@@ -285,6 +310,7 @@ namespace AmbermoonMapCharEditor
             {
                 int index = characterList.SelectedIndex;
                 characterList.Remove(index);
+                Dirty = true;
                 int count = map!.CharacterReferences.Length;
 
                 for (int i = index; i < count; ++i)
@@ -323,8 +349,16 @@ namespace AmbermoonMapCharEditor
 
                 if (settingsForm.ShowDialog() == DialogResult.OK)
                 {
-                    character.TileFlags = settingsForm.TileFlags;
-                    character.GraphicIndex = settingsForm.GraphicIndex;
+                    if (character.TileFlags != settingsForm.TileFlags)
+                    {
+                        character.TileFlags = settingsForm.TileFlags;
+                        Dirty = true;
+                    }
+                    if (character.GraphicIndex != settingsForm.GraphicIndex)
+                    {
+                        character.GraphicIndex = settingsForm.GraphicIndex;
+                        Dirty = true;
+                    }
                 }
             }
         }

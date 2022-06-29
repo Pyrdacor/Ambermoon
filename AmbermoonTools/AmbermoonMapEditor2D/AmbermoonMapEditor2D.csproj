@@ -34,6 +34,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\..\..\ambermoon.net\Ambermoon.net\Ambermoon.Data.Legacy\Ambermoon.Data.Legacy.csproj" />
     <ProjectReference Include="..\AmbermoonCharEditor\AmbermoonCharEditor.csproj" />
     <ProjectReference Include="..\AmbermoonMapCharEditor\AmbermoonMapCharEditor.csproj" />
   </ItemGroup>

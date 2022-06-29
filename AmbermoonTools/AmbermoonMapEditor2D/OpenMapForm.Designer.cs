@@ -29,6 +29,7 @@ namespace AmbermoonMapEditor2D
         /// </summary>
         private void InitializeComponent()
         {
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(OpenMapForm));
             this.buttonCreateMap = new System.Windows.Forms.Button();
             this.buttonOpenMap = new System.Windows.Forms.Button();
             this.radioButtonIndoor = new System.Windows.Forms.RadioButton();
@@ -116,6 +117,7 @@ namespace AmbermoonMapEditor2D
             this.Controls.Add(this.buttonOpenMap);
             this.Controls.Add(this.buttonCreateMap);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
+            this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.MaximizeBox = false;
             this.Name = "OpenMapForm";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;

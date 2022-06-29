@@ -38,7 +38,13 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AmbermoonCharEditor", "Ambe
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AmbermoonMapEditor3D", "AmbermoonMapEditor3D\AmbermoonMapEditor3D.csproj", "{28AD388D-6A41-4C4F-99D5-C1F1411C69A0}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AmbermoonMapCharEditor", "AmbermoonMapCharEditor\AmbermoonMapCharEditor.csproj", "{40FA3E72-A33A-4BCB-8CCA-6695E1B41358}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AmbermoonMapCharEditor", "AmbermoonMapCharEditor\AmbermoonMapCharEditor.csproj", "{40FA3E72-A33A-4BCB-8CCA-6695E1B41358}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Ambermoon.Common", "..\..\..\ambermoon.net\Ambermoon.net\Ambermoon.Common\Ambermoon.Common.csproj", "{8890D30B-69FC-4E5F-ADFC-876CB6C2F6DE}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Ambermoon.Data.Common", "..\..\..\ambermoon.net\Ambermoon.net\Ambermoon.Data.Common\Ambermoon.Data.Common.csproj", "{1CC9B87E-8067-413D-BBE6-6128FBFABCF0}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Ambermoon.Data.Legacy", "..\..\..\ambermoon.net\Ambermoon.net\Ambermoon.Data.Legacy\Ambermoon.Data.Legacy.csproj", "{1826DF06-13D9-4202-BFDA-FF0F52FAE951}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -166,6 +172,30 @@ Global
 		{40FA3E72-A33A-4BCB-8CCA-6695E1B41358}.Release|Any CPU.Build.0 = Release|Any CPU
 		{40FA3E72-A33A-4BCB-8CCA-6695E1B41358}.ReleaseLinux|Any CPU.ActiveCfg = Release|Any CPU
 		{40FA3E72-A33A-4BCB-8CCA-6695E1B41358}.ReleaseLinux|Any CPU.Build.0 = Release|Any CPU
+		{8890D30B-69FC-4E5F-ADFC-876CB6C2F6DE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8890D30B-69FC-4E5F-ADFC-876CB6C2F6DE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8890D30B-69FC-4E5F-ADFC-876CB6C2F6DE}.DebugAndroid|Any CPU.ActiveCfg = DebugAndroid|Any CPU
+		{8890D30B-69FC-4E5F-ADFC-876CB6C2F6DE}.DebugAndroid|Any CPU.Build.0 = DebugAndroid|Any CPU
+		{8890D30B-69FC-4E5F-ADFC-876CB6C2F6DE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8890D30B-69FC-4E5F-ADFC-876CB6C2F6DE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8890D30B-69FC-4E5F-ADFC-876CB6C2F6DE}.ReleaseLinux|Any CPU.ActiveCfg = Release|Any CPU
+		{8890D30B-69FC-4E5F-ADFC-876CB6C2F6DE}.ReleaseLinux|Any CPU.Build.0 = Release|Any CPU
+		{1CC9B87E-8067-413D-BBE6-6128FBFABCF0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1CC9B87E-8067-413D-BBE6-6128FBFABCF0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1CC9B87E-8067-413D-BBE6-6128FBFABCF0}.DebugAndroid|Any CPU.ActiveCfg = DebugAndroid|Any CPU
+		{1CC9B87E-8067-413D-BBE6-6128FBFABCF0}.DebugAndroid|Any CPU.Build.0 = DebugAndroid|Any CPU
+		{1CC9B87E-8067-413D-BBE6-6128FBFABCF0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1CC9B87E-8067-413D-BBE6-6128FBFABCF0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1CC9B87E-8067-413D-BBE6-6128FBFABCF0}.ReleaseLinux|Any CPU.ActiveCfg = Release|Any CPU
+		{1CC9B87E-8067-413D-BBE6-6128FBFABCF0}.ReleaseLinux|Any CPU.Build.0 = Release|Any CPU
+		{1826DF06-13D9-4202-BFDA-FF0F52FAE951}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1826DF06-13D9-4202-BFDA-FF0F52FAE951}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1826DF06-13D9-4202-BFDA-FF0F52FAE951}.DebugAndroid|Any CPU.ActiveCfg = DebugAndroid|Any CPU
+		{1826DF06-13D9-4202-BFDA-FF0F52FAE951}.DebugAndroid|Any CPU.Build.0 = DebugAndroid|Any CPU
+		{1826DF06-13D9-4202-BFDA-FF0F52FAE951}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1826DF06-13D9-4202-BFDA-FF0F52FAE951}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1826DF06-13D9-4202-BFDA-FF0F52FAE951}.ReleaseLinux|Any CPU.ActiveCfg = Release|Any CPU
+		{1826DF06-13D9-4202-BFDA-FF0F52FAE951}.ReleaseLinux|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -16,6 +16,8 @@ namespace AmbermoonMapCharEditor
             InitializeComponent();
         }
 
+        public bool Dirty { get; private set; }
+
         private void PositionEditorForm_Load(object sender, EventArgs e)
         {
             (dataGridView1.Columns[1] as NumericUpDownColumn)!.MinValue = 1;

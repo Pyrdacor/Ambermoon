@@ -25,6 +25,16 @@ namespace AmbermoonMapEditor2D
             return dropOut;
         }
 
+        public T Peek()
+        {
+            if (Count == 0)
+                return null;
+
+            int peekTop = (items.Length + top - 1) % items.Length;
+
+            return items[peekTop];
+        }
+
         public T Pop()
         {
             if (Count == 0)
@@ -44,8 +54,65 @@ namespace AmbermoonMapEditor2D
             top = 0;
         }
 
-        public IEnumerator<T> GetEnumerator() => (IEnumerator<T>)items.GetEnumerator();
+        class StackEnumerator<T> : IEnumerator<T>, IEnumerator where T : class
+        {
+            readonly DropOutStack<T> stack;
+            int position = -1;
 
-        IEnumerator IEnumerable.GetEnumerator() => items.GetEnumerator();
+            public StackEnumerator(DropOutStack<T> stack)
+            {
+                this.stack = stack;
+            }
+
+            object IEnumerator.Current => Current;
+
+            public T Current
+            {
+                get
+                {
+                    try
+                    {
+                        return stack.items[position];
+                    }
+                    catch (IndexOutOfRangeException)
+                    {
+                        throw new InvalidOperationException("Stack enumerator points to invalid item.");
+                    }
+                }
+            }
+
+            public void Dispose()
+            {
+
+            }
+
+            public bool MoveNext()
+            {
+                if (position == -1)
+                {
+                    int peekTop = stack.Count == 0 ? 0 : (stack.items.Length + stack.top - 1) % stack.items.Length;
+                    position = peekTop;
+                    return stack.Count != 0;
+                }
+                else
+                {
+                    position = (stack.items.Length + position - 1) % stack.items.Length;
+                    while (stack.items[position] == null)
+                    {
+                        position = (stack.items.Length + position - 1) % stack.items.Length;
+                    }
+                    return ((position + 1) % stack.items.Length) != stack.top;
+                }
+            }
+
+            public void Reset()
+            {
+                position = -1;
+            }
+        }
+
+        public IEnumerator<T> GetEnumerator() => new StackEnumerator<T>(this);
+
+        IEnumerator IEnumerable.GetEnumerator() => new StackEnumerator<T>(this);
     }
 }

@@ -14,14 +14,16 @@ namespace AmbermoonMapEditor2D
 {
     public partial class OpenMapForm : Form
     {
-        public OpenMapForm(IGameData gameData, Dictionary<uint, Tileset> tilesets, MapManager mapManager)
+        public OpenMapForm(string gameDataPath, IGameData gameData, Dictionary<uint, Tileset> tilesets, MapManager mapManager)
         {
+            GameDataPath = gameDataPath;
             GameData = gameData;
             Tilesets = tilesets;
             MapManager = mapManager;
             InitializeComponent();
         }
 
+        internal string GameDataPath { get; private set; }
         internal IGameData GameData { get; private set; }
         internal Dictionary<uint, Tileset> Tilesets { get; private set; }
         internal Map Map { get; private set; }
@@ -38,6 +40,7 @@ namespace AmbermoonMapEditor2D
 
             if (dialog.ShowDialog() == DialogResult.OK)
             {
+                string gameDataPath = dialog.SelectedPath;
                 var gameData = new GameData(Ambermoon.Data.Legacy.GameData.LoadPreference.PreferExtracted, null, false);
                 gameData.Load(dialog.SelectedPath);
 
@@ -69,6 +72,9 @@ namespace AmbermoonMapEditor2D
                     return null;
 
                 BringToFront();
+
+                GameDataPath = gameDataPath;
+
                 return gameData;
             }
             else
@@ -200,7 +206,7 @@ namespace AmbermoonMapEditor2D
             if (header == 0x414D4E50 || header == 0x414D4252 ||
                 header == 0x414d4e43 || header == 0x414d5043)
             {
-                var container = new FileReader().ReadFile(Path.GetFileName(filename), reader.ReadToEnd());
+                var container = new FileReader().ReadRawFile(Path.GetFileName(filename), reader.ReadToEnd());
 
                 if (mapIndex == 0 && !AskForMapIndex(out mapIndex, container.Files.Keys.ToDictionary(k => (uint)k, _ => (string)null)))
                     return null;                
@@ -228,7 +234,7 @@ namespace AmbermoonMapEditor2D
             // LOB, VOL1 or JH
             else if (header == 0x014c4f42 || header == 0x564f4c31 || (header & 0xffff0000) == 0x4a480000)
             {
-                var container = new FileReader().ReadFile(Path.GetFileName(filename), reader.ReadToEnd());
+                var container = new FileReader().ReadRawFile(Path.GetFileName(filename), reader.ReadToEnd());
 
                 if (mapIndex == 0 && !AskForMapIndex(out mapIndex))
                     return null;
@@ -314,7 +320,7 @@ namespace AmbermoonMapEditor2D
             if (header == 0x414D4E50 || header == 0x414D4252 ||
                 header == 0x414d4e43 || header == 0x414d5043)
             {
-                var container = new FileReader().ReadFile("", reader.ReadToEnd());
+                var container = new FileReader().ReadRawFile("", reader.ReadToEnd());
 
                 if (!container.Files.TryGetValue((int)mapIndex, out var textReader))
                 {
@@ -327,7 +333,7 @@ namespace AmbermoonMapEditor2D
             // LOB, VOL1 or JH
             else if (header == 0x014c4f42 || header == 0x564f4c31 || (header & 0xffff0000) == 0x4a480000)
             {
-                var container = new FileReader().ReadFile("", reader.ReadToEnd());
+                var container = new FileReader().ReadRawFile("", reader.ReadToEnd());
                 return container.Files[1];
             }
             else // Raw file

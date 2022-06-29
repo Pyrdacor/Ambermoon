@@ -30,6 +30,7 @@ namespace AmbermoonMapEditor2D
         private void InitializeComponent()
         {
             this.components = new System.ComponentModel.Container();
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(EditTileForm));
             this.panelImage = new System.Windows.Forms.DrawPanel();
             this.contextMenuImage = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.toolStripMenuItemExportImage = new System.Windows.Forms.ToolStripMenuItem();
@@ -546,6 +547,7 @@ namespace AmbermoonMapEditor2D
             this.Controls.Add(this.trackBarFrames);
             this.Controls.Add(this.numericUpDownImageIndex);
             this.Controls.Add(this.panelImage);
+            this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Name = "EditTileForm";
             this.Text = "Edit Tile";
             this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.EditTileForm_FormClosed);

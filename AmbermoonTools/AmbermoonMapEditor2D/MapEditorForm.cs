@@ -10,9 +10,13 @@ namespace AmbermoonMapEditor2D
 {
     public partial class MapEditorForm : Form
     {
+        string title;
+
         public MapEditorForm()
         {
             InitializeComponent();
+
+            title = Text;
         }
 
         private void MapEditorForm_Load(object sender, EventArgs e)
@@ -31,6 +35,7 @@ namespace AmbermoonMapEditor2D
                 mapCharEditorControl.Init(map, gameData, graphicProvider);
                 mapCharEditorControl.SelectionChanged += MapCharEditorControl_SelectionChanged;
                 mapCharEditorControl.CurrentCharacterChanged += MapCharEditorControl_CurrentCharacterChanged;
+                mapCharEditorControl.DirtyChanged += MapCharEditorControl_DirtyChanged;
 
                 selectedMapCharacter = mapCharEditorControl.Count == 0 ? -1 : 0;
                 UpdateMapCharacterButtons();
@@ -41,19 +46,26 @@ namespace AmbermoonMapEditor2D
             }
         }
 
+        private void MapCharEditorControl_DirtyChanged()
+        {
+            if (mapCharEditorControl.Dirty)
+                MarkAsDirty();
+        }
+
         bool OpenMap()
         {
-            var openMapForm = new OpenMapForm(gameData, tilesets, mapManager);
+            var openMapForm = new OpenMapForm(gameDataPath, gameData, tilesets, mapManager);
             if (openMapForm.ShowDialog(this) == DialogResult.OK)
             {
                 BringToFront();
                 Refresh();
+                gameDataPath = openMapForm.GameDataPath;
                 gameData = openMapForm.GameData;
                 tilesets = openMapForm.Tilesets;
                 mapManager = openMapForm.MapManager;
                 currentTilesetTiles = tilesets[openMapForm.Map.TilesetOrLabdataIndex].Tiles.Length;
                 Initialize();
-                InitializeMap(openMapForm.Map);
+                InitializeMap(openMapForm.Map.Clone());
                 history.Clear();
                 toolStripMenuItemEditUndo.Enabled = false;
                 toolStripMenuItemEditRedo.Enabled = false;
@@ -80,6 +92,8 @@ namespace AmbermoonMapEditor2D
             checkBoxResting.Checked = true;
             checkBoxNoSleepUntilDawn.Checked = false;
             checkBoxMagic.Checked = true;
+
+            MarkAsDirty();
         }
 
         private void buttonIndoorDefaults_Click(object sender, EventArgs e)
@@ -88,6 +102,8 @@ namespace AmbermoonMapEditor2D
             checkBoxWorldSurface.Checked = false;
             checkBoxResting.Checked = false;
             checkBoxMagic.Checked = true;
+
+            MarkAsDirty();
         }
 
         private void buttonResize_Click(object sender, EventArgs e)
@@ -142,6 +158,7 @@ namespace AmbermoonMapEditor2D
         {
             StopMusic();
             map.MusicIndex = (uint)(comboBoxMusic.SelectedIndex + 1);
+            MarkAsDirty();
         }
 
         private void checkBoxResting_CheckedChanged(object sender, EventArgs e)
@@ -705,11 +722,28 @@ namespace AmbermoonMapEditor2D
         private void toolStripMenuItemEditUndo_Click(object sender, EventArgs e)
         {
             history.Undo();
+
+            CheckHistoryUnsavedChanges();
         }
 
         private void toolStripMenuItemEditRedo_Click(object sender, EventArgs e)
         {
             history.Redo();
+
+            CheckHistoryUnsavedChanges();
+        }
+
+        void CheckHistoryUnsavedChanges()
+        {
+            if (unsavedChanges && !unsavedChangesBesideHistory && !history.Dirty)
+            {
+                unsavedChanges = false;
+                Text = title;
+            }
+            else if (history.Dirty)
+            {
+                MarkAsDirty(true);
+            }
         }
 
         private void toolStripMenuItemMapNew_Click(object sender, EventArgs e)
@@ -724,17 +758,25 @@ namespace AmbermoonMapEditor2D
 
                 if (result == DialogResult.Yes)
                 {
-                    if (!Save())
+                    var saveResult = Save();
+
+                    if (saveResult == SaveResult.Error)
                     {
                         if (MessageBox.Show(this, "Error saving the map. Do you want to abort and return to your current map?",
                             "Unable to save map", MessageBoxButtons.YesNo, MessageBoxIcon.Error) == DialogResult.Yes)
                             return;
+                    }
+                    else if (saveResult == SaveResult.Cancelled)
+                    {
+                        return;
                     }
                 }
             }
 
             if (OpenMap())
             {
+                saveFileName = null;
+                toolStripMenuItemMapSave.Enabled = false;
                 graphicProvider.PaletteIndex = map.PaletteIndex;
                 mapCharEditorControl.Init(map);
                 selectedMapCharacter = mapCharEditorControl.Count == 0 ? -1 : 0;
@@ -749,7 +791,8 @@ namespace AmbermoonMapEditor2D
 
         private void toolStripMenuItemMapSaveAs_Click(object sender, EventArgs e)
         {
-            SaveAs();
+            if (SaveAs() == SaveResult.Success && saveFileName != null)
+                toolStripMenuItemMapSave.Enabled = true;
         }
 
         private void toolStripMenuItemMapQuit_Click(object sender, EventArgs e)
@@ -772,7 +815,9 @@ namespace AmbermoonMapEditor2D
 
                 if (result == DialogResult.Yes)
                 {
-                    if (!Save())
+                    var saveResult = Save();
+
+                    if (saveResult == SaveResult.Error)
                     {
                         if (MessageBox.Show(this, "Error saving the map. Do you want to abort and return to your current map?",
                             "Unable to save map", MessageBoxButtons.YesNo, MessageBoxIcon.Error) == DialogResult.Yes)
@@ -780,6 +825,11 @@ namespace AmbermoonMapEditor2D
                             e.Cancel = true;
                             return;
                         }
+                    }
+                    else if (saveResult == SaveResult.Cancelled)
+                    {
+                        e.Cancel = true;
+                        return;
                     }
                 }
             }
@@ -930,6 +980,7 @@ namespace AmbermoonMapEditor2D
         private void comboBoxWorld_SelectedIndexChanged(object sender, EventArgs e)
         {
             map.World = (World)comboBoxWorld.SelectedIndex;
+            MarkAsDirty();
         }
 
         private void trackBarZoom_Scroll(object sender, EventArgs e)
@@ -955,6 +1006,9 @@ namespace AmbermoonMapEditor2D
             var positionEditor = new AmbermoonMapCharEditor.PositionEditorForm(map, character);
 
             positionEditor.ShowDialog();
+
+            if (positionEditor.Dirty)
+                MarkAsDirty();
         }
 
         private void buttonPlaceCharacterOnMap_Click(object sender, EventArgs e)
