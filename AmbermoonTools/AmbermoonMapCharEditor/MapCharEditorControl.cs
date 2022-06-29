@@ -185,7 +185,7 @@ namespace AmbermoonMapCharEditor
 
             if (character.Type == CharacterType.MapObject)
             {
-                character.EventIndex = character.Index;
+                character.EventIndex = character.Index + 1;
                 character.Index = 1;
             }
 
