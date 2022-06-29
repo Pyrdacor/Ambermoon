@@ -29,6 +29,11 @@ namespace AmbermoonMapEditor2D
                 graphicProvider = new GraphicProvider2D(combatBackgrounds, gameData, imageCache, tilesets);
                 graphicProvider.PaletteIndex = map.PaletteIndex;
                 mapCharEditorControl.Init(map, gameData, graphicProvider);
+                mapCharEditorControl.SelectionChanged += MapCharEditorControl_SelectionChanged;
+                mapCharEditorControl.CurrentCharacterChanged += MapCharEditorControl_CurrentCharacterChanged;
+
+                selectedMapCharacter = mapCharEditorControl.Count == 0 ? -1 : 0;
+                UpdateMapCharacterButtons();
             }
             else
             {
@@ -167,11 +172,6 @@ namespace AmbermoonMapEditor2D
         {
             if (radioButtonDungeon.Checked)
                 MapTypeChanged();
-        }
-
-        private void buttonShowCharacterOnMap_Click(object sender, EventArgs e)
-        {
-
         }
 
         private void buttonEditCharacter_Click(object sender, EventArgs e)
@@ -737,6 +737,8 @@ namespace AmbermoonMapEditor2D
             {
                 graphicProvider.PaletteIndex = map.PaletteIndex;
                 mapCharEditorControl.Init(map);
+                selectedMapCharacter = mapCharEditorControl.Count == 0 ? -1 : 0;
+                UpdateMapCharacterButtons();
             }
         }
 
@@ -938,6 +940,90 @@ namespace AmbermoonMapEditor2D
         private void mapCharEditorControl_Load(object sender, EventArgs e)
         {
 
+        }
+
+        private void buttonPositions_Click(object sender, EventArgs e)
+        {
+            if (selectedMapCharacter == -1)
+                return;
+
+            var character = map.CharacterReferences[selectedMapCharacter];
+
+            if (character == null)
+                return;
+
+            var positionEditor = new AmbermoonMapCharEditor.PositionEditorForm(map, character);
+
+            positionEditor.ShowDialog();
+        }
+
+        private void buttonPlaceCharacterOnMap_Click(object sender, EventArgs e)
+        {
+            SelectTool(Tool.PositionPicker);
+        }
+
+        private void MapCharEditorControl_SelectionChanged(int index)
+        {
+            selectedMapCharacter = index;
+
+            UpdateMapCharacterButtons();
+        }
+
+        private void MapCharEditorControl_CurrentCharacterChanged()
+        {
+            UpdateMapCharacterButtons();
+        }
+
+        void UpdateMapCharacterButtons()
+        {
+            if (selectedMapCharacter == -1 || map.CharacterReferences[selectedMapCharacter] == null)
+            {
+                buttonPositions.Enabled = false;
+                buttonPlaceCharacterOnMap.Enabled = false;
+                labelCharacterPosition.Visible = false;
+            }
+            else
+            {
+                var character = map.CharacterReferences[selectedMapCharacter];
+                buttonPositions.Enabled = !character.CharacterFlags.HasFlag(Map.CharacterReference.Flags.RandomMovement) &&
+                    (character.Type == CharacterType.Monster || !character.CharacterFlags.HasFlag(Map.CharacterReference.Flags.Stationary));
+                buttonPlaceCharacterOnMap.Enabled = !buttonPositions.Enabled;
+                labelCharacterPosition.Visible = buttonPlaceCharacterOnMap.Enabled;
+
+                if (buttonPositions.Enabled)
+                {
+                    if (character.Positions.Count < 288)
+                    {
+                        int add = 288 - character.Positions.Count;
+                        int x = character.Positions.Count == 0 ? 1 : character.Positions[0].X;
+                        int y = character.Positions.Count == 0 ? 1 : character.Positions[0].Y;
+
+                        for (int i = 0; i < add; ++i)
+                            character.Positions.Add(new Ambermoon.Position(x, y));
+                    }
+                }
+                else
+                {
+                    if (character.Positions.Count == 0)
+                        character.Positions.Add(new Ambermoon.Position(0, 0));
+                    else if (character.Positions.Count > 1)
+                        character.Positions.RemoveRange(1, character.Positions.Count - 1);
+
+                    var position = character.Positions[0];
+                    UpdateMapCharacterPosition(position);
+                }
+            }            
+        }
+
+        void UpdateMapCharacterPosition(Ambermoon.Position position)
+        {
+            labelCharacterPosition.Text = $"Location: {position.X}, {position.Y}";
+        }
+
+        private void buttonPlaceCharacterOnMap_EnabledChanged(object sender, EventArgs e)
+        {
+            if (!buttonPlaceCharacterOnMap.Enabled && currentTool == Tool.PositionPicker)
+                SelectTool(Tool.Brush);
         }
     }
 }

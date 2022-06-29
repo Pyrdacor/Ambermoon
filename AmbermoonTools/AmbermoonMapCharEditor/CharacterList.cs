@@ -58,6 +58,10 @@ namespace AmbermoonMapCharEditor
             {
                 characterRows[0].SelectRow();
             }
+            else
+            {
+                SelectedIndexChanged?.Invoke(-1);
+            }
         }
 
         private void CharacterRow_Selected(int index)

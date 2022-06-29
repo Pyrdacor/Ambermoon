@@ -27,7 +27,8 @@ namespace AmbermoonMapEditor2D
             Fill,
             ColorPicker,
             RemoveFrontLayer,
-            EventChanger
+            EventChanger,
+            PositionPicker
         }
 
         static readonly string[] LayerName = new string[2]
@@ -159,6 +160,7 @@ namespace AmbermoonMapEditor2D
         Cursor cursorPointer;
         Cursor cursorColorPicker;
         Cursor cursorEraser;
+        Cursor cursorPrecision;
         int tileMarkerWidth = 0;
         int tileMarkerHeight = 0;
         int hoveredMapTile = -1;
@@ -172,6 +174,7 @@ namespace AmbermoonMapEditor2D
         bool showEvents = false;
         bool mapLoading = false;
         ulong frame = 0;
+        int selectedMapCharacter = -1;
 
         History history = new History();
         Map map;
@@ -193,6 +196,7 @@ namespace AmbermoonMapEditor2D
             cursorPointer = CursorResourceLoader.LoadEmbeddedCursor(Properties.Resources.pointer);
             cursorColorPicker = CursorResourceLoader.LoadEmbeddedCursor(Properties.Resources.color_picker);
             cursorEraser = CursorResourceLoader.LoadEmbeddedCursor(Properties.Resources.eraser);
+            cursorPrecision = CursorResourceLoader.LoadEmbeddedCursor(Properties.Resources.Precision);
 
             toolTipIndoor.SetToolTip(radioButtonIndoor, "Indoor maps are always fully lighted.");
             toolTipOutdoor.SetToolTip(radioButtonOutdoor, "Outdoor maps are affected by the day-night-cycle.");
@@ -476,6 +480,8 @@ namespace AmbermoonMapEditor2D
                     return Properties.Resources.round_colorize_black_24;
                 case Tool.RemoveFrontLayer:
                     return Properties.Resources.round_layers_clear_black_24;
+                case Tool.PositionPicker:
+                    return Properties.Resources.round_control_camera_black_24;
                 default:
                     return null;
             }            
@@ -499,6 +505,8 @@ namespace AmbermoonMapEditor2D
                     return buttonToolRemoveFrontLayer;
                 case Tool.EventChanger:
                     return buttonToolEventChanger;
+                case Tool.PositionPicker:
+                    return buttonPlaceCharacterOnMap;
                 default:
                     return null;
             }
@@ -521,6 +529,8 @@ namespace AmbermoonMapEditor2D
                     return cursorColorPicker;
                 case Tool.RemoveFrontLayer:
                     return cursorEraser;
+                case Tool.PositionPicker:
+                    return cursorPrecision;
                 default:
                     return null;
             }
@@ -545,6 +555,8 @@ namespace AmbermoonMapEditor2D
                     return 1;
                 case Tool.EventChanger:
                     return 1;
+                case Tool.PositionPicker:
+                    return 1;
                 default:
                     return 0;
             }
@@ -568,6 +580,8 @@ namespace AmbermoonMapEditor2D
                 case Tool.RemoveFrontLayer:
                     return 1;
                 case Tool.EventChanger:
+                    return 1;
+                case Tool.PositionPicker:
                     return 1;
                 default:
                     return 0;
@@ -639,6 +653,9 @@ namespace AmbermoonMapEditor2D
                     break;
                 case Tool.EventChanger:
                     ChangeEvent(x, y, secondaryFunction);
+                    break;
+                case Tool.PositionPicker:
+                    PickPosition(x, y);
                     break;
             }
         }
@@ -816,8 +833,8 @@ namespace AmbermoonMapEditor2D
             {
                 if (areaOnly)
                 {
-                    // TODO
-                    NotImplemented();
+                    var areaFiller = new AreaFiller(map);
+                    areaFiller.Fill(x, y, newTileIndex, layer, changedTiles);
                 }
                 else
                 {
@@ -847,25 +864,17 @@ namespace AmbermoonMapEditor2D
                 panelMap.Refresh();
             }, () =>
             {
-                if (areaOnly)
+                foreach (var changedTile in changedTiles)
                 {
-                    // TODO
-                    NotImplemented();
-                }
-                else
-                {
-                    foreach (var changedTile in changedTiles)
+                    int x = changedTile.Key % map.Width;
+                    int y = changedTile.Key / map.Width;
+                    if (layer == 0)
                     {
-                        int x = changedTile.Key % map.Width;
-                        int y = changedTile.Key / map.Width;
-                        if (layer == 0)
-                        {
-                            map.InitialTiles[x, y].BackTileIndex = changedTile.Value;
-                        }
-                        else
-                        {
-                            map.InitialTiles[x, y].FrontTileIndex = changedTile.Value;
-                        }
+                        map.InitialTiles[x, y].BackTileIndex = changedTile.Value;
+                    }
+                    else
+                    {
+                        map.InitialTiles[x, y].FrontTileIndex = changedTile.Value;
                     }
                 }
                 panelMap.Refresh();
@@ -972,6 +981,48 @@ namespace AmbermoonMapEditor2D
             // TODO
             NotImplemented();
             return false;
+        }
+
+        void PickPosition(int x, int y)
+        {
+            // TODO: undo/redo
+
+            // x and y are 0-based here!
+            if (selectedMapCharacter != -1)
+            {
+                var character = map.CharacterReferences[selectedMapCharacter];
+
+                if (character != null)
+                {
+                    if (character.Positions.Count < 1)
+                        character.Positions.Add(new Ambermoon.Position(x + 1, y + 1));
+                    else
+                    {
+                        character.Positions[0].X = x + 1;
+                        character.Positions[0].Y = y + 1;
+                    }
+
+                    UpdateMapCharacterPosition(character.Positions[0]);
+                }
+            }
+
+            RunDelayed(TimeSpan.FromMilliseconds(250), () => SelectTool(Tool.Brush));
+        }
+
+        void RunDelayed(TimeSpan delay, Action action)
+        {
+            var timer = new Timer();
+            timer.Interval = (int)delay.TotalMilliseconds;
+            timer.Tick += Timer_Tick;
+
+            void Timer_Tick(object sender, EventArgs e)
+            {
+                timer.Stop();
+                timer.Tick -= Timer_Tick;
+                action();
+            }
+
+            timer.Start();
         }
     }
 }

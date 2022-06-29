@@ -18,11 +18,13 @@
   <ItemGroup>
     <None Remove="Resources\color-picker.cur" />
     <None Remove="Resources\pointer.cur" />
+    <None Remove="Resources\Precision.cur" />
   </ItemGroup>
 
   <ItemGroup>
     <EmbeddedResource Include="Resources\color-picker.cur" />
     <EmbeddedResource Include="Resources\pointer.cur" />
+    <EmbeddedResource Include="Resources\Precision.cur" />
   </ItemGroup>
 
   <ItemGroup>

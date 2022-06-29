@@ -16,5 +16,8 @@
     <Compile Update="MapCharSettingsForm.cs">
       <SubType>Form</SubType>
     </Compile>
+    <Compile Update="PositionEditorForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
   </ItemGroup>
 </Project>

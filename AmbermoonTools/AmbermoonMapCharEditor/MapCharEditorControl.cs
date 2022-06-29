@@ -1,11 +1,8 @@
 ﻿using Ambermoon.Data;
-using Ambermoon.Data.Legacy.Characters;
 using System.Text.RegularExpressions;
 
 namespace AmbermoonMapCharEditor
 {
-    // TODO: tile flags, combat background index, gfx index, positions
-
     public partial class MapCharEditorControl : UserControl
     {
         public MapCharEditorControl()
@@ -15,7 +12,9 @@ namespace AmbermoonMapCharEditor
             Visible = false;       
         }
 
-        static readonly Regex InkRegex = new Regex(@"~INK ?[0-9]+~", RegexOptions.Compiled); 
+        static readonly Regex InkRegex = new Regex(@"~INK ?[0-9]+~", RegexOptions.Compiled);
+
+        public int Count => characterList!.Count;
 
         public void Init(Map map)
         {
@@ -144,6 +143,9 @@ namespace AmbermoonMapCharEditor
             buttonAdd.Enabled = characterList!.Count < 32;
             buttonRemove.Enabled = characterList.SelectedIndex != -1 && characterList.Count != 0;
             groupBoxCharProperties.Enabled = characterList.Count != 0;
+
+            if (characterList.Count == 0)
+                SelectionChanged?.Invoke(-1);
         }
 
         private void CharacterList_SelectedIndexChanged(int index)
@@ -167,6 +169,8 @@ namespace AmbermoonMapCharEditor
             }
 
             UpdateCurrentCharacter(character);
+
+            CurrentCharacterChanged?.Invoke();
         }
 
         CharacterList? characterList;
@@ -180,10 +184,19 @@ namespace AmbermoonMapCharEditor
         List<string> mapTexts = new List<string>();
 
         public event Action<int>? SelectionChanged;
+        public event Action? CurrentCharacterChanged;
 
         void UpdateCurrentCharacter(Map.CharacterReference? character = null)
         {
-            character ??= map!.CharacterReferences[characterList!.SelectedIndex];
+            if (characterList!.SelectedIndex == -1)
+            {
+                groupBoxCharProperties.Enabled = false;
+                return;
+            }
+
+            groupBoxCharProperties.Enabled = true;
+
+            character ??= map!.CharacterReferences[characterList.SelectedIndex];
 
             checkBoxRandomMovement.Checked = character.CharacterFlags.HasFlag(Map.CharacterReference.Flags.RandomMovement);
             checkBoxUseTileset.Checked = character.Type != CharacterType.Monster &&
@@ -227,6 +240,8 @@ namespace AmbermoonMapCharEditor
                 character.CharacterFlags |= flag;
             else
                 character.CharacterFlags &= ~flag;
+
+            CurrentCharacterChanged?.Invoke();
         }
 
         private void checkBoxUseTileset_CheckedChanged(object sender, EventArgs e)
@@ -254,12 +269,13 @@ namespace AmbermoonMapCharEditor
 
         private void buttonAdd_Click(object sender, EventArgs e)
         {
-            map!.CharacterReferences[characterList!.Count] ??= new Map.CharacterReference
+            var character = map!.CharacterReferences[characterList!.Count] ??= new Map.CharacterReference
             {
                 Index = 1,
-                Type = CharacterType.NPC,
-                // Positions = new ...
+                Type = CharacterType.NPC
             };
+            character.Positions.AddRange(Enumerable.Range(0, 288).Select(_ => new Ambermoon.Position(0, 0)));
+            CurrentCharacterChanged?.Invoke();
             characterList.Add();
         }
 
