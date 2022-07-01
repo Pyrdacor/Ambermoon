@@ -1,3 +1,13 @@
+## Version 1.15
+
+- Fixed memory handle crash when using eagle (fix got lost in previous patch)
+- Renamed condition "Veralterung" to "Alterung"
+- Fixed option name "MMusik" to "Musik"
+- Fixed endboss defeat message: replaced "BEGABEN" with "BEGRABEN"
+- Renamed "PELANI" to "PELANIS" (is the correct name in Amberstar and english version)
+- Fixed NPC Brog (events and texts)
+- Nera's Ring is now marked as "important"
+
 ## Version 1.14
 
 - Added fixed Fantasy_intro which should also run on 060 CPUs

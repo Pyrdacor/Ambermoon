@@ -1,3 +1,11 @@
+## Version 1.15
+
+- Fixed memory handle crash when using eagle (fix got lost in previous patch)
+- Fixed text when using the elf harp at the crystal wall to work for females as well
+- Fixed wrong translation of Pelanis' farewell text
+- Fixed NPC Brog (events and texts)
+- Nera's Ring is now marked as "important"
+
 ## Version 1.14
 
 - Merged AM2_BLIT into AM2_CPU

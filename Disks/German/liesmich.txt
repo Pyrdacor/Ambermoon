@@ -1,5 +1,18 @@
-Ambermoon German 1.14 by Pyrdacor (20-06-2022)
+Ambermoon German 1.15 by Pyrdacor (01-07-2022)
 ==============================================
+
+Änderungen in 1.15
+==================
+
+- Der Crash wenn man den Adler zu oft ruft wurde nochmals behoben.
+  Der Fix ging wohl in 1.13 verloren.
+- Der Status "Veralterung" heißt nun "Alterung"
+- Typo im Optionsnamen für Musik behoben ("MMusik")
+- Im Text nach dem Endbosskampf wurde "BEGABEN" durch "BEGRABEN" ersetzt
+- Der NPC "Pelani" heißt nun "Pelanis" wie in Amberstar und der englischen Version
+- Der NPC "Brog" wurde gefixt. Einige Texte konnten nie getriggert werden außerdem gab es Textfehler bei denen Dor Kiredon statt Dor Grestin verwendet wurde.
+- Nera's Ring ist nun ein wichtiger Gegenstand
+
 
 Änderungen in 1.14
 ==================

@@ -1,5 +1,15 @@
-Ambermoon English 1.14 by Pyrdacor (13-05-2022)
+Ambermoon English 1.15 by Pyrdacor (01-07-2022)
 ===============================================
+
+Changes in 1.15
+===============
+
+- Fixed the eagle crash again (fix got lost in 1.14)
+- Fixed text when using the elf harp at the crystal wall to work for females too
+- Fixed wrong translation of Pelanis' farewell text
+- Fixed NPC Brog (events and texts)
+- Nera's Ring is now marked as "important"
+
 
 Changes in 1.14
 ===============
@@ -15,9 +25,6 @@ Changes in 1.14
 - Fixed "CELLAR" to "CELL" in Clementine's text about the madman
 - Fixed a glitch where it was possible to enter the upper part of the shipyard, also adjusted some tiles there
 
-
-Ambermoon English 1.13 by Pyrdacor (31-01-2022)
-===============================================
 
 Changes in 1.13
 ===============

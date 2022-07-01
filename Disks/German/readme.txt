@@ -1,5 +1,17 @@
-Ambermoon German 1.14 by Pyrdacor (20-06-2022)
+Ambermoon German 1.15 by Pyrdacor (01-07-2022)
 ==============================================
+
+Changes in 1.15
+===============
+
+- Fixed memory handle crash when using eagle (fix got lost in previous patch)
+- Renamed condition "Veralterung" to "Alterung"
+- Fixed option name "MMusik" to "Musik"
+- Fixed endboss defeat message: replaced "BEGABEN" with "BEGRABEN"
+- Renamed "PELANI" to "PELANIS" (is the correct name in Amberstar and english version)
+- Fixed NPC Brog (events and texts)
+- Nera's Ring is now marked as "important"
+
 
 Changes in 1.14
 ===============
