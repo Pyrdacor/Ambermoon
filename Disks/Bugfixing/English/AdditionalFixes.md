@@ -1,3 +1,8 @@
+## Version 1.16
+
+- Fixed second eagle memory handle crash (when releasing the eagle)
+- Fixed several tiles which allowed moving into walls (bandit's house, spannenberg and illien inn)
+
 ## Version 1.15
 
 - Fixed memory handle crash when using eagle (fix got lost in previous patch)
