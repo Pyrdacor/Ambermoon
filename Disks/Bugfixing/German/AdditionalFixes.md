@@ -3,6 +3,18 @@
 - Fixed second eagle memory handle crash (when releasing the eagle)
 - Fixed several tiles which allowed moving into walls (bandit's house, spannenberg and illien inn)
 - Fixed wrong case in the text when entering the hangar
+- Greatly improved Sansri's temple
+  - Unused levers are marked on the map
+  - Unused hourglasses are marked on the map
+  - Missing text when destroying hourglasses were added
+  - Improved the events that happen when the special walls come down
+  - Improved which levers open which walls
+  - Moved one hourglass to the end of the first level (feels much better)
+  - Minor adjustments which improve the feel of the dungeon
+- Fixed several NPCs (unused texts etc)
+  - Sandra
+  - Ketnar
+  - Drongeb
 
 ## Version 1.15
 
