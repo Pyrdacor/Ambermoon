@@ -16,6 +16,7 @@
   - Drongeb
 - You can now talk to the two patients in the house of healers in Burnville
 - The race name for animal NPCs is now correctly displayed
+- Mando's sword now grants Ghost Weapon instead of Fire Pillar (like in the german version)
 
 ## Version 1.15
 
