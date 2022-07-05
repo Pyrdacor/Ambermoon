@@ -15,6 +15,7 @@
   - Sandra
   - Ketnar
   - Drongeb
+- You can now talk to the two patients in the house of healers in Burnville
 
 ## Version 1.15
 
