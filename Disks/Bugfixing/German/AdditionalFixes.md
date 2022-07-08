@@ -1,5 +1,6 @@
 ## Version 1.16
 
+- Fixed crash when closing the game (introduce in 1.13)
 - Fixed second eagle memory handle crash (when releasing the eagle)
 - Fixed several tiles which allowed moving into walls (bandit's house, spannenberg and illien inn)
 - Fixed wrong case in the text when entering the hangar
