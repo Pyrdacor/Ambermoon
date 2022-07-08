@@ -22,10 +22,10 @@ I will provide some helpful tools too.
 
 Version | Language | Type | Download | Release date
 --- | --- | --- | --- | ---
-1.15 | English | Extracted Files | [zip](https://github.com/Pyrdacor/Ambermoon/raw/master/Disks/English/ambermoon_english_1.15_extracted.zip) [lha](https://github.com/Pyrdacor/Ambermoon/raw/master/Disks/English/ambermoon_english_1.15_extracted.lha) [tar.gz](https://github.com/Pyrdacor/Ambermoon/raw/master/Disks/English/ambermoon_english_1.15_extracted.tar.gz) | 01-07-2022
-1.15 | English | ADF Disk Images | [zip](https://github.com/Pyrdacor/Ambermoon/raw/master/Disks/English/ambermoon_english_1.15_adf.zip) [lha](https://github.com/Pyrdacor/Ambermoon/raw/master/Disks/English/ambermoon_english_1.15_adf.lha) [tar.gz](https://github.com/Pyrdacor/Ambermoon/raw/master/Disks/English/ambermoon_english_1.15_adf.tar.gz) | 01-07-2022
-1.15 | German | Extracted Files | [zip](https://github.com/Pyrdacor/Ambermoon/raw/master/Disks/German/ambermoon_german_1.15_extracted.zip) [lha](https://github.com/Pyrdacor/Ambermoon/raw/master/Disks/German/ambermoon_german_1.15_extracted.lha) [tar.gz](https://github.com/Pyrdacor/Ambermoon/raw/master/Disks/German/ambermoon_german_1.15_extracted.tar.gz) | 01-07-2022
-1.15 | German | ADF Disk Images | [zip](https://github.com/Pyrdacor/Ambermoon/raw/master/Disks/German/ambermoon_german_1.15_adf.zip) [lha](https://github.com/Pyrdacor/Ambermoon/raw/master/Disks/German/ambermoon_german_1.15_adf.lha) [tar.gz](https://github.com/Pyrdacor/Ambermoon/raw/master/Disks/German/ambermoon_german_1.15_adf.tar.gz) | 01-07-2022
+1.16 | English | Extracted Files | [zip](https://github.com/Pyrdacor/Ambermoon/raw/master/Disks/English/ambermoon_english_1.16_extracted.zip) [lha](https://github.com/Pyrdacor/Ambermoon/raw/master/Disks/English/ambermoon_english_1.16_extracted.lha) [tar.gz](https://github.com/Pyrdacor/Ambermoon/raw/master/Disks/English/ambermoon_english_1.16_extracted.tar.gz) | 08-07-2022
+1.16 | English | ADF Disk Images | [zip](https://github.com/Pyrdacor/Ambermoon/raw/master/Disks/English/ambermoon_english_1.16_adf.zip) [lha](https://github.com/Pyrdacor/Ambermoon/raw/master/Disks/English/ambermoon_english_1.16_adf.lha) [tar.gz](https://github.com/Pyrdacor/Ambermoon/raw/master/Disks/English/ambermoon_english_1.16_adf.tar.gz) | 08-07-2022
+1.16 | German | Extracted Files | [zip](https://github.com/Pyrdacor/Ambermoon/raw/master/Disks/German/ambermoon_german_1.16_extracted.zip) [lha](https://github.com/Pyrdacor/Ambermoon/raw/master/Disks/German/ambermoon_german_1.16_extracted.lha) [tar.gz](https://github.com/Pyrdacor/Ambermoon/raw/master/Disks/German/ambermoon_german_1.16_extracted.tar.gz) | 08-07-2022
+1.16 | German | ADF Disk Images | [zip](https://github.com/Pyrdacor/Ambermoon/raw/master/Disks/German/ambermoon_german_1.16_adf.zip) [lha](https://github.com/Pyrdacor/Ambermoon/raw/master/Disks/German/ambermoon_german_1.16_adf.lha) [tar.gz](https://github.com/Pyrdacor/Ambermoon/raw/master/Disks/German/ambermoon_german_1.16_adf.tar.gz) | 08-07-2022
 
 ### Patches
 
@@ -36,8 +36,8 @@ In contrast to the main releases, the patches only contain those files which hav
 
 Version | Language | Download | Release date
 --- | --- | --- | ---
-1.15 | English | [zip](https://github.com/Pyrdacor/Ambermoon/raw/master/Disks/Patches/PyrdacorFixEnglish1.15.zip) [lha](https://github.com/Pyrdacor/Ambermoon/raw/master/Disks/Patches/PyrdacorFixEnglish1.15.lha) [tar.gz](https://github.com/Pyrdacor/Ambermoon/raw/master/Disks/Patches/PyrdacorFixEnglish1.15.tar.gz) | 01-07-2022
-1.15 | German | [zip](https://github.com/Pyrdacor/Ambermoon/raw/master/Disks/Patches/PyrdacorFixGerman1.15.zip) [lha](https://github.com/Pyrdacor/Ambermoon/raw/master/Disks/Patches/PyrdacorFixGerman1.15.lha) [tar.gz](https://github.com/Pyrdacor/Ambermoon/raw/master/Disks/Patches/PyrdacorFixGerman1.15.tar.gz) | 01-07-2022
+1.16 | English | [zip](https://github.com/Pyrdacor/Ambermoon/raw/master/Disks/Patches/PyrdacorFixEnglish1.16.zip) [lha](https://github.com/Pyrdacor/Ambermoon/raw/master/Disks/Patches/PyrdacorFixEnglish1.16.lha) [tar.gz](https://github.com/Pyrdacor/Ambermoon/raw/master/Disks/Patches/PyrdacorFixEnglish1.16.tar.gz) | 08-07-2022
+1.16 | German | [zip](https://github.com/Pyrdacor/Ambermoon/raw/master/Disks/Patches/PyrdacorFixGerman1.16.zip) [lha](https://github.com/Pyrdacor/Ambermoon/raw/master/Disks/Patches/PyrdacorFixGerman1.16.lha) [tar.gz](https://github.com/Pyrdacor/Ambermoon/raw/master/Disks/Patches/PyrdacorFixGerman1.16.tar.gz) | 08-07-2022
 
 
 ## Tool releases

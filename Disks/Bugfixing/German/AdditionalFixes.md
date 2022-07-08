@@ -18,6 +18,7 @@
   - Drongeb
 - You can now talk to the two patients in the house of healers in Burnville
 - The race name for animal NPCs is now correctly displayed
+- Fixed name in last will
 
 ## Version 1.15
 

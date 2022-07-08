@@ -1,5 +1,32 @@
-Ambermoon German 1.15 by Pyrdacor (01-07-2022)
+Ambermoon German 1.16 by Pyrdacor (08-07-2022)
 ==============================================
+
+Änderungen in 1.16
+==================
+
+- Der Crash beim Beenden des Spiels, der ab 1.13 auftrat, ist nun behoben.
+- Ein weiterer Crash wenn man den Adler zu oft wieder freilässt wurde behoben.
+- Einige Map-Tiles wurden gefixt, die es erlaubten in Wände zu laufen.
+  - Banditenversteck
+  - Spannenberg Taverne
+  - Illien Taverne
+- Ein Typo (falscher Fall) beim Text-Popup beim Betreten des Hangars wurde behoben.
+- Sansris Tempel wurde verbessert:
+  - Nicht gezogene Hebel werden auf der Karte als "Spezial" markiert
+  - Nicht zerstörte Sanduhren ebenfalls
+  - Fehlende Texte beim Zerstören der Sanduhren wurden hinzugefügt
+  - Die Events für die herabfallenden Wände wurden verbessert
+  - Es wurde angepasst welcher Hebel welche Wand öffnet (nun viel besser)
+  - Eine der Sanduhren wurde ans Ende des Levels verschoben (nun viel logischer und besser)
+  - Weitere kleinere Verbesserungen, damit sich der Tempel schöner spielt
+- Einige fehlende NPC-Interaktionen wurden hinzugefügt:
+  - Sandra
+  - Ketnar
+  - Drongeb
+- Man kann nun die beiden Patienten im Haus der Heiler von Burnville ansprechen
+- Der Rassenname von Tieren wird nun in Gesprächen angezeigt
+- Im Testament steht nun immer der Name des Helden und nicht des aktiven Spielers
+
 
 Änderungen in 1.15
 ==================

@@ -1,5 +1,28 @@
-Ambermoon English 1.15 by Pyrdacor (01-07-2022)
+Ambermoon English 1.16 by Pyrdacor (08-07-2022)
 ===============================================
+
+Changes in 1.16
+===============
+
+- Fixed crash when closing the game (introduce in 1.14)
+- Fixed second eagle memory handle crash (when releasing the eagle)
+- Fixed several tiles which allowed moving into walls (bandit's house, spannenberg and illien inn)
+- Greatly improved Sansri's temple
+  - Unused levers are marked on the map
+  - Unused hourglasses are marked on the map
+  - Missing texts when destroying hourglasses were added
+  - Improved the events that happen when the special walls come down
+  - Improved which levers open which walls
+  - Moved one hourglass to the end of the first level (feels much better)
+  - Minor adjustments which improve the feel of the dungeon
+- Fixed several NPCs (unused texts etc)
+  - Sandra
+  - Ketnar
+  - Drongeb
+- You can now talk to the two patients in the house of healers in Burnville
+- The race name for animal NPCs is now correctly displayed
+- Mando's sword now grants Ghost Weapon instead of Fire Pillar (like in the german version)
+
 
 Changes in 1.15
 ===============
