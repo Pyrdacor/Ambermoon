@@ -1,3 +1,8 @@
+## Version 1.17
+
+- Fixed some broken map events introduced in 1.16 (bandit's house)
+- Kire's treasure room is not open on first visit anymore
+
 ## Version 1.16
 
 - Fixed crash when closing the game (introduce in 1.13)
