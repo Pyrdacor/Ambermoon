@@ -38,7 +38,8 @@ Bit | Meaning
 11 | CanUseSpells (**Note** in original you can still use spell scrolls or use spells in battles on that map. It only disables the spell book button on the map screen. In **Ambermoon Advanced** however you won't be able to use spell scrolls but still can use other items with spells like potions or equipment.)
 12 | No travel music (if the Travel bit is set, this will avoid playing music dependent on travel type but will play the map's music instead) (**Ambermoon Advanced** only)
 13 | No marking/returning (won't allow using the spells "Word of marking" or "Word of returning" on the map) (**Ambermoon Advanced** only)
-14-15 | Unused
+14 | Unused
+15 | This is only used by Ambermoon.net and a special data storage mechanism. If the bit is set, an additional word follows the header which gives the index of another map. All tile data is then taken from that map. This way many world maps (all water) can be stored with much less size. It saves almost 10000 uncompress bytes per such map.
 
 ### Map data
 
