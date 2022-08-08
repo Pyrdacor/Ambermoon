@@ -50,7 +50,7 @@ namespace AmbermoonMapEditor2D
                 set;
             }
 
-            public GraphicProvider2D(Dictionary<uint, Bitmap> combatBackgrounds, IGameData gameData, ImageCache imageCache,
+            public GraphicProvider2D(Dictionary<uint, Bitmap> combatBackgrounds, ILegacyGameData gameData, ImageCache imageCache,
                 Dictionary<uint, Tileset> tilesets)
             {
                 this.imageCache = imageCache;
@@ -138,8 +138,9 @@ namespace AmbermoonMapEditor2D
             }
         }
 
+        string title;
         string gameDataPath;
-        IGameData gameData;
+        ILegacyGameData gameData;
         GraphicProvider2D graphicProvider;
         Dictionary<uint, Tileset> tilesets;
         Dictionary<uint, Bitmap> combatBackgrounds = new Dictionary<uint, Bitmap>(16);
@@ -157,6 +158,7 @@ namespace AmbermoonMapEditor2D
         Tool blocksTool = Tool.Blocks2x2;
         bool showGrid = false;
         int selectedTilesetTile = 0;
+        bool choosingTileSlotForDuplicating = false;
         Cursor cursorPointer;
         Cursor cursorColorPicker;
         Cursor cursorEraser;
@@ -219,7 +221,13 @@ namespace AmbermoonMapEditor2D
             toolTipGrid.SetToolTip(buttonToggleGrid, "Toggles the tile grid overlay.");
             toolTipTileMarker.SetToolTip(buttonToggleTileMarker, "Toggles the tile selection marker.");
 
-            if (gameData.Files.TryGetValue("AM2_CPU", out var asmReader))
+            if (gameData.Files.TryGetValue("Text.amb", out var textAmbReader))
+            {
+                var textContainer = new TextContainer();
+                new TextContainerReader().ReadTextContainer(textContainer, textAmbReader.Files[1], false);
+                songNames = Ambermoon.Enum.GetValues<Song>().Skip(1).Take(32).ToDictionary(song => song, song => textContainer.MusicNames[(int)song - 1]);
+            }
+            else if (gameData.Files.TryGetValue("AM2_CPU", out var asmReader))
             {
                 var stream = asmReader.Files[1];
                 stream.Position = 0;

@@ -56,7 +56,7 @@ namespace AmbermoonMapCharEditor
             Dirty = false;
         }
 
-        public void Init(Map map, IGameData gameData, IGraphicProvider graphicProvider)
+        public void Init(Map map, ILegacyGameData gameData, IGraphicProvider graphicProvider)
         {
             this.graphicProvider = graphicProvider;
             this.map = map;

@@ -48,7 +48,7 @@ namespace AmbermoonMapEditor2D
             this.buttonEditTile = new System.Windows.Forms.Button();
             this.comboBoxPalettes = new System.Windows.Forms.ComboBox();
             this.comboBoxTilesets = new System.Windows.Forms.ComboBox();
-            this.buttonAddTileset = new System.Windows.Forms.Button();
+            this.buttonDuplicateTile = new System.Windows.Forms.Button();
             this.panelTileset = new System.Windows.Forms.ScrollDrawPanel();
             this.groupBoxProperties = new System.Windows.Forms.GroupBox();
             this.comboBoxWorld = new System.Windows.Forms.ComboBox();
@@ -253,7 +253,7 @@ namespace AmbermoonMapEditor2D
             this.groupBoxTileset.Controls.Add(this.buttonEditTile);
             this.groupBoxTileset.Controls.Add(this.comboBoxPalettes);
             this.groupBoxTileset.Controls.Add(this.comboBoxTilesets);
-            this.groupBoxTileset.Controls.Add(this.buttonAddTileset);
+            this.groupBoxTileset.Controls.Add(this.buttonDuplicateTile);
             this.groupBoxTileset.Controls.Add(this.panelTileset);
             this.groupBoxTileset.Location = new System.Drawing.Point(2, 510);
             this.groupBoxTileset.Margin = new System.Windows.Forms.Padding(2, 3, 2, 3);
@@ -308,16 +308,16 @@ namespace AmbermoonMapEditor2D
             this.comboBoxTilesets.TabIndex = 2;
             this.comboBoxTilesets.SelectedIndexChanged += new System.EventHandler(this.comboBoxTilesets_SelectedIndexChanged);
             // 
-            // buttonAddTileset
+            // buttonDuplicateTile
             // 
-            this.buttonAddTileset.Location = new System.Drawing.Point(707, 120);
-            this.buttonAddTileset.Margin = new System.Windows.Forms.Padding(2, 3, 2, 3);
-            this.buttonAddTileset.Name = "buttonAddTileset";
-            this.buttonAddTileset.Size = new System.Drawing.Size(89, 24);
-            this.buttonAddTileset.TabIndex = 1;
-            this.buttonAddTileset.Text = "New tileset ...";
-            this.buttonAddTileset.UseVisualStyleBackColor = true;
-            this.buttonAddTileset.Click += new System.EventHandler(this.buttonAddTileset_Click);
+            this.buttonDuplicateTile.Location = new System.Drawing.Point(707, 120);
+            this.buttonDuplicateTile.Margin = new System.Windows.Forms.Padding(2, 3, 2, 3);
+            this.buttonDuplicateTile.Name = "buttonDuplicateTile";
+            this.buttonDuplicateTile.Size = new System.Drawing.Size(89, 24);
+            this.buttonDuplicateTile.TabIndex = 1;
+            this.buttonDuplicateTile.Text = "Duplicate tile";
+            this.buttonDuplicateTile.UseVisualStyleBackColor = true;
+            this.buttonDuplicateTile.Click += new System.EventHandler(this.buttonDuplicateTile_Click);
             // 
             // panelTileset
             // 
@@ -1049,6 +1049,7 @@ namespace AmbermoonMapEditor2D
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.MapEditorForm_FormClosing);
             this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.MapEditorForm_FormClosed);
             this.Load += new System.EventHandler(this.MapEditorForm_Load);
+            this.KeyDown += new System.Windows.Forms.KeyEventHandler(this.MapEditorForm_KeyDown);
             this.menuStrip.ResumeLayout(false);
             this.menuStrip.PerformLayout();
             this.groupBoxTileset.ResumeLayout(false);
@@ -1074,7 +1075,7 @@ namespace AmbermoonMapEditor2D
         private System.Windows.Forms.MapDrawPanel panelMap;
         private System.Windows.Forms.MenuStrip menuStrip;
         private System.Windows.Forms.GroupBox groupBoxTileset;
-        private System.Windows.Forms.Button buttonAddTileset;
+        private System.Windows.Forms.Button buttonDuplicateTile;
         private System.Windows.Forms.ScrollDrawPanel panelTileset;
         private System.Windows.Forms.ComboBox comboBoxTilesets;
         private System.Windows.Forms.GroupBox groupBoxProperties;

@@ -10,8 +10,6 @@ namespace AmbermoonMapEditor2D
 {
     public partial class MapEditorForm : Form
     {
-        string title;
-
         public MapEditorForm()
         {
             InitializeComponent();
@@ -516,6 +514,28 @@ namespace AmbermoonMapEditor2D
             int ty = (e.Y - panelTileset.AutoScrollPosition.Y) / 16;
             int selectedIndex = tx + ty * TilesetTilesPerRow;
 
+            if (choosingTileSlotForDuplicating)
+            {
+                choosingTileSlotForDuplicating = false;
+
+                if (e.Button != MouseButtons.Left || selectedIndex >= tilesets[map.TilesetOrLabdataIndex].Tiles.Length)
+                    return;
+
+                var tile = tilesets[map.TilesetOrLabdataIndex].Tiles[selectedTilesetTile];
+                selectedTilesetTile = selectedIndex;
+                tilesets[map.TilesetOrLabdataIndex].Tiles[selectedTilesetTile].Fill(tile);
+                panelTileset.Refresh();
+
+                try
+                {
+                    toolStripStatusLabelCurrentTile.Image = imageCache.GetImage(map.TilesetOrLabdataIndex, tile.GraphicIndex - 1, map.PaletteIndex);
+                }
+                catch
+                {
+                    toolStripStatusLabelCurrentTile.Image = null;
+                }
+            }
+
             if (selectedIndex < tilesets[map.TilesetOrLabdataIndex].Tiles.Length)
             {
                 selectedTilesetTile = selectedIndex;
@@ -958,10 +978,17 @@ namespace AmbermoonMapEditor2D
             }
         }
 
-        private void buttonAddTileset_Click(object sender, EventArgs e)
+        private void buttonDuplicateTile_Click(object sender, EventArgs e)
+        {
+            MessageBox.Show("Close this window, then left click on the tile slot where the copy should be placed. Use right click on tileset or Escape key to abort.");
+
+            choosingTileSlotForDuplicating = true;
+        }
+
+        /*private void buttonAddTileset_Click(object sender, EventArgs e)
         {
             // TODO: we also have to add a new icon file
-            /*uint index = 1 + (uint)tilesets.Count;
+            uint index = 1 + (uint)tilesets.Count;
 
             var tileset = new Tileset()
             {
@@ -974,8 +1001,8 @@ namespace AmbermoonMapEditor2D
 
             tilesets.Add(index, tileset);
 
-            comboBoxTilesets.SelectedIndex = (int)index - 1;*/
-        }
+            comboBoxTilesets.SelectedIndex = (int)index - 1;
+        }*/
 
         private void comboBoxWorld_SelectedIndexChanged(object sender, EventArgs e)
         {
@@ -1078,6 +1105,12 @@ namespace AmbermoonMapEditor2D
         {
             if (!buttonPlaceCharacterOnMap.Enabled && currentTool == Tool.PositionPicker)
                 SelectTool(Tool.Brush);
+        }
+
+        private void MapEditorForm_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.KeyCode == Keys.Escape)
+                choosingTileSlotForDuplicating = false;
         }
     }
 }

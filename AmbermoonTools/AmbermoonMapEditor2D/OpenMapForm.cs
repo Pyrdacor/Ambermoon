@@ -14,7 +14,7 @@ namespace AmbermoonMapEditor2D
 {
     public partial class OpenMapForm : Form
     {
-        public OpenMapForm(string gameDataPath, IGameData gameData, Dictionary<uint, Tileset> tilesets, MapManager mapManager)
+        public OpenMapForm(string gameDataPath, ILegacyGameData gameData, Dictionary<uint, Tileset> tilesets, MapManager mapManager)
         {
             GameDataPath = gameDataPath;
             GameData = gameData;
@@ -24,12 +24,12 @@ namespace AmbermoonMapEditor2D
         }
 
         internal string GameDataPath { get; private set; }
-        internal IGameData GameData { get; private set; }
+        internal ILegacyGameData GameData { get; private set; }
         internal Dictionary<uint, Tileset> Tilesets { get; private set; }
         internal Map Map { get; private set; }
         internal MapManager MapManager { get; private set; }
 
-        IGameData LoadGameData()
+        ILegacyGameData LoadGameData()
         {
             var dialog = new FolderBrowserDialog();
 
