@@ -4,6 +4,8 @@ These are bit flags. So in theory a character could have multiple spell types. B
 
 The value 0x80 (which is equal to set the highest bit to 1) is used for classes which have mastered the spells: Healer, Mystic and Alchemist. The highest bit is zero for other classes like Adventurer, Paladin or Ranger. As there is only one class with destruction magic, the mages always use the value 0x08 without the highest bit set.
 
+In **Ambermoon Advanced** the values 0x10, 0x20 and 0x40 are also used for magicians to state that earth (0x10), wind (0x20) or fire (0x40) spells have increased damage. Basically the damage is adjusted to match the damage of the water/ice spells then. For example the spell Fire Pillar cast by a monster or magician with 0x48 would deal the same base damage as the spell Ice Shower.
+
 Value | Name
 ----|----
 0x00 | None (no spells)
@@ -27,6 +29,13 @@ Healer | 0x81
 Alchemist | 0x82
 Mystic | 0x84
 Mage | 0x08
+Mage with strong earth spells | 0x18
+Mage with strong wind spells | 0x28
+Mage with strong fire spells | 0x48
+Mage with strong earth and wind spells | 0x38
+Mage with strong earth and fire spells | 0x58
+Mage with strong wind and fire spells | 0x68
+Mage with strong earth, wind and fire spells | 0x78
 
 
 ## Immunity
@@ -90,7 +99,7 @@ Value | Name
 15 | Add speed (used by speed potion)
 16 | Add stamina (used by stamina potion)
 17 | Add charisma (used by charisma potion)
-18 | **Unknown**
+18 | Add luck (not used by any item)
 19 | Add anti-magic (used by anti-magic potion)
 20 | Rope (used by rope)
-21 | Stinking mushroom? (used by stinking mushroom)
+21 | Drugs (used by stinking mushroom)
