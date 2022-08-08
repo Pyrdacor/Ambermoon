@@ -29,6 +29,13 @@ Healer | 0x81
 Alchemist | 0x82
 Mystic | 0x84
 Mage | 0x08
+Mage with strong earth spells | 0x18
+Mage with strong wind spells | 0x28
+Mage with strong fire spells | 0x48
+Mage with strong earth and wind spells | 0x38
+Mage with strong earth and fire spells | 0x58
+Mage with strong wind and fire spells | 0x68
+Mage with strong earth, wind and fire spells | 0x78
 
 
 ## Immunity
