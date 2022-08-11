@@ -27,6 +27,11 @@ Version | Language | Type | Download | Release date
 1.16 | German | Extracted Files | [zip](https://github.com/Pyrdacor/Ambermoon/raw/master/Disks/German/ambermoon_german_1.16_extracted.zip) [lha](https://github.com/Pyrdacor/Ambermoon/raw/master/Disks/German/ambermoon_german_1.16_extracted.lha) [tar.gz](https://github.com/Pyrdacor/Ambermoon/raw/master/Disks/German/ambermoon_german_1.16_extracted.tar.gz) | 08-07-2022
 1.16 | German | ADF Disk Images | [zip](https://github.com/Pyrdacor/Ambermoon/raw/master/Disks/German/ambermoon_german_1.16_adf.zip) [lha](https://github.com/Pyrdacor/Ambermoon/raw/master/Disks/German/ambermoon_german_1.16_adf.lha) [tar.gz](https://github.com/Pyrdacor/Ambermoon/raw/master/Disks/German/ambermoon_german_1.16_adf.tar.gz) | 08-07-2022
 
+### WHDLoad
+
+Thanks to Wepl we now have a working WHDLoad slave for Ambermoon 1.16 and above. http://www.whdload.de/games/Ambermoon.html
+
+
 ### Patches
 
 Over all the years Alex Holland has carefully tracked all bug reports and fixes in an [excel sheet](https://docs.google.com/spreadsheets/d/1as5W8gibm-MTb9VEqpkfgtwWviqjQx96A3NmcvzX98A). Kudos to him!
