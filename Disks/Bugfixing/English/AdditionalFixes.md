@@ -2,6 +2,8 @@
 
 - Fixed some broken map events introduced in 1.16 (bandit's house)
 - Kire's treasure room is not open on first visit anymore
+- Improved a text in the temple of S'Trog
+- Fixed a text in the S'Angrila prison
 
 ## Version 1.16
 

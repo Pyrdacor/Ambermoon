@@ -2,6 +2,12 @@
 
 - Fixed some broken map events introduced in 1.16 (bandit's house)
 - Kire's treasure room is not open on first visit anymore
+- Fixed a text bug for NPC Bellard
+- Fixed a text bug when approaching S'Kat
+- Improved a text in the temple of S'Trog
+- Fixed a text in the S'Angrila prison
+- Fixed a typo in Ketnar's texts
+- Fixed a typo in Dor Kiredon welcome message
 
 ## Version 1.16
 
