@@ -28,7 +28,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Ambermoon.Data.Legacy" Version="10.7.5" />
+    <PackageReference Include="Ambermoon.Data.Legacy" Version="10.7.6" />
     <PackageReference Include="NAudio" Version="2.1.0" />
     <PackageReference Include="SonicArranger" Version="1.0.12" />
   </ItemGroup>

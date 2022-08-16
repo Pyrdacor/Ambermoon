@@ -104,6 +104,7 @@ namespace AmbermoonMapEditor2D
             Map.Width = initialWidth;
             Map.Height = initialHeight;
             Map.InitialTiles = new Map.Tile[initialWidth, initialHeight];
+            Map.Tiles = new Map.Tile[initialWidth, initialHeight];
             Map.TilesetOrLabdataIndex = 1;
             Map.PaletteIndex = 1;
             Map.World = (World)comboBoxWorld.SelectedIndex;
@@ -113,6 +114,10 @@ namespace AmbermoonMapEditor2D
                 for (int x = 0; x < initialWidth; ++x)
                 {
                     Map.InitialTiles[x, y] = new Map.Tile
+                    {
+                        BackTileIndex = 1
+                    };
+                    Map.Tiles[x, y] = new Map.Tile
                     {
                         BackTileIndex = 1
                     };
@@ -209,7 +214,7 @@ namespace AmbermoonMapEditor2D
                 var container = new FileReader().ReadRawFile(Path.GetFileName(filename), reader.ReadToEnd());
 
                 if (mapIndex == 0 && !AskForMapIndex(out mapIndex, container.Files.Keys.ToDictionary(k => (uint)k, _ => (string)null)))
-                    return null;                
+                    return null;
 
                 if (!container.Files.ContainsKey((int)mapIndex))
                 {

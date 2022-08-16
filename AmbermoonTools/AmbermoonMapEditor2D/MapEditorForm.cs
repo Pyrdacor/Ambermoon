@@ -63,7 +63,7 @@ namespace AmbermoonMapEditor2D
                 mapManager = openMapForm.MapManager;
                 currentTilesetTiles = tilesets[openMapForm.Map.TilesetOrLabdataIndex].Tiles.Length;
                 Initialize();
-                InitializeMap(openMapForm.Map.Clone());
+                InitializeMap(openMapForm.Map?.Clone());
                 history.Clear();
                 toolStripMenuItemEditUndo.Enabled = false;
                 toolStripMenuItemEditRedo.Enabled = false;
