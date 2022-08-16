@@ -7,6 +7,7 @@
 - Fixed tile issues at the stairs in the Thalion office
 - Fixed tiles on the forest moon (around 150,80)
 - You can no longer walk and land on lava
+- Dramatic music won't play forever after S'Arin anymore
 
 ## Version 1.16
 
