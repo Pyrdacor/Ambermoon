@@ -8,6 +8,9 @@
 - Fixed a text in the S'Angrila prison
 - Fixed a typo in Ketnar's texts
 - Fixed a typo in Dor Kiredon welcome message
+- Fixed tile issues at the stairs in the Thalion office
+- Fixed tiles on the forest moon (around 150,80)
+- You can no longer walk and land on lava
 
 ## Version 1.16
 
