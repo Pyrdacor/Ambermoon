@@ -8,6 +8,12 @@
 - Fixed tiles on the forest moon (around 150,80)
 - You can no longer walk and land on lava
 - Dramatic music won't play forever after S'Arin anymore
+- Dorina no longer stays in here hideout when you took her to Dor Kiredon
+- Fixed Luminor:
+  - You can't leave the room or remove his flame until he is dead.
+  - You can't pour any more ice water onto the flame (which has gone) after Luminor is dead.
+  - You can't re-spawn the flame in any way or cause invisible hurt events anymore.
+  - If you skipped the basement, there will be no text about the flame after Luminor and the flame have gone.
 
 ## Version 1.16
 
