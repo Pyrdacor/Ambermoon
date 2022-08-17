@@ -16,6 +16,8 @@
   - If you skipped the basement, there will be no text about the flame after Luminor and the flame have gone.
 - Fixed non-moving electric spark in Antique Area 2
 - The number door in Antique Area 2 is no longer clickable after it was opened
+- The door to Kire's treasure chamber is now also locked if you not already opened it
+- The door to Kire's treasure chamber is no longer locked after opening and the key is consumed directly
 
 ## Version 1.16
 
