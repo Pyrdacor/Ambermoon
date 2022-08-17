@@ -18,6 +18,8 @@
   - You can't pour any more ice water onto the flame (which has gone) after Luminor is dead.
   - You can't re-spawn the flame in any way or cause invisible hurt events anymore.
   - If you skipped the basement, there will be no text about the flame after Luminor and the flame have gone.
+- Fixed non-moving electric spark in Antique Area 2
+- The number door in Antique Area 2 is no longer clickable after it was opened
 
 ## Version 1.16
 
