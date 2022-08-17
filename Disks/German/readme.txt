@@ -1,5 +1,31 @@
-Ambermoon German 1.16 by Pyrdacor (08-07-2022)
+Ambermoon German 1.17 by Pyrdacor (17-08-2022)
 ==============================================
+
+Changes in 1.17
+===============
+
+- Fixed some broken map events introduced in 1.16 (bandit's house)
+- Fixed a text bug for NPC Bellard
+- Fixed a text bug when approaching S'Kat
+- Improved a text in the temple of S'Trog
+- Fixed a text in the S'Angrila prison
+- Fixed a typo in Ketnar's texts
+- Fixed a typo in Dor Kiredon welcome message
+- Fixed tile issues at the stairs in the Thalion office
+- Fixed tiles on the forest moon (around 150,80)
+- You can no longer walk and land on lava
+- Dramatic music won't play forever after S'Arin anymore
+- Dorina no longer stays in here hideout when you took her to Dor Kiredon
+- Fixed Luminor:
+  - You can't leave the room or remove his flame until he is dead.
+  - You can't pour any more ice water onto the flame (which has gone) after Luminor is dead.
+  - You can't re-spawn the flame in any way or cause invisible hurt events anymore.
+  - If you skipped the basement, there will be no text about the flame after Luminor and the flame have gone.
+- Fixed non-moving electric spark in Antique Area 2
+- The number door in Antique Area 2 is no longer clickable after it was opened
+- The door to Kire's treasure chamber is now also locked if you not already opened it
+- The door to Kire's treasure chamber is no longer locked after opening and the key is consumed directly
+- Fixed the installer
 
 Changes in 1.16
 ===============

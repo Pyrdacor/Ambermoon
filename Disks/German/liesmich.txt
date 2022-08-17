@@ -1,5 +1,32 @@
-Ambermoon German 1.16 by Pyrdacor (08-07-2022)
+Ambermoon German 1.17 by Pyrdacor (17-08-2022)
 ==============================================
+
+Änderungen in 1.17
+==================
+
+- Map Events im Banditenhaus wurden behoben, die in 1.16 kaputt gingen
+- Einige Texte wurden verbessert oder behoben:
+  - NPC Bellard
+  - Wenn S'Kat einen angreift
+  - Im Tempel von S'Trog
+  - Im S'Angrila Gefängnis
+  - NPC Ketnar
+  - Willkommen-Nachricht in Dor Kiredon
+- Im Thalion Büro blockieren einige Tiles der Treppe nun, damit visuelle Fehler nicht mehr auftreten
+- Auf dem Waldmond (ca bei 150,80) wurden falsche Tiles behoben
+- Man kann nicht länger auf Lava landen oder gehen
+- Nachdem man S'Arin trifft, bleibt die dramatische Musik nicht länger für immer bestehen
+- Dorina bleibt nicht in ihrem Baum, nachdem man mit ihr nach Dor Kiredon ging
+- Die Interaktionen mit Luminor wurden verbessert:
+  - Man kann nicht länger den Raum verlassen oder die Flamme löschen, solange Luminor lebt
+  - Man kann nach Luminors Tod kein weiteres Eiswasser mehr einfüllen (die Flamme ist ja weg)
+  - Man kann die Flamme nach Luminors Tod nicht irgendwie wieder erschaffen oder unsichtbare Schadenevents erzeugen
+  - Wenn man den Raum im unteren Teil des Turmes nicht betritt und Luminor gleich tötet, kommt danach unten nicht länger eine Nachricht über die Flamme (da sie nicht mehr da ist).
+- In der Antiken Anlage 2 wurde ein elektrischer Blitz behoben, der sich nicht bewegte
+- In der Antiken Anlage 2 kann man die Nummer-Tür nicht nochmals anklicken, nachdem sie bereits offen ist
+- Die Tür zu Kires Schatzkammer ist nicht länger initial offen
+- Die Tür zu Kires Schatzkammer bleibt nun nach dem Aufschließen offen und der Schlüssel wird zerstört
+- Der Installer wurde gefixt
 
 Änderungen in 1.16
 ==================

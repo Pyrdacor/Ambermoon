@@ -1,7 +1,6 @@
 ## Version 1.17
 
 - Fixed some broken map events introduced in 1.16 (bandit's house)
-- Kire's treasure room is not open on first visit anymore
 - Improved a text in the temple of S'Trog
 - Fixed a text in the S'Angrila prison
 - Fixed tile issues at the stairs in the Thalion office
@@ -18,6 +17,7 @@
 - The number door in Antique Area 2 is no longer clickable after it was opened
 - The door to Kire's treasure chamber is now also locked if you not already opened it
 - The door to Kire's treasure chamber is no longer locked after opening and the key is consumed directly
+- Fixed the installer
 
 ## Version 1.16
 
