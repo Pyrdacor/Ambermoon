@@ -62,7 +62,7 @@ Offset | Type | Description
 0x02 | ubyte | Type and flags
 0x03 | ubyte | Event index
 0x04 | uword | Graphic index
-0x06 | udword | Tile flags (will override the map tile flags if the character is on the tile, 3D only). Upper 4 bits are the combat background index for monsters.
+0x06 | udword | [Tile flags](Enumerations/TileFlags.md) (will override the map tile flags if the character is on the tile, 3D only). Upper 4 bits are the combat background index for monsters.
 
 If the index is 0, the map character slot is not used. Map objects don't have a meaningful index in general. In this case the index should be set to 1. For monsters the index is always the monster group index. For party members it is always the party member index. For NPCs it is the NPC index if the flag "Text popup" is not set. Otherwise it is the index of the map text.
 
