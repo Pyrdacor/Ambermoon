@@ -257,19 +257,19 @@ namespace AmbermoonEventEditor
                     Console.WriteLine();
                     Console.Write(headerText);
                     index = ReadInt(true) ?? -1;
+                }
 
+                if (eventList)
+                    --index;
+
+                if (index < 0 || index >= possibleEvents.Count)
+                {
                     if (eventList)
-                        --index;
-
-                    if (index < 0 || index >= possibleEvents.Count)
-                    {
-                        if (eventList)
-                            Console.WriteLine("Invalid event list index");
-                        else
-                            Console.WriteLine("Invalid event index");
-                        Console.WriteLine();
-                        return;
-                    }
+                        Console.WriteLine("Invalid event list index");
+                    else
+                        Console.WriteLine("Invalid event index");
+                    Console.WriteLine();
+                    return;
                 }
 
                 actionWithIndex?.Invoke(index, possibleEvents);
