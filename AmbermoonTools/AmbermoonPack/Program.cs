@@ -127,7 +127,7 @@ namespace AmbermoonPack
                     try
                     {
                         var containerData = File.ReadAllBytes(args[1]);
-                        var container = new FileReader().ReadFile(Path.GetFileName(args[1]), containerData);
+                        var container = new FileReader().ReadFile(Path.GetFileName(args[1]), new DataReader(containerData));
                         var containerType = (FileType)container.Header;
 
                         switch (containerType)
@@ -256,7 +256,7 @@ namespace AmbermoonPack
 
             try
             {
-                file = reader.ReadFile("", File.ReadAllBytes(args[1]));
+                file = reader.ReadFile("", new DataReader(File.ReadAllBytes(args[1])));
             }
             catch (Exception ex)
             {
