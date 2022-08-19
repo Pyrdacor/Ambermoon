@@ -35,6 +35,35 @@ namespace Ambermoon.Data.Descriptions
         public int FlagDescriptionOffset { get; set; } = 0;
         public string[] FlagDescriptions { get; set; } = null;
         public Func<EventDescription, Event, bool> Condition { get; set; } = null;
+        public virtual string AsString(object value)
+        {
+            switch (Type)
+            {
+                case ValueType.Byte:
+                case ValueType.SByte:
+                    if (ShowAsHex)
+                        return $"0x{value:x2}";
+                    else
+                        return $"{value}";
+                case ValueType.Word:
+                case ValueType.EventIndex:
+                    if (ShowAsHex)
+                        return $"0x{value:x4}";
+                    else
+                        return $"{value}";
+                case ValueType.Bool:
+                    if ((bool)value)
+                        return "1";
+                    else
+                        return "0";
+                case ValueType.Flag8:
+                    return $"0x{value:x2}";
+                case ValueType.Flag16:
+                    return $"0x{value:x4}";
+                default:
+                    return value.ToString();
+            }
+        }
         public virtual string GetPossibleValues()
         {
             switch (Type)

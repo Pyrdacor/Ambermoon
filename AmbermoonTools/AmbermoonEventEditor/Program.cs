@@ -249,6 +249,32 @@ namespace AmbermoonEventEditor
 
             command = args[0].ToLower();
 
+            void EventIndexAction(System.Action<int, List<Event>> actionWithIndex, List<Event> possibleEvents, string headerText, bool eventList)
+            {
+                if (args.Length < 2 || !int.TryParse(args[1], NumberStyles.AllowHexSpecifier, null, out int index))
+                {
+                    ListEvents(possibleEvents, eventList ? 1 : 0);
+                    Console.WriteLine();
+                    Console.Write(headerText);
+                    index = ReadInt(true) ?? -1;
+
+                    if (eventList)
+                        --index;
+
+                    if (index < 0 || index >= possibleEvents.Count)
+                    {
+                        if (eventList)
+                            Console.WriteLine("Invalid event list index");
+                        else
+                            Console.WriteLine("Invalid event index");
+                        Console.WriteLine();
+                        return;
+                    }
+                }
+
+                actionWithIndex?.Invoke(index, possibleEvents);
+            }
+
             switch (command)
             {
                 case "exit":
@@ -267,46 +293,31 @@ namespace AmbermoonEventEditor
                     ListEventsShort(events);
                     break;
                 case "chain":
-                    if (args.Length < 2)
-                    {
-                        Console.WriteLine();
-                        Console.WriteLine("No event list index given");
-                        Console.WriteLine();
-                    }
-                    else if (!int.TryParse(args[1], NumberStyles.AllowHexSpecifier, null, out int index))
-                    {
-                        Console.WriteLine();
-                        Console.WriteLine("No valid event list index given");
-                        Console.WriteLine();
-                    }
-                    else
-                    {
-                        ShowChain(eventList, events, index - 1);
-                    }
+                    EventIndexAction((index, _) => ShowChain(eventList, events, index), eventList, "Which event list to chain: ", true);
                     break;
                 case "add":
                     AddEvent(eventList, events, map);
                     break;
                 case "edit":
-                    EditEvent(eventList, events, map);
+                    EventIndexAction((index, _) => EditEvent(eventList, events, map, index), events, "Which event to edit: ", false);
                     break;
                 case "remove":
-                    RemoveEvent(eventList, events);
+                    EventIndexAction((index, _) => RemoveEvent(eventList, events, index), events, "Which event to remove: ", false);
                     break;
                 case "copy":
-                    CopyEvent(eventList, events);
+                    EventIndexAction((index, _) => CopyEvent(eventList, events, index), events, "Which event to copy: ", false);
                     break;
                 case "copychain":
-                    CopyEventChain(eventList, events);
+                    EventIndexAction((index, _) => CopyEventChain(eventList, events, index), eventList, "Which event chain to copy: ", true);
                     break;
                 case "connect":
-                    ConnectEvent(eventList, events);
+                    EventIndexAction((index, _) => ConnectEvent(eventList, events, index), events, "Which event to connect: ", false);
                     break;
                 case "disconnect":
-                    DisconnectEvent(eventList, events);
+                    EventIndexAction((index, _) => DisconnectEvent(eventList, events, index), events, "Which event to disconnect: ", false);
                     break;
                 case "connections":
-                    ShowConnections(eventList, events);
+                    EventIndexAction((index, _) => ShowConnections(eventList, events, index), events, "Which event to show connections for: ", false);
                     break;
                 case "reorder":
                     ReorderEvents(eventList, events);
@@ -427,21 +438,9 @@ namespace AmbermoonEventEditor
             }
         }
 
-        static void RemoveEvent(List<Event> eventList, List<Event> events)
+        static void RemoveEvent(List<Event> eventList, List<Event> events, int index)
         {
-            ListEvents(events);
-            Console.WriteLine();
-            Console.Write("Which event to remove: ");
-            var index = ReadInt(true);
-
-            if (index == null)
-            {
-                Console.WriteLine("Invalid event index");
-                Console.WriteLine();
-                return;
-            }
-
-            var @event = events[index.Value];
+            var @event = events[index];
 
             int listIndex = eventList.IndexOf(@event);
 
@@ -501,11 +500,11 @@ namespace AmbermoonEventEditor
             }
 
             var prevs = events.Where(e => e.Next == @event).ToList();
-            var conds = events.Where(e => e is ConditionEvent c && c.ContinueIfFalseWithMapEventIndex == index.Value).Cast<ConditionEvent>().ToList();
-            var doors = events.Where(e => e is DoorEvent d && d.UnlockFailedEventIndex == index.Value).Cast<DoorEvent>().ToList();
-            var chests = events.Where(e => e is ChestEvent c && c.UnlockFailedEventIndex == index.Value).Cast<ChestEvent>().ToList();
-            var dices = events.Where(e => e is Dice100RollEvent r && r.ContinueIfFalseWithMapEventIndex == index.Value).Cast<Dice100RollEvent>().ToList();
-            var decisions = events.Where(e => e is DecisionEvent d && d.NoEventIndex == index.Value).Cast<DecisionEvent>().ToList();
+            var conds = events.Where(e => e is ConditionEvent c && c.ContinueIfFalseWithMapEventIndex == index).Cast<ConditionEvent>().ToList();
+            var doors = events.Where(e => e is DoorEvent d && d.UnlockFailedEventIndex == index).Cast<DoorEvent>().ToList();
+            var chests = events.Where(e => e is ChestEvent c && c.UnlockFailedEventIndex == index).Cast<ChestEvent>().ToList();
+            var dices = events.Where(e => e is Dice100RollEvent r && r.ContinueIfFalseWithMapEventIndex == index).Cast<Dice100RollEvent>().ToList();
+            var decisions = events.Where(e => e is DecisionEvent d && d.NoEventIndex == index).Cast<DecisionEvent>().ToList();
 
             if (prevs.Count != 0 || conds.Count != 0 || doors.Count != 0 || chests.Count != 0 || dices.Count != 0 || decisions.Count != 0)
             {
@@ -520,7 +519,7 @@ namespace AmbermoonEventEditor
 
                 uint successorIndex = successor == null ? 0xffff : (uint)events.IndexOf(successor);
 
-                if (successorIndex != 0xffff && successorIndex > index.Value)
+                if (successorIndex != 0xffff && successorIndex > index)
                     --successorIndex;
 
                 foreach (var prev in prevs)
@@ -539,7 +538,7 @@ namespace AmbermoonEventEditor
 
             @event.Next = null;
 
-            for (int i = index.Value + 1; i < events.Count; ++i)
+            for (int i = index + 1; i < events.Count; ++i)
             {
                 var ev = events[i];
                 conds = events.Where(e => e is ConditionEvent c && c.ContinueIfFalseWithMapEventIndex == i).Cast<ConditionEvent>().ToList();
@@ -565,21 +564,9 @@ namespace AmbermoonEventEditor
             unsavedChanges = true;
         }
 
-        static void CopyEvent(List<Event> eventList, List<Event> events)
+        static void CopyEvent(List<Event> eventList, List<Event> events, int index)
         {
-            ListEvents(events);
-            Console.WriteLine();
-            Console.Write("Which event to copy: ");
-            var index = ReadInt(true);
-
-            if (index == null || index < 0 || index >= events.Count)
-            {
-                Console.WriteLine("Invalid event index");
-                Console.WriteLine();
-                return;
-            }
-
-            var @event = events[index.Value];
+            var @event = events[index];
             bool keepNext = false;
 
             if (@event.Next != null)
@@ -616,20 +603,8 @@ namespace AmbermoonEventEditor
             unsavedChanges = true;
         }
 
-        static void CopyEventChain(List<Event> eventList, List<Event> events)
+        static void CopyEventChain(List<Event> eventList, List<Event> events, int index)
         {
-            ListEvents(eventList, 1);
-            Console.WriteLine();
-            Console.Write("Which event chain to copy: ");
-            var index = ReadInt(true);
-
-            if (index == null || index <= 0 || index > eventList.Count)
-            {
-                Console.WriteLine("Invalid event chain index");
-                Console.WriteLine();
-                return;
-            }
-
             Console.WriteLine();
             Console.WriteLine("You want to copy the whole chain or only some part of it?");
             var option = ReadOption(0, "Whole chain", "Only a part (cut off the rest)", "Only a part (keep the rest from original)");
@@ -637,7 +612,7 @@ namespace AmbermoonEventEditor
 
             if (option != 0)
             {
-                ShowChain(eventList, events, index.Value - 1);
+                ShowChain(eventList, events, index);
                 Console.WriteLine();
 
                 Console.Write("Copy count: ");
@@ -651,7 +626,7 @@ namespace AmbermoonEventEditor
                 }
             }
 
-            var @event = eventList[index.Value - 1];
+            var @event = eventList[index];
             var clone = @event.Clone(false);
             @event = @event.Next;
 
@@ -698,21 +673,9 @@ namespace AmbermoonEventEditor
             }
         }
 
-        static void EditEvent(List<Event> eventList, List<Event> events, bool map)
+        static void EditEvent(List<Event> eventList, List<Event> events, bool map, int index)
         {
-            ListEvents(events);
-            Console.WriteLine();
-            Console.Write("Which event to edit: ");
-            var index = ReadInt(true);
-
-            if (index == null)
-            {
-                Console.WriteLine("Invalid event index");
-                Console.WriteLine();
-                return;
-            }
-
-            var @event = events[index.Value];
+            var @event = events[index];
             Console.WriteLine($"Do you want to change the event type? Current is {@event.Type}. All data will be lost!");
             var option = ReadOption(0, "No, keep it", "Yes, change please") ?? 0;
 
@@ -721,7 +684,7 @@ namespace AmbermoonEventEditor
                 unsavedChanges = true;
                 var tempEventList = new List<Event>();
                 var tempEvents = new List<Event>();
-                AddEvent(tempEventList, tempEvents, map, index.Value, true);
+                AddEvent(tempEventList, tempEvents, map, index, true);
                 ReplaceEvent(eventList, events, @event, tempEvents[0]);
                 return;
             }
@@ -781,7 +744,7 @@ namespace AmbermoonEventEditor
 
                         var property = type.GetProperty(value.Name);
                         var currentValue = property.GetValue(@event);
-                        Console.Write($"> {value.Name} ({currentValue}): ");
+                        Console.Write($"> {value.Name} ({value.AsString(currentValue)}): ");
                         var input = ReadInt(value.ShowAsHex);
 
                         if (input == null || input < 0 || input > 0xffff || !value.Check((ushort)input))
@@ -802,12 +765,12 @@ namespace AmbermoonEventEditor
 
                 // re-create event from filled data
                 var eventReader = new DataReader(eventData);
-                events[index.Value] = EventReader.ParseEvent(eventReader);
-                events[index.Value].Next = next;
+                events[index] = EventReader.ParseEvent(eventReader);
+                events[index].Next = next;
 
                 unsavedChanges = true;
 
-                var newEvent = events[index.Value];
+                var newEvent = events[index];
                 int eventListIndex = eventList.IndexOf(@event);
 
                 if (eventListIndex != -1)
@@ -824,22 +787,9 @@ namespace AmbermoonEventEditor
             }
         }
 
-        static void ShowConnections(List<Event> eventList, List<Event> events)
+        static void ShowConnections(List<Event> eventList, List<Event> events, int index)
         {
-            ListEvents(events);
-            Console.WriteLine();
-            Console.Write("Which event to show connections for: ");
-
-            var index = ReadInt(true);
-
-            if (index == null)
-            {
-                Console.WriteLine("Invalid event index");
-                Console.WriteLine();
-                return;
-            }
-
-            var @event = events[index.Value];
+            var @event = events[index];
             int listIndex = eventList.IndexOf(@event);
             var prevEvents = events.Where(e => e.Next == @event).Select(e => events.IndexOf(e)).ToList();
 
@@ -866,22 +816,9 @@ namespace AmbermoonEventEditor
             Console.WriteLine();
         }
 
-        static void DisconnectEvent(List<Event> eventList, List<Event> events)
+        static void DisconnectEvent(List<Event> eventList, List<Event> events, int index)
         {
-            ListEvents(events);
-            Console.WriteLine();
-            Console.Write("Which event to disconnect: ");
-
-            var index = ReadInt(true);
-
-            if (index == null)
-            {
-                Console.WriteLine("Invalid event index");
-                Console.WriteLine();
-                return;
-            }
-
-            var @event = events[index.Value];
+            var @event = events[index];
             int listIndex = eventList.IndexOf(@event);
 
             if (listIndex != -1)
@@ -897,11 +834,11 @@ namespace AmbermoonEventEditor
             }
 
             var prevs = events.Where(e => e.Next == @event).ToList();
-            var conds = events.Where(e => e is ConditionEvent c && c.ContinueIfFalseWithMapEventIndex == index.Value).Cast<ConditionEvent>().ToList();
-            var doors = events.Where(e => e is DoorEvent d && d.UnlockFailedEventIndex == index.Value).Cast<DoorEvent>().ToList();
-            var chests = events.Where(e => e is ChestEvent c && c.UnlockFailedEventIndex == index.Value).Cast<ChestEvent>().ToList();
-            var dices = events.Where(e => e is Dice100RollEvent r && r.ContinueIfFalseWithMapEventIndex == index.Value).Cast<Dice100RollEvent>().ToList();
-            var decisions = events.Where(e => e is DecisionEvent d && d.NoEventIndex == index.Value).Cast<DecisionEvent>().ToList();
+            var conds = events.Where(e => e is ConditionEvent c && c.ContinueIfFalseWithMapEventIndex == index).Cast<ConditionEvent>().ToList();
+            var doors = events.Where(e => e is DoorEvent d && d.UnlockFailedEventIndex == index).Cast<DoorEvent>().ToList();
+            var chests = events.Where(e => e is ChestEvent c && c.UnlockFailedEventIndex == index).Cast<ChestEvent>().ToList();
+            var dices = events.Where(e => e is Dice100RollEvent r && r.ContinueIfFalseWithMapEventIndex == index).Cast<Dice100RollEvent>().ToList();
+            var decisions = events.Where(e => e is DecisionEvent d && d.NoEventIndex == index).Cast<DecisionEvent>().ToList();
 
             foreach (var prev in prevs)
                 prev.Next = null;
@@ -949,21 +886,9 @@ namespace AmbermoonEventEditor
             Console.WriteLine();
         }
 
-        static void ConnectEvent(List<Event> eventList, List<Event> events)
+        static void ConnectEvent(List<Event> eventList, List<Event> events, int index)
         {
-            ListEvents(events);
-            Console.WriteLine();
-            Console.Write("Which event to connect: ");
-            var index = ReadInt(true);
-
-            if (index == null)
-            {
-                Console.WriteLine("Invalid event index");
-                Console.WriteLine();
-                return;
-            }
-
-            var @event = events[index.Value];
+            var @event = events[index];
             var description = EventDescriptions.Events[@event.Type];
 
             if (description.AllowOnlyAsFirst)
