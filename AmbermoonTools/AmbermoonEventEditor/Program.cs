@@ -325,6 +325,9 @@ namespace AmbermoonEventEditor
                 case "save":
                     Save(out save, out saveFileName);
                     break;
+                case "graph":
+                    EventIndexAction((index, _) => Graph(eventList, events, index), eventList, "Which event chain to graph: ", true);
+                    break;
                 case "help":
                     ShowHelp(args.Length == 1 ? "" : args[1].ToLower());
                     break;
@@ -1488,6 +1491,13 @@ namespace AmbermoonEventEditor
             events.Clear();
             events.AddRange(reorderedList);
             unsavedChanges = true;
+        }
+
+        static void Graph(List<Event> eventList, List<Event> events, int index)
+        {
+            var flowChart = new FlowChart(eventList[index], events);
+            flowChart.Print(Console.WriteLine);
+            Console.WriteLine();
         }
     }
 }
