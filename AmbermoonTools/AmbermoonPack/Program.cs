@@ -1,4 +1,5 @@
-﻿using Ambermoon.Data.Legacy.Serialization;
+﻿using Ambermoon.Data.Legacy;
+using Ambermoon.Data.Legacy.Serialization;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -16,6 +17,7 @@ namespace AmbermoonPack
         const int ERROR_INVALID_JH_KEY = 5;
         const int ERROR_EXECUTION = 6;
         const int ERROR_INVALID_SOURCE_FILE = 7;
+        const int ERROR_INVALID_FILE_INDICES = 8;
 
         static void Usage()
         {
@@ -23,10 +25,14 @@ namespace AmbermoonPack
             Console.WriteLine("Usage: AmbermoonPack <type> <source> <dest> [key]");
             Console.WriteLine("       AmbermoonPack REPACK <source> <dest>");
             Console.WriteLine("       AmbermoonPack UNPACK <source> <dest>");
+            Console.WriteLine("       AmbermoonPack UNITEM <source> <dest>");
+            Console.WriteLine("       AmbermoonPack PKITEM <source> <dest>");
             Console.WriteLine();
             Console.WriteLine("The first version packs a directory of single files into a container.");
             Console.WriteLine("UNPACK unpacks a container to a directory of single files.");
             Console.WriteLine("REPACK packs a container to a different format.");
+            Console.WriteLine("UNITEM unpacks an item container to a single item files.");
+            Console.WriteLine("PKITEM packs a directory of item files into an item container.");
             Console.WriteLine();
             Console.WriteLine(" <type>     JH, LOB, VOL1, AMNC, AMNP, AMBR, AMPC or JH+LOB");
             Console.WriteLine(" <source>   Source file or directory path");
@@ -37,6 +43,8 @@ namespace AmbermoonPack
             Console.WriteLine();
             Console.WriteLine(" AmbermoonPack LOB \"my\\path\\to\\file\" \"test.amb\"");
             Console.WriteLine(" AmbermoonPack AMNP \"my\\path\\to\\dir\\with\\files\" \"test.amb\"");
+            Console.WriteLine(" AmbermoonPack JH+LOB \"my\\path\\to\\dir\\with\\textfiles\\001\" \"Text.amb\" 0xd2e7");
+            Console.WriteLine(" AmbermoonPack UNITEM \"my\\path\\to\\file\" \"my\\path\\to\\dir\"");
             Console.WriteLine();
             Console.WriteLine("Note:");
             Console.WriteLine(" If the files have names like 001, 002, etc this is used as the");
@@ -52,6 +60,7 @@ namespace AmbermoonPack
             Console.WriteLine(" 5: Invalid JH encrypt key");
             Console.WriteLine(" 6: Internal program error");
             Console.WriteLine(" 7: Invalid source file for repack");
+            Console.WriteLine(" 8: Invalid file numbering for item pack");
             Console.WriteLine();
         }
 
@@ -66,20 +75,31 @@ namespace AmbermoonPack
 
             FileType? type;
             bool additionalLobCompression = false;
+            string op = args[0].ToUpper();
 
-            if (args[0].ToUpper() == "REPACK")
+            if (op == "REPACK")
             {
                 type = null;
             }
-            else if (args[0].ToUpper() == "UNPACK")
+            else if (op == "UNPACK")
             {
                 Unpack(args);
                 return;
             }
-            else if (args[0].ToUpper() == "JH+LOB")
+            else if (op == "JH+LOB")
             {
                 type = FileType.JH;
                 additionalLobCompression = true;
+            }
+            else if (op == "UNITEM")
+            {
+                UnpackItems(args);
+                return;
+            }
+            else if (op == "PKITEM")
+            {
+                PackItems(args);
+                return;
             }
             else if (!Enum.TryParse<FileType>(args[0].ToUpper(), out FileType fileType))
             {
@@ -203,26 +223,7 @@ namespace AmbermoonPack
                         WriteFiles(writer, type.Value, GetContainerDataFromFiles(Directory.GetFiles(args[1])));
                 }
 
-                try
-                {
-                    var destinationDirectory = Path.GetDirectoryName(args[2]);
-
-                    if (!string.IsNullOrWhiteSpace(destinationDirectory))
-                        Directory.CreateDirectory(destinationDirectory);
-
-                    var destinationStream = File.Create(args[2]);
-                    writer.CopyTo(destinationStream);
-                    destinationStream.Flush();
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine($"Error writing to destination '{args[2]}': {ex.Message}");
-                    Console.WriteLine($" Ensure to specify a valid file path.");
-                    Console.WriteLine($" Ensure that you have write permission.");
-                    Console.WriteLine($" Ensure that the file is not opened in another program.");
-                    Environment.Exit(ERROR_WRITING_TO_DESTINATION);
-                    return;
-                }
+                WriteFile(args[2], writer);
 
                 Console.WriteLine("File was written successfully.");
                 Environment.Exit(0);
@@ -294,6 +295,118 @@ namespace AmbermoonPack
                 Environment.Exit(ERROR_WRITING_TO_DESTINATION);
                 return;
             }
+        }
+
+        static void UnpackItems(string[] args)
+        {
+            if (args.Length != 3)
+            {
+                Usage();
+                Environment.Exit(ERROR_INVALID_USAGE);
+                return;
+            }
+
+            var tempDir = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
+            var tempFile = Path.Combine(tempDir, "001");
+            Unpack(new string[] { args[0], args[1], tempDir });
+            var reader = new DataReader(File.ReadAllBytes(tempFile));
+            int itemCount = reader.ReadWord();
+
+            try
+            {
+                Directory.CreateDirectory(args[2]);
+            }
+            catch
+            {
+                Console.WriteLine("Failed to create output directory");
+                Environment.Exit(ERROR_WRITING_TO_DESTINATION);
+                return;
+            }
+
+            try
+            {
+                for (int i = 0; i < itemCount; ++i)
+                {
+                    File.WriteAllBytes(Path.Combine(args[2], $"{(i + 1):000}"), reader.ReadBytes(60));
+                }
+            }
+            catch
+            {
+                Console.WriteLine("Failed to write output files");
+                Environment.Exit(ERROR_WRITING_TO_DESTINATION);
+                return;
+            }
+
+            return;
+        }
+
+        static void WriteFile(string path, DataWriter dataWriter)
+        {
+            try
+            {
+                var destinationDirectory = Path.GetDirectoryName(path);
+
+                if (!string.IsNullOrWhiteSpace(destinationDirectory))
+                    Directory.CreateDirectory(destinationDirectory);
+
+                var destinationStream = File.Create(path);
+                dataWriter.CopyTo(destinationStream);
+                destinationStream.Flush();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error writing to destination '{path}': {ex.Message}");
+                Console.WriteLine($" Ensure to specify a valid file path.");
+                Console.WriteLine($" Ensure that you have write permission.");
+                Console.WriteLine($" Ensure that the file is not opened in another program.");
+                Environment.Exit(ERROR_WRITING_TO_DESTINATION);
+                return;
+            }
+        }
+
+        static void PackItems(string[] args)
+        {
+            if (args.Length != 3)
+            {
+                Usage();
+                Environment.Exit(ERROR_INVALID_USAGE);
+                return;
+            }
+
+            if (!Directory.Exists(args[1]))
+            {
+                Console.WriteLine($"Source directory '{args[1]}' not found.");
+                Usage();
+                Environment.Exit(ERROR_SOURCE_FOUND);
+                return;
+            }
+
+            var files = GetContainerDataFromFiles(Directory.GetFiles(args[1]));
+
+            if (files.Keys.Max() != files.Count)
+            {
+                Console.WriteLine($"Invalid file numbering. Ensure file names starting at 001 and without gaps.");
+                Environment.Exit(ERROR_INVALID_FILE_INDICES);
+                return;
+            }
+
+            var dataWriter = new DataWriter();
+
+            dataWriter.Write((ushort)files.Count);
+
+            foreach (var file in files.ToList().OrderBy(f => f.Key))
+            {
+                dataWriter.Write(file.Value);
+            }
+
+            var outputWriter = new DataWriter();
+
+            WriteFiles(outputWriter, FileType.JH, 0xd2e7, true, dataWriter.ToArray());
+
+            WriteFile(args[2], outputWriter);
+
+            Console.WriteLine("File was written successfully.");
+            Environment.Exit(0);
         }
 
         static Dictionary<uint, byte[]> GetContainerDataFromFiles(params string[] files)
