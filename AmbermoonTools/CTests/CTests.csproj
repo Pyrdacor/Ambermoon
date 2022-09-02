@@ -12,8 +12,4 @@
     <PackageReference Include="Ambermoon.Data.Legacy" Version="10.7.6" />
   </ItemGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\CSharpToC\CSharpToC.csproj" />
-  </ItemGroup>
-
 </Project>
