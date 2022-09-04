@@ -28,7 +28,7 @@ Offset | Type | Description
 0x000F | ubyte | Monster morale (0-100)
 0x0010 | ubyte | Immunity to [spell types](Enumerations/SpellTypes.md)
 0x0011 | ubyte | Attacks per round (APR)
-0x0012 | ubyte | [Monster flags](Enumerations/MonsterFlags.md) (monsters only)
+0x0012 | ubyte | [Battle flags](Enumerations/BattleFlags.md) (monsters only in Ambermoon, party members as well in **Ambermoon Advanced**)
 0x0013 | ubyte | [Elements and immunities](Enumerations/ElementsAndImmunities.md) (in original only used for monsters)
 0x0014 | uword | Spell learning points (SLP)
 0x0016 | uword | Training points (TP)
