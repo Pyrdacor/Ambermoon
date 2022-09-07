@@ -228,6 +228,7 @@ Value | Meaning
 14 | Defense (**Ambermoon Advanced** only)
 15 | Max LP (**Ambermoon Advanced** only)
 16 | Max SP (**Ambermoon Advanced** only)
+17 | Empower spell types (value is 0: earth, 1: wind, 2: fire) (**Ambermoon Advanced** only)
 
 ### Reward operation
 
