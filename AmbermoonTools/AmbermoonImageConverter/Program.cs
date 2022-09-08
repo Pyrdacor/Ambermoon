@@ -15,6 +15,7 @@ namespace AmbermoonImageConverter
         // args[2]: Output image
         // args[3]: Format (5: 5bit, 4: 4bit, 3: 3bit, 0: 4bit texture)
         // args[4]: Frames (default 1)
+        // args[5]: Palette index offset (default: 0)
         static void Main(string[] args)
         {
             // TODO: Later add both ways of conversion and support 3, 4 and 5 bit images as well as palettes.
@@ -28,11 +29,20 @@ namespace AmbermoonImageConverter
             if (bpp == 0)
                 bpp = 4;
 
-            int frames = args.Length == 4 ? 1 : int.Parse(args[4]);
+            int frames = args.Length < 5 ? 1 : int.Parse(args[4]);
+            int paletteIndexOffset = args.Length < 6 ? 0 : Math.Max(0, int.Parse(args[5]));
+            if (bpp == 5)
+                paletteIndexOffset = 0;
+            else if (bpp == 4)
+                paletteIndexOffset = Math.Min(16, paletteIndexOffset);
+            else
+                paletteIndexOffset = Math.Min(24, paletteIndexOffset);
+            byte minIndex = (byte)paletteIndexOffset;
+            byte maxIndex = (byte)((1 << bpp) - 1 + paletteIndexOffset);
 
             for (int i = 0; i < palIndices.Length; ++i)
             {
-                palIndices[i] = FindPaletteIndex(palette, BitConverter.ToUInt32(imageData, i * 4), (byte)((1 << bpp) - 1));
+                palIndices[i] = FindPaletteIndex(palette, BitConverter.ToUInt32(imageData, i * 4), minIndex, maxIndex);
             }
 
             var outputData = new byte[height * bpp * width / 8];
@@ -70,7 +80,7 @@ namespace AmbermoonImageConverter
             File.WriteAllBytes(args[2], outputData);
         }
 
-        static byte FindPaletteIndex(uint[] palette, uint color, byte max)
+        static byte FindPaletteIndex(uint[] palette, uint color, byte min, byte max)
         {
             max = Math.Min(max, (byte)31);
 
@@ -85,10 +95,10 @@ namespace AmbermoonImageConverter
 
             var diffs = new SortedDictionary<int, int>();
 
-            for (int i = 0; i <= max; ++i)
+            for (int i = min; i <= max; ++i)
             {
                 if (palette[i] == color)
-                    return (byte)i;
+                    return (byte)(i - min);
 
                 var diffA = Math.Abs((int)(color >> 24) - (int)(palette[i] >> 24));
                 var diffR = Math.Abs((int)((color >> 16) & 0xff) - (int)((palette[i] >> 16) & 0xff));
