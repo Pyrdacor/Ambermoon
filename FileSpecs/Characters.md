@@ -52,7 +52,7 @@ Offset | Type | Description
 0x006A | uword | Current age
 0x006C | uword | Max age
 0x006E | uword[2] | Looks like age has a bonus and 4th value as well but they are always 0.
-0x0072 | uword[4] | **Unknown**. This looks like a hidden or unused attribute/ability cause it uses most likely 4 uwords as well. The current and max value is always 0. The bonus is 25 for Chris and 5 for Gryban. The last value is 0 as well. With this there are 10 attributes. I guess this was a reserve and matches the amount of abilities.
+0x0072 | uword[4] | **Unknown**. This looks like a hidden or unused attribute/ability cause it uses most likely 4 uwords as well. The current and max value is always 0. The bonus is 25 for Chris and 5 for Gryban. The last value is 0 as well. With this there are 10 attributes. I guess this was a reserve and matches the amount of abilities. In **Ambermoon Advanced** the current value specifies a plain minimum damage bonus for elemental spells and the max value specifies a maximum damage bonus. Only earth, wind, fire and ice spells are affected. Mostly used by monsters which should deal more damage than the base spell damage.
 0x007A | uword[4] | ATT (see [Abilities](Enumerations/Abilities.md))
 0x0082 | uword[4] | PAR (see [Abilities](Enumerations/Abilities.md))
 0x008A | uword[4] | SWI (see [Abilities](Enumerations/Abilities.md))
