@@ -190,7 +190,7 @@ Note that learned spells are stored a bit strange (with 1 bit offset). The lowes
 
 In **Ambermoon Advanced** the 10th attribute grants bonus damage to spells of the 4 elements earth, wind, fire and water. The "current value" specifies the minimum damage bonus and the "max value" specifies the maximum damage bonus. The other two values are ignored.
 
-The total minimum damage is: spell min damage + minimum bonus damage.
-The total maximum damage is: spell max damage + minimum bonus damage + maximum bonus damage.
+- The total minimum damage is: spell min damage + minimum bonus damage.
+- The total maximum damage is: spell max damage + minimum bonus damage + maximum bonus damage.
 
 Other bonusses like the elemental, level and intelligence bonus are applied afterwards so that the plain damage bonus given here increases the base damage range.
