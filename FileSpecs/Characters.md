@@ -185,3 +185,12 @@ There might be condition events which force jumps to different PrintText or Conv
 ## Learned spells
 
 Note that learned spells are stored a bit strange (with 1 bit offset). The lowest bit is always 0 (not used). Bit 1 is then used for spell 1, bit 2 for spell 2, etc. I guess the spell index 0 was also a valid value in the original (namely "no spell") and could theoretically be stored as bit 0.
+
+## Bonus spell damage
+
+In **Ambermoon Advanced** the 10th attribute grants bonus damage to spells of the 4 elements earth, wind, fire and water. The "current value" specifies the minimum damage bonus and the "max value" specifies the maximum damage bonus. The other two values are ignored.
+
+The total minimum damage is: spell min damage + minimum bonus damage.
+The total maximum damage is: spell max damage + minimum bonus damage + maximum bonus damage.
+
+Other bonusses like the elemental, level and intelligence bonus are applied afterwards so that the plain damage bonus given here increases the base damage range.
