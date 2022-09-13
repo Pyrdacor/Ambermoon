@@ -47,7 +47,7 @@ Offset | Type | Description
 0x001E | sbyte | M-B-R value (magic armor level)
 0x001F | sbyte | M-B-W value (magic attack level)
 0x0020 | ubyte | Item flags (see below)
-0x0021 | ubyte | Item slot flags (see below)
+0x0021 | ubyte | Item slot flags (see below, used when creating items through events)
 0x0022 | uword | [Classes](Enumerations/Classes.md)
 0x0024 | uword | Price (see price formula below)
 0x0026 | uword | Weight
