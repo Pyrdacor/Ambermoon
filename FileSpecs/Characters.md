@@ -188,12 +188,12 @@ Note that learned spells are stored a bit strange (with 1 bit offset). The lowes
 
 ## Bonus spell damage
 
-In **Ambermoon Advanced** the 10th attribute grants bonus damage to spells of the 4 elements earth, wind, fire and water and for magic projectiles and ghost weapon. The "current value" specifies the base damage bonus which is applied in any case and the "max value" specifies the maximum damage bonus which only increases the possible maximum value. The 3rd value gives a plain damage penalty instead and the fourth value can specify a percentage value which is used for the total damage (0 means it is ignored).
+In **Ambermoon Advanced** the 10th attribute grants bonus damage to spells of the 4 elements earth, wind, fire and water and for magic projectiles and ghost weapon. The "current value" specifies the base damage bonus which is applied in any case and the "max value" specifies the maximum damage bonus which only increases the possible maximum value. The 3rd value is ignored. The fourth value can specify a percentage value which is used for the total damage (0 means it is ignored). Note that the damage bonus values can also be negative and thus may represent a penalty.
 
-- The total minimum damage is: spell's min damage + base bonus damage - damage penalty.
-- The total maximum damage is: spell's max damage + base bonus damage + maximum bonus damage - damage penalty.
+- The total minimum damage is: spell's min damage + base bonus damage
+- The total maximum damage is: spell's max damage + base bonus damage + maximum bonus damage
 
-If the fourth value is not 0, it is interpreted as a percentage value (1% to 255%) and both min and max damage are modified by this value. A value of 100 would mean "same damage", 150 would be +50% damage and 10 would be -90% damage.
+The fourth value is interpreted as a signed value in the range -32768 to +32767 and gives a percent value to add to the damage. A value of 0 would not change the damage, a value of 100 would increase the damage by 100% (so in total deals double damage). Every value smaller or equal -100 will set the damage to 0 but the logic will always use at least 1 point of damage.
 
 Other bonusses like the elemental, level and intelligence bonus are applied afterwards so that the plain damage bonus given here increases the base damage range only.
 
