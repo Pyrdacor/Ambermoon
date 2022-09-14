@@ -52,7 +52,7 @@ Offset | Type | Description
 0x006A | uword | Current age
 0x006C | uword | Max age
 0x006E | uword[2] | Looks like age has a bonus and 4th value as well but they are always 0.
-0x0072 | uword[4] | **Unknown**. This looks like a hidden or unused attribute/ability cause it uses most likely 4 uwords as well. The current and max value is always 0. The bonus is 25 for Chris and 5 for Gryban. The last value is 0 as well. With this there are 10 attributes. I guess this was a reserve and matches the amount of abilities. In **Ambermoon Advanced** this attribute is used for spell damage increasing for monsters (see below).
+0x0072 | uword[4] | **Unknown**. This looks like a hidden or unused attribute/ability cause it uses most likely 4 uwords as well. The current and max value is always 0. The bonus is 25 for Chris and 5 for Gryban. The last value is 0 as well. With this there are 10 attributes. I guess this was a reserve and matches the amount of abilities. In **Ambermoon Advanced** this attribute is used for spell damage adjustment (see below).
 0x007A | uword[4] | ATT (see [Abilities](Enumerations/Abilities.md))
 0x0082 | uword[4] | PAR (see [Abilities](Enumerations/Abilities.md))
 0x008A | uword[4] | SWI (see [Abilities](Enumerations/Abilities.md))
@@ -188,12 +188,14 @@ Note that learned spells are stored a bit strange (with 1 bit offset). The lowes
 
 ## Bonus spell damage
 
-In **Ambermoon Advanced** the 10th attribute grants bonus damage to spells of the 4 elements earth, wind, fire and water. The "current value" specifies the base damage bonus which is applied in any case and the "max value" specifies the maximum damage bonus which only increases the possible maximum value. The other two values are ignored.
+In **Ambermoon Advanced** the 10th attribute grants bonus damage to spells of the 4 elements earth, wind, fire and water and for magic projectiles and ghost weapon. The "current value" specifies the base damage bonus which is applied in any case and the "max value" specifies the maximum damage bonus which only increases the possible maximum value. The 3rd value gives a plain damage penalty instead and the fourth value can specify a percentage value which is used for the total damage (0 means it is ignored).
 
-- The total minimum damage is: spell's min damage + base bonus damage.
-- The total maximum damage is: spell's max damage + base bonus damage + maximum bonus damage.
+- The total minimum damage is: spell's min damage + base bonus damage - damage penalty.
+- The total maximum damage is: spell's max damage + base bonus damage + maximum bonus damage - damage penalty.
 
-Other bonusses like the elemental, level and intelligence bonus are applied afterwards so that the plain damage bonus given here increases the base damage range.
+If the fourth value is not 0, it is interpreted as a percentage value (1% to 255%) and both min and max damage are modified by this value. A value of 100 would mean "same damage", 150 would be +50% damage and 10 would be -90% damage.
+
+Other bonusses like the elemental, level and intelligence bonus are applied afterwards so that the plain damage bonus given here increases the base damage range only.
 
 For example if a level 40 monster has values 10 (base bonus) and 5 (max bonus) and casts the spell "Magic Projectile", the damage is as follows. Note that the spell does half the level as damage in general.
 
