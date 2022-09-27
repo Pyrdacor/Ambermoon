@@ -10,7 +10,7 @@
     <RepositoryType>Github</RepositoryType>
     <PackageTags>Ambermoon Packer File Legacy Amiga Compression Encryption</PackageTags>
     <RuntimeIdentifiers>win-x64;win-x86;linux-x64</RuntimeIdentifiers>
-    <Version>1.0.14</Version>
+    <Version>1.0.13</Version>
     <Configurations>Debug;Release;ReleaseLinux</Configurations>
   </PropertyGroup>
 

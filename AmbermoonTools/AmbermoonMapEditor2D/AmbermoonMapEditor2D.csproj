@@ -6,7 +6,7 @@
     <RuntimeIdentifiers>win-x64;win-x86</RuntimeIdentifiers>
     <UseWindowsForms>true</UseWindowsForms>
     <Configurations>Debug;Release;ReleaseLinux</Configurations>
-    <Version>1.0.14</Version>
+    <Version>1.0.13</Version>
     <Authors>Robert Schneckenhaus</Authors>
   </PropertyGroup>
 

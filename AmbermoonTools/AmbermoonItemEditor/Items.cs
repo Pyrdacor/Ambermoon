@@ -17,7 +17,7 @@ namespace AmbermoonItemEditor
         static IDataReader Read(string filename)
         {
             var reader = new FileReader();
-            var container = reader.ReadFile("", File.ReadAllBytes(filename));
+            var container = reader.ReadFile("", new DataReader(File.ReadAllBytes(filename)));
 
             return container.Files[1];
         }

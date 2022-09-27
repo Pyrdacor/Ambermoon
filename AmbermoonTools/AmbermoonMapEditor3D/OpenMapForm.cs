@@ -149,7 +149,7 @@ namespace AmbermoonMapEditor3D
             if (header == 0x414D4E50 || header == 0x414D4252 ||
                 header == 0x414d4e43 || header == 0x414d5043)
             {
-                var container = new FileReader().ReadFile(Path.GetFileName(filename), reader.ReadToEnd());
+                var container = new FileReader().ReadFile(Path.GetFileName(filename), reader);
 
                 if (mapIndex == 0 && !AskForMapIndex(out mapIndex, container.Files.Keys.ToDictionary(k => (uint)k, _ => (string)null)))
                     return null;                
@@ -177,7 +177,7 @@ namespace AmbermoonMapEditor3D
             // LOB, VOL1 or JH
             else if (header == 0x014c4f42 || header == 0x564f4c31 || (header & 0xffff0000) == 0x4a480000)
             {
-                var container = new FileReader().ReadFile(Path.GetFileName(filename), reader.ReadToEnd());
+                var container = new FileReader().ReadFile(Path.GetFileName(filename), reader);
 
                 if (mapIndex == 0 && !AskForMapIndex(out mapIndex))
                     return null;
@@ -263,7 +263,7 @@ namespace AmbermoonMapEditor3D
             if (header == 0x414D4E50 || header == 0x414D4252 ||
                 header == 0x414d4e43 || header == 0x414d5043)
             {
-                var container = new FileReader().ReadFile("", reader.ReadToEnd());
+                var container = new FileReader().ReadFile("", reader);
 
                 if (!container.Files.TryGetValue((int)mapIndex, out var textReader))
                 {
@@ -276,7 +276,7 @@ namespace AmbermoonMapEditor3D
             // LOB, VOL1 or JH
             else if (header == 0x014c4f42 || header == 0x564f4c31 || (header & 0xffff0000) == 0x4a480000)
             {
-                var container = new FileReader().ReadFile("", reader.ReadToEnd());
+                var container = new FileReader().ReadFile("", reader);
                 return container.Files[1];
             }
             else // Raw file
@@ -309,7 +309,7 @@ namespace AmbermoonMapEditor3D
             if (GameData != null)
             {
                 if (MapManager == null)
-                    MapManager = new MapManager(GameData, new MapReader(), new TilesetReader(), new LabdataReader());
+                    MapManager = new MapManager(GameData as ILegacyGameData, new MapReader(), new TilesetReader(), new LabdataReader());
             }
 
             BringToFront();
