@@ -1,10 +1,12 @@
-﻿using Ambermoon.Data;
+﻿using Ambermoon;
+using Ambermoon.Data;
+using Ambermoon.Data.Enumerations;
 using Ambermoon.Data.Legacy.Serialization;
 using System;
-using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
 using System.Windows.Forms;
+using Color = System.Drawing.Color;
 
 namespace AmbermoonMapEditor2D
 {
@@ -219,8 +221,19 @@ namespace AmbermoonMapEditor2D
                 using var grid = new Pen(Color.Black, 1.0f);
                 using var textBrush = new SolidBrush(Color.White);
                 using var textBackground = new SolidBrush(Color.FromArgb(0x40, 0x80, 0x80, 0x80));
+                using var blockBrush = new SolidBrush(Color.FromArgb(0x80, 0x20, 0xff, 0x40));
                 using var font = new Font(FontFamily.GenericMonospace, 8.0f);
                 int tileSize = (trackBarZoom.Maximum - trackBarZoom.Value + 1) * 16;
+                int showAllowedTravelTypes = 0;
+
+                if (toolStripMenuShowAllowWalk.Checked)
+                    showAllowedTravelTypes |= (1 << (int)TravelType.Walk);
+                if (toolStripMenuShowAllowHorse.Checked)
+                    showAllowedTravelTypes |= (1 << (int)TravelType.Horse);
+                if (toolStripMenuShowAllowRaft.Checked)
+                    showAllowedTravelTypes |= (1 << (int)TravelType.Raft);
+                if (toolStripMenuShowAllowShip.Checked)
+                    showAllowedTravelTypes |= (1 << (int)TravelType.Ship);
 
                 for (int y = 0; y < MapHeight; ++y)
                 {
@@ -281,6 +294,14 @@ namespace AmbermoonMapEditor2D
                             }
                         }
 
+                        if (showAllowedTravelTypes != 0)
+                        {
+                            Tileset.Tile blockFlagsTile = foregroundTile == null || foregroundTile.UseBackgroundTileFlags ? backgroundTile : foregroundTile;
+
+                            if ((~blockFlagsTile.AllowedTravelTypes & showAllowedTravelTypes) != showAllowedTravelTypes)
+                                e.Graphics.FillRectangle(blockBrush, rect);
+                        }
+
                         if (showGrid)
                             e.Graphics.DrawRectangle(grid, new Rectangle(drawX, drawY, tileSize - 1, tileSize - 1));
 
@@ -336,7 +357,14 @@ namespace AmbermoonMapEditor2D
                 using var errorBrush = new SolidBrush(Color.White);
                 using var errorFont = new Font(FontFamily.GenericMonospace, 8.0f);
                 using var errorFontBrush = new SolidBrush(Color.Red);
+                using var unusedBrush = new SolidBrush(Color.FromArgb(0x80, 0xff, 0x40, 0x20));
                 var tiles = currentLayer == 0 ? tileset.Tiles.Take(256) : tileset.Tiles;
+                var mapTiles = !checkBoxMarkUnusedTiles.Checked ? null : map.InitialTiles.Cast<Map.Tile>()
+                    .SelectMany(tile => new[] { tile.BackTileIndex, tile.FrontTileIndex })
+                    .Distinct()
+                    .Where(tile => tile != 0)
+                    .ToHashSet();
+                uint tileIndex = 1;
 
                 foreach (var tile in tiles)
                 {
@@ -364,6 +392,11 @@ namespace AmbermoonMapEditor2D
                             e.Graphics.DrawString("X", errorFont, errorFontBrush, rect.X + 3, rect.Y);
                             // ignore, there are many unused tiles without valid graphic indices, just skip them and mark them as unused/invalid
                         }
+
+                        if (checkBoxMarkUnusedTiles.Checked && !mapTiles.Contains(tileIndex))
+                        {
+                            e.Graphics.FillRectangle(unusedBrush, rect);
+                        }
                     }
 
                     if (++x == TilesetTilesPerRow)
@@ -371,6 +404,8 @@ namespace AmbermoonMapEditor2D
                         x = 0;
                         ++y;
                     }
+
+                    ++tileIndex;
                 }
 
                 if (selectedTilesetTile > tiles.Count())
@@ -469,6 +504,26 @@ namespace AmbermoonMapEditor2D
         }
 
         private void toolStripMenuItemShowFrontLayer_Click(object sender, EventArgs e)
+        {
+            panelMap.Refresh();
+        }
+
+        private void toolStripMenuShowAllowWalk_Click(object sender, EventArgs e)
+        {
+            panelMap.Refresh();
+        }
+
+        private void toolStripMenuShowAllowHorse_Click(object sender, EventArgs e)
+        {
+            panelMap.Refresh();
+        }
+
+        private void toolStripMenuShowAllowRaft_Click(object sender, EventArgs e)
+        {
+            panelMap.Refresh();
+        }
+
+        private void toolStripMenuShowAllowShip_Click(object sender, EventArgs e)
         {
             panelMap.Refresh();
         }
@@ -669,7 +724,7 @@ namespace AmbermoonMapEditor2D
             int y = scrolledYTile + hoveredRow;
             int index = x + y * TilesetTilesPerRow;
 
-            if (index >= (currentLayer == 0 ? 256 : 2500))
+            if (index >= (currentLayer == 0 ? Math.Min(256, currentTilesetTiles) : currentTilesetTiles))
             {
                 toolStripStatusLabelCurrentTilesetTile.Visible = false;
 
@@ -681,7 +736,7 @@ namespace AmbermoonMapEditor2D
             }
             else
             {
-                toolStripStatusLabelCurrentTilesetTile.Text = $"{1 + x}, {1 + y} [Index: {index}]";
+                toolStripStatusLabelCurrentTilesetTile.Text = $"{1 + x}, {1 + y} [Index: {index + 1}]";
                 toolStripStatusLabelCurrentTilesetTile.Visible = true;
 
                 if (newHoveredTile != hoveredTilesetTile)
@@ -1111,6 +1166,11 @@ namespace AmbermoonMapEditor2D
         {
             if (e.KeyCode == Keys.Escape)
                 choosingTileSlotForDuplicating = false;
+        }
+
+        private void checkBoxMarkUnusedTiles_CheckedChanged(object sender, EventArgs e)
+        {
+            panelTileset.Refresh();
         }
     }
 }

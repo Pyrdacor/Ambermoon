@@ -222,8 +222,19 @@ namespace Ambermoon.Data.Descriptions
             (
                 true, true, true, true, false,
                 Use.Enum<RewardEvent.RewardType>("TypeOfReward", true),
-                Use.Enum("Operation", true, RewardEvent.RewardOperation.Increase),
-                Use.Bool("Random", true),
+                Use.Conditional<RewardEvent>(() => Use.Enum("Operation", true, RewardEvent.RewardOperation.Increase), rewardEvent =>
+                {
+                    return rewardEvent.TypeOfReward != RewardEvent.RewardType.ChangePortrait &&
+                           rewardEvent.TypeOfReward != RewardEvent.RewardType.EmpowerSpells;
+                }),
+                Use.Conditional<RewardEvent>(() => Use.Bool("Random", true), rewardEvent =>
+                {
+                    return rewardEvent.TypeOfReward != RewardEvent.RewardType.ChangePortrait &&
+                           rewardEvent.TypeOfReward != RewardEvent.RewardType.Conditions &&
+                           rewardEvent.TypeOfReward != RewardEvent.RewardType.EmpowerSpells &&
+                           rewardEvent.TypeOfReward != RewardEvent.RewardType.Languages &&
+                           rewardEvent.TypeOfReward != RewardEvent.RewardType.UsableSpellTypes;
+                }),
                 Use.Enum("Target", true, RewardEvent.RewardTarget.ActivePlayer),
                 Use.HiddenByte(),
                 Use.Conditional<RewardEvent>(() => Use.Word("RewardTypeValue", false), rewardEvent =>
@@ -282,7 +293,8 @@ namespace Ambermoon.Data.Descriptions
                     conditionEvent.TypeOfCondition != ConditionEvent.ConditionType.Hand &&
                     conditionEvent.TypeOfCondition != ConditionEvent.ConditionType.Mouth &&
                     conditionEvent.TypeOfCondition != ConditionEvent.ConditionType.LastEventResult &&
-                    conditionEvent.TypeOfCondition != ConditionEvent.ConditionType.Levitating
+                    conditionEvent.TypeOfCondition != ConditionEvent.ConditionType.Levitating &&
+                    conditionEvent.TypeOfCondition != ConditionEvent.ConditionType.IsNight
                 ),
                 Use.EventIndex("ContinueIfFalseWithMapEventIndex", false)
             )},

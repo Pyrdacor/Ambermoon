@@ -3,11 +3,14 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
+using System.Xml.Linq;
 
 namespace AmbermoonEventEditor
 {
     internal class FlowChart
     {
+        private const string EndMarker = "<< END >>";
+
         private record Node
         {
             public int Index { get; init; }
@@ -116,7 +119,7 @@ namespace AmbermoonEventEditor
                         node = new Node
                         {
                             Index = nodes.Count,
-                            Name = @event.ToString()
+                            Name = $"{events.IndexOf(@event):x2} {@event}"
                         };
                         CommitNode();
                     }
@@ -125,7 +128,7 @@ namespace AmbermoonEventEditor
                         var branch = new Branch
                         {
                             Index = nodes.Count,
-                            Name = @event.ToString()
+                            Name = $"{events.IndexOf(@event):x2} {@event}"
                         };
                         node = branch;
                         CommitNode();
@@ -158,7 +161,7 @@ namespace AmbermoonEventEditor
                     node = new Node
                     {
                         Index = nodes.Count,
-                        Name = @event.ToString()
+                        Name = $"{events.IndexOf(@event):x2} {@event}"
                     };
                     CommitNode();
                 }
@@ -200,6 +203,10 @@ namespace AmbermoonEventEditor
             public Node GetLowIndexNode() => node1;
 
             public Node GetHighIndexNode() => node2;
+
+            public int LowIndex => index1;
+
+            public int HighIndex => index2;
         }
 
         public void Print(Action<string> printLine)
@@ -239,6 +246,8 @@ namespace AmbermoonEventEditor
                     }
                 }
 
+                bool endMarker = text == EndMarker;
+
                 if (text.Length > maxLabelSize)
                     text = text.Substring(0, maxLabelSize - 3) + "...";
                 else if (text.Length < maxLabelSize)
@@ -274,7 +283,18 @@ namespace AmbermoonEventEditor
                         backRef = backRef[0..otherBackRefIndex] + "|" + (otherBackRefIndex == backRef.Length - 1 ? "" : backRef[(otherBackRefIndex + 1)..]);
                 }
 
-                foreach (var branchRefSpan in branchRefSpans.Where(s => s.IsWithin(index)))
+                bool ContainsIndex(Range r)
+                {
+                    if (r.IsWithin(index))
+                        return true;
+
+                    if (endMarker && index == r.LowIndex)
+                        return true;
+
+                    return false;
+                }
+
+                foreach (var branchRefSpan in branchRefSpans.Where(s => ContainsIndex(s)))
                 {
                     int refIndex = branchRefSpans.IndexOf(branchRefSpan);
                     var sourceNode = BranchRefForward[refIndex] ? branchRefSpan.GetLowIndexNode() : branchRefSpan.GetHighIndexNode();
@@ -316,7 +336,7 @@ namespace AmbermoonEventEditor
                 }
                 WriteLine(node.Name, node.Index, backRefIndex, branchRefIndex, backRefDrawType, branchRefDrawType);
                 if (node.Next == null)
-                    WriteLine("<< END >>", node.Index);
+                    WriteLine(EndMarker, node.Index);
             }
         }
     }

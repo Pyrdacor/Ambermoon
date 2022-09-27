@@ -92,6 +92,10 @@ namespace AmbermoonMapEditor2D
             this.toolStripSeparatorLayers1 = new System.Windows.Forms.ToolStripSeparator();
             this.toolStripMenuItemShowBackLayer = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripMenuItemShowFrontLayer = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripMenuShowAllowWalk = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripMenuShowAllowHorse = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripMenuShowAllowRaft = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripMenuShowAllowShip = new System.Windows.Forms.ToolStripMenuItem();
             this.statusStrip = new System.Windows.Forms.StatusStrip();
             this.toolStripStatusLabelTool = new System.Windows.Forms.ToolStripStatusLabel();
             this.toolStripStatusLabelLayer = new System.Windows.Forms.ToolStripStatusLabel();
@@ -123,6 +127,7 @@ namespace AmbermoonMapEditor2D
             this.timerAnimation = new System.Windows.Forms.Timer(this.components);
             this.trackBarZoom = new System.Windows.Forms.TrackBar();
             this.buttonToolEventChanger = new System.Windows.Forms.Button();
+            this.checkBoxMarkUnusedTiles = new System.Windows.Forms.CheckBox();
             this.menuStrip.SuspendLayout();
             this.groupBoxTileset.SuspendLayout();
             this.groupBoxProperties.SuspendLayout();
@@ -249,6 +254,7 @@ namespace AmbermoonMapEditor2D
             // 
             // groupBoxTileset
             // 
+            this.groupBoxTileset.Controls.Add(this.checkBoxMarkUnusedTiles);
             this.groupBoxTileset.Controls.Add(this.buttonExportTileset);
             this.groupBoxTileset.Controls.Add(this.buttonEditTile);
             this.groupBoxTileset.Controls.Add(this.comboBoxPalettes);
@@ -277,7 +283,7 @@ namespace AmbermoonMapEditor2D
             // 
             // buttonEditTile
             // 
-            this.buttonEditTile.Location = new System.Drawing.Point(707, 93);
+            this.buttonEditTile.Location = new System.Drawing.Point(707, 94);
             this.buttonEditTile.Margin = new System.Windows.Forms.Padding(2, 3, 2, 3);
             this.buttonEditTile.Name = "buttonEditTile";
             this.buttonEditTile.Size = new System.Drawing.Size(89, 24);
@@ -290,7 +296,7 @@ namespace AmbermoonMapEditor2D
             // 
             this.comboBoxPalettes.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.comboBoxPalettes.FormattingEnabled = true;
-            this.comboBoxPalettes.Location = new System.Drawing.Point(707, 51);
+            this.comboBoxPalettes.Location = new System.Drawing.Point(707, 47);
             this.comboBoxPalettes.Margin = new System.Windows.Forms.Padding(2, 3, 2, 3);
             this.comboBoxPalettes.Name = "comboBoxPalettes";
             this.comboBoxPalettes.Size = new System.Drawing.Size(89, 23);
@@ -310,7 +316,7 @@ namespace AmbermoonMapEditor2D
             // 
             // buttonDuplicateTile
             // 
-            this.buttonDuplicateTile.Location = new System.Drawing.Point(707, 120);
+            this.buttonDuplicateTile.Location = new System.Drawing.Point(707, 121);
             this.buttonDuplicateTile.Margin = new System.Windows.Forms.Padding(2, 3, 2, 3);
             this.buttonDuplicateTile.Name = "buttonDuplicateTile";
             this.buttonDuplicateTile.Size = new System.Drawing.Size(89, 24);
@@ -736,9 +742,13 @@ namespace AmbermoonMapEditor2D
             this.toolStripMenuItemFrontLayer,
             this.toolStripSeparatorLayers1,
             this.toolStripMenuItemShowBackLayer,
-            this.toolStripMenuItemShowFrontLayer});
+            this.toolStripMenuItemShowFrontLayer,
+            this.toolStripMenuShowAllowWalk,
+            this.toolStripMenuShowAllowHorse,
+            this.toolStripMenuShowAllowRaft,
+            this.toolStripMenuShowAllowShip});
             this.contextMenuStripLayers.Name = "contextMenuStripLayers";
-            this.contextMenuStripLayers.Size = new System.Drawing.Size(166, 98);
+            this.contextMenuStripLayers.Size = new System.Drawing.Size(171, 186);
             // 
             // toolStripMenuItemBackLayer
             // 
@@ -746,7 +756,7 @@ namespace AmbermoonMapEditor2D
             this.toolStripMenuItemBackLayer.CheckOnClick = true;
             this.toolStripMenuItemBackLayer.CheckState = System.Windows.Forms.CheckState.Checked;
             this.toolStripMenuItemBackLayer.Name = "toolStripMenuItemBackLayer";
-            this.toolStripMenuItemBackLayer.Size = new System.Drawing.Size(165, 22);
+            this.toolStripMenuItemBackLayer.Size = new System.Drawing.Size(170, 22);
             this.toolStripMenuItemBackLayer.Text = "Back Layer";
             this.toolStripMenuItemBackLayer.Click += new System.EventHandler(this.toolStripMenuItemBackLayer_Click);
             // 
@@ -754,14 +764,14 @@ namespace AmbermoonMapEditor2D
             // 
             this.toolStripMenuItemFrontLayer.CheckOnClick = true;
             this.toolStripMenuItemFrontLayer.Name = "toolStripMenuItemFrontLayer";
-            this.toolStripMenuItemFrontLayer.Size = new System.Drawing.Size(165, 22);
+            this.toolStripMenuItemFrontLayer.Size = new System.Drawing.Size(170, 22);
             this.toolStripMenuItemFrontLayer.Text = "Front Layer";
             this.toolStripMenuItemFrontLayer.Click += new System.EventHandler(this.toolStripMenuItemFrontLayer_Click);
             // 
             // toolStripSeparatorLayers1
             // 
             this.toolStripSeparatorLayers1.Name = "toolStripSeparatorLayers1";
-            this.toolStripSeparatorLayers1.Size = new System.Drawing.Size(162, 6);
+            this.toolStripSeparatorLayers1.Size = new System.Drawing.Size(167, 6);
             // 
             // toolStripMenuItemShowBackLayer
             // 
@@ -769,7 +779,7 @@ namespace AmbermoonMapEditor2D
             this.toolStripMenuItemShowBackLayer.CheckOnClick = true;
             this.toolStripMenuItemShowBackLayer.CheckState = System.Windows.Forms.CheckState.Checked;
             this.toolStripMenuItemShowBackLayer.Name = "toolStripMenuItemShowBackLayer";
-            this.toolStripMenuItemShowBackLayer.Size = new System.Drawing.Size(165, 22);
+            this.toolStripMenuItemShowBackLayer.Size = new System.Drawing.Size(170, 22);
             this.toolStripMenuItemShowBackLayer.Text = "Show Back Layer";
             this.toolStripMenuItemShowBackLayer.Click += new System.EventHandler(this.toolStripMenuItemShowBackLayer_Click);
             // 
@@ -779,9 +789,41 @@ namespace AmbermoonMapEditor2D
             this.toolStripMenuItemShowFrontLayer.CheckOnClick = true;
             this.toolStripMenuItemShowFrontLayer.CheckState = System.Windows.Forms.CheckState.Checked;
             this.toolStripMenuItemShowFrontLayer.Name = "toolStripMenuItemShowFrontLayer";
-            this.toolStripMenuItemShowFrontLayer.Size = new System.Drawing.Size(165, 22);
+            this.toolStripMenuItemShowFrontLayer.Size = new System.Drawing.Size(170, 22);
             this.toolStripMenuItemShowFrontLayer.Text = "Show Front Layer";
             this.toolStripMenuItemShowFrontLayer.Click += new System.EventHandler(this.toolStripMenuItemShowFrontLayer_Click);
+            // 
+            // toolStripMenuShowAllowWalk
+            // 
+            this.toolStripMenuShowAllowWalk.CheckOnClick = true;
+            this.toolStripMenuShowAllowWalk.Name = "toolStripMenuShowAllowWalk";
+            this.toolStripMenuShowAllowWalk.Size = new System.Drawing.Size(170, 22);
+            this.toolStripMenuShowAllowWalk.Text = "Show Allow Walk";
+            this.toolStripMenuShowAllowWalk.Click += new System.EventHandler(this.toolStripMenuShowAllowWalk_Click);
+            // 
+            // toolStripMenuShowAllowHorse
+            // 
+            this.toolStripMenuShowAllowHorse.CheckOnClick = true;
+            this.toolStripMenuShowAllowHorse.Name = "toolStripMenuShowAllowHorse";
+            this.toolStripMenuShowAllowHorse.Size = new System.Drawing.Size(170, 22);
+            this.toolStripMenuShowAllowHorse.Text = "Show Allow Horse";
+            this.toolStripMenuShowAllowHorse.Click += new System.EventHandler(this.toolStripMenuShowAllowHorse_Click);
+            // 
+            // toolStripMenuShowAllowRaft
+            // 
+            this.toolStripMenuShowAllowRaft.CheckOnClick = true;
+            this.toolStripMenuShowAllowRaft.Name = "toolStripMenuShowAllowRaft";
+            this.toolStripMenuShowAllowRaft.Size = new System.Drawing.Size(170, 22);
+            this.toolStripMenuShowAllowRaft.Text = "Show Allow Raft";
+            this.toolStripMenuShowAllowRaft.Click += new System.EventHandler(this.toolStripMenuShowAllowRaft_Click);
+            // 
+            // toolStripMenuShowAllowShip
+            // 
+            this.toolStripMenuShowAllowShip.CheckOnClick = true;
+            this.toolStripMenuShowAllowShip.Name = "toolStripMenuShowAllowShip";
+            this.toolStripMenuShowAllowShip.Size = new System.Drawing.Size(170, 22);
+            this.toolStripMenuShowAllowShip.Text = "Show Allow Ship";
+            this.toolStripMenuShowAllowShip.Click += new System.EventHandler(this.toolStripMenuShowAllowShip_Click);
             // 
             // statusStrip
             // 
@@ -1015,6 +1057,17 @@ namespace AmbermoonMapEditor2D
             this.buttonToolEventChanger.UseVisualStyleBackColor = true;
             this.buttonToolEventChanger.Click += new System.EventHandler(this.buttonToolEventChanger_Click);
             // 
+            // checkBoxMarkUnusedTiles
+            // 
+            this.checkBoxMarkUnusedTiles.AutoSize = true;
+            this.checkBoxMarkUnusedTiles.Location = new System.Drawing.Point(707, 73);
+            this.checkBoxMarkUnusedTiles.Name = "checkBoxMarkUnusedTiles";
+            this.checkBoxMarkUnusedTiles.Size = new System.Drawing.Size(95, 19);
+            this.checkBoxMarkUnusedTiles.TabIndex = 6;
+            this.checkBoxMarkUnusedTiles.Text = "Mark unused";
+            this.checkBoxMarkUnusedTiles.UseVisualStyleBackColor = true;
+            this.checkBoxMarkUnusedTiles.CheckedChanged += new System.EventHandler(this.checkBoxMarkUnusedTiles_CheckedChanged);
+            // 
             // MapEditorForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
@@ -1053,6 +1106,7 @@ namespace AmbermoonMapEditor2D
             this.menuStrip.ResumeLayout(false);
             this.menuStrip.PerformLayout();
             this.groupBoxTileset.ResumeLayout(false);
+            this.groupBoxTileset.PerformLayout();
             this.groupBoxProperties.ResumeLayout(false);
             this.groupBoxProperties.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDownHeight)).EndInit();
@@ -1164,6 +1218,11 @@ namespace AmbermoonMapEditor2D
         private System.Windows.Forms.Button buttonToolEventChanger;
         private AmbermoonMapCharEditor.MapCharEditorControl mapCharEditorControl;
         private System.Windows.Forms.Button buttonPositions;
+        private System.Windows.Forms.ToolStripMenuItem toolStripMenuShowAllowWalk;
+        private System.Windows.Forms.ToolStripMenuItem toolStripMenuShowAllowHorse;
+        private System.Windows.Forms.ToolStripMenuItem toolStripMenuShowAllowRaft;
+        private System.Windows.Forms.ToolStripMenuItem toolStripMenuShowAllowShip;
+        private System.Windows.Forms.CheckBox checkBoxMarkUnusedTiles;
     }
 }
 

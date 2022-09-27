@@ -57,9 +57,9 @@ namespace Ambermoon.Data.Descriptions
                     else
                         return "0";
                 case ValueType.Flag8:
-                    return $"0x{value:x2}";
+                    return $"0x{Convert.ChangeType(value, typeof(uint)):x2}";
                 case ValueType.Flag16:
-                    return $"0x{value:x4}";
+                    return $"0x{Convert.ChangeType(value, typeof(uint)):x4}";
                 default:
                     return value.ToString();
             }
