@@ -230,6 +230,8 @@ namespace AmbermoonMapEditor2D
                     showAllowedTravelTypes |= (1 << (int)TravelType.Walk);
                 if (toolStripMenuShowAllowHorse.Checked)
                     showAllowedTravelTypes |= (1 << (int)TravelType.Horse);
+                if (toolStripMenuShowAllowDisc.Checked)
+                    showAllowedTravelTypes |= (1 << (int)TravelType.MagicalDisc);
                 if (toolStripMenuShowAllowRaft.Checked)
                     showAllowedTravelTypes |= (1 << (int)TravelType.Raft);
                 if (toolStripMenuShowAllowShip.Checked)
@@ -514,6 +516,11 @@ namespace AmbermoonMapEditor2D
         }
 
         private void toolStripMenuShowAllowHorse_Click(object sender, EventArgs e)
+        {
+            panelMap.Refresh();
+        }
+
+        private void toolStripMenuShowAllowDisc_Click(object sender, EventArgs e)
         {
             panelMap.Refresh();
         }
