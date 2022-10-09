@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
+using static Ambermoon.Data.Legacy.Compression.LobCompression;
 
 namespace AmbermoonTextImport
 {
@@ -31,7 +32,8 @@ namespace AmbermoonTextImport
         {
             PreserveWhitespaces,
             PreserveZeros,
-            HexSubfileNames
+            HexSubfileNames,
+            ExtendedCompression
         }
 
         static void Exit(ErrorCode errorCode)
@@ -66,6 +68,7 @@ namespace AmbermoonTextImport
             Console.WriteLine(" --preserve-whitespaces / -p :     Preserve whitespaces");
             Console.WriteLine(" --preserve-zero-bytes / -z  :     Preserve 0-bytes");
             Console.WriteLine(" --hex-subfile-names / -x    :     Subfile name with hex numbering");
+            Console.WriteLine(" --extended-compression / -c :     Extended compression");
             Console.WriteLine(" Those can be combined like -pzx or -xz.");
             Console.WriteLine();
         }
@@ -147,9 +150,11 @@ namespace AmbermoonTextImport
                         options.Add(Option.PreserveZeros);
                     else if (arg == "--hex-subfile-names")
                         options.Add(Option.HexSubfileNames);
+                    else if (arg == "--extended-compression")
+                        options.Add(Option.ExtendedCompression);
                     else if (arg.StartsWith("-"))
                     {
-                        if (arg.Length < 2 || arg.Length > 4)
+                        if (arg.Length < 2 || arg.Length > 5)
                             throw new Exception();
 
                         for (int i = 1; i < arg.Length; ++i)
@@ -160,6 +165,8 @@ namespace AmbermoonTextImport
                                 options.Add(Option.PreserveZeros);
                             else if (arg[i] == 'x')
                                 options.Add(Option.HexSubfileNames);
+                            else if (arg[i] == 'c')
+                                options.Add(Option.ExtendedCompression);
                             else
                                 throw new Exception();
                         }
@@ -457,7 +464,9 @@ namespace AmbermoonTextImport
 
             try
             {
-                Ambermoon.Data.Legacy.Serialization.FileWriter.WriteContainer(containerWriter, data, Ambermoon.Data.Legacy.Serialization.FileType.AMNP);
+                bool extComp = options.Contains(Option.ExtendedCompression);
+                Ambermoon.Data.Legacy.Serialization.FileWriter.WriteContainer(containerWriter, data, Ambermoon.Data.Legacy.Serialization.FileType.AMNP,
+                    null, extComp ? LobType.Text : LobType.Ambermoon, extComp);
 
                 using var stream = File.Create(outPath);
                 containerWriter.CopyTo(stream);

@@ -4,6 +4,7 @@ using System;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using static Ambermoon.Data.Legacy.Compression.LobCompression;
 
 namespace AmbermoonDiskExtract
 {
@@ -77,7 +78,7 @@ namespace AmbermoonDiskExtract
                             if (uncompressed)
                                 dataWriter.Write(file.Value.Files[1].ToArray());
                             else
-                                FileWriter.Write(dataWriter, file.Value);
+                                FileWriter.Write(dataWriter, file.Value, LobType.Ambermoon);
                             break;
                         case FileType.AMBR:
                         case FileType.AMNC:
@@ -86,7 +87,7 @@ namespace AmbermoonDiskExtract
                             if (uncompressed)
                                 FileWriter.WriteContainer(dataWriter, file.Value.Files.ToDictionary(f => (uint)f.Key, f => f.Value.ToArray()), FileType.AMBR);
                             else
-                                FileWriter.Write(dataWriter, file.Value);
+                                FileWriter.Write(dataWriter, file.Value, LobType.Ambermoon);
                             break;
                         default: // raw
                             dataWriter.Write(file.Value.Files[1].ToArray());

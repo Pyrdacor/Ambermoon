@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
+using static Ambermoon.Data.Legacy.Compression.LobCompression;
 
 namespace AmbermoonPack
 {
@@ -34,10 +35,13 @@ namespace AmbermoonPack
             Console.WriteLine("UNITEM unpacks an item container to a single item files.");
             Console.WriteLine("PKITEM packs a directory of item files into an item container.");
             Console.WriteLine();
-            Console.WriteLine(" <type>     JH, LOB, VOL1, AMNC, AMNP, AMBR, AMPC or JH+LOB");
+            Console.WriteLine(" <type>     JH, LOB, VOL1, AMNC, AMNP, AMBR, AMPC, JH+AMBR, JH+LOB");
             Console.WriteLine(" <source>   Source file or directory path");
             Console.WriteLine(" <dest>     Destination file path");
             Console.WriteLine(" [key]      Optional encrypt key for JH files");
+            Console.WriteLine();
+            Console.WriteLine("Append a plus sign to the type to compress the subfile dictionary.");
+            Console.WriteLine("Add one more and the extended LOB compression is used instead of the normal one.");
             Console.WriteLine();
             Console.WriteLine("Examples:");
             Console.WriteLine();
@@ -75,6 +79,8 @@ namespace AmbermoonPack
 
             FileType? type;
             bool additionalLobCompression = false;
+            bool useExtendedLob = false;
+            bool compressDictionary = false;
             string op = args[0].ToUpper();
 
             if (op == "REPACK")
@@ -91,6 +97,10 @@ namespace AmbermoonPack
                 type = FileType.JH;
                 additionalLobCompression = true;
             }
+            else if (op == "JH+AMBR")
+            {
+                type = FileType.JHPlusAMBR;
+            }
             else if (op == "UNITEM")
             {
                 UnpackItems(args);
@@ -101,7 +111,7 @@ namespace AmbermoonPack
                 PackItems(args);
                 return;
             }
-            else if (!Enum.TryParse<FileType>(args[0].ToUpper(), out FileType fileType))
+            else if (!Enum.TryParse<FileType>(args[0].TrimEnd('+').ToUpper(), out FileType fileType))
             {
                 Console.WriteLine($"Invalid type '{args[0]}'");
                 Usage();
@@ -110,6 +120,8 @@ namespace AmbermoonPack
             }
             else
             {
+                compressDictionary = args[0].EndsWith('+');
+                useExtendedLob = args[0].EndsWith("++");
                 type = fileType;
             }
 
@@ -139,6 +151,7 @@ namespace AmbermoonPack
             }
 
             var writer = new DataWriter();
+            var lobType = useExtendedLob ? LobType.Extended : LobType.Ambermoon;
 
             try
             {
@@ -161,15 +174,16 @@ namespace AmbermoonPack
                                     tempReader = new DataReader(containerData);
                                     header = tempReader.ReadDword(); // read potential LOB/VOL1 header
                                     bool lob = header == (uint)FileType.LOB || header == (uint)FileType.VOL1;
-                                    WriteFiles(writer, containerType, key, lob, container.Files.First().Value.ToArray());
+                                    WriteFiles(writer, containerType, key, lob, container.Files.First().Value.ToArray(), lobType);
                                     break;
                                 }
                             case FileType.LOB:
                             case FileType.VOL1:
-                                WriteFiles(writer, containerType, null, null, container.Files.First().Value.ToArray());
+                                WriteFiles(writer, containerType, null, null, container.Files.First().Value.ToArray(), lobType);
                                 break;
                             default:
-                                WriteFiles(writer, containerType, container.Files.ToDictionary(f => (uint)f.Key, f => f.Value.ToArray()));
+                                WriteFiles(writer, containerType, container.Files.ToDictionary(f => (uint)f.Key, f => f.Value.ToArray()),
+                                    lobType, compressDictionary);
                                 break;
                         }
                     }
@@ -198,7 +212,7 @@ namespace AmbermoonPack
                     try
                     {
                         if (keyString.StartsWith("0x", StringComparison.InvariantCultureIgnoreCase))
-                            key = ushort.Parse(keyString.Substring(2), System.Globalization.NumberStyles.HexNumber);
+                            key = ushort.Parse(keyString[2..], System.Globalization.NumberStyles.HexNumber);
                         else
                             key = ushort.Parse(keyString);
                     }
@@ -209,18 +223,18 @@ namespace AmbermoonPack
                         return;
                     }
 
-                    WriteFiles(writer, FileType.JH, key, additionalLobCompression, File.ReadAllBytes(args[1]));
+                    WriteFiles(writer, FileType.JH, key, additionalLobCompression, File.ReadAllBytes(args[1]), lobType);
                 }
                 else if (type == FileType.LOB || type == FileType.VOL1)
                 {
-                    WriteFiles(writer, type.Value, null, null, File.ReadAllBytes(args[1]));
+                    WriteFiles(writer, type.Value, null, null, File.ReadAllBytes(args[1]), lobType);
                 }
                 else
                 {
                     if (File.Exists(args[1]))
-                        WriteFiles(writer, type.Value, GetContainerDataFromFiles(args[1]));
+                        WriteFiles(writer, type.Value, GetContainerDataFromFiles(args[1]), lobType, compressDictionary);
                     else
-                        WriteFiles(writer, type.Value, GetContainerDataFromFiles(Directory.GetFiles(args[1])));
+                        WriteFiles(writer, type.Value, GetContainerDataFromFiles(Directory.GetFiles(args[1])), lobType, compressDictionary);
                 }
 
                 WriteFile(args[2], writer);
@@ -401,7 +415,7 @@ namespace AmbermoonPack
 
             var outputWriter = new DataWriter();
 
-            WriteFiles(outputWriter, FileType.JH, 0xd2e7, true, dataWriter.ToArray());
+            WriteFiles(outputWriter, FileType.JH, 0xd2e7, true, dataWriter.ToArray(), LobType.Ambermoon);
 
             WriteFile(args[2], outputWriter);
 
@@ -437,7 +451,7 @@ namespace AmbermoonPack
             return result;
         }
 
-        static void WriteFiles(DataWriter writer, FileType type, ushort? jhKey, bool? addLob, byte[] file)
+        static void WriteFiles(DataWriter writer, FileType type, ushort? jhKey, bool? addLob, byte[] file, LobType lobType)
         {
             switch (type)
             {
@@ -445,17 +459,17 @@ namespace AmbermoonPack
                     FileWriter.WriteJH(writer, file, jhKey.Value, addLob.Value);
                     break;
                 case FileType.LOB:
-                    FileWriter.WriteLob(writer, file);
+                    FileWriter.WriteLob(writer, file, lobType);
                     break;
                 case FileType.VOL1:
-                    FileWriter.WriteVol1(writer, file);
+                    FileWriter.WriteVol1(writer, file, lobType);
                     break;
                 default:
                     throw new Exception("Invalid call of WriteFiles for container format.");
             }
         }
 
-        static void WriteFiles(DataWriter writer, FileType type, Dictionary<uint, byte[]> files)
+        static void WriteFiles(DataWriter writer, FileType type, Dictionary<uint, byte[]> files, LobType lobType, bool compressDictionary)
         {
             switch (type)
             {
@@ -464,7 +478,7 @@ namespace AmbermoonPack
                 case FileType.VOL1:
                     throw new Exception("Invalid call of WriteFiles for non-container format.");
                 default:
-                    FileWriter.WriteContainer(writer, files, type);
+                    FileWriter.WriteContainer(writer, files, type, null, lobType, compressDictionary);
                     break;
             }
         }
