@@ -1,5 +1,4 @@
-﻿using Ambermoon.Data.Legacy;
-using Ambermoon.Data.Legacy.Serialization;
+﻿using Ambermoon.Data.Legacy.Serialization;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -23,8 +22,8 @@ namespace AmbermoonPack
         static void Usage()
         {
             Console.WriteLine();
-            Console.WriteLine("Usage: AmbermoonPack <type> <source> <dest> [key]");
-            Console.WriteLine("       AmbermoonPack REPACK <source> <dest>");
+            Console.WriteLine("Usage: AmbermoonPack <type> <source> <dest> [key] [options]");
+            Console.WriteLine("       AmbermoonPack REPACK <source> <dest> [options]");
             Console.WriteLine("       AmbermoonPack UNPACK <source> <dest>");
             Console.WriteLine("       AmbermoonPack UNITEM <source> <dest>");
             Console.WriteLine("       AmbermoonPack PKITEM <source> <dest>");
@@ -39,9 +38,27 @@ namespace AmbermoonPack
             Console.WriteLine(" <source>   Source file or directory path");
             Console.WriteLine(" <dest>     Destination file path");
             Console.WriteLine(" [key]      Optional encrypt key for JH files");
+            Console.WriteLine(" [options]  See below");
             Console.WriteLine();
-            Console.WriteLine("Append a plus sign to the type to compress the subfile dictionary.");
-            Console.WriteLine("Add one more and the extended LOB compression is used instead of the normal one.");
+            Console.WriteLine("Don't use the compression options if you plan to pack data for the original!");
+            Console.WriteLine();
+            Console.WriteLine("Options:");
+            Console.WriteLine();
+            Console.WriteLine(" -dN: Dictionary compression");
+            Console.WriteLine("      N=0: None (default)");
+            Console.WriteLine("      N=1: Half file size entry size");
+            Console.WriteLine("      N=2: Use file size sections (to compress gaps)");
+            Console.WriteLine("      N=3: Combines 1 and 2");
+            Console.WriteLine("      N=4: Uses 1 and if valuable also 2");
+            Console.WriteLine(" -cN: Lob compression");
+            Console.WriteLine("      N=0: Original Lob (default)");
+            Console.WriteLine("      N=1: Extended Lob");
+            Console.WriteLine("      N=2: Advanced Lob");
+            Console.WriteLine("      N=3: Use best of 0, 1 and 2");
+            Console.WriteLine("      N=4: Text Lob");
+            Console.WriteLine("      N=5: Use best of 0 and 4");
+            Console.WriteLine("      Note that for AMNP, the raw data is used if the best compression is worse.");
+            Console.WriteLine(" -v: Verbose. Prints compression info for each subfile to the console.");
             Console.WriteLine();
             Console.WriteLine("Examples:");
             Console.WriteLine();
@@ -68,8 +85,60 @@ namespace AmbermoonPack
             Console.WriteLine();
         }
 
+        static string[] ParseOptions(string[] args, out bool verbose, out LobType lobType, out FileDictionaryCompression fileDictionaryCompression)
+        {
+            var dictionaryCompressOptions = args.Where(a => a.StartsWith("-d")).ToList();
+            var compressOptions = args.Where(a => a.StartsWith("-c")).ToList();
+            verbose = args.Any(a => a == "-v");
+            lobType = LobType.Ambermoon;
+            fileDictionaryCompression = FileDictionaryCompression.None;
+
+            if (dictionaryCompressOptions.Count > 1 || compressOptions.Count > 1)
+                return null;
+
+            if (dictionaryCompressOptions.Count == 1)
+            {
+                string option = dictionaryCompressOptions[0];
+
+                if (option.Length != 3 || !int.TryParse(option[2].ToString(), out int dictionaryCompression) || dictionaryCompression > 4)
+                    return null;
+
+                fileDictionaryCompression = (FileDictionaryCompression)dictionaryCompression;
+            }
+
+            if (compressOptions.Count == 1)
+            {
+                string option = compressOptions[0];
+
+                if (option.Length != 3 || !int.TryParse(option[2].ToString(), out int fileCompression) || fileCompression > 6)
+                    return null;
+
+                lobType = fileCompression switch
+                {
+                    0 => LobType.Ambermoon,
+                    1 => LobType.Extended,
+                    2 => LobType.Advanced,
+                    3 => LobType.TakeBest,
+                    4 => LobType.Text,
+                    5 => LobType.TakeBestForText,
+                    _ => LobType.Ambermoon
+                };
+            }
+
+            return args.Where(a => a[0] != '-').ToArray();
+        }
+
         static void Main(string[] args)
         {
+            args = ParseOptions(args, out bool verbose, out var lobType, out var fileDictionaryCompression);
+
+            if (args == null)
+            {
+                Usage();
+                Environment.Exit(ERROR_INVALID_USAGE);
+                return;
+            }
+
             if (args.Length != 3 && args.Length != 4)
             {
                 Usage();
@@ -79,8 +148,6 @@ namespace AmbermoonPack
 
             FileType? type;
             bool additionalLobCompression = false;
-            bool useExtendedLob = false;
-            bool compressDictionary = false;
             string op = args[0].ToUpper();
 
             if (op == "REPACK")
@@ -111,7 +178,7 @@ namespace AmbermoonPack
                 PackItems(args);
                 return;
             }
-            else if (!Enum.TryParse<FileType>(args[0].TrimEnd('+').ToUpper(), out FileType fileType))
+            else if (!Enum.TryParse<FileType>(op.TrimEnd('+').ToUpper(), out FileType fileType))
             {
                 Console.WriteLine($"Invalid type '{args[0]}'");
                 Usage();
@@ -120,8 +187,6 @@ namespace AmbermoonPack
             }
             else
             {
-                compressDictionary = args[0].EndsWith('+');
-                useExtendedLob = args[0].EndsWith("++");
                 type = fileType;
             }
 
@@ -151,11 +216,21 @@ namespace AmbermoonPack
             }
 
             var writer = new DataWriter();
-            var lobType = useExtendedLob ? LobType.Extended : LobType.Ambermoon;
+
+            void PrintCompression(int uncompressedSize, int compressedSize, int? subfile = null)
+            {
+                if (!verbose)
+                    return;
+
+                if (subfile != null)
+                    Console.WriteLine($"{subfile:000}: {uncompressedSize,-10} -> {compressedSize,-10} ({(float)compressedSize * 100.0f / uncompressedSize:0.00}%)");
+                else
+                    Console.WriteLine($"Compression result: {uncompressedSize,-10} -> {compressedSize,-10} ({(float)compressedSize * 100.0f / uncompressedSize:0.00}%)");
+            }
 
             try
             {
-                if (type == null)
+                if (type == null) // repack
                 {
                     try
                     {
@@ -183,7 +258,7 @@ namespace AmbermoonPack
                                 break;
                             default:
                                 WriteFiles(writer, containerType, container.Files.ToDictionary(f => (uint)f.Key, f => f.Value.ToArray()),
-                                    lobType, compressDictionary);
+                                    lobType, fileDictionaryCompression, PrintCompression);
                                 break;
                         }
                     }
@@ -227,14 +302,16 @@ namespace AmbermoonPack
                 }
                 else if (type == FileType.LOB || type == FileType.VOL1)
                 {
-                    WriteFiles(writer, type.Value, null, null, File.ReadAllBytes(args[1]), lobType);
+                    var data = File.ReadAllBytes(args[1]);
+                    WriteFiles(writer, type.Value, null, null, data, lobType);
+                    PrintCompression(data.Length, writer.Size);
                 }
                 else
                 {
                     if (File.Exists(args[1]))
-                        WriteFiles(writer, type.Value, GetContainerDataFromFiles(args[1]), lobType, compressDictionary);
+                        WriteFiles(writer, type.Value, GetContainerDataFromFiles(args[1]), lobType, fileDictionaryCompression, PrintCompression);
                     else
-                        WriteFiles(writer, type.Value, GetContainerDataFromFiles(Directory.GetFiles(args[1])), lobType, compressDictionary);
+                        WriteFiles(writer, type.Value, GetContainerDataFromFiles(Directory.GetFiles(args[1])), lobType, fileDictionaryCompression, PrintCompression);
                 }
 
                 WriteFile(args[2], writer);
@@ -469,7 +546,8 @@ namespace AmbermoonPack
             }
         }
 
-        static void WriteFiles(DataWriter writer, FileType type, Dictionary<uint, byte[]> files, LobType lobType, bool compressDictionary)
+        static void WriteFiles(DataWriter writer, FileType type, Dictionary<uint, byte[]> files, LobType lobType,
+            FileDictionaryCompression fileDictionaryCompression, Action<int, int, int?> compressionPrinter)
         {
             switch (type)
             {
@@ -478,7 +556,7 @@ namespace AmbermoonPack
                 case FileType.VOL1:
                     throw new Exception("Invalid call of WriteFiles for non-container format.");
                 default:
-                    FileWriter.WriteContainer(writer, files, type, null, lobType, compressDictionary);
+                    FileWriter.WriteContainer(writer, files, type, null, lobType, fileDictionaryCompression, compressionPrinter);
                     break;
             }
         }

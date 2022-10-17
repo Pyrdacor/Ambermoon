@@ -1,4 +1,5 @@
 ﻿using Ambermoon.Data.Legacy;
+using Ambermoon.Data.Legacy.Serialization;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -399,7 +400,7 @@ namespace AmbermoonTextImport
             {
                 data = textFiles.Select(f =>
                 {
-                    var dataWriter = new Ambermoon.Data.Legacy.Serialization.DataWriter();
+                    var dataWriter = new DataWriter();
                     if (f.Value.Count != 0)
                         Ambermoon.Data.Legacy.Serialization.TextWriter.WriteTexts(dataWriter, f.Value, TrimCharsFromOptions(options), true);
                     return new KeyValuePair<uint, byte[]>((uint)f.Key, dataWriter.ToArray());
@@ -460,13 +461,14 @@ namespace AmbermoonTextImport
                 }
             }
 
-            var containerWriter = new Ambermoon.Data.Legacy.Serialization.DataWriter();
+            var containerWriter = new DataWriter();
 
             try
             {
                 bool extComp = options.Contains(Option.ExtendedCompression);
-                Ambermoon.Data.Legacy.Serialization.FileWriter.WriteContainer(containerWriter, data, Ambermoon.Data.Legacy.Serialization.FileType.AMNP,
-                    null, extComp ? LobType.Text : LobType.Ambermoon, extComp);
+                FileWriter.WriteContainer(containerWriter, data, FileType.AMPC, null,
+                    extComp ? LobType.TakeBestForText : LobType.Ambermoon,
+                    extComp ? FileDictionaryCompression.UseBest : FileDictionaryCompression.None);
 
                 using var stream = File.Create(outPath);
                 containerWriter.CopyTo(stream);
