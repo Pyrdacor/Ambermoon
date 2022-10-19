@@ -9,5 +9,6 @@
         int GetNPCGraphicCount(uint fileIndex);
         int GetTileGraphicCount(uint tilesetIndex);
         int GetObject3DGraphicCount();
+        Color[] GetPaletteColors(uint paletteIndex);
     }
 }

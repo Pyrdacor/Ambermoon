@@ -10,6 +10,7 @@ namespace AmbermoonMapEditor2D
 {
     partial class EditTileForm : Form
     {
+        readonly Configuration configuration;
         internal Tile Tile { get; }
         readonly Tileset tileset;
         readonly ImageCache imageCache;
@@ -20,9 +21,10 @@ namespace AmbermoonMapEditor2D
         bool animateForward = true;
         ImageDisplayForm combatBackgroundPreview = null;
 
-        public EditTileForm(Tile tile, Tileset tileset, ImageCache imageCache, uint paletteIndex,
-            Dictionary<uint, Bitmap> combatGraphics)
+        public EditTileForm(Configuration configuration, Tile tile, Tileset tileset, ImageCache imageCache,
+            uint paletteIndex, Dictionary<uint, Bitmap> combatGraphics)
         {
+            this.configuration = configuration;
             Tile = new Tile();
             Tile.Fill(tile);
             this.tileset = tileset;
@@ -260,15 +262,9 @@ namespace AmbermoonMapEditor2D
 
         private void toolStripMenuItemExportImage_Click(object sender, EventArgs e)
         {
-            var dialog = new SaveFileDialog();
+            var dialog = new SaveDialog(configuration, Configuration.ImagePathName, "Export tile graphic", "png");
             dialog.Filter = "Portable Network Graphics (*.png)|*.png|Amiga Bit Planes (*.abp)|*.abp|All Files (*.*)|*.*";
-            dialog.FilterIndex = 0;
-            dialog.Title = "Export tile graphic";
-            dialog.AddExtension = true;
-            dialog.DefaultExt = "png";
             dialog.FileName = $"{Tile.GraphicIndex:000}";
-            dialog.OverwritePrompt = true;
-            dialog.RestoreDirectory = true;
             
             if (dialog.ShowDialog(this) == DialogResult.OK)
             {

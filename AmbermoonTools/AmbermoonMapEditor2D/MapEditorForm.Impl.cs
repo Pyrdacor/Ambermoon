@@ -136,8 +136,14 @@ namespace AmbermoonMapEditor2D
             {
                 return tilesets[tilesetIndex].Tiles.Length;
             }
+
+            public Color[] GetPaletteColors(uint paletteIndex)
+            {
+                return imageCache.GetPaletteColors(paletteIndex);
+            }
         }
 
+        Configuration configuration;
         string title;
         string gameDataPath;
         ILegacyGameData gameData;
@@ -993,19 +999,12 @@ namespace AmbermoonMapEditor2D
         {
             if (string.IsNullOrWhiteSpace(fileName))
             {
-                var dialog = new SaveFileDialog();
-                dialog.AddExtension = false;
-                dialog.AutoUpgradeEnabled = true;
-                dialog.CheckFileExists = false;
-                dialog.CheckPathExists = false;
-                dialog.CreatePrompt = false;
+                var dialog = new SaveDialog(configuration, Configuration.MapPathName, "Save map");
+
                 dialog.FileName = suggestedFileName ?? "";
                 dialog.Filter = "All files (*.*)|*.*";
-                dialog.OverwritePrompt = true;
-                dialog.RestoreDirectory = true;
-                dialog.Title = "Save map";
 
-                if (dialog.ShowDialog() != DialogResult.OK)
+                if (dialog.ShowDialog(this) != DialogResult.OK)
                     return false;
 
                 fileName = dialog.FileName;

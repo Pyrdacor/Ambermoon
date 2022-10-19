@@ -466,7 +466,7 @@ namespace AmbermoonTextImport
             try
             {
                 bool extComp = options.Contains(Option.ExtendedCompression);
-                FileWriter.WriteContainer(containerWriter, data, FileType.AMPC, null,
+                FileWriter.WriteContainer(containerWriter, data, FileType.AMNP, null,
                     extComp ? LobType.TakeBestForText : LobType.Ambermoon,
                     extComp ? FileDictionaryCompression.UseBest : FileDictionaryCompression.None);
 

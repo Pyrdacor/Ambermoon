@@ -3,6 +3,7 @@ using Ambermoon.Data;
 using Ambermoon.Data.Enumerations;
 using Ambermoon.Data.Legacy.Serialization;
 using System;
+using System.Configuration;
 using System.Drawing;
 using System.Linq;
 using System.Windows.Forms;
@@ -21,6 +22,8 @@ namespace AmbermoonMapEditor2D
 
         private void MapEditorForm_Load(object sender, EventArgs e)
         {
+            configuration = Configuration.Load(Configuration.FilePath);
+
             BringToFront();            
 
             if (OpenMap())
@@ -32,7 +35,7 @@ namespace AmbermoonMapEditor2D
 
                 graphicProvider = new GraphicProvider2D(combatBackgrounds, gameData, imageCache, tilesets);
                 graphicProvider.PaletteIndex = map.PaletteIndex;
-                mapCharEditorControl.Init(map, gameData, graphicProvider);
+                mapCharEditorControl.Init(map, gameData, graphicProvider, SaveImage);
                 mapCharEditorControl.SelectionChanged += MapCharEditorControl_SelectionChanged;
                 mapCharEditorControl.CurrentCharacterChanged += MapCharEditorControl_CurrentCharacterChanged;
                 mapCharEditorControl.DirtyChanged += MapCharEditorControl_DirtyChanged;
@@ -52,9 +55,19 @@ namespace AmbermoonMapEditor2D
                 MarkAsDirty();
         }
 
+        void SaveImage(IWin32Window parent, Action<string> saveAction)
+        {
+            var dialog = new SaveDialog(configuration, Configuration.ImagePathName, "Save image", "png");
+
+            dialog.Filter = "Portable Network Graphic (*.png)|*.png";
+
+            if (dialog.ShowDialog(parent) == DialogResult.OK)
+                saveAction?.Invoke(dialog.FileName);
+        }
+
         bool OpenMap()
         {
-            var openMapForm = new OpenMapForm(gameDataPath, gameData, tilesets, mapManager);
+            var openMapForm = new OpenMapForm(configuration, gameDataPath, gameData, tilesets, mapManager);
             if (openMapForm.ShowDialog(this) == DialogResult.OK)
             {
                 BringToFront();
@@ -439,6 +452,7 @@ namespace AmbermoonMapEditor2D
         private void MapEditorForm_FormClosed(object sender, FormClosedEventArgs e)
         {
             CleanUp();
+            configuration.Save(Configuration.FilePath);
         }
 
         private void panelMap_Scroll(object sender, ScrollEventArgs e)
@@ -998,7 +1012,7 @@ namespace AmbermoonMapEditor2D
         private void buttonEditTile_Click(object sender, EventArgs e)
         {
             var tileset = tilesets[map.TilesetOrLabdataIndex];
-            var form = new EditTileForm(tileset.Tiles[selectedTilesetTile], tileset, imageCache, map.PaletteIndex, combatBackgrounds);
+            var form = new EditTileForm(configuration, tileset.Tiles[selectedTilesetTile], tileset, imageCache, map.PaletteIndex, combatBackgrounds);
 
             if (form.ShowDialog() == DialogResult.OK)
             {
@@ -1019,19 +1033,11 @@ namespace AmbermoonMapEditor2D
 
         private void buttonExportTileset_Click(object sender, EventArgs e)
         {
-            var dialog = new SaveFileDialog();
+            var dialog = new SaveDialog(configuration, Configuration.TilesetPathName, "Save tileset");
 
-            dialog.AddExtension = false;
-            dialog.AutoUpgradeEnabled = true;
-            dialog.CheckFileExists = false;
-            dialog.CheckPathExists = false;
-            dialog.CreatePrompt = false;
             dialog.Filter = "All files (*.*)|*.*";
-            dialog.OverwritePrompt = true;
-            dialog.RestoreDirectory = true;
-            dialog.Title = "Save tileset";
 
-            if (dialog.ShowDialog() == DialogResult.OK)
+            if (dialog.ShowDialog(this) == DialogResult.OK)
             {
                 var tileset = tilesets[map.TilesetOrLabdataIndex];
                 var dataWriter = new DataWriter();

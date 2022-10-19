@@ -116,8 +116,8 @@ namespace AmbermoonPack
                 lobType = fileCompression switch
                 {
                     0 => LobType.Ambermoon,
-                    1 => LobType.Extended,
-                    2 => LobType.Advanced,
+                    1 => LobType.LZRS,
+                    2 => LobType.Extended,
                     3 => LobType.TakeBest,
                     4 => LobType.Text,
                     5 => LobType.TakeBestForText,

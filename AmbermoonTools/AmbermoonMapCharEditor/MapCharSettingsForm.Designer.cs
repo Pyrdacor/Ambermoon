@@ -28,7 +28,10 @@
         /// </summary>
         private void InitializeComponent()
         {
+            this.components = new System.ComponentModel.Container();
             this.pictureBoxGraphic = new System.Windows.Forms.ExtendedPictureBox();
+            this.contextMenuStripImage = new System.Windows.Forms.ContextMenuStrip(this.components);
+            this.toolStripMenuItemExportImage = new System.Windows.Forms.ToolStripMenuItem();
             this.checkBoxAlternateAnimation = new System.Windows.Forms.CheckBox();
             this.labelCombatBackground = new System.Windows.Forms.Label();
             this.numericUpDownCombatBackground = new System.Windows.Forms.NumericUpDown();
@@ -62,6 +65,7 @@
             this.buttonCancel = new System.Windows.Forms.Button();
             this.buttonApply = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBoxGraphic)).BeginInit();
+            this.contextMenuStripImage.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDownCombatBackground)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBoxCombatBackground)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDownGraphic)).BeginInit();
@@ -72,13 +76,28 @@
             // 
             this.pictureBoxGraphic.BackColor = System.Drawing.Color.Black;
             this.pictureBoxGraphic.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
+            this.pictureBoxGraphic.ContextMenuStrip = this.contextMenuStripImage;
+            this.pictureBoxGraphic.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.NearestNeighbor;
             this.pictureBoxGraphic.Location = new System.Drawing.Point(12, 12);
             this.pictureBoxGraphic.Name = "pictureBoxGraphic";
             this.pictureBoxGraphic.Size = new System.Drawing.Size(68, 68);
+            this.pictureBoxGraphic.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
             this.pictureBoxGraphic.TabIndex = 0;
             this.pictureBoxGraphic.TabStop = false;
-            this.pictureBoxGraphic.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.NearestNeighbor;
-            this.pictureBoxGraphic.SizeMode = PictureBoxSizeMode.Zoom;
+            // 
+            // contextMenuStripImage
+            // 
+            this.contextMenuStripImage.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.toolStripMenuItemExportImage});
+            this.contextMenuStripImage.Name = "contextMenuStripImage";
+            this.contextMenuStripImage.Size = new System.Drawing.Size(125, 26);
+            // 
+            // toolStripMenuItemExportImage
+            // 
+            this.toolStripMenuItemExportImage.Name = "toolStripMenuItemExportImage";
+            this.toolStripMenuItemExportImage.Size = new System.Drawing.Size(124, 22);
+            this.toolStripMenuItemExportImage.Text = "Save as ...";
+            this.toolStripMenuItemExportImage.Click += new System.EventHandler(this.toolStripMenuItemExportImage_Click);
             // 
             // checkBoxAlternateAnimation
             // 
@@ -447,6 +466,7 @@
             this.Name = "MapCharSettingsForm";
             this.Text = "Character settings";
             ((System.ComponentModel.ISupportInitialize)(this.pictureBoxGraphic)).EndInit();
+            this.contextMenuStripImage.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDownCombatBackground)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBoxCombatBackground)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDownGraphic)).EndInit();
@@ -492,5 +512,7 @@
         private CheckBox checkBoxBlockSight;
         private Button buttonCancel;
         private Button buttonApply;
+        private ContextMenuStrip contextMenuStripImage;
+        private ToolStripMenuItem toolStripMenuItemExportImage;
     }
 }

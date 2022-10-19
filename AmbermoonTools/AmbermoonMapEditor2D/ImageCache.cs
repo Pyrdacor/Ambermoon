@@ -37,6 +37,11 @@ namespace AmbermoonMapEditor2D
         // TODO: Maybe allow adding new palettes later
         public int PaletteCount => palettes.Count;
 
+        public Color[] GetPaletteColors(uint index)
+        {
+            return Enumerable.Range(0, 32).Select(i => GetPaletteColor(index, (uint)i)).ToArray();
+        }
+
         public ImageCache(ILegacyGameData gameData)
         {
             var icons1 = gameData.Files["1Icon_gfx.amb"];

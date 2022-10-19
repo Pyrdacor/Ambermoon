@@ -14,8 +14,9 @@ namespace AmbermoonMapEditor2D
 {
     public partial class OpenMapForm : Form
     {
-        public OpenMapForm(string gameDataPath, ILegacyGameData gameData, Dictionary<uint, Tileset> tilesets, MapManager mapManager)
+        internal OpenMapForm(Configuration configuration, string gameDataPath, ILegacyGameData gameData, Dictionary<uint, Tileset> tilesets, MapManager mapManager)
         {
+            this.configuration = configuration;
             GameDataPath = gameDataPath;
             GameData = gameData;
             Tilesets = tilesets;
@@ -23,6 +24,7 @@ namespace AmbermoonMapEditor2D
             InitializeComponent();
         }
 
+        readonly Configuration configuration;
         internal string GameDataPath { get; private set; }
         internal ILegacyGameData GameData { get; private set; }
         internal Dictionary<uint, Tileset> Tilesets { get; private set; }
@@ -31,18 +33,16 @@ namespace AmbermoonMapEditor2D
 
         ILegacyGameData LoadGameData()
         {
-            var dialog = new FolderBrowserDialog();
+            var dialog = new SelectFolderDialog(configuration, Configuration.GameDataPathName,
+                "Where is your Ambermoon data folder (i.e. Amberfiles)?");
 
-            dialog.AutoUpgradeEnabled = true;
-            dialog.Description = "Where is your Ambermoon data folder (i.e. Amberfiles)?";
             dialog.ShowNewFolderButton = false;
-            dialog.UseDescriptionForTitle = true;
 
             if (dialog.ShowDialog() == DialogResult.OK)
             {
-                string gameDataPath = dialog.SelectedPath;
+                string gameDataPath = dialog.Folder;
                 var gameData = new GameData(Ambermoon.Data.Legacy.GameData.LoadPreference.PreferExtracted, null, false);
-                gameData.Load(dialog.SelectedPath);
+                gameData.Load(gameDataPath);
 
                 bool CheckFile(string file, string name)
                 {
@@ -162,18 +162,12 @@ namespace AmbermoonMapEditor2D
             }
             else
             {
-                var dialog = new OpenFileDialog();
+                var dialog = new OpenDialog(configuration, Configuration.MapPathName, "Open Ambermoon map");
 
-                dialog.AddExtension = false;
-                dialog.AutoUpgradeEnabled = true;
                 dialog.CheckFileExists = true;
-                dialog.CheckPathExists = true;
                 dialog.Filter = "All files (*.*)|*.*";
-                dialog.Multiselect = false;
-                dialog.RestoreDirectory = true;
-                dialog.Title = "Open Ambermoon map";
 
-                if (dialog.ShowDialog() == DialogResult.OK)
+                if (dialog.ShowDialog(this) == DialogResult.OK)
                     Map = LoadFromFile(dialog.FileName);
             }
 
@@ -293,18 +287,12 @@ namespace AmbermoonMapEditor2D
                     }
                 }
 
-                var dialog = new OpenFileDialog();
+                var dialog = new OpenDialog(configuration, Configuration.MapTextPathName, "Open Ambermoon map texts");
 
-                dialog.AddExtension = false;
-                dialog.AutoUpgradeEnabled = true;
                 dialog.CheckFileExists = true;
-                dialog.CheckPathExists = true;
                 dialog.Filter = "All files (*.*)|*.*";
-                dialog.Multiselect = false;
-                dialog.RestoreDirectory = true;
-                dialog.Title = "Open Ambermoon map texts";
 
-                if (dialog.ShowDialog() == DialogResult.OK)
+                if (dialog.ShowDialog(this) == DialogResult.OK)
                 {
                     textDataReader = GetTextDataReader(new DataReader(File.ReadAllBytes(dialog.FileName)), mapIndex);
 

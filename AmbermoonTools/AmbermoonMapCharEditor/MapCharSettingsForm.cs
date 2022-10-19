@@ -1,4 +1,6 @@
-﻿using Ambermoon.Data;
+﻿using System.Drawing.Imaging;
+using System.Runtime.InteropServices;
+using Ambermoon.Data;
 using static Ambermoon.Data.Tileset;
 
 namespace AmbermoonMapCharEditor
@@ -7,6 +9,7 @@ namespace AmbermoonMapCharEditor
     {
         readonly Func<uint, Bitmap> combatBackgroundProvider;
         readonly Func<uint, Bitmap> graphicProvider;
+        readonly Action<IWin32Window, Action<string>> imageSaveHandler;
         readonly bool mapIs3D;
         public TileFlags TileFlags
         {
@@ -16,11 +19,12 @@ namespace AmbermoonMapCharEditor
         public uint GraphicIndex => (uint)numericUpDownGraphic.Value;
 
         public MapCharSettingsForm(bool mapIs3D, Map.CharacterReference character, Func<uint, Bitmap> combatBackgroundProvider,
-            Func<uint, Bitmap> graphicProvider, Func<int> graphicCountProvider)
+            Func<uint, Bitmap> graphicProvider, Func<int> graphicCountProvider, Action<IWin32Window, Action<string>> imageSaveHandler)
         {
             this.mapIs3D = mapIs3D;
             this.combatBackgroundProvider = combatBackgroundProvider;
             this.graphicProvider = graphicProvider;
+            this.imageSaveHandler = imageSaveHandler;
             var tileFlags = TileFlags = character.TileFlags;
 
             InitializeComponent();
@@ -188,5 +192,10 @@ namespace AmbermoonMapCharEditor
 
             DialogResult = DialogResult.OK;
         }
+
+        private void toolStripMenuItemExportImage_Click(object sender, EventArgs e)
+        {
+            imageSaveHandler?.Invoke(this, filename => pictureBoxGraphic.Image.Save(filename, ImageFormat.Png));
+        }       
     }
 }

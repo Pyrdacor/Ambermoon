@@ -9,7 +9,7 @@ namespace AmbermoonMapCharEditor
         {
             InitializeComponent();
 
-            Visible = false;       
+            Visible = false;
         }
 
         static readonly Regex InkRegex = new Regex(@"~INK ?[0-9]+~", RegexOptions.Compiled);
@@ -56,8 +56,9 @@ namespace AmbermoonMapCharEditor
             Dirty = false;
         }
 
-        public void Init(Map map, ILegacyGameData gameData, IGraphicProvider graphicProvider)
+        public void Init(Map map, ILegacyGameData gameData, IGraphicProvider graphicProvider, Action<IWin32Window, Action<string>> imageSaveHandler)
         {
+            this.imageSaveHandler = imageSaveHandler;
             this.graphicProvider = graphicProvider;
             this.map = map;
             eventNames = map.EventList.Select(e => e.ToString()!).ToList();
@@ -196,6 +197,7 @@ namespace AmbermoonMapCharEditor
             Dirty = true;
         }
 
+        Action<IWin32Window, Action<string>> imageSaveHandler;
         CharacterList? characterList;
         IGraphicProvider? graphicProvider;
         Map? map;
@@ -203,8 +205,8 @@ namespace AmbermoonMapCharEditor
         readonly Dictionary<int, string> monsterGroups = new();
         readonly Dictionary<int, string> partyMembers = new();
         readonly Dictionary<int, string> npcs = new();
-        List<string> eventNames = new List<string>();
-        List<string> mapTexts = new List<string>();
+        List<string> eventNames = new();
+        List<string> mapTexts = new();
 
         public event Action<int>? SelectionChanged;
         public event Action? CurrentCharacterChanged;
@@ -345,7 +347,7 @@ namespace AmbermoonMapCharEditor
 
                 var settingsForm = new MapCharSettingsForm(mapIs3D, character,
                     index => this.graphicProvider!.GetCombatBackgroundGraphic(mapIs3D, index),
-                    graphicProvider, graphicCountProvider);
+                    graphicProvider, graphicCountProvider, imageSaveHandler);
 
                 if (settingsForm.ShowDialog() == DialogResult.OK)
                 {
