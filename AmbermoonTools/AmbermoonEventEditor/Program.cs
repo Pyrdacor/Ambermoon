@@ -441,7 +441,7 @@ namespace AmbermoonEventEditor
             }
         }
 
-        static void RemoveEvent(List<Event> eventList, List<Event> events, int index)
+        static void RemoveEvent(List<Event> eventList, List<Event> events, int index, bool alwaysDisconnect = false)
         {
             var @event = events[index];
 
@@ -491,9 +491,16 @@ namespace AmbermoonEventEditor
                             eventsToRemove.Add(eventToRemove);
                             eventToRemove = eventToRemove.Next;
                         }
+                        if (eventsToRemove.Count != 0)
+                        {
+                            for (int i = eventsToRemove.Count - 1; i >= 0; --i)
+                            {
+                                RemoveEvent(eventList, events, events.IndexOf(eventsToRemove[i]), true);
+                            }
+                        }
                         Console.WriteLine("Chain removed. Events too.");
                         Console.WriteLine();
-                        break;
+                        return;
                     case 3:
                         eventList[listIndex] = @event.Next;
                         Console.WriteLine("Chain now starts with successor.");
@@ -515,9 +522,14 @@ namespace AmbermoonEventEditor
 
                 if (@event.Next != null)
                 {
-                    Console.WriteLine("The event has a successor. How to handle it?");
-                    var option = ReadOption(0, "Connect predecessors with successor", "Disconnect") ?? 0;
-                    successor = option == 0 ? @event.Next : null;
+                    if (alwaysDisconnect)
+                        successor = null;
+                    else
+                    {
+                        Console.WriteLine("The event has a successor. How to handle it?");
+                        var option = ReadOption(0, "Connect predecessors with successor", "Disconnect") ?? 0;
+                        successor = option == 0 ? @event.Next : null;
+                    }
                 }
 
                 uint successorIndex = successor == null ? 0xffff : (uint)events.IndexOf(successor);
