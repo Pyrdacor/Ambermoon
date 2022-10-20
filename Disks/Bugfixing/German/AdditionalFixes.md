@@ -1,3 +1,9 @@
+## Version 1.18
+
+- Fixed 2 buttons in Antique Area 2 which were not changed back after pressing them again (inside the circle with lightnings)
+- Cleaned up unused map event data from Antique Area 4 (those are copies from Antique Area 2, so I guess they copied the map before editing)
+- Fixed an event in Dor Kiredon so that random encounters with Gizzeks can happen near the town walls
+
 ## Version 1.17
 
 - Fixed some broken map events introduced in 1.16 (bandit's house)
