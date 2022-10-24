@@ -4,6 +4,7 @@
 - Cleaned up unused map event data from Antique Area 4 (those are copies from Antique Area 2, so I guess they copied the map before editing)
 - Fixed an event in Dor Kiredon so that random encounters with Gizzeks can happen near the town walls
 - Pelanis will no correctly react to several words after you gave him Sansri's blood
+- The character of Monika Krawinkel finally got a female sprite on the map
 
 ## Version 1.17
 
