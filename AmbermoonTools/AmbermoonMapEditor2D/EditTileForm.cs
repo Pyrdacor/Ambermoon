@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Windows.Forms;
 using static Ambermoon.Data.Tileset;
+using Random = Ambermoon.Random;
 
 namespace AmbermoonMapEditor2D
 {
@@ -20,6 +21,7 @@ namespace AmbermoonMapEditor2D
         uint frame = 0;
         bool animateForward = true;
         ImageDisplayForm combatBackgroundPreview = null;
+        readonly Random random = new Random();
 
         public EditTileForm(Configuration configuration, Tile tile, Tileset tileset, ImageCache imageCache,
             uint paletteIndex, Dictionary<uint, Bitmap> combatGraphics)
@@ -59,6 +61,8 @@ namespace AmbermoonMapEditor2D
             checkBoxBlockSight.Checked = tile.Flags.HasFlag(TileFlags.BlockSight);
             checkBoxFloor.Checked = tile.Flags.HasFlag(TileFlags.Floor);
             checkBoxHidePlayer.Checked = tile.Flags.HasFlag(TileFlags.PlayerInvisible);
+            checkBoxRandomAnimationStart.Checked = tile.Flags.HasFlag(TileFlags.RandomAnimationStart);
+            checkBoxAutoPoison.Checked = tile.Flags.HasFlag(TileFlags.AutoPoison);
 
             if (tile.Flags.HasFlag(TileFlags.Background))
             {
@@ -122,14 +126,15 @@ namespace AmbermoonMapEditor2D
                 }
                 else
                 {
-                    if (frame == 0)
+                    if (--frame == 0)
                     {
                         animateForward = true;
                         frame = 1;
                     }
                 }
-                panelImage.Refresh();
             }
+
+            panelImage.Refresh();
         }
 
         private void panelImage_Paint(object sender, PaintEventArgs e)
@@ -202,6 +207,10 @@ namespace AmbermoonMapEditor2D
                 Tile.Flags |= TileFlags.Floor;
             if (checkBoxHidePlayer.Checked)
                 Tile.Flags |= TileFlags.PlayerInvisible;
+            if (checkBoxRandomAnimationStart.Checked)
+                Tile.Flags |= TileFlags.RandomAnimationStart;
+            if (checkBoxAutoPoison.Checked)
+                Tile.Flags |= TileFlags.AutoPoison;
 
             if (radioButtonBackground.Checked)
                 Tile.Flags |= TileFlags.Background;
@@ -290,6 +299,124 @@ namespace AmbermoonMapEditor2D
                         "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
             }
+        }
+
+        private void buttonFreeIn_Click(object sender, EventArgs e)
+        {
+            checkBoxBlockAllMovement.Checked = false;
+            checkBoxAllowWalk.Checked = true;
+            checkBoxAllowHorse.Checked = false;
+            checkBoxAllowRaft.Checked = false;
+            checkBoxAllowShip.Checked = false;
+            checkBoxAllowMagicDisc.Checked = false;
+            checkBoxAllowEagle.Checked = false;
+            checkBoxAllowFly.Checked = true;
+            checkBoxAllowSwim.Checked = false;
+            checkBoxAllowBroom.Checked = false;
+            checkBoxAllowSandLizard.Checked = false;
+            checkBoxAllowSandShip.Checked = false;
+            checkBoxAllowUnused1.Checked = false;
+            checkBoxAllowUnused2.Checked = false;
+            checkBoxAllowUnused3.Checked = false;
+            checkBoxAllowUnused4.Checked = false;
+        }
+
+        private void buttonFreeOut_Click(object sender, EventArgs e)
+        {
+            checkBoxBlockAllMovement.Checked = false;
+            checkBoxAllowWalk.Checked = true;
+            checkBoxAllowHorse.Checked = true;
+            checkBoxAllowRaft.Checked = false;
+            checkBoxAllowShip.Checked = false;
+            checkBoxAllowMagicDisc.Checked = true;
+            checkBoxAllowEagle.Checked = true;
+            checkBoxAllowFly.Checked = true;
+            checkBoxAllowSwim.Checked = false;
+            checkBoxAllowBroom.Checked = true;
+            checkBoxAllowSandLizard.Checked = false;
+            checkBoxAllowSandShip.Checked = false;
+            checkBoxAllowUnused1.Checked = false;
+            checkBoxAllowUnused2.Checked = false;
+            checkBoxAllowUnused3.Checked = false;
+            checkBoxAllowUnused4.Checked = false;
+        }
+
+        private void buttonSwim_Click(object sender, EventArgs e)
+        {
+            checkBoxBlockAllMovement.Checked = false;
+            checkBoxAllowWalk.Checked = true;
+            checkBoxAllowHorse.Checked = false;
+            checkBoxAllowRaft.Checked = true;
+            checkBoxAllowShip.Checked = true;
+            checkBoxAllowMagicDisc.Checked = true;
+            checkBoxAllowEagle.Checked = true;
+            checkBoxAllowFly.Checked = true;
+            checkBoxAllowSwim.Checked = true;
+            checkBoxAllowBroom.Checked = true;
+            checkBoxAllowSandLizard.Checked = false;
+            checkBoxAllowSandShip.Checked = false;
+            checkBoxAllowUnused1.Checked = false;
+            checkBoxAllowUnused2.Checked = false;
+            checkBoxAllowUnused3.Checked = false;
+            checkBoxAllowUnused4.Checked = false;
+        }
+
+        private void buttonBlockIndoor_Click(object sender, EventArgs e)
+        {
+            checkBoxBlockAllMovement.Checked = false;
+            checkBoxAllowWalk.Checked = false;
+            checkBoxAllowHorse.Checked = false;
+            checkBoxAllowRaft.Checked = false;
+            checkBoxAllowShip.Checked = false;
+            checkBoxAllowMagicDisc.Checked = false;
+            checkBoxAllowEagle.Checked = false;
+            checkBoxAllowFly.Checked = true;
+            checkBoxAllowSwim.Checked = false;
+            checkBoxAllowBroom.Checked = false;
+            checkBoxAllowSandLizard.Checked = false;
+            checkBoxAllowSandShip.Checked = false;
+            checkBoxAllowUnused1.Checked = false;
+            checkBoxAllowUnused2.Checked = false;
+            checkBoxAllowUnused3.Checked = false;
+            checkBoxAllowUnused4.Checked = false;
+        }
+
+        private void buttonBlockOutdoor_Click(object sender, EventArgs e)
+        {
+            checkBoxBlockAllMovement.Checked = false;
+            checkBoxAllowWalk.Checked = false;
+            checkBoxAllowHorse.Checked = false;
+            checkBoxAllowRaft.Checked = false;
+            checkBoxAllowShip.Checked = false;
+            checkBoxAllowMagicDisc.Checked = false;
+            checkBoxAllowEagle.Checked = true;
+            checkBoxAllowFly.Checked = true;
+            checkBoxAllowSwim.Checked = false;
+            checkBoxAllowBroom.Checked = true;
+            checkBoxAllowSandLizard.Checked = false;
+            checkBoxAllowSandShip.Checked = false;
+            checkBoxAllowUnused1.Checked = false;
+            checkBoxAllowUnused2.Checked = false;
+            checkBoxAllowUnused3.Checked = false;
+            checkBoxAllowUnused4.Checked = false;
+        }
+
+        private void checkBoxAlternate_CheckedChanged(object sender, EventArgs e)
+        {
+            this.timerAnimation.Stop();
+            frame = 0;
+            animateForward = true;
+            panelImage.Refresh();
+            this.timerAnimation.Start();
+        }
+
+        private void checkBoxRandomAnimationStart_CheckedChanged(object sender, EventArgs e)
+        {
+            this.timerAnimation.Stop();
+            frame = checkBoxRandomAnimationStart.Checked && Tile.NumAnimationFrames > 1 ? random.Next() % (uint)Tile.NumAnimationFrames : 0u;
+            animateForward = true;
+            panelImage.Refresh();
+            this.timerAnimation.Start();
         }
     }
 }

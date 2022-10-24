@@ -72,6 +72,14 @@ namespace AmbermoonMapEditor2D
             this.labelDraw = new System.Windows.Forms.Label();
             this.drawPanelColor = new System.Windows.Forms.DrawPanel();
             this.label1 = new System.Windows.Forms.Label();
+            this.buttonFreeIn = new System.Windows.Forms.Button();
+            this.buttonSwim = new System.Windows.Forms.Button();
+            this.buttonBlockIndoor = new System.Windows.Forms.Button();
+            this.buttonBlockOutdoor = new System.Windows.Forms.Button();
+            this.buttonFreeOut = new System.Windows.Forms.Button();
+            this.label2 = new System.Windows.Forms.Label();
+            this.checkBoxRandomAnimationStart = new System.Windows.Forms.CheckBox();
+            this.checkBoxAutoPoison = new System.Windows.Forms.CheckBox();
             this.contextMenuImage.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDownImageIndex)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.trackBarFrames)).BeginInit();
@@ -149,6 +157,7 @@ namespace AmbermoonMapEditor2D
             this.checkBoxAlternate.TabIndex = 3;
             this.checkBoxAlternate.Text = "Alternate";
             this.checkBoxAlternate.UseVisualStyleBackColor = true;
+            this.checkBoxAlternate.CheckedChanged += new System.EventHandler(this.checkBoxAlternate_CheckedChanged);
             // 
             // labelFrames
             // 
@@ -391,7 +400,7 @@ namespace AmbermoonMapEditor2D
             // 
             // buttonApply
             // 
-            this.buttonApply.Location = new System.Drawing.Point(12, 108);
+            this.buttonApply.Location = new System.Drawing.Point(12, 136);
             this.buttonApply.Name = "buttonApply";
             this.buttonApply.Size = new System.Drawing.Size(68, 25);
             this.buttonApply.TabIndex = 13;
@@ -402,7 +411,7 @@ namespace AmbermoonMapEditor2D
             // buttonCancel
             // 
             this.buttonCancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-            this.buttonCancel.Location = new System.Drawing.Point(83, 108);
+            this.buttonCancel.Location = new System.Drawing.Point(83, 136);
             this.buttonCancel.Name = "buttonCancel";
             this.buttonCancel.Size = new System.Drawing.Size(68, 25);
             this.buttonCancel.TabIndex = 14;
@@ -519,11 +528,99 @@ namespace AmbermoonMapEditor2D
             this.label1.TabIndex = 24;
             this.label1.Text = "Minimap ->";
             // 
+            // buttonFreeIn
+            // 
+            this.buttonFreeIn.Location = new System.Drawing.Point(352, 134);
+            this.buttonFreeIn.Name = "buttonFreeIn";
+            this.buttonFreeIn.Size = new System.Drawing.Size(64, 25);
+            this.buttonFreeIn.TabIndex = 25;
+            this.buttonFreeIn.Text = "^ Free In";
+            this.buttonFreeIn.UseVisualStyleBackColor = true;
+            this.buttonFreeIn.Click += new System.EventHandler(this.buttonFreeIn_Click);
+            // 
+            // buttonSwim
+            // 
+            this.buttonSwim.Location = new System.Drawing.Point(485, 134);
+            this.buttonSwim.Name = "buttonSwim";
+            this.buttonSwim.Size = new System.Drawing.Size(55, 25);
+            this.buttonSwim.TabIndex = 26;
+            this.buttonSwim.Text = "^ Swim";
+            this.buttonSwim.UseVisualStyleBackColor = true;
+            this.buttonSwim.Click += new System.EventHandler(this.buttonSwim_Click);
+            // 
+            // buttonBlockIndoor
+            // 
+            this.buttonBlockIndoor.Location = new System.Drawing.Point(539, 134);
+            this.buttonBlockIndoor.Name = "buttonBlockIndoor";
+            this.buttonBlockIndoor.Size = new System.Drawing.Size(74, 25);
+            this.buttonBlockIndoor.TabIndex = 27;
+            this.buttonBlockIndoor.Text = "^ Block In";
+            this.buttonBlockIndoor.UseVisualStyleBackColor = true;
+            this.buttonBlockIndoor.Click += new System.EventHandler(this.buttonBlockIndoor_Click);
+            // 
+            // buttonBlockOutdoor
+            // 
+            this.buttonBlockOutdoor.Location = new System.Drawing.Point(612, 134);
+            this.buttonBlockOutdoor.Name = "buttonBlockOutdoor";
+            this.buttonBlockOutdoor.Size = new System.Drawing.Size(81, 25);
+            this.buttonBlockOutdoor.TabIndex = 28;
+            this.buttonBlockOutdoor.Text = "^ Block Out";
+            this.buttonBlockOutdoor.UseVisualStyleBackColor = true;
+            this.buttonBlockOutdoor.Click += new System.EventHandler(this.buttonBlockOutdoor_Click);
+            // 
+            // buttonFreeOut
+            // 
+            this.buttonFreeOut.Location = new System.Drawing.Point(415, 134);
+            this.buttonFreeOut.Name = "buttonFreeOut";
+            this.buttonFreeOut.Size = new System.Drawing.Size(71, 25);
+            this.buttonFreeOut.TabIndex = 29;
+            this.buttonFreeOut.Text = "^ Free Out";
+            this.buttonFreeOut.UseVisualStyleBackColor = true;
+            this.buttonFreeOut.Click += new System.EventHandler(this.buttonFreeOut_Click);
+            // 
+            // label2
+            // 
+            this.label2.AutoSize = true;
+            this.label2.Location = new System.Drawing.Point(205, 139);
+            this.label2.Name = "label2";
+            this.label2.Size = new System.Drawing.Size(141, 15);
+            this.label2.TabIndex = 30;
+            this.label2.Text = "Allow Movement Presets:";
+            // 
+            // checkBoxRandomAnimationStart
+            // 
+            this.checkBoxRandomAnimationStart.AutoSize = true;
+            this.checkBoxRandomAnimationStart.Location = new System.Drawing.Point(12, 99);
+            this.checkBoxRandomAnimationStart.Name = "checkBoxRandomAnimationStart";
+            this.checkBoxRandomAnimationStart.Size = new System.Drawing.Size(98, 19);
+            this.checkBoxRandomAnimationStart.TabIndex = 31;
+            this.checkBoxRandomAnimationStart.Text = "Random Start";
+            this.checkBoxRandomAnimationStart.UseVisualStyleBackColor = true;
+            this.checkBoxRandomAnimationStart.CheckedChanged += new System.EventHandler(this.checkBoxRandomAnimationStart_CheckedChanged);
+            // 
+            // checkBoxAutoPoison
+            // 
+            this.checkBoxAutoPoison.AutoSize = true;
+            this.checkBoxAutoPoison.Location = new System.Drawing.Point(12, 116);
+            this.checkBoxAutoPoison.Name = "checkBoxAutoPoison";
+            this.checkBoxAutoPoison.Size = new System.Drawing.Size(91, 19);
+            this.checkBoxAutoPoison.TabIndex = 32;
+            this.checkBoxAutoPoison.Text = "Auto Poison";
+            this.checkBoxAutoPoison.UseVisualStyleBackColor = true;
+            // 
             // EditTileForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(698, 141);
+            this.ClientSize = new System.Drawing.Size(700, 163);
+            this.Controls.Add(this.checkBoxAutoPoison);
+            this.Controls.Add(this.checkBoxRandomAnimationStart);
+            this.Controls.Add(this.label2);
+            this.Controls.Add(this.buttonFreeOut);
+            this.Controls.Add(this.buttonBlockOutdoor);
+            this.Controls.Add(this.buttonBlockIndoor);
+            this.Controls.Add(this.buttonSwim);
+            this.Controls.Add(this.buttonFreeIn);
             this.Controls.Add(this.label1);
             this.Controls.Add(this.drawPanelColor);
             this.Controls.Add(this.labelDraw);
@@ -605,5 +702,13 @@ namespace AmbermoonMapEditor2D
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.ContextMenuStrip contextMenuImage;
         private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemExportImage;
+        private System.Windows.Forms.Button buttonFreeIn;
+        private System.Windows.Forms.Button buttonSwim;
+        private System.Windows.Forms.Button buttonBlockIndoor;
+        private System.Windows.Forms.Button buttonBlockOutdoor;
+        private System.Windows.Forms.Button buttonFreeOut;
+        private System.Windows.Forms.Label label2;
+        private System.Windows.Forms.CheckBox checkBoxRandomAnimationStart;
+        private System.Windows.Forms.CheckBox checkBoxAutoPoison;
     }
 }
