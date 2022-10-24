@@ -25,7 +25,7 @@ Offset | Type | Description
 0x000B | uword | Combat graphic index (only used for monsters)
 0x000D | ubyte | **Unknown** (only used for monsters, looks likes percent values like 70, 90, 100, etc. -> max value is 100), most likely a kind of parry/dodge chance as low monsters have 0. but many have 100 (maybe it's reduced by party member ATT ability?)
 0x000E | ubyte | **Unknown** (only used for monsters, 0-5, maybe critical strike chance for monsters?)
-0x000F | ubyte | Monster morale (0-100)
+0x000F | ubyte | Monster morale (0-100), in **Ambermoon Advanced** this is used for party members as well to state if they exchanged experience already.
 0x0010 | ubyte | Immunity to [spell types](Enumerations/SpellTypes.md)
 0x0011 | ubyte | Attacks per round (APR)
 0x0012 | ubyte | [Battle flags](Enumerations/BattleFlags.md) (monsters only in Ambermoon, party members as well in **Ambermoon Advanced**)
