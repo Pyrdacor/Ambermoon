@@ -1,7 +1,9 @@
-﻿using Ambermoon.Data.Descriptions;
+﻿using Ambermoon.Data;
+using Ambermoon.Data.Descriptions;
 using Ambermoon.Data.Legacy;
 using Ambermoon.Data.Legacy.Serialization;
 using System;
+using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using ValueType = Ambermoon.Data.Descriptions.ValueType;
@@ -71,6 +73,7 @@ namespace AmbermoonItemEditor
                 Console.WriteLine("R: Remove item");
                 Console.WriteLine("S: Save items");
                 Console.WriteLine("I: Show items");
+                Console.WriteLine("P: List item properties");
                 Console.WriteLine("H: Show help");
                 Console.WriteLine("Q: Quit");
                 PrintLine();
@@ -121,6 +124,13 @@ namespace AmbermoonItemEditor
                     case "items":
                         PrintHeader("Items");
                         items1.PrintItems();
+                        break;
+                    case "p":
+                    case "props":
+                    case "properties":
+                    case "item properties":
+                    case "list item properties":
+                        ShowItem(items1);
                         break;
                     default:
                         Console.WriteLine();
@@ -191,6 +201,120 @@ namespace AmbermoonItemEditor
                 return defaultOption;
 
             return option ?? defaultOption;
+        }
+
+        static void ShowItem(ItemManager items)
+        {
+            items.PrintItems();
+
+            PrintHeader("List item properties");
+
+            Console.Write("Enter item index: ");
+            int? id = ReadInt();
+
+            if (id != null)
+                --id;
+
+            if (id == null || id < 0 || id >= items.ItemCount)
+            {
+                Console.WriteLine();
+                Console.WriteLine("Invalid item index");
+                Console.WriteLine();
+                return;
+            }
+
+            var item = items.GetItem(id.Value);
+            var writer = new DataWriter();
+            ItemWriter.WriteItem(item, writer);
+            var data = writer.ToArray();
+            int dataIndex = 0;
+
+            ushort ReadWord()
+            {
+                int index = dataIndex;
+                dataIndex += 2;
+                return (ushort)(((ushort)data[index] << 8) | data[index + 1]);
+            }
+
+            int Read(ValueDescription valueDescription)
+            {
+                if (valueDescription.Type == ValueType.Word ||
+                    valueDescription.Type == ValueType.Flag16 ||
+                    valueDescription.Type == ValueType.EventIndex)
+                    return ReadWord();
+                else if (valueDescription.Type == ValueType.SByte)
+                    return unchecked((sbyte)data[dataIndex++]);
+                else
+                    return data[dataIndex++];
+            }
+
+            Console.WriteLine();
+            Console.WriteLine("[Item: " + item.Name + "]");
+
+            bool OnlySingleBitSet(long value)
+            {
+                return value != 0 && (value & (value - 1)) == 0;
+            }
+
+            foreach (var value in ItemDescription.ValueDescriptions)
+            {
+                int? currentValue = Read(value);
+                string currentValueSuffix = currentValue == null ? "<not set>" : $"{currentValue}";
+
+                if (value is IEnumValueDescription enumValueDescription)
+                {
+                    Console.Write($"- {value.Name}:");
+                    var values = new List<string>(16);
+                    var options = enumValueDescription.AllowedValues;
+
+                    if (enumValueDescription.Flags)
+                    {
+                        for (int i = 0; i < options.Length; ++i)
+                        {
+                            long enumValue = (long)Convert.ChangeType(options[i], typeof(long));
+
+                            if (!OnlySingleBitSet(enumValue))
+                                continue;
+
+                            if ((currentValue & enumValue) != 0)
+                                values.Add($"{options[i]}");
+                        }
+
+                        if (values.Count == 0)
+                            values.Add(value.DefaultValueText);
+                    }
+                    else
+                    {
+                        for (int i = 0; i < options.Length; ++i)
+                        {
+                            if (i == currentValue) // for items, enum values are always in a sequence without gaps
+                            {
+                                values.Add($"{options[i]}");
+                                break;
+                            }
+                        }
+
+                        if (values.Count == 0)
+                            values.Add(value.DefaultValueText);
+                    }
+
+                    if (values.Count == 1)
+                    {
+                        Console.WriteLine(" " + values[0]);
+                    }
+                    else
+                    {
+                        Console.WriteLine();
+                        values.ForEach(v => Console.WriteLine("  | " + v));
+                    }
+                }
+                else
+                {
+                    Console.WriteLine($"- {value.Name}: {currentValueSuffix}");
+                }
+            }
+
+            Console.WriteLine();
         }
 
         static void EditItem(ItemManager items1, ItemManager items2, bool adding = false, int? id = null)
@@ -342,7 +466,7 @@ namespace AmbermoonItemEditor
                     data[59 - i] = 0;
 
                 var itemReader = new ItemReader();
-                item = new Ambermoon.Data.Item();
+                item = new Item();
                 itemReader.ReadItem(item, new DataReader(data));
 
                 items2?.UpdateItem(id.Value, _ => item);

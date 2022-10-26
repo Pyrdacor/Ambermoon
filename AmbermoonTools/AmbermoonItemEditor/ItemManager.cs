@@ -43,6 +43,8 @@ namespace AmbermoonItemEditor
             items[index].Index = (uint)index + 1;
         }
 
+        public Item GetItem(int index) => items[index];
+
         public void PrintItems()
         {
             int numRows = (items.Count + 2) / 3;
