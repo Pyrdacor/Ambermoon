@@ -97,7 +97,7 @@ Bit | Description
 4 | Destroy after usage
 5 | Indestructable
 6 | Clonable
-7 | Locked (not draggable) **Ambermoon Advanced** only
+7 | Unused
 
 Item stacks can hold up to 99 items. Merchant item slots can stack all items even without that flag
 and they can provide unlimited amounts if the item amount is set to 255.
@@ -170,5 +170,6 @@ Value | Name
 0x01 | Identified
 0x02 | Broken
 0x04 | Cursed
+0x08 | Locked (not draggable) **Ambermoon Advanced** only
 
 Note: Items also store an item slot flags value. I guess it overrides the one from the chest/merchant etc. or is kind of a default value. Maybe useful if the item is given to the party by events (like NPCs).
