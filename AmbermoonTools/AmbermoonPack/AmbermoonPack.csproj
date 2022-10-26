@@ -15,11 +15,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Ambermoon.Data.Legacy" Version="10.7.19" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="..\..\..\..\ambermoon.net\Ambermoon.net\Ambermoon.Data.Legacy\Ambermoon.Data.Legacy.csproj" />
+    <PackageReference Include="Ambermoon.Data.Legacy" Version="10.7.20" />
   </ItemGroup>
 
 </Project>

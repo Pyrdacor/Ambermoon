@@ -78,7 +78,7 @@ namespace AmbermoonDiskExtract
                             if (uncompressed)
                                 dataWriter.Write(file.Value.Files[1].ToArray());
                             else
-                                FileWriter.Write(dataWriter, file.Value, LobType.Ambermoon);
+                                FileWriter.Write(dataWriter, file.Value, LobType.Ambermoon, FileDictionaryCompression.None);
                             break;
                         case FileType.AMBR:
                         case FileType.AMNC:
@@ -87,7 +87,7 @@ namespace AmbermoonDiskExtract
                             if (uncompressed)
                                 FileWriter.WriteContainer(dataWriter, file.Value.Files.ToDictionary(f => (uint)f.Key, f => f.Value.ToArray()), FileType.AMBR);
                             else
-                                FileWriter.Write(dataWriter, file.Value, LobType.Ambermoon);
+                                FileWriter.Write(dataWriter, file.Value, LobType.Ambermoon, FileDictionaryCompression.None);
                             break;
                         default: // raw
                             dataWriter.Write(file.Value.Files[1].ToArray());
