@@ -97,7 +97,7 @@ Bit | Description
 4 | Destroy after usage
 5 | Indestructable
 6 | Clonable
-7 | Unused
+7 | Locked (not draggable) **Ambermoon Advanced** only
 
 Item stacks can hold up to 99 items. Merchant item slots can stack all items even without that flag
 and they can provide unlimited amounts if the item amount is set to 255.
