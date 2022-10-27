@@ -181,7 +181,7 @@ The order of the bits is this (where each digit is a chest index in hex). \
 Note: There is a chest sub-file with index 256 inside Chest_data.amb. It is completely empty and is not used at all in the game.
 It can't be used because the chest index is stored as a byte and a byte can only store values up to 255.
 
-Note: In **Ambermoon Advanced** there are 128 additional chests. As the savegame's should stay compatible, the last 16 bytes of the door locked states are used. This way the existing door locked states stay untouched. [Chest events](EventData.md) have a new flag to distinguish between normal and extended chests.
+Note: In **Ambermoon Advanced** there are 128 additional chests. As the savegames should stay compatible, the last 16 bytes of the door locked states are used. This way the existing door locked states stay untouched. [Chest events](EventData.md) have a new flag to distinguish between normal and extended chests.
 
 
 ### Door locked states
