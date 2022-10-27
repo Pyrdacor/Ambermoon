@@ -600,7 +600,7 @@ Offset | Type | Description
 0x03 | ubyte | Chest index for inventory items
 0x04 | ubyte[6] | Unused
 
-This event can't be used in the original as there is a event type range check which won't allow types greater than 23. But there is actually code for this event in the original.
+This event is not used in the original but there is actually code for this event.
 
 First the party members in slot 2 to 6 are checked for a match with the character index. The character index is basically the sub-file index of Party_char.amb. So you can specify something like `remove Sabine from party` by specifying the character index for Sabine. If the given character is not inside the party, nothing happens.
 
@@ -608,4 +608,4 @@ Before the character is removed from the party, all equipped items are stored in
 
 **Bug:** There is a code bug in the original, where the amount of items is stored in register D1 instead of D7. This way the event wouldn't work as expected or might even crash the application dependent on the previous value in D7.
 
-**Ambermoon Advanced:** I repaired the event code for the extension and also adjusted the event type check so in theory it can be used with this codebase. It is untested though and not really used by Ambermoon Advanced as well.
+**Ambermoon Advanced:** I repaired the event code for the extension so in theory it can be used with this codebase. It is untested though and not really used by Ambermoon Advanced as well.
