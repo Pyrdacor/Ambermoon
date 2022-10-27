@@ -181,6 +181,8 @@ The order of the bits is this (where each digit is a chest index in hex). \
 Note: There is a chest sub-file with index 256 inside Chest_data.amb. It is completely empty and is not used at all in the game.
 It can't be used because the chest index is stored as a byte and a byte can only store values up to 255.
 
+Note: In **Ambermoon Advanced** there are 128 additional chests. As the savegame's should stay compatible, the last 16 bytes of the door locked states are used. This way the existing door locked states stay untouched. [Chest events](EventData.md) have a new flag to distinguish between normal and extended chests.
+
 
 ### Door locked states
 
@@ -192,6 +194,8 @@ doors on the forest moon have higher door indices in general and this is chest i
 The one in Crook's cellar can be opened by a lockpick or using the ability lockpicking. But in some tests the door in Kire's residence was
 still locked even when the other door was opened. So maybe it is reset by some event? Would be interesting if the door in Crook's cellar is
 locked again after returning from forest moon without opening the door to Kire's treasure room.
+
+Note: In **Ambermoon Advanced** the door limit is reduced to 128, so only the first 16 bytes are used. This is more than enough as the original only uses around 40 doors in total. The other 16 bytes are used to allow 128 more chests.
 
 
 ### Game options
