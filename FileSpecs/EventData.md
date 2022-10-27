@@ -84,11 +84,14 @@ If I get the 68k assembler right, Ambermoon just checks the whole byte value for
 
 - Bit0: Remove when empty
 - Bit1: No chest auto remove
-- Bit2-7: Unused
+- Bit2: Extended chest (**Ambermoon Advanced** only)
+- Bit3-7: Unused
 
 Bit0 will actually close the chest when you have looted all items, gold and food. The chest event (chain) is then deactivated so that you can't access the chest again. This also disallows storing items in that chest.
 
 Bit1 is only used when Bit0 is set as well. If this is set, the event (chain) is not deactivated so that you can access the chest again after fully looting it. This is used for things like the flowers on Lyramion. You can loot them infinitely. Although the chest popup closes after looting and you can't of course store items there.
+
+In Ambermoon Advanced the limit of 256 chests was exceeded. As the event has only a byte for the chest index, we use a new flag to distinguish between the normal 256 chests and the extended chests. There are 128 possible additional chests in Ambermoon Advanced. See the [savegame documentation](Savegame.md) for more details.
 
 
 ## Text popup event (0x04 / 4)
