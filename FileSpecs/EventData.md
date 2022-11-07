@@ -232,6 +232,10 @@ Value | Meaning
 15 | Max LP (**Ambermoon Advanced** only)
 16 | Max SP (**Ambermoon Advanced** only)
 17 | Empower spell types (value is 0: earth, 1: wind, 2: fire) (**Ambermoon Advanced** only)
+18 | Change portrait (**Ambermoon Advanced** only)
+19 | Max skill (**Ambermoon Advanced** only)
+20 | M-B-A (magic armor level, **Ambermoon Advanced** only)
+21 | M-B-W (magic weapon level, **Ambermoon Advanced** only)
 
 ### Reward operation
 
