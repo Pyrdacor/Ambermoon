@@ -8,6 +8,8 @@ if ($isWindows) {
   dotnet publish -c $env:CONFIGURATION "./AmbermoonTools/AmbermoonMonsterEditor/AmbermoonMonsterEditor.csproj" -p:PublishSingleFile=true -p:IncludeAllContentForSelfExtract=true -r win-x64 --no-restore --no-self-contained --nologo
   dotnet publish -c $env:CONFIGURATION "./AmbermoonTools/AmbermoonTextImport/AmbermoonTextImport.csproj" -p:PublishSingleFile=true -p:IncludeAllContentForSelfExtract=true -r win-x86 --no-restore --no-self-contained --nologo
   dotnet publish -c $env:CONFIGURATION "./AmbermoonTools/AmbermoonTextImport/AmbermoonTextImport.csproj" -p:PublishSingleFile=true -p:IncludeAllContentForSelfExtract=true -r win-x64 --no-restore --no-self-contained --nologo
+  dotnet publish -c $env:CONFIGURATION "./AmbermoonTools/AmbermoonTextManager/AmbermoonTextManager.csproj" -p:PublishSingleFile=true -p:IncludeAllContentForSelfExtract=true -r win-x86 --no-restore --no-self-contained --nologo
+  dotnet publish -c $env:CONFIGURATION "./AmbermoonTools/AmbermoonTextManager/AmbermoonTextManager.csproj" -p:PublishSingleFile=true -p:IncludeAllContentForSelfExtract=true -r win-x64 --no-restore --no-self-contained --nologo
   dotnet publish -c $env:CONFIGURATION "./AmbermoonTools/AmbermoonDiskExtract/AmbermoonDiskExtract.csproj" -p:PublishSingleFile=true -p:IncludeAllContentForSelfExtract=true -r win-x86 --no-restore --no-self-contained --nologo
   dotnet publish -c $env:CONFIGURATION "./AmbermoonTools/AmbermoonDiskExtract/AmbermoonDiskExtract.csproj" -p:PublishSingleFile=true -p:IncludeAllContentForSelfExtract=true -r win-x64 --no-restore --no-self-contained --nologo
   dotnet publish -c $env:CONFIGURATION "./AmbermoonTools/AmbermoonEventEditor/AmbermoonEventEditor.csproj" -p:PublishSingleFile=true -p:IncludeAllContentForSelfExtract=true -r win-x86 --no-restore --no-self-contained --nologo
@@ -23,6 +25,7 @@ if ($isWindows) {
   copy "AmbermoonTools\AmbermoonPack\bin\Any CPU\Release\net6.0\win-x64\publish\AmbermoonPack.exe" "dist\"
   copy "AmbermoonTools\AmbermoonMonsterEditor\bin\Any CPU\Release\net6.0\win-x64\publish\AmbermoonMonsterEditor.exe" "dist\"
   copy "AmbermoonTools\AmbermoonTextImport\bin\Any CPU\Release\net6.0\win-x64\publish\AmbermoonTextImport.exe" "dist\"
+  copy "AmbermoonTools\AmbermoonTextManager\bin\Any CPU\Release\net6.0\win-x64\publish\AmbermoonTextManager.exe" "dist\"
   copy "AmbermoonTools\AmbermoonDiskExtract\bin\Any CPU\Release\net6.0\win-x64\publish\AmbermoonDiskExtract.exe" "dist\"
   copy "AmbermoonTools\AmbermoonEventEditor\bin\Any CPU\Release\net6.0\win-x64\publish\AmbermoonEventEditor.exe" "dist\"
   copy "AmbermoonTools\AmbermoonLabdataEditor\bin\Any CPU\Release\net6.0\win-x64\publish\AmbermoonLabdataEditor.exe" "dist\"
@@ -36,6 +39,7 @@ if ($isWindows) {
   copy "AmbermoonTools\AmbermoonPack\bin\Any CPU\Release\net6.0\win-x86\publish\AmbermoonPack.exe" "dist\"
   copy "AmbermoonTools\AmbermoonMonsterEditor\bin\Any CPU\Release\net6.0\win-x86\publish\AmbermoonMonsterEditor.exe" "dist\"
   copy "AmbermoonTools\AmbermoonTextImport\bin\Any CPU\Release\net6.0\win-x86\publish\AmbermoonTextImport.exe" "dist\"
+  copy "AmbermoonTools\AmbermoonTextManager\bin\Any CPU\Release\net6.0\win-x86\publish\AmbermoonTextManager.exe" "dist\"
   copy "AmbermoonTools\AmbermoonDiskExtract\bin\Any CPU\Release\net6.0\win-x86\publish\AmbermoonDiskExtract.exe" "dist\"
   copy "AmbermoonTools\AmbermoonEventEditor\bin\Any CPU\Release\net6.0\win-x86\publish\AmbermoonEventEditor.exe" "dist\"
   copy "AmbermoonTools\AmbermoonLabdataEditor\bin\Any CPU\Release\net6.0\win-x86\publish\AmbermoonLabdataEditor.exe" "dist\"
@@ -51,6 +55,7 @@ if ($isWindows) {
   dotnet publish -c $env:CONFIGURATION "./AmbermoonTools/AmbermoonPack/AmbermoonPack.csproj" -p:PublishSingleFile=true -p:IncludeAllContentForSelfExtract=true -r linux-x64 --no-restore --no-self-contained --nologo
   dotnet publish -c $env:CONFIGURATION "./AmbermoonTools/AmbermoonMonsterEditor/AmbermoonMonsterEditor.csproj" -p:PublishSingleFile=true -p:IncludeAllContentForSelfExtract=true -r linux-x64 --no-restore --no-self-contained --nologo
   dotnet publish -c $env:CONFIGURATION "./AmbermoonTools/AmbermoonTextImport/AmbermoonTextImport.csproj" -p:PublishSingleFile=true -p:IncludeAllContentForSelfExtract=true -r linux-x64 --no-restore --no-self-contained --nologo
+  dotnet publish -c $env:CONFIGURATION "./AmbermoonTools/AmbermoonTextManager/AmbermoonTextManager.csproj" -p:PublishSingleFile=true -p:IncludeAllContentForSelfExtract=true -r linux-x64 --no-restore --no-self-contained --nologo
   dotnet publish -c $env:CONFIGURATION "./AmbermoonTools/AmbermoonDiskExtract/AmbermoonDiskExtract.csproj" -p:PublishSingleFile=true -p:IncludeAllContentForSelfExtract=true -r linux-x64 --no-restore --no-self-contained --nologo
   dotnet publish -c $env:CONFIGURATION "./AmbermoonTools/AmbermoonEventEditor/AmbermoonEventEditor.csproj" -p:PublishSingleFile=true -p:IncludeAllContentForSelfExtract=true -r linux-x64 --no-restore --no-self-contained --nologo
   dotnet publish -c $env:CONFIGURATION "./AmbermoonTools/AmbermoonLabdataEditor/AmbermoonLabdataEditor.csproj" -p:PublishSingleFile=true -p:IncludeAllContentForSelfExtract=true -r linux-x64 --no-restore --no-self-contained --nologo
@@ -60,6 +65,7 @@ if ($isWindows) {
   7z a AmbermoonTools-Linux.tar "./AmbermoonTools/AmbermoonPack/bin/Any CPU/ReleaseLinux/net6.0/linux-x64/publish/AmbermoonPack"
   7z a AmbermoonTools-Linux.tar "./AmbermoonTools/AmbermoonMonsterEditor/bin/Any CPU/ReleaseLinux/net6.0/linux-x64/publish/AmbermoonMonsterEditor"
   7z a AmbermoonTools-Linux.tar "./AmbermoonTools/AmbermoonTextImport/bin/Any CPU/ReleaseLinux/net6.0/linux-x64/publish/AmbermoonTextImport"
+  7z a AmbermoonTools-Linux.tar "./AmbermoonTools/AmbermoonTextManager/bin/Any CPU/ReleaseLinux/net6.0/linux-x64/publish/AmbermoonTextManager"
   7z a AmbermoonTools-Linux.tar "./AmbermoonTools/AmbermoonDiskExtract/bin/Any CPU/ReleaseLinux/net6.0/linux-x64/publish/AmbermoonDiskExtract"
   7z a AmbermoonTools-Linux.tar "./AmbermoonTools/AmbermoonEventEditor/bin/Any CPU/ReleaseLinux/net6.0/linux-x64/publish/AmbermoonEventEditor"
   7z a AmbermoonTools-Linux.tar "./AmbermoonTools/AmbermoonLabdataEditor/bin/Any CPU/ReleaseLinux/net6.0/linux-x64/publish/AmbermoonLabdataEditor"

@@ -23,6 +23,22 @@ namespace Ambermoon.Data.Descriptions
             return description;
         }
 
+        public static ValueDescription WithDisplayMapping<TEvent>(Func<ValueDescription> provider, Func<TEvent, ValueDescription, string> displayMapping) where TEvent : Event
+        {
+            var description = provider();
+
+            string MapDisplay(Event @event, ValueDescription valueDescription)
+            {
+                if (!(@event is TEvent specificEvent))
+                    return EventDescriptions.ToString(@event, valueDescription);
+
+                return displayMapping?.Invoke(specificEvent, valueDescription) ?? EventDescriptions.ToString(@event, valueDescription);
+            }
+
+            description.DisplayMapping = MapDisplay;
+            return description;
+        }
+
         public static ValueDescription Byte(string name, bool required, byte maxValue = 255, byte minValue = 0, byte defaultValue = 0, bool showAsHex = false) => new ValueDescription
         {
             Type = ValueType.Byte,

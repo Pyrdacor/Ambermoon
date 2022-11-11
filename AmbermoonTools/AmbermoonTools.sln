@@ -40,6 +40,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AmbermoonMapEditor3D", "Amb
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AmbermoonMapCharEditor", "AmbermoonMapCharEditor\AmbermoonMapCharEditor.csproj", "{40FA3E72-A33A-4BCB-8CCA-6695E1B41358}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AmbermoonTextManager", "AmbermoonTextManager\AmbermoonTextManager.csproj", "{41460891-9AFC-4259-8E83-3FEAE82BBA76}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -164,6 +166,14 @@ Global
 		{40FA3E72-A33A-4BCB-8CCA-6695E1B41358}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{40FA3E72-A33A-4BCB-8CCA-6695E1B41358}.Release|Any CPU.Build.0 = Release|Any CPU
 		{40FA3E72-A33A-4BCB-8CCA-6695E1B41358}.ReleaseLinux|Any CPU.ActiveCfg = Release|Any CPU
+		{41460891-9AFC-4259-8E83-3FEAE82BBA76}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{41460891-9AFC-4259-8E83-3FEAE82BBA76}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{41460891-9AFC-4259-8E83-3FEAE82BBA76}.DebugAndroid|Any CPU.ActiveCfg = Debug|Any CPU
+		{41460891-9AFC-4259-8E83-3FEAE82BBA76}.DebugAndroid|Any CPU.Build.0 = Debug|Any CPU
+		{41460891-9AFC-4259-8E83-3FEAE82BBA76}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{41460891-9AFC-4259-8E83-3FEAE82BBA76}.Release|Any CPU.Build.0 = Release|Any CPU
+		{41460891-9AFC-4259-8E83-3FEAE82BBA76}.ReleaseLinux|Any CPU.ActiveCfg = ReleaseLinux|Any CPU
+		{41460891-9AFC-4259-8E83-3FEAE82BBA76}.ReleaseLinux|Any CPU.Build.0 = ReleaseLinux|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

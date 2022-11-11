@@ -1,5 +1,6 @@
 ﻿using Ambermoon.Data;
 using Ambermoon.Data.Legacy;
+using Ambermoon.Data.Legacy.Compression;
 using Ambermoon.Data.Legacy.Serialization;
 using System;
 using System.Collections.Generic;
@@ -32,9 +33,10 @@ namespace AmbermoonTextImport
 
         enum Option
         {
-            PreserveWhitespaces,
-            PreserveZeros,
-            HexSubfileNames
+            Export,
+            Import,
+            HexSubfileNames,
+            NewCompression
         }
 
         static void Exit(ErrorCode errorCode)
@@ -58,7 +60,11 @@ namespace AmbermoonTextImport
             Console.WriteLine("-> AmbermoonTextManager -i \"C:\\Ambermoon\\Amberfiles\" \"C:\\AmbermoonData\\Texts\" --hex-subfile-names");
             Console.WriteLine();
             Console.WriteLine("Options:");
-            Console.WriteLine(" --hex-subfile-names / -x    :     Subfile name with hex numbering");
+            Console.WriteLine(" --hex-subfile-names / -x    : Subfile names with hex numbering");
+            Console.WriteLine(" --file <name> / -f <name>   : Only consider this file (can be repeated for more)");
+            Console.WriteLine("   Use names like Place_data or 2Map_texts.amb here.");
+            Console.WriteLine("   If no file is given explicitly, all files are considered.");
+            Console.WriteLine(" --use-new-compression / -c  : Uses new compression algorithms (Advanced only).");
             Console.WriteLine();
         }
 
@@ -73,27 +79,19 @@ namespace AmbermoonTextImport
                 return;
             }
 
-            var options = new List<string>();
-            var parameters = new List<string>();
-
-            foreach (var arg in args)
-            {
-                if (arg.StartsWith("--"))
-                    options.Add(arg.ToLower());
-                else if (arg.StartsWith("-"))
-                    options.Add(arg.ToLower());
-                else
-                    parameters.Add(arg);
-            }
-
-            if (options.Contains("--help") || options.Contains("-h"))
+            if (args.Contains("--help") || args.Contains("-h"))
             {
                 Usage();
                 Exit(ErrorCode.NoError);
                 return;
             }
 
-            if (parameters.Count != 2 || options.Count < 1 || options.Count > 2)
+            var options = ParseOptions(ref args, out var files);
+
+            if (options == null)
+                return;
+
+            if (args.Length < 2 || options.Count < 1)
             {
                 Console.WriteLine("Invalid arguments.");
                 Console.WriteLine();
@@ -102,18 +100,22 @@ namespace AmbermoonTextImport
                 return;
             }
 
-            var additionalOptions = ParseOptions(options.Skip(1).ToArray());
-
-            if (additionalOptions == null)
+            if (options.Contains(Option.Export) && options.Contains(Option.Import))
+            {
+                Console.WriteLine("Invalid arguments.");
+                Console.WriteLine();
+                Usage();
+                Exit(ErrorCode.InvalidArguments);
                 return;
-
-            if (options[0] == "-e")
-            {
-                Export(parameters[0], parameters[1], additionalOptions);
             }
-            else if (options[0] == "-i")
+
+            if (options[0] == Option.Export)
             {
-                Import(parameters[0], parameters[1], additionalOptions);
+                Export(args[0], args[1], options.Skip(1).ToList(), files);
+            }
+            else if (options[0] == Option.Import)
+            {
+                Import(args[0], args[1], options.Skip(1).ToList(), files);
             }
             else
             {
@@ -125,32 +127,68 @@ namespace AmbermoonTextImport
             }
         }
 
-        static List<Option> ParseOptions(IEnumerable<string> args)
+        static List<Option> ParseOptions(ref string[] args, out List<string> files)
         {
             var options = new List<Option>();
+            var foundFiles = new List<string>();
+            files = null;
+            var remainingArgs = new List<string>();
 
             try
             {
-                foreach (var arg in args)
+                for (int i = 0; i < args.Length; ++i)
                 {
+                    string arg = args[i];
+
                     if (arg == "--hex-subfile-names")
                         options.Add(Option.HexSubfileNames);
+                    else if (arg == "--file")
+                        AddFile(args);
+                    else if (arg == "--use-new-compression")
+                        options.Add(Option.NewCompression);
                     else if (arg.StartsWith("-"))
                     {
                         if (arg.Length != 2)
                             throw new Exception();
 
-                        for (int i = 1; i < arg.Length; ++i)
+                        if (arg[1] == 'f')
+                            AddFile(args);
+                        else if (arg[1] == 'e')
+                            options.Insert(0, Option.Export);
+                        else if (arg[1] == 'i')
+                            options.Insert(0, Option.Import);
+                        else
                         {
-                            if (arg[i] == 'x')
-                                options.Add(Option.HexSubfileNames);
-                            else
-                                throw new Exception();
+                            for (int n = 1; n < arg.Length; ++n)
+                            {
+                                if (arg[n] == 'x')
+                                    options.Add(Option.HexSubfileNames);
+                                else if (arg[n] == 'c')
+                                    options.Add(Option.NewCompression);
+                                else
+                                    throw new Exception();
+                            }
                         }
                     }
                     else
-                        throw new Exception();
+                        remainingArgs.Add(arg);
+
+                    void AddFile(string[] args)
+                    {
+                        if (i == args.Length - 1)
+                            throw new Exception();
+
+                        string file = args[++i];
+
+                        if (file.StartsWith('-'))
+                            throw new Exception();
+
+                        foundFiles.Add(file.ToLower());
+                    }
                 }
+
+                files = foundFiles;
+                args = remainingArgs.ToArray();
 
                 return options;
             }
@@ -174,6 +212,13 @@ namespace AmbermoonTextImport
             "Party_texts.amb"
         };
 
+        static readonly string[] DictionaryFiles = new string[]
+        {
+            "Dict.amb",
+            "Dictionary.english",
+            "Dictionary.german"
+        };
+
         class FileNameComparer : IEqualityComparer<string>
         {
             public bool Equals(string x, string y)
@@ -187,7 +232,7 @@ namespace AmbermoonTextImport
             }
         }
 
-        static void Export(string gameDataPath, string outputPath, List<Option> options)
+        static void Export(string gameDataPath, string outputPath, List<Option> options, List<string> files)
         {
             var gameData = new GameData(GameData.LoadPreference.PreferExtracted, null, false);
 
@@ -203,6 +248,14 @@ namespace AmbermoonTextImport
                 return;
             }
 
+            bool CheckFile(string name) => name != null && (files == null || files.Count == 0 || files.Contains(name.ToLower()));
+            bool CheckAnyFile(params string[] names) => names != null && names.Any(CheckFile);
+            bool CheckAndGetFile(string name, out IFileContainer fileContainer)
+            {
+                fileContainer = null;
+                return CheckFile(name) && gameData.Files.TryGetValue(name, out fileContainer);
+            }
+
             var fileNameComparer = new FileNameComparer();
             var filenameCreator = options.Contains(Option.HexSubfileNames)
                 ? (Func<int, string>)(i => i.ToString("X3"))
@@ -211,12 +264,14 @@ namespace AmbermoonTextImport
 
             // TODO: intro, outro, etc
 
-            if (!gameData.Files.TryGetValue("Dict.amb", out var dictionary))
+            IFileContainer dictionary = null;
+
+            if (CheckAnyFile(DictionaryFiles))
             {
-                if (!gameData.Files.TryGetValue("Dictionary.english", out dictionary))
+                foreach (var dictionaryFile in DictionaryFiles)
                 {
-                    if (!gameData.Files.TryGetValue("Dictionary.german", out dictionary))
-                        dictionary = null;
+                    if (gameData.Files.TryGetValue(dictionaryFile, out dictionary))
+                        break;
                 }
             }
 
@@ -248,7 +303,7 @@ namespace AmbermoonTextImport
                 }
             }
 
-            if (gameData.Files.TryGetValue("Text.amb", out var textAmb))
+            if (CheckAndGetFile("Text.amb", out var textAmb))
             {
                 outPath = Path.Combine(outputPath, textAmb.Name);
                 var reader = textAmb.Files[1];
@@ -275,6 +330,8 @@ namespace AmbermoonTextImport
                 WriteTexts("ItemTypeNames", textContainer.ItemTypeNames);
                 WriteTexts("ConditionNames", textContainer.ConditionNames);
                 WriteTexts("UITexts", textContainer.UITexts);
+                WriteTexts("DateAndLanguageString", new() { textContainer.DateAndLanguageString });
+                WriteTexts("VersionString", new() { textContainer.VersionString });
 
                 void WriteTexts(string folderName, List<string> texts)
                 {
@@ -295,15 +352,9 @@ namespace AmbermoonTextImport
                     for (int i = 0; i < texts.Count; ++i)
                     {
                         var fileOutPath = Path.Combine(path, filenameCreator(i) + ".txt");
-                        File.WriteAllText(fileOutPath, texts[i]);
+                        File.WriteAllText(fileOutPath, texts[i], Encoding.UTF8);
                     }
                 }
-
-                var foo = new TextContainerWriter();
-                var writer = new DataWriter();
-                foo.WriteTextContainer(textContainer, writer, false);
-                using var bar = File.Create(@"C:\Projects\AmigaAsm\NewAmbermoon\foo.amb");
-                writer.CopyTo(bar);
             }
 
             void ExportCharNames(string filename, string fallbackFilename = null)
@@ -341,11 +392,14 @@ namespace AmbermoonTextImport
                 }
             }
 
-            ExportCharNames("Monster_char_data.amb", "Monster_char.amb");
-            ExportCharNames("Party_char.amb");
-            ExportCharNames("NPC_char.amb");
+            if (CheckFile("Monster_char_data.amb") || CheckFile("Monster_char.amb"))
+                ExportCharNames("Monster_char_data.amb", "Monster_char.amb");
+            if (CheckFile("Party_char.amb"))
+                ExportCharNames("Save.00/Party_char.amb");
+            if (CheckFile("NPC_char.amb"))
+                ExportCharNames("NPC_char.amb");
 
-            if (gameData.Files.TryGetValue("Place_data", out var container))
+            if (CheckAndGetFile("Place_data", out var container))
             {
                 outPath = Path.Combine(outputPath, "Place_data");
 
@@ -371,7 +425,7 @@ namespace AmbermoonTextImport
                 }
             }
 
-            if (gameData.Files.TryGetValue("Objects.amb", out container))
+            if (CheckAndGetFile("Objects.amb", out container))
             {
                 outPath = Path.Combine(outputPath, "Objects.amb");
 
@@ -388,10 +442,7 @@ namespace AmbermoonTextImport
                 }
 
                 var reader = container.Files[1];
-                reader.Position = reader.Size - 4;
-                int numIcons = reader.ReadWord();
                 int numItems = reader.ReadWord();
-                reader.Position = numIcons * 160;
 
                 for (int i = 0; i < numItems; ++i)
                 {
@@ -455,255 +506,554 @@ namespace AmbermoonTextImport
                 }
             }
 
-            WriteGotoPointNames("1Map_data.amb");
-            WriteGotoPointNames("2Map_data.amb");
-            WriteGotoPointNames("3Map_data.amb");
+            if (CheckFile("1Map_data.amb"))
+                WriteGotoPointNames("1Map_data.amb");
+            if (CheckFile("2Map_data.amb"))
+                WriteGotoPointNames("2Map_data.amb");
+            if (CheckFile("3Map_data.amb"))
+                WriteGotoPointNames("3Map_data.amb");
 
-            foreach (var textContainerFile in gameData.Files.Where(f => TextContainerFiles.Contains(f.Key, fileNameComparer)))
+            var textContainerFilesToProcess = TextContainerFiles.Where(f => CheckFile(f));
+
+            if (textContainerFilesToProcess.Any())
             {
-                outPath = Path.Combine(outputPath, textContainerFile.Key);
+                foreach (var textContainerFile in gameData.Files.Where(f => textContainerFilesToProcess.Contains(f.Key, fileNameComparer)))
+                {
+                    outPath = Path.Combine(outputPath, textContainerFile.Key);
+
+                    try
+                    {
+                        Directory.CreateDirectory(outPath);
+                    }
+                    catch
+                    {
+                        Console.WriteLine($"Unable to create output directory '{outPath}'.");
+                        Console.WriteLine();
+                        Exit(ErrorCode.UnableToCreateDirectory);
+                        return;
+                    }
+
+                    foreach (var textFile in textContainerFile.Value.Files)
+                    {
+                        Console.Write($"Reading texts from sub-file {textFile.Key} ... ");
+                        List<string> texts;
+
+                        try
+                        {
+                            texts = Ambermoon.Data.Legacy.Serialization.TextReader.ReadTexts(textFile.Value, new char[] { ' ', '\0' });
+                        }
+                        catch
+                        {
+                            Console.WriteLine("failed");
+                            Console.WriteLine($"Unable to read text data.");
+                            Console.WriteLine();
+                            Exit(ErrorCode.UnableToReadTextData);
+                            return;
+                        }
+
+                        Console.WriteLine("done");
+
+                        var fileOutPath = Path.Combine(outPath, filenameCreator(textFile.Key));
+
+                        Console.Write($"Writing texts to '{fileOutPath}' ... ");
+
+                        try
+                        {
+                            Directory.CreateDirectory(fileOutPath);
+
+                            for (int i = 0; i < texts.Count; ++i)
+                            {
+                                File.WriteAllText(Path.Combine(fileOutPath, filenameCreator(i) + ".txt"), texts[i], Encoding.UTF8);
+                            }
+                        }
+                        catch
+                        {
+                            Console.WriteLine("failed");
+                            Console.WriteLine($"Unable to write text files.");
+                            Console.WriteLine();
+                            Exit(ErrorCode.UnableToCreateTextFiles);
+                            return;
+                        }
+
+                        Console.WriteLine("done");
+                    }
+                }
+            }
+        }
+
+        static void Import(string gameDataPath, string inputPath, List<Option> options, List<string> files)
+        {
+            GameData gameData = null;
+            Func<GameData> gameDataProvider = () =>
+            {
+                if (gameData != null)
+                    return gameData;
+
+                gameData = new GameData(GameData.LoadPreference.ForceExtracted, null, false);
 
                 try
                 {
-                    Directory.CreateDirectory(outPath);
+                    gameData.Load(gameDataPath);
+                    return gameData;
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine("Failed to load game data: " + ex.Message);
+                    Console.WriteLine();
+                    Exit(ErrorCode.UnableToLoadGameData);
+                    return null;
+                }
+            };
+
+            bool CheckFile(string name) => name != null && (files == null || files.Count == 0 || files.Contains(name.ToLower()));
+            string CheckAnyFile(params string[] names)
+            {
+                if (names == null)
+                    return null;
+
+                return names.FirstOrDefault(CheckFile);
+            }
+
+            bool hexNames = options.Contains(Option.HexSubfileNames);
+            var fileNameMatcher = hexNames
+                ? new Regex(@"^[0-9a-f]{3}$", RegexOptions.Compiled | RegexOptions.IgnoreCase)
+                : new Regex(@"^[0-9]{3}$", RegexOptions.Compiled | RegexOptions.IgnoreCase);
+            Func<string, uint> fileIndexParser = hexNames
+                ? name => uint.Parse(name, System.Globalization.NumberStyles.AllowHexSpecifier)
+                : name => uint.Parse(name);
+
+            bool WriteFile(string outputFileName, Func<string, byte[], bool> writer, byte[] data)
+            {
+                try
+                {
+                    writer(outputFileName, data);
+                    return true;
                 }
                 catch
                 {
-                    Console.WriteLine($"Unable to create output directory '{outPath}'.");
+                    Console.WriteLine($"Failed to write data to '{outputFileName}'.");
                     Console.WriteLine();
-                    Exit(ErrorCode.UnableToCreateDirectory);
-                    return;
+                    Exit(ErrorCode.UnableToWriteData);
+                    return false;
                 }
+            }
 
-                foreach (var textFile in textContainerFile.Value.Files)
+            bool WriteSingleFile(string outputFileName, byte[] data)
+            {
+                return WriteFile(outputFileName, (string fileName, byte[] data) =>
                 {
-                    Console.Write($"Reading texts from sub-file {textFile.Key} ... ");
-                    List<string> texts;
+                    if (options.Contains(Option.NewCompression))
+                    {
+                        var compressWriter1 = new DataWriter();
+                        FileWriter.WriteJH(compressWriter1, data, 0xd2e7, true, false, LobCompression.LobType.TakeBest);
+                        var compressWriter2 = new DataWriter();
+                        FileWriter.WriteJH(compressWriter2, data, 0xd2e7, false);
+                        if (compressWriter1.Size < compressWriter2.Size)
+                            File.WriteAllBytes(fileName, compressWriter1.ToArray());
+                        else
+                            File.WriteAllBytes(fileName, compressWriter2.ToArray());
+                    }
+                    else
+                    {
+                        var compressWriter = new DataWriter();
+                        FileWriter.WriteJH(compressWriter, data, 0xd2e7, false);
+                        File.WriteAllBytes(fileName, compressWriter.ToArray());
+                    }
+                    return true;
+                }, data);
+            }
 
+            bool ProcessAndWriteFiles(string containerFile, Func<SortedDictionary<uint, string>, byte[]> processor, bool zeroBased, bool withMultipleTextsForSubFiles = false)
+            {
+                string outputFileName = Path.Combine(gameDataPath, containerFile);
+
+                return ProcessFiles(containerFile, fileEntries =>
+                {
                     try
                     {
-                        texts = Ambermoon.Data.Legacy.Serialization.TextReader.ReadTexts(textFile.Value, new char[] { ' ', '\0' });
-                    }
-                    catch
-                    {
-                        Console.WriteLine("failed");
-                        Console.WriteLine($"Unable to read text data.");
-                        Console.WriteLine();
-                        Exit(ErrorCode.UnableToReadTextData);
-                        return;
-                    }
+                        var data = processor(fileEntries);
 
-                    Console.WriteLine("done");
-
-                    var fileOutPath = Path.Combine(outPath, filenameCreator(textFile.Key));
-
-                    Console.Write($"Writing texts to '{fileOutPath}' ... ");
-
-                    try
-                    {
-                        Directory.CreateDirectory(fileOutPath);
-
-                        for (int i = 0; i < texts.Count; ++i)
+                        if (data != null)
                         {
-                            File.WriteAllText(Path.Combine(fileOutPath, filenameCreator(i) + ".txt"), texts[i], Encoding.UTF8);
+                            if (data.Length == 0)
+                                return true;
+
+                            try
+                            {
+                                File.WriteAllBytes(outputFileName, data);
+                            }
+                            catch
+                            {
+                                Console.WriteLine($"Failed to write data to '{outputFileName}'.");
+                                Console.WriteLine();
+                                Exit(ErrorCode.UnableToWriteData);
+                                return false;
+                            }
+                        }
+                        else
+                        {
+                            Console.WriteLine("failed");
                         }
                     }
                     catch
                     {
                         Console.WriteLine("failed");
-                        Console.WriteLine($"Unable to write text files.");
                         Console.WriteLine();
-                        Exit(ErrorCode.UnableToCreateTextFiles);
-                        return;
+                        Exit(ErrorCode.UnableToWriteData);
+                        return false;
                     }
 
-                    Console.WriteLine("done");
-                }
-            }
-        }
-
-        static bool AskForConfirmation(string message)
-        {
-            Console.WriteLine(message);
-            Console.Write("Do you want to continue (Y/N)? ");
-
-            return Console.ReadLine().ToLower() == "y";
-        }
-
-        static void Import(string gameDataPath, string inputPath, List<Option> options)
-        {
-            /*string inPath = inputPath;
-
-            if (!inputPath.ToLower().TrimEnd(new char[] { '/', '\\' }).EndsWith(file.ToLower()))
-                inPath = Path.Combine(inputPath, file);
-
-            Console.Write($"Looking for text data in '{inPath}' ... ");
-
-            if (!Directory.Exists(inPath))
-            {
-                Console.WriteLine("failed");
-                Console.WriteLine($"Directory does not exist.");
-                Console.WriteLine();
-                Exit(ErrorCode.DirectoryNotFound);
-                return;
+                    return true;
+                }, zeroBased, withMultipleTextsForSubFiles);
             }
 
-            var subDirs = Directory.GetDirectories(inPath);
-
-            if (subDirs.Length == 0)
+            bool ProcessFiles(string containerFile, Func<SortedDictionary<uint, string>, bool> processor, bool zeroBased, bool withMultipleTextsForSubFiles = false)
             {
-                Console.WriteLine("failed");
+                string directory = Path.Combine(inputPath, containerFile);
+                Func<uint, uint> indexAdjust = zeroBased ? index => index + 1 : index => index;
 
-                if (!AskForConfirmation("No sub directory exists so the resulting data file will be empty!"))
+                if (withMultipleTextsForSubFiles)
                 {
-                    Console.WriteLine("Directory does not exist.");
-                    Console.WriteLine();
-                    Exit(ErrorCode.Aborted);
-                    return;
-                }
-            }
-
-            var textFiles = new Dictionary<int, List<string>>();
-            var regex = new Regex(options.Contains(Option.HexSubfileNames) ? "^[0-9a-fA-F]{3}$" : "^[0-9]{3}$", RegexOptions.Compiled);
-            int foundTextCount = 0;
-            var filenameParser = options.Contains(Option.HexSubfileNames)
-                ? (Func<string, int>)(name => int.Parse(name, System.Globalization.NumberStyles.AllowHexSpecifier))
-                : name => int.Parse(name);
-
-            foreach (var subDir in subDirs)
-            {
-                string dirName = Path.GetFileName(subDir); // Note: GetFileName will retrieve last directory part in this case.
-
-                if (regex.IsMatch(dirName))
-                {
-                    var list = new List<string>();
-                    var localTextFiles = new List<string>(Directory.GetFiles(subDir).Where(f => regex.IsMatch(Path.GetFileNameWithoutExtension(f))));
-                    localTextFiles.Sort();
-
-                    for (int i = 0; i < localTextFiles.Count; ++i)
+                    var subDirs = Directory.GetDirectories(directory)
+                        .Select(f => new { path = f, name = Path.GetFileName(f) })
+                        .Where(f => fileNameMatcher.IsMatch(f.name))
+                        .ToList();
+                    var result = new SortedDictionary<uint, string>();
+                    foreach (var subDir in subDirs)
                     {
-                        if (i != filenameParser(Path.GetFileNameWithoutExtension(localTextFiles[i])))
+                        if (!ProcessFiles(Path.Combine(directory, subDir.name), texts =>
                         {
-                            Console.WriteLine($"Text files must be numbered from 0 to n without gaps. Missing number before {i:000}.txt.");
-                            Console.WriteLine();
-                            Exit(ErrorCode.WrongFileNumbering);
-                            return;
-                        }
+                            result.Add(indexAdjust(fileIndexParser(subDir.name)), string.Join('\n', texts.Values));
+                            return true;
+                        }, true))
+                        return false;
                     }
 
-                    list.AddRange(localTextFiles.Select(f => File.ReadAllText(f, Encoding.UTF8)));
+                    processor(result);
 
-                    foundTextCount += list.Count;
-
-                    textFiles[filenameParser(dirName)] = list;
+                    return true;
                 }
-            }
 
-            if (foundTextCount == 0)
-            {
-                Console.WriteLine("failed");
+                Console.Write($"Looking for text data in '{directory}' ... ");
 
-                if (!AskForConfirmation("No text files with the right names exist so the resulting data file will be empty!"))
+                var files = Directory.GetFiles(directory, "*.txt")
+                    .Select(f => new { path = f, name = Path.GetFileNameWithoutExtension(f) })
+                    .Where(f => fileNameMatcher.IsMatch(f.name));
+                var fileEntries = new SortedDictionary<uint, string>(files.ToDictionary(f => indexAdjust(fileIndexParser(f.name)), f => File.ReadAllText(f.path, Encoding.UTF8)));
+                uint maxIndex = fileEntries.Keys.Max();
+                
+                if (fileEntries.Count != maxIndex)
                 {
-                    Console.WriteLine("No text files found.");
+                    for (uint i = 1; i <= maxIndex; ++i)
+                    {
+                        if (!fileEntries.ContainsKey(i))
+                            fileEntries.Add(i, "");
+                    }
+                }
+
+                if (processor(fileEntries))
+                {
+                    Console.WriteLine("done");
                     Console.WriteLine();
-                    Exit(ErrorCode.Aborted);
-                    return;
+                    return true;
+                }
+                else
+                {
+                    return false;
                 }
             }
-            else
-            {
-                Console.WriteLine("done");
-                Console.WriteLine($"Found {foundTextCount} texts in {textFiles.Count} filled sub-directories.");
-            }
 
-            Console.Write("Collecting text data ... ");
-            Dictionary<uint, byte[]> data;
+            // TODO: intro, outro, etc
 
             try
             {
-                data = textFiles.Select(f =>
-                {
-                    var dataWriter = new Ambermoon.Data.Legacy.Serialization.DataWriter();
-                    if (f.Value.Count != 0)
-                        Ambermoon.Data.Legacy.Serialization.TextWriter.WriteTexts(dataWriter, f.Value, TrimCharsFromOptions(options), true);
-                    return new KeyValuePair<uint, byte[]>((uint)f.Key, dataWriter.ToArray());
-                }).ToDictionary(x => x.Key, x => x.Value);
+                Directory.CreateDirectory(gameDataPath);
             }
             catch
             {
-                Console.WriteLine("failed");
-                Console.WriteLine("Error while transforming texts to data.");
-                Exit(ErrorCode.UnableToTransformTexts);
-                return;
-            }
-
-            Console.WriteLine("done");
-
-            var outPath = Path.IsPathRooted(file) ? file : Path.Combine(gameDataPath, file);
-
-            Console.Write($"Writing data to '{outPath}' ... ");
-
-            try
-            {
-                Directory.CreateDirectory(Path.GetDirectoryName(outPath));
-            }
-            catch
-            {
-                Console.WriteLine("failed");
-                Console.WriteLine($"Unable to create output directory '{outPath}'.");
+                Console.WriteLine($"Unable to create output directory '{gameDataPath}'.");
                 Console.WriteLine();
                 Exit(ErrorCode.UnableToCreateDirectory);
                 return;
             }
 
-            if (File.Exists(outPath))
-            {
-                string backup = outPath + ".backup";
+            string dictionaryFile = CheckAnyFile(DictionaryFiles);
 
-                if (!File.Exists(backup))
+            if (dictionaryFile != null)
+            {
+                if (!ProcessAndWriteFiles(dictionaryFile, texts =>
                 {
-                    Console.WriteLine("halted");
-                    Console.WriteLine($"Target file exists and there is no backup.");
-                    Console.Write($"Creating backup at '{backup}' ... ");
+                    var writer = new DataWriter();
+                    writer.Write((ushort)texts.Count);
 
-                    try
+                    foreach (var text in texts)
                     {
-                        File.Copy(outPath, backup);
-                    }
-                    catch
-                    {
-                        Console.WriteLine("failed");
-                        Console.WriteLine("Failed to create backup. Import is now aborted.");
-                        Console.WriteLine();
-                        Exit(ErrorCode.UnableToCreateBackup);
-                        return;
+                        writer.Write((byte)text.Value.Length);
+                        writer.WriteWithoutLength(text.Value);
                     }
 
-                    Console.WriteLine("done");
-                    Console.Write("Resuming data writing ... ");
-                }
-            }
+                    byte zero = 0;
 
-            var containerWriter = new Ambermoon.Data.Legacy.Serialization.DataWriter();
+                    do
+                    {
+                        writer.Write(zero);
+                    } while (writer.Position % 4 != 0);
 
-            try
-            {
-                Ambermoon.Data.Legacy.Serialization.FileWriter.WriteContainer(containerWriter, data, Ambermoon.Data.Legacy.Serialization.FileType.AMNP);
-
-                using var stream = File.Create(outPath);
-                containerWriter.CopyTo(stream);
-            }
-            catch
-            {
-                Console.WriteLine("failed");
-                Console.WriteLine($"Failed to write data to '{outPath}'.");
-                Console.WriteLine();
-                Exit(ErrorCode.UnableToWriteData);
+                    return writer.ToArray();
+                }, true))
                 return;
             }
 
-            Console.WriteLine("done");*/
+            if (CheckFile("Text.amb"))
+            {
+                var textContainer = new TextContainer();
+
+                Console.WriteLine("Reading all texts from Text.amb.");
+
+                ReadTexts("WorldNames", textContainer.WorldNames);
+                ReadTexts("FormatMessages", textContainer.FormatMessages);
+                ReadTexts("AutomapTypeNames", textContainer.AutomapTypeNames);
+                ReadTexts("OptionNames", textContainer.OptionNames);
+                ReadTexts("MusicNames", textContainer.MusicNames);
+                ReadTexts("SpellClassNames", textContainer.SpellClassNames);
+                ReadTexts("SpellNames", textContainer.SpellNames);
+                ReadTexts("LanguageNames", textContainer.LanguageNames);
+                ReadTexts("ClassNames", textContainer.ClassNames);
+                ReadTexts("RaceNames", textContainer.RaceNames);
+                ReadTexts("SkillNames", textContainer.SkillNames);
+                ReadTexts("AttributeNames", textContainer.AttributeNames);
+                ReadTexts("SkillShortNames", textContainer.SkillShortNames);
+                ReadTexts("AttributeShortNames", textContainer.AttributeShortNames);
+                ReadTexts("ItemTypeNames", textContainer.ItemTypeNames);
+                ReadTexts("ConditionNames", textContainer.ConditionNames);
+                ReadTexts("UITexts", textContainer.UITexts);
+                List<string> versionStrings = new();
+                ReadTexts("DateAndLanguageString", versionStrings);
+                ReadTexts("VersionString", versionStrings);
+                textContainer.DateAndLanguageString = versionStrings[0];
+                textContainer.VersionString = versionStrings[1];
+
+                void ReadTexts(string folderName, List<string> texts)
+                {
+                    ProcessFiles(Path.Combine("Text.amb", folderName), files =>
+                    {
+                        texts.AddRange(files.Values);
+                        return true;
+                    }, true);
+                }
+
+                var writer = new DataWriter();
+                var textContainerWriter = new TextContainerWriter();
+
+                textContainerWriter.WriteTextContainer(textContainer, writer, false);
+
+                string outputFileName = Path.Combine(gameDataPath, "Text.amb");
+
+                WriteSingleFile(outputFileName, writer.ToArray());
+            }
+
+            static string SizeString(int size, string str, bool trimStart = true)
+            {
+                if (trimStart)
+                    str = str.TrimStart();
+
+                if (str.Length < size)
+                    return str.PadRight(size - 1) + "\0";
+                else
+                {
+                    string newString = str[0..(size - 1)] + "\0";
+                    Console.WriteLine($"WARNING: String '{str}' was shortened to '{newString.TrimEnd('\0')}' because the max size is {size-1} without terminating null.");
+                    return newString;
+                }
+            }
+
+            void ImportCharNames(string filename)
+            {
+                ProcessAndWriteFiles(filename, entries =>
+                {
+                    var gameData = gameDataProvider();
+
+                    if (gameData == null || !gameData.Files.ContainsKey(filename))
+                        return null;
+
+                    var containerFiles = gameData.Files[filename].Files;
+                    var files = entries.ToDictionary(entry => entry.Key, entry =>
+                    {
+                        var reader = containerFiles[(int)entry.Key];
+
+                        if (reader.Size == 0)
+                            return Array.Empty<byte>();
+
+                        var writer = new DataWriter(reader.ReadBytes(0x0112));
+                        writer.WriteWithoutLength(SizeString(16, entry.Value));
+                        reader.Position += 16;
+                        writer.Write(reader.ReadToEnd());
+                        return writer.ToArray();
+                    });
+                    var containerWriter = new DataWriter();
+                    bool newComp = options.Contains(Option.NewCompression);
+                    FileWriter.WriteContainer(containerWriter, files,
+                        filename.ToLower().StartsWith("party") ? FileType.AMBR : FileType.AMPC, null,
+                        newComp ? LobCompression.LobType.TakeBest : LobCompression.LobType.Ambermoon,
+                        newComp ? FileDictionaryCompression.UseBest : FileDictionaryCompression.None);
+                    return containerWriter.ToArray();
+                }, false);
+            }
+
+            if (CheckFile("Monster_char.amb"))
+                ImportCharNames("Monster_char.amb");
+            else if (CheckFile("Monster_char_data.amb"))
+                ImportCharNames("Monster_char_data.amb");
+            if (CheckFile("Party_char.amb"))
+                ImportCharNames("Save.00/Party_char.amb");
+            if (CheckFile("NPC_char.amb"))
+                ImportCharNames("NPC_char.amb");
+
+            string filename = "Place_data";
+
+            if (CheckFile(filename))
+            {
+                string outputFileName = Path.Combine(gameDataPath, filename);
+
+                ProcessFiles(filename, entries =>
+                {
+                    var gameData = gameDataProvider();
+
+                    if (gameData == null || !gameData.Files.ContainsKey(filename))
+                        return false;
+
+                    var file = gameData.Files[filename].Files[1];
+                    int placeCount = file.PeekWord();
+
+                    if (placeCount != entries.Count)
+                        throw new Exception("Mismatching place data/text count.");
+
+                    var writer = new DataWriter();
+                    writer.Write(file.ReadBytes(2 + placeCount * 32));
+                    for (uint i = 1; i <= placeCount; ++i)
+                    {
+                        writer.WriteWithoutLength(SizeString(30, entries[i]));
+                    }
+                    return WriteSingleFile(outputFileName, writer.ToArray());
+                }, true);
+            }
+
+            filename = "Objects.amb";
+
+            if (CheckFile(filename))
+            {
+                string outputFileName = Path.Combine(gameDataPath, filename);
+
+                ProcessFiles(filename, entries =>
+                {
+                    var gameData = gameDataProvider();
+
+                    if (gameData == null || !gameData.Files.ContainsKey(filename))
+                        return false;
+
+                    var file = gameData.Files[filename].Files[1];
+                    int itemCount = file.ReadWord();
+
+                    if (itemCount != entries.Count)
+                        throw new Exception("Mismatching item data/text count.");
+
+                    var writer = new DataWriter();
+                    writer.Write((ushort)itemCount);
+                    for (uint i = 1; i <= itemCount; ++i)
+                    {
+                        writer.Write(file.ReadBytes(40));
+                        file.Position += 20;
+                        writer.WriteWithoutLength(SizeString(20, entries[i]));
+                    }
+                    return WriteSingleFile(outputFileName, writer.ToArray());
+                }, true);
+            }
+
+            void ReadGotoPointNames(string filename)
+            {
+                ProcessAndWriteFiles(filename, entries =>
+                {
+                    if (entries.Count == 0)
+                        return Array.Empty<byte>();
+
+                    var gameData = gameDataProvider();
+
+                    if (gameData == null || !gameData.Files.ContainsKey(filename))
+                        return null;
+
+                    var mapReader = new MapReader();
+                    var containerFiles = gameData.Files[filename].Files;
+                    var files = entries.ToDictionary(entry => entry.Key, entry =>
+                    {
+                        var reader = containerFiles[(int)entry.Key];
+
+                        if (reader.Size == 0)
+                            return Array.Empty<byte>();
+
+                        if ((reader.PeekDword() & 0x0000ff00) != 0x00000100)
+                            return reader.ReadToEnd(); // just return the data for 2D maps
+
+                        var map = Map.LoadWithoutTexts(entry.Key, mapReader, reader, null);
+                        var names = entry.Value.Split('\n');
+
+                        if (map.GotoPoints.Count != names.Length)
+                            throw new Exception($"Mismatching goto point data/text count for map {entry.Key}.");
+
+                        reader.Position = 0;
+
+                        if (map.GotoPoints.Count == 0)
+                            return reader.ReadToEnd(); // just return the data if there are no goto points
+
+                        var writer = new DataWriter(reader.ReadBytes(0x014c + map.Width * map.Height * 2 +
+                            2 + map.EventList.Count * 2 + 2 + map.Events.Count * 12));
+
+                        foreach (var mapChar in map.CharacterReferences ?? Array.Empty<Map.CharacterReference>())
+                        {
+                            if (mapChar == null)
+                                continue;
+
+                            if (mapChar.Type != CharacterType.Monster &&
+                                !mapChar.CharacterFlags.HasFlag(Map.CharacterReference.Flags.RandomMovement) &&
+                                !mapChar.CharacterFlags.HasFlag(Map.CharacterReference.Flags.Stationary))
+                            {
+                                writer.Write(reader.ReadBytes(288 * 2));
+                            }
+                            else
+                            {
+                                writer.Write(reader.ReadBytes(2));
+                            }
+                        }
+
+                        writer.Write(reader.ReadBytes(2)); // goto point count
+
+                        for (int i = 0; i < map.GotoPoints.Count; ++i)
+                        {
+                            writer.Write(reader.ReadBytes(4));
+                            writer.WriteWithoutLength(SizeString(16, names[i]));
+                            reader.Position += 16;
+                        }
+
+                        writer.Write(reader.ReadToEnd());
+                        return writer.ToArray();
+                    });
+                    var containerWriter = new DataWriter();
+                    bool newComp = options.Contains(Option.NewCompression);
+                    FileWriter.WriteContainer(containerWriter, files,
+                        filename.ToLower().StartsWith("party") ? FileType.AMBR : FileType.AMPC, null,
+                        newComp ? LobCompression.LobType.TakeBest : LobCompression.LobType.Ambermoon,
+                        newComp ? FileDictionaryCompression.UseBest : FileDictionaryCompression.None);
+                    return containerWriter.ToArray();
+                }, false, true);
+            }
+
+            if (CheckFile("1Map_data.amb"))
+                ReadGotoPointNames("1Map_data.amb");
+            if (CheckFile("2Map_data.amb"))
+                ReadGotoPointNames("2Map_data.amb");
+            if (CheckFile("3Map_data.amb"))
+                ReadGotoPointNames("3Map_data.amb");
+
+            // TODO: text containers like 1Map_texts.amb
         }
     }
 }

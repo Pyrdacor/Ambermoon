@@ -16,6 +16,7 @@ namespace AmbermoonImageConverter
         // args[3]: Format (5: 5bit, 4: 4bit, 3: 3bit, 0: 4bit texture)
         // args[4]: Frames (default 1)
         // args[5]: Palette index offset (default: 0)
+        // args[6]: Transparent color index (default: 0)
         static void Main(string[] args)
         {
             // TODO: Later add both ways of conversion and support 3, 4 and 5 bit images as well as palettes.
@@ -31,6 +32,7 @@ namespace AmbermoonImageConverter
 
             int frames = args.Length < 5 ? 1 : int.Parse(args[4]);
             int paletteIndexOffset = args.Length < 6 ? 0 : Math.Max(0, int.Parse(args[5]));
+            int transparentColorIndex = args.Length < 7 ? 0 : Math.Max(0, int.Parse(args[6]));
             if (bpp == 5)
                 paletteIndexOffset = 0;
             else if (bpp == 4)
@@ -42,7 +44,7 @@ namespace AmbermoonImageConverter
 
             for (int i = 0; i < palIndices.Length; ++i)
             {
-                palIndices[i] = FindPaletteIndex(palette, BitConverter.ToUInt32(imageData, i * 4), minIndex, maxIndex);
+                palIndices[i] = FindPaletteIndex(palette, BitConverter.ToUInt32(imageData, i * 4), minIndex, maxIndex, (byte)transparentColorIndex);
             }
 
             var outputData = new byte[height * bpp * width / 8];
@@ -80,11 +82,11 @@ namespace AmbermoonImageConverter
             File.WriteAllBytes(args[2], outputData);
         }
 
-        static byte FindPaletteIndex(uint[] palette, uint color, byte min, byte max)
+        static byte FindPaletteIndex(uint[] palette, uint color, byte min, byte max, byte transparentColorIndex)
         {
             max = Math.Min(max, (byte)31);
 
-            if ((color & 0xff000000) == 0) // transparent
+            if ((color >> 24) == transparentColorIndex) // transparent
                 return 0;
 
             uint r = (color >> 16) & 0xf0;

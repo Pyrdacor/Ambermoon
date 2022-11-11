@@ -35,6 +35,7 @@ namespace Ambermoon.Data.Descriptions
         public int FlagDescriptionOffset { get; set; } = 0;
         public string[] FlagDescriptions { get; set; } = null;
         public Func<EventDescription, Event, bool> Condition { get; set; } = null;
+        public Func<Event, ValueDescription, string> DisplayMapping { get; set; } = null;
         public virtual string AsString(object value)
         {
             switch (Type)

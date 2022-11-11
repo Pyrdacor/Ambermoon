@@ -1,6 +1,7 @@
 ﻿using Ambermoon.Data.Enumerations;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Ambermoon.Data.Descriptions
 {
@@ -42,6 +43,53 @@ namespace Ambermoon.Data.Descriptions
 
     public static class EventDescriptions
     {
+        internal static string ToString(Event @event, ValueDescription value)
+        {
+            return ToString(@event.GetType(), @event, value);
+        }
+            
+        private static string ToString(Type type, Event @event, ValueDescription value)
+        {
+            if (value.DisplayMapping != null)
+                return value.DisplayMapping(@event, value);
+
+            var property = type.GetProperty(value.Name).GetValue(@event);
+
+            if (value.FlagDescriptions != null)
+            {
+                string info = $" {value.Name}=";
+                var bits = (ushort)Convert.ChangeType(property, typeof(ushort));
+
+                for (int i = 0; i < value.FlagDescriptions.Length; ++i)
+                {
+                    int bit = value.FlagDescriptionOffset + i;
+
+                    if ((bits & (1 << bit)) != 0)
+                        info += $" {value.FlagDescriptions[i]}|";
+                }
+
+                return  info.TrimEnd('|') + ",";
+            }
+            else if (value is IEnumValueDescription enumValueDescription && enumValueDescription.Flags)
+            {
+                return $" {value.Name}=" + Enum.GetFlagNames(value.GetType().GetGenericArguments()[0], property) + ",";
+            }
+            else if (value.ShowAsHex)
+            {
+                if (value.Type == ValueType.Byte)
+                    return $" {value.Name}=0x{(ushort)Convert.ChangeType(property, typeof(ushort)):x2},";
+                else
+                    return $" {value.Name}=0x{(ushort)Convert.ChangeType(property, typeof(ushort)):x4},";
+            }
+            else
+            {
+                if (value is IEnumValueDescription)
+                    return $" {value.Name}={System.Enum.ToObject(value.GetType().GetGenericArguments()[0], property)},";
+
+                return $" {value.Name}={property},";
+            }
+        }
+
         public static string ToString(Event @event, int identation, string subIdentation = "  ")
         {
             if (Events.TryGetValue(@event.Type, out var description))
@@ -54,37 +102,7 @@ namespace Ambermoon.Data.Descriptions
                     if (value.Hidden || value.Condition?.Invoke(description, @event) == false)
                         continue;
 
-                    var property = type.GetProperty(value.Name).GetValue(@event);
-                    if (value.FlagDescriptions != null)
-                    {
-                        info += $" {value.Name}=";
-                        var bits = (ushort)Convert.ChangeType(property, typeof(ushort));
-
-                        for (int i = 0; i < value.FlagDescriptions.Length; ++i)
-                        {
-                            int bit = value.FlagDescriptionOffset + i;
-
-                            if ((bits & (1 << bit)) != 0)
-                                info += $" {value.FlagDescriptions[i]}|";
-                        }
-
-                        info = info.TrimEnd('|') + ",";
-                    }
-                    else if (value is IEnumValueDescription enumValueDescription && enumValueDescription.Flags)
-                    {
-                        info += $" {value.Name}=" + Enum.GetFlagNames(value.GetType().GetGenericArguments()[0], property) + ",";
-                    }
-                    else if (value.ShowAsHex)
-                    {
-                        if (value.Type == ValueType.Byte)
-                            info += $" {value.Name}=0x{(ushort)Convert.ChangeType(property, typeof(ushort)):x2},";
-                        else
-                            info += $" {value.Name}=0x{(ushort)Convert.ChangeType(property, typeof(ushort)):x4},";
-                    }
-                    else
-                    {
-                        info += $" {value.Name}={property},";
-                    }
+                    info += ToString(type, @event, value);
                 }
 
                 info = info.TrimEnd(',');
@@ -237,12 +255,40 @@ namespace Ambermoon.Data.Descriptions
                 }),
                 Use.Enum("Target", true, RewardEvent.RewardTarget.ActivePlayer),
                 Use.HiddenByte(),
-                Use.Conditional<RewardEvent>(() => Use.Word("RewardTypeValue", false), rewardEvent =>
-                {
-                    return rewardEvent.TypeOfReward == RewardEvent.RewardType.Attribute ||
-                           rewardEvent.TypeOfReward == RewardEvent.RewardType.Skill ||
-                           rewardEvent.TypeOfReward == RewardEvent.RewardType.MaxAttribute;
-                }),
+                Use.Conditional<RewardEvent>
+                (
+                    () => Use.WithDisplayMapping<RewardEvent>
+                    (
+                        () => Use.Word("RewardTypeValue", false),
+                        (rewardEvent, description) =>
+                        {
+                            ValueDescription displayDescription = null;
+
+                            switch (rewardEvent.TypeOfReward)
+                            {
+                                case RewardEvent.RewardType.Attribute:
+                                case RewardEvent.RewardType.MaxAttribute:
+                                    displayDescription = Use.Enum(description.Name, description.Required, default, Enum.GetValues<Attribute>().Take(8).ToArray());
+                                    break;
+                                case RewardEvent.RewardType.Skill:
+                                case RewardEvent.RewardType.MaxSkill:
+                                    displayDescription = Use.Enum(description.Name, description.Required, default, Enum.GetValues<Skill>().Take(10).ToArray());
+                                    break;
+                                default:
+                                    return null;
+                            };
+
+                            return EventDescriptions.ToString(rewardEvent, displayDescription);
+                        }
+                    ),
+                    rewardEvent =>
+                    {
+                        return rewardEvent.TypeOfReward == RewardEvent.RewardType.Attribute ||
+                               rewardEvent.TypeOfReward == RewardEvent.RewardType.Skill ||
+                               rewardEvent.TypeOfReward == RewardEvent.RewardType.MaxAttribute ||
+                               rewardEvent.TypeOfReward == RewardEvent.RewardType.MaxSkill;
+                    }
+                ),
                 Use.Word("Value", false)
             )},
             { EventType.ChangeTile, new EventDescription
