@@ -45,7 +45,8 @@ Value | Name
 - Strength: Increases the max weight by 1kg per point. Actually the max weight formula seems to be 999 + STR * 1000 in grams. Also increases damage by 1 every 25 points.
 - Intelligence: Adds INT/25 (rounded down) SP and SLP on level up.
 - Dexterity: Chance in percent to not trigger lock traps.
-- Speed: Characters with higher values can act earlier in battle.
+- Speed: Characters with higher values can act earlier in battle. And every full 80 points you can move another field in battle. So with 80 SPD you can move 2 fields in battle
+
 - Stamina: Increases defense by 1 every 25 points.
 - Charisma: Increases the sell price by 1% every full 10 points.
 - Luck: Chance in percent to avoid the effect of a triggered trap.
