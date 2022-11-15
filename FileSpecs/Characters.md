@@ -188,7 +188,7 @@ Note that learned spells are stored a bit strange (with 1 bit offset). The lowes
 
 ## Bonus spell damage
 
-In **Ambermoon Advanced** the 10th attribute grants bonus damage to spells of the 4 elements earth, wind, fire and water and for magic projectiles and ghost weapon or magic damage reduction. The "current value" specifies the base damage bonus which is applied in any case and the "max value" specifies the maximum damage bonus which only increases the possible maximum value. The 3rd value is a plain magic damage reduction value. The fourth value can specify a percentage value which is used for the total damage (0 means it is ignored). Note that the damage bonus values can also be negative and thus may represent a penalty.
+In **Ambermoon Advanced** the 10th attribute grants bonus damage to spells of the 4 elements earth, wind, fire and water and for magic projectiles and ghost weapon or magic damage reduction. The "current value" specifies the base damage bonus which is applied in any case and the "max value" specifies the maximum damage bonus which only increases the possible maximum value. The 3rd value is a magic damage reduction value in percentage. The fourth value can specify a percentage value which is used for the total damage (0 means it is ignored). Note that the damage bonus values can also be negative and thus may represent a penalty.
 
 - The total minimum damage is: spell's min damage + base bonus damage
 - The total maximum damage is: spell's max damage + base bonus damage + maximum bonus damage
@@ -202,4 +202,4 @@ For example if a level 40 monster has values 10 (base bonus) and 5 (max bonus) a
 - Minimum damage is 20 + 10 = 30
 - Maximum damage is 20 + 10 + 5 = 35
 
-The third value (damage reduction) of the target is subtracted after the final damage calculation. It can reduce the damage down to 1.
+The third value (damage reduction) of the target is subtracted after the final damage calculation. It can reduce the damage down to 1. It is also a signed percentage value. So a value of 50 would reduce the received damage by 50%, while a value of -50% will even increase the received magic damage by 50%.
