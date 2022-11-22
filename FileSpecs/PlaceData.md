@@ -43,6 +43,7 @@ Offset | Meaning
 Offset | Meaning
 --- | ---
 0 | Cost to identify an item
+2 | Cost to tell SLP of scroll (**Ambermoon Advanced** only)
 
 ### Enchanter
 
