@@ -162,11 +162,17 @@ Base damage can be 0 in which case only the ailment is inflicted.
 
 Removes/stops active buffs.
 
+In **Ambermoon Advanced** this becomes a "change buffs event" and can also add buffs. It is compatible with the original event structure. All properties marked bold are not used in the original game.
+
 Offset | Type | Description
 --- | --- | ---
 0x00 | ubyte | Event type (= 0x07)
 0x01 | ubyte | Buff to stop
-0x02 | ubyte[8] | Unused
+0x02 | ubyte | **0: Remove buffs, 1: Add buffs**
+0x03 | ubyte | Unused
+0x04 | uword | **Value for the added buff (light level, bonus value, etc) exactly as given in the [savegame](Savegame.md)**
+0x06 | uword | **Duration in 5 minute chunks exactly as given in the [savegame](Savegame.md)**
+0x08 | ubyte[2] | Unused
 
 ### Buffs
 
