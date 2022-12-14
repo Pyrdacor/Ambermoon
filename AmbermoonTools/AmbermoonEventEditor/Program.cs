@@ -1,12 +1,13 @@
 ﻿using Ambermoon.Data;
 using Ambermoon.Data.Descriptions;
+using Ambermoon.Data.Enumerations;
 using Ambermoon.Data.Legacy.Serialization;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using File = System.IO.File;
 using Console = System.Console;
-using Ambermoon.Data.Enumerations;
+using IntAction = System.Action<int>;
 
 namespace AmbermoonEventEditor
 {
@@ -84,7 +85,7 @@ namespace AmbermoonEventEditor
                 var eventList = new List<Event>();
                 EventReader.ReadEvents(dataReader, events, eventList);
                 var tail = dataReader.ReadToEnd();
-                ProcessEvents(eventList, events, head, tail, args[0], true, eventList.Count, mapType);
+                ProcessEvents(eventList, events, head, tail, args[0], true, eventList.Count, mapType, 0x014C, mapWidth * mapHeight);
             }
             else if (type == 1) // NPC
             {
@@ -110,7 +111,8 @@ namespace AmbermoonEventEditor
         }
 
         static void ProcessEvents(List<Event> eventList, List<Event> events, byte[] head, byte[] tail,
-            string inputFileName, bool map, int initialMapEventCount = 0, MapType? mapType = null)
+            string inputFileName, bool map, int initialMapEventCount = 0, MapType? mapType = null,
+            int? tileOffset = null, int? numTiles = null)
         {
             Console.WriteLine();
             Console.WriteLine("Event list");
@@ -128,7 +130,25 @@ namespace AmbermoonEventEditor
                 string command = Console.ReadLine();
                 DrawLine();
 
-                ProcessCommand(command, eventList, events, map, out bool save, out string saveFileName);
+                ProcessCommand(command, eventList, events, map, out bool save, out string saveFileName, eventChainIndex =>
+                {
+                    if (mapType != null && tileOffset != null && numTiles != null)
+                    {
+                        ++eventChainIndex; // 0-based to 1-based
+                        int sizePerTile = mapType == MapType.Map2D ? 4 : 2;
+                        int index = tileOffset.Value + 1;
+
+                        for (int i = 0; i < numTiles; ++i)
+                        {
+                            if (head[index] == eventChainIndex)
+                                head[index] = 0;
+                            else if (head[index] > eventChainIndex)
+                                --head[index];
+
+                            index += sizePerTile;
+                        }
+                    }
+                });
 
                 if (save)
                 {
@@ -235,7 +255,7 @@ namespace AmbermoonEventEditor
         }
 
         static void ProcessCommand(string command, List<Event> eventList, List<Event> events,
-            bool map, out bool save, out string saveFileName)
+            bool map, out bool save, out string saveFileName, IntAction removeEventChainHandler = null)
         {
             save = false;
             saveFileName = null;
@@ -302,7 +322,7 @@ namespace AmbermoonEventEditor
                     EventIndexAction((index, _) => EditEvent(eventList, events, map, index), events, "Which event to edit: ", false);
                     break;
                 case "remove":
-                    EventIndexAction((index, _) => RemoveEvent(eventList, events, index), events, "Which event to remove: ", false);
+                    EventIndexAction((index, _) => RemoveEvent(eventList, events, index, false, removeEventChainHandler), events, "Which event to remove: ", false);
                     break;
                 case "copy":
                     EventIndexAction((index, _) => CopyEvent(eventList, events, index), events, "Which event to copy: ", false);
@@ -441,7 +461,7 @@ namespace AmbermoonEventEditor
             }
         }
 
-        static void RemoveEvent(List<Event> eventList, List<Event> events, int index, bool alwaysDisconnect = false)
+        static void RemoveEvent(List<Event> eventList, List<Event> events, int index, bool alwaysDisconnect = false, IntAction removeEventChainHandler = null)
         {
             var @event = events[index];
 
@@ -471,6 +491,7 @@ namespace AmbermoonEventEditor
                         return;
                     case 1:
                         eventList.Remove(@event);
+                        removeEventChainHandler?.Invoke(listIndex);
                         Console.WriteLine("Chain removed. Events kept.");
                         Console.WriteLine();
                         return;
@@ -498,6 +519,7 @@ namespace AmbermoonEventEditor
                                 RemoveEvent(eventList, events, events.IndexOf(eventsToRemove[i]), true);
                             }
                         }
+                        removeEventChainHandler?.Invoke(listIndex);
                         Console.WriteLine("Chain removed. Events too.");
                         Console.WriteLine();
                         return;

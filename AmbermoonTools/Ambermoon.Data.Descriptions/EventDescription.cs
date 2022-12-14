@@ -212,16 +212,14 @@ namespace Ambermoon.Data.Descriptions
                 Use.HiddenByte(),
                 Use.HiddenByte()
             )},
-            { EventType.RemoveBuffs, new EventDescription
+            { EventType.ChangeBuffs, new EventDescription
             (
                 true, true, true, true, false,
                 Use.Byte("AffectedBuff", false, 6),
+                Use.Bool("Add", false),
                 Use.HiddenByte(),
-                Use.HiddenByte(),
-                Use.HiddenByte(),
-                Use.HiddenByte(),
-                Use.HiddenByte(),
-                Use.HiddenByte(),
+                Use.Conditional<ChangeBuffsEvent>(() => Use.Word("Value", true, 100, 1), changeBuffEvent => changeBuffEvent.Add),
+                Use.Conditional<ChangeBuffsEvent>(() => Use.Word("Duration", true, 180, 1), changeBuffEvent => changeBuffEvent.Add),
                 Use.HiddenByte(),
                 Use.HiddenByte()
             )},
