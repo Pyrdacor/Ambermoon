@@ -709,7 +709,7 @@ namespace AmbermoonTextImport
 
             bool ProcessFiles(string containerFile, Func<SortedDictionary<uint, string>, bool> processor, bool zeroBased, bool withMultipleTextsForSubFiles = false)
             {
-                string directory = Path.Combine(inputPath, containerFile);
+                string directory = Path.IsPathRooted(containerFile) || containerFile.StartsWith(inputPath) ? containerFile : Path.Combine(inputPath, containerFile);
                 Func<uint, uint> indexAdjust = zeroBased ? index => index + 1 : index => index;
 
                 if (withMultipleTextsForSubFiles)
@@ -852,18 +852,30 @@ namespace AmbermoonTextImport
                 WriteSingleFile(outputFileName, writer.ToArray());
             }
 
-            static string SizeString(int size, string str, bool trimStart = true)
+            static string SizeString(int size, string str, bool trimStart = true, bool needsTermNull = true)
             {
                 if (trimStart)
                     str = str.TrimStart();
 
                 if (str.Length < size)
-                    return str.PadRight(size - 1) + "\0";
+                {
+                    return str.PadRight(size, '\0');
+                }
                 else
                 {
-                    string newString = str[0..(size - 1)] + "\0";
-                    Console.WriteLine($"WARNING: String '{str}' was shortened to '{newString.TrimEnd('\0')}' because the max size is {size-1} without terminating null.");
-                    return newString;
+                    if (needsTermNull)
+                    {
+                        string newString = str[0..(size - 1)] + "\0";
+                        Console.WriteLine($"WARNING: String '{str}' was shortened to '{newString.TrimEnd('\0')}' because the max size is {size - 1} without terminating null.");
+                        return newString;
+                    }
+                    else
+                    {
+                        string newString = str[0..size];
+                        if (str.Length > size)
+                            Console.WriteLine($"WARNING: String '{str}' was shortened to '{newString}' because the max size is {size}.");
+                        return newString;
+                    }
                 }
             }
 
@@ -932,7 +944,7 @@ namespace AmbermoonTextImport
                     writer.Write(file.ReadBytes(2 + placeCount * 32));
                     for (uint i = 1; i <= placeCount; ++i)
                     {
-                        writer.WriteWithoutLength(SizeString(30, entries[i]));
+                        writer.WriteWithoutLength(SizeString(30, entries[i], true, false));
                     }
                     return WriteSingleFile(outputFileName, writer.ToArray());
                 }, true);
@@ -1029,7 +1041,7 @@ namespace AmbermoonTextImport
                         for (int i = 0; i < map.GotoPoints.Count; ++i)
                         {
                             writer.Write(reader.ReadBytes(4));
-                            writer.WriteWithoutLength(SizeString(16, names[i]));
+                            writer.WriteWithoutLength(SizeString(16, names[i], true, false));
                             reader.Position += 16;
                         }
 
