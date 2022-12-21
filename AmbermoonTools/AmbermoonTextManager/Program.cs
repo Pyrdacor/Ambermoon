@@ -1,6 +1,7 @@
 ﻿using Ambermoon.Data;
 using Ambermoon.Data.Legacy;
 using Ambermoon.Data.Legacy.Compression;
+using Ambermoon.Data.Legacy.ExecutableData;
 using Ambermoon.Data.Legacy.Serialization;
 using System;
 using System.Collections.Generic;
@@ -9,11 +10,14 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
+using static Ambermoon.Data.Legacy.Compression.LobCompression;
 
 namespace AmbermoonTextImport
 {
     class Program
     {
+        const string PlaceholderIndexFile = "placeholders.idx";
+
         enum ErrorCode
         {
             Aborted = -1,
@@ -332,6 +336,7 @@ namespace AmbermoonTextImport
                 WriteTexts("UITexts", textContainer.UITexts);
                 WriteTexts("DateAndLanguageString", new() { textContainer.DateAndLanguageString });
                 WriteTexts("VersionString", new() { textContainer.VersionString });
+                WriteTexts("Messages", textContainer.Messages);
 
                 void WriteTexts(string folderName, List<string> texts)
                 {
@@ -353,6 +358,16 @@ namespace AmbermoonTextImport
                     {
                         var fileOutPath = Path.Combine(path, filenameCreator(i) + ".txt");
                         File.WriteAllText(fileOutPath, texts[i], Encoding.UTF8);
+                    }
+
+                    if (folderName.ToLower() == nameof(TextContainer.UITexts).ToLower())
+                    {
+                        var indexWriter = new DataWriter();
+
+                        indexWriter.Write((ushort)textContainer.UITextWithPlaceholderIndices.Count);
+                        textContainer.UITextWithPlaceholderIndices.ForEach(i => indexWriter.Write((ushort)i));
+
+                        File.WriteAllBytes(Path.Combine(path, PlaceholderIndexFile), indexWriter.ToArray());
                     }
                 }
             }
@@ -740,7 +755,7 @@ namespace AmbermoonTextImport
                     .Select(f => new { path = f, name = Path.GetFileNameWithoutExtension(f) })
                     .Where(f => fileNameMatcher.IsMatch(f.name));
                 var fileEntries = new SortedDictionary<uint, string>(files.ToDictionary(f => indexAdjust(fileIndexParser(f.name)), f => File.ReadAllText(f.path, Encoding.UTF8)));
-                uint maxIndex = fileEntries.Keys.Max();
+                uint maxIndex = fileEntries.Keys.DefaultIfEmpty().Max();
                 
                 if (fileEntries.Count != maxIndex)
                 {
@@ -810,6 +825,7 @@ namespace AmbermoonTextImport
 
                 Console.WriteLine("Reading all texts from Text.amb.");
 
+                ReadTexts("Messages", textContainer.Messages);
                 ReadTexts("WorldNames", textContainer.WorldNames);
                 ReadTexts("FormatMessages", textContainer.FormatMessages);
                 ReadTexts("AutomapTypeNames", textContainer.AutomapTypeNames);
@@ -832,6 +848,14 @@ namespace AmbermoonTextImport
                 ReadTexts("VersionString", versionStrings);
                 textContainer.DateAndLanguageString = versionStrings[0];
                 textContainer.VersionString = versionStrings[1];
+
+                string indexFilePath = Path.Combine(inputPath, "Text.amb", "UITexts", PlaceholderIndexFile);
+                var indexReader = new DataReader(File.ReadAllBytes(indexFilePath));
+
+                int count = indexReader.ReadWord();
+
+                for (int i = 0; i < count; ++i)
+                    textContainer.UITextWithPlaceholderIndices.Add(indexReader.ReadWord());
 
                 void ReadTexts(string folderName, List<string> texts)
                 {
@@ -1048,24 +1072,73 @@ namespace AmbermoonTextImport
                         writer.Write(reader.ReadToEnd());
                         return writer.ToArray();
                     });
+                    foreach (var existingFile in containerFiles)
+                        files.TryAdd((uint)existingFile.Key, existingFile.Value.ReadToEnd());
                     var containerWriter = new DataWriter();
                     bool newComp = options.Contains(Option.NewCompression);
                     FileWriter.WriteContainer(containerWriter, files,
-                        filename.ToLower().StartsWith("party") ? FileType.AMBR : FileType.AMPC, null,
+                        FileType.AMPC, null,
                         newComp ? LobCompression.LobType.TakeBest : LobCompression.LobType.Ambermoon,
                         newComp ? FileDictionaryCompression.UseBest : FileDictionaryCompression.None);
                     return containerWriter.ToArray();
                 }, false, true);
             }
 
-            if (CheckFile("1Map_data.amb"))
-                ReadGotoPointNames("1Map_data.amb");
-            if (CheckFile("2Map_data.amb"))
-                ReadGotoPointNames("2Map_data.amb");
-            if (CheckFile("3Map_data.amb"))
-                ReadGotoPointNames("3Map_data.amb");
+            void CheckAndRead(string file, Action<string> reader)
+            {
+                if (CheckFile(file))
+                    reader(file);
+            }
 
-            // TODO: text containers like 1Map_texts.amb
+            CheckAndRead("1Map_data.amb", ReadGotoPointNames);
+            CheckAndRead("2Map_data.amb", ReadGotoPointNames);
+            CheckAndRead("3Map_data.amb", ReadGotoPointNames);
+
+            CheckAndRead("1Map_texts.amb", ReadTextContainers);
+            CheckAndRead("2Map_texts.amb", ReadTextContainers);
+            CheckAndRead("3Map_texts.amb", ReadTextContainers);
+            CheckAndRead("NPC_texts.amb", ReadTextContainers);
+            CheckAndRead("Object_texts.amb", ReadTextContainers);
+            CheckAndRead("Party_texts.amb", ReadTextContainers);
+
+            void ReadTextContainers(string file)
+            {
+                ProcessAndWriteFiles(file, entries =>
+                {
+                    if (entries.Count == 0)
+                        return Array.Empty<byte>();
+
+                    var gameData = gameDataProvider();
+
+                    if (gameData == null || !gameData.Files.ContainsKey(file))
+                        return null;
+
+                    var containerFiles = new Dictionary<uint, byte[]>(entries.Count);
+
+                    foreach (var entry in entries)
+                    {
+                        if (entry.Value.Length == 0)
+                        {
+                            containerFiles.Add(entry.Key, Array.Empty<byte>());
+                            continue;
+                        }
+
+                        var texts = new List<string>(entry.Value.Split('\n'));
+                        var dataWriter = new DataWriter();
+
+                        Ambermoon.Data.Legacy.Serialization.TextWriter.WriteTexts(dataWriter, texts);
+
+                        containerFiles.Add(entry.Key, dataWriter.ToArray());
+                    }
+
+                    var containerWriter = new DataWriter();
+                    bool newComp = options.Contains(Option.NewCompression);
+                    FileWriter.WriteContainer(containerWriter, containerFiles, FileType.AMNP, null,
+                        newComp ? LobType.TakeBest : LobType.Ambermoon,
+                        newComp ? FileDictionaryCompression.UseBest : FileDictionaryCompression.None);
+                    return containerWriter.ToArray();
+                }, false, true);
+            }
         }
     }
 }
