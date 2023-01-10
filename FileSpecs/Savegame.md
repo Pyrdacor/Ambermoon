@@ -169,7 +169,7 @@ A set bit means "unlocked" and an unset one means "not unlocked yet".
 ### Chest locked states
 
 There are only 185 chests (1-131 and 203-256). In total there can be 256 chests.
-Chests in events are 1-based. But chest 1 uses bit1 and not bit0. So either this is a bug or chest index 0 is also valid in theory.
+Chests in events are 0-based so 0 is a valid index in a chest event.
 
 Each bit has the following meaning:
 - 0: Chest is locked
@@ -178,8 +178,7 @@ Each bit has the following meaning:
 The order of the bits is this (where each digit is a chest index in hex). \
 76543210 FEDCBA98 ...
 
-Note: There is a chest sub-file with index 256 inside Chest_data.amb. It is completely empty and is not used at all in the game.
-It can't be used because the chest index is stored as a byte and a byte can only store values up to 255.
+Not all chests use these flags. They are only considered if a chest event has a lock picking chance reduction greater than 0. Otherwise the chest is always open and won't check the flag in the savegame. For example any pile or items that are directly accesible like flowers and so on are represented by chests which are always open and don't require the flag. The flag only is necessary to track the opening state of initial closed chests.
 
 Note: In **Ambermoon Advanced** there are 128 additional chests. As the savegames should stay compatible, the last 16 bytes of the door locked states are used. This way the existing door locked states stay untouched. [Chest events](EventData.md) have a new flag to distinguish between normal and extended chests.
 
