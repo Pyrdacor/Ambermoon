@@ -178,7 +178,7 @@ Each bit has the following meaning:
 The order of the bits is this (where each digit is a chest index in hex). \
 76543210 FEDCBA98 ...
 
-Not all chests use these flags. They are only considered if a chest event has a lock picking chance reduction greater than 0. Otherwise the chest is always open and won't check the flag in the savegame. For example any pile or items that are directly accesible like flowers and so on are represented by chests which are always open and don't require the flag. The flag only is necessary to track the opening state of initial closed chests.
+Not all chests use these flags. They are only considered if a chest event has a lock picking chance reduction greater than 0. Otherwise the chest is always open and won't check the flag in the savegame. For example any pile or items that are directly accesible like flowers and so on are represented by chests which are always open and don't require the flag. The flag only is necessary to track the opening state of initial closed chests. Otherwise the flag is just ignored by the game.
 
 Note: In **Ambermoon Advanced** there are 128 additional chests. As the savegames should stay compatible, the last 16 bytes of the door locked states are used. This way the existing door locked states stay untouched. [Chest events](EventData.md) have a new flag to distinguish between normal and extended chests.
 
