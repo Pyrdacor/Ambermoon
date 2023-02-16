@@ -1,0 +1,1 @@
+﻿Tout le monde recoit {0} points d'experience..

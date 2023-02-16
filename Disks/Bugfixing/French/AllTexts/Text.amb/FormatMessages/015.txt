@@ -1,0 +1,1 @@
+﻿Une ration de nourriture vous coutera {0} PO.

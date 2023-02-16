@@ -1,0 +1,1 @@
+﻿{0} a fait {1} points de degats!

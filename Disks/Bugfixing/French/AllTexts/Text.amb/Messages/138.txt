@@ -1,0 +1,1 @@
+﻿Veuillez retirer la protection en ecriture du disque de sauvegarde. (La fenetre de protection en ecriture doit etre obturee)

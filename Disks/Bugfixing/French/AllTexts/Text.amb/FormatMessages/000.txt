@@ -1,0 +1,1 @@
+﻿Une erreur E/S s'est produite: ^{0}^^Le fichier concerne: ^{1}^^Re-essayer?

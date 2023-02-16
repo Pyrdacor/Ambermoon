@@ -1,0 +1,9 @@
+﻿A cause d'un manque de memoire chip le programme va maintenant
+desactiver la musique.
+
+Veuillez utiliser le programme d'installation pour lire le
+document de depannage, pour trouver de quelle facon
+ce probleme peut etre evite.
+
+Cliquez sur un bouton de la souris pour continuer.
+{{Click}}

@@ -1,0 +1,1 @@
+﻿~INVN~ n'a pas la classe requise pour faire usage de cet objet.
