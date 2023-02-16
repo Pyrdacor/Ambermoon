@@ -1,0 +1,464 @@
+
+ListAutomap.MSG
+	db	'Riddlemouth',0
+	db	'Teleporter',0
+	db	'Spinner',0
+	db	'Trap',0
+	db	'Trap door',0
+	db	'Special',0
+	db	'Monster',0
+	db	'Door',0,0
+	db	'Merchant',0
+	db	'Inn',0
+	db	'Chest',0
+	db	'Exit',0,0
+
+Trashpile.MSG
+	db	'Trashpile',0
+	db	'Person',0
+	db	'Goto-point',0
+
+_MenuOptionListTxt.MSG
+	db	'Music',0
+	db	'Fast combat mode',0
+	db	'Outlined text',0
+	db	'3D floor texture',0
+	db	'3D ceiling texture',0
+
+_ListTxtonSCreen.MSG
+	db	'Who said "Hi Ho" ?',0
+	db	'Mellow camel funk',0
+	db	'Close to the hedge',0
+	db	'Voice of the bagpipe',0
+	db	'Downtown',0
+	db	'He is sailing',0
+	db	'Whole lotta dove',0
+	db	'Horse is no disgrace',0
+	db	"Don't look Bach",0
+	db	'Rough waterfront tavern',0
+	db	'Sapphire fireballs of pure love',0
+	db	'The Aum remains the same',0
+	db	'Capital',0
+	db	'Plodding along',0
+	db	'Compact disc',0
+	db	'Riverside travelling blues',0
+	db	"Nobody's vault but mine",0
+	db	'La Crypta Strangiato',0
+	db	'Misty dungeon hop',0
+	db	'Burn baby burn!',0
+	db	"Bar brawlin'",0
+	db	'Psychedelic dune groove',0
+	db	'Stairway to level 50',0
+	db	'That hunch is back',0
+	db	'Chicken soup',0
+	db	'Dragon chase in creepy dungeon',0
+	db	"His master's voice",0
+	db	'To the unknown song',0
+	db	'Oh no not another magical event',0
+	db	'The Uh-oh song',0
+	db	'Owner of a lonely sword',0
+	db	'GAME OVER',0
+
+Healing.MSG
+		db	'Healing',0
+		db	'Alchemy',0
+		db	'Mysticism',0
+		db	'Destruction',0,0
+		db	0
+
+Function.MSG	db	'Function',0
+
+
+ListSort1.MSG
+	db	'Healing hand',0
+	db	'Remove fear',0
+	db	'Remove panic',0
+	db	'Remove shadows',0
+	db	'Remove blindness',0
+	db	'Remove pain',0
+	db	'Remove disease',0
+	db	'Small healing',0
+	db	'Remove poison',0
+	db	'Neutralize poison',0
+	db	'Medium healing',0
+	db	'Dispell undead',0
+	db	'Destroy undead',0
+	db	'Holy word',0
+	db	'Wake the dead',0
+	db	'Change ashes',0
+	db	'Change dust',0
+	db	'Great healing',0
+	db	'Mass healing',0
+	db	'Resurrection',0
+	db	'Remove rigidness',0
+	db	'Remove lamedness',0
+	db	'Heal aging',0
+	db	'Stop aging',0
+	db	'Stone to flesh',0
+	db	'Wake up',0
+	db	'Remove irritation',0
+	db	'Remove drugged',0
+	db	'Remove madness',0
+	db	'Restore stamina',0
+	db	'Charge item',0
+	db	'Light',0
+	db	'Magical torch',0
+	db	'Magical lantern',0
+	db	'Magical sun',0
+	db	'Ghost weapon',0
+	db	'Create food',0
+	db	'Remove curses',0
+	db	'Blink',0
+	db	'Jump',0
+	db	'Flight',0
+	db	'Word of marking',0
+	db	'Word of returning',0
+	db	'Magical shield',0
+	db	'Magical wall',0
+	db	'Magical barrier',0
+	db	'Magical weapon',0
+	db	'Magical assault',0
+	db	'Magical attack',0
+	db	'Levitation',0
+	db	'Anti-magic wall',0
+	db	'Anti-magic sphere',0
+	db	'Alchemistic globe',0
+	db	'Hurry',0
+	db	'Mass hurry',0
+	db	'Repair item',0
+	db	'Duplicate item',0
+	db	'LP-stealer',0
+	db	'SP-stealer',0,0
+	db	'Monster knowledge',0
+	db	'Identification',0
+	db	'Knowledge',0
+	db	'Clairvoyance',0
+	db	'See the truth',0
+	db	'Map view',0
+	db	'Magical compass',0
+	db	'Find traps',0
+	db	'Find monsters',0
+	db	'Find persons',0
+	db	'Find secret doors',0
+	db	'Mystical mapping',0
+	db	'Mystical map I',0
+	db	'Mystical map II',0
+	db	'Mystical map III',0
+	db	'Mystical globe',0
+	db	'Show monster LP',0,0
+	db	0
+	db	0
+	db	0
+	db	0
+	db	0
+	db	0
+	db	0
+	db	0
+	db	0
+	db	0
+	db	0
+	db	0
+	db	'Magical projectile',0
+	db	'Magical arrows',0
+	db	'Lame',0
+	db	'Poison',0
+	db	'Petrify',0
+	db	'Cause disease',0
+	db	'Cause aging',0
+	db	'Irritate',0
+	db	'Cause madness',0
+	db	'Sleep',0
+	db	'Fear',0
+	db	'Blind',0
+	db	'Drug',0
+	db	'Dissolve victim',0
+	db	'Mudsling',0
+	db	'Rockfall',0
+	db	'Earthslide',0
+	db	'Earthquake',0
+	db	'Winddevil',0
+	db	'Windhowler',0
+	db	'Thunderbolt',0
+	db	'Whirlwind',0
+	db	'Firebeam',0
+	db	'Fireball',0
+	db	'Firestorm',0
+	db	'Firepillar',0
+	db	'Waterfall',0
+	db	'Iceball',0
+	db	'Icestorm',0
+	db	'Iceshower',0,0
+	db	0
+	db	0
+	db	0
+	db	0
+	db	0
+	db	0
+	db	0
+	db	0
+	db	0
+	db	0
+	db	0
+	db	0
+	db	0
+	db	0
+	db	0
+	db	0
+	db	0
+	db	0
+	db	0
+	db	0
+	db	0
+	db	0
+	db	0
+	db	0
+	db	0
+	db	0
+	db	0
+	db	0
+	db	0
+	db	0
+	db	0
+	db	0
+	db	0
+	db	0
+	db	0
+	db	0
+	db	0
+	db	0
+	db	0
+	db	0
+	db	0
+	db	0
+	db	0
+	db	0
+	db	0
+	db	0
+	db	0
+	db	0
+	db	0
+	db	0
+	db	0
+	db	0
+	db	0
+	db	0
+	db	0
+	db	0
+	db	0
+	db	0
+	db	0
+	db	'Opening locks',0
+	db	'Eagle call',0
+	db	'Youth',0
+	db	'Magical music',0
+	db	'Spellpoints I',0
+	db	'Spellpoints II',0
+	db	'Spellpoints III',0
+	db	'Spellpoints IV',0
+	db	'Spellpoints V',0
+	db	'Heal all',0
+	db	'Magical map',0
+	db	'Increase strength',0
+	db	'Increase intelligence',0
+	db	'Increase dexterity',0
+	db	'Increase speed',0
+	db	'Increase stamina',0
+	db	'Increase charisma',0
+	db	'Increase luck',0
+	db	'Increase anti-magic',0
+	db	'Climbing',0
+	db	'Drug',0,0
+	db	0
+	db	0
+	db	0
+	db	0
+	db	0
+	db	0
+	db	0
+	db	0
+
+_RaceList2Txt.MSG
+	db	'Human',0
+	db	'Elf',0
+	db	'Dwarvish',0
+	db	'Gnomish',0
+	db	'Sylph',0
+	db	'Felinic',0
+	db	'Morag',0
+	db	'Animal',0
+
+_TypeOfPersoListTxt.MSG
+	db	'Advent.',0
+	db	'Warrior',0
+	db	'Paladin',0
+	db	'Thief',0
+	db	'Ranger',0
+	db	'Healer',0
+	db	'Alchem.',0
+	db	'Mystic.',0
+	db	'Mage',0,0
+	db	0
+
+_RaceListTxt.MSG
+	db	'Human',0
+	db	'Elf',0
+	db	'Dwarf',0
+	db	'Gnome',0
+	db	'Half-elf',0
+	db	'Sylphe',0
+	db	'Felinic',0
+	db	'Moranian',0
+	db	'Thalionic',0,0
+	db	0
+	db	0
+	db	0
+	db	0
+	db	'Animal',0,0
+
+_ActionListTxt.MSG
+	db	'Attack',0
+	db	'Parry',0
+	db	'Swimming',0
+	db	'Critical hit',0
+	db	'Finding traps',0
+	db	'Disarming traps',0
+	db	'Lock-picking',0
+	db	'Searching',0
+	db	'Reading magic',0
+	db	'Using magic',0
+
+_SkillListFullNameTxt.MSG.MSG
+	db	'Strength',0
+	db	'Intelligence',0
+	db	'Dexterity',0
+	db	'Speed',0
+	db	'Stamina',0
+	db	'Charisma',0
+	db	'Luck',0
+	db	'Anti-magic',0
+	db	'Age',0
+
+ATT.MSG
+	db	'ATT',0
+	db	'PAR',0
+	db	'SWI',0
+	db	'CRI',0
+	db	'F-T',0
+	db	'D-T',0
+	db	'L-P',0
+	db	'SEA',0
+	db	'R-M',0
+	db	'U-M',0
+
+_SkillListTxt.MSG
+	db	'STR',0
+	db	'INT',0
+	db	'DEX',0
+	db	'SPE',0
+	db	'STA',0
+	db	'CHA',0
+	db	'LUC',0
+	db	'A-M',0
+
+ArmourListTxt.MSG
+	db	'Armour',0
+	db	'Helmet',0
+	db	'Shoes',0
+	db	'Shield',0
+	db	'Close-range weapon',0
+	db	'Long-range weapon',0
+	db	'Ammunition',0
+	db	'Text scroll',0
+	db	'Spell scroll',0
+	db	'Drink',0
+	db	'Amulet',0
+	db	'Brooch',0
+	db	'Ring',0
+	db	'Gem',0
+	db	'Tool',0
+	db	'Key',0
+	db	'Normal item',0
+	db	'Magical item',0
+	db	'Special item',0
+	db	'Transportation',0,0
+
+IrritationListTxt.MSG
+	db	'Irritation',0
+	db	'Madness',0
+	db	'Sleep',0
+	db	'Panic',0
+	db	'Blindness',0
+	db	'Stoned',0
+	db	'Exhaustion',0,0
+	db	'Lamedness',0
+	db	'Poison',0
+	db	'Petrification',0
+	db	'Disease',0
+	db	'Aging',0
+	db	'Death',0,0
+	db	0
+
+APR.MSG			db	'APR:  ',0
+HE.MSG			db	'HE',0
+SHE.MSG			db	'SHE',0
+HIS.MSG			db	'HIS',0
+HER.MSG			db	'HER',0
+SKILLS.MSG		db	'SKILLS',0
+ATTRIBUTES.MSG		db	'ATTRIBUTES',0
+LANGUAGES.MSG		db	'LANGUAGES',0
+CONDITIONS.MSG		db	'CONDITIONS',0
+MALE.MSG		db	'MALE',0
+FEMALE.MSG		db	'FEMALE',0
+WNWNNEESESSWW.MSG	db	'W  N-W  N  N-E  E  S-E  S  S-W  W  N-W  N  ',0
+AGE.MSG			db	'AGE:'
+ascii.MSG6		db	'012',0
+ascii.MSG4		db	'01%/01%',0
+ascii.MSG5		db	'012/012',0
+EP.MSG			db	'EP',0
+EP.MSG0			db	'EP:'
+_0123456789.MSG		db	'0123456789',0
+LP012012.MSG		db	'LP : 012/012',0
+SP012012.MSG		db	'SP : 012/012',0
+SLP012.MSG		db	'SLP:012',0
+TP012.MSG		db	'TP:012',0
+G01234R0123.MSG		db	'G:01234 R:0123',0
+ascii.MSG8		db	': 012',0
+GOLD.MSG		db	'GOLD',0
+RATIONS.MSG		db	'RATIONS',0
+CLASSES.MSG		db	'---- CLASSES ----',0
+GENDER.MSG		db	'GENDER:',0
+BOTH.MSG		db	'BOTH',0
+WEIGHT.MSG0		db	'WEIGHT : '
+GR.MSG			db	'01234 GR',0
+HANDS.MSG		db	'  HANDS: '
+ascii.MSG9		db	'0',0
+FINGERS.MSG		db	'FINGERS: '
+ascii.MSG10		db	'0',0
+DAMAGE.MSG		db	' DAMAGE: '
+ascii.MSG11		db	' 012',0
+SHIELD.MSG		db	' SHIELD: '
+ascii.MSG12		db	' 012',0
+LPMAX.MSG		db	'LP-MAX:'
+ascii.MSG13		db	' 012',0
+SPMAX.MSG		db	'SP-MAX:'
+ascii.MSG14		db	' 012',0
+MBW.MSG			db	' M-B-W: '
+ascii.MSG15		db	'01',0
+MBA.MSG			db	' M-B-A: '
+ascii.MSG16		db	'01',0
+ATTRIBUTE.MSG		db	'ATTRIBUTE',0
+SKILL.MSG		db	'SKILL',0
+ascii.MSG17		db	' 01',0
+lbB052975		db	$28
+ascii.MSG18		db	'01)',0
+CURSED.MSG		db	'CURSED',0
+WEIGHT.MSG		db	'WEIGHT',0
+KG.MSG0			db	'012KG/'
+KG.MSG			db	'012KG',0
+LEGEND.MSG		db	'LEGEND',0
+YOUREHERE.MSG		db	"YOU'RE HERE",0
+ON.MSG			db	'ON',0
+OFF.MSG			db	'OFF',0
+DATA.MSG		db	'-------- DATA --------',0
+Createyourcha.MSG	db	'Create your character :',0
+Inventory.MSG		db	'Inventory',0,0
