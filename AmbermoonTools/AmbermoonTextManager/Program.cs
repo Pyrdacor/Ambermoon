@@ -307,14 +307,8 @@ namespace AmbermoonTextImport
                 }
             }
 
-            if (CheckAndGetFile("Text.amb", out var textAmb))
+            void WriteAllTexts(TextContainer textContainer)
             {
-                outPath = Path.Combine(outputPath, textAmb.Name);
-                var reader = textAmb.Files[1];
-                var textContainerReader = new TextContainerReader();
-                var textContainer = new TextContainer();
-                textContainerReader.ReadTextContainer(textContainer, reader, false);
-
                 Console.WriteLine("Writing all texts from Text.amb.");
 
                 WriteTexts("WorldNames", textContainer.WorldNames);
@@ -370,6 +364,65 @@ namespace AmbermoonTextImport
                         File.WriteAllBytes(Path.Combine(path, PlaceholderIndexFile), indexWriter.ToArray());
                     }
                 }
+            }
+
+            if (CheckAndGetFile("Text.amb", out var textAmb))
+            {
+                outPath = Path.Combine(outputPath, textAmb.Name);
+                var reader = textAmb.Files[1];
+                var textContainerReader = new TextContainerReader();
+                var textContainer = new TextContainer();
+                textContainerReader.ReadTextContainer(textContainer, reader, false);
+
+                WriteAllTexts(textContainer);
+            }
+            else if (CheckFile("AM2_CPU") || CheckFile("AM2_BLIT"))
+            {
+                outPath = Path.Combine(outputPath, "Text.amb");
+                var exeData = ExecutableData.FromGameData(gameData);
+                var textContainer = new TextContainer();
+                textContainer.WorldNames.AddRange(exeData.WorldNames.Entries.OrderBy(e => (int)e.Key).Select(e => e.Value));
+                textContainer.FormatMessages.AddRange(exeData.Messages.Entries.Take(26));
+                textContainer.AutomapTypeNames.AddRange(exeData.AutomapNames.Entries.OrderBy(e => (int)e.Key).Skip(2).Select(e => e.Value));
+                textContainer.OptionNames.AddRange(exeData.OptionNames.Entries.OrderBy(e => (int)e.Key).Select(e => e.Value));
+                textContainer.MusicNames.AddRange(exeData.SongNames.Entries.OrderBy(e => (int)e.Key).Select(e => e.Value));
+                textContainer.SpellClassNames.AddRange(exeData.SpellTypeNames.Entries.OrderBy(e => (int)e.Key).Select(e => e.Value));
+                textContainer.SpellNames.AddRange(exeData.SpellNames.Entries.OrderBy(e => (int)e.Key).Skip(1).Select(e => e.Value));
+                textContainer.LanguageNames.AddRange(exeData.LanguageNames.Entries.OrderBy(e => (int)e.Key).Select(e => e.Value));
+                textContainer.ClassNames.AddRange(exeData.ClassNames.Entries.OrderBy(e => (int)e.Key).Select(e => e.Value));
+                textContainer.RaceNames.AddRange(exeData.RaceNames.Entries.OrderBy(e => (int)e.Key).Select(e => e.Value));
+                textContainer.SkillNames.AddRange(exeData.SkillNames.Entries.OrderBy(e => (int)e.Key).Select(e => e.Value));
+                textContainer.AttributeNames.AddRange(exeData.AttributeNames.Entries.OrderBy(e => (int)e.Key).Take(9).Select(e => e.Value));
+                textContainer.SkillShortNames.AddRange(exeData.SkillNames.ShortNames.OrderBy(e => (int)e.Key).Select(e => e.Value));
+                textContainer.AttributeShortNames.AddRange(exeData.AttributeNames.ShortNames.OrderBy(e => (int)e.Key).Take(8).Select(e => e.Value));
+                textContainer.ItemTypeNames.AddRange(exeData.ItemTypeNames.Entries.OrderBy(e => (int)e.Key).Skip(1).Select(e => e.Value));
+                textContainer.ConditionNames.AddRange(exeData.ConditionNames.Entries.OrderBy(e => (int)e.Key).Skip(1).Select(e => e.Value));
+                textContainer.UITextWithPlaceholderIndices.AddRange(new int[]
+                {
+                    13, 17, 28, 29, 30, 31, 32, 33, 34, 35, 36, 41
+                });
+                textContainer.UITexts.AddRange(exeData.UITexts.Entries.OrderBy(e => (int)e.Key).Take(11).Select(e => ProcessUIText(e.Value)));
+                textContainer.UITexts.Add(exeData.UITexts.Entries[UITextIndex.BothSexes]);
+                textContainer.UITexts.AddRange(exeData.UITexts.Entries.OrderBy(e => (int)e.Key).Skip(11).Where(e => e.Key != UITextIndex.BothSexes && e.Key != UITextIndex.Placeholder2Digit && e.Key !=UITextIndex.Placeholder2DigitInParentheses).Select(e => ProcessUIText(e.Value)));
+                textContainer.DateAndLanguageString = exeData.DataInfoString;
+                textContainer.VersionString = exeData.DataVersionString;
+                textContainer.Messages.AddRange(exeData.Messages.Entries.Skip(26));
+                
+                // TODO: format messages and messages do not work. I guess we need to prepare formatted messages.
+
+                string ProcessUIText(string text)
+                {
+                    if (textContainer.UITextWithPlaceholderIndices.Contains(textContainer.UITexts.Count))
+                    {
+                        var regex = new Regex(@"\{[0-9]:(0+)\}");
+
+                        text = regex.Replace(text, match => string.Join("", Enumerable.Repeat(0, match.Groups[1].Length).Select((_, i) => i.ToString())));
+                    }
+
+                    return text;
+                }
+
+                WriteAllTexts(textContainer);
             }
 
             void ExportCharNames(string filename, string fallbackFilename = null)
@@ -464,6 +517,31 @@ namespace AmbermoonTextImport
                     var fileOutPath = Path.Combine(outPath, filenameCreator(i) + ".txt");
                     reader.Position += 40;
                     File.WriteAllText(fileOutPath, reader.ReadString(20).TrimEnd(' ', '\0'));
+                }
+            }
+            else if (CheckFile("AM2_CPU") || CheckFile("AM2_BLIT"))
+            {
+                outPath = Path.Combine(outputPath, "Objects.amb");
+                var exeData = ExecutableData.FromGameData(gameData);
+
+                try
+                {
+                    Directory.CreateDirectory(outPath);
+                }
+                catch
+                {
+                    Console.WriteLine($"Unable to create output directory '{outPath}'.");
+                    Console.WriteLine();
+                    Exit(ErrorCode.UnableToCreateDirectory);
+                    return;
+                }
+
+                var items = exeData.ItemManager.Items;
+
+                for (int i = 0; i < items.Count; ++i)
+                {
+                    var fileOutPath = Path.Combine(outPath, filenameCreator(i) + ".txt");
+                    File.WriteAllText(fileOutPath, items[i].Name.TrimEnd(' ', '\0'));
                 }
             }
 
