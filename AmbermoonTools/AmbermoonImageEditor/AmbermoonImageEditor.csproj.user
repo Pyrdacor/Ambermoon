@@ -4,6 +4,9 @@
     <Compile Update="MainForm.cs">
       <SubType>Form</SubType>
     </Compile>
+    <Compile Update="PaletteForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
     <Compile Update="RenderPanel.cs">
       <SubType>Component</SubType>
     </Compile>

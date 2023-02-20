@@ -2,6 +2,7 @@ using System.Drawing.Drawing2D;
 using System.Runtime.InteropServices;
 using Ambermoon.Data;
 using Ambermoon.Data.Legacy.Serialization;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 using static System.Windows.Forms.DataFormats;
 
 namespace AmbermoonImageEditor
@@ -15,6 +16,7 @@ namespace AmbermoonImageEditor
         private Graphic? palette = null;
         private Bitmap? bitmap = null;
         private int zoomFactor = 8;
+        private PaletteForm paletteForm = new();
 
         public MainForm()
         {
@@ -26,10 +28,29 @@ namespace AmbermoonImageEditor
 
         }
 
+        private void OpenPalette()
+        {
+            if (palette is not null)
+            {
+                var colors = new Color[32];
+
+                for (int i = 0; i < 32; ++i)
+                {
+                    int index = i * 4;
+                    colors[i] = Color.FromArgb(palette.Data[index + 3], palette.Data[index + 0], palette.Data[index + 1], palette.Data[index + 2]);
+                }
+
+                if (!paletteForm.Visible)
+                    paletteForm.Show(this);
+
+                paletteForm.SetPaletteColors(colors);
+            }
+        }
+
         private void newToolStripMenuItem_Click(object sender, EventArgs e)
         {
 
-        }
+        }        
 
         private void openToolStripMenuItem_Click(object sender, EventArgs e)
         {
@@ -87,10 +108,53 @@ namespace AmbermoonImageEditor
                         graphicReader.ReadGraphic(palette, new DataReader(File.ReadAllBytes(ofd.FileName)), paletteInfo);
                         saveToolStripMenuItem.Enabled = true;
 
+                        switch (graphicInfo.GraphicFormat)
+                        {
+                            case GraphicFormat.Palette3Bit:
+                                bpp3ToolStripMenuItem.Checked = true;
+                                break;
+                            case GraphicFormat.Palette4Bit:
+                            case GraphicFormat.Texture4Bit:
+                                bpp4ToolStripMenuItem.Checked = true;
+                                break;
+                            default:
+                                bpp5ToolStripMenuItem.Checked = true;
+                                break;
+                        }
+
                         UpdateImage();
+                        OpenPalette();
                     }
                 }
             }
+        }
+
+        private byte[] ToPixelData(Graphic graphic, Graphic palette, byte alphaIndex = 0)
+        {
+            if (graphic.IndexedGraphic)
+            {
+                if (palette == null)
+                {
+                    throw new ArgumentNullException("Palette for indexed graphic was null.");
+                }
+
+                byte[] array = new byte[graphic.Width * graphic.Height * 4];
+                for (int i = 0; i < graphic.Width * graphic.Height; i++)
+                {
+                    byte b = graphic.Data[i];
+                    if (b != alphaIndex)
+                    {
+                        array[i * 4 + 0] = palette.Data[b * 4 + 2];
+                        array[i * 4 + 1] = palette.Data[b * 4 + 1];
+                        array[i * 4 + 2] = palette.Data[b * 4 + 0];
+                        array[i * 4 + 3] = palette.Data[b * 4 + 3];
+                    }
+                }
+
+                return array;
+            }
+
+            return graphic.Data;
         }
 
         private void UpdateImage()
@@ -98,7 +162,7 @@ namespace AmbermoonImageEditor
             var bitmap = new Bitmap(image!.Width, image.Height);
             var data = bitmap.LockBits(new Rectangle(Point.Empty, bitmap.Size), System.Drawing.Imaging.ImageLockMode.WriteOnly, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
 
-            var bytes = image.ToPixelData(palette);
+            var bytes = ToPixelData(image, palette!);
 
             Marshal.Copy(bytes, 0, data.Scan0, bytes.Length);
 
@@ -337,6 +401,90 @@ namespace AmbermoonImageEditor
                 var writer = new DataWriter();
                 GraphicWriter.Write(writer, image!, format!.Value);
                 File.WriteAllBytes(sfd.FileName, writer.ToArray());
+            }
+        }
+
+        private void UpdateMode()
+        {
+            int numColors = bpp3ToolStripMenuItem.Checked ? 8 : bpp4ToolStripMenuItem.Checked ? 16 : 32;
+            int start = toolStripMenuItemPalOffset24.Checked ? 24 : toolStripMenuItemPalOffset16.Checked ? 16 : 0;
+            paletteForm.RestrictColorSelection(start, start + numColors - 1);
+        }
+
+        private void bpp3ToolStripMenuItem_CheckedChanged(object sender, EventArgs e)
+        {
+            if (bpp3ToolStripMenuItem.Checked)
+            {
+                bpp4ToolStripMenuItem.Checked = false;
+                bpp5ToolStripMenuItem.Checked = false;
+                toolStripMenuItemPalOffset16.Enabled = true;
+                toolStripMenuItemPalOffset24.Enabled = true;
+                UpdateMode();
+            }
+        }
+
+        private void bpp4ToolStripMenuItem_CheckedChanged(object sender, EventArgs e)
+        {
+            if (bpp4ToolStripMenuItem.Checked)
+            {
+                bpp3ToolStripMenuItem.Checked = false;
+                bpp5ToolStripMenuItem.Checked = false;
+                toolStripMenuItemPalOffset16.Enabled = true;
+                toolStripMenuItemPalOffset24.Enabled = false;
+
+                if (toolStripMenuItemPalOffset24.Checked)
+                    toolStripMenuItemPalOffset16.Checked = true; // this will trigger UpdateMode
+                else
+                    UpdateMode();
+            }
+        }
+
+        private void bpp5ToolStripMenuItem_CheckedChanged(object sender, EventArgs e)
+        {
+            if (bpp5ToolStripMenuItem.Checked)
+            {
+                bpp3ToolStripMenuItem.Checked = false;
+                bpp4ToolStripMenuItem.Checked = false;
+                toolStripMenuItemPalOffset16.Enabled = false;
+                toolStripMenuItemPalOffset24.Enabled = false;
+
+                if (!toolStripMenuItemPalOffset0.Checked)
+                    toolStripMenuItemPalOffset0.Checked = true; // this will trigger UpdateMode
+                else
+                    UpdateMode();
+            }
+        }
+
+        private void toolStripMenuItemPalOffset0_CheckedChanged(object sender, EventArgs e)
+        {
+            if (toolStripMenuItemPalOffset0.Checked)
+            {
+                toolStripMenuItemPalOffset16.Checked = false;
+                toolStripMenuItemPalOffset24.Checked = false;
+
+                UpdateMode();
+            }
+        }
+
+        private void toolStripMenuItemPalOffset16_CheckedChanged(object sender, EventArgs e)
+        {
+            if (toolStripMenuItemPalOffset16.Checked)
+            {
+                toolStripMenuItemPalOffset0.Checked = false;
+                toolStripMenuItemPalOffset24.Checked = false;
+
+                UpdateMode();
+            }
+        }
+
+        private void toolStripMenuItemPalOffset24_CheckedChanged(object sender, EventArgs e)
+        {
+            if (toolStripMenuItemPalOffset24.Checked)
+            {
+                toolStripMenuItemPalOffset0.Checked = false;
+                toolStripMenuItemPalOffset16.Checked = false;
+
+                UpdateMode();
             }
         }
     }
