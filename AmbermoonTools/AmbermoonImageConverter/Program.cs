@@ -82,12 +82,17 @@ namespace AmbermoonImageConverter
             File.WriteAllBytes(args[2], outputData);
         }
 
+        static readonly Dictionary<uint, byte> mappedPaletteIndices = new();
+
         static byte FindPaletteIndex(uint[] palette, uint color, byte min, byte max, byte transparentColorIndex)
         {
+            if (mappedPaletteIndices.TryGetValue(color, out var index))
+                return index;
+
             max = Math.Min(max, (byte)31);
 
             if ((color >> 24) == transparentColorIndex) // transparent
-                return 0;
+                return transparentColorIndex;
 
             uint r = (color >> 16) & 0xf0;
             uint g = (color >> 8) & 0xf0;
@@ -100,7 +105,10 @@ namespace AmbermoonImageConverter
             for (int i = min; i <= max; ++i)
             {
                 if (palette[i] == color)
-                    return (byte)(i - min);
+                {
+                    mappedPaletteIndices.Add(color, (byte)i);
+                    return (byte)i;
+                }
 
                 var diffA = Math.Abs((int)(color >> 24) - (int)(palette[i] >> 24));
                 var diffR = Math.Abs((int)((color >> 16) & 0xff) - (int)((palette[i] >> 16) & 0xff));
@@ -112,10 +120,15 @@ namespace AmbermoonImageConverter
                     diffs.Add(diff, i);
             }
 
-            if (diffs.First().Value != 0)
+            if (diffs.First().Key > 2 * 0x22 * 0x22)
                 throw new Exception();
-
-            return (byte)diffs.First().Value;
+            else
+            {
+                uint paletteColor = palette[diffs.First().Value];
+                Console.WriteLine($"Warning: Color {color >> 24:x2}{r:x2}{g:x2}{b:x2} was changed to palette color {paletteColor >> 24:x2}{(paletteColor >> 16) & 0xff:x2}{(paletteColor >> 8) & 0xff:x2}{paletteColor & 0xff:x2}");
+                mappedPaletteIndices.Add(color, (byte)diffs.First().Value);
+                return (byte)diffs.First().Value;
+            }
         }
 
         static uint[] LoadPalette(string filename)
