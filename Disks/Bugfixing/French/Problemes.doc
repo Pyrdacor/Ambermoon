@@ -1,0 +1,188 @@
+             *** AMBERMOON Document d'aide et assistance ***
+                   Version 3.0 FranÃ§aise / XX-XX-2013
+
+
+****************************************************************************
+*                    EN JOUANT DEPUIS LES DISQUETTES                       *
+****************************************************************************
+
+LE PROGRAMME DEMANDE LA DISQUETTE DE SAUVEGARDE (DISQUE J)!
+  Avant que vous ne commenciez à jouer vous devez utiliser le programme
+d'installation program pour créer un disque qui sera utilisé pour sauver 
+vos positions pendant le jeu. Vous pouvez utiliser le disque de votre choix,
+mais étant donné que les accès y seront très fréquents, nous vous 
+conseillons d'utiliser une disquette d'excellente qualité. Le programme 
+d'installation formatera automatiquement le disque et le préparera. Tout 
+l'ancien contenu de celui-ci sera effacé!
+Après avoir crée le disque de sauvegarde, chargez AMBERMOON en re-bootant 
+votre ordinateur. Insérez le disque de sauvegarde (disk J), lorsque le 
+programme le demande.
+
+CES SEANCES DE GRILLE-PAIN AVEC LES DISQUETTES COMMENCENT A M'ENERVER!
+  Désolé, mais croyez-nous lorsqu'on vous dit qu'on a eu beaucoup de 
+problèmes pour réduire les changements de disques au minimum. Mais voilà ,
+AMBERMOON est vraiment un programme gigantesque avec une énorme quantité 
+de données et de ce fait les changements de disques ne peuvent être évités
+entièrement. Cependant, voici quelques astuces qui rendront le jeu depuis
+les disquettes un peu plus faciles :
+
+- Désactivez la musique dans le menu d'options. Matthias Steinwachs, notre 
+  musicien, ne sera pas content, mais ça diminuera les changement de disques.
+  Parce que tout les scénarios du jeu accèdent au même fichier de musiques, 
+  cette disquette est très souvent demandée.
+
+- Si vous utilisez plus d'un lecteur de disquette, laissez le disque de 
+  sauvegarde dans l'un d'eux (toutes les modifications dans le jeu et les
+  automaps sont sauvées dedans) et/ou le disque G, qui contient lui aussi
+  des fichiers souvent utilisés.
+
+- Considérez l'achat d'un disque dur. Des petits disques dur peuvent être
+  achetés pour une petite somme d'argent.
+
+ET LES TEMPS DE CHARGEMENT POURRAIENT ETRE AUSSI PLUS COURTS!
+
+  Si vous avez un Amiga qui possède une version du Kickstart 2.0 ou plus, ou
+si vous avez installé un pilote FFS(Fast-File-System), il y a une solution. 
+Formatez neuf disques en utilisant le FFS, puis copiez tout les fichiers des
+disques originaux d'AMBERMOON sur le disque FFS correspondant. PUIS renommez 
+tout les disques de façon à ce qu'ils aient les même noms que les disques
+d'origine d'AMBERMOON (attention à bien donner le bon nom au bon disque). 
+Vous trouverez une description exacte sur comment faire dans votre manuel 
+Amiga. Lorsque tout est fait, le jeu chargera tout un peu plus rapidement
+qu'avant. Malheureusement, nous n'avons pas pu mettre le jeu sur des disques
+FFS, étant donné que les ordinateurs avec un Kickstart d'une version 
+inférieure au 2.0 (et sans pilote FFS) serait incapables de pouvoir lire ces 
+disques.
+
+
+****************************************************************************
+*                     INFORMATION TECHNIQUE GENERALE                       *
+****************************************************************************
+
+PARTIES SAUVEGARDEES
+  Si vous voulez faire une copie de vos parties sauvées ou impressionner un 
+ami avec votre impressionant groupe, voilà comment faire :
+
+  Si vous jouez depuis les disquettes, copiez simplement le disque de 
+sauvegarde (disk J).
+
+  Si vous jouez depuis un disque dur, vous devez copier les fichiers suivants
+et les répertoires, que vous trouverez dans le répertoire >Amberfiles< 
+(lequel se trouve lui-même dans le répertoire >Ambermoon<) :
+
+- Tout les répertoires commençant par >Save.<, par ex. >Save.00< à >Save.10<.
+- Le fichier appelé >Saves<.
+
+
+****************************************************************************
+*                       ERREURS ET COMMENT LES EVITER                      *
+****************************************************************************
+
+MEMOIRE INSUFFISANTE
+
+Erreur reportée :
+>Il n'y a pas assez de mémoire libre.<
+>Il n'y a pas assez de mémoire CHIP disponible.<
+>Il n'y a pas assez de mémoire disponible.<
+
+Pendant le jeu :
+>Un redémarrage va être tenté maintenant.<
+>Le programme va désactiver la musique.<
+
+Si le programme se plaint d'un manque de mémoire, il y a plusieurs façons
+pour avoir plus de mémoire libre :
+
+- Disque dur :
+  Utilisez l'option du programme d'installation >Créer une disquette de 
+  démarrage<. Le programme va créer un disque (en éffaçant au passage tout
+  l'ancien contenu), lequel chargera AMBERMOON depuis le disque dur dès que
+  vous mettrez sous tension votre ordinateur. Tout les programmes en plus 
+  qui consomment de la mémoire sont bypassés, et il n'y a pas besoin que 
+  vous changiez quoique ce soit sur votre disque-dur.
+
+- Disque dur :
+  Vous pouvez désactiver les programmes qui utilisent la mémoire de façon
+  intensive de votre startup-sequence ou du répertoire WBStartup. La 
+  méthode mentionnée ci-dessous est la plus simple néanmoins.
+
+- Disques et disque dur :
+  Si vous rencontrez régulièrement les messages en cours de jeu mentionnés
+  ci-dessus, coupez la musique dans les options du menu.
+
+- Disques :
+  Si vous avez seulement 1Mo de RAM mais avec 3 lecteurs de disquette ou 
+  plus, la mémoire peut être trop juste.
+  Retirez un des lecteurs.
+
+
+ERREUR DE FICHIER
+
+Erreur reportée :
+>Répertoire non trouvé.<
+>Fichier non trouvé.<
+>Erreur de lecture< ou >Erreur de Checksum< pendant l'installation.
+
+Si vous jouez depuis un disque dur :
+  La meilleure solution est de réinstaller le jeu. Pour éviter d'avoir à
+tout recommencer, faites une copie de vos jeux sauvegardés sur disque ou
+dans un autre répertoire. Vous pouvez trouver comment faire cela dans le
+document sous le titre JEUX SAUVEGARDES.
+  Si vous avez ré-installé, le jeu actuellement sauvé peut être 
+endommagé. Dans ce cas choisissez NOUVELLE QUETE dans le menu principal. 
+Dans le jeu vous pouvez alors essayer de charger un de vos autres jeux 
+sauvés.
+
+Si vous jouez depuis les disques :
+
+  ...un de vos disques est probablement défectueux. Lorsque vous avez fait
+une copie de vos disques originaux, faites une nouvelle copie du disque 
+erroné. Si ce n'est pas le cas, envoyez vos disques originaux avec une 
+description de vos problèmes et on vous enverra des disques fonctionnels
+en retour.
+
+Pendant l'installation sur disque dur :
+
+  Si l'OS reporte une erreur pendant l'installation, vos disques originaux
+sont surement défectueux. Envoyez-nous les disquettes originales et on vous
+renverra des disques fonctionnels.
+
+
+ERREUR INTERNE
+
+Erreur reportée :
+>L'OS a reporté une erreur pendant le jeu.<
+>68000 address error exception.<
+>68000 illegal exception.<
+>68000 divide by zero exception.<
+>Un texte est trop long après fusion.<
+>Un texte est trop long après traitement.<
+>Il y a une boucle infinie dans la chaine d'évenements.<
+>ERREUR INCONNUE.<
+
+  Les erreurs de ce genre ne devraient pas se produire. Si c'est le cas, nous
+vous prions de nous excuser. Un bug a échappé à nos testeurs. Veuillez 
+redémarrer votre ordinateur et essayez de rejouer. Il est possible que ce 
+genre d'erreur ne se produise pas à chaque fois.
+Si l'erreur est persistante et que vous êtes incapable de continuer, 
+veuillez nous envoyer ce qui suit dans une enveloppe renforcée :
+
+- Le rapport d'erreur exact.
+- Votre disquette originale A.
+- Une description exacte de vos actions dans le jeu avant que l'erreur ne se 
+  produise.
+- Une description exacte de votre matériel
+  (quel modèle d'Amiga, combien de mémoire, quels périphériques, version du 
+  Kickstart,etc.)
+- Si vous jouez depuis les disques, une copie de votre disque de sauvegarde.
+- Si vous jouez depuis un disque dur, une copie de vos jeux sauvés
+  (voir au-dessus : JEUX SAUVEGARDES).
+
+On vous enverra une nouvelle version dès que possible.
+Notre adresse :
+
+Thalion Software U.K. Ltd.
+120 Anderton Park Road
+Mosely
+Birmingham B13 9DQ
+
+Traduction du document par DLFRSILVER le 18 mai 2013.
