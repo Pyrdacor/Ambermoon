@@ -74,7 +74,7 @@ namespace AmbermoonImageEditor
 
                 if (ofd.ShowDialog(this) == DialogResult.OK)
                 {
-                    var sizeForm = new SizeForm();
+                    var sizeForm = new SizeForm(true);
 
                     if (sizeForm.ShowDialog() == DialogResult.OK)
                     {
@@ -84,7 +84,8 @@ namespace AmbermoonImageEditor
                         {
                             Width = w,
                             Height = h,
-                            GraphicFormat = sizeForm.Format
+                            GraphicFormat = sizeForm.Format,
+                            PaletteOffset = sizeForm.PaletteOffset
                         };
                         var imageData = new DataReader(File.ReadAllBytes(file));
 
@@ -119,6 +120,19 @@ namespace AmbermoonImageEditor
                                 break;
                             default:
                                 bpp5ToolStripMenuItem.Checked = true;
+                                break;
+                        }
+
+                        switch (graphicInfo.PaletteOffset)
+                        {                            
+                            case 16:
+                                toolStripMenuItemPalOffset16.Checked = true;
+                                break;
+                            case 24:
+                                toolStripMenuItemPalOffset24.Checked = true;
+                                break;
+                            default:
+                                toolStripMenuItemPalOffset0.Checked = true;
                                 break;
                         }
 
@@ -268,7 +282,7 @@ namespace AmbermoonImageEditor
                             {
                                 for (int x = 0; x < imageArea.Width; x++)
                                 {
-                                    newImage.Data[x + y * imageArea.Width] = image.Data[imageArea.X + x + (imageArea.Y + y) * image.Width];
+                                    newImage.Data[x + y * imageArea.Width] = image!.Data[imageArea.X + x + (imageArea.Y + y) * image.Width];
                                 }
                             }
 
@@ -485,6 +499,130 @@ namespace AmbermoonImageEditor
                 toolStripMenuItemPalOffset16.Checked = false;
 
                 UpdateMode();
+            }
+        }
+
+        private void copyToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (bitmap is not null)
+                Clipboard.SetImage(bitmap);
+        }
+
+        private void pasteToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            bitmap = new Bitmap(Clipboard.GetImage()!);
+            imagePanel.Size = new(bitmap.Width * zoomFactor, bitmap.Height * zoomFactor);
+            panel1.Size = imagePanel.Size + new Size(20, 24);
+
+            if (panel1.Width < 200)
+                panel1.Width = 200;
+
+            imagePanel.Refresh();
+        }
+
+        private void copyHexBytesToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (format is null || palette is null)
+                return;
+
+            var data = bitmap!.LockBits(new Rectangle(Point.Empty, bitmap.Size), System.Drawing.Imaging.ImageLockMode.WriteOnly, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
+
+            var bgra = new byte[bitmap.Width * bitmap.Height * 4];
+            Marshal.Copy(data.Scan0, bgra, 0, bgra.Length);
+            bitmap.UnlockBits(data);
+
+            var indices = new byte[bitmap.Width * bitmap.Height];
+            int offset = toolStripMenuItemPalOffset24.Checked ? 24 : toolStripMenuItemPalOffset16.Checked ? 16 : 0;
+
+            int FindPaletteIndex(byte r, byte g, byte b)
+            {
+                for (int i = offset; i < 32; ++i)
+                {
+                    byte pr = palette.Data[i * 4 + 0];
+                    byte pg = palette.Data[i * 4 + 1];
+                    byte pb = palette.Data[i * 4 + 2];
+
+                    if (pr == r && pg == g && pb == b)
+                        return i - offset;
+                }
+
+                return -1;
+            }
+
+            for (int i = 0; i < indices.Length; ++i)
+            {
+                indices[i] = (byte)FindPaletteIndex(bgra[i * 4 + 2], bgra[i * 4 + 1], bgra[i * 4 + 0]);
+            }
+
+            switch (format.Value)
+            {
+                case GraphicFormat.Palette3Bit:
+                    Clipboard.SetText(GetBPPHex(indices, bitmap.Width, bitmap.Height, 3));
+                    break;
+                case GraphicFormat.Palette4Bit:
+                    Clipboard.SetText(GetBPPHex(indices, bitmap.Width, bitmap.Height, 4));
+                    break;
+                case GraphicFormat.Palette5Bit:
+                    Clipboard.SetText(GetBPPHex(indices, bitmap.Width, bitmap.Height, 5));
+                    break;
+                    // TODO...
+            }
+        }
+
+        static string GetBPPHex(byte[] indices, int width, int height, int bpp)
+        {
+            int bytesPerPlaneRow = (width + 7) / 8;
+            var outputBytes = new byte[bytesPerPlaneRow * bpp * height];
+
+            for (int y = 0; y < height; ++y)
+            {
+                for (int p = 0; p < bpp; ++p)
+                {
+                    byte mask = (byte)(1 << p);
+
+                    for (int x = 0; x < width; ++x)
+                    {
+                        int b = x / 8;
+                        int n = x % 8;
+                        byte index = indices[x + y * width];
+
+                        if ((index & mask) != 0)
+                        {
+                            outputBytes[b + p * bytesPerPlaneRow + y * (bytesPerPlaneRow * bpp)] |= (byte)(1 << (7 - n));
+                        }
+                    }
+                }
+            }
+
+            return string.Join(" ", outputBytes.Select(b => b.ToString("X2")));
+        }
+
+        private void resizeToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            var sizeForm = new SizeForm(false);
+
+            if (sizeForm.ShowDialog() == DialogResult.OK)
+            {
+                var newImage = new Graphic
+                {
+                    Width = Math.Min(image!.Width, sizeForm.ImageWidth),
+                    Height = Math.Min(image.Height, sizeForm.ImageHeight),
+                    IndexedGraphic = true
+                };
+
+                newImage.Data = new byte[newImage.Width * newImage.Height];
+
+                for (int y = 0; y < newImage.Height; y++)
+                {
+                    for (int x = 0; x < newImage.Width; x++)
+                    {
+                        newImage.Data[x + y * newImage.Width] = image!.Data[x + y * image.Width];
+                    }
+                }
+
+                image = newImage;
+
+                UpdateImage();
             }
         }
     }

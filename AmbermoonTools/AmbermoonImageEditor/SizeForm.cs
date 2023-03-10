@@ -27,14 +27,19 @@ namespace AmbermoonImageEditor
             formatEntries.Add(new("Monster", GraphicFormat.Palette5Bit));
         }
 
-        public SizeForm()
+        public SizeForm(bool showFormat)
         {
             InitializeComponent();
+
+            label3.Visible = showFormat;
+            comboBox1.Visible = showFormat;
+            comboBox2.Visible = showFormat;
         }
 
         public int ImageWidth => (int)numericUpDown1.Value;
         public int ImageHeight => (int)numericUpDown2.Value;
         public GraphicFormat Format => (comboBox1.SelectedItem as FormatEntry)!.GraphicFormat;
+        public byte PaletteOffset => (byte)(comboBox2.SelectedItem is not int offset ? 0 : offset);
 
         private void SizeForm_Load(object sender, EventArgs e)
         {
@@ -63,6 +68,51 @@ namespace AmbermoonImageEditor
             {
                 numericUpDown1.Enabled = true;
                 numericUpDown2.Enabled = true;
+            }
+
+            UpdateOffsetValues(entry);
+        }
+
+        private void UpdateOffsetValues(FormatEntry? formatEntry)
+        {
+            int bpp = formatEntry is null ? 5 : formatEntry.GraphicFormat switch
+            {
+                GraphicFormat.Palette3Bit => 3,
+                GraphicFormat.Palette4Bit => 4,
+                GraphicFormat.Texture4Bit => 4,
+                _ =>  5
+            };
+
+            int oldOffset = PaletteOffset;
+
+            if (bpp == 3)
+            {
+                comboBox2.Items.Clear();
+                comboBox2.Items.Add(0);
+                comboBox2.Items.Add(16);
+                comboBox2.Items.Add(24);
+                comboBox2.SelectedIndex = oldOffset switch
+                {
+                    24 => 2,
+                    16 => 1,
+                    _ => 0
+                };
+                comboBox2.Enabled = true;
+            }
+            else if (bpp == 4)
+            {
+                comboBox2.Items.Clear();
+                comboBox2.Items.Add(0);
+                comboBox2.Items.Add(16);
+                comboBox2.SelectedIndex = oldOffset == 16 ? 1 : 0;
+                comboBox2.Enabled = true;
+            }
+            else
+            {
+                comboBox2.Items.Clear();
+                comboBox2.Items.Add(0);
+                comboBox2.SelectedIndex = 0;
+                comboBox2.Enabled = false;
             }
         }
     }
