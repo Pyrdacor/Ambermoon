@@ -1,0 +1,1 @@
+﻿You cannot un-equip this in combat.

@@ -1,0 +1,10 @@
+﻿The program has run out of memory! A restart will
+now be attempted. Your position in the game won't be
+harmed, but you will be returned to the map screen.
+
+Please use the installation program to read the
+troubleshooting-document, to find out how this
+problem may be avoided.
+
+Click any mouse button to continue.
+{{Click}}

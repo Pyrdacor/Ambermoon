@@ -1,0 +1,1 @@
+﻿Please remove the write protection from the saved-game-disk. (The write-protection-window must be closed)

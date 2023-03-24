@@ -1,0 +1,1 @@
+﻿{0} casts the {1} - spell from the {2}!

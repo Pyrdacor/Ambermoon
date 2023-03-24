@@ -1,0 +1,1 @@
+﻿An I/O error has occurred: ^{0}^^The current file: ^{1}^^Retry?

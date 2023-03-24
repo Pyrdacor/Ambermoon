@@ -1,0 +1,1 @@
+﻿Because no games were saved yet, you can only load the initial saved game.^Is this alright ?

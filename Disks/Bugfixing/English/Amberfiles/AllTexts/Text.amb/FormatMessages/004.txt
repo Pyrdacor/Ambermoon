@@ -1,0 +1,9 @@
+﻿Due to lack of chip memory the program will now
+deactivate the music.
+
+Please use the installation program to read the
+troubleshooting-document, to find out how this
+problem may be avoided.
+
+Click any mouse button to continue.
+{{Click}}

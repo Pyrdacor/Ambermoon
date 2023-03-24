@@ -1,0 +1,1 @@
+﻿One food ration will cost you {0} GP.

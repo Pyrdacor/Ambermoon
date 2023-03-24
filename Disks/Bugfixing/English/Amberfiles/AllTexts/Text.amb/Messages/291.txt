@@ -1,0 +1,1 @@
+﻿Do you want to load a saved game or quit the game?

@@ -1,0 +1,1 @@
+﻿{0} regains {1} LP and {2} SP.

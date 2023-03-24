@@ -1,0 +1,1 @@
+﻿{0} has no more food and cannot recuperate.
