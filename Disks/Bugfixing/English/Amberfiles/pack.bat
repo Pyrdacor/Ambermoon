@@ -1,2 +1,2 @@
-AmbermoonTextManager.exe -i . AllTexts
+AmbermoonTextManager.exe -i . ../AllTexts
 pause
