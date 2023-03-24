@@ -3,8 +3,14 @@
 - Fixed 2 buttons in Antique Area 2 which were not changed back after pressing them again (inside the circle with lightnings)
 - Cleaned up unused map event data from Antique Area 4 (those are copies from Antique Area 2, so I guess they copied the map before editing)
 - Fixed an event in Dor Kiredon so that random encounters with Gizzeks can happen near the town walls
-- Pelanis will no correctly react to several words after you gave him Sansri's blood
+- Pelanis will now correctly react to several words after you gave him Sansri's blood
 - The character of Monika Krawinkel finally got a female sprite on the map
+- Fixed some issues in Kire's residence
+  - There were many tile issues where front layers were missing etc
+  - Improved the treasure chamber door
+  - Adjusted the south entrance position to fit the corridore
+  - Fixed wrong key index for door on map 337
+- Fixed a wrong event chain in Morag hangar (wasn't noticable in game though)
 
 ## Version 1.17
 
