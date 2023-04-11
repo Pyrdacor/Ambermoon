@@ -11,6 +11,17 @@
   - Adjusted the south entrance position to fit the corridore
   - Fixed wrong key index for door on map 337
 - Fixed a wrong event chain in Morag hangar (wasn't noticable in game though)
+- Adjusted some weapon levels (M-B-W value)
+  - Zweihander: 0 -> 1
+  - Holy Sword: 0 -> 1
+  - Trident: 0 -> 1
+  - Crossbow: 0 -> 1
+  - Mando's Sword: 0 -> 2
+  - Murderer's Blade: 0 -> 1
+  - Firebrand: 2 -> 1
+  - Valdyn's Sword: 3 -> 1
+  - Gala's Club: 2 -> 1
+  - Scimitar: 1 -> 2
 
 ## Version 1.17
 
