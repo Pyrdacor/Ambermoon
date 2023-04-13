@@ -23,6 +23,7 @@
   - Valdyn's Sword: 3 -> 1
   - Gala's Club: 2 -> 1
   - Scimitar: 1 -> 2
+- The item Target Brooch is now correctly classified as Brooch and no longer as Amulet
 
 ## Version 1.17
 
