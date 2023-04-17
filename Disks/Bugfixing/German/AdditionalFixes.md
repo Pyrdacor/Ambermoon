@@ -24,6 +24,11 @@
   - Gala's Club: 2 -> 1
   - Scimitar: 1 -> 2
 - The item Target Brooch is now correctly classified as Brooch and no longer as Amulet
+- Fixed some issues in the cellar of the house of bandits
+  - Text about two buttons is no longer displayed when missing the first teleport (there is only 1 button there)
+  - Text about two buttons is no longer displayed multiple times when moving through the rooms
+  - Text about two buttons is no longer displayed when you already made peace with Nagier
+  - Fixed a bug where you could enter Nagier's bedroom by activating a button through the wall
 
 ## Version 1.17
 
