@@ -1,5 +1,39 @@
-Ambermoon German 1.17 by Pyrdacor (17-08-2022)
+Ambermoon German 1.18 by Pyrdacor (25-04-2023)
 ==============================================
+
+Änderungen in 1.18
+==================
+
+- 2 Schalter in der Antiken Anlage 2 wurden gefixt, die nicht mehr zurücksprangen bei erneutem Drücken (im Kreis mit den Blitzen)
+- Einige ungenutzte Map-Events wurden in der Antiken Anlage 4 entfernt (diese waren Kopien von Level 2)
+- Ein Event in Dor Kiredon wurde behoben, sodass nun an den Stadtmauern Kämpfe mit Gizzeks auftreten können
+- Eine Flamme in Dorina's Höhle wurde gefixt, sodass diese auch Schaden anrichtet wie die anderen
+- Pelanis reagiert nun korrekt auf Wörter wenn man Sansries Blut abgegeben hat
+- Der Charakter von Monika Krawinkel hat nun endlich ein weibliches Aussehen auf der Map
+- Einige Bugs in Kires Residenz wurden behoben
+  - Es gab einige verbuggte Tiles, sodass man manchmal auf Wänden stand
+  - Die Tür zur Schatzkammer funktioniert nun besser (der Schlüssel wird nun zerstört aber die Tür bleibt offen)
+  - Die Tür kann nun auch passiert werden wenn man mit der Hand draufklickt
+  - Der Südeingang ist nun mittig zur Eingangshalle ausgerichtet
+- Ein Musik-Bug im Morag Hangar wurde behoben, der aber nicht im Spiel bemerkbar war
+- Einige Waffenlevel (M-B-W) wurden angepasst
+  - Zweihänder: 0 -> 1
+  - Heiliges Schwert: 0 -> 1
+  - Trident: 0 -> 1
+  - Armbrust: 0 -> 1
+  - Mando's Schwert: 0 -> 2
+  - Mörderklinge: 0 -> 1
+  - Feuerbrand: 2 -> 1
+  - Valdyn's Schwert: 3 -> 1
+  - Keule der Gala: 2 -> 1
+  - Scimitar: 1 -> 2
+- Die Zielbrosche ist nun eine Brosche und kein Amulett mehr
+- Im Keller der Banditen wurden einige Anpassungen vorgenommen:
+  - Der Text über die 2 Schalter wird nicht mehr angezeigt wenn man den Teleporter falsch betritt (dort ist nur 1 Schalter)
+  - Der Text über die 2 Schalter wird nicht mehr in jedem Raum angezeigt wenn man in einen späteren Raum teleportiert wird und dann zurückläuft
+  - Der Text über die 2 Schalter wird nicht mehr angezeigt wenn man bereits Frieden mit Nagier geschlossen hat
+  - Ein Bug wurde behoben, durch den man einen Schalter durch die Wand aktivieren konnte und somit direkt zu Nagier gelangte
+- Ein Bug in der Nähe des Alchemistenturms wurde behoben, bei dem man Schwimmschaden erleiden konnte wenn man hinter dem Dach der Turmspitze langlief
 
 Änderungen in 1.17
 ==================

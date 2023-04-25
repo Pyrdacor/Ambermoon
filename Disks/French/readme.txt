@@ -1,4 +1,6 @@
-Ambermoon English 1.18 by Pyrdacor (25-04-2023)
+Ambermoon French 1.18 by Pyrdacor (25-04-2023)
+Translations by Dlfrsilver
+Supported by CFOU!
 ===============================================
 
 Changes in 1.18
@@ -34,9 +36,8 @@ Changes in 1.18
   - Text about two buttons is no longer displayed when you already made peace with Nagier
   - Fixed a bug where you could enter Nagier's bedroom by activating a button through the wall
 - Fixed swim damage bug near alchemist tower
-- Fixed a text related to Shandra in the Newlake crypt
-- Fixed a typo in a text of Father Anthony
-- Fixed a typo in the text of the spider book
+- Truncated too long text appearing in level up window
+- Replaced attribute shortname "SPE" with "VIT" (Vitesse)
 
 Changes in 1.17
 ===============
