@@ -29,6 +29,7 @@
   - Text about two buttons is no longer displayed multiple times when moving through the rooms
   - Text about two buttons is no longer displayed when you already made peace with Nagier
   - Fixed a bug where you could enter Nagier's bedroom by activating a button through the wall
+- Fixed swim damage bug near alchemist tower
 
 ## Version 1.17
 

@@ -8,6 +8,7 @@ using System.Linq;
 using File = System.IO.File;
 using Console = System.Console;
 using IntAction = System.Action<int>;
+using System.IO;
 
 namespace AmbermoonEventEditor
 {
@@ -85,7 +86,7 @@ namespace AmbermoonEventEditor
                 var eventList = new List<Event>();
                 EventReader.ReadEvents(dataReader, events, eventList);
                 var tail = dataReader.ReadToEnd();
-                ProcessEvents(eventList, events, head, tail, args[0], true, eventList.Count, mapType, 0x014C, mapWidth * mapHeight);
+                ProcessEvents(eventList, events, head, tail, args[0], true, eventList.Count, mapType, 0x014C, mapWidth * mapHeight, int.TryParse(Path.GetFileName(args[0]), out int mapIndex) ? mapIndex : 0);
             }
             else if (type == 1) // NPC
             {
@@ -112,7 +113,7 @@ namespace AmbermoonEventEditor
 
         static void ProcessEvents(List<Event> eventList, List<Event> events, byte[] head, byte[] tail,
             string inputFileName, bool map, int initialMapEventCount = 0, MapType? mapType = null,
-            int? tileOffset = null, int? numTiles = null)
+            int? tileOffset = null, int? numTiles = null, int? mapIndex = null)
         {
             Console.WriteLine();
             Console.WriteLine("Event list");
@@ -135,6 +136,8 @@ namespace AmbermoonEventEditor
                     if (mapType != null && tileOffset != null && numTiles != null)
                     {
                         ++eventChainIndex; // 0-based to 1-based
+
+                        // Adjust all tile references (remove the deleted chain, and decrease index of chains with higher index)
                         int sizePerTile = mapType == MapType.Map2D ? 4 : 2;
                         int index = tileOffset.Value + 1;
 
@@ -146,6 +149,56 @@ namespace AmbermoonEventEditor
                                 --head[index];
 
                             index += sizePerTile;
+                        }
+
+                        // Adjust all SetEventBit actions which set bits of events on the same map with higher index.
+                        // Do the same for EventBit conditions.
+                        if (mapIndex == null || mapIndex < 1 || mapIndex > 530)
+                        {
+                            Console.WriteLine("WARNING: The map index could not be determined so SetEventBit actions could not be adjusted. You have to do so on your own.");
+                        }
+                        else
+                        {
+                            int mapBitOffset = (mapIndex.Value - 1) * 64;
+                            int end = mapBitOffset + 64; // behind last index to decrease
+                            int start = mapBitOffset + eventChainIndex; // first index to decrease
+                            int remove = start - 1; // this can be removed at all
+                            var eventsToRemove = new List<Event>();
+
+                            foreach (var action in events.OfType<ActionEvent>())
+                            {
+                                if (action.TypeOfAction == ActionEvent.ActionType.SetEventBit)
+                                {
+                                    if (action.ObjectIndex == remove)
+                                        eventsToRemove.Add(action);
+                                    else if (action.ObjectIndex >= start && action.ObjectIndex < end)
+                                        --action.ObjectIndex;
+                                }
+                            }
+
+                            foreach (var condition in events.OfType<ConditionEvent>())
+                            {
+                                if (condition.TypeOfCondition == ConditionEvent.ConditionType.EventBit)
+                                {
+                                    if (condition.ObjectIndex == remove)
+                                    {
+                                        // This hopefully don't happen but if so the resolution might be complex.
+                                        // Therefore we just warn the user and don't delete or modify it.
+                                        Console.WriteLine($"EventBit condition event {events.IndexOf(condition):x2} references the removed event chain. Please check this manually.");
+                                    }
+                                    else if (condition.ObjectIndex >= start && condition.ObjectIndex < end)
+                                        --condition.ObjectIndex;
+                                }
+                            }
+
+                            eventsToRemove.Reverse();
+
+                            foreach (var e in eventsToRemove)
+                            {
+                                int eventIndex = events.IndexOf(e);
+                                Console.WriteLine($"SetEventBit action event {eventIndex:x2} references the removed event chain. Now trying to remove it.");
+                                RemoveEvent(eventList, events, eventIndex);
+                            }
                         }
                     }
                 });
