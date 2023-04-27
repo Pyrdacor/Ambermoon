@@ -15,6 +15,7 @@ Value | Name
 8 | Witch's Broom
 9 | Sand lizard
 10 | Sand ship
+11 | Wasp (**Ambermoon Advanced** only)
 
 They often are used as bit flags in code:
 
@@ -31,3 +32,4 @@ Value | Name
 0x0100 | Witch's Broom
 0x0200 | Sand lizard
 0x0400 | Sand ship
+0x0800 | Wasp (**Ambermoon Advanced** only)
