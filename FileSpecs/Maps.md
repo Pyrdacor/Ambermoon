@@ -16,7 +16,7 @@ Offset | Type | Description
 0x0008 | ubyte | Labyrinth background index
 0x0009 | ubyte | Palette index
 0x000A | ubyte | World (0: Lyramion, 1: Forest moon, 2: Morag)
-0x000B | ubyte | End of map header (always 0)
+0x000B | ubyte | Padding byte (always 0)
 
 ### Map flags
 
