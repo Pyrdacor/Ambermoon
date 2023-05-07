@@ -140,11 +140,11 @@ Each contains 32 bytes. Each byte gives a frame index (inside the monster graphi
 
 There is an animation info for 8 different actions:
 - 0: Move (also used for the random idle animation, frame 0 of this is the monster idle frame!)
-- 1: Attack
-- 2: Different attack version? Crit?
+- 1: Short-range attack
+- 2: Long-range attack
 - 3: Cast spell
 - 4: Hurt (receive damage)
-- 5: Unknown2
+- 5: Die
 - 6: Start animation (like transformation of Nera, are played once at start)
 - 7: Unknown3
 
