@@ -112,7 +112,7 @@ Offset | Type | Description
 0x00 | ubyte | [Travel type](Enumerations/TravelType.md)
 0x01 | ubyte | X coordinate
 0x02 | ubyte | Y coordinate
-0x03 | ubyte | Unknown
+0x03 | ubyte | Padding byte (always 0)
 0x04 | uword | Map index
 
 Note: The direction of the transport is not stored.
