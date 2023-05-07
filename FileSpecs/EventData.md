@@ -57,28 +57,24 @@ Used for chests, piles, lootable map objects etc.
 Offset | Type | Description
 --- | --- | ---
 0x00 | ubyte | Event type (= 0x03)
-0x01 | ubyte | Lockpicking chance reduction (0-100)
-0x02 | ubyte | Chest flags (see below, only 1 chest has a value other than 0)
+0x01 | ubyte | Lockpicking chance reduction (0-100%)
+0x02 | ubyte | Search check (0-100%) **bugged**
 0x03 | ubyte | Optional index of a map text to display when showing the opened chest (0xff means no text)
 0x04 | ubyte | Chest data index (also used for locked state in savegame)
 0x05 | ubyte | Chest loot flags
 0x06 | uword | Key index if locked
 0x08 | uword | Unlock fail event index (0-based, 0xffff means none, this is basically the trap event chain)
 
-If the lockpicking chance reduction is 0, the chest is always open. A value of 100 means that the chest can't be lockpicked at all. Many chests have a value of 1 which is a chest that is locked and lockpicking it succeeds nearly with the lockpicking ability in percent as chance.
-If the key index is not 0, the chest can't be opened with a lockpick.
+If the lockpicking chance reduction is 0, the chest is always open. A value of 100 means that the chest can't be lockpicked at all and needs a key. Many chests have a value of 1 which is a chest that is locked and lockpicking it succeeds nearly with the lockpicking ability in percent as chance.
+If the key index is not 0, the chest can't be opened with a lockpick except if the key index is the lockpick index.
 
-### Chest flags
+### Search check
 
-- Bit0: Unused
-- Bit1: If set a search ability check is performed and only if successful the chest is shown.
-- Bit2-7: Unused
+The specs define a percentage value. If it is 0, the chest is always detected. Otherwise a check with the search skill and the given value should be done. The original game code just does a random check against your search skill and ignores the given value.
 
-Only one chest in Ambermoon uses the flags. It is a skull in the Antique Area which contains the Antique Weapon. You will only find it when your search ability is high enough cause Bit1 is set. The chest uses value 50 (hex 32).
+Only one chest in Ambermoon uses the search check. It is a skull in the Antique Area which contains the Antique Weapon. You will only find it when your search ability is high enough cause the value is not 0. The chest actually uses value 50 (hex 32) but as mentioned this doesn't matter.
 
-In binary this is 0011 0010. So in addition two other bits are set as well. But the meaning is unknown.
-
-If I get the 68k assembler right, Ambermoon just checks the whole byte value for "not equal zero". But maybe it has some different meaning in Amberstar?
+**Note:** The chest is always detected if the clairvoyance spell is active!
 
 ### Chest loot flags
 
