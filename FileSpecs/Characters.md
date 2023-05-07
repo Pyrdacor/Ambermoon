@@ -1,5 +1,9 @@
 # Character file format spec
 
+On 07.02.2023 Jurie Horneman found and released the original specs. The associated spec can be found here now: https://github.com/Pyrdacor/ambermoon-source/blob/main/documents/AMBEDOCS.ORD/CHARDATA.TXT
+
+This also revealed that the format ordered the values by size. First all bytes, then all words, then all long-words and then the character name.
+
 This format is used for the following files:
 - Monster_char_data.amb
 - NPC_char.amb
@@ -17,15 +21,16 @@ Offset | Type | Description
 0x0003 | ubyte | [Class](Enumerations/Classes.md)
 0x0004 | ubyte | [Usable spell types](Enumerations/SpellTypes.md)
 0x0005 | ubyte | Level (1-50)
-0x0006 | ubyte | Number of free hands (0-2, Alkem has 255 which might be a bug)
-0x0007 | ubyte | Number of free fingers (0-2)
+0x0006 | ubyte | Number of occupied hands (0-2, Alkem has 255 which might be a bug)
+0x0007 | ubyte | Number of occupied fingers (0-2)
 0x0008 | ubyte | [Spoken languages](Enumerations/Languages.md)
 0x0009 | ubyte | Inventory inaccessible (0 means accessible, otherwise it's inaccessible)
 0x000A | ubyte | Portrait index
-0x000B | uword | Combat graphic index (only used for monsters)
-0x000D | ubyte | **Unknown** (only used for monsters, looks likes percent values like 70, 90, 100, etc. -> max value is 100), most likely a kind of parry/dodge chance as low monsters have 0. but many have 100 (maybe it's reduced by party member ATT ability?)
-0x000E | ubyte | **Unknown** (only used for monsters, 0-5, maybe critical strike chance for monsters?)
-0x000F | ubyte | Monster morale (0-100), in **Ambermoon Advanced** this is used for party members as well to state if they exchanged experience already.
+0x000B | ubyte | Join percentage (0-100%)
+0x000C | ubyte | Combat graphic index (only used for monsters)
+0x000D | ubyte | Spell chance percentage (only used for monsters)
+0x000E | ubyte | Magic bonus to hit (0-255, only used for monsters)
+0x000F | ubyte | Monster morale, retreat percentage (0-100%), in **Ambermoon Advanced** this is used for party members as well to state if they exchanged experience already.
 0x0010 | ubyte | Immunity to [spell types](Enumerations/SpellTypes.md)
 0x0011 | ubyte | Attacks per round (APR)
 0x0012 | ubyte | [Battle flags](Enumerations/BattleFlags.md) (monsters only in Ambermoon, party members as well in **Ambermoon Advanced**)
@@ -51,8 +56,8 @@ Offset | Type | Description
 0x0062 | uword[4] | A-M (see [Attributes](Enumerations/Attributes.md))
 0x006A | uword | Current age
 0x006C | uword | Max age
-0x006E | uword[2] | Looks like age has a bonus and 4th value as well but they are always 0.
-0x0072 | uword[4] | **Unknown**. This looks like a hidden or unused attribute/ability cause it uses most likely 4 uwords as well. The current and max value is always 0. The bonus is 25 for Chris and 5 for Gryban. The last value is 0 as well. With this there are 10 attributes. I guess this was a reserve and matches the amount of abilities. In **Ambermoon Advanced** this attribute is used for spell damage adjustment (see below).
+0x006E | uword[2] | Age bonus and backup values (like for other attributes). Always 0 in Ambermoon.
+0x0072 | uword[4] | In Ambermoon there was also a 10th unused attribute. The current and max value is always 0. The bonus is 25 for Chris and 5 for Gryban. The last value is 0 as well. I guess this was a reserve and matches the amount of abilities. In **Ambermoon Advanced** this attribute is used for spell damage adjustment (see below).
 0x007A | uword[4] | ATT (see [Abilities](Enumerations/Abilities.md))
 0x0082 | uword[4] | PAR (see [Abilities](Enumerations/Abilities.md))
 0x008A | uword[4] | SWI (see [Abilities](Enumerations/Abilities.md))
@@ -80,7 +85,7 @@ Offset | Type | Description
 0x00E6 | uword | SP per level
 0x00E8 | uword | SLP per level
 0x00EA | uword | TP per level
-0x00EC | uword | **Unknown** (0xffff for all monsters, Thalion, Chris and Gryban, 0x0007 for the NPC Dönner, 0x0000 for all others)
+0x00EC | uword | Text index for looking at the character (0xffff for all monsters, Thalion, Chris and Gryban, 0x0007 for the NPC Dönner, 0x0000 for all others). 0xffff means "none". For Gryban and Chris this is a bug.
 0x00EE | ulong | Experience (EXP)
 0x00F2 | ulong | Learned healing [spells](Enumerations/Spells.md)
 0x00F6 | ulong | Learned alchemistic [spells](Enumerations/Spells.md)
@@ -120,10 +125,10 @@ Offset | Type | Description
 ----|----|----
 0x01E8 | AnimationInfo[8] | Monster battle animations
 0x02E8 | byte[8] | Used number of frames for each of the 8 animations (0-32)
-0x02F0 | byte[16] | **Unknown** (looks like the values 0-15 in a sequence)
-0x0300 | byte[32] | Palette index mapping
+0x02F0 | byte[16] | Atari palette (16 color indices)
+0x0300 | byte[32] | Amiga palette (32 color indices)
 0x0320 | ubyte | 1 bit for each animation (if set, the animation is played backwards after it has finished)
-0x0321 | ubyte | **Unknown** (most likely unused and only for word alignment)
+0x0321 | ubyte | Padding byte to get word alignment (always 0)
 0x0322 | uword | Frame width (for graphic loading)
 0x0324 | uword | Frame height (for graphic loading)
 0x0326 | uword | Mapped frame width (for displaying)
