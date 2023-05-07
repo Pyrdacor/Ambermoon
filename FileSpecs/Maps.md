@@ -7,7 +7,7 @@
 Offset | Type | Description
 ----|----|----
 0x0000 | uword | Flags
-0x0002 | ubyte | Type (1: 3D map, 2: 2D map)
+0x0002 | ubyte | Type (1: 3D map, 2: 2D map, the docs say there was also 0 for an old 2D map format but it is not used nor supported in Ambermoon)
 0x0003 | ubyte | Music index
 0x0004 | ubyte | Width in tiles
 0x0005 | ubyte | Height in tiles
@@ -29,11 +29,11 @@ Bit | Meaning
 2 | Dungeon (light depends only on own light sources)
 3 | Automapper (if active the dungeon map is available and the map has to be explored)
 4 | CanRest
-5 | **Unknown** (all world maps have this set)
-6 | Sky (3D maps only)
-7 | NoSleepUntilDawn (if active sleep time is always 8 hours)
+5 | Map is wilderness (all world maps have this set)
+6 | Map is city (in Ambermoon 3D maps only, enables a sky)
+7 | Map is dungeon (if active sleep time is always 8 hours)
 8 | Travel (enable transport graphics like horse or ship, play music dependent on your travel type, this is set for all world maps only)
-9 | **Unknown** (never set in Ambermoon)
+9 | Secret submarine bit (never set in Ambermoon)
 10 | WorldSurface
 11 | CanUseSpells (**Note** in original you can still use spell scrolls or use spells in battles on that map. It only disables the spell book button on the map screen. In **Ambermoon Advanced** however you won't be able to use spell scrolls but still can use other items with spells like potions or equipment.)
 12 | No travel music (if the Travel bit is set, this will avoid playing music dependent on travel type but will play the map's music instead) (**Ambermoon Advanced** only)
