@@ -87,6 +87,8 @@ Bit0 will actually close the chest when you have looted all items, gold and food
 
 Bit1 is only used when Bit0 is set as well. If this is set, the event (chain) is not deactivated so that you can access the chest again after fully looting it. This is used for things like the flowers on Lyramion. You can loot them infinitely. Although the chest popup closes after looting and you can't of course store items there.
 
+**Note:** Rhe original specs state that the loot flags actually are the "chest type" and it can be chest (0), trashpile (1), chest no save (2) or trashpile no save (3). But it is compatible to the above interpretation. A value of 2 is never used in the original.
+
 In Ambermoon Advanced the limit of 256 chests was exceeded. As the event has only a byte for the chest index, we use a new flag to distinguish between the normal 256 chests and the extended chests. There are 128 possible additional chests in Ambermoon Advanced. See the [savegame documentation](Savegame.md) for more details.
 
 
@@ -533,14 +535,14 @@ There is a byte that is always 0xff. I guessed that this might be the volume. Bu
 Offset | Type | Description
 --- | --- | ---
 0x00 | ubyte | Event type (= 0x14)
-0x01 | ubyte | Sync flag
+0x01 | ubyte | Sound type (0 = music)
 0x02 | ubyte | Music index (0x00 = stop, 0xff = default map music or last song, 1-32 are valid song indices)
 0x03 | ubyte | Volume (always 0xff -> 100%, not used in original)
 0x04 | ubyte[6] | Unused
 
-**Note**: If the sync flag is set (value is not 0), all pending bus cycles are awaited which effectivly syncs the pipelines. In original code this results just in a NOP instruction on the Amiga. The rest of the data is just ignored then. Maybe this was reserved for some future functionality.
+**Note**: If the sound type is is not 0, all pending bus cycles are awaited which effectivly syncs the pipelines. In original code this results just in a NOP instruction on the Amiga. The rest of the data is just ignored then. Maybe this was reserved for some future functionality to support other sounds as well.
 
-**Note**: The volume value is not used in original Ambermoon code. It isn't even read. But I guess this was planned as a volume value.
+**Note**: The volume value is not used in original Ambermoon code and is not inside the specs. But I guess this was planned as a volume value as the value is always 0xff.
 
 ## Exit event (0x15 / 21)
 
