@@ -1,3 +1,9 @@
+## Version 1.19
+
+- Fixed wrong magic weapon level for Mando.
+- Fixed invalid look-at text indices for Gryban and Chris.
+- Fixed some wrong savegame character values and aligned with the german savegame.
+
 ## Version 1.18
 
 - Fixed 2 buttons in Antique Area 2 which were not changed back after pressing them again (inside the circle with lightnings)
