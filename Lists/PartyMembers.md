@@ -1,14 +1,10 @@
-<style>
-  .pixel {
-      image-rendering: pixelated;
-  }
-</style>
-
 # Party members
 
 ## THALION
 
-<img alt="THALION Portrait" src="../Graphics/Portraits/002.png"  width="64" height="64" class="pixel">
+<div style="image-rendering: pixelated;">
+<img alt="THALION Portrait" src="../Graphics/Portraits/002.png"  width="64" height="64"/>
+</div>
 
 Property | Value | Property | Value
 --- | --- | --- | ---
