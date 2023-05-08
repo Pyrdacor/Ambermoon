@@ -26,7 +26,7 @@ Offset | Type | Description
 0x0008 | ubyte | [Spoken languages](Enumerations/Languages.md)
 0x0009 | ubyte | Inventory inaccessible (0 means accessible, otherwise it's inaccessible)
 0x000A | ubyte | Portrait index
-0x000B | ubyte | Join percentage (0-100%)
+0x000B | ubyte | Join percentage (0-100%). In Amberstar if you invite someone to your party this is the chance that he/she accepts. This is not used in Ambermoon.
 0x000C | ubyte | Combat graphic index (only used for monsters)
 0x000D | ubyte | Spell chance percentage (only used for monsters)
 0x000E | ubyte | Magic bonus to hit (0-255, only used for monsters)
