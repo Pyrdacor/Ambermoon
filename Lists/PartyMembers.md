@@ -2,7 +2,7 @@
 
 ## THALION
 
-![THALION Portrait](../Graphics/Portraits/002.png)
+<img alt="THALION Portrait" src="../Graphics/Portraits/002.png"  width="64" height="64">
 
 Property | Value | Property | Value
 --- | --- | --- | ---
@@ -20,7 +20,7 @@ Learned Spells | - | Equipment | -
 
 ## NETSRAK
 
-![NETSRAK Portrait](../Graphics/Portraits/010.png)
+<img alt="NETSRAK Portrait" src="../Graphics/Portraits/010.png"  width="64" height="64">
 
 Property | Value | Property | Value
 --- | --- | --- | ---
@@ -38,7 +38,7 @@ Learned Spells | MagicalProjectile, MagicalArrows, <br />Lame, Poison, <br />Pet
 
 ## MANDO
 
-![MANDO Portrait](../Graphics/Portraits/025.png)
+<img alt="MANDO Portrait" src="../Graphics/Portraits/025.png"  width="64" height="64">
 
 Property | Value | Property | Value
 --- | --- | --- | ---
@@ -56,7 +56,7 @@ Learned Spells | - | Equipment | Head: HUT <br />RightHand: MANDO'S SCHWERT <br 
 
 ## ERIK
 
-![ERIK Portrait](../Graphics/Portraits/060.png)
+<img alt="ERIK Portrait" src="../Graphics/Portraits/060.png"  width="64" height="64">
 
 Property | Value | Property | Value
 --- | --- | --- | ---
@@ -74,7 +74,7 @@ Learned Spells | - | Equipment | Head: STAHLHELM <br />RightHand: SCIMITAR <br /
 
 ## CHRIS
 
-![CHRIS Portrait](../Graphics/Portraits/061.png)
+<img alt="CHRIS Portrait" src="../Graphics/Portraits/061.png"  width="64" height="64">
 
 Property | Value | Property | Value
 --- | --- | --- | ---
@@ -92,7 +92,7 @@ Learned Spells | MonsterKnowledge, Identification, <br />Knowledge, Clairvoyance
 
 ## MONIKA
 
-![MONIKA Portrait](../Graphics/Portraits/047.png)
+<img alt="MONIKA Portrait" src="../Graphics/Portraits/047.png"  width="64" height="64">
 
 Property | Value | Property | Value
 --- | --- | --- | ---
@@ -110,7 +110,7 @@ Learned Spells | HealingHand, RemoveFear, <br />RemovePanic, RemoveShadows, <br 
 
 ## TAR DER DUNKLE
 
-![TAR DER DUNKLE Portrait](../Graphics/Portraits/026.png)
+<img alt="TAR DER DUNKLE Portrait" src="../Graphics/Portraits/026.png"  width="64" height="64">
 
 Property | Value | Property | Value
 --- | --- | --- | ---
@@ -128,7 +128,7 @@ Learned Spells | MagicalProjectile, MagicalArrows, <br />Lame, Poison, <br />Pet
 
 ## EGIL
 
-![EGIL Portrait](../Graphics/Portraits/005.png)
+<img alt="EGIL Portrait" src="../Graphics/Portraits/005.png"  width="64" height="64">
 
 Property | Value | Property | Value
 --- | --- | --- | ---
@@ -146,7 +146,7 @@ Learned Spells | - | Equipment | RightHand: LANGSCHWERT <br />Body: WATTIERTES L
 
 ## SELENA
 
-![SELENA Portrait](../Graphics/Portraits/080.png)
+<img alt="SELENA Portrait" src="../Graphics/Portraits/080.png"  width="64" height="64">
 
 Property | Value | Property | Value
 --- | --- | --- | ---
@@ -164,7 +164,7 @@ Learned Spells | - | Equipment | Head: HUT <br />RightHand: KURZBOGEN <br />Body
 
 ## NELVIN
 
-![NELVIN Portrait](../Graphics/Portraits/019.png)
+<img alt="NELVIN Portrait" src="../Graphics/Portraits/019.png"  width="64" height="64">
 
 Property | Value | Property | Value
 --- | --- | --- | ---
@@ -182,7 +182,7 @@ Learned Spells | MagicalProjectile, Sleep, <br />Mudsling, Rockfall, <br />Windd
 
 ## SABINE
 
-![SABINE Portrait](../Graphics/Portraits/046.png)
+<img alt="SABINE Portrait" src="../Graphics/Portraits/046.png"  width="64" height="64">
 
 Property | Value | Property | Value
 --- | --- | --- | ---
@@ -200,7 +200,7 @@ Learned Spells | HealingHand, RemoveFear, <br />RemoveShadows, RemovePain, <br /
 
 ## VALDYN
 
-![VALDYN Portrait](../Graphics/Portraits/084.png)
+<img alt="VALDYN Portrait" src="../Graphics/Portraits/084.png"  width="64" height="64">
 
 Property | Value | Property | Value
 --- | --- | --- | ---
@@ -218,7 +218,7 @@ Learned Spells | MonsterKnowledge, ShowMonsterLP | Equipment | RightHand: VALDYN
 
 ## TARGOR
 
-![TARGOR Portrait](../Graphics/Portraits/057.png)
+<img alt="TARGOR Portrait" src="../Graphics/Portraits/057.png"  width="64" height="64">
 
 Property | Value | Property | Value
 --- | --- | --- | ---
@@ -236,7 +236,7 @@ Learned Spells | MonsterKnowledge, Identification, <br />Clairvoyance, MapView, 
 
 ## LEONARIA
 
-![LEONARIA Portrait](../Graphics/Portraits/076.png)
+<img alt="LEONARIA Portrait" src="../Graphics/Portraits/076.png"  width="64" height="64">
 
 Property | Value | Property | Value
 --- | --- | --- | ---
@@ -254,7 +254,7 @@ Learned Spells | ChargeItem, MagicalTorch, <br />MagicalSun, GhostWeapon, <br />
 
 ## GRYBAN
 
-![GRYBAN Portrait](../Graphics/Portraits/015.png)
+<img alt="GRYBAN Portrait" src="../Graphics/Portraits/015.png"  width="64" height="64">
 
 Property | Value | Property | Value
 --- | --- | --- | ---
