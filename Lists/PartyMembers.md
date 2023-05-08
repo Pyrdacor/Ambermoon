@@ -2,7 +2,7 @@
 
 ## THALION
 
-<img alt="THALION Portrait" src="../Graphics/Portraits/002.png"  width="64" height="64">
+<img alt="THALION Portrait" src="../Graphics/Portraits/002.png"  width="64" height="64" style="image-rendering: pixelated;">
 
 Property | Value | Property | Value
 --- | --- | --- | ---
