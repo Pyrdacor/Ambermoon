@@ -40,6 +40,7 @@ namespace AmbermoonImageEditor
         public int ImageHeight => (int)numericUpDown2.Value;
         public GraphicFormat Format => (comboBox1.SelectedItem as FormatEntry)!.GraphicFormat;
         public byte PaletteOffset => (byte)(comboBox2.SelectedItem is not int offset ? 0 : offset);
+        public int Frames => (int)numericUpDown3.Value;
 
         private void SizeForm_Load(object sender, EventArgs e)
         {

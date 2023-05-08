@@ -80,6 +80,7 @@ namespace AmbermoonImageEditor
                     {
                         int w = sizeForm.ImageWidth;
                         int h = sizeForm.ImageHeight;
+                        int frames = sizeForm.Frames;
                         var graphicInfo = new GraphicInfo
                         {
                             Width = w,
@@ -89,7 +90,7 @@ namespace AmbermoonImageEditor
                         };
                         var imageData = new DataReader(File.ReadAllBytes(file));
 
-                        if (w == 0 || h == 0 || (w * h * graphicInfo.BitsPerPixel + 7) / 8 != imageData.Size)
+                        if (w == 0 || h == 0 || (frames * w * h * graphicInfo.BitsPerPixel + 7) / 8 != imageData.Size)
                         {
                             MessageBox.Show("The given image size was invalid.");
                             return;
@@ -103,8 +104,22 @@ namespace AmbermoonImageEditor
                             GraphicFormat = GraphicFormat.XRGB16
                         };
                         format = graphicInfo.GraphicFormat;
-                        image = new Graphic();
-                        graphicReader.ReadGraphic(image, imageData, graphicInfo);
+                        if (frames == 1)
+                        {
+                            image = new Graphic();
+                            graphicReader.ReadGraphic(image, imageData, graphicInfo);
+                        }
+                        else
+                        {
+                            image = new Graphic(frames * w, h, 0);
+
+                            for (int i = 0; i < frames; ++i)
+                            {
+                                var frame = new Graphic();
+                                graphicReader.ReadGraphic(frame, imageData, graphicInfo);
+                                image.AddOverlay((uint)(i * w), 0, frame, false);
+                            }
+                        }
                         palette = new Graphic();
                         graphicReader.ReadGraphic(palette, new DataReader(File.ReadAllBytes(ofd.FileName)), paletteInfo);
                         saveToolStripMenuItem.Enabled = true;
@@ -623,6 +638,38 @@ namespace AmbermoonImageEditor
                 image = newImage;
 
                 UpdateImage();
+            }
+        }
+
+        private void openPaletteToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (this.image != null)
+            {
+                var ofd = new OpenFileDialog
+                {
+                    AddExtension = false,
+                    CheckFileExists = true,
+                    CheckPathExists = true,
+                    Filter = "All files (*.*)|*.*",
+                    FilterIndex = 0,
+                    Multiselect = false,
+                    Title = "Open Ambermoon palette"
+                };
+
+                if (ofd.ShowDialog(this) == DialogResult.OK)
+                {
+                    var graphicReader = new GraphicReader();
+                    var paletteInfo = new GraphicInfo
+                    {
+                        Width = 32,
+                        Height = 1,
+                        GraphicFormat = GraphicFormat.XRGB16
+                    };
+                    palette = new Graphic();
+                    graphicReader.ReadGraphic(palette, new DataReader(File.ReadAllBytes(ofd.FileName)), paletteInfo);
+                    UpdateImage();
+                    OpenPalette();
+                }
             }
         }
     }

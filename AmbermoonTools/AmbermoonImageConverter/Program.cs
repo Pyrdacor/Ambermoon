@@ -100,14 +100,19 @@ namespace AmbermoonImageConverter
 
             color = 0xff000000 | (r << 16) | (r << 12) | (g << 8) | (g << 4) | b | (b >> 4);
 
+            if (mappedPaletteIndices.TryGetValue(color, out index))
+                return index;
+
             var diffs = new SortedDictionary<int, int>();
 
             for (int i = min; i <= max; ++i)
             {
                 if (palette[i] == color)
                 {
-                    mappedPaletteIndices.Add(color, (byte)i);
-                    return (byte)i;
+                    if (mappedPaletteIndices.TryAdd(color, (byte)i))
+                        return (byte)i;
+                    else
+                        return mappedPaletteIndices[color];
                 }
 
                 var diffA = Math.Abs((int)(color >> 24) - (int)(palette[i] >> 24));
