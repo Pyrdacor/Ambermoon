@@ -137,8 +137,9 @@ namespace AmbermoonEventEditor
 
                         var process = () =>
                         {
-                            bool forward = targetNode == null;
+                            bool forward = targetNode == null || targetNode.Index > branch.Index;
                             targetNode = branch.BranchTarget = targetNode ?? ProcessEvent(branchEvent);
+                            var foo = FindNodeByEvent(branchEvent);
 
                             if (!BranchReferenceTargets.TryAdd(targetNode, new List<Node> { node }))
                                 BranchReferenceTargets[targetNode].Add(node);
