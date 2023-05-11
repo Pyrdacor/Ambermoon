@@ -39,6 +39,18 @@ if (args.Length != 2)
     return;
 }
 
+string GetWallFlagNames(WallFlags flags)
+{
+    string names = string.Join(" | ", AllWallFlags.Where(flag => flags.HasFlag(flag.Key)).Select(flag => flag.Value));
+    return names.Length == 0 ? "None" : names;
+}
+
+string GetObjectFlagNames(ObjectFlags flags)
+{
+    string names = string.Join(" | ", AllObjectFlags.Where(flag => flags.HasFlag(flag.Key)).Select(flag => flag.Value));
+    return names.Length == 0 ? "None" : names;
+}
+
 var gameData = new GameData(GameData.LoadPreference.PreferExtracted, null, false);
 gameData.Load(args[1]);
 
@@ -436,7 +448,7 @@ void Add()
             Error();
             return;
         }
-        if (!QueryFlags(wall, "Flags", (wall, flags) => { wall.Flags = flags; return wall; }, AllWallFlags))
+        if (!QueryFlags(wall, "Flags", (wall, flags) => { wall.Flags = flags | (Tileset.TileFlags)(labdata.CombatBackground << 28); return wall; }, AllWallFlags))
         {
             Error();
             return;
@@ -681,12 +693,12 @@ void Edit()
         Console.WriteLine();
 
         var wall = new Reference<Labdata.WallData>();
-        wall.Value = labdata.Walls[index - 1];
+        var old = wall.Value = labdata.Walls[index - 1];
 
-        QueryInt(wall, "TextureIndex", (wall, textureIndex) => { wall.TextureIndex = (uint)textureIndex; return wall; }, 1, 255);
-        QueryAutomapType(wall, "AutomapType", (wall, automapType) => { wall.AutomapType = automapType; return wall; });
-        QueryInt(wall, "ColorIndex", (wall, colorIndex) => { wall.ColorIndex = (byte)colorIndex; return wall; }, 0, 31);
-        QueryFlags(wall, "Flags", (wall, flags) => { wall.Flags = flags; return wall; }, AllWallFlags);
+        QueryInt(wall, $"TextureIndex ({old.TextureIndex})", (wall, textureIndex) => { wall.TextureIndex = (uint)textureIndex; return wall; }, 1, 255);
+        QueryAutomapType(wall, $"AutomapType ({old.AutomapType})", (wall, automapType) => { wall.AutomapType = automapType; return wall; });
+        QueryInt(wall, $"ColorIndex ({old.ColorIndex})", (wall, colorIndex) => { wall.ColorIndex = (byte)colorIndex; return wall; }, 0, 31);
+        QueryFlags(wall, $"Flags ({GetWallFlagNames(old.Flags)})", (wall, flags) => { wall.Flags = flags | (Tileset.TileFlags)(labdata.CombatBackground << 28); return wall; }, AllWallFlags);
         var overlays = new List<Labdata.OverlayData>(wall.Value.Overlays ?? new Labdata.OverlayData[0]);
         int prevOverlayAmount = wall.Value.Overlays?.Length ?? 0;
         while (overlays.Count < 255)
@@ -701,28 +713,33 @@ void Edit()
         for (int i = 0; i < prevOverlayAmount; ++i)
         {
             if (!QueryYesNo($"Do you want to edit overlay {i}?"))
+            {
+                if (i == prevOverlayAmount - 1 && (QueryYesNo($"Do you want to delete overlay {i}?")))
+                    overlays.RemoveAt(overlays.Count - 1);
+
                 continue;
+            }
 
             AddOverlay(i);
         }
 
-        if (overlays.Count != 0)
+        if (overlays.Count != 0 || wall.Value.Overlays != null)
         {
             var wallCopy = wall.Value;
             wallCopy.Overlays = overlays.ToArray();
             labdata.Walls[index - 1] = wallCopy;
         }
-        else
-            labdata.Walls[index - 1] = wall.Value;
 
         void AddOverlay(int editIndex = -1)
         {
             var overlay = new Reference<Labdata.OverlayData>();
+            Labdata.OverlayData old = default;
 
             if (editIndex != -1)
-                overlay.Value = overlays[editIndex];
+                old = overlay.Value = overlays[editIndex];
 
-            if (!QueryInt(overlay, "Blending", (overlay, blend) => { overlay.Blend = blend != 0; return overlay; }, 0, 1))
+            string name = editIndex == -1 ? "Blending" : $"Blending ({old.Blend})";
+            if (!QueryInt(overlay, name, (overlay, blend) => { overlay.Blend = blend != 0; return overlay; }, 0, 1))
             {
                 if (editIndex == -1)
                 {
@@ -730,7 +747,8 @@ void Edit()
                     return;
                 }
             }
-            if (!QueryInt(overlay, "TextureIndex", (overlay, textureIndex) => { overlay.TextureIndex = (uint)textureIndex; return overlay; }, 1, 255))
+            name = editIndex == -1 ? "TextureIndex" : $"TextureIndex ({old.TextureIndex})";
+            if (!QueryInt(overlay, name, (overlay, textureIndex) => { overlay.TextureIndex = (uint)textureIndex; return overlay; }, 1, 255))
             {
                 if (editIndex == -1)
                 {
@@ -738,7 +756,8 @@ void Edit()
                     return;
                 }
             }
-            if (!QueryInt(overlay, "PositionX", (overlay, x) => { overlay.PositionX = (uint)x; return overlay; }, 0, 255))
+            name = editIndex == -1 ? "PositionX" : $"PositionX ({old.PositionX})";
+            if (!QueryInt(overlay, name, (overlay, x) => { overlay.PositionX = (uint)x; return overlay; }, 0, 255))
             {
                 if (editIndex == -1)
                 {
@@ -746,7 +765,8 @@ void Edit()
                     return;
                 }
             }
-            if (!QueryInt(overlay, "PositionY", (overlay, y) => { overlay.PositionY = (uint)y; return overlay; }, 0, 255))
+            name = editIndex == -1 ? "PositionY" : $"PositionY ({old.PositionY})";
+            if (!QueryInt(overlay, name, (overlay, y) => { overlay.PositionY = (uint)y; return overlay; }, 0, 255))
             {
                 if (editIndex == -1)
                 {
@@ -754,7 +774,8 @@ void Edit()
                     return;
                 }
             }
-            if (!QueryInt(overlay, "TextureWidth", (overlay, textureWidth) => { overlay.TextureWidth = (uint)textureWidth; return overlay; }, 1, 255))
+            name = editIndex == -1 ? "TextureWidth" : $"TextureWidth ({old.TextureWidth})";
+            if (!QueryInt(overlay, name, (overlay, textureWidth) => { overlay.TextureWidth = (uint)textureWidth; return overlay; }, 1, 255))
             {
                 if (editIndex == -1)
                 {
@@ -762,7 +783,8 @@ void Edit()
                     return;
                 }
             }
-            if (!QueryInt(overlay, "TextureHeight", (overlay, textureHeight) => { overlay.TextureHeight = (uint)textureHeight; return overlay; }, 1, 255))
+            name = editIndex == -1 ? "TextureHeight" : $"TextureHeight ({old.TextureHeight})";
+            if (!QueryInt(overlay, name, (overlay, textureHeight) => { overlay.TextureHeight = (uint)textureHeight; return overlay; }, 1, 255))
             {
                 if (editIndex == -1)
                 {
@@ -787,9 +809,9 @@ void Edit()
         Console.WriteLine();
 
         var obj = new Reference<Labdata.Object>();
-        obj.Value = labdata.Objects[index - 1];
+        var old = obj.Value = labdata.Objects[index - 1];
 
-        QueryAutomapType(obj, "AutomapType", (obj, automapType) => { obj.AutomapType = automapType; return obj; });
+        QueryAutomapType(obj, $"AutomapType ({old.AutomapType})", (obj, automapType) => { obj.AutomapType = automapType; return obj; });
         var subObjects = new List<Labdata.ObjectPosition>(obj.Value.SubObjects);
         bool adding = false;
         for (int i = 0; i < 8; ++i)
@@ -818,11 +840,13 @@ void Edit()
         void AddSubObject(int editIndex = -1)
         {
             var subObject = new Reference<Labdata.ObjectPosition>();
+            Labdata.ObjectPosition old = default;
 
             if (editIndex != -1)
-                subObject.Value = subObjects[editIndex];
+                old = subObject.Value = subObjects[editIndex];
 
-            if (!QueryInt(subObject, "X", (subObject, x) => { subObject.X = (short)x; return subObject; }, short.MinValue, short.MaxValue))
+            string name = editIndex == -1 ? "X" : $"X ({old.X})";
+            if (!QueryInt(subObject, name, (subObject, x) => { subObject.X = (short)x; return subObject; }, short.MinValue, short.MaxValue))
             {
                 if (editIndex == -1)
                 {
@@ -830,7 +854,8 @@ void Edit()
                     return;
                 }
             }
-            if (!QueryInt(subObject, "Y", (subObject, y) => { subObject.Y = (short)y; return subObject; }, short.MinValue, short.MaxValue))
+            name = editIndex == -1 ? "Y" : $"Y ({old.Y})";
+            if (!QueryInt(subObject, name, (subObject, y) => { subObject.Y = (short)y; return subObject; }, short.MinValue, short.MaxValue))
             {
                 if (editIndex == -1)
                 {
@@ -838,7 +863,8 @@ void Edit()
                     return;
                 }
             }
-            if (!QueryInt(subObject, "Z", (subObject, z) => { subObject.Z = (short)z; return subObject; }, short.MinValue, short.MaxValue))
+            name = editIndex == -1 ? "Z" : $"Z ({old.Z})";
+            if (!QueryInt(subObject, name, (subObject, z) => { subObject.Z = (short)z; return subObject; }, short.MinValue, short.MaxValue))
             {
                 if (editIndex == -1)
                 {
@@ -846,7 +872,8 @@ void Edit()
                     return;
                 }
             }
-            if (!QueryInt(subObject, "Object Data Index", (subObject, index) => { subObject.Object = labdata.ObjectInfos[index - 1]; return subObject; }, 1, labdata.ObjectInfos.Count))
+            name = editIndex == -1 ? "Object Data Index" : $"Object Data Index ({labdata.ObjectInfos.IndexOf(old.Object)})";
+            if (!QueryInt(subObject, name, (subObject, index) => { subObject.Object = labdata.ObjectInfos[index - 1]; return subObject; }, 1, labdata.ObjectInfos.Count))
             {
                 if (editIndex == -1)
                 {
@@ -873,15 +900,15 @@ void Edit()
         var objectInfo = new Reference<Labdata.ObjectInfo>();
         var old = objectInfo.Value = labdata.ObjectInfos[index - 1];
 
-        QueryInt(objectInfo, "TextureIndex", (objectInfo, textureIndex) => { objectInfo.TextureIndex = (uint)textureIndex; return objectInfo; }, 1, 65535);
-        QueryInt(objectInfo, "TextureWidth", (objectInfo, textureWidth) => { objectInfo.TextureWidth = (uint)textureWidth; return objectInfo; }, 1, 255);
-        QueryInt(objectInfo, "TextureHeight", (objectInfo, textureHeight) => { objectInfo.TextureHeight = (uint)textureHeight; return objectInfo; }, 1, 255);
-        QueryInt(objectInfo, "MappedWidth", (objectInfo, mappedWidth) => { objectInfo.MappedTextureWidth = (uint)mappedWidth; return objectInfo; }, 1, 65535);
-        QueryInt(objectInfo, "MappedHeight", (objectInfo, mappedHeight) => { objectInfo.MappedTextureHeight = (uint)mappedHeight; return objectInfo; }, 1, 65535);
-        QueryInt(objectInfo, "Frames", (objectInfo, frames) => { objectInfo.NumAnimationFrames = (uint)frames; return objectInfo; }, 1, 255);
-        QueryInt(objectInfo, "ColorIndex", (objectInfo, colorIndex) => { objectInfo.ColorIndex = (byte)colorIndex; return objectInfo; }, 0, 31);
-        QueryFlags(objectInfo, "Flags", (objectInfo, flags) => { objectInfo.Flags = flags; return objectInfo; }, AllObjectFlags);
-        QueryInt(objectInfo, "CombatBackground", (objectInfo, combatBackground) => { objectInfo.Flags = (Tileset.TileFlags)((uint)objectInfo.Flags | ((uint)combatBackground << 28)); return objectInfo; }, 0, 15);
+        QueryInt(objectInfo, $"TextureIndex ({old.TextureIndex:000})", (objectInfo, textureIndex) => { objectInfo.TextureIndex = (uint)textureIndex; return objectInfo; }, 1, 65535);
+        QueryInt(objectInfo, $"TextureWidth ({old.TextureWidth})", (objectInfo, textureWidth) => { objectInfo.TextureWidth = (uint)textureWidth; return objectInfo; }, 1, 255);
+        QueryInt(objectInfo, $"TextureHeight ({old.TextureHeight})", (objectInfo, textureHeight) => { objectInfo.TextureHeight = (uint)textureHeight; return objectInfo; }, 1, 255);
+        QueryInt(objectInfo, $"MappedWidth ({old.MappedTextureWidth})", (objectInfo, mappedWidth) => { objectInfo.MappedTextureWidth = (uint)mappedWidth; return objectInfo; }, 1, 65535);
+        QueryInt(objectInfo, $"MappedHeight ({old.MappedTextureHeight})", (objectInfo, mappedHeight) => { objectInfo.MappedTextureHeight = (uint)mappedHeight; return objectInfo; }, 1, 65535);
+        QueryInt(objectInfo, $"Frames ({old.NumAnimationFrames})", (objectInfo, frames) => { objectInfo.NumAnimationFrames = (uint)frames; return objectInfo; }, 1, 255);
+        QueryInt(objectInfo, $"ColorIndex ({old.ColorIndex})", (objectInfo, colorIndex) => { objectInfo.ColorIndex = (byte)colorIndex; return objectInfo; }, 0, 31);
+        QueryFlags(objectInfo, $"Flags ({GetObjectFlagNames(old.Flags)})", (objectInfo, flags) => { objectInfo.Flags = flags; return objectInfo; }, AllObjectFlags);
+        QueryInt(objectInfo, $"CombatBackground ({(uint)old.Flags >> 28})", (objectInfo, combatBackground) => { objectInfo.Flags = (ObjectFlags)((uint)objectInfo.Flags | ((uint)combatBackground << 28)); return objectInfo; }, 0, 15);
 
         labdata.ObjectInfos[index - 1] = objectInfo.Value;
 
