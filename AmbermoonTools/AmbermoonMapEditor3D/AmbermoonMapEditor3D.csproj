@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
-    <TargetFramework>net6.0-windows</TargetFramework>
+    <TargetFramework>net7.0-windows</TargetFramework>
     <Nullable>disable</Nullable>
     <UseWindowsForms>true</UseWindowsForms>
     <ImplicitUsings>enable</ImplicitUsings>
@@ -11,8 +11,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Ambermoon.Common" Version="10.7.1" />
-    <PackageReference Include="Ambermoon.Data.Legacy" Version="10.7.25" />
+    <PackageReference Include="Ambermoon.Common" Version="10.8.3" />
+    <PackageReference Include="Ambermoon.Data.Legacy" Version="10.8.5" />
   </ItemGroup>
 
 </Project>

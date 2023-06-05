@@ -5,7 +5,7 @@ using System.Linq;
 
 namespace Ambermoon.Data.Descriptions
 {
-    public class EventIndexDescription : ValueDescription
+    public record EventIndexDescription : ValueDescription
     {
         public EventIndexDescription(string name, bool required)
         {
@@ -57,7 +57,7 @@ namespace Ambermoon.Data.Descriptions
 
             if (value.FlagDescriptions != null)
             {
-                string info = $" {value.Name}=";
+                string info = $" {value.DisplayName}=";
                 var bits = (ushort)Convert.ChangeType(property, typeof(ushort));
 
                 for (int i = 0; i < value.FlagDescriptions.Length; ++i)
@@ -72,21 +72,21 @@ namespace Ambermoon.Data.Descriptions
             }
             else if (value is IEnumValueDescription enumValueDescription && enumValueDescription.Flags)
             {
-                return $" {value.Name}=" + Enum.GetFlagNames(value.GetType().GetGenericArguments()[0], property) + ",";
+                return $" {value.DisplayName}=" + Enum.GetFlagNames(value.GetType().GetGenericArguments()[0], property) + ",";
             }
             else if (value.ShowAsHex)
             {
                 if (value.Type == ValueType.Byte)
-                    return $" {value.Name}=0x{(ushort)Convert.ChangeType(property, typeof(ushort)):x2},";
+                    return $" {value.DisplayName}=0x{(ushort)Convert.ChangeType(property, typeof(ushort)):x2},";
                 else
-                    return $" {value.Name}=0x{(ushort)Convert.ChangeType(property, typeof(ushort)):x4},";
+                    return $" {value.DisplayName}=0x{(ushort)Convert.ChangeType(property, typeof(ushort)):x4},";
             }
             else
             {
                 if (value is IEnumValueDescription)
-                    return $" {value.Name}={System.Enum.ToObject(value.GetType().GetGenericArguments()[0], property)},";
+                    return $" {value.DisplayName}={System.Enum.ToObject(value.GetType().GetGenericArguments()[0], property)},";
 
-                return $" {value.Name}={property},";
+                return $" {value.DisplayName}={property},";
             }
         }
 
@@ -329,7 +329,16 @@ namespace Ambermoon.Data.Descriptions
                 true, true, true, false, false,
                 Use.Enum<ConditionEvent.ConditionType>("TypeOfCondition", true),
                 Use.Byte("Value", true),
-                Use.Conditional<ConditionEvent>(() => Use.Byte("Count", false), conditionEvent => conditionEvent.TypeOfCondition == ConditionEvent.ConditionType.ItemOwned),
+                Use.WithNameIf<ConditionEvent>(
+                    () => Use.Conditional<ConditionEvent>(() => Use.Byte("Count", false), conditionEvent =>
+                        conditionEvent.TypeOfCondition == ConditionEvent.ConditionType.ItemOwned ||
+                        conditionEvent.TypeOfCondition == ConditionEvent.ConditionType.Attribute ||
+                        conditionEvent.TypeOfCondition == ConditionEvent.ConditionType.Skill
+                    ),
+                    conditionEvent =>
+                        conditionEvent.TypeOfCondition == ConditionEvent.ConditionType.Attribute ||
+                        conditionEvent.TypeOfCondition == ConditionEvent.ConditionType.Skill,
+                    "Amount"),
                 Use.Conditional<ConditionEvent>(() => Use.Flags16<Condition>("DisallowedAilments", false), conditionEvent => conditionEvent.TypeOfCondition == ConditionEvent.ConditionType.PartyMember),
                 Use.Conditional<ConditionEvent>(() => Use.Word("ObjectIndex", true), conditionEvent =>
                     conditionEvent.TypeOfCondition != ConditionEvent.ConditionType.CanSee &&

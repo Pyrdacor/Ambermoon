@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net6.0-windows</TargetFramework>
+    <TargetFramework>net7.0-windows</TargetFramework>
     <Nullable>enable</Nullable>
     <UseWindowsForms>true</UseWindowsForms>
     <ImplicitUsings>enable</ImplicitUsings>
@@ -10,8 +10,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Ambermoon.Data.Common" Version="10.7.14" />
-    <PackageReference Include="Ambermoon.Data.Legacy" Version="10.7.25" />
+    <PackageReference Include="Ambermoon.Data.Common" Version="10.8.5" />
+    <PackageReference Include="Ambermoon.Data.Legacy" Version="10.8.5" />
   </ItemGroup>
 
   <ItemGroup>

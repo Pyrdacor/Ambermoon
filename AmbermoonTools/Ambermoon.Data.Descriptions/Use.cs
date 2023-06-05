@@ -39,6 +39,22 @@ namespace Ambermoon.Data.Descriptions
             return description;
         }
 
+        public static ValueDescription WithNameIf<TEvent>(Func<ValueDescription> provider, Func<TEvent, bool> condition, string newName) where TEvent : Event
+        {
+            var description = provider();
+
+            string MapDisplayName(Event @event, ValueDescription valueDescription)
+            {
+                if (!(@event is TEvent specificEvent) || condition(specificEvent) == false)
+                    return valueDescription.DisplayName;
+
+                return newName;
+            }
+
+            description.DisplayNameMapping = MapDisplayName;
+            return description;
+        }
+
         public static ValueDescription Byte(string name, bool required, byte maxValue = 255, byte minValue = 0, byte defaultValue = 0, bool showAsHex = false) => new ValueDescription
         {
             Type = ValueType.Byte,

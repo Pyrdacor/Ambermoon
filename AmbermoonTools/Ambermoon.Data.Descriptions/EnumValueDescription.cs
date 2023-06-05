@@ -13,7 +13,7 @@ namespace Ambermoon.Data.Descriptions
         public bool Flags { get; }
     }
 
-    public class EnumValueDescription<TEnum> : ValueDescription, IEnumValueDescription where TEnum : System.Enum
+    public record EnumValueDescription<TEnum> : ValueDescription, IEnumValueDescription where TEnum : System.Enum
     {
         public TEnum[] AllowedEnumValues { get; }
         public bool Flags { get; }

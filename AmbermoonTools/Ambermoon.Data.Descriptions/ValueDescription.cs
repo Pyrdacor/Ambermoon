@@ -15,11 +15,21 @@ namespace Ambermoon.Data.Descriptions
         SByte
     }
 
-    public class ValueDescription
+    public record ValueDescription
     {
+        private string displayName;
+
         public ValueType Type { get; set; } = ValueType.Byte;
         public ushort DefaultValue { get; set; } = 0;
         public string Name { get; set; }
+        public string DisplayName
+        {
+            get => displayName ?? Name;
+            set
+            {
+                displayName = value;
+            }
+        }
         /// <summary>
         /// Must be set by the user in any case.
         /// </summary>
@@ -36,6 +46,7 @@ namespace Ambermoon.Data.Descriptions
         public string[] FlagDescriptions { get; set; } = null;
         public Func<EventDescription, Event, bool> Condition { get; set; } = null;
         public Func<Event, ValueDescription, string> DisplayMapping { get; set; } = null;
+        public Func<Event, ValueDescription, string> DisplayNameMapping { get; set; } = null;
         public virtual string AsString(object value)
         {
             switch (Type)

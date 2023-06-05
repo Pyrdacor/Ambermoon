@@ -93,7 +93,7 @@ namespace AmbermoonMapCharEditor
             checkBoxAllowSandShip.Checked = tileFlags.HasFlag(TileFlags.AllowMovementSandShip);
             checkBoxAllowShip.Checked = tileFlags.HasFlag(TileFlags.AllowMovementShip);
             checkBoxAllowSwim.Checked = tileFlags.HasFlag(TileFlags.AllowMovementSwim);
-            checkBoxAllowUnused1.Checked = tileFlags.HasFlag(TileFlags.AllowMovementUnused12);
+            checkBoxAllowUnused1.Checked = tileFlags.HasFlag(TileFlags.AllowMovementWasp);
             checkBoxAllowUnused2.Checked = tileFlags.HasFlag(TileFlags.AllowMovementUnused13);
             checkBoxAllowUnused3.Checked = tileFlags.HasFlag(TileFlags.AllowMovementUnused14);
             checkBoxAllowUnused4.Checked = tileFlags.HasFlag(TileFlags.AllowMovementUnused15);
@@ -155,7 +155,7 @@ namespace AmbermoonMapCharEditor
             if (checkBoxAllowSwim.Checked)
                 TileFlags |= TileFlags.AllowMovementSwim;
             if (checkBoxAllowUnused1.Checked)
-                TileFlags |= TileFlags.AllowMovementUnused12;
+                TileFlags |= TileFlags.AllowMovementWasp;
             if (checkBoxAllowUnused2.Checked)
                 TileFlags |= TileFlags.AllowMovementUnused13;
             if (checkBoxAllowUnused3.Checked)

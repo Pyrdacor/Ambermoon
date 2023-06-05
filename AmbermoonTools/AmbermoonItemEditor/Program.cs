@@ -16,7 +16,16 @@ namespace AmbermoonItemEditor
         {
             if (File.Exists(args[0]))
             {
-                ProcessExecutables(Path.GetDirectoryName(args[0]), new Items(args[0]), null);
+                try
+                {
+                    ProcessExecutables(Path.GetDirectoryName(args[0]), new Items(args[0]), null);
+                }
+                catch
+                {
+                    Console.WriteLine("Unable to load item data.");
+                    Console.WriteLine();
+                    ShowHelp();
+                }
             }
             else
             {
@@ -32,6 +41,8 @@ namespace AmbermoonItemEditor
                 catch
                 {
                     Console.WriteLine("Unable to load executables.");
+                    Console.WriteLine();
+                    ShowHelp();
                     Environment.Exit(1);
                     return;
                 }
@@ -144,7 +155,20 @@ namespace AmbermoonItemEditor
 
         static void ShowHelp()
         {
-            // TODO
+            Console.WriteLine();
+            Console.WriteLine("Usage: AmbermoonItemEditor <path>");
+            Console.WriteLine();
+            Console.WriteLine(" <path>  Either the extracted item data file like Objects.amb/001 or the game data");
+            Console.WriteLine("         directory like my/path/Amberfiles.");
+            Console.WriteLine();
+            Console.WriteLine("Note: If a game data directory is given, the item data is read from the main executables");
+            Console.WriteLine("      AM2_CPU or AM2_BLIT. This is the old way (Ambermoon english 1.13/german 1.12 and below).");
+            Console.WriteLine();
+            Console.WriteLine("      For new versions the item data file should be used instead. First extract Objects.amb");
+            Console.WriteLine("      to some folder and use the extracted single sub-file 001 as an input for this tool.");
+            Console.WriteLine("      You can use this command for extraction AmbermoonPack UNPACK Objects.amb Objects");
+            Console.WriteLine("      Later you can pack this file again with: AmbermoonPack JH+LOB Objects/001 Objects.amb 0xd2e7.");
+            Console.WriteLine();
         }
 
         static void AddItem(ItemManager items1, ItemManager items2)

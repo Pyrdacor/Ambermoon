@@ -52,7 +52,7 @@ namespace AmbermoonMonsterEditor
 
                     var hunks = AmigaExecutable.Read(gameData.Files["AM2_CPU"].Files[1]);
                     graphicProvider = new GraphicProvider(gameData,
-                        new Ambermoon.Data.Legacy.ExecutableData.ExecutableData(hunks), null, null);
+                        new Ambermoon.Data.Legacy.ExecutableData.ExecutableData(hunks), null);
                 }
 
                 return gameData;

@@ -10,6 +10,33 @@ namespace AmbermoonImageConverter
 {
     class Program
     {
+        static void Usage()
+        {
+            Console.WriteLine("USAGE: AmbermoonImageConverter <imageFile> <paletteFile> <outFile> <format> [frames] [palOffset] [tindex]");
+            Console.WriteLine("       AmbermoonImageConverter --help");
+            Console.WriteLine();
+            Console.WriteLine("Creates an image data file from a graphic and a palette. This file can then be used in Ambermoon.");
+            Console.WriteLine();
+            Console.WriteLine("<imageFile>   Image file (PNG, BMP, etc)");
+            Console.WriteLine("<paletteFile> Palette data file from the original game data");
+            Console.WriteLine("<outFile>     Path where the output file should be created");
+            Console.WriteLine("<format>      3: 3 bit planes (mostly UI graphics)");
+            Console.WriteLine("              4: 4 bit planes (floors, lab background, intro, etc)");
+            Console.WriteLine("              5: 5 bit planes (items, monsters, tile graphics, etc)");
+            Console.WriteLine("              0: 4 bit 3D textures (walls, overlays, objects)");
+            Console.WriteLine("[frames]      Number of frames (default: 1)");
+            Console.WriteLine("[palOffset]   Palette offset (default: 0)");
+            Console.WriteLine("              Based on <format> this is limited to 0 (5 bpp), 16 (4 bpp) or 24 (3 bpp).");
+            Console.WriteLine("[tindex]      Transparent color index (default: 0)");
+            Console.WriteLine();
+            Console.WriteLine("Note: The provided palette must be a decompressed/extracted single file like Palettes/001.");
+            Console.WriteLine("      Do not pass the whole container Palettes.amb here!");
+            Console.WriteLine("Note: The tool tries to use similar palette indices if the given image contains colors which");
+            Console.WriteLine("      are not part of the given palette. However this has its limits. The tool will error if");
+            Console.WriteLine("      the color is too far away from every palette color.");
+            Console.WriteLine();
+        }
+
         // args[0]: Image
         // args[1]: Palette file
         // args[2]: Output image
@@ -19,16 +46,73 @@ namespace AmbermoonImageConverter
         // args[6]: Transparent color index (default: 0)
         static void Main(string[] args)
         {
+            if (args.Contains("--help"))
+            {
+                Usage();
+                return;
+            }
+
+            if (args.Length < 4 || args.Length > 7)
+            {
+                Console.WriteLine("Invalid number of arguments.");
+                Console.WriteLine();
+                Usage();
+                return;
+            }
+
             // TODO: Later add both ways of conversion and support 3, 4 and 5 bit images as well as palettes.
 
-            var imageData = LoadImageData(args[0], out int width, out int height);
-            var palette = LoadPalette(args[1]);
+            byte[] imageData;
+            int width;
+            int height;
+
+            try
+            {
+                imageData = LoadImageData(args[0], out width, out height);
+            }
+            catch
+            {
+                Console.WriteLine("Failed to read image file.");
+                Console.WriteLine();
+                Usage();
+                return;
+            }
+
+            uint[] palette;
+
+            try
+            {
+                palette = LoadPalette(args[1]);
+            }
+            catch
+            {
+                Console.WriteLine("Failed to read palette file.");
+                Console.WriteLine();
+                Usage();
+                return;
+            }
+
             var palIndices = new byte[imageData.Length / 4];
-            int format = int.Parse(args[3]);
+            
+            if (!int.TryParse(args[3], out int format))
+            {
+                Console.WriteLine("Invalid format given.");
+                Console.WriteLine();
+                Usage();
+                return;
+            }
+
             int bpp = format;
 
             if (bpp == 0)
                 bpp = 4;
+            else if (bpp < 3 || bpp > 5)
+            {
+                Console.WriteLine("Invalid format given.");
+                Console.WriteLine();
+                Usage();
+                return;
+            }
 
             int frames = args.Length < 5 ? 1 : int.Parse(args[4]);
             int paletteIndexOffset = args.Length < 6 ? 0 : Math.Max(0, int.Parse(args[5]));
@@ -41,6 +125,21 @@ namespace AmbermoonImageConverter
                 paletteIndexOffset = Math.Min(24, paletteIndexOffset);
             byte minIndex = (byte)paletteIndexOffset;
             byte maxIndex = (byte)((1 << bpp) - 1 + paletteIndexOffset);
+
+            if (frames == 0)
+            {
+                Console.WriteLine("Frames must not be 0.");
+                Console.WriteLine();
+                Usage();
+                return;
+            }
+
+            if (width == 0 || height == 0)
+            {
+                Console.WriteLine("Image dimensions are invalid.");
+                Console.WriteLine();
+                return;
+            }
 
             for (int i = 0; i < palIndices.Length; ++i)
             {
@@ -79,7 +178,23 @@ namespace AmbermoonImageConverter
                 }
             }
 
-            File.WriteAllBytes(args[2], outputData);
+            try
+            {
+                File.WriteAllBytes(args[2], outputData);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Failed to write output file.");
+                Console.WriteLine("  " + ex.Message);
+
+                while (ex.InnerException != null)
+                {
+                    Console.WriteLine(ex.InnerException.Message);
+                    ex = ex.InnerException;
+                }
+
+                Console.WriteLine();
+            }
         }
 
         static readonly Dictionary<uint, byte> mappedPaletteIndices = new();

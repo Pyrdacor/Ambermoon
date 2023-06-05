@@ -832,9 +832,11 @@ namespace AmbermoonEventEditor
                                 e.AllowedEntries.ToList().ForEach(v => Console.WriteLine($" {v.Key,3}: {v.Value}"));
                         }
 
+                        if (value.DisplayNameMapping != null)
+                            value.DisplayName = value.DisplayNameMapping(@event, value);
                         var property = type.GetProperty(value.Name);
                         var currentValue = property.GetValue(@event);
-                        Console.Write($"> {value.Name} ({value.AsString(currentValue)}): ");
+                        Console.Write($"> {value.DisplayName} ({value.AsString(currentValue)}): ");
                         var input = ReadInt(value.ShowAsHex);
 
                         if (input == null || input < 0 || input > 0xffff || !value.Check((ushort)input))
@@ -1236,10 +1238,15 @@ namespace AmbermoonEventEditor
 
             foreach (var value in eventDescription.ValueDescriptions)
             {
-                if (value.Hidden || value.Condition?.Invoke(eventDescription, EventReader.ParseEvent(new DataReader(eventData))) == false)
+                var ev = EventReader.ParseEvent(new DataReader(eventData));
+
+                if (value.Hidden || value.Condition?.Invoke(eventDescription, ev) == false)
                     Write(value, value.DefaultValue);
                 else
                 {
+                    if (value.DisplayNameMapping != null)
+                        value.DisplayName = value.DisplayNameMapping(ev, value);
+
                     if (value.Required)
                     {
                         if (value is IEnumValueDescription e)
@@ -1251,7 +1258,7 @@ namespace AmbermoonEventEditor
                                 e.AllowedEntries.ToList().ForEach(v => Console.WriteLine($" {v.Key,3}: {v.Value}"));
                         }
 
-                        Console.Write($"> {value.Name}: ");
+                        Console.Write($"> {value.DisplayName}: ");
                         var input = ReadInt(value.ShowAsHex);
 
                         if (input == null)
@@ -1280,7 +1287,7 @@ namespace AmbermoonEventEditor
                                 e.AllowedEntries.ToList().ForEach(v => Console.WriteLine($" {v.Key,3}: {v.Value}"));
                         }
 
-                        Console.Write($"> {value.Name} ({value.DefaultValueText}): ");
+                        Console.Write($"> {value.DisplayName} ({value.DefaultValueText}): ");
                         var input = ReadInt(value.ShowAsHex) ?? value.DefaultValue;
 
                         if (input < 0 || input > 0xffff || !value.Check((ushort)input))
