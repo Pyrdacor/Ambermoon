@@ -22,6 +22,8 @@ if ($isWindows) {
   dotnet publish -c $env:CONFIGURATION "./AmbermoonTools/Ambermoon3DMapViewer/Ambermoon3DMapViewer.csproj" -p:PublishSingleFile=true -p:IncludeAllContentForSelfExtract=true -r win-x64 --no-restore --no-self-contained --nologo
   dotnet publish -c $env:CONFIGURATION "./AmbermoonTools/AmbermoonImageConverter/AmbermoonImageConverter.csproj" -p:PublishSingleFile=true -p:IncludeAllContentForSelfExtract=true -r win-x86 --no-restore --no-self-contained --nologo
   dotnet publish -c $env:CONFIGURATION "./AmbermoonTools/AmbermoonImageConverter/AmbermoonImageConverter.csproj" -p:PublishSingleFile=true -p:IncludeAllContentForSelfExtract=true -r win-x64 --no-restore --no-self-contained --nologo
+  dotnet publish -c $env:CONFIGURATION "./AmbermoonTools/AmbermoonMapEditor2D/AmbermoonMapEditor2D.csproj" -p:PublishSingleFile=true -p:IncludeAllContentForSelfExtract=true -r win-x86 --no-restore --no-self-contained --nologo
+  dotnet publish -c $env:CONFIGURATION "./AmbermoonTools/AmbermoonMapEditor2D/AmbermoonMapEditor2D.csproj" -p:PublishSingleFile=true -p:IncludeAllContentForSelfExtract=true -r win-x64 --no-restore --no-self-contained --nologo
   Write-Host Pack zip for Windows
   mkdir dist
   copy "AmbermoonTools\AmbermoonPack\bin\Any CPU\Release\net7.0\win-x64\publish\AmbermoonPack.exe" "dist\"
@@ -34,6 +36,7 @@ if ($isWindows) {
   copy "AmbermoonTools\AmbermoonItemEditor\bin\Any CPU\Release\net7.0\win-x64\publish\AmbermoonItemEditor.exe" "dist\"
   copy "AmbermoonTools\Ambermoon3DMapViewer\bin\Any CPU\Release\net7.0\win-x64\publish\Ambermoon3DMapViewer.exe" "dist\"
   copy "AmbermoonTools\AmbermoonImageConverter\bin\Any CPU\Release\net7.0\win-x64\publish\AmbermoonImageConverter.exe" "dist\"
+  copy "AmbermoonTools\AmbermoonMapEditor2D\bin\Any CPU\Release\net7.0-windows\win-x64\publish\AmbermoonMapEditor2D.exe" "dist\"
   copy "AmbermoonTools\x64\api-ms-win-core-winrt-l1-1-0.dll" "dist\"
   cd dist
   7z a ..\AmbermoonTools-Windows.zip *.*
@@ -49,6 +52,7 @@ if ($isWindows) {
   copy "AmbermoonTools\AmbermoonItemEditor\bin\Any CPU\Release\net7.0\win-x86\publish\AmbermoonItemEditor.exe" "dist\"
   copy "AmbermoonTools\Ambermoon3DMapViewer\bin\Any CPU\Release\net7.0\win-x86\publish\Ambermoon3DMapViewer.exe" "dist\"
   copy "AmbermoonTools\AmbermoonImageConverter\bin\Any CPU\Release\net7.0\win-x86\publish\AmbermoonImageConverter.exe" "dist\"
+  copy "AmbermoonTools\AmbermoonMapEditor2D\bin\Any CPU\Release\net7.0-windows\win-x86\publish\AmbermoonMapEditor2D.exe" "dist\"
   copy "AmbermoonTools\x86\api-ms-win-core-winrt-l1-1-0.dll" "dist\"
   cd dist
   7z a ..\AmbermoonTools-Windows32Bit.zip *.*
