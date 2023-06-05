@@ -892,7 +892,10 @@ namespace AmbermoonTextImport
                         writer.Write(zero);
                     } while (writer.Position % 4 != 0);
 
-                    return writer.ToArray();
+                    var containerWriter = new DataWriter();
+                    bool newComp = options.Contains(Option.NewCompression);
+                    FileWriter.WriteJH(containerWriter, writer.ToArray(), 0xd2e7, true, false, newComp ? LobCompression.LobType.TakeBestForText : LobCompression.LobType.Ambermoon);
+                    return containerWriter.ToArray();
                 }, true))
                 return;
             }
