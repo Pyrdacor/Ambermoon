@@ -52,17 +52,19 @@ Version | Language | Download | Release date
 
 Version | Release date | Windows 64bit | Linux 64bit | Windows 32bit
 --- | --- | --- | --- | ---
-1.13 | 05-06-2023 | [Download](https://github.com/Pyrdacor/Ambermoon/releases/download/v1.13/AmbermoonTools-Windows.zip) | [Download](https://github.com/Pyrdacor/Ambermoon/releases/download/v1.13/AmbermoonTools-Linux.tar.gz) | [Download](https://github.com/Pyrdacor/Ambermoon/releases/download/v1.13/AmbermoonTools-Windows32Bit.zip)
+1.14 | 05-06-2023 | [Download](https://github.com/Pyrdacor/Ambermoon/releases/download/v1.14/AmbermoonTools-Windows.zip) | [Download](https://github.com/Pyrdacor/Ambermoon/releases/download/v1.14/AmbermoonTools-Linux.tar.gz) | [Download](https://github.com/Pyrdacor/Ambermoon/releases/download/v1.14/AmbermoonTools-Windows32Bit.zip)
 
 This zip file contains:
 - A tool to pack files into Ambermoon game data files or extract them (AmbermoonPack)
-- A tool to change monster values (AmbermoonMonsterValueChanger)
+- A tool to change monster values (AmbermoonMonsterEditor)
 - A tool to export and import texts from/into Ambermoon game data files (AmbermoonTextImport)
+- A tool to export and import all texts from/into Ambermoon game data files (AmbermoonTextManager) **use this now**
 - A tool to extract ADF disk files (AmbermoonDiskExtract)
 - A tool to view and edit map/NPC/partychar events (AmbermoonEventEditor)
-- A tool to vied and edit labdata (AmbermoonLabdataEditor)
+- A tool to vied and edit labyrinth data (AmbermoonLabdataEditor)
 - A tool to view, add and edit items (AmbermoonItemEditor)
 - A tool to inspect 3D maps in a console window (Ambermoon3DMapViewer)
+- A tool to create Ambermoon graphic files from PNGs and palettes (AmbermoonImageConverter)
 
 **Note:** Some tools are in beta state so use with care, save often and always backup your files!
 
