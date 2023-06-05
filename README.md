@@ -52,7 +52,7 @@ Version | Language | Download | Release date
 
 Version | Release date | Windows 64bit | Linux 64bit | Windows 32bit
 --- | --- | --- | --- | ---
-1.12 | 02-06-2022 | [Download](https://github.com/Pyrdacor/Ambermoon/releases/download/v1.12/AmbermoonTools-Windows.zip) | [Download](https://github.com/Pyrdacor/Ambermoon/releases/download/v1.12/AmbermoonTools-Linux.tar.gz) | [Download](https://github.com/Pyrdacor/Ambermoon/releases/download/v1.12/AmbermoonTools-Windows32Bit.zip)
+1.13 | 05-06-2023 | [Download](https://github.com/Pyrdacor/Ambermoon/releases/download/v1.13/AmbermoonTools-Windows.zip) | [Download](https://github.com/Pyrdacor/Ambermoon/releases/download/v1.13/AmbermoonTools-Linux.tar.gz) | [Download](https://github.com/Pyrdacor/Ambermoon/releases/download/v1.13/AmbermoonTools-Windows32Bit.zip)
 
 This zip file contains:
 - A tool to pack files into Ambermoon game data files or extract them (AmbermoonPack)

@@ -8,7 +8,7 @@ The most recent version can be found here:
 
 Version | Release date | Windows 64bit | Linux 64bit | Windows 32bit
 --- | --- | --- | --- | ---
-1.13 | 27-09-2022 | [Download](https://github.com/Pyrdacor/Ambermoon/releases/download/v1.13/AmbermoonTools-Windows.zip) | [Download](https://github.com/Pyrdacor/Ambermoon/releases/download/v1.13/AmbermoonTools-Linux.tar.gz) | [Download](https://github.com/Pyrdacor/Ambermoon/releases/download/v1.13/AmbermoonTools-Windows32Bit.zip)
+1.13 | 05-06-2023 | [Download](https://github.com/Pyrdacor/Ambermoon/releases/download/v1.13/AmbermoonTools-Windows.zip) | [Download](https://github.com/Pyrdacor/Ambermoon/releases/download/v1.13/AmbermoonTools-Linux.tar.gz) | [Download](https://github.com/Pyrdacor/Ambermoon/releases/download/v1.13/AmbermoonTools-Windows32Bit.zip)
 
 Most tools have a help. Try to run with command line argument `--help` for further information.
 
@@ -17,7 +17,7 @@ If you have problems, try to install the .NET6 runtime (see link below).
 
 ## Build yourself
 
-Ensure to install .NET6. You can download it from here: https://dotnet.microsoft.com/en-us/download/dotnet/6.0
+Ensure to install .NET7. You can download it from here: https://dotnet.microsoft.com/en-us/download/dotnet/7.0
 
 If you just want to use the tools, the runtime is enough. But if you want to build and/or modify the code, you'll need the SDK.
 
