@@ -10,12 +10,12 @@
     <Authors>Robert Schneckenhaus</Authors>
     <Description>Command line tool to show and edit monster values of legacy Ambermoon game data.</Description>
     <RuntimeIdentifiers>win-x64;win-x86;linux-x64</RuntimeIdentifiers>
-    <Version>1.0.14</Version>
+    <Version>1.0.15</Version>
     <Configurations>Debug;Release;ReleaseLinux</Configurations>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Ambermoon.Data.Legacy" Version="10.8.5" />
+    <PackageReference Include="Ambermoon.Data.Legacy" Version="10.8.6" />
   </ItemGroup>
 
 </Project>

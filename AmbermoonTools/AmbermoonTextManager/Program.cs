@@ -296,6 +296,7 @@ namespace AmbermoonTextImport
                 }
 
                 var reader = dictionary.Files[1];
+                reader.Position = 0;
                 int numEntries = reader.ReadWord();
 
                 Console.WriteLine($"Writing {numEntries} dictionary entries.");
@@ -370,6 +371,7 @@ namespace AmbermoonTextImport
             {
                 outPath = Path.Combine(outputPath, textAmb.Name);
                 var reader = textAmb.Files[1];
+                reader.Position = 0;
                 var textContainerReader = new TextContainerReader();
                 var textContainer = new TextContainer();
                 textContainerReader.ReadTextContainer(textContainer, reader, false);
@@ -483,6 +485,7 @@ namespace AmbermoonTextImport
                     return;
                 }
 
+                container.Files[1].Position = 0;
                 var placeReader = new PlacesReader();
                 var places = Places.Load(placeReader, container.Files[1]);
 
@@ -510,6 +513,7 @@ namespace AmbermoonTextImport
                 }
 
                 var reader = container.Files[1];
+                reader.Position = 0;
                 int numItems = reader.ReadWord();
 
                 for (int i = 0; i < numItems; ++i)
@@ -568,6 +572,7 @@ namespace AmbermoonTextImport
                         if (file.Value.Size == 0)
                             continue;
 
+                        file.Value.Position = 0;
                         var mapReader = new MapReader();
                         if ((file.Value.PeekDword() & 0x0000ff00) != 0x00000100)
                             continue; // no 3D map
@@ -633,6 +638,7 @@ namespace AmbermoonTextImport
 
                         try
                         {
+                            textFile.Value.Position = 0;
                             texts = Ambermoon.Data.Legacy.Serialization.TextReader.ReadTexts(textFile.Value, new char[] { ' ', '\0' });
                         }
                         catch

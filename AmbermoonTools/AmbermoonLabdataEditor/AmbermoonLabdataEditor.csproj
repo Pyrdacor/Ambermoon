@@ -5,13 +5,13 @@
     <TargetFramework>net7.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
-	<Version>1.0.14</Version>
+	<Version>1.0.15</Version>
 	<Authors>Robert Schneckenhaus</Authors>
 	<RuntimeIdentifiers>win-x64;win-x86;linux-x64</RuntimeIdentifiers>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Ambermoon.Data.Legacy" Version="10.8.5" />
+    <PackageReference Include="Ambermoon.Data.Legacy" Version="10.8.6" />
   </ItemGroup>
 
 </Project>
