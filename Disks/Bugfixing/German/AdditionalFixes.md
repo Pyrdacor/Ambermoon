@@ -3,6 +3,7 @@
 - Fixed wrong magic weapon level for Mando.
 - Fixed invalid look-at text indices for Gryban and Chris.
 - Fixed wrong max values for Netsrak's skills UseMagic and ReadMagic.
+- Fixed wrong Lyramion world map data file.
 
 
 ## Version 1.18

@@ -1,7 +1,15 @@
-Ambermoon French 1.18 by Pyrdacor (25-04-2023)
+Ambermoon French 1.19 by Pyrdacor (12-06-2023)
 Translations by Dlfrsilver
 Supported by CFOU!
 ===============================================
+
+Changes in 1.19
+===============
+
+- Fixed wrong magic weapon level for Mando.
+- Fixed invalid look-at text indices for Gryban and Chris.
+- Fixed some wrong savegame character values and aligned with the german savegame.
+- Fixed wrong Lyramion world map data file.
 
 Changes in 1.18
 ===============

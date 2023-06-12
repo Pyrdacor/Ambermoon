@@ -1,5 +1,13 @@
-Ambermoon German 1.18 by Pyrdacor (25-04-2023)
+Ambermoon German 1.19 by Pyrdacor (12-06-2023)
 ==============================================
+
+Changes in 1.19
+===============
+
+- Fixed wrong magic weapon level for Mando.
+- Fixed invalid look-at text indices for Gryban and Chris.
+- Fixed wrong max values for Netsrak's skills UseMagic and ReadMagic.
+- Due to wrong data, the door to the wind shrine was broken. This is fixed now.
 
 Changes in 1.18
 ===============

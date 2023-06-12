@@ -1,5 +1,13 @@
-Ambermoon German 1.18 by Pyrdacor (25-04-2023)
+Ambermoon German 1.19 by Pyrdacor (12-06-2023)
 ==============================================
+
+Änderungen in 1.19
+==================
+
+- Das falsche magische Waffenlevel (M-B-W) für Mando wurde gefixt.
+- Der falsche Text-Index, wenn man Gryban oder Chris ansieht, wurde gefixt.
+- Falsche Max-Werte für Netsraks Fähigkeiten "Magie benutzen" und "Spruchrollen lesen" wurden gefixt.
+- Durch falsche Daten war die Tür zum Windschrein kaputt. Dies ist nun behoben.
 
 Änderungen in 1.18
 ==================

@@ -3,6 +3,7 @@
 - Fixed wrong magic weapon level for Mando.
 - Fixed invalid look-at text indices for Gryban and Chris.
 - Fixed some wrong savegame character values and aligned with the german savegame.
+- Fixed wrong Lyramion world map data file.
 
 ## Version 1.18
 
