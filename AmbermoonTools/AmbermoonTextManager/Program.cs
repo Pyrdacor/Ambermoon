@@ -1007,6 +1007,8 @@ namespace AmbermoonTextImport
                         if (reader.Size == 0)
                             return Array.Empty<byte>();
 
+                        reader.Position = 0;
+
                         var writer = new DataWriter(reader.ReadBytes(0x0112));
                         writer.WriteWithoutLength(SizeString(16, entry.Value));
                         reader.Position += 16;
@@ -1046,6 +1048,7 @@ namespace AmbermoonTextImport
                         return false;
 
                     var file = gameData.Files[filename].Files[1];
+                    file.Position = 0;
                     int placeCount = file.PeekWord();
 
                     if (placeCount != entries.Count)
@@ -1075,6 +1078,7 @@ namespace AmbermoonTextImport
                         return false;
 
                     var file = gameData.Files[filename].Files[1];
+                    file.Position = 0;
                     int itemCount = file.ReadWord();
 
                     if (itemCount != entries.Count)
@@ -1106,23 +1110,23 @@ namespace AmbermoonTextImport
 
                     var mapReader = new MapReader();
                     var containerFiles = gameData.Files[filename].Files;
-                    var files = entries.ToDictionary(entry => entry.Key, entry =>
+                    var files = containerFiles.ToDictionary(entry => (uint)entry.Key, entry =>
                     {
-                        var reader = containerFiles[(int)entry.Key];
+                        var reader = containerFiles[entry.Key];
 
                         if (reader.Size == 0)
                             return Array.Empty<byte>();
 
+                        reader.Position = 0;
+
                         if ((reader.PeekDword() & 0x0000ff00) != 0x00000100)
                             return reader.ReadToEnd(); // just return the data for 2D maps
 
-                        var map = Map.LoadWithoutTexts(entry.Key, mapReader, reader, null);
-                        var names = entry.Value.Split('\n');
+                        var map = Map.LoadWithoutTexts((uint)entry.Key, mapReader, reader, null);
+                        var names = entries[(uint)entry.Key].Split('\n');
 
                         if (map.GotoPoints.Count != names.Length)
                             throw new Exception($"Mismatching goto point data/text count for map {entry.Key}.");
-
-                        reader.Position = 0;
 
                         if (map.GotoPoints.Count == 0)
                             return reader.ReadToEnd(); // just return the data if there are no goto points

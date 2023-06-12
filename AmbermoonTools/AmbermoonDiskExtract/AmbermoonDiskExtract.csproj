@@ -9,7 +9,7 @@
     <RepositoryUrl>https://github.com/Pyrdacor/Ambermoon</RepositoryUrl>
     <RepositoryType>Github</RepositoryType>
     <PackageTags>Ambermoon ADF Extract File Legacy Amiga Disk</PackageTags>
-    <Version>1.0.15</Version>
+    <Version>1.0.16</Version>
     <RuntimeIdentifiers>win-x64;win-x86;linux-x64</RuntimeIdentifiers>
     <Configurations>Debug;Release;ReleaseLinux</Configurations>
   </PropertyGroup>
