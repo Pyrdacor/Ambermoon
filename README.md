@@ -45,14 +45,14 @@ Version | Language | Download | Release date
 --- | --- | --- | ---
 1.18 | English | [zip](https://github.com/Pyrdacor/Ambermoon/raw/master/Disks/Patches/PyrdacorFixEnglish1.18.zip) [lha](https://github.com/Pyrdacor/Ambermoon/raw/master/Disks/Patches/PyrdacorFixEnglish1.18.lha) [tar.gz](https://github.com/Pyrdacor/Ambermoon/raw/master/Disks/Patches/PyrdacorFixEnglish1.18.tar.gz) | 25-04-2023
 1.18 | German | [zip](https://github.com/Pyrdacor/Ambermoon/raw/master/Disks/Patches/PyrdacorFixGerman1.18.zip) [lha](https://github.com/Pyrdacor/Ambermoon/raw/master/Disks/Patches/PyrdacorFixGerman1.18.lha) [tar.gz](https://github.com/Pyrdacor/Ambermoon/raw/master/Disks/Patches/PyrdacorFixGerman1.18.tar.gz) | 25-04-2023
-1.18 | German | [zip](https://github.com/Pyrdacor/Ambermoon/raw/master/Disks/Patches/PyrdacorFixFrench1.18.zip) [lha](https://github.com/Pyrdacor/Ambermoon/raw/master/Disks/Patches/PyrdacorFixFrench1.18.lha) [tar.gz](https://github.com/Pyrdacor/Ambermoon/raw/master/Disks/Patches/PyrdacorFixFrench1.18.tar.gz) | 25-04-2023
+1.18 | French | [zip](https://github.com/Pyrdacor/Ambermoon/raw/master/Disks/Patches/PyrdacorFixFrench1.18.zip) [lha](https://github.com/Pyrdacor/Ambermoon/raw/master/Disks/Patches/PyrdacorFixFrench1.18.lha) [tar.gz](https://github.com/Pyrdacor/Ambermoon/raw/master/Disks/Patches/PyrdacorFixFrench1.18.tar.gz) | 25-04-2023
 
 
 ## Tool releases
 
 Version | Release date | Windows 64bit | Linux 64bit | Windows 32bit
 --- | --- | --- | --- | ---
-1.14 | 05-06-2023 | [Download](https://github.com/Pyrdacor/Ambermoon/releases/download/v1.14/AmbermoonTools-Windows.zip) | [Download](https://github.com/Pyrdacor/Ambermoon/releases/download/v1.14/AmbermoonTools-Linux.tar.gz) | [Download](https://github.com/Pyrdacor/Ambermoon/releases/download/v1.14/AmbermoonTools-Windows32Bit.zip)
+1.16 | 12-06-2023 | [Download](https://github.com/Pyrdacor/Ambermoon/releases/download/v1.16/AmbermoonTools-Windows.zip) | [Download](https://github.com/Pyrdacor/Ambermoon/releases/download/v1.16/AmbermoonTools-Linux.tar.gz) | [Download](https://github.com/Pyrdacor/Ambermoon/releases/download/v1.16/AmbermoonTools-Windows32Bit.zip)
 
 This zip file contains:
 - A tool to pack files into Ambermoon game data files or extract them (AmbermoonPack)
