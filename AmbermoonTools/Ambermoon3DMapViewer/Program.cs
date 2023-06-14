@@ -30,7 +30,7 @@ namespace Ambermoon3DMapViewer
             var gameData = new GameData(GameData.LoadPreference.PreferExtracted, null, false);
             gameData.Load(args[1]);
 
-            var mapManager = new MapManager(gameData, new MapReader(), new TilesetReader(), new LabdataReader());
+            var mapManager = new MapManager(gameData, new MapReader(), new TilesetReader(), new LabdataReader(), true);
 
             ProcessMap(map, mapManager.GetLabdataForMap(map));
         }
