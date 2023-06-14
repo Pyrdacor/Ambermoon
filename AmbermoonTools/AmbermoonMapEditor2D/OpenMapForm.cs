@@ -362,7 +362,7 @@ namespace AmbermoonMapEditor2D
             if (GameData != null)
             {
                 if (MapManager == null)
-                    MapManager = new MapManager(GameData, new MapReader(), new TilesetReader(), new LabdataReader());
+                    MapManager = new MapManager(GameData, new MapReader(), new TilesetReader(), new LabdataReader(), true);
 
                 if (Tilesets == null)
                 {

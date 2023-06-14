@@ -309,7 +309,7 @@ namespace AmbermoonMapEditor3D
             if (GameData != null)
             {
                 if (MapManager == null)
-                    MapManager = new MapManager(GameData as ILegacyGameData, new MapReader(), new TilesetReader(), new LabdataReader());
+                    MapManager = new MapManager(GameData as ILegacyGameData, new MapReader(), new TilesetReader(), new LabdataReader(), true);
             }
 
             BringToFront();
