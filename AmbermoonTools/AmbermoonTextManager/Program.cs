@@ -791,12 +791,14 @@ namespace AmbermoonTextImport
                         }
                         else
                         {
-                            Console.WriteLine("failed");
+                            Console.WriteLine($"{containerFile} was not found in target folder. Skipped it.");
+                            Console.WriteLine();
                         }
                     }
-                    catch
+                    catch (Exception ex)
                     {
-                        Console.WriteLine("failed");
+                        Console.WriteLine();
+                        Console.WriteLine("Failed: " + ex.ToString());
                         Console.WriteLine();
                         Exit(ErrorCode.UnableToWriteData);
                         return false;
@@ -1119,14 +1121,16 @@ namespace AmbermoonTextImport
 
                         reader.Position = 0;
 
-                        if ((reader.PeekDword() & 0x0000ff00) != 0x00000100)
+                        if ((reader.PeekDword() & 0x0000ff00) != 0x00000100 || !entries.TryGetValue((uint)entry.Key, out var nameString))
                             return reader.ReadToEnd(); // just return the data for 2D maps
 
                         var map = Map.LoadWithoutTexts((uint)entry.Key, mapReader, reader, null);
-                        var names = entries[(uint)entry.Key].Split('\n');
+                        var names = nameString.Split('\n');
 
                         if (map.GotoPoints.Count != names.Length)
                             throw new Exception($"Mismatching goto point data/text count for map {entry.Key}.");
+
+                        reader.Position = 0;
 
                         if (map.GotoPoints.Count == 0)
                             return reader.ReadToEnd(); // just return the data if there are no goto points
