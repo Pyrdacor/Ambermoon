@@ -97,7 +97,7 @@ Often collision class 1 is used. It is different from the player collision class
 
 The stationary flag specifies that the NPC or party member stays at one position. In the original this was also possible (i.e. grandfather in bed) but required to store 288 identical positions (one for each 5 minute slot of the day). This flag allows only storing a single position. The same bit is used for monsters but has a different meaning there. The monster will only move if it can see the player. Otherwise it won't move at all.
 
-Bit 5 is only used if the character is a normal NPC. If the player approaches such NPC (reaching the same tile) the conversation window is opened automatically. This will lead to endless window opening in general so only use this if the NPC is immediately removed after the conversation! This is only used for some special story NPCs in Ambermoon Advanced.
+Bit 5 is only used if the character is a normal NPC. If the player approaches such NPC (reaching the same tile) the conversation window is opened automatically. This will lead to endless window opening in general so only use this if the NPC is immediately removed after the conversation! This is only used for some special story NPCs in Ambermoon Advanced. This is also only implemented for 3D NPCs.
 
 ### Map events
 
