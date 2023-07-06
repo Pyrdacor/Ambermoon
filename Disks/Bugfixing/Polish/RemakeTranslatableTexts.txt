@@ -1,0 +1,324 @@
+## Remake messages
+
+{ Index.ReallyStartNewGame, "Czy naprawdę chcesz rozpocząć nową grę?" },
+{ Index.FailedToLoadSavegame, "Nie udało się wczytać gry." },
+{ Index.FailedToLoadInitialSavegame, "Nie udało się wczytać startowego stanu gry." },
+{ Index.FailedToLoadSavegameUseInitial, "Nie udało się wczytać gry. Zamiast tego załadowano startowy zapis gry." },
+{ Index.StartNewGameOrQuit, "Chcesz rozpocząć nową grę czy wyjść z gry?" },
+{ Index.RuneTableUsage, "Tak długo, jak masz tabelę run w ekwipunku, wszystkie runy będą automatycznie wyświetlane jako tekst." },
+{ Index.LoadCrashedGame, "Wykryto kopię awaryjną zapisu gry. Czy chcesz ją załadować?" },
+{ Index.FailedToRemoveCrashSavegame, "Awaryjna kopia zapisu gry nie może zostać usunięta automatycznie. Należy to zrobić samodzielnie. Jest ona przechowywana w podkatalogu 'Save.99'." },
+{ Index.GameSaved, "Zapisano jako ~INK 22~'{0}'~INK 31~."},
+{ Index.GameLoaded, "~INK 22~Zapis {0}~INK 31~ został wczytany."},
+{ Index.InitialGameLoaded, "~INK 22~Zapis startowy~INK 31~ został wczytany."}
+
+
+## Custom remake outro texts
+
+"Egil: To była niesamowita przygoda, ale teraz muszę się pożegnać.",
+"Egil: Krasnoludy z Gemstone potrzebują ochotników do odbudowy swojej stolicy.",
+"~HERO~: Mam nadzieję, że jeszcze się spotkamy. Udanej podróży przyjacielu!",
+" ^~HERO~: ...",
+" ^Nieznajomy: Nie tak szybko ~HERO~!",
+" ^~HERO~: Kim jesteś?",
+"Nieznajomy: Moje imię to ~INK17~Pyrdacor~INK31~. Nie mam zbyt wiele czasu.",
+"Nieznajomy: Ale mogę powiedzieć jedno: Przygoda jeszcze się nie skończyła.",
+" ^~HERO~: O czym ty mówisz?",
+" ^Planowana jest ~INK17~Trzecia część trylogii Amber~INK31~.",
+" ^~HERO~: Wspaniale!",
+"Pyrdacor: Dziękuję za grę w ~INK22~Ambermoon~INK31~! Mam nadzieję, że dobrze się bawiliście."
+
+
+## Tutorial texts
+
+// Introduction
+"Cześć ~SELF~, witaj w Ambermoon Remake.^^Potrzebujesz małego wprowadzenia?",
+// Tip 1
+"Przyciski w prawym dolnym rogu ekranu zapewniają wiele przydatnych funkcji " +
+"w grze. Na głównym ekranie można je przełączać , naciskając prawy " +
+"przycisk myszki nad ich obszarem lub wciskając klawisz Return. To pokaże " +
+"dodatkowe funkcje.",
+// Tip 2
+"Do obsługi tych przycisków możesz też użyć klawiatury numerycznej. Układ " +
+"jest dokładnie taki sam jak przycisków w grze. Tak więc klawisz 7 odpowiada " +
+"górnemu lewemu przyciskowi (oko).",
+// Tip 3
+"W górnej części znajdują się portrety postaci. Kliknięcie w jeden z nich wybiera " +
+"aktywną postać a prawy klik otwiera ekwipunek. Z klawiatury, klawisze 1-6 wybierają " +
+"aktywną postać a F1-F6 otworzą ekwipunek.",
+// Tip 4
+"Po mapie możesz się poruszać używając myszy, klawiszy W, A, S, D lub strzałek." +
+"W widoku 2D prawy klik na mapie zmienia kursor w ikonę interakcji z obiektami " +
+"lub postaciami takimi jak NPC.",
+// End
+"Teraz zamilknę. baw się dobrze grając w Ambermoon!"
+
+
+## Attribute tooltips
+
+// Strength
+"Siła^^Zwiększa maksymalny udźwig o 1 kg na punkt.^ Zwiększa również obrażenia o 1 co 25 punktów.^^ Obecnie +{0} kg i +{1} obrażeń.",
+// Intelligence
+"Inteligencja^^Dodaje 1 dodatkowy PM i PNM^na poziom, za każde 25 punktów.^^Obecnie +{0} PM i PNM",
+// Dexterity
+"Zręczność^^Szansa w procentach, by nie uruchomić pułapki^podczas majstrowania przy zamkach.^Dodaje się, wraz ze szczęściem,^do szansy na uniknięcie walki.^^Obecnie {0}% szansy na uniknięcie pułapki^        {1}% szansy na uniknięcie walki.",
+// Speed
+"Szybkość^^Wyższa wartość szybkości pozwala działać wcześniej w walce.^Za każde 80 punktów możesz poruszyć się o 1 dodatkowe pole^na rundę.^^ Obecnie możesz poruszyć się o {0} pól.",
+// Stamina
+"Wytrzymałość^^Zwiększa obronę o 1 co 25 punktów.^^Obecnie +{0} do obrony",
+// Charisma
+"Charyzma^^Zwiększa cenę sprzedaży o 1%^za każde pełne 10 punktów.^^Obecnie +{0}% ceny sprzedaży",
+// Luck
+"Szczęście^^Szansa w procentach na uniknięcie efektu już uruchomionej pułapki.^Dodaje się, wraz ze Zręcznością, do szansy na uniknięcie walki.^^Obecnie {0}% szansy na uniknięcie efektu pułapki^        {1}% szansy na uniknięcie walki.",
+// Anti-Magic
+"Anty-magia^^Procentowa szansa na zablokowanie zaklęć przeciwnika.^^Obecnie {0}% szansy na zablokowanie zaklęć."
+
+
+## Skill tooltips
+
+// Attack
+"Atak^^Szansa na trafienie przeciwnika.^^ Obecnie {0}% szansy na trafienie",
+// Parry
+"Parowanie^^Szansa na zablokowanie ataku przeciwnika.^Konieczne jest wykonanie w trakcie walki akcji 'Obrona'.^^Obecnie {0}% szansy na zablokowanie.",
+// Swim
+"Pływanie^^Redukcja obrażeń podczas pływania.^^Obecnie {0}% redukcji obrażeń",
+// Crit
+"Krytyczne uderzenie^^Szansa na zabicie przeciwnika jednym uderzeniem.^^Nie działa przeciwko bossom.^^Aktualna szansa: {0}%",
+// Find traps
+"Znajdowanie pułapek^^Szansa na znalezienie pułapki w zamku.^^Aktualna szansa: {0}%",
+// Disarm traps
+"Rozbrajanie pułapek^^Szansa na rozbrojenie znalezionej pułapki.^^Aktualna szansa: {0}%",
+// Lockpick
+"Otwieranie zamków^^Szansa na otwarcie zamka bez wytrycha.^^Nie działa w przypadku drzwi wymagających klucza.^^Aktualna szansa: {0}%",
+// Search
+"Przeszukiwanie^^Szansa na znalezienie ukrytych skarbów.^Wyższe wartości pozwalają znaleźć określone skrzynie.",
+// Read magic
+"Czytanie magii^^Szansa na nauczenie się zaklęcia ze zwoju.^W przeciwnym razie zwój zostanie zniszczony.^^Aktualna szansa: {0}%",
+// Use magic
+"Używanie magii^^Szansa na pomyślne rzucenie zaklęcia.^Niektóre zaklęcia mają negatywne efekty, jeśli rzucenie nie powiedzie się^^Aktualna szansa: {0}%",
+
+
+## Condition tooltips
+
+// Irritated
+{ Condition.Irritated,"Postać nie może rzucać zaklęć.^^Aktywne tylko podczas walki." },
+// Crazy
+{ Condition.Crazy, "Postać wykonuje losowe akcje w walce.^Jej ekwipunek jest niedostępny." },
+// Sleep
+{ Condition.Sleep, "Postać nie może wykonywać akcji w walce.^Jakiekolwiek obrażenia anulują ten status.^^Aktywne tylko podczas walki." },
+// Panic
+{ Condition.Panic, "Postać próbuje uciec.^Brak możliwości wykonania akcji w walce.^Brak dostępu do ekwipunku.^^Aktywne tylko podczas walki." },
+// Blind
+{ Condition.Blind, "Postać nie widzi.^Zasięg wzroku na mapach 2D jest wyzerowany.^Całkowita ciemność na mapach 3D." },
+// Drugged
+{ Condition.Drugged, "Postać jest pod wpływem narkotyków.^Utrudnion sterowanie i efekty wizualne." },
+// Exhausted
+{ Condition.Exhausted, "Wszystkie atrybuty są tymczasowo zmniejszone o połowę.^Można usunąć przez przespanie się." },
+// Unused
+{ Condition.Unused, "" },
+// Lamed
+{ Condition.Lamed, "Nie jest możliwy ruch ani atak." },
+// Poisoned
+{ Condition.Poisoned, "Postać otrzymuje obrażenia^co rundę lub co godzinę." },
+// Petrified
+{ Condition.Petrified, "Ekwipunek jest niedostępny.^Postać nie może wykonać żadnej^ akcji i nie starzeje się." },
+// Diseased
+{ Condition.Diseased, "Postać traci codziennie punkt^losowo wybranej cechy." },
+// Aging
+{ Condition.Aging, "Postać starzeje się każdego dnia.^W zależności od rasy ostatecznie umrze w określonym wieku.^^Maksymalny wiek: {0}" },
+// DeadCorpse
+{ Condition.DeadCorpse, "Postać nie bierze udziału w walce.^Nie może się komunikować." },
+// DeadAshes
+{ Condition.DeadAshes, "Postać nie bierze udziału w walce.^Nie może się komunikować.^By ją wskrzesić, najpierw popioły^muszą zostać przekształcone w ciało." },
+// DeadDust
+{ Condition.DeadDust, "Postać nie bierze udziału w walce.^Nie może się komunikować.^By ją wskrzesić, proch musi zostać^przekształcony w popiół, a następnie w ciało." }
+
+
+## Stat tooltips; sprawdzić
+
+// Age
+"Wiek postaci^^Umiera w maksymalnym wieku {0} lat.",
+// LP
+"Punkty życia^^Gdy osiągną 0^, postać umiera.",
+// SP
+"Punkty magii^^Służą do rzucania zaklęć.",
+// SLP
+"Punkty nauki magii^^Służą do nauki zaklęć.",
+// TP
+"Punkty treningu^^Są używane do zwiększania umiejętności u trenerów.",
+// Gold
+"Złoto^^Waluta Ambermoon.^Służy do kupowania towarów.",
+// Food
+"Racje żywnościowe^^Każdy odpoczynek (poza spaniem w karczmach)^zużywa 1 rację żywnościową na postać w celu^uzupełnienia PŻ i PM.",
+// Damage
+"Obrażenia^^Podstawowa wartość obrażeń w walce.^^Składowa wyposażenia i siły.",
+// Defense
+"Osłona^^Podstawowa wartość redukcji obrażeń fizycznych w walce.^^Składowa wyposażenia i wytrzymałości.",
+// EPPre50
+"Punkty doświadczenia^^Potrzebne do zdobywania poziomów.^^Następny poziom przy {0} EP.",
+// EP50
+"Punkty doświadczenia^^Potrzebne do zdobywania poziomów.^^Maksymalny poziom został już osiągnięty.",
+// LevelWithAPRIncrease
+"Poziom postaci^^Każde podniesienie poziomu zwiększa cechy postaci o:^^ PŻ : {0,-10}{1} PT : {2}{3}^^Ataki na rundę wzrastają^na określonych poziomach:^^ {5}^^Ataki na rundę wynoszą {4}",
+// LevelWithoutAPRIncrease
+"Poziom postaci^^Każde podniesienie poziomu zwiększa cechy postaci o:^^ PŻ : {0,-10}{1} PT : {2}{3}^^Ataki na rundę wynoszą {4}.",
+// MagicLevelUpValues
+" PM : {0}^ PNM: {1,-10}",
+// RangeOperator
+" do ",
+// MagicIntBonus
+"^ Premia: PM i PNM +INT/25 ({0})"
+
+
+## Button tooltips
+
+"Zamknij",
+"Zakończ grę",
+"Opcje",
+"Zapisz",
+"Wczytaj",
+"Nowa gra",
+"Sprawdź",
+"Dotknij",
+"Rozmawiaj",
+"Transport",
+"Księga czarów",
+"Obóz",
+"Mapa",
+"Pozycja w walce",
+"Czekaj",
+"Statystyki postaci",
+"Ekwipunek",
+"Użyj przedmiot",
+"Sprawdź przedmiot",
+"Schowaj przedmiot w skrzyni",
+"Schowaj złoto w skrzyni",
+"Schowaj żywność w skrzyni",
+"Wyrzuć przedmiot",
+"Wyrzuć złoto",
+"Wyrzuć żywność",
+"Przekaż złoto",
+"Przekaż żywność",
+"Rozdziel złoto",
+"Rozdziel żywność",
+"Kup",
+"Sprzedaj",
+"Trenuj",
+"Ulecz osobę",
+"Usuń klątwę",
+"Ulecz stan",
+"Zostań na noc",
+"Zidentyfikuj sprzęt",
+"Zidentyfikuj przedmioty",
+"Napraw przedmiot",
+"Naładuj przedmiot",
+"Odczytaj zwój zaklęcia",
+"Śpij",
+"Otwórz zamek",
+"Znajdź pułapkę",
+"Rozbrój pułapkę",
+"Odpowiedz",
+"Powtórz zagadkę",
+"Powiedz coś",
+"Pokaż przedmiot",
+"Daj przedmiot",
+"Daj złoto",
+"Daj żywność",
+"Poproś o dołączenie",
+"Poproś o odejście",
+"Uciekaj",
+"Rozpocznij rundę",
+"Zmień pozycję",
+"Naprzód",
+"Atak",
+"Obrona",
+"Żuć zaklęcie",
+"Określ wymagane punkty nauki zaklęć"
+
+
+## Option names
+
+IMPORTANT: Try to limit those texts to the end marker at max!
+                             | <- end marker including the quotes
+// Page 1
+"Muzyka",
+"Głośność",
+"Rozdzielczość",
+"Pełny ekran",
+"Filtr graficzny",
+"Nakładka graficzna",
+"Efekt",
+// Page 2
+"Szybkość walki",
+"Ruch 3D",
+"Pokaż opisy przycisków",
+"Pokaż opisy statystyk",
+"Pokaż runy jako tekst",
+"Włącz cheaty",
+"Podłoga i sufit 3D",
+// Page 3
+"Dodatkowe miejsca zapisu",
+"Zewnętrzna muzyka",
+"Pokaż logo Pyrdacora",
+"Pokaż fantasy intro",
+"Pokaż inf. zapis/odczyt"
+// TODO
+//"Pokaż intro",
+
+
+## Floor / ceiling display names
+
+"Żadna",
+"Podłoga",
+"Sufit",
+"Obie"
+
+
+## Default battle speed name
+
+"Domyślna"
+
+
+## Language names
+
+"Niemiecki",
+"Francuski",
+"Angielski",
+"Polski"
+
+
+## Version selector texts
+
+IMPORTANT: The (?) must be at the same position (fill with spaces)!
+
+"Wybierz wersję gry:                (?)"
+"Wersja danych gry odnosi się do danych bazowych Amigi. Ta wersja jest niezależna od wersji Ambermoon.net."
+"Zapisane gry są przechowywane obok pliku Ambermoon.net.exe w podfolderze "Saves"."
+"Zapisane gry są przechowywane w oryginalnej ścieżce danych i mogą nadpisywać oryginalne zapisy!"
+
+IMPORTANT: The following 2 texts must not be longer than the first english text!
+                            | <- end marker including the 2 quotes
+
+"Zapis gry w ścieżce progr."
+"Zapis gry w ścieżce danych"
+
+
+## Starting texts
+
+"Rozpoczynanie gry ...",
+"Przygotowanie nowej gry ..."
+
+
+## Patcher texts
+
+"Czy chcesz używać patchera? Nieznacznie wydłuża to czas uruchamiania i wymaga dostępu do Internetu. Nowe wersje będą jednak wykrywane i możliwe do pobrania  automatycznie.",
+"Jeśli zdecydujesz się użyć patchera później, możesz aktywować go ręcznie w pliku konfiguracyjnym "ambermoon.cfg".",
+"Kliknij, aby kontynuować",
+"Dostępna jest nowa wersja! Czy chcesz ją pobrać i zainstalować?",
+"Nowa wersja nie została znaleziona. Prosimy o zgłoszenie tego do Pyrdacora (trobt(at)web.de).",
+"Nie udało się pobrać nowej wersji. Spróbuj ponownie później lub pobierz ją ręcznie.",
+"Pobieranie Ambermoon {0} ...",
+"{0} z {1}",
+"Gotowe",
+"Anuluj pobieranie",
+"Nie udało się zastosować poprawki. Pobierz najnowszą wersję ręcznie."
