@@ -1,0 +1,1 @@
+{0} rzuca zaklęcie {1} - z {2}!

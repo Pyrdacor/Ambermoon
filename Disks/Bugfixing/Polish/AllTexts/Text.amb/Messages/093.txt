@@ -1,0 +1,1 @@
+Wystąpił błąd odczytu/zapisu.

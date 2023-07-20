@@ -1,0 +1,1 @@
+Wystąpił błąd we/wy: ^{0}^^Bieżący plik: ^{1}^^Ponowić?

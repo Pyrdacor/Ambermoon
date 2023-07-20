@@ -1,0 +1,10 @@
+Zabrakło pamięci! Nastąpi próba ponownego
+uruchomienia. Twoja pozycja w grze nie zostanie
+uszkodzona, ale nastąpi powrót do ekranu mapy.
+
+Użyj programu instalacyjnego, aby przeczytać
+dokument dotyczący rozwiązywania problemów
+i dowiedzieć się, jak uniknąć tego problemu.
+
+Wciśnij dowolny przycisk myszy, aby kontynuować.
+{{Click}}

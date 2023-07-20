@@ -1,0 +1,1 @@
+Usuń zabezpieczenie przed zapisem z dysku z zapisami gry. (Okno ochrony przed zapisem musi być zamknięte)

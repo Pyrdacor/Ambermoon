@@ -1,0 +1,1 @@
+{0} atakuje {1} przy użyciu {2}!

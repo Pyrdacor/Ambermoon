@@ -1,0 +1,1 @@
+Chcesz wczytać zapisaną grę czy wyjść z gry?
