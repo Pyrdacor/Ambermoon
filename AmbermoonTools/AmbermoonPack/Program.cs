@@ -510,6 +510,7 @@ namespace AmbermoonPack
             list.Sort();
             var regex = new Regex("^[0-9]+$", RegexOptions.Compiled);
             uint lastIndex = 0;
+            bool anyDigitMatch = files.Any(file => regex.IsMatch(Path.GetFileNameWithoutExtension(file)));
 
             foreach (var file in list)
             {
@@ -518,6 +519,10 @@ namespace AmbermoonPack
                 if (regex.IsMatch(Path.GetFileNameWithoutExtension(file)))
                 {
                     index = uint.Parse(Path.GetFileNameWithoutExtension(file));
+                }
+                else if (anyDigitMatch)
+                {
+                    continue;
                 }
 
                 result[index] = File.ReadAllBytes(file);
