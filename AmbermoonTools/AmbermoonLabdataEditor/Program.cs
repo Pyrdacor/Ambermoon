@@ -872,7 +872,7 @@ void Edit()
                     return;
                 }
             }
-            name = editIndex == -1 ? "Object Data Index" : $"Object Data Index ({labdata.ObjectInfos.IndexOf(old.Object)})";
+            name = editIndex == -1 ? "Object Data Index" : $"Object Data Index ({1 + labdata.ObjectInfos.IndexOf(old.Object)})";
             if (!QueryInt(subObject, name, (subObject, index) => { subObject.Object = labdata.ObjectInfos[index - 1]; return subObject; }, 1, labdata.ObjectInfos.Count))
             {
                 if (editIndex == -1)
