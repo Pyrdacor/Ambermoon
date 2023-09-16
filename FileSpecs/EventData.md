@@ -617,3 +617,20 @@ Before the character is removed from the party, all equipped items are stored in
 **Bug:** There is a code bug in the original, where the amount of items is stored in register D1 instead of D7. This way the event wouldn't work as expected or might even crash the application dependent on the previous value in D7.
 
 **Ambermoon Advanced:** I repaired the event code for the extension so in theory it can be used with this codebase. It is untested though and not really used by Ambermoon Advanced as well.
+
+
+## Delay event (0x19 / 25) (Ambermoon Advanced only)
+
+Adds a delay where the game just waits and you can't do anything.
+This is mainly used for some kind of scripted sequences where you
+show some text and change something on the map, then wait so you can
+see the changes, and then something else happens and so on.
+
+The delay is given in milliseconds.
+
+Offset | Type | Description
+--- | --- | ---
+0x00 | ubyte | Event type (= 0x19)
+0x01 | ubyte[5] | Unused
+0x06 | uword | Milliseconds
+0x08 | uword | Unused
