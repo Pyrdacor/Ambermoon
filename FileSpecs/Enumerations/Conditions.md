@@ -27,3 +27,24 @@ Value | Name | Effect
 There is also an Overweight status which is active if the carried weight exceeds the max weight (which is Strength in kilogram). It has no own ailment flag as it can be determined by the weight.
 
 Every character ages each year (with artificial aging every day). Dependent on race there are max values for the age (e.g. 80 for humans). If reaching the max age, a character dies. Some ailments will prevent aging: dead (all types), petrify and the unknown ailment 0x80. One of these ailments must be active on the year (or day) transition to prevent the age increase.
+
+
+## Masks
+
+The Amiga game code defines the following masks where the lowest (rightmost) digit is the first condition and the highest (leftmost) digit is the last condition.
+
+```
+Fight_mask	    	EQU %1110000010000000
+Control_mask    	EQU %1110010010001110
+Damage_mask     	EQU %1110010000000000	; Can NOT be damaged
+Parade_mask     	EQU %1110010101001110	; Combat actions
+Attack_mask     	EQU %1110010110001100
+Move_mask 	    	EQU %1110010110000100
+Blink_mask	    	EQU %1110010010000000
+Flee_mask 	    	EQU %1110010110000100
+Magic_mask	    	EQU %1110010010101101
+Use_item_mask   	EQU %1110010110101110
+Reset_mask	    	EQU %1111111101110010	; To reset combat conditions
+Animate_mask    	EQU %1110010110000100
+End_monster_mask	EQU %0000010100101011 ; Possible conditions for bosses
+```
