@@ -46,5 +46,5 @@ Magic_mask	    	EQU %1110010010101101
 Use_item_mask   	EQU %1110010110101110
 Reset_mask	    	EQU %1111111101110010	; To reset combat conditions
 Animate_mask    	EQU %1110010110000100
-End_monster_mask	EQU %0000010100101011 ; Possible conditions for bosses
+End_monster_mask	EQU %0000010100101011 ; Impossible conditions for bosses
 ```
