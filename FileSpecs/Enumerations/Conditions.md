@@ -31,20 +31,20 @@ Every character ages each year (with artificial aging every day). Dependent on r
 
 ## Masks
 
-The Amiga game code defines the following masks where the lowest (rightmost) digit is the first condition and the highest (leftmost) digit is the last condition.
+The Amiga game code defines the following masks where the lowest (rightmost) digit is the first condition and the highest (leftmost) digit is the last condition. A zero bit often means that the action is possible with the given condition.
 
 ```
-Fight_mask	    	EQU %1110000010000000
-Control_mask    	EQU %1110010010001110
-Damage_mask     	EQU %1110010000000000	; Can NOT be damaged
-Parade_mask     	EQU %1110010101001110	; Combat actions
-Attack_mask     	EQU %1110010110001100
-Move_mask 	    	EQU %1110010110000100
-Blink_mask	    	EQU %1110010010000000
-Flee_mask 	    	EQU %1110010110000100
-Magic_mask	    	EQU %1110010010101101
-Use_item_mask   	EQU %1110010110101110
-Reset_mask	    	EQU %1111111101110010	; To reset combat conditions
-Animate_mask    	EQU %1110010110000100
+Fight_mask	    	EQU %1110000010000000 ; Can participate in battle
+Control_mask    	EQU %1110010010001110 ; Can control (pick actions)
+Damage_mask     	EQU %1110010000000000 ; Can be damaged
+Parade_mask     	EQU %1110010101001110 ; Can parry
+Attack_mask     	EQU %1110010110001100 ; Can attack
+Move_mask 	    	EQU %1110010110000100 ; Can move
+Blink_mask	    	EQU %1110010010000000 ; Can blink
+Flee_mask 	    	EQU %1110010110000100 ; Can flee
+Magic_mask	    	EQU %1110010010101101 ; Can use spells
+Use_item_mask   	EQU %1110010110101110 ; Can use item
+Reset_mask	    	EQU %1111111101110010 ; To reset combat conditions
+Animate_mask    	EQU %1110010110000100 ; Play idle animation
 End_monster_mask	EQU %0000010100101011 ; Impossible conditions for bosses
 ```
