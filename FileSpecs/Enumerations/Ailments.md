@@ -1,4 +1,4 @@
-# Ailments
+# Conditions
 
 These are bit flags. So combininig them with bitwise OR will allow multiple ailments on a character.
 
@@ -14,7 +14,7 @@ Value | Name | Effect
 0x0010 | Blind | Map view is black if selected, reduced hit chance
 0x0020 | Stoned (drugs) | Fancy colors and moving mouse cursor if selected
 0x0040 | Exhausted | All values (attributes and abilities) are halved (the STR reduction will also decrease the max weight and may cause Overweight status as well). Moreover the party member is damaged every ingame hour but not in battles. Can not parry in battles.
-0x0080 | - (unused?) | None (in code it is checked, if this ailment is active a character is not affected by aging)
+0x0080 | Fleeing | The character is about to flee
 0x0100 | Paralyzed | Not able to move or attack.
 0x0200 | Poisoned | Receives damage every battle round or ingame hour when outside battles.
 0x0400 | Petrified | Not able to give orders or do anything at all. Inventory not accessible. Can't be damaged by attacks or damage spells.
