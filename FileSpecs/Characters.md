@@ -40,7 +40,7 @@ Offset | Type | Description
 0x0018 | uword | Gold
 0x001A | uword | Food
 0x001C | uword | Character bit index. This bit is changed when a party member leaves the party or a conversation is left without taking the person with you. Initial this is set for Selena, Sabine and Valdyn. They will wait for you at different locations than when you first met them. Selena goes to the Sylph cave, Sabine and Valdyn go to Burnville. Gryban has an initial value of 0x0000. This is a bug. Gryban will vanish forever when he leaves the party or you won't take him with you. The correct value would be 0x35c0 or 0xffff. The value 0xffff means "not used" or "use initial location/use initial map character".
-0x001E | uword | [Ailments](Enumerations/Ailments.md)
+0x001E | uword | [Conditions](Enumerations/Conditions.md)
 0x0020 | uword | Monster experience (gained when defeating it)
 0x0022 | uword | Battle round spell point usage (not used in Ambermoon)
 0x0024 | uword | Mark of return x-coordinate (1-based, party member only)
