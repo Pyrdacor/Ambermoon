@@ -78,7 +78,7 @@ Value | Name
 
 You can determine if an item provides a spell by checking the spell index or usage count.
 
-The special spell type is used with the following spell indices (this might not be complete yet):
+The special spell type is used with the following spell indices:
 
 Value | Name
 ----|----
@@ -103,3 +103,8 @@ Value | Name
 19 | Add anti-magic (used by anti-magic potion)
 20 | Rope (used by rope)
 21 | Drugs (used by stinking mushroom)
+22 | Self healing (pet food, **Ambermoon Advanced** only)
+23 | Self reviving (cat lives, **Ambermoon Advanced** only)
+24 | Exp exchange (transfer stone, **Ambermoon Advanced** only)
+25 | Mount wasp (Riding harness, **Ambermoon Advanced** only)
+
