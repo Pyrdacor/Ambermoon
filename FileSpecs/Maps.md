@@ -80,12 +80,14 @@ The lower 2 bits represent the character type:
 - 3: Map object (like non-interactive small spiders, etc)
 
 The upper 6 bits contain the flags:
-- Bit 2: Random movement
+- Bit 2: Base movement type
 - Bit 3: Use tileset
 - Bit 4: Text popup
 - Bit 5: NPC talks to you (**Ambermoon Advanced** only)
 - Bit 6: Unused
 - Bit 7: Stationary / Only move when see player (**Ambermoon Advanced** only)
+
+The base movement type has different meaning for monsters and NPCs/party members. For monsters a value of 0 means stationary and 1 means random moving and chasing the player. For NPCs and party members a value of 0 means using a predefined path of 288 positions (one for each 5 minute timeslot of the day) and 1 means random moving.
 
 For NPCs if flag "Text popup" is set, the index is a map text index and only a text popup is shown on interaction.
 
