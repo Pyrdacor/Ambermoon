@@ -79,7 +79,7 @@ namespace AmbermoonImageEditor
             }
         }
 
-        public static void Write(IDataWriter writer, Graphic graphic, GraphicFormat graphicFormat, int paletteOffset = 0)
+        public static void Write(IDataWriter writer, Graphic graphic, GraphicFormat graphicFormat, int paletteOffset = 0, int frames = 1)
         {
             void EnsureCorrectDataSize(int bytesPerPixel)
             {
@@ -87,6 +87,21 @@ namespace AmbermoonImageEditor
 
                 if (expectedSize != graphic.Data.Length)
                     throw new InvalidDataException("Given graphic data size mismatches the expected size.");
+            }
+
+            if (frames > 1)
+            {
+                int widthPerFrame = graphic.Width / frames;
+
+                if (widthPerFrame == 0)
+                    throw new ArgumentOutOfRangeException(nameof(frames));
+
+                for (int i = 0; i < frames; ++i)
+                {
+                    Write(writer, graphic.GetArea(i * widthPerFrame, 0, widthPerFrame, graphic.Height), graphicFormat, paletteOffset);
+                }
+
+                return;
             }
 
             switch (graphicFormat)

@@ -6,6 +6,7 @@ using WallFlags = Ambermoon.Data.Tileset.TileFlags;
 using ObjectFlags = Ambermoon.Data.Tileset.TileFlags;
 using Ambermoon.Data.Enumerations;
 using AmbermoonLabdataEditor;
+using static Ambermoon.Data.Labdata;
 
 Dictionary<WallFlags, string> AllWallFlags = new()
 {
@@ -15,7 +16,8 @@ Dictionary<WallFlags, string> AllWallFlags = new()
     { WallFlags.RandomAnimationStart, "Random Animation Start" },
     { WallFlags.BlockAllMovement, "Block All Movement" },
     { WallFlags.AllowMovementWalk, "Allow Player Move" },
-    { WallFlags.AllowMovementMonster, "Allow Monster Move" }  
+    { WallFlags.AllowMovementMonster, "Allow Monster 1 Move" },
+    { WallFlags.AllowMovementRaft, "Allow Monster 2 Move" }
 };
 
 Dictionary<ObjectFlags, string> AllObjectFlags = new()
@@ -26,7 +28,8 @@ Dictionary<ObjectFlags, string> AllObjectFlags = new()
     { ObjectFlags.RandomAnimationStart, "Random Animation Start" },
     { ObjectFlags.BlockAllMovement, "Block All Movement" },
     { ObjectFlags.AllowMovementWalk, "Allow Player Move" },
-    { ObjectFlags.AllowMovementMonster, "Allow Monster Move" }
+    { ObjectFlags.AllowMovementMonster, "Allow Monster 1 Move" },
+    { ObjectFlags.AllowMovementRaft, "Allow Monster 2 Move" }
 };
 
 if (args.Length != 2)
@@ -453,6 +456,10 @@ void Add()
             Error();
             return;
         }
+        if (!wall.Value.Flags.HasFlag(WallFlags.BlockAllMovement))
+        {
+            QueryInt(wall, "CombatBackground", (wall, combatBackground) => { wall.Flags = (Tileset.TileFlags)((uint)wall.Flags | ((uint)combatBackground << 28)); return wall; }, 0, 15);
+        }
         var overlays = new List<Labdata.OverlayData>();
         while (overlays.Count < 255)
         {
@@ -698,7 +705,9 @@ void Edit()
         QueryInt(wall, $"TextureIndex ({old.TextureIndex})", (wall, textureIndex) => { wall.TextureIndex = (uint)textureIndex; return wall; }, 1, 255);
         QueryAutomapType(wall, $"AutomapType ({old.AutomapType})", (wall, automapType) => { wall.AutomapType = automapType; return wall; });
         QueryInt(wall, $"ColorIndex ({old.ColorIndex})", (wall, colorIndex) => { wall.ColorIndex = (byte)colorIndex; return wall; }, 0, 31);
-        QueryFlags(wall, $"Flags ({GetWallFlagNames(old.Flags)})", (wall, flags) => { wall.Flags = flags | (Tileset.TileFlags)(labdata.CombatBackground << 28); return wall; }, AllWallFlags);
+        QueryFlags(wall, $"Flags ({GetWallFlagNames(old.Flags)}) [0x{(uint)old.Flags:x8}]", (wall, flags) => { wall.Flags = flags | (Tileset.TileFlags)(labdata.CombatBackground << 28); return wall; }, AllWallFlags);
+        QueryInt(wall, $"CombatBackground ({(uint)old.Flags >> 28})", (wall, combatBackground) => { wall.Flags = (Tileset.TileFlags)((uint)wall.Flags | ((uint)combatBackground << 28)); return wall; }, 0, 15);
+
         var overlays = new List<Labdata.OverlayData>(wall.Value.Overlays ?? new Labdata.OverlayData[0]);
         int prevOverlayAmount = wall.Value.Overlays?.Length ?? 0;
         while (overlays.Count < 255)
@@ -907,7 +916,7 @@ void Edit()
         QueryInt(objectInfo, $"MappedHeight ({old.MappedTextureHeight})", (objectInfo, mappedHeight) => { objectInfo.MappedTextureHeight = (uint)mappedHeight; return objectInfo; }, 1, 65535);
         QueryInt(objectInfo, $"Frames ({old.NumAnimationFrames})", (objectInfo, frames) => { objectInfo.NumAnimationFrames = (uint)frames; return objectInfo; }, 1, 255);
         QueryInt(objectInfo, $"ColorIndex ({old.ColorIndex})", (objectInfo, colorIndex) => { objectInfo.ColorIndex = (byte)colorIndex; return objectInfo; }, 0, 31);
-        QueryFlags(objectInfo, $"Flags ({GetObjectFlagNames(old.Flags)})", (objectInfo, flags) => { objectInfo.Flags = flags; return objectInfo; }, AllObjectFlags);
+        QueryFlags(objectInfo, $"Flags ({GetObjectFlagNames(old.Flags)}) [0x{(uint)old.Flags:x8}]", (objectInfo, flags) => { objectInfo.Flags = flags; return objectInfo; }, AllObjectFlags);
         QueryInt(objectInfo, $"CombatBackground ({(uint)old.Flags >> 28})", (objectInfo, combatBackground) => { objectInfo.Flags = (ObjectFlags)((uint)objectInfo.Flags | ((uint)combatBackground << 28)); return objectInfo; }, 0, 15);
 
         labdata.ObjectInfos[index - 1] = objectInfo.Value;

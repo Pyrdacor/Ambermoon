@@ -1,7 +1,9 @@
 using System.Drawing.Drawing2D;
 using System.Runtime.InteropServices;
+using System.Security.Cryptography;
 using Ambermoon.Data;
 using Ambermoon.Data.Legacy.Serialization;
+using Ambermoon.Data.Serialization;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 using static System.Windows.Forms.DataFormats;
 
@@ -50,7 +52,37 @@ namespace AmbermoonImageEditor
         private void newToolStripMenuItem_Click(object sender, EventArgs e)
         {
 
-        }        
+        }
+
+        private Graphic? LoadPalette()
+        {
+            var ofd = new OpenFileDialog
+            {
+                AddExtension = false,
+                CheckFileExists = true,
+                CheckPathExists = true,
+                Filter = "All files (*.*)|*.*",
+                FilterIndex = 0,
+                Multiselect = false,
+                Title = "Open Ambermoon palette"
+            };
+
+            if (ofd.ShowDialog(this) == DialogResult.OK)
+            {
+                var graphicReader = new GraphicReader();
+                var paletteInfo = new GraphicInfo
+                {
+                    Width = 32,
+                    Height = 1,
+                    GraphicFormat = GraphicFormat.XRGB16
+                };
+                var palette = new Graphic();
+                graphicReader.ReadGraphic(palette, new DataReader(File.ReadAllBytes(ofd.FileName)), paletteInfo);
+                return palette;
+            }
+
+            return null;
+        }
 
         private void openToolStripMenuItem_Click(object sender, EventArgs e)
         {
@@ -68,11 +100,9 @@ namespace AmbermoonImageEditor
             if (ofd.ShowDialog(this) == DialogResult.OK) 
             {
                 var file = ofd.FileName;
+                var palette = LoadPalette();
 
-                ofd.FileName = null;
-                ofd.Title = "Open Ambermoon palette";
-
-                if (ofd.ShowDialog(this) == DialogResult.OK)
+                if (palette != null)
                 {
                     var sizeForm = new SizeForm(true);
 
@@ -97,12 +127,6 @@ namespace AmbermoonImageEditor
                         }
 
                         var graphicReader = new GraphicReader();
-                        var paletteInfo = new GraphicInfo
-                        {
-                            Width = 32,
-                            Height = 1,
-                            GraphicFormat = GraphicFormat.XRGB16
-                        };
                         format = graphicInfo.GraphicFormat;
                         if (frames == 1)
                         {
@@ -120,8 +144,6 @@ namespace AmbermoonImageEditor
                                 image.AddOverlay((uint)(i * w), 0, frame, false);
                             }
                         }
-                        palette = new Graphic();
-                        graphicReader.ReadGraphic(palette, new DataReader(File.ReadAllBytes(ofd.FileName)), paletteInfo);
                         saveToolStripMenuItem.Enabled = true;
 
                         switch (graphicInfo.GraphicFormat)
@@ -151,11 +173,100 @@ namespace AmbermoonImageEditor
                                 break;
                         }
 
+                        this.palette = palette;
+
                         UpdateImage();
                         OpenPalette();
                     }
                 }
             }
+        }
+
+        private bool UpdateImageFromBitmapAndPalette()
+        {
+            if (bitmap == null || palette == null)
+                return false;
+
+            var data = bitmap.LockBits(new Rectangle(Point.Empty, bitmap.Size), System.Drawing.Imaging.ImageLockMode.ReadOnly, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
+            var bytes = new byte[data.Width * data.Height * 4];
+
+            Marshal.Copy(data.Scan0, bytes, 0, bytes.Length);
+
+            bitmap.UnlockBits(data);
+
+            var paletteColors = new List<uint>(32);
+            int minColorIndexBesideZero = 32;
+            int maxColorIndex = 0;
+
+            // Source 66 33 11 ff
+            // Dest   ff 66 33 11
+            for (int i = 0; i < 32; ++i)
+            {
+                int index = i * 4;
+                // RGBA -> Little Endian 0xAARRGGBB
+                uint color = palette.Data[index + 3]; // A
+                color <<= 8;
+                color |= palette.Data[index + 0]; // R
+                color <<= 8;
+                color |= palette.Data[index + 1]; // G
+                color <<= 8;
+                color |= palette.Data[index + 2]; // B
+                paletteColors.Add(color);
+            }
+
+            var graphic = new Graphic(bitmap.Width, bitmap.Height, 0);
+
+            for (int y = 0; y < bitmap.Height; ++y)
+            {
+                for (int x = 0; x < bitmap.Width; ++x)
+                {
+                    int colorIndex = paletteColors.IndexOf(BitConverter.ToUInt32(bytes, (x + y * bitmap.Width) * 4));
+
+                    if (colorIndex == -1)
+                    {
+                        return false;
+                    }
+
+                    graphic.Data[x + y * bitmap.Width] = (byte)colorIndex;
+
+                    if (colorIndex > maxColorIndex)
+                        maxColorIndex = colorIndex;
+                    if (colorIndex != 0 && colorIndex < minColorIndexBesideZero)
+                        minColorIndexBesideZero = colorIndex;
+                }
+            }
+
+            int colorRange = minColorIndexBesideZero == 32 ? 1 : 1 + maxColorIndex - minColorIndexBesideZero;
+
+            if (format == null || format == GraphicFormat.Palette5Bit || maxColorIndex >= 16)
+                format = GraphicFormat.Palette5Bit;
+            else if (format == GraphicFormat.Palette3Bit)
+            {
+                 if ((colorRange <= 8 && minColorIndexBesideZero >= 24) ||
+                     (colorRange <= 7 && minColorIndexBesideZero + colorRange <= 8))
+                    format = GraphicFormat.Palette3Bit;
+                 else
+                    format = GraphicFormat.Palette4Bit;
+            }
+
+            switch (format)
+            {
+                case GraphicFormat.Palette3Bit:
+                    bpp3ToolStripMenuItem.Checked = true;
+                    break;
+                case GraphicFormat.Palette4Bit:
+                case GraphicFormat.Texture4Bit:
+                    bpp4ToolStripMenuItem.Checked = true;
+                    break;
+                default:
+                    bpp5ToolStripMenuItem.Checked = true;
+                    break;
+            }
+
+            image = graphic;
+            saveToolStripMenuItem.Enabled = true;
+
+            return true;
         }
 
         private byte[] ToPixelData(Graphic graphic, Graphic palette, byte alphaIndex = 0)
@@ -407,8 +518,48 @@ namespace AmbermoonImageEditor
             toolStripStatusLabelHeight.Visible = showArea;
         }
 
+        private int PaletteOffset
+        {
+            get
+            {
+                if (toolStripMenuItemPalOffset16.Checked)
+                    return 16;
+                if (toolStripMenuItemPalOffset24.Checked)
+                    return 24;
+                return 0;
+            }
+        }
+        private int NumColors
+        {
+            get
+            {
+                if (bpp3ToolStripMenuItem.Checked)
+                    return 8;
+                if (bpp4ToolStripMenuItem.Checked)
+                    return 16;
+                return 32;
+            }
+        }
+
         private void saveToolStripMenuItem_Click(object sender, EventArgs e)
         {
+            int frames = 1; // TODO
+            format ??= GraphicFormat.Palette5Bit;
+            format = GraphicFormat.Texture4Bit;
+            int maxColor = Math.Min(31, PaletteOffset + NumColors - 1);
+
+            if (image == null || palette == null || image.Data.Any(i => i < PaletteOffset || i > maxColor))
+            {
+                MessageBox.Show("The image contains colors outside the range or there is no image or palette data given. Either provide the data or change the color format or palette offset.", "Invalid image data", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
+
+            if (format == GraphicFormat.Palette4Bit)
+            {
+                if (MessageBox.Show("Do you want to store as a texture (3D wall, overlay or object)? Otherwise as normal 4bpp image.", "Save as texture?", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
+                    format = GraphicFormat.Texture4Bit;
+            }
+
             var sfd = new SaveFileDialog
             {
                 OverwritePrompt = true,
@@ -417,7 +568,7 @@ namespace AmbermoonImageEditor
 
             if (sfd.ShowDialog() == DialogResult.OK)
             {
-                var imageToSave = image!;
+                var imageToSave = image;
 
                 if (format!.Value == GraphicFormat.Texture4Bit && imageToSave.Width % 8 != 0)
                 {
@@ -428,15 +579,30 @@ namespace AmbermoonImageEditor
                 }
 
                 var writer = new DataWriter();
-                GraphicWriter.Write(writer, image!, format!.Value);
+                GraphicWriter.Write(writer, image, format.Value, PaletteOffset, frames);
                 File.WriteAllBytes(sfd.FileName, writer.ToArray());
             }
         }
 
         private void UpdateMode()
         {
+            var newFormat = bpp3ToolStripMenuItem.Checked ? GraphicFormat.Palette3Bit : bpp4ToolStripMenuItem.Checked ? GraphicFormat.Palette4Bit : GraphicFormat.Palette5Bit;
             int numColors = bpp3ToolStripMenuItem.Checked ? 8 : bpp4ToolStripMenuItem.Checked ? 16 : 32;
-            int start = toolStripMenuItemPalOffset24.Checked ? 24 : toolStripMenuItemPalOffset16.Checked ? 16 : 0;
+            int start = PaletteOffset;
+
+            if (format != newFormat)
+            {
+                // Keep texture 4 bit if the new format would be palette 4 bit
+                if (format != GraphicFormat.Texture4Bit || newFormat != GraphicFormat.Palette4Bit)
+                {
+                    format = newFormat;
+                }
+                else if (start != 0)
+                {
+                    format = newFormat;
+                }
+            }
+
             paletteForm.RestrictColorSelection(start, start + numColors - 1);
         }
 
@@ -533,6 +699,32 @@ namespace AmbermoonImageEditor
                 panel1.Width = 200;
 
             imagePanel.Refresh();
+
+            void LoadNewPalette()
+            {
+                var palette = LoadPalette();
+
+                if (palette != null)
+                    this.palette = palette;
+            }
+
+            if (palette != null)
+            {
+                if (MessageBox.Show("Do you want to load a specific palette for the pasted image?", "Image Palette", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
+                {
+                    LoadNewPalette();
+                }
+            }
+            else
+            {
+                LoadNewPalette();
+            }
+
+            if (!UpdateImageFromBitmapAndPalette())
+            {
+                MessageBox.Show("No matching palette found. Please load an appropriate one.", "Invalid palette", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                image = null;
+            }
         }
 
         private void copyHexBytesToolStripMenuItem_Click(object sender, EventArgs e)
@@ -643,33 +835,16 @@ namespace AmbermoonImageEditor
 
         private void openPaletteToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            if (this.image != null)
-            {
-                var ofd = new OpenFileDialog
-                {
-                    AddExtension = false,
-                    CheckFileExists = true,
-                    CheckPathExists = true,
-                    Filter = "All files (*.*)|*.*",
-                    FilterIndex = 0,
-                    Multiselect = false,
-                    Title = "Open Ambermoon palette"
-                };
+            var palette = LoadPalette();
 
-                if (ofd.ShowDialog(this) == DialogResult.OK)
-                {
-                    var graphicReader = new GraphicReader();
-                    var paletteInfo = new GraphicInfo
-                    {
-                        Width = 32,
-                        Height = 1,
-                        GraphicFormat = GraphicFormat.XRGB16
-                    };
-                    palette = new Graphic();
-                    graphicReader.ReadGraphic(palette, new DataReader(File.ReadAllBytes(ofd.FileName)), paletteInfo);
+            if (palette != null)
+            {
+                this.palette = palette;
+                if (image != null)
                     UpdateImage();
-                    OpenPalette();
-                }
+                else
+                    UpdateImageFromBitmapAndPalette();
+                OpenPalette();
             }
         }
     }

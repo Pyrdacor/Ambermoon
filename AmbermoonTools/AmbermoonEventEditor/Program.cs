@@ -1069,7 +1069,6 @@ namespace AmbermoonEventEditor
             var availableEvents = EventDescriptions.Events.Where(e => map && e.Value.AllowMaps || !map && e.Value.AllowNPCs).Select(e => e.Key).ToList();
 
             availableEvents.Remove(EventType.Invalid);
-            availableEvents.Remove(EventType.Unknown);
 
             if (!map && fromEdit)
             {

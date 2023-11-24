@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace Ambermoon.Data.Descriptions
 {
@@ -170,6 +172,9 @@ namespace Ambermoon.Data.Descriptions
         public static EnumValueDescription<TEnum> Enum<TEnum>(string name, bool required, TEnum defaultValue = default(TEnum),
             params TEnum[] allowedValues)
             where TEnum : System.Enum => new EnumValueDescription<TEnum>(name, required, false, defaultValue, false, false, allowedValues);
+
+        public static EnumValueDescription<TEnum> Enum<TEnum>(string name, bool required, TEnum defaultValue, IEnumerable<TEnum> allowedValues)
+            where TEnum : System.Enum => new EnumValueDescription<TEnum>(name, required, false, defaultValue, false, false, allowedValues.ToArray());
 
         public static EnumValueDescription<TEnum> HiddenEnum<TEnum>(TEnum defaultValue = default(TEnum))
             where TEnum : System.Enum => new EnumValueDescription<TEnum>("Unknown", false, true, defaultValue, false, false, null);

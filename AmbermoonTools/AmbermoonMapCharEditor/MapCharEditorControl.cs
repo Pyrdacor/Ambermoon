@@ -101,6 +101,7 @@ namespace AmbermoonMapCharEditor
             {
                 if (monsterGroupFile.Value.Size != 0)
                 {
+                    monsterGroupFile.Value.Position = 0;
                     var indices = Enumerable.Range(0, 18).Select(_ => monsterGroupFile.Value.ReadWord()).Where(i => i != 0).ToList();
                     var group = indices.Select(i => monsters[i]).ToList();
 

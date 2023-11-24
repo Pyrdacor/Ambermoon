@@ -46,6 +46,10 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AmbermoonImageEditor", "Amb
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AmbermoonListExtractor", "AmbermoonListExtractor\AmbermoonListExtractor.csproj", "{FCD634B1-AE09-4D08-BFEC-A87CF66F2848}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ConsoleApp1", "ConsoleApp1\ConsoleApp1.csproj", "{D90D90AF-2482-49D4-99AB-6CB9E0718CF5}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AmbermoonLabdataExtractor", "AmbermoonLabdataExtractor\AmbermoonLabdataExtractor.csproj", "{7D536219-8AA5-434C-98B5-11098C77D235}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -267,6 +271,30 @@ Global
 		{FCD634B1-AE09-4D08-BFEC-A87CF66F2848}.ReleaseES|Any CPU.Build.0 = Release|Any CPU
 		{FCD634B1-AE09-4D08-BFEC-A87CF66F2848}.ReleaseLinux|Any CPU.ActiveCfg = Release|Any CPU
 		{FCD634B1-AE09-4D08-BFEC-A87CF66F2848}.ReleaseLinux|Any CPU.Build.0 = Release|Any CPU
+		{D90D90AF-2482-49D4-99AB-6CB9E0718CF5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D90D90AF-2482-49D4-99AB-6CB9E0718CF5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D90D90AF-2482-49D4-99AB-6CB9E0718CF5}.DebugAndroid|Any CPU.ActiveCfg = Debug|Any CPU
+		{D90D90AF-2482-49D4-99AB-6CB9E0718CF5}.DebugAndroid|Any CPU.Build.0 = Debug|Any CPU
+		{D90D90AF-2482-49D4-99AB-6CB9E0718CF5}.DebugES|Any CPU.ActiveCfg = Debug|Any CPU
+		{D90D90AF-2482-49D4-99AB-6CB9E0718CF5}.DebugES|Any CPU.Build.0 = Debug|Any CPU
+		{D90D90AF-2482-49D4-99AB-6CB9E0718CF5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D90D90AF-2482-49D4-99AB-6CB9E0718CF5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D90D90AF-2482-49D4-99AB-6CB9E0718CF5}.ReleaseES|Any CPU.ActiveCfg = Release|Any CPU
+		{D90D90AF-2482-49D4-99AB-6CB9E0718CF5}.ReleaseES|Any CPU.Build.0 = Release|Any CPU
+		{D90D90AF-2482-49D4-99AB-6CB9E0718CF5}.ReleaseLinux|Any CPU.ActiveCfg = Release|Any CPU
+		{D90D90AF-2482-49D4-99AB-6CB9E0718CF5}.ReleaseLinux|Any CPU.Build.0 = Release|Any CPU
+		{7D536219-8AA5-434C-98B5-11098C77D235}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7D536219-8AA5-434C-98B5-11098C77D235}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7D536219-8AA5-434C-98B5-11098C77D235}.DebugAndroid|Any CPU.ActiveCfg = Debug|Any CPU
+		{7D536219-8AA5-434C-98B5-11098C77D235}.DebugAndroid|Any CPU.Build.0 = Debug|Any CPU
+		{7D536219-8AA5-434C-98B5-11098C77D235}.DebugES|Any CPU.ActiveCfg = Debug|Any CPU
+		{7D536219-8AA5-434C-98B5-11098C77D235}.DebugES|Any CPU.Build.0 = Debug|Any CPU
+		{7D536219-8AA5-434C-98B5-11098C77D235}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7D536219-8AA5-434C-98B5-11098C77D235}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7D536219-8AA5-434C-98B5-11098C77D235}.ReleaseES|Any CPU.ActiveCfg = Release|Any CPU
+		{7D536219-8AA5-434C-98B5-11098C77D235}.ReleaseES|Any CPU.Build.0 = Release|Any CPU
+		{7D536219-8AA5-434C-98B5-11098C77D235}.ReleaseLinux|Any CPU.ActiveCfg = Release|Any CPU
+		{7D536219-8AA5-434C-98B5-11098C77D235}.ReleaseLinux|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

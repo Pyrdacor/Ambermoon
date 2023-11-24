@@ -473,6 +473,28 @@ namespace Ambermoon.Data.Descriptions
                 Use.HiddenByte(),
                 Use.HiddenByte(),
                 Use.HiddenByte()
+            )},
+            { EventType.RemovePartyMember, new EventDescription
+            (
+                true, true, true, true, false,
+                Use.Enum("Character", true, PartyMembers.Netsrak, Enum.GetValues<PartyMembers>().Skip(2)), // Skip "None" and "Hero"
+                Use.Byte("EquipmentChest", true),
+                Use.Byte("InventoryChest", true),
+                Use.HiddenByte(),
+                Use.HiddenByte(),
+                Use.HiddenWord(),
+                Use.HiddenWord()
+            )},
+            { EventType.Delay, new EventDescription
+            (
+                true, true, true, true, false,
+                Use.HiddenByte(),
+                Use.HiddenByte(),
+                Use.HiddenByte(),
+                Use.HiddenByte(),
+                Use.HiddenByte(),
+                Use.Word("Milliseconds", true),
+                Use.HiddenWord()
             )}
         };
     }

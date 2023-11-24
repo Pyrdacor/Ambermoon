@@ -47,7 +47,7 @@ namespace AmbermoonMapEditor2D
             var icons1 = gameData.Files["1Icon_gfx.amb"];
             var icons2 = gameData.Files["2Icon_gfx.amb"];
             var icons3 = gameData.Files["3Icon_gfx.amb"];
-            palettes = gameData.Files["Palettes.amb"].Files.ToDictionary(f => (uint)f.Key, f => ReadPalette(f.Value));
+            palettes = gameData.Files["Palettes.amb"].Files.ToDictionary(f => (uint)f.Key, f => { f.Value.Position = 0; return ReadPalette(f.Value); });
             tilesets = new Dictionary<uint, IDataReader>();
 
             void AddTilesets(IFileContainer container)
