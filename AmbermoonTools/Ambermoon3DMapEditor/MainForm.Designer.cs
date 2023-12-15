@@ -35,6 +35,7 @@
             keyInputTimer = new System.Windows.Forms.Timer(components);
             statusStrip1 = new StatusStrip();
             statusPosition = new ToolStripStatusLabel();
+            initTimer = new System.Windows.Forms.Timer(components);
             ((System.ComponentModel.ISupportInitialize)splitContainer1).BeginInit();
             splitContainer1.Panel1.SuspendLayout();
             splitContainer1.Panel2.SuspendLayout();
@@ -107,6 +108,10 @@
             statusPosition.Size = new Size(29, 20);
             statusPosition.Text = "X,Y";
             // 
+            // initTimer
+            // 
+            initTimer.Tick += initTimer_Tick;
+            // 
             // MainForm
             // 
             AutoScaleDimensions = new SizeF(8F, 20F);
@@ -139,5 +144,6 @@
         private System.Windows.Forms.Timer keyInputTimer;
         private StatusStrip statusStrip1;
         private ToolStripStatusLabel statusPosition;
+        private System.Windows.Forms.Timer initTimer;
     }
 }

@@ -88,10 +88,6 @@ namespace Ambermoon3DMapEditor
 
             GL.End();
 
-            /*
-            ... use various other GL.*() calls here to draw stuff ...
-            */
-
             view3D.SwapBuffers();
         }
 
@@ -106,15 +102,6 @@ namespace Ambermoon3DMapEditor
             Matrix4 perpective = Matrix4.CreatePerspectiveFieldOfView(MathHelper.PiOver4, 1.6f, 1, 64);
 
             GL.LoadMatrix(ref perpective);
-
-            /*
-                Usually you compute projection matrices here too, like this:
-
-                float aspect_ratio = MyGLControl.ClientSize.Width / (float)MyGLControl.ClientSize.Height;
-                Matrix4 perpective = Matrix4.CreatePerspectiveFieldOfView(MathHelper.PiOver4, aspect_ratio, 1, 64);
-
-                And then you load that into OpenGL with a call like GL.LoadMatrix() or GL.Uniform().
-            */
         }
 
         private void MainForm_KeyDown(object sender, KeyEventArgs e)
@@ -172,7 +159,19 @@ namespace Ambermoon3DMapEditor
             ModelViewMatrix = Matrix4.Mult(ModelViewMatrix, Matrix4.CreateRotationY(PlayerViewAngle));
             GL.LoadMatrix(ref ModelViewMatrix);
             GL.MatrixMode(MatrixMode.Projection);
-            statusPosition.Text = $"X: {PlayerX:0.0}, Y: {PlayerY:0.0}";
+            const float segment = MathHelper.Pi / 8;
+            string direction = PlayerViewAngle switch
+            {
+                >= segment and < 3 * segment => "UpRight",
+                >= 3 * segment and < 5 * segment => "Right",
+                >= 5 * segment and < 7 * segment => "DownRight",
+                >= 7 * segment and < 9 * segment => "Down",
+                >= 9 * segment and < 11 * segment => "DownLeft",
+                >= 11 * segment and < 13 * segment => "Left",
+                >= 13 * segment and < 15 * segment => "UpLeft",
+                _ => "Up"
+            };
+            statusPosition.Text = $"X: {PlayerX:0.0}, Y: {PlayerY:0.0}, Dir: {direction}";
             Refresh();
         }
 
@@ -222,7 +221,17 @@ namespace Ambermoon3DMapEditor
 
         private void MainForm_Load(object sender, EventArgs e)
         {
-            GL.Enable(EnableCap.DepthTest);
+            GL.Enable(EnableCap.DepthTest);            
+            PlayerX = 0.5f * MapWidth;
+            PlayerY = 0.5f * MapHeight;
+            statusPosition.Text = $"X: {PlayerX:0.0}, Y: {PlayerY:0.0}";
+            initTimer.Start();
+        }
+
+        private void initTimer_Tick(object sender, EventArgs e)
+        {
+            view3D_Resize(this, EventArgs.Empty);
+            initTimer.Stop();
         }
     }
 }
