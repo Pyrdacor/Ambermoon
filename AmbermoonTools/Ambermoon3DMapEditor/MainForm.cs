@@ -60,7 +60,7 @@ namespace Ambermoon3DMapEditor
         private bool showObjects = true;
         private bool showWallColors = false;
         private bool showObjectColors = false;
-        private bool noClip = true;
+        private bool noClip = false;
         private bool initialized = false;
         private int animationFrame = 0;
 
@@ -496,42 +496,89 @@ namespace Ambermoon3DMapEditor
                 >= 13 * segment and < 15 * segment => "UpLeft",
                 _ => "Up"
             };
-            statusPosition.Text = $"X: {1 + playerX:0.0}, Y: {1 + mapHeight - playerY:0.0}, Dir: {direction}";
+            statusPosition.Text = $"X: {1 + playerX:0.0}, Y: {1 + playerY:0.0}, Dir: {direction}";
             Refresh();
         }
 
         private void MoveTo(float x, float y, bool testBlocking = true)
         {
-            if (x < 0 || x >= mapWidth) return;
-            if (y < 0 || y >= mapHeight) return;
+            float dx = x - playerX;
+            float dy = y - playerY;
+            float max = Math.Max(Math.Abs(dx), Math.Abs(dy));
+            if (max != 0)
+            {
+                dx /= max;
+                dy /= max;
+            }
+            bool allowX = true;
+            bool allowY = true;
+
+            if (x < 0.5f || x >= mapWidth - 0.5f) allowX = false;
+            if (y < 0.5f || y >= mapHeight - 0.5f) allowY = false;
 
             if (!noClip && testBlocking)
             {
-                int ix = (int)Math.Round(x);
-                int iy = (int)Math.Round(y);
-                int blockIndex = ix + (mapHeight - iy - 1) * mapWidth; // TODO
-                int index = blocks[/*ix + iy * mapWidth*/blockIndex];
-                
-                if (index == 255) return; // always blocking
-                if (index > 0 && labdata != null)
+                int ix = (int)Math.Floor(x + dx * PlayerSize);
+                int iy = (int)Math.Floor(y + dy * PlayerSize);
+                int px = (int)Math.Floor(playerX);
+                int py = (int)Math.Floor(playerY);
+                int indexOnlyX = blocks[ix + py * mapWidth];
+                int indexOnlyY = blocks[px + iy * mapWidth];
+                float xMod = dx >= 0 ? (x + dx * PlayerSize) % BlockSize : BlockSize - (x + dx * PlayerSize) % BlockSize;
+                float yMod = dy >= 0 ? (y + dy * PlayerSize) % BlockSize : BlockSize - (y + dy * PlayerSize) % BlockSize;
+
+                if (allowX && allowY)
                 {
-                    if (index <= 100)
+                    allowX = TestBlock(indexOnlyX, xMod);
+                    allowY = TestBlock(indexOnlyY, yMod);
+                }
+                else if (allowX)
+                {
+                    if (!TestBlock(indexOnlyX, xMod))
+                        return;
+                }
+                else if (allowY)
+                {
+                    if (!TestBlock(indexOnlyY, yMod))
+                        return;
+                }
+
+                bool TestBlock(int index, float distInsideBlock)
+                {
+                    if (index == 255)
                     {
-                        var obj = labdata.Objects[index];
-                        if (obj.SubObjects.Any(so => so.Object.Flags.HasFlag(Tileset.TileFlags.BlockAllMovement) || !so.Object.Flags.HasFlag(Tileset.TileFlags.AllowMovementWalk)))
-                            return;
+                        return false;
                     }
-                    else
+                    if (index > 0 && labdata != null)
                     {
-                        var wall = labdata.Walls[index - 101];
-                        if (wall.Flags.HasFlag(Tileset.TileFlags.BlockAllMovement) || !wall.Flags.HasFlag(Tileset.TileFlags.AllowMovementWalk))
-                            return;
+                        if (index <= 100)
+                        {
+                            var obj = labdata.Objects[index - 1];
+                            if (obj.SubObjects.Any(so => so.Object.Flags.HasFlag(Tileset.TileFlags.BlockAllMovement) || !so.Object.Flags.HasFlag(Tileset.TileFlags.AllowMovementWalk)))
+                            {
+                                // We ease this a bit
+                                float d = obj.SubObjects.Max(so => so.Object.MappedTextureWidth / 512.0f) * 0.45f;
+
+                                if (2.0f * distInsideBlock > BlockSize - d)
+                                    return false;
+                            }
+                        }
+                        else
+                        {
+                            var wall = labdata.Walls[index - 101];
+                            if (wall.Flags.HasFlag(Tileset.TileFlags.BlockAllMovement) || !wall.Flags.HasFlag(Tileset.TileFlags.AllowMovementWalk))
+                                return false;
+                        }
                     }
+
+                    return true;
                 }
             }
 
-            playerX = x;
-            playerY = y;
+            if (allowX)
+                playerX = x;
+            if (allowY)
+                playerY = y;
         }
 
         private void MoveForward()
@@ -594,7 +641,7 @@ namespace Ambermoon3DMapEditor
             LoadMap(259);
 
             playerX = 0.5f * mapWidth;
-            playerY = 0.5f * mapHeight;
+            playerY = 0.5f * mapHeight - 1;
 
             initialized = true;
             initTimer.Start();
