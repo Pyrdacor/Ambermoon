@@ -25,10 +25,10 @@ namespace Ambermoon3DMapEditor
         uint paletteIndex = 1;
         Labdata? labdata;
         byte[] blocks = new byte[10 * 10];
-        private readonly Matrix4 perspectiveMatrix = Matrix4.CreatePerspectiveFieldOfView(0.26f * MathHelper.Pi, 1.6f, 0.1f, 40.0f * BlockSize);
+        private Matrix4 perspectiveMatrix => Matrix4.CreatePerspectiveFieldOfView(0.26f * MathHelper.Pi, 341.0f / (labdata?.WallHeight ?? 400), 0.1f, 40.0f * BlockSize);
         private const float BlockSize = 1.0f;
-        private const float RefWallHeight = 2 * BlockSize / (2.0f * 3.0f);
-        private float WallHeight => mapWallHeight * 2 * BlockSize / (2.0f * 3.0f * 341.0f);
+        private const float RefWallHeight = 341.0f * BlockSize / 512.0f;
+        private float WallHeight => (labdata?.WallHeight ?? 400) * BlockSize / 512.0f;
         private int mapWidth = 10;
         private int mapHeight = 10;
         private bool[] pressedKeys = Enumerable.Repeat(false, 256).ToArray();
@@ -36,7 +36,7 @@ namespace Ambermoon3DMapEditor
         private float playerX = 0.0f;
         private float playerY = 0.0f;
         private float playerViewAngle = 0.0f;
-        private float moveSpeed => speedBoost ? 0.1f * BlockSize : 0.05f * BlockSize;
+        private float moveSpeed => speedBoost ? 0.15f * BlockSize : 0.075f * BlockSize;
         private const float TurnSpeed = 0.1f;
         private bool speedBoost = false;
         private List<Texture>? wallTextures = null;
@@ -49,7 +49,6 @@ namespace Ambermoon3DMapEditor
         private readonly Dictionary<uint, Palette> palettes = new();
         private Color4 floorColor = Color4.White;
         private Color4 ceilingColor = Color4.White;
-        private uint mapWallHeight = 400;
         private bool showFloorTexture = true;
         private bool showCeilingTexture = true;
         private bool showFloor = true;
@@ -178,22 +177,11 @@ namespace Ambermoon3DMapEditor
 
         private void DrawSubObject(int x, int y, Labdata.ObjectPosition obj)
         {
-            /*float left = x * BlockSize;
-            float right = left + BlockSize;
-            float far = -(mapHeight - y) * BlockSize;
-            float near = far + BlockSize;
-            float top = WallHeight;
-            float bottom = 0.0f;*/
-            float h = (obj.Z + obj.Object.MappedTextureHeight) * WallHeight / 341.0f;
-            Vector4 position = new Vector4((x + obj.X / 512.0f) * BlockSize, h, -(mapHeight - (y - obj.Y / 512.0f)) * BlockSize, 1.0f);
-            /*var mappedPosition = perspectiveMatrix * modelViewMatrix * position;
-            mappedPosition /= mappedPosition.W;*/
-            /*var mappedPosition = modelViewMatrix * position;
-            mappedPosition /= mappedPosition.W;*/
-            var mappedPosition = position;
-
-            //if (mappedPosition.Z < 0)
-            //    return;
+            float bottomY = obj.Z / 341.0f;
+            //float h = (obj.Z + obj.Object.MappedTextureHeight) * WallHeight / 341.0f;
+            Vector4 position = new Vector4((x + obj.X / 512.0f) * BlockSize, bottomY, -(mapHeight - (y - obj.Y / 512.0f)) * BlockSize, 1.0f);
+            var mappedPosition = position * modelViewMatrix;
+            mappedPosition /= mappedPosition.W;
 
             int index = labdata!.ObjectInfos.IndexOf(obj.Object);
             var texture = objectTextures![index];
@@ -211,8 +199,10 @@ namespace Ambermoon3DMapEditor
 
             float left = mappedPosition.X - 0.5f * obj.Object.MappedTextureWidth * BlockSize / 512.0f;
             float right = left + obj.Object.MappedTextureWidth * BlockSize / 512.0f;
-            float top = mappedPosition.Y;
-            float bottom = top - obj.Object.MappedTextureHeight * BlockSize / 512.0f;
+            //float top = mappedPosition.Y;
+            //float bottom = top - obj.Object.MappedTextureHeight * BlockSize / 512.0f;
+            float bottom = mappedPosition.Y;
+            float top = bottom + obj.Object.MappedTextureHeight / 512.0f;
             float z = mappedPosition.Z;
 
             // Front
@@ -306,7 +296,7 @@ namespace Ambermoon3DMapEditor
                 GL.Ortho(0.0, view3D.Width, view3D.Height, 0.0, -100.0, 400.0);*/
                 GL.MatrixMode(MatrixMode.Modelview);
                 GL.PushMatrix();
-                //GL.LoadIdentity();
+                GL.LoadIdentity();
                 GL.Disable(EnableCap.CullFace);
                 //GL.Disable(EnableCap.DepthTest);
                 //GL.Disable(EnableCap.Texture2D);
@@ -520,6 +510,10 @@ namespace Ambermoon3DMapEditor
             ceilingTextureAtlas = paletteTextureAtlas.ToTextureAtlas(palettes[paletteIndex], false);
             objectTextures = TextureLoader.Load(labdata.ObjectGraphics, out paletteTextureAtlas);
             objectTextureAtlas = paletteTextureAtlas.ToTextureAtlas(palettes[paletteIndex], true);
+
+            GL.MatrixMode(MatrixMode.Projection);
+            var perspective = perspectiveMatrix;
+            GL.LoadMatrix(ref perspective);
         }
 
         private void initTimer_Tick(object sender, EventArgs e)
