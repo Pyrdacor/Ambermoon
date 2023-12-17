@@ -24,22 +24,24 @@ namespace Ambermoon3DMapEditor
         GameData gameData;
         uint paletteIndex = 1;
         Labdata? labdata;
-        byte[] Blocks = new byte[10 * 10];
+        byte[] blocks = new byte[10 * 10];
+        private readonly Matrix4 perspectiveMatrix = Matrix4.CreatePerspectiveFieldOfView(0.26f * MathHelper.Pi, 1.6f, 0.1f, 40.0f * BlockSize);
         private const float BlockSize = 1.0f;
         private const float RefWallHeight = 2 * BlockSize / (2.0f * 3.0f);
         private float WallHeight => mapWallHeight * 2 * BlockSize / (2.0f * 3.0f * 341.0f);
-        private int MapWidth = 10;
-        private int MapHeight = 10;
-        private bool[] PressedKeys = Enumerable.Repeat(false, 256).ToArray();
-        private Matrix4 ModelViewMatrix = Matrix4.Identity;
-        private float PlayerX = 0.0f;
-        private float PlayerY = 0.0f;
-        private float PlayerViewAngle = 0.0f;
-        private float MoveSpeed => speedBoost ? 0.1f * BlockSize : 0.05f * BlockSize;
+        private int mapWidth = 10;
+        private int mapHeight = 10;
+        private bool[] pressedKeys = Enumerable.Repeat(false, 256).ToArray();
+        private Matrix4 modelViewMatrix = Matrix4.Identity;
+        private float playerX = 0.0f;
+        private float playerY = 0.0f;
+        private float playerViewAngle = 0.0f;
+        private float moveSpeed => speedBoost ? 0.1f * BlockSize : 0.05f * BlockSize;
         private const float TurnSpeed = 0.1f;
         private bool speedBoost = false;
         private List<Texture>? wallTextures = null;
         private TextureAtlas? wallTextureAtlas = null;
+        private TextureAtlas? transparentWallTextureAtlas = null;
         private TextureAtlas? floorTextureAtlas = null;
         private TextureAtlas? ceilingTextureAtlas = null;
         private List<Texture>? objectTextures = null;
@@ -69,12 +71,12 @@ namespace Ambermoon3DMapEditor
 
             GL.Begin(PrimitiveType.Quads);
             GL.TexCoord2(0.0f, 0.0f);
-            GL.Vertex3(0.0f, 0.0f, -MapHeight * BlockSize);
-            GL.TexCoord2(MapWidth, 0.0f);
-            GL.Vertex3(MapWidth * BlockSize, 0.0f, -MapHeight * BlockSize);
-            GL.TexCoord2(MapWidth, MapHeight);
-            GL.Vertex3(MapWidth * BlockSize, 0.0f, 0.0f);
-            GL.TexCoord2(0.0f, MapHeight);
+            GL.Vertex3(0.0f, 0.0f, -mapHeight * BlockSize);
+            GL.TexCoord2(mapWidth, 0.0f);
+            GL.Vertex3(mapWidth * BlockSize, 0.0f, -mapHeight * BlockSize);
+            GL.TexCoord2(mapWidth, mapHeight);
+            GL.Vertex3(mapWidth * BlockSize, 0.0f, 0.0f);
+            GL.TexCoord2(0.0f, mapHeight);
             GL.Vertex3(0.0f, 0.0f, 0.0f);
             GL.End();
         }
@@ -89,17 +91,17 @@ namespace Ambermoon3DMapEditor
 
             GL.Begin(PrimitiveType.Quads);
             GL.TexCoord2(0.0f, 0.0f);
-            GL.Vertex3(0.0f, WallHeight, -MapHeight * BlockSize);
-            GL.TexCoord2(MapWidth, 0.0f);
-            GL.Vertex3(MapWidth * BlockSize, WallHeight, -MapHeight * BlockSize);
-            GL.TexCoord2(MapWidth, MapHeight);
-            GL.Vertex3(MapWidth * BlockSize, WallHeight, 0.0f);
-            GL.TexCoord2(0.0f, MapHeight);
+            GL.Vertex3(mapWidth * BlockSize, WallHeight, -mapHeight * BlockSize);
+            GL.TexCoord2(mapWidth, 0.0f);
+            GL.Vertex3(0.0f, WallHeight, -mapHeight * BlockSize);
+            GL.TexCoord2(mapWidth, mapHeight);
             GL.Vertex3(0.0f, WallHeight, 0.0f);
+            GL.TexCoord2(0.0f, mapHeight);
+            GL.Vertex3(mapWidth * BlockSize, WallHeight, 0.0f);
             GL.End();
         }
 
-        private void DrawWall(int x, int y, Color4 color, Texture texture)
+        private void DrawWall(int x, int y, Color4 color, Texture texture, bool transparency)
         {
             if (showWallColors)
             {
@@ -109,12 +111,15 @@ namespace Ambermoon3DMapEditor
             else
             {
                 GL.Color4(Color4.White);
-                wallTextureAtlas?.Bind();                
+                if (transparency)
+                    transparentWallTextureAtlas?.Bind();
+                else
+                    wallTextureAtlas?.Bind();
             }
 
             float left = x * BlockSize;
             float right = left + BlockSize;
-            float far = -(MapHeight - y) * BlockSize;
+            float far = -(mapHeight - y) * BlockSize;
             float near = far + BlockSize;
             float top = WallHeight;
             float bottom = 0.0f;
@@ -171,15 +176,85 @@ namespace Ambermoon3DMapEditor
             GL.End();
         }
 
+        private void DrawSubObject(int x, int y, Labdata.ObjectPosition obj)
+        {
+            /*float left = x * BlockSize;
+            float right = left + BlockSize;
+            float far = -(mapHeight - y) * BlockSize;
+            float near = far + BlockSize;
+            float top = WallHeight;
+            float bottom = 0.0f;*/
+            float h = (obj.Z + obj.Object.MappedTextureHeight) * WallHeight / 341.0f;
+            Vector4 position = new Vector4((x + obj.X / 512.0f) * BlockSize, h, -(mapHeight - (y - obj.Y / 512.0f)) * BlockSize, 1.0f);
+            /*var mappedPosition = perspectiveMatrix * modelViewMatrix * position;
+            mappedPosition /= mappedPosition.W;*/
+            /*var mappedPosition = modelViewMatrix * position;
+            mappedPosition /= mappedPosition.W;*/
+            var mappedPosition = position;
+
+            //if (mappedPosition.Z < 0)
+            //    return;
+
+            int index = labdata!.ObjectInfos.IndexOf(obj.Object);
+            var texture = objectTextures![index];
+            float textureWidth = obj.Object.TextureWidth;
+            float textureHeight = obj.Object.TextureHeight;
+            float atlasWidth = objectTextureAtlas!.Width;
+            float atlasHeight = objectTextureAtlas!.Height;
+
+            void UpperLeftUv() => GL.TexCoord2(texture.AtlasX / atlasWidth, texture.AtlasY / atlasHeight);
+            void UpperRightUv() => GL.TexCoord2((texture.AtlasX + textureWidth) / atlasWidth, texture.AtlasY / atlasHeight);
+            void LowerRightUv() => GL.TexCoord2((texture.AtlasX + textureWidth) / atlasWidth, (texture.AtlasY + textureHeight) / atlasHeight);
+            void LowerLeftUv() => GL.TexCoord2(texture.AtlasX / atlasWidth, (texture.AtlasY + textureHeight) / atlasHeight);
+
+            GL.Begin(PrimitiveType.Quads);
+
+            float left = mappedPosition.X - 0.5f * obj.Object.MappedTextureWidth * BlockSize / 512.0f;
+            float right = left + obj.Object.MappedTextureWidth * BlockSize / 512.0f;
+            float top = mappedPosition.Y;
+            float bottom = top - obj.Object.MappedTextureHeight * BlockSize / 512.0f;
+            float z = mappedPosition.Z;
+
+            // Front
+            UpperLeftUv();
+            GL.Vertex3(left, top, z);
+            UpperRightUv();
+            GL.Vertex3(right, top, z);
+            LowerRightUv();
+            GL.Vertex3(right, bottom, z);
+            LowerLeftUv();
+            GL.Vertex3(left, bottom, z);
+
+            GL.End();
+        }
+
+        private void DrawObject(int x, int y, Color4 color, Labdata.Object obj)
+        {
+            if (showObjectColors)
+            {
+                GL.Color4(color);
+                GL.BindTexture(TextureTarget.Texture2D, 0);
+            }
+            else
+            {
+                GL.Color4(Color4.White);
+                objectTextureAtlas?.Bind();
+            }
+
+            foreach (var subObject in obj.SubObjects)
+                DrawSubObject(x, y, subObject);
+        }
+
         private void DrawWallsAndObjects(List<Labdata.WallData> walls, List<Labdata.Object> objects, Palette palette)
         {
-            var transparentDrawCalls = new List<Action>();
+            var transparentWallDrawCalls = new List<Action>();
+            var objectDrawCalls = new List<Action>();
 
-            for (int y = 0; y < MapHeight; y++)
+            for (int y = 0; y < mapHeight; y++)
             {
-                for (int x = 0; x < MapWidth; x++)
+                for (int x = 0; x < mapWidth; x++)
                 {
-                    byte index = Blocks[x + (MapHeight - y - 1) * MapWidth];
+                    byte index = blocks[x + (mapHeight - y - 1) * mapWidth];
 
                     if (index == 0 || index == 255)
                         continue;
@@ -189,8 +264,12 @@ namespace Ambermoon3DMapEditor
                         if (showObjects)
                         {
                             var obj = objects[index];
-                            // TODO
-                            //transparentDrawCalls.Add(() => DrawObject)
+                            if (obj.SubObjects.Count > 0)
+                            {
+                                int ox = x;
+                                int oy = y;
+                                objectDrawCalls.Add(() => DrawObject(ox, oy, palette[obj.SubObjects[0].Object.ColorIndex], obj));
+                            }
                         }
                     }
                     else
@@ -199,18 +278,46 @@ namespace Ambermoon3DMapEditor
                         {
                             var wall = walls[index - 101];
                             if (!wall.Flags.HasFlag(Tileset.TileFlags.Transparency))
-                                DrawWall(x, y, palette[wall.ColorIndex], wallTextures![index - 101]);
+                                DrawWall(x, y, palette[wall.ColorIndex], wallTextures![index - 101], false);
                             else
-                                transparentDrawCalls.Add(() => DrawWall(x, y, palette[wall.ColorIndex], wallTextures![index - 101]));
+                            {
+                                int wx = x;
+                                int wy = y;
+                                transparentWallDrawCalls.Add(() => DrawWall(wx, wy, palette[wall.ColorIndex], wallTextures![index - 101], true));
+                            }
                         }
                     }
                 }
             }
 
-            if (transparentDrawCalls.Count != 0)
+            if (transparentWallDrawCalls.Count != 0)
             {
                 GL.Enable(EnableCap.AlphaTest);
-                transparentDrawCalls.ForEach(drawCall => drawCall());
+                transparentWallDrawCalls.ForEach(drawCall => drawCall());
+                GL.Disable(EnableCap.AlphaTest);
+            }
+
+            if (objectDrawCalls.Count != 0)
+            {
+                GL.Enable(EnableCap.AlphaTest);
+                /*GL.MatrixMode(MatrixMode.Projection);
+                GL.PushMatrix();
+                GL.LoadIdentity();
+                GL.Ortho(0.0, view3D.Width, view3D.Height, 0.0, -100.0, 400.0);*/
+                GL.MatrixMode(MatrixMode.Modelview);
+                GL.PushMatrix();
+                //GL.LoadIdentity();
+                GL.Disable(EnableCap.CullFace);
+                //GL.Disable(EnableCap.DepthTest);
+                //GL.Disable(EnableCap.Texture2D);
+                objectDrawCalls.ForEach(drawCall => drawCall());
+                GL.Enable(EnableCap.CullFace);
+                //GL.Enable(EnableCap.DepthTest);
+                //GL.Enable(EnableCap.Texture2D);
+                //GL.PopMatrix();
+                //GL.MatrixMode(MatrixMode.Projection);
+                GL.PopMatrix();
+                GL.MatrixMode(MatrixMode.Projection);
                 GL.Disable(EnableCap.AlphaTest);
             }
         }
@@ -239,62 +346,61 @@ namespace Ambermoon3DMapEditor
 
             UpdateModelView();
 
-            Matrix4 perpective = Matrix4.CreatePerspectiveFieldOfView(0.26f * MathHelper.Pi, 1.6f, 0.1f, 40.0f * BlockSize);
-
-            GL.LoadMatrix(ref perpective);
+            var perspective = perspectiveMatrix;
+            GL.LoadMatrix(ref perspective);
         }
 
         private void MainForm_KeyDown(object sender, KeyEventArgs e)
         {
-            PressedKeys[e.KeyValue] = true;
+            pressedKeys[e.KeyValue] = true;
         }
 
         private void MainForm_KeyUp(object sender, KeyEventArgs e)
         {
-            PressedKeys[e.KeyValue] = false;
+            pressedKeys[e.KeyValue] = false;
         }
 
         private void keyInputTimer_Tick(object sender, EventArgs e)
         {
-            if (PressedKeys[(int)Keys.W])
+            if (pressedKeys[(int)Keys.W])
             {
-                if (PressedKeys[(int)Keys.Q] || PressedKeys[(int)Keys.A])
+                if (pressedKeys[(int)Keys.Q] || pressedKeys[(int)Keys.A])
                 {
                     TurnLeft();
                 }
-                else if (PressedKeys[(int)Keys.E] || PressedKeys[(int)Keys.D])
+                else if (pressedKeys[(int)Keys.E] || pressedKeys[(int)Keys.D])
                 {
                     TurnRight();
                 }
 
                 MoveForward();
             }
-            else if (PressedKeys[(int)Keys.A])
+            else if (pressedKeys[(int)Keys.A])
             {
                 MoveLeft();
             }
-            else if (PressedKeys[(int)Keys.S])
+            else if (pressedKeys[(int)Keys.S])
             {
-                if (PressedKeys[(int)Keys.Q] || PressedKeys[(int)Keys.A])
+                if (pressedKeys[(int)Keys.Q] || pressedKeys[(int)Keys.A])
                 {
                     TurnLeft();
                 }
-                else if (PressedKeys[(int)Keys.E] || PressedKeys[(int)Keys.D])
+                else if (pressedKeys[(int)Keys.E] || pressedKeys[(int)Keys.D])
                 {
                     TurnRight();
                 }
 
                 MoveBackward();
             }
-            else if (PressedKeys[(int)Keys.D])
+            else if (pressedKeys[(int)Keys.D])
             {
                 MoveRight();
             }
-            else if (PressedKeys[(int)Keys.Q])
+            else if (pressedKeys[(int)Keys.Q])
             {
                 TurnLeft();
             }
-            else if (PressedKeys[(int)Keys.E])
+            else if (pressedKeys[(int)Keys.E])
             {
                 TurnRight();
             }
@@ -304,12 +410,12 @@ namespace Ambermoon3DMapEditor
         {
             view3D.MakeCurrent();
             GL.MatrixMode(MatrixMode.Modelview);
-            ModelViewMatrix = Matrix4.CreateTranslation(-PlayerX, -0.5f * RefWallHeight, MapHeight * BlockSize - PlayerY);
-            ModelViewMatrix = Matrix4.Mult(ModelViewMatrix, Matrix4.CreateRotationY(PlayerViewAngle));
-            GL.LoadMatrix(ref ModelViewMatrix);
+            modelViewMatrix = Matrix4.CreateTranslation(-playerX, -0.5f * RefWallHeight, mapHeight * BlockSize - playerY);
+            modelViewMatrix = Matrix4.Mult(modelViewMatrix, Matrix4.CreateRotationY(playerViewAngle));
+            GL.LoadMatrix(ref modelViewMatrix);
             GL.MatrixMode(MatrixMode.Projection);
             const float segment = MathHelper.Pi / 8;
-            string direction = PlayerViewAngle switch
+            string direction = playerViewAngle switch
             {
                 >= segment and < 3 * segment => "UpRight",
                 >= 3 * segment and < 5 * segment => "Right",
@@ -320,62 +426,65 @@ namespace Ambermoon3DMapEditor
                 >= 13 * segment and < 15 * segment => "UpLeft",
                 _ => "Up"
             };
-            statusPosition.Text = $"X: {PlayerX:0.0}, Y: {PlayerY:0.0}, Dir: {direction}";
+            statusPosition.Text = $"X: {playerX:0.0}, Y: {playerY:0.0}, Dir: {direction}";
             Refresh();
         }
 
         private void MoveForward()
         {
-            PlayerX += (float)(Math.Sin(PlayerViewAngle) * MoveSpeed);
-            PlayerY -= (float)(Math.Cos(PlayerViewAngle) * MoveSpeed);
+            playerX += (float)(Math.Sin(playerViewAngle) * moveSpeed);
+            playerY -= (float)(Math.Cos(playerViewAngle) * moveSpeed);
             UpdateModelView();
         }
 
         private void MoveBackward()
         {
-            PlayerX -= (float)(Math.Sin(PlayerViewAngle) * MoveSpeed);
-            PlayerY += (float)(Math.Cos(PlayerViewAngle) * MoveSpeed);
+            playerX -= (float)(Math.Sin(playerViewAngle) * moveSpeed);
+            playerY += (float)(Math.Cos(playerViewAngle) * moveSpeed);
             UpdateModelView();
         }
 
         private void MoveLeft()
         {
-            PlayerX -= (float)(Math.Cos(PlayerViewAngle) * MoveSpeed);
-            PlayerY -= (float)(Math.Sin(PlayerViewAngle) * MoveSpeed);
+            playerX -= (float)(Math.Cos(playerViewAngle) * moveSpeed);
+            playerY -= (float)(Math.Sin(playerViewAngle) * moveSpeed);
             UpdateModelView();
         }
 
         private void MoveRight()
         {
-            PlayerX += (float)(Math.Cos(PlayerViewAngle) * MoveSpeed);
-            PlayerY += (float)(Math.Sin(PlayerViewAngle) * MoveSpeed);
+            playerX += (float)(Math.Cos(playerViewAngle) * moveSpeed);
+            playerY += (float)(Math.Sin(playerViewAngle) * moveSpeed);
             UpdateModelView();
         }
 
         private void TurnLeft()
         {
-            PlayerViewAngle -= TurnSpeed;
-            if (PlayerViewAngle < 0.0f)
-                PlayerViewAngle += MathHelper.TwoPi;
+            playerViewAngle -= TurnSpeed;
+            if (playerViewAngle < 0.0f)
+                playerViewAngle += MathHelper.TwoPi;
             UpdateModelView();
         }
 
         private void TurnRight()
         {
-            PlayerViewAngle += TurnSpeed;
-            if (PlayerViewAngle >= MathHelper.TwoPi)
-                PlayerViewAngle -= MathHelper.TwoPi;
+            playerViewAngle += TurnSpeed;
+            if (playerViewAngle >= MathHelper.TwoPi)
+                playerViewAngle -= MathHelper.TwoPi;
             UpdateModelView();
         }
 
         private void MainForm_Load(object sender, EventArgs e)
         {
             view3D.MakeCurrent();
+            GL.AlphaFunc(AlphaFunction.Greater, 0.0f);
             GL.Enable(EnableCap.DepthTest);
             GL.Enable(EnableCap.Texture2D);
-            PlayerX = 0.5f * MapWidth;
-            PlayerY = 0.5f * MapHeight;
-            statusPosition.Text = $"X: {PlayerX:0.0}, Y: {PlayerY:0.0}";
+            GL.Enable(EnableCap.CullFace);
+            GL.CullFace(CullFaceMode.Front);
+            playerX = 0.5f * mapWidth;
+            playerY = 0.5f * mapHeight;
+            statusPosition.Text = $"X: {playerX:0.0}, Y: {playerY:0.0}";
 
             LoadMap(259);
 
@@ -389,26 +498,28 @@ namespace Ambermoon3DMapEditor
             labdata = gameData.MapManager.GetLabdataForMap(map);
             paletteIndex = map.PaletteIndex;
             InitLabdata(labdata, map.PaletteIndex);
-            MapWidth = map.Width;
-            MapHeight = map.Height;
-            Blocks = map.Blocks.OfType<Map.Block>().Select(b => (byte)(b.MapBorder ? 255 : b.WallIndex == 0 ? b.ObjectIndex : 100 + b.WallIndex)).ToArray();
+            mapWidth = map.Width;
+            mapHeight = map.Height;
+            blocks = map.Blocks.OfType<Map.Block>().Select(b => (byte)(b.MapBorder ? 255 : b.WallIndex == 0 ? b.ObjectIndex : 100 + b.WallIndex)).ToArray();
         }
 
         private void InitLabdata(Labdata labdata, uint paletteIndex)
         {
             wallTextureAtlas?.Dispose();
+            transparentWallTextureAtlas?.Dispose();
             floorTextureAtlas?.Dispose();
             ceilingTextureAtlas?.Dispose();
             objectTextureAtlas?.Dispose();
 
             wallTextures = TextureLoader.Load(labdata.WallGraphics, out var paletteTextureAtlas);
-            wallTextureAtlas = paletteTextureAtlas.ToTextureAtlas(palettes[paletteIndex]);
+            wallTextureAtlas = paletteTextureAtlas.ToTextureAtlas(palettes[paletteIndex], false);
+            transparentWallTextureAtlas = paletteTextureAtlas.ToTextureAtlas(palettes[paletteIndex], true);
             TextureLoader.Load((new[] { labdata.FloorGraphic }).ToList(), out paletteTextureAtlas);
-            floorTextureAtlas = paletteTextureAtlas.ToTextureAtlas(palettes[paletteIndex]);
+            floorTextureAtlas = paletteTextureAtlas.ToTextureAtlas(palettes[paletteIndex], false);
             TextureLoader.Load((new[] { labdata.CeilingGraphic }).ToList(), out paletteTextureAtlas);
-            ceilingTextureAtlas = paletteTextureAtlas.ToTextureAtlas(palettes[paletteIndex]);
+            ceilingTextureAtlas = paletteTextureAtlas.ToTextureAtlas(palettes[paletteIndex], false);
             objectTextures = TextureLoader.Load(labdata.ObjectGraphics, out paletteTextureAtlas);
-            objectTextureAtlas = paletteTextureAtlas.ToTextureAtlas(palettes[paletteIndex]);
+            objectTextureAtlas = paletteTextureAtlas.ToTextureAtlas(palettes[paletteIndex], true);
         }
 
         private void initTimer_Tick(object sender, EventArgs e)
@@ -420,6 +531,7 @@ namespace Ambermoon3DMapEditor
         private void MainForm_FormClosed(object sender, FormClosedEventArgs e)
         {
             wallTextureAtlas?.Dispose();
+            transparentWallTextureAtlas?.Dispose();
             floorTextureAtlas?.Dispose();
             ceilingTextureAtlas?.Dispose();
             objectTextureAtlas?.Dispose();

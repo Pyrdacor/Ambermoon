@@ -83,7 +83,7 @@ namespace Ambermoon3DMapEditor
                         emptyRects.Sort((a, b) => (b.Height * 1000 + b.Width).CompareTo(a.Height * 1000 + a.Width));
                     }
                     AddTexture(0, atlasHeight, graphic);
-                    atlasX = 0;
+                    atlasX = graphic.Width;
                     atlasY = atlasHeight;
                     atlasHeight += graphic.Height;
                 }

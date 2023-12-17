@@ -15,14 +15,14 @@
 
         public int Height { get; }
 
-        public TextureAtlas ToTextureAtlas(Palette palette)
+        public TextureAtlas ToTextureAtlas(Palette palette, bool transparency)
         {
             var data = new byte[this.data.Length * 4];
             int i = 0;
 
             foreach (var index in this.data)
             {
-                var color = palette.Colors[index];
+                var color = transparency && index == 0 ? Color.Transparent : palette.Colors[index];
                 data[i++] = color.R;
                 data[i++] = color.G;
                 data[i++] = color.B;
