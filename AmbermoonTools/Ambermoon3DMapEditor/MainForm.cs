@@ -1,9 +1,11 @@
 using Ambermoon;
 using Ambermoon.Data;
+using Ambermoon.Data.Enumerations;
 using Ambermoon.Data.Legacy;
 using OpenTK.Graphics.OpenGL;
 using OpenTK.Mathematics;
-using System.Text.Json;
+using System.Runtime.InteropServices;
+using Color = System.Drawing.Color;
 
 namespace Ambermoon3DMapEditor
 {
@@ -20,7 +22,44 @@ namespace Ambermoon3DMapEditor
                 palettes.Add((uint)paletteGraphic.Key, PaletteLoader.LoadPalette(paletteGraphic.Value));
             }
 
+            var automapPalette = gameData.GraphicProvider.Palettes[gameData.GraphicProvider.AutomapPaletteIndex];
+            automapGraphics = gameData.GraphicProvider.GetGraphics(GraphicType.AutomapGraphics).Select(g => GraphicToBitmaps(g, automapPalette, 16)).ToArray();
+
             InitializeComponent();
+        }
+
+        private Bitmap[] GraphicToBitmaps(Graphic graphic, Graphic palette, int frameWidth)
+        {
+            int numFrames = graphic.Width / frameWidth;
+            var frames = new List<Bitmap>(numFrames);
+
+            for (int i = 0; i < numFrames; i++)
+            {
+                frames.Add(GraphicToBitmap(graphic.GetArea(i * frameWidth, 0, frameWidth, graphic.Height), palette));
+            }
+
+            return frames.ToArray();
+        }
+
+        private Bitmap GraphicToBitmap(Graphic graphic, Graphic palette)
+        {
+            var pixelData = graphic.ToPixelData(palette);
+
+            for (int i = 0; i < graphic.Width * graphic.Height; i++)
+            {
+                var temp = pixelData[i * 4 + 2];
+                pixelData[i * 4 + 2] = pixelData[i * 4 + 0];
+                pixelData[i * 4 + 0] = temp;
+            }
+
+            var bitmap = new Bitmap(graphic.Width, graphic.Height);
+            var bitmapData = bitmap.LockBits(new Rectangle(0, 0, bitmap.Width, bitmap.Height), System.Drawing.Imaging.ImageLockMode.WriteOnly, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
+
+            Marshal.Copy(pixelData, 0, bitmapData.Scan0, pixelData.Length);
+
+            bitmap.UnlockBits(bitmapData);
+
+            return bitmap;
         }
 
         GameData gameData;
@@ -63,6 +102,22 @@ namespace Ambermoon3DMapEditor
         private bool noClip = false;
         private bool initialized = false;
         private int animationFrame = 0;
+        private Bitmap mapView2D = new(1, 1);
+        private readonly Bitmap[][] automapGraphics;
+        private int GetAutomapGraphicFrames(AutomapType automapType) => automapType switch
+        {
+            < AutomapType.Riddlemouth => 0,
+            < AutomapType.Door => 4,
+            AutomapType.GotoPoint => 8,
+            AutomapType.Invalid => 0,
+            _ => 1
+        };
+        private readonly Color automapBackgroundColor = Color.FromArgb(0xAA, 0x77, 0x44);
+        private readonly Color automapLineColor = Color.FromArgb(0x66, 0x33, 0x00);
+        const int TileSize2D = 32;
+        bool showAsAutomap = false;
+        private Bitmap[] wallGraphics = new Bitmap[0];
+        private Bitmap[][] objectGraphics = new Bitmap[0][];
 
         private void DrawFloor(Color4 color)
         {
@@ -403,7 +458,7 @@ namespace Ambermoon3DMapEditor
             GL.DepthMask(true);
 
             if (labdata != null)
-                DrawWallsAndObjects(labdata.Walls, labdata.Objects, palettes[paletteIndex]);    
+                DrawWallsAndObjects(labdata.Walls, labdata.Objects, palettes[paletteIndex]);
 
             view3D.SwapBuffers();
         }
@@ -497,10 +552,11 @@ namespace Ambermoon3DMapEditor
                 _ => "Up"
             };
             statusPosition.Text = $"X: {1 + playerX:0.0}, Y: {1 + playerY:0.0}, Dir: {direction}";
-            Refresh();
+            Redraw2DView();
+            view3D.Refresh();
         }
 
-        private void MoveTo(float x, float y, bool testBlocking = true)
+        private bool MoveTo(float x, float y, bool testBlocking = true)
         {
             float dx = x - playerX;
             float dy = y - playerY;
@@ -535,12 +591,12 @@ namespace Ambermoon3DMapEditor
                 else if (allowX)
                 {
                     if (!TestBlock(indexOnlyX, xMod))
-                        return;
+                        return false;
                 }
                 else if (allowY)
                 {
                     if (!TestBlock(indexOnlyY, yMod))
-                        return;
+                        return false;
                 }
 
                 bool TestBlock(int index, float distInsideBlock)
@@ -579,38 +635,40 @@ namespace Ambermoon3DMapEditor
                 playerX = x;
             if (allowY)
                 playerY = y;
+
+            return allowX || allowY;
         }
 
         private void MoveForward()
         {
             var newX = playerX + (float)(Math.Sin(playerViewAngle) * MoveSpeed);
             var newY = playerY - (float)(Math.Cos(playerViewAngle) * MoveSpeed);
-            MoveTo(newX, newY);
-            UpdateModelView();
+            if (MoveTo(newX, newY))
+                UpdateModelView();
         }
 
         private void MoveBackward()
         {
             var newX = playerX - (float)(Math.Sin(playerViewAngle) * MoveSpeed);
             var newY = playerY + (float)(Math.Cos(playerViewAngle) * MoveSpeed);
-            MoveTo(newX, newY);
-            UpdateModelView();
+            if (MoveTo(newX, newY))
+                UpdateModelView();
         }
 
         private void MoveLeft()
         {
             var newX = playerX - (float)(Math.Cos(playerViewAngle) * MoveSpeed);
             var newY = playerY - (float)(Math.Sin(playerViewAngle) * MoveSpeed);
-            MoveTo(newX, newY);
-            UpdateModelView();
+            if (MoveTo(newX, newY))
+                UpdateModelView();
         }
 
         private void MoveRight()
         {
             var newX = playerX + (float)(Math.Cos(playerViewAngle) * MoveSpeed);
             var newY = playerY + (float)(Math.Sin(playerViewAngle) * MoveSpeed);
-            MoveTo(newX, newY);
-            UpdateModelView();
+            if (MoveTo(newX, newY))
+                UpdateModelView();
         }
 
         private void TurnLeft()
@@ -631,6 +689,7 @@ namespace Ambermoon3DMapEditor
 
         private void MainForm_Load(object sender, EventArgs e)
         {
+            view2D.BackColor = automapBackgroundColor;
             view3D.MakeCurrent();
             GL.AlphaFunc(AlphaFunction.Greater, 0.0f);
             GL.Enable(EnableCap.DepthTest);
@@ -665,6 +724,8 @@ namespace Ambermoon3DMapEditor
                     blocks[i++] = (byte)(b.MapBorder ? 255 : b.WallIndex == 0 ? b.ObjectIndex : 100 + b.WallIndex);
                 }
             }
+            Draw2DViewToImage();
+            Redraw2DView();
         }
 
         private void InitLabdata(Labdata labdata, uint paletteIndex)
@@ -685,6 +746,10 @@ namespace Ambermoon3DMapEditor
             objectTextures = TextureLoader.Load(labdata.ObjectGraphics, out paletteTextureAtlas);
             objectTextureAtlas = paletteTextureAtlas.ToTextureAtlas(palettes[paletteIndex], true);
 
+            var palette = gameData.GraphicProvider.Palettes[(int)paletteIndex];
+            wallGraphics = labdata.WallGraphics.Select(g => GraphicToBitmap(g, palette)).ToArray();
+            objectGraphics = labdata.ObjectGraphics.Select((g, i) => GraphicToBitmaps(g, palette, g.Width / (int)labdata.ObjectInfos[i].NumAnimationFrames)).ToArray();
+
             GL.MatrixMode(MatrixMode.Projection);
             var perspective = perspectiveMatrix;
             GL.LoadMatrix(ref perspective);
@@ -703,6 +768,136 @@ namespace Ambermoon3DMapEditor
             floorTextureAtlas?.Dispose();
             ceilingTextureAtlas?.Dispose();
             objectTextureAtlas?.Dispose();
+        }
+
+        private void Draw2DViewToImage()
+        {
+            if (labdata == null)
+                return;
+
+            mapView2D = new Bitmap(mapWidth * TileSize2D, mapHeight * TileSize2D);
+            using var graphics = Graphics.FromImage(mapView2D);
+            var palette = palettes[paletteIndex];
+
+            void DrawBlock(int x, int y, Color fill, Color? border, string? text = null)
+            {
+                var area = new Rectangle(x * TileSize2D, y * TileSize2D, TileSize2D, TileSize2D);
+                using var fillBrush = new SolidBrush(fill);
+                graphics.FillRectangle(fillBrush, area);
+                if (border != null)
+                {
+                    using var borderPen = new Pen(border.Value, 2.0f);
+                    graphics.DrawRectangle(borderPen, area);
+                }
+                if (text != null)
+                {
+                    using var textBrush = new SolidBrush(border ?? Color.Black);
+                    graphics.DrawString(text, view2D.Font, textBrush, new Rectangle(new Point(area.X + 2, area.Y - 2), area.Size));
+                }
+            }
+
+            for (int y = 0; y < mapHeight; y++)
+            {
+                for (int x = 0; x < mapWidth; x++)
+                {
+                    int blockIndex = x + y * mapWidth;
+                    byte index = blocks[blockIndex];
+
+                    if (index == 0 || index == 255)
+                    {
+                        DrawBlock(x, y, automapBackgroundColor, index == 0 ? null : automapLineColor, index == 0 ? null : "X");
+                        continue;
+                    }
+
+                    if (index <= 100)
+                    {
+                        var obj = labdata.Objects[index - 1];
+                        if (showAsAutomap)
+                        {
+                            int numFrames = GetAutomapGraphicFrames(obj.AutomapType);
+                            if (numFrames == 0)
+                            {
+                                DrawBlock(x, y, automapBackgroundColor, Color.ForestGreen);
+                            }
+                            else
+                            {
+                                int frame = numFrames == 1 ? 0 : animationFrame % numFrames;
+                                var frameImage = automapGraphics[(int)obj.AutomapType - 2][frame];
+                                graphics.DrawImage(frameImage, x * TileSize2D, y * TileSize2D, TileSize2D, TileSize2D);
+                            }
+                        }
+                        else
+                        {
+                            // TODO
+                            // Show mini versions of the objects
+                            int numFrames = (int)obj.SubObjects[0].Object.NumAnimationFrames;
+                            int frame = numFrames <= 1 ? 0 : animationFrame % numFrames;
+                            int objIndex = labdata.ObjectInfos.IndexOf(obj.SubObjects[0].Object);
+                            graphics.DrawImage(objectGraphics[objIndex][frame], x * TileSize2D, y * TileSize2D, TileSize2D, TileSize2D);
+                        }
+                    }
+                    else
+                    {
+                        if (showAsAutomap)
+                        {
+                            // TODO
+                            DrawBlock(x, y, automapBackgroundColor, automapLineColor);
+                        }
+                        else
+                        {
+                            graphics.DrawImage(wallGraphics[index - 101], x * TileSize2D, y * TileSize2D, TileSize2D, TileSize2D);
+                        }
+
+                        
+                        // TODO
+                        /*if (showWalls)
+                        {
+                            bool IsObjectOrNonBlocking(int blockIndex)
+                            {
+                                if (blocks[blockIndex] <= 100)
+                                    return true;
+
+                                if (blocks[blockIndex] == 255)
+                                    return false;
+
+                                var wallFlags = walls[blocks[blockIndex] - 101].Flags;
+
+                                return wallFlags.HasFlag(Tileset.TileFlags.Transparency) || ((uint)wallFlags & 0x180) == 0x100;
+                            }
+
+                            bool renderUpFace = y > 0 && IsObjectOrNonBlocking(blockIndex - mapWidth);
+                            bool renderRightFace = x < mapWidth - 1 && IsObjectOrNonBlocking(blockIndex + 1);
+                            bool renderDownFace = y < mapHeight - 1 && IsObjectOrNonBlocking(blockIndex + mapWidth);
+                            bool renderLeftFace = x > 0 && IsObjectOrNonBlocking(blockIndex - 1);
+                            var wall = walls[index - 101];
+                            if (!wall.Flags.HasFlag(Tileset.TileFlags.Transparency))
+                            {
+                                DrawWall(x, y, palette[wall.ColorIndex], wallTextures![index - 101], false,
+                                    renderUpFace, renderRightFace, renderDownFace, renderLeftFace);
+                            }
+                            else
+                            {
+                                int wx = x;
+                                int wy = y;
+                                transparentWallDrawCalls.Add(() => DrawWall(wx, wy, palette[wall.ColorIndex], wallTextures![index - 101], true,
+                                    renderUpFace, renderRightFace, renderDownFace, renderLeftFace));
+                            }
+                        }*/
+                    }
+                }
+            }
+        }
+
+        private void Redraw2DView()
+        {
+            view2D.AutoScrollMinSize = mapView2D.Size;
+            view2D.Refresh();
+        }
+
+        private void view2D_Paint(object sender, PaintEventArgs e)
+        {
+            e.Graphics.DrawImage(mapView2D, 0, 0);
+
         }
     }
 }

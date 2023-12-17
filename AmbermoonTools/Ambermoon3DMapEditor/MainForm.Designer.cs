@@ -30,7 +30,7 @@
         {
             components = new System.ComponentModel.Container();
             splitContainer1 = new SplitContainer();
-            view2D = new Panel();
+            view2D = new RenderPanel();
             view3D = new OpenTK.WinForms.GLControl();
             keyInputTimer = new System.Windows.Forms.Timer(components);
             statusStrip1 = new StatusStrip();
@@ -62,11 +62,14 @@
             // 
             // view2D
             // 
+            view2D.AutoScroll = true;
+            view2D.BackColor = Color.White;
             view2D.Dock = DockStyle.Fill;
             view2D.Location = new Point(0, 0);
             view2D.Name = "view2D";
             view2D.Size = new Size(391, 450);
             view2D.TabIndex = 1;
+            view2D.Paint += view2D_Paint;
             // 
             // view3D
             // 
@@ -141,7 +144,7 @@
 
         private SplitContainer splitContainer1;
         private OpenTK.WinForms.GLControl view3D;
-        private Panel view2D;
+        private RenderPanel view2D;
         private System.Windows.Forms.Timer keyInputTimer;
         private StatusStrip statusStrip1;
         private ToolStripStatusLabel statusPosition;
