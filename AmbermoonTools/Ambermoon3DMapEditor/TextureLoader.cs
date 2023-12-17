@@ -58,9 +58,10 @@ namespace Ambermoon3DMapEditor
                 return false;
             }
 
-            graphics.Sort((a, b) => (b.Height * 1000 + b.Width).CompareTo(a.Height * 1000 + a.Width));
+            var sortedGraphics = new List<Graphic>(graphics);
+            sortedGraphics.Sort((a, b) => (b.Height * 1000 + b.Width).CompareTo(a.Height * 1000 + a.Width));
 
-            foreach (var graphic in graphics)
+            foreach (var graphic in sortedGraphics)
             {
                 if (atlasWidth == 0)
                 {
@@ -101,6 +102,8 @@ namespace Ambermoon3DMapEditor
                     }
                 }
             }
+
+            textures = textures.OrderBy(t => graphics.IndexOf(t.Value)).ToList();
 
             textureAtlas = BuildAtlas(atlasWidth, atlasHeight, textures);
 

@@ -25,9 +25,9 @@ namespace Ambermoon3DMapEditor
         uint paletteIndex = 1;
         Labdata? labdata;
         byte[] Blocks = new byte[10 * 10];
-        private const float BlockSize = 4.0f;
-        private const float RefWallHeight = 2 * BlockSize / (2.5f * 3.0f);
-        private float WallHeight => mapWallHeight * 2 * BlockSize / (2.5f * 3.0f * 341.0f);
+        private const float BlockSize = 1.0f;
+        private const float RefWallHeight = 2 * BlockSize / (2.0f * 3.0f);
+        private float WallHeight => mapWallHeight * 2 * BlockSize / (2.0f * 3.0f * 341.0f);
         private int MapWidth = 10;
         private int MapHeight = 10;
         private bool[] PressedKeys = Enumerable.Repeat(false, 256).ToArray();
@@ -239,7 +239,7 @@ namespace Ambermoon3DMapEditor
 
             UpdateModelView();
 
-            Matrix4 perpective = Matrix4.CreatePerspectiveFieldOfView(MathHelper.Pi / 3.0f, 1.6f, 0.001f, 100.0f);
+            Matrix4 perpective = Matrix4.CreatePerspectiveFieldOfView(0.26f * MathHelper.Pi, 1.6f, 0.1f, 40.0f * BlockSize);
 
             GL.LoadMatrix(ref perpective);
         }
