@@ -123,6 +123,7 @@
             MinimumSize = new Size(640, 480);
             Name = "MainForm";
             Text = "Ambermoon Map Editor 3D";
+            FormClosed += MainForm_FormClosed;
             Load += MainForm_Load;
             KeyDown += MainForm_KeyDown;
             KeyUp += MainForm_KeyUp;
