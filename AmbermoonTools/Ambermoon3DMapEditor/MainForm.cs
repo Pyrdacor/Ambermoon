@@ -1,7 +1,10 @@
+using Ambermoon;
 using Ambermoon.Data;
 using Ambermoon.Data.Legacy;
 using OpenTK.Graphics.OpenGL;
 using OpenTK.Mathematics;
+using System.Text.Json;
+using static Ambermoon.Data.Labdata;
 
 namespace Ambermoon3DMapEditor
 {
@@ -27,16 +30,17 @@ namespace Ambermoon3DMapEditor
         byte[] blocks = new byte[10 * 10];
         private Matrix4 perspectiveMatrix => Matrix4.CreatePerspectiveFieldOfView(0.26f * MathHelper.Pi, 341.0f / (labdata?.WallHeight ?? 400), 0.1f, 40.0f * BlockSize);
         private const float BlockSize = 1.0f;
+        private const float PlayerSize = 0.6f * BlockSize;
         private const float RefWallHeight = 341.0f * BlockSize / 512.0f;
         private float WallHeight => (labdata?.WallHeight ?? 400) * BlockSize / 512.0f;
         private int mapWidth = 10;
         private int mapHeight = 10;
-        private bool[] pressedKeys = Enumerable.Repeat(false, 256).ToArray();
+        private readonly bool[] pressedKeys = Enumerable.Repeat(false, 256).ToArray();
         private Matrix4 modelViewMatrix = Matrix4.Identity;
         private float playerX = 0.0f;
         private float playerY = 0.0f;
         private float playerViewAngle = 0.0f;
-        private float moveSpeed => speedBoost ? 0.15f * BlockSize : 0.075f * BlockSize;
+        private float MoveSpeed => speedBoost ? 0.15f * BlockSize : 0.075f * BlockSize;
         private const float TurnSpeed = 0.1f;
         private bool speedBoost = false;
         private List<Texture>? wallTextures = null;
@@ -53,10 +57,11 @@ namespace Ambermoon3DMapEditor
         private bool showCeilingTexture = true;
         private bool showFloor = true;
         private bool showCeiling = true;
-        private bool showWalls = true;
+        private bool showWalls = false;
         private bool showObjects = true;
         private bool showWallColors = false;
         private bool showObjectColors = false;
+        private bool noClip = true;
         private bool initialized = false;
         private int animationFrame = 0;
 
@@ -70,13 +75,13 @@ namespace Ambermoon3DMapEditor
 
             GL.Begin(PrimitiveType.Quads);
             GL.TexCoord2(0.0f, 0.0f);
-            GL.Vertex3(0.0f, 0.0f, -mapHeight * BlockSize);
-            GL.TexCoord2(mapWidth, 0.0f);
-            GL.Vertex3(mapWidth * BlockSize, 0.0f, -mapHeight * BlockSize);
-            GL.TexCoord2(mapWidth, mapHeight);
-            GL.Vertex3(mapWidth * BlockSize, 0.0f, 0.0f);
-            GL.TexCoord2(0.0f, mapHeight);
             GL.Vertex3(0.0f, 0.0f, 0.0f);
+            GL.TexCoord2(mapWidth, 0.0f);
+            GL.Vertex3(mapWidth * BlockSize, 0.0f, 0.0f);
+            GL.TexCoord2(mapWidth, mapHeight);
+            GL.Vertex3(mapWidth * BlockSize, 0.0f, mapHeight * BlockSize);
+            GL.TexCoord2(0.0f, mapHeight);
+            GL.Vertex3(0.0f, 0.0f, mapHeight * BlockSize);
             GL.End();
         }
 
@@ -90,17 +95,18 @@ namespace Ambermoon3DMapEditor
 
             GL.Begin(PrimitiveType.Quads);
             GL.TexCoord2(0.0f, 0.0f);
-            GL.Vertex3(mapWidth * BlockSize, WallHeight, -mapHeight * BlockSize);
-            GL.TexCoord2(mapWidth, 0.0f);
-            GL.Vertex3(0.0f, WallHeight, -mapHeight * BlockSize);
-            GL.TexCoord2(mapWidth, mapHeight);
-            GL.Vertex3(0.0f, WallHeight, 0.0f);
-            GL.TexCoord2(0.0f, mapHeight);
             GL.Vertex3(mapWidth * BlockSize, WallHeight, 0.0f);
+            GL.TexCoord2(mapWidth, 0.0f);
+            GL.Vertex3(0.0f, WallHeight, 0.0f);
+            GL.TexCoord2(mapWidth, mapHeight);
+            GL.Vertex3(0.0f, WallHeight, mapHeight * BlockSize);
+            GL.TexCoord2(0.0f, mapHeight);
+            GL.Vertex3(mapWidth * BlockSize, WallHeight, mapHeight * BlockSize);
             GL.End();
         }
 
-        private void DrawWall(int x, int y, Color4 color, Texture texture, bool transparency)
+        private void DrawWall(int x, int y, Color4 color, Texture texture, bool transparency,
+            bool renderUpFace, bool renderRightFace, bool renderDownFace, bool renderLeftFace)
         {
             if (showWallColors)
             {
@@ -118,7 +124,7 @@ namespace Ambermoon3DMapEditor
 
             float left = x * BlockSize;
             float right = left + BlockSize;
-            float far = -(mapHeight - y) * BlockSize;
+            float far = (mapHeight - y) * BlockSize;
             float near = far + BlockSize;
             float top = WallHeight;
             float bottom = 0.0f;
@@ -133,57 +139,83 @@ namespace Ambermoon3DMapEditor
             GL.Begin(PrimitiveType.Quads);
 
             // Front
-            UpperLeftUv();
-            GL.Vertex3(left, top, near);
-            UpperRightUv();
-            GL.Vertex3(right, top, near);
-            LowerRightUv();
-            GL.Vertex3(right, bottom, near);
-            LowerLeftUv();
-            GL.Vertex3(left, bottom, near);
+            if (renderUpFace)
+            {
+                UpperLeftUv();
+                GL.Vertex3(left, top, near);
+                UpperRightUv();
+                GL.Vertex3(right, top, near);
+                LowerRightUv();
+                GL.Vertex3(right, bottom, near);
+                LowerLeftUv();
+                GL.Vertex3(left, bottom, near);
+            }
 
             // Left
-            UpperLeftUv();
-            GL.Vertex3(left, top, far);
-            UpperRightUv();
-            GL.Vertex3(left, top, near);
-            LowerRightUv();
-            GL.Vertex3(left, bottom, near);
-            LowerLeftUv();
-            GL.Vertex3(left, bottom, far);
+            if (renderLeftFace)
+            {
+                UpperLeftUv();
+                GL.Vertex3(left, top, far);
+                UpperRightUv();
+                GL.Vertex3(left, top, near);
+                LowerRightUv();
+                GL.Vertex3(left, bottom, near);
+                LowerLeftUv();
+                GL.Vertex3(left, bottom, far);
+            }
 
             // Back
-            UpperLeftUv();
-            GL.Vertex3(right, top, far);
-            UpperRightUv();
-            GL.Vertex3(left, top, far);
-            LowerRightUv();
-            GL.Vertex3(left, bottom, far);
-            LowerLeftUv();
-            GL.Vertex3(right, bottom, far);
+            if (renderDownFace)
+            {
+                UpperLeftUv();
+                GL.Vertex3(right, top, far);
+                UpperRightUv();
+                GL.Vertex3(left, top, far);
+                LowerRightUv();
+                GL.Vertex3(left, bottom, far);
+                LowerLeftUv();
+                GL.Vertex3(right, bottom, far);
+            }
 
             // Right
-            UpperLeftUv();
-            GL.Vertex3(right, top, near);
-            UpperRightUv();
-            GL.Vertex3(right, top, far);
-            LowerRightUv();
-            GL.Vertex3(right, bottom, far);
-            LowerLeftUv();
-            GL.Vertex3(right, bottom, near);
+            if (renderRightFace)
+            {
+                UpperLeftUv();
+                GL.Vertex3(right, top, near);
+                UpperRightUv();
+                GL.Vertex3(right, top, far);
+                LowerRightUv();
+                GL.Vertex3(right, bottom, far);
+                LowerLeftUv();
+                GL.Vertex3(right, bottom, near);
+            }
 
             GL.End();
         }
 
         private void DrawSubObject(int x, int y, Labdata.ObjectPosition obj)
         {
-            float bottomY = obj.Z / 341.0f;
-            //float h = (obj.Z + obj.Object.MappedTextureHeight) * WallHeight / 341.0f;
-            Vector4 position = new Vector4((x + obj.X / 512.0f) * BlockSize, bottomY, -(mapHeight - (y - obj.Y / 512.0f)) * BlockSize, 1.0f);
+            bool floor = obj.Object.Flags.HasFlag(Tileset.TileFlags.Floor);
+            float topY;
+
+            if (floor)
+            {
+                topY = Math.Max(1, Math.Min(340, (int)obj.Z)) * labdata!.WallHeight * BlockSize / (341.0f * 512.0f);
+            }
+            else
+            {
+                topY = obj.Z + obj.Object.TextureHeight;
+                if (topY + 0.00001f < 341.0f)
+                    topY = obj.Z + obj.Object.MappedTextureHeight;
+                topY *= labdata!.WallHeight * BlockSize / (341.0f * 512.0f);
+            }
+            Vector4 position = new((x + obj.X / 512.0f) * BlockSize, topY, (mapHeight - y - obj.Y / 512.0f) * BlockSize, 1.0f);
             var mappedPosition = position * modelViewMatrix;
-            mappedPosition /= mappedPosition.W;
 
             int index = labdata!.ObjectInfos.IndexOf(obj.Object);
+            var foo = labdata!.ObjectInfos[index];
+            if (JsonSerializer.Serialize(obj.Object) != JsonSerializer.Serialize(foo))
+                throw new Exception();
             var texture = objectTextures![index];
             float textureWidth = obj.Object.TextureWidth;
             float textureHeight = obj.Object.TextureHeight;
@@ -197,23 +229,63 @@ namespace Ambermoon3DMapEditor
 
             GL.Begin(PrimitiveType.Quads);
 
-            float left = mappedPosition.X - 0.5f * obj.Object.MappedTextureWidth * BlockSize / 512.0f;
-            float right = left + obj.Object.MappedTextureWidth * BlockSize / 512.0f;
-            //float top = mappedPosition.Y;
-            //float bottom = top - obj.Object.MappedTextureHeight * BlockSize / 512.0f;
-            float bottom = mappedPosition.Y;
-            float top = bottom + obj.Object.MappedTextureHeight / 512.0f;
-            float z = mappedPosition.Z;
+            if (floor)
+            {
+                if (obj.Z > 255.0f)
+                {
+                    float left = mappedPosition.X - 0.5f * obj.Object.MappedTextureWidth * BlockSize / 512.0f;
+                    float right = left + obj.Object.MappedTextureWidth * BlockSize / 512.0f;
+                    float h = mappedPosition.Y;
+                    float near = mappedPosition.Z + 0.5f * obj.Object.MappedTextureHeight / 512.0f;
+                    float far = near - obj.Object.MappedTextureHeight / 512.0f;
 
-            // Front
-            UpperLeftUv();
-            GL.Vertex3(left, top, z);
-            UpperRightUv();
-            GL.Vertex3(right, top, z);
-            LowerRightUv();
-            GL.Vertex3(right, bottom, z);
-            LowerLeftUv();
-            GL.Vertex3(left, bottom, z);
+                    // Bottom
+                    UpperLeftUv();
+                    GL.Vertex3(left, h, near);
+                    UpperRightUv();
+                    GL.Vertex3(right, h, near);
+                    LowerRightUv();
+                    GL.Vertex3(right, h, far);
+                    LowerLeftUv();
+                    GL.Vertex3(left, h, far);
+                }
+                else
+                {
+                    float left = mappedPosition.X - 0.5f * obj.Object.MappedTextureWidth * BlockSize / 512.0f;
+                    float right = left + obj.Object.MappedTextureWidth * BlockSize / 512.0f;
+                    float h = mappedPosition.Y;
+                    float near = mappedPosition.Z + 0.5f * obj.Object.MappedTextureHeight / 512.0f;
+                    float far = near - obj.Object.MappedTextureHeight / 512.0f;
+
+                    // Top
+                    UpperLeftUv();
+                    GL.Vertex3(left, h, far);
+                    UpperRightUv();
+                    GL.Vertex3(right, h, far);
+                    LowerRightUv();
+                    GL.Vertex3(right, h, near);
+                    LowerLeftUv();
+                    GL.Vertex3(left, h, near);
+                }
+            }
+            else
+            {
+                float left = mappedPosition.X - 0.5f * obj.Object.MappedTextureWidth * BlockSize / 512.0f;
+                float right = left + obj.Object.MappedTextureWidth * BlockSize / 512.0f;
+                float top = mappedPosition.Y;
+                float bottom = top - obj.Object.MappedTextureHeight / 512.0f;
+                float z = mappedPosition.Z;
+
+                // Front
+                UpperLeftUv();
+                GL.Vertex3(left, top, z);
+                UpperRightUv();
+                GL.Vertex3(right, top, z);
+                LowerRightUv();
+                GL.Vertex3(right, bottom, z);
+                LowerLeftUv();
+                GL.Vertex3(left, bottom, z);
+            }
 
             GL.End();
         }
@@ -244,7 +316,8 @@ namespace Ambermoon3DMapEditor
             {
                 for (int x = 0; x < mapWidth; x++)
                 {
-                    byte index = blocks[x + (mapHeight - y - 1) * mapWidth];
+                    int blockIndex = x + y * mapWidth;
+                    byte index = blocks[blockIndex];
 
                     if (index == 0 || index == 255)
                         continue;
@@ -266,14 +339,33 @@ namespace Ambermoon3DMapEditor
                     {
                         if (showWalls)
                         {
+                            bool IsObjectOrNonBlocking(int blockIndex)
+                            {
+                                if (blocks[blockIndex] <= 100)
+                                    return true;
+
+                                if (blocks[blockIndex] == 255)
+                                    return false;
+
+                                return ((uint)walls[blocks[blockIndex] - 101].Flags & 0x180) == 0x100;
+                            }
+
+                            bool renderUpFace = y > 0 && IsObjectOrNonBlocking(blockIndex - mapWidth);
+                            bool renderRightFace = x < mapWidth - 1 && IsObjectOrNonBlocking(blockIndex + 1);
+                            bool renderDownFace = y < mapHeight - 1 && IsObjectOrNonBlocking(blockIndex + mapWidth);
+                            bool renderLeftFace = x > 0 && IsObjectOrNonBlocking(blockIndex - 1);
                             var wall = walls[index - 101];
                             if (!wall.Flags.HasFlag(Tileset.TileFlags.Transparency))
-                                DrawWall(x, y, palette[wall.ColorIndex], wallTextures![index - 101], false);
+                            {
+                                DrawWall(x, y, palette[wall.ColorIndex], wallTextures![index - 101], false,
+                                    renderUpFace, renderRightFace, renderDownFace, renderLeftFace);
+                            }
                             else
                             {
                                 int wx = x;
                                 int wy = y;
-                                transparentWallDrawCalls.Add(() => DrawWall(wx, wy, palette[wall.ColorIndex], wallTextures![index - 101], true));
+                                transparentWallDrawCalls.Add(() => DrawWall(wx, wy, palette[wall.ColorIndex], wallTextures![index - 101], true,
+                                    renderUpFace, renderRightFace, renderDownFace, renderLeftFace));
                             }
                         }
                     }
@@ -290,22 +382,10 @@ namespace Ambermoon3DMapEditor
             if (objectDrawCalls.Count != 0)
             {
                 GL.Enable(EnableCap.AlphaTest);
-                /*GL.MatrixMode(MatrixMode.Projection);
-                GL.PushMatrix();
-                GL.LoadIdentity();
-                GL.Ortho(0.0, view3D.Width, view3D.Height, 0.0, -100.0, 400.0);*/
                 GL.MatrixMode(MatrixMode.Modelview);
                 GL.PushMatrix();
                 GL.LoadIdentity();
-                GL.Disable(EnableCap.CullFace);
-                //GL.Disable(EnableCap.DepthTest);
-                //GL.Disable(EnableCap.Texture2D);
                 objectDrawCalls.ForEach(drawCall => drawCall());
-                GL.Enable(EnableCap.CullFace);
-                //GL.Enable(EnableCap.DepthTest);
-                //GL.Enable(EnableCap.Texture2D);
-                //GL.PopMatrix();
-                //GL.MatrixMode(MatrixMode.Projection);
                 GL.PopMatrix();
                 GL.MatrixMode(MatrixMode.Projection);
                 GL.Disable(EnableCap.AlphaTest);
@@ -315,12 +395,14 @@ namespace Ambermoon3DMapEditor
         private void view3D_Paint(object sender, PaintEventArgs e)
         {
             view3D.MakeCurrent();
-            GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);            
+            GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
 
+            GL.DepthMask(false);
             if (showFloor && floorTextureAtlas != null)
                 DrawFloor(floorColor);
             if (showCeiling && ceilingTextureAtlas != null)
                 DrawCeiling(ceilingColor);
+            GL.DepthMask(true);
 
             if (labdata != null)
                 DrawWallsAndObjects(labdata.Walls, labdata.Objects, palettes[paletteIndex]);    
@@ -400,7 +482,7 @@ namespace Ambermoon3DMapEditor
         {
             view3D.MakeCurrent();
             GL.MatrixMode(MatrixMode.Modelview);
-            modelViewMatrix = Matrix4.CreateTranslation(-playerX, -0.5f * RefWallHeight, mapHeight * BlockSize - playerY);
+            modelViewMatrix = Matrix4.CreateTranslation(-playerX, -0.5f * RefWallHeight, -playerY);
             modelViewMatrix = Matrix4.Mult(modelViewMatrix, Matrix4.CreateRotationY(playerViewAngle));
             GL.LoadMatrix(ref modelViewMatrix);
             GL.MatrixMode(MatrixMode.Projection);
@@ -416,35 +498,73 @@ namespace Ambermoon3DMapEditor
                 >= 13 * segment and < 15 * segment => "UpLeft",
                 _ => "Up"
             };
-            statusPosition.Text = $"X: {playerX:0.0}, Y: {playerY:0.0}, Dir: {direction}";
+            statusPosition.Text = $"X: {1 + playerX:0.0}, Y: {1 + mapHeight - playerY:0.0}, Dir: {direction}";
             Refresh();
+        }
+
+        private void MoveTo(float x, float y, bool testBlocking = true)
+        {
+            if (x < 0 || x >= mapWidth) return;
+            if (y < 0 || y >= mapHeight) return;
+
+            if (!noClip && testBlocking)
+            {
+                int ix = (int)Math.Round(x);
+                int iy = (int)Math.Round(y);
+                int blockIndex = ix + (mapHeight - iy - 1) * mapWidth;
+                int index = blocks[/*ix + iy * mapWidth*/blockIndex];
+                
+                if (index == 255) return; // always blocking
+                if (index > 0 && labdata != null)
+                {
+                    if (index <= 100)
+                    {
+                        var obj = labdata.Objects[index];
+                        if (obj.SubObjects.Any(so => so.Object.Flags.HasFlag(Tileset.TileFlags.BlockAllMovement) || !so.Object.Flags.HasFlag(Tileset.TileFlags.AllowMovementWalk)))
+                            return;
+                    }
+                    else
+                    {
+                        var wall = labdata.Walls[index - 101];
+                        if (wall.Flags.HasFlag(Tileset.TileFlags.BlockAllMovement) || !wall.Flags.HasFlag(Tileset.TileFlags.AllowMovementWalk))
+                            return;
+                    }
+                }
+            }
+
+            playerX = x;
+            playerY = y;
         }
 
         private void MoveForward()
         {
-            playerX += (float)(Math.Sin(playerViewAngle) * moveSpeed);
-            playerY -= (float)(Math.Cos(playerViewAngle) * moveSpeed);
+            var newX = playerX + (float)(Math.Sin(playerViewAngle) * MoveSpeed);
+            var newY = playerY - (float)(Math.Cos(playerViewAngle) * MoveSpeed);
+            MoveTo(newX, newY);
             UpdateModelView();
         }
 
         private void MoveBackward()
         {
-            playerX -= (float)(Math.Sin(playerViewAngle) * moveSpeed);
-            playerY += (float)(Math.Cos(playerViewAngle) * moveSpeed);
+            var newX = playerX - (float)(Math.Sin(playerViewAngle) * MoveSpeed);
+            var newY = playerY + (float)(Math.Cos(playerViewAngle) * MoveSpeed);
+            MoveTo(newX, newY);
             UpdateModelView();
         }
 
         private void MoveLeft()
         {
-            playerX -= (float)(Math.Cos(playerViewAngle) * moveSpeed);
-            playerY -= (float)(Math.Sin(playerViewAngle) * moveSpeed);
+            var newX = playerX - (float)(Math.Cos(playerViewAngle) * MoveSpeed);
+            var newY = playerY - (float)(Math.Sin(playerViewAngle) * MoveSpeed);
+            MoveTo(newX, newY);
             UpdateModelView();
         }
 
         private void MoveRight()
         {
-            playerX += (float)(Math.Cos(playerViewAngle) * moveSpeed);
-            playerY += (float)(Math.Sin(playerViewAngle) * moveSpeed);
+            var newX = playerX + (float)(Math.Cos(playerViewAngle) * MoveSpeed);
+            var newY = playerY + (float)(Math.Sin(playerViewAngle) * MoveSpeed);
+            MoveTo(newX, newY);
             UpdateModelView();
         }
 
@@ -472,11 +592,11 @@ namespace Ambermoon3DMapEditor
             GL.Enable(EnableCap.Texture2D);
             GL.Enable(EnableCap.CullFace);
             GL.CullFace(CullFaceMode.Front);
-            playerX = 0.5f * mapWidth;
-            playerY = 0.5f * mapHeight;
-            statusPosition.Text = $"X: {playerX:0.0}, Y: {playerY:0.0}";
 
             LoadMap(259);
+
+            playerX = 0.5f * mapWidth;
+            playerY = 0.5f * mapHeight;
 
             initialized = true;
             initTimer.Start();
