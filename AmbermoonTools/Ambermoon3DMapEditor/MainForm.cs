@@ -4,7 +4,6 @@ using Ambermoon.Data.Legacy;
 using OpenTK.Graphics.OpenGL;
 using OpenTK.Mathematics;
 using System.Text.Json;
-using static Ambermoon.Data.Labdata;
 
 namespace Ambermoon3DMapEditor
 {
@@ -57,7 +56,7 @@ namespace Ambermoon3DMapEditor
         private bool showCeilingTexture = true;
         private bool showFloor = true;
         private bool showCeiling = true;
-        private bool showWalls = false;
+        private bool showWalls = true;
         private bool showObjects = true;
         private bool showWallColors = false;
         private bool showObjectColors = false;
@@ -124,7 +123,7 @@ namespace Ambermoon3DMapEditor
 
             float left = x * BlockSize;
             float right = left + BlockSize;
-            float far = (mapHeight - y) * BlockSize;
+            float far = y * BlockSize;
             float near = far + BlockSize;
             float top = WallHeight;
             float bottom = 0.0f;
@@ -139,7 +138,7 @@ namespace Ambermoon3DMapEditor
             GL.Begin(PrimitiveType.Quads);
 
             // Front
-            if (renderUpFace)
+            if (renderDownFace)
             {
                 UpperLeftUv();
                 GL.Vertex3(left, top, near);
@@ -165,7 +164,7 @@ namespace Ambermoon3DMapEditor
             }
 
             // Back
-            if (renderDownFace)
+            if (renderUpFace)
             {
                 UpperLeftUv();
                 GL.Vertex3(right, top, far);
@@ -209,13 +208,10 @@ namespace Ambermoon3DMapEditor
                     topY = obj.Z + obj.Object.MappedTextureHeight;
                 topY *= labdata!.WallHeight * BlockSize / (341.0f * 512.0f);
             }
-            Vector4 position = new((x + obj.X / 512.0f) * BlockSize, topY, (mapHeight - y - obj.Y / 512.0f) * BlockSize, 1.0f);
+            Vector4 position = new((x + obj.X / 512.0f) * BlockSize, topY, (y + obj.Y / 512.0f) * BlockSize, 1.0f);
             var mappedPosition = position * modelViewMatrix;
 
             int index = labdata!.ObjectInfos.IndexOf(obj.Object);
-            var foo = labdata!.ObjectInfos[index];
-            if (JsonSerializer.Serialize(obj.Object) != JsonSerializer.Serialize(foo))
-                throw new Exception();
             var texture = objectTextures![index];
             float textureWidth = obj.Object.TextureWidth;
             float textureHeight = obj.Object.TextureHeight;
@@ -326,7 +322,7 @@ namespace Ambermoon3DMapEditor
                     {
                         if (showObjects)
                         {
-                            var obj = objects[index];
+                            var obj = objects[index - 1];
                             if (obj.SubObjects.Count > 0)
                             {
                                 int ox = x;
@@ -347,7 +343,9 @@ namespace Ambermoon3DMapEditor
                                 if (blocks[blockIndex] == 255)
                                     return false;
 
-                                return ((uint)walls[blocks[blockIndex] - 101].Flags & 0x180) == 0x100;
+                                var wallFlags = walls[blocks[blockIndex] - 101].Flags;
+
+                                return wallFlags.HasFlag(Tileset.TileFlags.Transparency) || ((uint)wallFlags & 0x180) == 0x100;
                             }
 
                             bool renderUpFace = y > 0 && IsObjectOrNonBlocking(blockIndex - mapWidth);
@@ -511,7 +509,7 @@ namespace Ambermoon3DMapEditor
             {
                 int ix = (int)Math.Round(x);
                 int iy = (int)Math.Round(y);
-                int blockIndex = ix + (mapHeight - iy - 1) * mapWidth;
+                int blockIndex = ix + (mapHeight - iy - 1) * mapWidth; // TODO
                 int index = blocks[/*ix + iy * mapWidth*/blockIndex];
                 
                 if (index == 255) return; // always blocking
@@ -610,7 +608,16 @@ namespace Ambermoon3DMapEditor
             InitLabdata(labdata, map.PaletteIndex);
             mapWidth = map.Width;
             mapHeight = map.Height;
-            blocks = map.Blocks.OfType<Map.Block>().Select(b => (byte)(b.MapBorder ? 255 : b.WallIndex == 0 ? b.ObjectIndex : 100 + b.WallIndex)).ToArray();
+            blocks = new byte[mapWidth * mapHeight];
+            int i = 0;
+            for (int y = 0; y < mapHeight; y++)
+            {
+                for (int x = 0; x < mapWidth; x++)
+                {
+                    var b = map.Blocks[x, y];
+                    blocks[i++] = (byte)(b.MapBorder ? 255 : b.WallIndex == 0 ? b.ObjectIndex : 100 + b.WallIndex);
+                }
+            }
         }
 
         private void InitLabdata(Labdata labdata, uint paletteIndex)
