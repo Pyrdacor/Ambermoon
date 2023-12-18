@@ -11,6 +11,75 @@ namespace Ambermoon3DMapEditor
 {
     public partial class MainForm : Form
     {
+        #region Constants
+        private const float BlockSize = 1.0f;
+        private const float PlayerSize = 0.6f * BlockSize;
+        private const float RefWallHeight = 341.0f * BlockSize / 512.0f;
+        private const float TurnSpeed = 0.1f;
+        private const int TileSize2D = 32;
+        private readonly Color AutomapBackgroundColor = Color.FromArgb(0xAA, 0x77, 0x44);
+        private readonly Color AutomapLineColor = Color.FromArgb(0x66, 0x33, 0x00);
+        #endregion
+
+        #region Inline Properties
+        private Matrix4 PerspectiveMatrix => Matrix4.CreatePerspectiveFieldOfView(0.26f * MathHelper.Pi, 341.0f / (labdata?.WallHeight ?? 400), 0.1f, 40.0f * BlockSize);
+        private float WallHeight => (labdata?.WallHeight ?? 400) * BlockSize / 512.0f;
+        private float MoveSpeed => speedBoost ? 0.15f * BlockSize : 0.075f * BlockSize;
+        #endregion
+
+        #region Settings
+        private bool speedBoost = false;
+        private bool showFloorTexture = true;
+        private bool showCeilingTexture = true;
+        private bool showFloor = true;
+        private bool showCeiling = true;
+        private bool showWalls = true;
+        private bool showObjects = true;
+        private bool showWallColors = false;
+        private bool showObjectColors = false;
+        private bool noClip = false;
+        private bool showAsAutomap = false;
+        #endregion
+
+        #region 3D Player / Camera
+        private Matrix4 modelViewMatrix = Matrix4.Identity;
+        private float playerX = 0.0f;
+        private float playerY = 0.0f;
+        private float playerViewAngle = 0.0f;
+        #endregion
+
+        #region Data, Map, Lab
+        private readonly GameData gameData;
+        private Labdata? labdata;
+        private byte[] blocks = new byte[10 * 10];
+        private uint paletteIndex = 1;
+        private int mapWidth = 10;
+        private int mapHeight = 10;
+        private List<Texture>? wallTextures = null;
+        private TextureAtlas? wallTextureAtlas = null;
+        private TextureAtlas? transparentWallTextureAtlas = null;
+        private TextureAtlas? floorTextureAtlas = null;
+        private TextureAtlas? ceilingTextureAtlas = null;
+        private List<Texture>? objectTextures = null;
+        private TextureAtlas? objectTextureAtlas = null;
+        private readonly Dictionary<uint, Palette> palettes = new();
+        private Color4 floorColor = Color4.White;
+        private Color4 ceilingColor = Color4.White;
+        private readonly Bitmap[][] automapGraphics;
+        private Bitmap[] wallGraphics = Array.Empty<Bitmap>();
+        private Bitmap[][] objectGraphics = Array.Empty<Bitmap[]>();
+        #endregion
+
+        #region State
+        private readonly bool[] pressedKeys = Enumerable.Repeat(false, 256).ToArray();
+        private bool initialized = false;
+        private int animationFrame = 0;
+        #endregion
+
+        #region UI
+        private Bitmap mapView2D = new(1, 1);
+        #endregion
+
         public MainForm()
         {
             const string dataPath = @"C:\Users\flavia\Desktop\ambermoon_german_1.19_extracted\Amberfiles";
@@ -23,87 +92,143 @@ namespace Ambermoon3DMapEditor
             }
 
             var automapPalette = gameData.GraphicProvider.Palettes[gameData.GraphicProvider.AutomapPaletteIndex];
-            automapGraphics = gameData.GraphicProvider.GetGraphics(GraphicType.AutomapGraphics).Select(g => GraphicToBitmaps(g, automapPalette, 16)).ToArray();
+            automapGraphics = gameData.GraphicProvider.GetGraphics(GraphicType.AutomapGraphics).Select(g =>
+                GraphicHelper.GraphicToBitmaps(g, automapPalette, 16)).ToArray();
 
             InitializeComponent();
         }
 
-        private Bitmap[] GraphicToBitmaps(Graphic graphic, Graphic palette, int frameWidth)
+        private void MainForm_Load(object sender, EventArgs e)
         {
-            int numFrames = graphic.Width / frameWidth;
-            var frames = new List<Bitmap>(numFrames);
+            view2D.BackColor = AutomapBackgroundColor;
+            view3D.MakeCurrent();
+            GL.AlphaFunc(AlphaFunction.Greater, 0.0f);
+            GL.Enable(EnableCap.DepthTest);
+            GL.Enable(EnableCap.Texture2D);
+            GL.Enable(EnableCap.CullFace);
+            GL.CullFace(CullFaceMode.Front);
 
-            for (int i = 0; i < numFrames; i++)
-            {
-                frames.Add(GraphicToBitmap(graphic.GetArea(i * frameWidth, 0, frameWidth, graphic.Height), palette));
-            }
+            LoadMap(259);
 
-            return frames.ToArray();
+            initialized = true;
+            initTimer.Start();
         }
 
-        private Bitmap GraphicToBitmap(Graphic graphic, Graphic palette)
+        private void initTimer_Tick(object sender, EventArgs e)
         {
-            var pixelData = graphic.ToPixelData(palette);
-
-            for (int i = 0; i < graphic.Width * graphic.Height; i++)
-            {
-                var temp = pixelData[i * 4 + 2];
-                pixelData[i * 4 + 2] = pixelData[i * 4 + 0];
-                pixelData[i * 4 + 0] = temp;
-            }
-
-            var bitmap = new Bitmap(graphic.Width, graphic.Height);
-            var bitmapData = bitmap.LockBits(new Rectangle(0, 0, bitmap.Width, bitmap.Height), System.Drawing.Imaging.ImageLockMode.WriteOnly, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
-
-            Marshal.Copy(pixelData, 0, bitmapData.Scan0, pixelData.Length);
-
-            bitmap.UnlockBits(bitmapData);
-
-            return bitmap;
+            view3D_Resize(this, EventArgs.Empty);
+            initTimer.Stop();
         }
 
-        GameData gameData;
-        uint paletteIndex = 1;
-        Labdata? labdata;
-        byte[] blocks = new byte[10 * 10];
-        private Matrix4 perspectiveMatrix => Matrix4.CreatePerspectiveFieldOfView(0.26f * MathHelper.Pi, 341.0f / (labdata?.WallHeight ?? 400), 0.1f, 40.0f * BlockSize);
-        private const float BlockSize = 1.0f;
-        private const float PlayerSize = 0.6f * BlockSize;
-        private const float RefWallHeight = 341.0f * BlockSize / 512.0f;
-        private float WallHeight => (labdata?.WallHeight ?? 400) * BlockSize / 512.0f;
-        private int mapWidth = 10;
-        private int mapHeight = 10;
-        private readonly bool[] pressedKeys = Enumerable.Repeat(false, 256).ToArray();
-        private Matrix4 modelViewMatrix = Matrix4.Identity;
-        private float playerX = 0.0f;
-        private float playerY = 0.0f;
-        private float playerViewAngle = 0.0f;
-        private float MoveSpeed => speedBoost ? 0.15f * BlockSize : 0.075f * BlockSize;
-        private const float TurnSpeed = 0.1f;
-        private bool speedBoost = false;
-        private List<Texture>? wallTextures = null;
-        private TextureAtlas? wallTextureAtlas = null;
-        private TextureAtlas? transparentWallTextureAtlas = null;
-        private TextureAtlas? floorTextureAtlas = null;
-        private TextureAtlas? ceilingTextureAtlas = null;
-        private List<Texture>? objectTextures = null;
-        private TextureAtlas? objectTextureAtlas = null;
-        private readonly Dictionary<uint, Palette> palettes = new();
-        private Color4 floorColor = Color4.White;
-        private Color4 ceilingColor = Color4.White;
-        private bool showFloorTexture = true;
-        private bool showCeilingTexture = true;
-        private bool showFloor = true;
-        private bool showCeiling = true;
-        private bool showWalls = true;
-        private bool showObjects = true;
-        private bool showWallColors = false;
-        private bool showObjectColors = false;
-        private bool noClip = false;
-        private bool initialized = false;
-        private int animationFrame = 0;
-        private Bitmap mapView2D = new(1, 1);
-        private readonly Bitmap[][] automapGraphics;
+        private void MainForm_FormClosed(object sender, FormClosedEventArgs e)
+        {
+            wallTextureAtlas?.Dispose();
+            transparentWallTextureAtlas?.Dispose();
+            floorTextureAtlas?.Dispose();
+            ceilingTextureAtlas?.Dispose();
+            objectTextureAtlas?.Dispose();
+        }
+
+        private void LoadMap(uint index)
+        {
+            var map = gameData.MapManager.GetMap(index);
+            labdata = gameData.MapManager.GetLabdataForMap(map);
+            paletteIndex = map.PaletteIndex;
+            InitLabdata(labdata, map.PaletteIndex);
+            mapWidth = map.Width;
+            mapHeight = map.Height;
+            blocks = new byte[mapWidth * mapHeight];
+            bool playerPlaced = false;
+            int i = 0;
+            for (int y = 0; y < mapHeight; y++)
+            {
+                for (int x = 0; x < mapWidth; x++)
+                {
+                    var b = map.Blocks[x, y];
+                    var objOrWall = blocks[i++] = (byte)(b.MapBorder ? 255 : b.WallIndex == 0 ? b.ObjectIndex : 100 + b.WallIndex);
+
+                    if (!playerPlaced && objOrWall == 0)
+                    {
+                        bool dirSet = false;
+                        playerX = x + 0.5f * BlockSize;
+                        playerY = y + 0.5f * BlockSize;
+
+                        byte right = x < mapWidth - 1 ? blocks[i] : (byte)255;
+
+                        if (right == 0)
+                        {
+                            playerViewAngle = MathHelper.PiOver2;
+                            dirSet = true;
+                        }
+
+                        if (!dirSet)
+                        {
+                            byte left = x > 0 ? blocks[i - 2] : (byte)255;
+
+                            if (left == 0)
+                            {
+                                playerViewAngle = MathHelper.ThreePiOver2;
+                                dirSet = true;
+                            }
+                        }
+
+                        if (!dirSet)
+                        {
+                            byte down = y < mapHeight - 1 ? blocks[i + mapWidth - 1] : (byte)255;
+
+                            if (down == 0)
+                            {
+                                playerViewAngle = MathHelper.Pi;
+                                dirSet = true;
+                            }
+                        }
+
+                        if (!dirSet)
+                        {
+                            byte up = y > 0 ? blocks[i - mapWidth - 1] : (byte)255;
+
+                            if (up == 0)
+                            {
+                                playerViewAngle = 0;
+                            }
+                        }
+
+                        playerPlaced = true;
+                    }
+                }
+            }
+
+            Draw2DViewToImage();
+            Redraw2DView();
+        }
+
+        private void InitLabdata(Labdata labdata, uint paletteIndex)
+        {
+            wallTextureAtlas?.Dispose();
+            transparentWallTextureAtlas?.Dispose();
+            floorTextureAtlas?.Dispose();
+            ceilingTextureAtlas?.Dispose();
+            objectTextureAtlas?.Dispose();
+
+            wallTextures = TextureLoader.Load(labdata.WallGraphics, out var paletteTextureAtlas);
+            wallTextureAtlas = paletteTextureAtlas.ToTextureAtlas(palettes[paletteIndex], false);
+            transparentWallTextureAtlas = paletteTextureAtlas.ToTextureAtlas(palettes[paletteIndex], true);
+            TextureLoader.Load((new[] { labdata.FloorGraphic }).ToList(), out paletteTextureAtlas);
+            floorTextureAtlas = paletteTextureAtlas.ToTextureAtlas(palettes[paletteIndex], false);
+            TextureLoader.Load((new[] { labdata.CeilingGraphic }).ToList(), out paletteTextureAtlas);
+            ceilingTextureAtlas = paletteTextureAtlas.ToTextureAtlas(palettes[paletteIndex], false);
+            objectTextures = TextureLoader.Load(labdata.ObjectGraphics, out paletteTextureAtlas);
+            objectTextureAtlas = paletteTextureAtlas.ToTextureAtlas(palettes[paletteIndex], true);
+
+            var palette = gameData.GraphicProvider.Palettes[(int)paletteIndex];
+            wallGraphics = labdata.WallGraphics.Select(g => GraphicHelper.GraphicToBitmap(g, palette)).ToArray();
+            objectGraphics = labdata.ObjectGraphics.Select((g, i) => GraphicHelper.GraphicToBitmaps(g, palette, g.Width / (int)labdata.ObjectInfos[i].NumAnimationFrames)).ToArray();
+
+            GL.MatrixMode(MatrixMode.Projection);
+            var perspective = PerspectiveMatrix;
+            GL.LoadMatrix(ref perspective);
+        }
+
         private int GetAutomapGraphicFrames(AutomapType automapType) => automapType switch
         {
             < AutomapType.Riddlemouth => 0,
@@ -112,12 +237,6 @@ namespace Ambermoon3DMapEditor
             AutomapType.Invalid => 0,
             _ => 1
         };
-        private readonly Color automapBackgroundColor = Color.FromArgb(0xAA, 0x77, 0x44);
-        private readonly Color automapLineColor = Color.FromArgb(0x66, 0x33, 0x00);
-        const int TileSize2D = 32;
-        bool showAsAutomap = false;
-        private Bitmap[] wallGraphics = new Bitmap[0];
-        private Bitmap[][] objectGraphics = new Bitmap[0][];
 
         private void DrawFloor(Color4 color)
         {
@@ -471,7 +590,7 @@ namespace Ambermoon3DMapEditor
 
             UpdateModelView();
 
-            var perspective = perspectiveMatrix;
+            var perspective = PerspectiveMatrix;
             GL.LoadMatrix(ref perspective);
         }
 
@@ -687,89 +806,6 @@ namespace Ambermoon3DMapEditor
             UpdateModelView();
         }
 
-        private void MainForm_Load(object sender, EventArgs e)
-        {
-            view2D.BackColor = automapBackgroundColor;
-            view3D.MakeCurrent();
-            GL.AlphaFunc(AlphaFunction.Greater, 0.0f);
-            GL.Enable(EnableCap.DepthTest);
-            GL.Enable(EnableCap.Texture2D);
-            GL.Enable(EnableCap.CullFace);
-            GL.CullFace(CullFaceMode.Front);
-
-            LoadMap(259);
-
-            playerX = 0.5f * mapWidth;
-            playerY = 0.5f * mapHeight - 1;
-
-            initialized = true;
-            initTimer.Start();
-        }
-
-        private void LoadMap(uint index)
-        {
-            var map = gameData.MapManager.GetMap(index);
-            labdata = gameData.MapManager.GetLabdataForMap(map);
-            paletteIndex = map.PaletteIndex;
-            InitLabdata(labdata, map.PaletteIndex);
-            mapWidth = map.Width;
-            mapHeight = map.Height;
-            blocks = new byte[mapWidth * mapHeight];
-            int i = 0;
-            for (int y = 0; y < mapHeight; y++)
-            {
-                for (int x = 0; x < mapWidth; x++)
-                {
-                    var b = map.Blocks[x, y];
-                    blocks[i++] = (byte)(b.MapBorder ? 255 : b.WallIndex == 0 ? b.ObjectIndex : 100 + b.WallIndex);
-                }
-            }
-            Draw2DViewToImage();
-            Redraw2DView();
-        }
-
-        private void InitLabdata(Labdata labdata, uint paletteIndex)
-        {
-            wallTextureAtlas?.Dispose();
-            transparentWallTextureAtlas?.Dispose();
-            floorTextureAtlas?.Dispose();
-            ceilingTextureAtlas?.Dispose();
-            objectTextureAtlas?.Dispose();
-
-            wallTextures = TextureLoader.Load(labdata.WallGraphics, out var paletteTextureAtlas);
-            wallTextureAtlas = paletteTextureAtlas.ToTextureAtlas(palettes[paletteIndex], false);
-            transparentWallTextureAtlas = paletteTextureAtlas.ToTextureAtlas(palettes[paletteIndex], true);
-            TextureLoader.Load((new[] { labdata.FloorGraphic }).ToList(), out paletteTextureAtlas);
-            floorTextureAtlas = paletteTextureAtlas.ToTextureAtlas(palettes[paletteIndex], false);
-            TextureLoader.Load((new[] { labdata.CeilingGraphic }).ToList(), out paletteTextureAtlas);
-            ceilingTextureAtlas = paletteTextureAtlas.ToTextureAtlas(palettes[paletteIndex], false);
-            objectTextures = TextureLoader.Load(labdata.ObjectGraphics, out paletteTextureAtlas);
-            objectTextureAtlas = paletteTextureAtlas.ToTextureAtlas(palettes[paletteIndex], true);
-
-            var palette = gameData.GraphicProvider.Palettes[(int)paletteIndex];
-            wallGraphics = labdata.WallGraphics.Select(g => GraphicToBitmap(g, palette)).ToArray();
-            objectGraphics = labdata.ObjectGraphics.Select((g, i) => GraphicToBitmaps(g, palette, g.Width / (int)labdata.ObjectInfos[i].NumAnimationFrames)).ToArray();
-
-            GL.MatrixMode(MatrixMode.Projection);
-            var perspective = perspectiveMatrix;
-            GL.LoadMatrix(ref perspective);
-        }
-
-        private void initTimer_Tick(object sender, EventArgs e)
-        {
-            view3D_Resize(this, EventArgs.Empty);
-            initTimer.Stop();
-        }
-
-        private void MainForm_FormClosed(object sender, FormClosedEventArgs e)
-        {
-            wallTextureAtlas?.Dispose();
-            transparentWallTextureAtlas?.Dispose();
-            floorTextureAtlas?.Dispose();
-            ceilingTextureAtlas?.Dispose();
-            objectTextureAtlas?.Dispose();
-        }
-
         private void Draw2DViewToImage()
         {
             if (labdata == null)
@@ -805,7 +841,7 @@ namespace Ambermoon3DMapEditor
 
                     if (index == 0 || index == 255)
                     {
-                        DrawBlock(x, y, automapBackgroundColor, index == 0 ? null : automapLineColor, index == 0 ? null : "X");
+                        DrawBlock(x, y, AutomapBackgroundColor, index == 0 ? null : AutomapLineColor, index == 0 ? null : "X");
                         continue;
                     }
 
@@ -817,7 +853,7 @@ namespace Ambermoon3DMapEditor
                             int numFrames = GetAutomapGraphicFrames(obj.AutomapType);
                             if (numFrames == 0)
                             {
-                                DrawBlock(x, y, automapBackgroundColor, Color.ForestGreen);
+                                DrawBlock(x, y, AutomapBackgroundColor, Color.ForestGreen);
                             }
                             else
                             {
@@ -841,14 +877,14 @@ namespace Ambermoon3DMapEditor
                         if (showAsAutomap)
                         {
                             // TODO
-                            DrawBlock(x, y, automapBackgroundColor, automapLineColor);
+                            DrawBlock(x, y, AutomapBackgroundColor, AutomapLineColor);
                         }
                         else
                         {
                             graphics.DrawImage(wallGraphics[index - 101], x * TileSize2D, y * TileSize2D, TileSize2D, TileSize2D);
                         }
 
-                        
+
                         // TODO
                         /*if (showWalls)
                         {

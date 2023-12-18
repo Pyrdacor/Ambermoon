@@ -7,5 +7,8 @@
     <Compile Update="RenderPanel.cs">
       <SubType>Component</SubType>
     </Compile>
+    <Compile Update="SettingsControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
   </ItemGroup>
 </Project>

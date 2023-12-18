@@ -1,0 +1,76 @@
+﻿namespace Ambermoon3DMapEditor
+{
+    public partial class SettingsControl : UserControl
+    {
+        private readonly Settings settings = new();
+
+        public SettingsControl()
+        {
+            InitializeComponent();
+
+            // 3D View
+            MapCheckbox(settings => settings.Settings3DView.ShowFloorTexture, checkBoxShowFloorTexture);
+            MapCheckbox(settings => settings.Settings3DView.ShowCeilingTexture, checkBoxShowCeilingTexture);
+            MapCheckbox(settings => settings.Settings3DView.ShowFloor, checkBoxShowFloor);
+            MapCheckbox(settings => settings.Settings3DView.ShowCeiling, checkBoxShowCeiling);
+            MapCheckbox(settings => settings.Settings3DView.ShowWalls, checkBoxShowWalls);
+            MapCheckbox(settings => settings.Settings3DView.ShowObjects, checkBoxShowObjects);
+
+            // 2D View
+            MapRadioGroup(settings => settings.Settings2DView.ShowAsAutomap, radioButtonMiniatureMap, radioButtonDungeonMap);
+
+            // Misc
+        }
+
+        private void MapCheckbox(Func<Settings, Settings.Value<bool>> selector, CheckBox checkBox)
+        {
+            var setting = selector(settings);
+            checkBox.CheckedChanged += (object? sender, EventArgs e) => setting.CurrentValue = (sender as CheckBox)!.Checked;
+        }
+
+        private void MapRadioGroup<T>(Func<Settings, Settings.Value<T>> selector, params RadioButton[] radioButtons) where T : struct, IEquatable<T>
+        {
+            if (radioButtons.Length == 0)
+                throw new InvalidOperationException("No radio buttons given for radio group mapping.");
+
+            var setting = selector(settings);
+
+            if (typeof(T) == typeof(bool))
+            {
+                if (radioButtons.Length != 2)
+                    throw new InvalidOperationException("Mapping a radio group to a boolean requires 2 radio buttons.");
+
+                radioButtons[0].CheckedChanged += (object? sender, EventArgs e) =>
+                {
+                    bool @checked = (sender as RadioButton)!.Checked;
+                    if (@checked)
+                        setting.CurrentValue = (T)Convert.ChangeType(false, typeof(T));
+                };
+                radioButtons[1].CheckedChanged += (object? sender, EventArgs e) =>
+                {
+                    bool @checked = (sender as RadioButton)!.Checked;
+                    if (@checked)
+                        setting.CurrentValue = (T)Convert.ChangeType(true, typeof(T));
+                };
+            }
+            else if (typeof(T) == typeof(int))
+            {
+                for (int i = 0; i < radioButtons.Length; i++)
+                {
+                    int index = i;
+                    radioButtons[i].CheckedChanged += (object? sender, EventArgs e) =>
+                    {
+                        bool @checked = (sender as RadioButton)!.Checked;
+                        if (@checked)
+                            setting.CurrentValue = (T)Convert.ChangeType(index, typeof(T));
+                    };
+                }
+            }
+            else
+            {
+                // TODO: support enums?
+                throw new NotSupportedException("Only type bool and int are supported for radio groups.");
+            }
+        }
+    }
+}

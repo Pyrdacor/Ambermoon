@@ -36,6 +36,7 @@
             statusStrip1 = new StatusStrip();
             statusPosition = new ToolStripStatusLabel();
             initTimer = new System.Windows.Forms.Timer(components);
+            settingsControl1 = new SettingsControl();
             ((System.ComponentModel.ISupportInitialize)splitContainer1).BeginInit();
             splitContainer1.Panel1.SuspendLayout();
             splitContainer1.Panel2.SuspendLayout();
@@ -115,11 +116,20 @@
             // 
             initTimer.Tick += initTimer_Tick;
             // 
+            // settingsControl1
+            // 
+            settingsControl1.Dock = DockStyle.Bottom;
+            settingsControl1.Location = new Point(0, 208);
+            settingsControl1.Name = "settingsControl1";
+            settingsControl1.Size = new Size(800, 216);
+            settingsControl1.TabIndex = 2;
+            // 
             // MainForm
             // 
             AutoScaleDimensions = new SizeF(8F, 20F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(800, 450);
+            Controls.Add(settingsControl1);
             Controls.Add(statusStrip1);
             Controls.Add(splitContainer1);
             KeyPreview = true;
@@ -149,5 +159,6 @@
         private StatusStrip statusStrip1;
         private ToolStripStatusLabel statusPosition;
         private System.Windows.Forms.Timer initTimer;
+        private SettingsControl settingsControl1;
     }
 }
