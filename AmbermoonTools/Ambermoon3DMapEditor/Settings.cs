@@ -49,8 +49,11 @@
 
         internal class _Settings2DView
         {
+            public Value<bool> ShowPlayer { get; } = false;
             public Value<bool> ShowAsAutomap { get; } = false;
             public Value<int> ZoomLevel { get; } = 2;
+            public Value<bool> ShowBlockingModes { get; } = false;
+            public Value<int> ShowBlockingModesClass { get; } = 0;
         }
 
         internal class _SettingsMisc

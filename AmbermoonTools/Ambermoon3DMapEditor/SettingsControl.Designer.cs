@@ -43,12 +43,16 @@
             checkBoxShowCeilingTexture = new CheckBox();
             checkBoxShowFloorTexture = new CheckBox();
             tabPage2DView = new TabPage();
+            label1 = new Label();
+            comboBoxShowBlockingModesClass = new ComboBox();
+            checkBoxShowBlockingModes = new CheckBox();
             groupBox1 = new GroupBox();
             sliderZoomLevel = new Slider();
             groupBoxDisplayType = new GroupBox();
             radioButtonDungeonMap = new RadioButton();
             radioButtonMiniatureMap = new RadioButton();
             tabPageMisc = new TabPage();
+            checkBoxShowPlayer = new CheckBox();
             tabControlSettings.SuspendLayout();
             tabPage3DView.SuspendLayout();
             tabPage2DView.SuspendLayout();
@@ -239,6 +243,10 @@
             // 
             // tabPage2DView
             // 
+            tabPage2DView.Controls.Add(checkBoxShowPlayer);
+            tabPage2DView.Controls.Add(label1);
+            tabPage2DView.Controls.Add(comboBoxShowBlockingModesClass);
+            tabPage2DView.Controls.Add(checkBoxShowBlockingModes);
             tabPage2DView.Controls.Add(groupBox1);
             tabPage2DView.Controls.Add(groupBoxDisplayType);
             tabPage2DView.Location = new Point(4, 29);
@@ -249,10 +257,39 @@
             tabPage2DView.Text = "2D View";
             tabPage2DView.UseVisualStyleBackColor = true;
             // 
+            // label1
+            // 
+            label1.AutoSize = true;
+            label1.Location = new Point(18, 106);
+            label1.Name = "label1";
+            label1.Size = new Size(33, 20);
+            label1.TabIndex = 11;
+            label1.Text = "For:";
+            // 
+            // comboBoxShowBlockingModesClass
+            // 
+            comboBoxShowBlockingModesClass.DropDownStyle = ComboBoxStyle.DropDownList;
+            comboBoxShowBlockingModesClass.FormattingEnabled = true;
+            comboBoxShowBlockingModesClass.Items.AddRange(new object[] { "Player", "Monsters 1", "Monsters 2", "Monsters 3", "Monsters 4", "Monsters 5", "Monsters 6", "Monsters 7", "Monsters 8", "Monsters 9", "Monsters 10", "Monsters 11", "Monsters 12", "Monsters 13", "Monsters 14" });
+            comboBoxShowBlockingModesClass.Location = new Point(52, 103);
+            comboBoxShowBlockingModesClass.Name = "comboBoxShowBlockingModesClass";
+            comboBoxShowBlockingModesClass.Size = new Size(234, 28);
+            comboBoxShowBlockingModesClass.TabIndex = 10;
+            // 
+            // checkBoxShowBlockingModes
+            // 
+            checkBoxShowBlockingModes.AutoSize = true;
+            checkBoxShowBlockingModes.Location = new Point(22, 73);
+            checkBoxShowBlockingModes.Name = "checkBoxShowBlockingModes";
+            checkBoxShowBlockingModes.Size = new Size(177, 24);
+            checkBoxShowBlockingModes.TabIndex = 9;
+            checkBoxShowBlockingModes.Text = "Show Blocking Modes";
+            checkBoxShowBlockingModes.UseVisualStyleBackColor = true;
+            // 
             // groupBox1
             // 
             groupBox1.Controls.Add(sliderZoomLevel);
-            groupBox1.Location = new Point(292, 15);
+            groupBox1.Location = new Point(292, 7);
             groupBox1.Name = "groupBox1";
             groupBox1.Size = new Size(274, 94);
             groupBox1.TabIndex = 8;
@@ -268,13 +305,14 @@
             sliderZoomLevel.Name = "sliderZoomLevel";
             sliderZoomLevel.Size = new Size(262, 56);
             sliderZoomLevel.TabIndex = 9;
+            sliderZoomLevel.TickFrequency = 1;
             sliderZoomLevel.Value = 1;
             // 
             // groupBoxDisplayType
             // 
             groupBoxDisplayType.Controls.Add(radioButtonDungeonMap);
             groupBoxDisplayType.Controls.Add(radioButtonMiniatureMap);
-            groupBoxDisplayType.Location = new Point(12, 15);
+            groupBoxDisplayType.Location = new Point(12, 7);
             groupBoxDisplayType.Name = "groupBoxDisplayType";
             groupBoxDisplayType.Size = new Size(274, 63);
             groupBoxDisplayType.TabIndex = 7;
@@ -313,6 +351,16 @@
             tabPageMisc.Text = "Misc";
             tabPageMisc.UseVisualStyleBackColor = true;
             // 
+            // checkBoxShowPlayer
+            // 
+            checkBoxShowPlayer.AutoSize = true;
+            checkBoxShowPlayer.Location = new Point(298, 105);
+            checkBoxShowPlayer.Name = "checkBoxShowPlayer";
+            checkBoxShowPlayer.Size = new Size(111, 24);
+            checkBoxShowPlayer.TabIndex = 12;
+            checkBoxShowPlayer.Text = "Show Player";
+            checkBoxShowPlayer.UseVisualStyleBackColor = true;
+            // 
             // SettingsControl
             // 
             AutoScaleDimensions = new SizeF(8F, 20F);
@@ -327,8 +375,8 @@
             tabPage3DView.ResumeLayout(false);
             tabPage3DView.PerformLayout();
             tabPage2DView.ResumeLayout(false);
+            tabPage2DView.PerformLayout();
             groupBox1.ResumeLayout(false);
-            groupBox1.PerformLayout();
             groupBoxDisplayType.ResumeLayout(false);
             groupBoxDisplayType.PerformLayout();
             ResumeLayout(false);
@@ -357,5 +405,9 @@
         private CheckBox checkBoxNoWallClip;
         private Slider sliderZoomLevel;
         private GroupBox groupBox1;
+        private CheckBox checkBoxShowBlockingModes;
+        private ComboBox comboBoxShowBlockingModesClass;
+        private Label label1;
+        private CheckBox checkBoxShowPlayer;
     }
 }

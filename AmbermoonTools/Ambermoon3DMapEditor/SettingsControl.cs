@@ -26,6 +26,9 @@
             // 2D View
             MapRadioGroup(settings => settings.Settings2DView.ShowAsAutomap, radioButtonMiniatureMap, radioButtonDungeonMap);
             MapSlider(setting => Settings.Settings2DView.ZoomLevel, sliderZoomLevel);
+            MapCheckbox(settings => settings.Settings2DView.ShowBlockingModes, checkBoxShowBlockingModes);
+            MapComboBox(settings => settings.Settings2DView.ShowBlockingModesClass, comboBoxShowBlockingModesClass);
+            MapCheckbox(settings => settings.Settings2DView.ShowPlayer, checkBoxShowPlayer);
 
             // Misc
         }
@@ -42,6 +45,13 @@
             var setting = selector(Settings);
             slider.Value = setting.CurrentValue;
             slider.ValueChanged += value => setting.CurrentValue = value;
+        }
+
+        private void MapComboBox(Func<Settings, Settings.Value<int>> selector, ComboBox comboBox)
+        {
+            var setting = selector(Settings);
+            comboBox.SelectedIndex = setting.CurrentValue;
+            comboBox.SelectedIndexChanged += (object? sender, EventArgs e) => setting.CurrentValue = (sender as ComboBox)!.SelectedIndex;
         }
 
         private void MapRadioGroup<T>(Func<Settings, Settings.Value<T>> selector, params RadioButton[] radioButtons) where T : struct, IEquatable<T>

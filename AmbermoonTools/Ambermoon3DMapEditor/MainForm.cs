@@ -4,6 +4,7 @@ using Ambermoon.Data.Enumerations;
 using Ambermoon.Data.Legacy;
 using OpenTK.Graphics.OpenGL;
 using OpenTK.Mathematics;
+using System.Drawing;
 using Color = System.Drawing.Color;
 
 namespace Ambermoon3DMapEditor
@@ -24,6 +25,25 @@ namespace Ambermoon3DMapEditor
         private float WallHeight => (labdata?.WallHeight ?? 400) * BlockSize / 512.0f;
         private float MoveSpeed => settings3D.SpeedBoost.CurrentValue ? 0.15f * BlockSize : 0.075f * BlockSize;
         private int TileSize2D => settings2D.ZoomLevel.CurrentValue * 16;
+        private Direction CurrentDirection
+        {
+            get
+            {
+                const float segment = MathHelper.Pi / 8;
+
+                return playerViewAngle switch
+                {
+                    >= segment and < 3 * segment => Direction.UpRight,
+                    >= 3 * segment and < 5 * segment => Direction.Right,
+                    >= 5 * segment and < 7 * segment => Direction.DownRight,
+                    >= 7 * segment and < 9 * segment => Direction.Down,
+                    >= 9 * segment and < 11 * segment => Direction.DownLeft,
+                    >= 11 * segment and < 13 * segment => Direction.Left,
+                    >= 13 * segment and < 15 * segment => Direction.UpLeft,
+                    _ => Direction.Up
+                };
+            }
+        }
         #endregion
 
         #region Settings
@@ -57,6 +77,7 @@ namespace Ambermoon3DMapEditor
         private readonly Dictionary<uint, Palette> palettes = new();
         private readonly Bitmap[][] automapGraphics;
         private Bitmap[] wallGraphics = Array.Empty<Bitmap>();
+        private Bitmap[] transparentWallGraphics = Array.Empty<Bitmap>();
         private Bitmap[][] objectGraphics = Array.Empty<Bitmap[]>();
         #endregion
 
@@ -83,7 +104,7 @@ namespace Ambermoon3DMapEditor
 
             var automapPalette = gameData.GraphicProvider.Palettes[gameData.GraphicProvider.AutomapPaletteIndex];
             automapGraphics = gameData.GraphicProvider.GetGraphics(GraphicType.AutomapGraphics).Select(g =>
-                GraphicHelper.GraphicToBitmaps(g, automapPalette, 16)).ToArray();
+                GraphicHelper.GraphicToBitmaps(g, automapPalette, 16, true)).ToArray();
 
             InitializeComponent();
         }
@@ -116,6 +137,9 @@ namespace Ambermoon3DMapEditor
 
             settings2D.ShowAsAutomap.Changed += _ => Changed2D();
             settings2D.ZoomLevel.Changed += _ => Changed2D();
+            settings2D.ShowBlockingModes.Changed += _ => Changed2D();
+            settings2D.ShowBlockingModes.Changed += _ => { if (settings2D.ShowBlockingModes.CurrentValue) Changed2D(); };
+            settings2D.ShowPlayer.Changed += _ => Changed2D();
 
             settings3D.ShowFloor.Changed += _ => Changed3D();
             settings3D.ShowCeiling.Changed += _ => Changed3D();
@@ -234,8 +258,9 @@ namespace Ambermoon3DMapEditor
             objectTextureAtlas = paletteTextureAtlas.ToTextureAtlas(palettes[paletteIndex], true);
 
             var palette = gameData.GraphicProvider.Palettes[(int)paletteIndex];
-            wallGraphics = labdata.WallGraphics.Select(g => GraphicHelper.GraphicToBitmap(g, palette)).ToArray();
-            objectGraphics = labdata.ObjectGraphics.Select((g, i) => GraphicHelper.GraphicToBitmaps(g, palette, g.Width / (int)labdata.ObjectInfos[i].NumAnimationFrames)).ToArray();
+            wallGraphics = labdata.WallGraphics.Select(g => GraphicHelper.GraphicToBitmap(g, palette, false)).ToArray();
+            transparentWallGraphics = labdata.WallGraphics.Select(g => GraphicHelper.GraphicToBitmap(g, palette, true)).ToArray();
+            objectGraphics = labdata.ObjectGraphics.Select((g, i) => GraphicHelper.GraphicToBitmaps(g, palette, g.Width / (int)labdata.ObjectInfos[i].NumAnimationFrames, true)).ToArray();
 
             GL.MatrixMode(MatrixMode.Projection);
             var perspective = PerspectiveMatrix;
@@ -844,6 +869,10 @@ namespace Ambermoon3DMapEditor
             using var graphics = Graphics.FromImage(mapView2D);
             var palette = palettes[paletteIndex];
 
+            graphics.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.NearestNeighbor;
+            graphics.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.None;
+            graphics.PixelOffsetMode = System.Drawing.Drawing2D.PixelOffsetMode.Half;
+
             void DrawBlock(int x, int y, Color fill, Color? border, string? text = null)
             {
                 var area = new Rectangle(x * TileSize2D, y * TileSize2D, TileSize2D, TileSize2D);
@@ -861,6 +890,21 @@ namespace Ambermoon3DMapEditor
                 }
             }
 
+            void DrawBlockingMode(int x, int y, ushort blockedTravelTypes)
+            {
+                int bit = 1 << settings2D.ShowBlockingModesClass.CurrentValue;
+                var area = new Rectangle(x * TileSize2D, y * TileSize2D, TileSize2D, TileSize2D);
+
+                if ((blockedTravelTypes & bit) != 0)
+                {
+                    int lineSize = 4;
+                    using var borderPen = new Pen(Color.Red, lineSize);
+                    graphics.DrawRectangle(borderPen, area);
+                    graphics.DrawLine(borderPen, new Point(area.X, area.Y), new Point(area.Right - lineSize, area.Bottom - lineSize));
+                    graphics.DrawLine(borderPen, new Point(area.Right - lineSize, area.Y), new Point(area.X, area.Bottom - lineSize));
+                }
+            }
+
             for (int y = 0; y < mapHeight; y++)
             {
                 for (int x = 0; x < mapWidth; x++)
@@ -871,6 +915,10 @@ namespace Ambermoon3DMapEditor
                     if (index == 0 || index == 255)
                     {
                         DrawBlock(x, y, AutomapBackgroundColor, index == 0 ? null : AutomapLineColor, index == 0 ? null : "X");
+
+                        if (settings2D.ShowBlockingModes.CurrentValue && index == 255)
+                            DrawBlockingMode(x, y, 0xffff);
+
                         continue;
                     }
 
@@ -900,9 +948,22 @@ namespace Ambermoon3DMapEditor
                             int objIndex = labdata.ObjectInfos.IndexOf(obj.SubObjects[0].Object);
                             graphics.DrawImage(objectGraphics[objIndex][frame], x * TileSize2D, y * TileSize2D, TileSize2D, TileSize2D);
                         }
+
+                        if (settings2D.ShowBlockingModes.CurrentValue)
+                        {
+                            if (obj.SubObjects.Any(so => so.Object.Flags.HasFlag(Tileset.TileFlags.BlockAllMovement)))
+                                DrawBlockingMode(x, y, 0xffff);
+                            else
+                            {
+                                ushort allowedTravelTypes = obj.SubObjects.Select(so => (ushort)(((int)so.Object.Flags >> 8) & 0x7fff)).Aggregate((a, b) => (ushort)(a & b));
+                                DrawBlockingMode(x, y, (ushort)~allowedTravelTypes);
+                            }
+                        }
                     }
                     else
                     {
+                        var wall = labdata.Walls[index - 101];
+
                         if (settings2D.ShowAsAutomap.CurrentValue)
                         {
                             // TODO
@@ -910,7 +971,19 @@ namespace Ambermoon3DMapEditor
                         }
                         else
                         {
-                            graphics.DrawImage(wallGraphics[index - 101], x * TileSize2D, y * TileSize2D, TileSize2D, TileSize2D);
+                            bool transparent = wall.Flags.HasFlag(Tileset.TileFlags.Transparency);
+                            if (transparent)
+                                graphics.DrawImage(transparentWallGraphics[index - 101], x * TileSize2D, y * TileSize2D, TileSize2D, TileSize2D);
+                            else
+                                graphics.DrawImage(wallGraphics[index - 101], x * TileSize2D, y * TileSize2D, TileSize2D, TileSize2D);
+                        }
+
+                        if (settings2D.ShowBlockingModes.CurrentValue)
+                        {
+                            if (wall.Flags.HasFlag(Tileset.TileFlags.BlockAllMovement))
+                                DrawBlockingMode(x, y, 0xffff);
+                            else
+                                DrawBlockingMode(x, y, (ushort)~(((int)wall.Flags >> 8) & 0x7fff));
                         }
 
 
@@ -951,6 +1024,15 @@ namespace Ambermoon3DMapEditor
                     }
                 }
             }
+
+            if (settings2D.ShowPlayer.CurrentValue)
+            {
+                // draw lower half
+                graphics.DrawImage(automapGraphics[16][0], new Rectangle((int)Math.Floor(playerX) * TileSize2D, (int)Math.Floor(playerY) * TileSize2D, TileSize2D, TileSize2D));
+
+                // draw upper half
+                graphics.DrawImage(automapGraphics[18 + (int)CurrentDirection][0], new Rectangle((int)Math.Floor(playerX) * TileSize2D, (int)Math.Floor(playerY) * TileSize2D - TileSize2D, TileSize2D, TileSize2D));
+            }
         }
 
         private void Redraw2DView()
@@ -964,5 +1046,15 @@ namespace Ambermoon3DMapEditor
             e.Graphics.DrawImage(mapView2D, view2D.AutoScrollPosition);
         }
 
+        private void animationTimer_Tick(object sender, EventArgs e)
+        {
+            animationFrame = animationFrame == int.MaxValue ? 0 : animationFrame + 1;
+
+            if (settings3D.ShowObjects.CurrentValue && settings3D.ShowObjectTextures.CurrentValue)
+                view3D.Refresh();
+
+            Draw2DViewToImage();
+            Redraw2DView();
+        }
     }
 }

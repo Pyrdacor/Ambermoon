@@ -5,22 +5,22 @@ namespace Ambermoon3DMapEditor
 {
     internal static class GraphicHelper
     {
-        public static Bitmap[] GraphicToBitmaps(Graphic graphic, Graphic palette, int frameWidth)
+        public static Bitmap[] GraphicToBitmaps(Graphic graphic, Graphic palette, int frameWidth, bool transparency)
         {
             int numFrames = graphic.Width / frameWidth;
             var frames = new List<Bitmap>(numFrames);
 
             for (int i = 0; i < numFrames; i++)
             {
-                frames.Add(GraphicToBitmap(graphic.GetArea(i * frameWidth, 0, frameWidth, graphic.Height), palette));
+                frames.Add(GraphicToBitmap(graphic.GetArea(i * frameWidth, 0, frameWidth, graphic.Height), palette, transparency));
             }
 
             return frames.ToArray();
         }
 
-        public static Bitmap GraphicToBitmap(Graphic graphic, Graphic palette)
+        public static Bitmap GraphicToBitmap(Graphic graphic, Graphic palette, bool transparency)
         {
-            var pixelData = graphic.ToPixelData(palette);
+            var pixelData = graphic.ToPixelData(palette, (byte)(transparency ? 0 : 255));
 
             for (int i = 0; i < graphic.Width * graphic.Height; i++)
             {

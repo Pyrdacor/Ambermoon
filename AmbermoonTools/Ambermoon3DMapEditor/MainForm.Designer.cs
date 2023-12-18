@@ -37,6 +37,7 @@
             statusPosition = new ToolStripStatusLabel();
             initTimer = new System.Windows.Forms.Timer(components);
             settingsControl1 = new SettingsControl();
+            animationTimer = new System.Windows.Forms.Timer(components);
             ((System.ComponentModel.ISupportInitialize)splitContainer1).BeginInit();
             splitContainer1.Panel1.SuspendLayout();
             splitContainer1.Panel2.SuspendLayout();
@@ -126,6 +127,12 @@
             settingsControl1.Size = new Size(800, 172);
             settingsControl1.TabIndex = 2;
             // 
+            // animationTimer
+            // 
+            animationTimer.Enabled = true;
+            animationTimer.Interval = 20;
+            animationTimer.Tick += animationTimer_Tick;
+            // 
             // MainForm
             // 
             AutoScaleDimensions = new SizeF(8F, 20F);
@@ -162,5 +169,6 @@
         private ToolStripStatusLabel statusPosition;
         private System.Windows.Forms.Timer initTimer;
         private SettingsControl settingsControl1;
+        private System.Windows.Forms.Timer animationTimer;
     }
 }
