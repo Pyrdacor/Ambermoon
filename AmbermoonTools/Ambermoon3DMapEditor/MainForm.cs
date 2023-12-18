@@ -5,6 +5,7 @@ using Ambermoon.Data.Legacy;
 using OpenTK.Graphics.OpenGL;
 using OpenTK.Mathematics;
 using System.Drawing;
+using static Ambermoon.Data.Map;
 using Color = System.Drawing.Color;
 
 namespace Ambermoon3DMapEditor
@@ -62,8 +63,11 @@ namespace Ambermoon3DMapEditor
 
         #region Data, Map, Lab
         private readonly GameData gameData;
+        private Map? map;
         private Labdata? labdata;
+        private readonly Graphic automapPalette;
         private byte[] blocks = new byte[10 * 10];
+        private uint[] events = new uint[10 * 10];
         private uint paletteIndex = 1;
         private int mapWidth = 10;
         private int mapHeight = 10;
@@ -79,6 +83,9 @@ namespace Ambermoon3DMapEditor
         private Bitmap[] wallGraphics = Array.Empty<Bitmap>();
         private Bitmap[] transparentWallGraphics = Array.Empty<Bitmap>();
         private Bitmap[][] objectGraphics = Array.Empty<Bitmap[]>();
+        private Bitmap[] automapWallGraphics = Array.Empty<Bitmap>();
+        private Bitmap? automapFakeWallOverlay; // TODO
+        private Bitmap? thalion;
         #endregion
 
         #region State
@@ -102,7 +109,7 @@ namespace Ambermoon3DMapEditor
                 palettes.Add((uint)paletteGraphic.Key, PaletteLoader.LoadPalette(paletteGraphic.Value));
             }
 
-            var automapPalette = gameData.GraphicProvider.Palettes[gameData.GraphicProvider.AutomapPaletteIndex];
+            automapPalette = gameData.GraphicProvider.Palettes[gameData.GraphicProvider.AutomapPaletteIndex];
             automapGraphics = gameData.GraphicProvider.GetGraphics(GraphicType.AutomapGraphics).Select(g =>
                 GraphicHelper.GraphicToBitmaps(g, automapPalette, 16, true)).ToArray();
 
@@ -168,13 +175,14 @@ namespace Ambermoon3DMapEditor
 
         private void LoadMap(uint index)
         {
-            var map = gameData.MapManager.GetMap(index);
-            labdata = gameData.MapManager.GetLabdataForMap(map);
+            map = gameData.MapManager.GetMap(index);
+            labdata = gameData.MapManager.GetLabdataForMap(map!);
             paletteIndex = map.PaletteIndex;
             InitLabdata(labdata, map.PaletteIndex);
             mapWidth = map.Width;
             mapHeight = map.Height;
             blocks = new byte[mapWidth * mapHeight];
+            events = new uint[mapWidth * mapHeight];
             bool playerPlaced = false;
             int i = 0;
             for (int y = 0; y < mapHeight; y++)
@@ -183,6 +191,8 @@ namespace Ambermoon3DMapEditor
                 {
                     var b = map.Blocks[x, y];
                     var objOrWall = blocks[i++] = (byte)(b.MapBorder ? 255 : b.WallIndex == 0 ? b.ObjectIndex : 100 + b.WallIndex);
+
+                    events[x + y * mapWidth] = b.MapEventId;
 
                     if (!playerPlaced && objOrWall == 0)
                     {
@@ -261,6 +271,10 @@ namespace Ambermoon3DMapEditor
             wallGraphics = labdata.WallGraphics.Select(g => GraphicHelper.GraphicToBitmap(g, palette, false)).ToArray();
             transparentWallGraphics = labdata.WallGraphics.Select(g => GraphicHelper.GraphicToBitmap(g, palette, true)).ToArray();
             objectGraphics = labdata.ObjectGraphics.Select((g, i) => GraphicHelper.GraphicToBitmaps(g, palette, g.Width / (int)labdata.ObjectInfos[i].NumAnimationFrames, true)).ToArray();
+            var uiElements = gameData.GraphicProvider.GetGraphics(GraphicType.UIElements);
+            automapWallGraphics = GraphicHelper.GraphicToBitmaps(uiElements[(int)UICustomGraphic.AutomapWallFrames], automapPalette, 8, false);
+            automapFakeWallOverlay = GraphicHelper.GraphicToBitmap(uiElements[(int)UICustomGraphic.FakeWallOverlay], automapPalette, true);
+            thalion = GraphicHelper.GraphicToBitmap(gameData.GraphicProvider.GetGraphics(GraphicType.Portrait)[1], gameData.GraphicProvider.Palettes[gameData.GraphicProvider.PrimaryUIPaletteIndex], true, true);
 
             GL.MatrixMode(MatrixMode.Projection);
             var perspective = PerspectiveMatrix;
@@ -862,7 +876,7 @@ namespace Ambermoon3DMapEditor
 
         private void Draw2DViewToImage()
         {
-            if (labdata == null)
+            if (map == null || labdata == null)
                 return;
 
             mapView2D = new Bitmap(mapWidth * TileSize2D, mapHeight * TileSize2D);
@@ -880,13 +894,16 @@ namespace Ambermoon3DMapEditor
                 graphics.FillRectangle(fillBrush, area);
                 if (border != null)
                 {
-                    using var borderPen = new Pen(border.Value, 2.0f);
-                    graphics.DrawRectangle(borderPen, area);
+                    using var borderPen = new Pen(border.Value, 4.0f);
+                    graphics.DrawRectangle(borderPen, new Rectangle(area.X + 2, area.Y + 2, area.Width - 4, area.Height - 4));
                 }
                 if (text != null)
                 {
                     using var textBrush = new SolidBrush(border ?? Color.Black);
-                    graphics.DrawString(text, view2D.Font, textBrush, new Rectangle(new Point(area.X + 2, area.Y - 2), area.Size));
+                    var textSize = graphics.MeasureString(text, view2D.Font);
+                    var tx = 0.5f * (area.Width - textSize.Width);
+                    var ty = 0.5f * (area.Height - textSize.Height);
+                    graphics.DrawString(text, view2D.Font, textBrush, area.X + tx, area.Y + ty);
                 }
             }
 
@@ -905,6 +922,33 @@ namespace Ambermoon3DMapEditor
                 }
             }
 
+            // Key: Draw, Value: BlockSight
+            KeyValuePair<bool, bool> GetWallInfo(int x, int y, Labdata.WallData wall)
+            {
+                bool blockingWall = wall.Flags.HasFlag(Tileset.TileFlags.BlockAllMovement) || !wall.Flags.HasFlag(Tileset.TileFlags.AllowMovementWalk);
+
+                if (wall.AutomapType == AutomapType.Wall || blockingWall || !wall.Flags.HasFlag(Tileset.TileFlags.Transparency))
+                {
+                    var automapType = wall.AutomapType;
+                    uint eventId = events[x + y * mapWidth];
+
+                    if (eventId != 0)
+                    {
+                        var eventAutomapType = map!.GetEventAutomapType(eventId - 1);
+
+                        if (eventAutomapType != AutomapType.None)
+                            automapType = eventAutomapType;
+                    }
+
+                    bool draw = automapType == AutomapType.None || wall.AutomapType == AutomapType.Wall ||
+                        automapType == AutomapType.Tavern || automapType == AutomapType.Merchant || automapType == AutomapType.Door;
+
+                    return KeyValuePair.Create(draw, wall.Flags.HasFlag(Tileset.TileFlags.BlockSight));
+                }
+
+                return KeyValuePair.Create(false, false);
+            }
+
             for (int y = 0; y < mapHeight; y++)
             {
                 for (int x = 0; x < mapWidth; x++)
@@ -912,11 +956,37 @@ namespace Ambermoon3DMapEditor
                     int blockIndex = x + y * mapWidth;
                     byte index = blocks[blockIndex];
 
-                    if (index == 0 || index == 255)
+                    if (settings2D.ShowPlayer.CurrentValue)
                     {
-                        DrawBlock(x, y, AutomapBackgroundColor, index == 0 ? null : AutomapLineColor, index == 0 ? null : "X");
+                        int px = (int)Math.Floor(playerX);
+                        int py = (int)Math.Floor(playerY);
 
-                        if (settings2D.ShowBlockingModes.CurrentValue && index == 255)
+                        if (px == x && py == y)
+                        {
+                            if (settings2D.ShowAsAutomap.CurrentValue)
+                            {
+                                // draw lower half
+                                graphics.DrawImage(automapGraphics[16][0], new Rectangle(px * TileSize2D - TileSize2D / 8, py * TileSize2D - TileSize2D, TileSize2D * 2, TileSize2D * 2));
+
+                                // draw upper half
+                                graphics.DrawImage(automapGraphics[18 + (int)CurrentDirection][0], new Rectangle(px * TileSize2D - TileSize2D / 8, py * TileSize2D - TileSize2D * 3, TileSize2D * 2, TileSize2D * 2));
+                            }
+                            else
+                            {
+                                DrawBlock(x, y, Color.Green, null);
+                                graphics.DrawImage(thalion!, new Rectangle(px * TileSize2D, py * TileSize2D, TileSize2D, TileSize2D));
+                            }
+                        }
+                    }
+
+                    if (index == 0)
+                        continue;
+                    
+                    if (index == 255)
+                    {
+                        DrawBlock(x, y, AutomapBackgroundColor, AutomapLineColor, "X");
+
+                        if (settings2D.ShowBlockingModes.CurrentValue)
                             DrawBlockingMode(x, y, 0xffff);
 
                         continue;
@@ -927,22 +997,28 @@ namespace Ambermoon3DMapEditor
                         var obj = labdata.Objects[index - 1];
                         if (settings2D.ShowAsAutomap.CurrentValue)
                         {
-                            int numFrames = GetAutomapGraphicFrames(obj.AutomapType);
-                            if (numFrames == 0)
+                            var automapType = obj.AutomapType;
+                            uint eventId = events[x + y * mapWidth];
+
+                            if (eventId != 0)
                             {
-                                DrawBlock(x, y, AutomapBackgroundColor, Color.ForestGreen);
+                                var eventAutomapType = map!.GetEventAutomapType(eventId - 1);
+
+                                if (eventAutomapType != AutomapType.None)
+                                    automapType = eventAutomapType;
                             }
-                            else
+
+                            int numFrames = GetAutomapGraphicFrames(automapType);
+
+                            if (numFrames != 0)
                             {
                                 int frame = numFrames == 1 ? 0 : animationFrame % numFrames;
-                                var frameImage = automapGraphics[26 + (int)obj.AutomapType][frame];
-                                graphics.DrawImage(frameImage, x * TileSize2D, y * TileSize2D, TileSize2D, TileSize2D);
+                                var frameImage = automapGraphics[24 + (int)automapType][frame];
+                                graphics.DrawImage(frameImage, new Rectangle(x * TileSize2D, y * TileSize2D - TileSize2D, TileSize2D * 2, TileSize2D * 2), 0, 0, 16, 16, GraphicsUnit.Pixel);
                             }
                         }
                         else
                         {
-                            // TODO
-                            // Show mini versions of the objects
                             int numFrames = (int)obj.SubObjects[0].Object.NumAnimationFrames;
                             int frame = numFrames <= 1 ? 0 : animationFrame % numFrames;
                             int objIndex = labdata.ObjectInfos.IndexOf(obj.SubObjects[0].Object);
@@ -966,8 +1042,163 @@ namespace Ambermoon3DMapEditor
 
                         if (settings2D.ShowAsAutomap.CurrentValue)
                         {
-                            // TODO
-                            DrawBlock(x, y, AutomapBackgroundColor, AutomapLineColor);
+                            var wallInfo = GetWallInfo(x, y, wall);
+
+                            if (wallInfo.Key)
+                            {
+                                bool ContainsSameWall(int x, int y)
+                                {
+                                    byte i = blocks[x + y * mapWidth];
+
+                                    if (i == 255 || i <= 100)
+                                        return false;
+
+                                    var otherWallInfo = GetWallInfo(x, y, labdata!.Walls[i - 101]);
+
+                                    if (wallInfo.Value == otherWallInfo.Value)
+                                        return true;
+
+                                    return otherWallInfo.Key;
+                                }
+
+                                bool hasWallLeft = x > 0 && ContainsSameWall(x - 1, y);
+                                bool hasWallUp = y > 0 && ContainsSameWall(x, y - 1);
+                                bool hasWallRight = x < mapWidth - 1 && ContainsSameWall(x + 1, y);
+                                bool hasWallDown = y < mapHeight - 1 && ContainsSameWall(x, y + 1);
+                                int wallGraphicType = 15; // closed
+
+                                if (hasWallLeft)
+                                {
+                                    if (hasWallRight)
+                                    {
+                                        if (hasWallUp)
+                                        {
+                                            if (hasWallDown)
+                                            {
+                                                // all directions open (+ crossing)
+                                                wallGraphicType = 12;
+                                            }
+                                            else
+                                            {
+                                                // left, right and top open (T crossing)
+                                                wallGraphicType = 8;
+                                            }
+                                        }
+                                        else if (hasWallDown)
+                                        {
+                                            // left, right and bottom open (T crossing)
+                                            wallGraphicType = 10;
+                                        }
+                                        else
+                                        {
+                                            // left and right open
+                                            wallGraphicType = 14;
+                                        }
+                                    }
+                                    else
+                                    {
+                                        if (hasWallUp)
+                                        {
+                                            if (hasWallDown)
+                                            {
+                                                // left, top and bottom open (T crossing)
+                                                wallGraphicType = 11;
+                                            }
+                                            else
+                                            {
+                                                // left and top open (corner)
+                                                wallGraphicType = 7;
+                                            }
+                                        }
+                                        else if (hasWallDown)
+                                        {
+                                            // left and bottom open (corner)
+                                            wallGraphicType = 5;
+                                        }
+                                        else
+                                        {
+                                            // only left open
+                                            wallGraphicType = 3;
+                                        }
+                                    }
+                                }
+                                else if (hasWallRight)
+                                {
+                                    if (hasWallUp)
+                                    {
+                                        if (hasWallDown)
+                                        {
+                                            // right, top and bottom open (T crossing)
+                                            wallGraphicType = 9;
+                                        }
+                                        else
+                                        {
+                                            // right and top open
+                                            wallGraphicType = 6;
+                                        }
+                                    }
+                                    else if (hasWallDown)
+                                    {
+                                        // right and bottom open (corner)
+                                        wallGraphicType = 4;
+                                    }
+                                    else
+                                    {
+                                        // only right open
+                                        wallGraphicType = 1;
+                                    }
+                                }
+                                else
+                                {
+                                    if (hasWallUp)
+                                    {
+                                        if (hasWallDown)
+                                        {
+                                            // top and bottom open
+                                            wallGraphicType = 13;
+                                        }
+                                        else
+                                        {
+                                            // only top open
+                                            wallGraphicType = 0;
+                                        }
+                                    }
+                                    else if (hasWallDown)
+                                    {
+                                        // only bottom open
+                                        wallGraphicType = 2;
+                                    }
+                                    else
+                                    {
+                                        // closed single wall
+                                        wallGraphicType = 15;
+                                    }
+                                }
+
+                                graphics.DrawImage(automapWallGraphics[wallGraphicType], x * TileSize2D, y * TileSize2D, TileSize2D, TileSize2D);
+                            }
+                            else
+                            {
+                                var automapType = wall.AutomapType;
+                                uint eventId = events[x + y * mapWidth];
+
+                                if (eventId != 0)
+                                {
+                                    var eventAutomapType = map!.GetEventAutomapType(eventId - 1);
+
+                                    if (eventAutomapType != AutomapType.None)
+                                        automapType = eventAutomapType;
+                                }
+
+                                int numFrames = GetAutomapGraphicFrames(automapType);
+
+                                if (numFrames != 0)
+                                {
+                                    int frame = numFrames == 1 ? 0 : animationFrame % numFrames;
+                                    var frameImage = automapGraphics[24 + (int)automapType][frame];
+                                    graphics.DrawImage(frameImage, new Rectangle(x * TileSize2D, y * TileSize2D - TileSize2D, TileSize2D * 2, TileSize2D * 2), 0, 0, 16, 16, GraphicsUnit.Pixel);
+                                }
+                            }
                         }
                         else
                         {
@@ -985,53 +1216,8 @@ namespace Ambermoon3DMapEditor
                             else
                                 DrawBlockingMode(x, y, (ushort)~(((int)wall.Flags >> 8) & 0x7fff));
                         }
-
-
-                        // TODO
-                        /*if (showWalls)
-                        {
-                            bool IsObjectOrNonBlocking(int blockIndex)
-                            {
-                                if (blocks[blockIndex] <= 100)
-                                    return true;
-
-                                if (blocks[blockIndex] == 255)
-                                    return false;
-
-                                var wallFlags = walls[blocks[blockIndex] - 101].Flags;
-
-                                return wallFlags.HasFlag(Tileset.TileFlags.Transparency) || ((uint)wallFlags & 0x180) == 0x100;
-                            }
-
-                            bool renderUpFace = y > 0 && IsObjectOrNonBlocking(blockIndex - mapWidth);
-                            bool renderRightFace = x < mapWidth - 1 && IsObjectOrNonBlocking(blockIndex + 1);
-                            bool renderDownFace = y < mapHeight - 1 && IsObjectOrNonBlocking(blockIndex + mapWidth);
-                            bool renderLeftFace = x > 0 && IsObjectOrNonBlocking(blockIndex - 1);
-                            var wall = walls[index - 101];
-                            if (!wall.Flags.HasFlag(Tileset.TileFlags.Transparency))
-                            {
-                                DrawWall(x, y, palette[wall.ColorIndex], wallTextures![index - 101], false,
-                                    renderUpFace, renderRightFace, renderDownFace, renderLeftFace);
-                            }
-                            else
-                            {
-                                int wx = x;
-                                int wy = y;
-                                transparentWallDrawCalls.Add(() => DrawWall(wx, wy, palette[wall.ColorIndex], wallTextures![index - 101], true,
-                                    renderUpFace, renderRightFace, renderDownFace, renderLeftFace));
-                            }
-                        }*/
                     }
                 }
-            }
-
-            if (settings2D.ShowPlayer.CurrentValue)
-            {
-                // draw lower half
-                graphics.DrawImage(automapGraphics[16][0], new Rectangle((int)Math.Floor(playerX) * TileSize2D, (int)Math.Floor(playerY) * TileSize2D, TileSize2D, TileSize2D));
-
-                // draw upper half
-                graphics.DrawImage(automapGraphics[18 + (int)CurrentDirection][0], new Rectangle((int)Math.Floor(playerX) * TileSize2D, (int)Math.Floor(playerY) * TileSize2D - TileSize2D, TileSize2D, TileSize2D));
             }
         }
 

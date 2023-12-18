@@ -18,9 +18,27 @@ namespace Ambermoon3DMapEditor
             return frames.ToArray();
         }
 
-        public static Bitmap GraphicToBitmap(Graphic graphic, Graphic palette, bool transparency)
+        public static Bitmap GraphicToBitmap(Graphic graphic, Graphic palette, bool transparency, bool portrait = false)
         {
-            var pixelData = graphic.ToPixelData(palette, (byte)(transparency ? 0 : 255));
+            if (portrait)
+            {
+                if (transparency)
+                {
+                    for (int i = 0; i < graphic.Data.Length; i++)
+                    {
+                        if (graphic.Data[i] == 0)
+                            graphic.Data[i] = 25;
+                    }
+                }
+
+                for (int i = 0; i < graphic.Data.Length; i++)
+                {
+                    if (graphic.Data[i] == 32)
+                        graphic.Data[i] = 0;
+                }
+            }
+
+            var pixelData = graphic.ToPixelData(palette, (byte)(transparency ? (portrait ? 25 : 0) : 32));
 
             for (int i = 0; i < graphic.Width * graphic.Height; i++)
             {
