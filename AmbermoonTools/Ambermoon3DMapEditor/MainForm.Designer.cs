@@ -57,7 +57,7 @@
             // splitContainer1.Panel2
             // 
             splitContainer1.Panel2.Controls.Add(view3D);
-            splitContainer1.Size = new Size(800, 337);
+            splitContainer1.Size = new Size(800, 355);
             splitContainer1.SplitterDistance = 391;
             splitContainer1.TabIndex = 0;
             // 
@@ -68,7 +68,7 @@
             view2D.Dock = DockStyle.Fill;
             view2D.Location = new Point(0, 0);
             view2D.Name = "view2D";
-            view2D.Size = new Size(391, 337);
+            view2D.Size = new Size(391, 355);
             view2D.TabIndex = 1;
             view2D.Paint += view2D_Paint;
             // 
@@ -82,7 +82,7 @@
             view3D.Location = new Point(0, 0);
             view3D.Name = "view3D";
             view3D.Profile = OpenTK.Windowing.Common.ContextProfile.Compatability;
-            view3D.Size = new Size(405, 337);
+            view3D.Size = new Size(405, 355);
             view3D.TabIndex = 0;
             view3D.Text = "glControl1";
             view3D.Paint += view3D_Paint;
@@ -100,7 +100,7 @@
             // 
             statusStrip1.ImageScalingSize = new Size(20, 20);
             statusStrip1.Items.AddRange(new ToolStripItem[] { statusPosition });
-            statusStrip1.Location = new Point(0, 311);
+            statusStrip1.Location = new Point(0, 355);
             statusStrip1.Name = "statusStrip1";
             statusStrip1.Size = new Size(800, 26);
             statusStrip1.TabIndex = 1;
@@ -119,9 +119,11 @@
             // settingsControl1
             // 
             settingsControl1.Dock = DockStyle.Bottom;
-            settingsControl1.Location = new Point(0, 337);
+            settingsControl1.Location = new Point(0, 381);
+            settingsControl1.MaximumSize = new Size(8000, 172);
+            settingsControl1.MinimumSize = new Size(0, 172);
             settingsControl1.Name = "settingsControl1";
-            settingsControl1.Size = new Size(800, 216);
+            settingsControl1.Size = new Size(800, 172);
             settingsControl1.TabIndex = 2;
             // 
             // MainForm
@@ -129,8 +131,8 @@
             AutoScaleDimensions = new SizeF(8F, 20F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(800, 553);
-            Controls.Add(statusStrip1);
             Controls.Add(splitContainer1);
+            Controls.Add(statusStrip1);
             Controls.Add(settingsControl1);
             KeyPreview = true;
             MinimumSize = new Size(800, 600);

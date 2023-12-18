@@ -10,5 +10,8 @@
     <Compile Update="SettingsControl.cs">
       <SubType>UserControl</SubType>
     </Compile>
+    <Compile Update="Slider.cs">
+      <SubType>Component</SubType>
+    </Compile>
   </ItemGroup>
 </Project>

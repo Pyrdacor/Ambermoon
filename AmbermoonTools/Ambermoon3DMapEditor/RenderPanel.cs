@@ -4,7 +4,7 @@
     {
         public RenderPanel()
         {
-            this.DoubleBuffered = true;
+            DoubleBuffered = true;
         }
     }
 }

@@ -4,7 +4,6 @@ using Ambermoon.Data.Enumerations;
 using Ambermoon.Data.Legacy;
 using OpenTK.Graphics.OpenGL;
 using OpenTK.Mathematics;
-using System.Runtime.InteropServices;
 using Color = System.Drawing.Color;
 
 namespace Ambermoon3DMapEditor
@@ -16,7 +15,6 @@ namespace Ambermoon3DMapEditor
         private const float PlayerSize = 0.6f * BlockSize;
         private const float RefWallHeight = 341.0f * BlockSize / 512.0f;
         private const float TurnSpeed = 0.1f;
-        private const int TileSize2D = 32;
         private readonly Color AutomapBackgroundColor = Color.FromArgb(0xAA, 0x77, 0x44);
         private readonly Color AutomapLineColor = Color.FromArgb(0x66, 0x33, 0x00);
         #endregion
@@ -25,6 +23,7 @@ namespace Ambermoon3DMapEditor
         private Matrix4 PerspectiveMatrix => Matrix4.CreatePerspectiveFieldOfView(0.26f * MathHelper.Pi, 341.0f / (labdata?.WallHeight ?? 400), 0.1f, 40.0f * BlockSize);
         private float WallHeight => (labdata?.WallHeight ?? 400) * BlockSize / 512.0f;
         private float MoveSpeed => settings3D.SpeedBoost.CurrentValue ? 0.15f * BlockSize : 0.075f * BlockSize;
+        private int TileSize2D => settings2D.ZoomLevel.CurrentValue * 16;
         #endregion
 
         #region Settings
@@ -116,6 +115,7 @@ namespace Ambermoon3DMapEditor
             }
 
             settings2D.ShowAsAutomap.Changed += _ => Changed2D();
+            settings2D.ZoomLevel.Changed += _ => Changed2D();
 
             settings3D.ShowFloor.Changed += _ => Changed3D();
             settings3D.ShowCeiling.Changed += _ => Changed3D();
@@ -287,7 +287,7 @@ namespace Ambermoon3DMapEditor
             {
                 GL.Color4(color);
                 GL.BindTexture(TextureTarget.Texture2D, 0);
-            }              
+            }
 
             GL.Begin(PrimitiveType.Quads);
             GL.TexCoord2(0.0f, 0.0f);
@@ -887,7 +887,7 @@ namespace Ambermoon3DMapEditor
                             else
                             {
                                 int frame = numFrames == 1 ? 0 : animationFrame % numFrames;
-                                var frameImage = automapGraphics[(int)obj.AutomapType - 2][frame];
+                                var frameImage = automapGraphics[26 + (int)obj.AutomapType][frame];
                                 graphics.DrawImage(frameImage, x * TileSize2D, y * TileSize2D, TileSize2D, TileSize2D);
                             }
                         }
@@ -961,8 +961,8 @@ namespace Ambermoon3DMapEditor
 
         private void view2D_Paint(object sender, PaintEventArgs e)
         {
-            e.Graphics.DrawImage(mapView2D, 0, 0);
-
+            e.Graphics.DrawImage(mapView2D, view2D.AutoScrollPosition);
         }
+
     }
 }

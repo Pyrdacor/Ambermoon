@@ -50,6 +50,7 @@
         internal class _Settings2DView
         {
             public Value<bool> ShowAsAutomap { get; } = false;
+            public Value<int> ZoomLevel { get; } = 2;
         }
 
         internal class _SettingsMisc

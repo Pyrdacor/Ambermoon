@@ -43,6 +43,8 @@
             checkBoxShowCeilingTexture = new CheckBox();
             checkBoxShowFloorTexture = new CheckBox();
             tabPage2DView = new TabPage();
+            groupBox1 = new GroupBox();
+            sliderZoomLevel = new Slider();
             groupBoxDisplayType = new GroupBox();
             radioButtonDungeonMap = new RadioButton();
             radioButtonMiniatureMap = new RadioButton();
@@ -50,6 +52,7 @@
             tabControlSettings.SuspendLayout();
             tabPage3DView.SuspendLayout();
             tabPage2DView.SuspendLayout();
+            groupBox1.SuspendLayout();
             groupBoxDisplayType.SuspendLayout();
             SuspendLayout();
             // 
@@ -236,6 +239,7 @@
             // 
             // tabPage2DView
             // 
+            tabPage2DView.Controls.Add(groupBox1);
             tabPage2DView.Controls.Add(groupBoxDisplayType);
             tabPage2DView.Location = new Point(4, 29);
             tabPage2DView.Name = "tabPage2DView";
@@ -244,6 +248,27 @@
             tabPage2DView.TabIndex = 1;
             tabPage2DView.Text = "2D View";
             tabPage2DView.UseVisualStyleBackColor = true;
+            // 
+            // groupBox1
+            // 
+            groupBox1.Controls.Add(sliderZoomLevel);
+            groupBox1.Location = new Point(292, 15);
+            groupBox1.Name = "groupBox1";
+            groupBox1.Size = new Size(274, 94);
+            groupBox1.TabIndex = 8;
+            groupBox1.TabStop = false;
+            groupBox1.Text = "Zoom Level";
+            // 
+            // sliderZoomLevel
+            // 
+            sliderZoomLevel.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
+            sliderZoomLevel.Location = new Point(6, 26);
+            sliderZoomLevel.Maximum = 4;
+            sliderZoomLevel.Minimum = 1;
+            sliderZoomLevel.Name = "sliderZoomLevel";
+            sliderZoomLevel.Size = new Size(262, 56);
+            sliderZoomLevel.TabIndex = 9;
+            sliderZoomLevel.Value = 1;
             // 
             // groupBoxDisplayType
             // 
@@ -302,6 +327,8 @@
             tabPage3DView.ResumeLayout(false);
             tabPage3DView.PerformLayout();
             tabPage2DView.ResumeLayout(false);
+            groupBox1.ResumeLayout(false);
+            groupBox1.PerformLayout();
             groupBoxDisplayType.ResumeLayout(false);
             groupBoxDisplayType.PerformLayout();
             ResumeLayout(false);
@@ -328,5 +355,7 @@
         private CheckBox checkBoxNoClip;
         private CheckBox checkBoxNoObjectClip;
         private CheckBox checkBoxNoWallClip;
+        private Slider sliderZoomLevel;
+        private GroupBox groupBox1;
     }
 }
