@@ -30,6 +30,12 @@
         {
             tabControlSettings = new TabControl();
             tabPage3DView = new TabPage();
+            checkBoxNoObjectClip = new CheckBox();
+            checkBoxNoWallClip = new CheckBox();
+            checkBoxSpeedBoost = new CheckBox();
+            checkBoxNoClip = new CheckBox();
+            checkBoxShowObjectTextures = new CheckBox();
+            checkBoxShowWallTextures = new CheckBox();
             checkBoxShowObjects = new CheckBox();
             checkBoxShowWalls = new CheckBox();
             checkBoxShowCeiling = new CheckBox();
@@ -37,10 +43,10 @@
             checkBoxShowCeilingTexture = new CheckBox();
             checkBoxShowFloorTexture = new CheckBox();
             tabPage2DView = new TabPage();
-            tabPageMisc = new TabPage();
             groupBoxDisplayType = new GroupBox();
-            radioButtonMiniatureMap = new RadioButton();
             radioButtonDungeonMap = new RadioButton();
+            radioButtonMiniatureMap = new RadioButton();
+            tabPageMisc = new TabPage();
             tabControlSettings.SuspendLayout();
             tabPage3DView.SuspendLayout();
             tabPage2DView.SuspendLayout();
@@ -56,11 +62,17 @@
             tabControlSettings.Location = new Point(0, 0);
             tabControlSettings.Name = "tabControlSettings";
             tabControlSettings.SelectedIndex = 0;
-            tabControlSettings.Size = new Size(819, 173);
+            tabControlSettings.Size = new Size(819, 172);
             tabControlSettings.TabIndex = 0;
             // 
             // tabPage3DView
             // 
+            tabPage3DView.Controls.Add(checkBoxNoObjectClip);
+            tabPage3DView.Controls.Add(checkBoxNoWallClip);
+            tabPage3DView.Controls.Add(checkBoxSpeedBoost);
+            tabPage3DView.Controls.Add(checkBoxNoClip);
+            tabPage3DView.Controls.Add(checkBoxShowObjectTextures);
+            tabPage3DView.Controls.Add(checkBoxShowWallTextures);
             tabPage3DView.Controls.Add(checkBoxShowObjects);
             tabPage3DView.Controls.Add(checkBoxShowWalls);
             tabPage3DView.Controls.Add(checkBoxShowCeiling);
@@ -70,10 +82,85 @@
             tabPage3DView.Location = new Point(4, 29);
             tabPage3DView.Name = "tabPage3DView";
             tabPage3DView.Padding = new Padding(3);
-            tabPage3DView.Size = new Size(811, 140);
+            tabPage3DView.Size = new Size(811, 139);
             tabPage3DView.TabIndex = 0;
             tabPage3DView.Text = "3D View";
             tabPage3DView.UseVisualStyleBackColor = true;
+            // 
+            // checkBoxNoObjectClip
+            // 
+            checkBoxNoObjectClip.AutoSize = true;
+            checkBoxNoObjectClip.Checked = true;
+            checkBoxNoObjectClip.CheckState = CheckState.Checked;
+            checkBoxNoObjectClip.Location = new Point(344, 105);
+            checkBoxNoObjectClip.Name = "checkBoxNoObjectClip";
+            checkBoxNoObjectClip.Size = new Size(129, 24);
+            checkBoxNoObjectClip.TabIndex = 11;
+            checkBoxNoObjectClip.Text = "No Object Clip";
+            checkBoxNoObjectClip.UseVisualStyleBackColor = true;
+            checkBoxNoObjectClip.CheckedChanged += checkBoxNoObjectClip_CheckedChanged;
+            // 
+            // checkBoxNoWallClip
+            // 
+            checkBoxNoWallClip.AutoSize = true;
+            checkBoxNoWallClip.Checked = true;
+            checkBoxNoWallClip.CheckState = CheckState.Checked;
+            checkBoxNoWallClip.Location = new Point(344, 75);
+            checkBoxNoWallClip.Name = "checkBoxNoWallClip";
+            checkBoxNoWallClip.Size = new Size(114, 24);
+            checkBoxNoWallClip.TabIndex = 10;
+            checkBoxNoWallClip.Text = "No Wall Clip";
+            checkBoxNoWallClip.UseVisualStyleBackColor = true;
+            checkBoxNoWallClip.CheckedChanged += checkBoxNoWallClip_CheckedChanged;
+            // 
+            // checkBoxSpeedBoost
+            // 
+            checkBoxSpeedBoost.AutoSize = true;
+            checkBoxSpeedBoost.Checked = true;
+            checkBoxSpeedBoost.CheckState = CheckState.Checked;
+            checkBoxSpeedBoost.Location = new Point(344, 45);
+            checkBoxSpeedBoost.Name = "checkBoxSpeedBoost";
+            checkBoxSpeedBoost.Size = new Size(115, 24);
+            checkBoxSpeedBoost.TabIndex = 9;
+            checkBoxSpeedBoost.Text = "Speed Boost";
+            checkBoxSpeedBoost.UseVisualStyleBackColor = true;
+            // 
+            // checkBoxNoClip
+            // 
+            checkBoxNoClip.AutoSize = true;
+            checkBoxNoClip.Location = new Point(344, 15);
+            checkBoxNoClip.Name = "checkBoxNoClip";
+            checkBoxNoClip.Size = new Size(81, 24);
+            checkBoxNoClip.TabIndex = 8;
+            checkBoxNoClip.Text = "No Clip";
+            checkBoxNoClip.ThreeState = true;
+            checkBoxNoClip.UseVisualStyleBackColor = true;
+            checkBoxNoClip.CheckedChanged += checkBoxNoClip_CheckedChanged;
+            checkBoxNoClip.CheckStateChanged += checkBoxNoClip_CheckStateChanged;
+            // 
+            // checkBoxShowObjectTextures
+            // 
+            checkBoxShowObjectTextures.AutoSize = true;
+            checkBoxShowObjectTextures.Checked = true;
+            checkBoxShowObjectTextures.CheckState = CheckState.Checked;
+            checkBoxShowObjectTextures.Location = new Point(161, 105);
+            checkBoxShowObjectTextures.Name = "checkBoxShowObjectTextures";
+            checkBoxShowObjectTextures.Size = new Size(173, 24);
+            checkBoxShowObjectTextures.TabIndex = 7;
+            checkBoxShowObjectTextures.Text = "Show Object Textures";
+            checkBoxShowObjectTextures.UseVisualStyleBackColor = true;
+            // 
+            // checkBoxShowWallTextures
+            // 
+            checkBoxShowWallTextures.AutoSize = true;
+            checkBoxShowWallTextures.Checked = true;
+            checkBoxShowWallTextures.CheckState = CheckState.Checked;
+            checkBoxShowWallTextures.Location = new Point(161, 75);
+            checkBoxShowWallTextures.Name = "checkBoxShowWallTextures";
+            checkBoxShowWallTextures.Size = new Size(158, 24);
+            checkBoxShowWallTextures.TabIndex = 6;
+            checkBoxShowWallTextures.Text = "Show Wall Textures";
+            checkBoxShowWallTextures.UseVisualStyleBackColor = true;
             // 
             // checkBoxShowObjects
             // 
@@ -104,7 +191,7 @@
             checkBoxShowCeiling.AutoSize = true;
             checkBoxShowCeiling.Checked = true;
             checkBoxShowCeiling.CheckState = CheckState.Checked;
-            checkBoxShowCeiling.Location = new Point(15, 105);
+            checkBoxShowCeiling.Location = new Point(15, 45);
             checkBoxShowCeiling.Name = "checkBoxShowCeiling";
             checkBoxShowCeiling.Size = new Size(117, 24);
             checkBoxShowCeiling.TabIndex = 3;
@@ -116,7 +203,7 @@
             checkBoxShowFloor.AutoSize = true;
             checkBoxShowFloor.Checked = true;
             checkBoxShowFloor.CheckState = CheckState.Checked;
-            checkBoxShowFloor.Location = new Point(15, 75);
+            checkBoxShowFloor.Location = new Point(15, 15);
             checkBoxShowFloor.Name = "checkBoxShowFloor";
             checkBoxShowFloor.Size = new Size(105, 24);
             checkBoxShowFloor.TabIndex = 2;
@@ -128,7 +215,7 @@
             checkBoxShowCeilingTexture.AutoSize = true;
             checkBoxShowCeilingTexture.Checked = true;
             checkBoxShowCeilingTexture.CheckState = CheckState.Checked;
-            checkBoxShowCeilingTexture.Location = new Point(15, 45);
+            checkBoxShowCeilingTexture.Location = new Point(15, 105);
             checkBoxShowCeilingTexture.Name = "checkBoxShowCeilingTexture";
             checkBoxShowCeilingTexture.Size = new Size(129, 24);
             checkBoxShowCeilingTexture.TabIndex = 1;
@@ -140,7 +227,7 @@
             checkBoxShowFloorTexture.AutoSize = true;
             checkBoxShowFloorTexture.Checked = true;
             checkBoxShowFloorTexture.CheckState = CheckState.Checked;
-            checkBoxShowFloorTexture.Location = new Point(15, 15);
+            checkBoxShowFloorTexture.Location = new Point(15, 75);
             checkBoxShowFloorTexture.Name = "checkBoxShowFloorTexture";
             checkBoxShowFloorTexture.Size = new Size(117, 24);
             checkBoxShowFloorTexture.TabIndex = 0;
@@ -153,19 +240,10 @@
             tabPage2DView.Location = new Point(4, 29);
             tabPage2DView.Name = "tabPage2DView";
             tabPage2DView.Padding = new Padding(3);
-            tabPage2DView.Size = new Size(811, 140);
+            tabPage2DView.Size = new Size(811, 139);
             tabPage2DView.TabIndex = 1;
             tabPage2DView.Text = "2D View";
             tabPage2DView.UseVisualStyleBackColor = true;
-            // 
-            // tabPageMisc
-            // 
-            tabPageMisc.Location = new Point(4, 29);
-            tabPageMisc.Name = "tabPageMisc";
-            tabPageMisc.Size = new Size(811, 140);
-            tabPageMisc.TabIndex = 2;
-            tabPageMisc.Text = "Misc";
-            tabPageMisc.UseVisualStyleBackColor = true;
             // 
             // groupBoxDisplayType
             // 
@@ -177,6 +255,17 @@
             groupBoxDisplayType.TabIndex = 7;
             groupBoxDisplayType.TabStop = false;
             groupBoxDisplayType.Text = "Display Type";
+            // 
+            // radioButtonDungeonMap
+            // 
+            radioButtonDungeonMap.AutoSize = true;
+            radioButtonDungeonMap.Location = new Point(143, 26);
+            radioButtonDungeonMap.Name = "radioButtonDungeonMap";
+            radioButtonDungeonMap.Size = new Size(125, 24);
+            radioButtonDungeonMap.TabIndex = 1;
+            radioButtonDungeonMap.TabStop = true;
+            radioButtonDungeonMap.Text = "Dungeon Map";
+            radioButtonDungeonMap.UseVisualStyleBackColor = true;
             // 
             // radioButtonMiniatureMap
             // 
@@ -190,24 +279,25 @@
             radioButtonMiniatureMap.Text = "Miniature Map";
             radioButtonMiniatureMap.UseVisualStyleBackColor = true;
             // 
-            // radioButtonDungeonMap
+            // tabPageMisc
             // 
-            radioButtonDungeonMap.AutoSize = true;
-            radioButtonDungeonMap.Location = new Point(143, 26);
-            radioButtonDungeonMap.Name = "radioButtonDungeonMap";
-            radioButtonDungeonMap.Size = new Size(125, 24);
-            radioButtonDungeonMap.TabIndex = 1;
-            radioButtonDungeonMap.TabStop = true;
-            radioButtonDungeonMap.Text = "Dungeon Map";
-            radioButtonDungeonMap.UseVisualStyleBackColor = true;
+            tabPageMisc.Location = new Point(4, 29);
+            tabPageMisc.Name = "tabPageMisc";
+            tabPageMisc.Size = new Size(811, 139);
+            tabPageMisc.TabIndex = 2;
+            tabPageMisc.Text = "Misc";
+            tabPageMisc.UseVisualStyleBackColor = true;
             // 
             // SettingsControl
             // 
             AutoScaleDimensions = new SizeF(8F, 20F);
             AutoScaleMode = AutoScaleMode.Font;
             Controls.Add(tabControlSettings);
+            MaximumSize = new Size(8000, 172);
+            MinimumSize = new Size(0, 172);
             Name = "SettingsControl";
-            Size = new Size(819, 173);
+            Size = new Size(819, 172);
+            Load += SettingsControl_Load;
             tabControlSettings.ResumeLayout(false);
             tabPage3DView.ResumeLayout(false);
             tabPage3DView.PerformLayout();
@@ -232,5 +322,11 @@
         private GroupBox groupBoxDisplayType;
         private RadioButton radioButtonDungeonMap;
         private RadioButton radioButtonMiniatureMap;
+        private CheckBox checkBoxShowObjectTextures;
+        private CheckBox checkBoxShowWallTextures;
+        private CheckBox checkBoxSpeedBoost;
+        private CheckBox checkBoxNoClip;
+        private CheckBox checkBoxNoObjectClip;
+        private CheckBox checkBoxNoWallClip;
     }
 }

@@ -24,21 +24,14 @@ namespace Ambermoon3DMapEditor
         #region Inline Properties
         private Matrix4 PerspectiveMatrix => Matrix4.CreatePerspectiveFieldOfView(0.26f * MathHelper.Pi, 341.0f / (labdata?.WallHeight ?? 400), 0.1f, 40.0f * BlockSize);
         private float WallHeight => (labdata?.WallHeight ?? 400) * BlockSize / 512.0f;
-        private float MoveSpeed => speedBoost ? 0.15f * BlockSize : 0.075f * BlockSize;
+        private float MoveSpeed => settings3D.SpeedBoost.CurrentValue ? 0.15f * BlockSize : 0.075f * BlockSize;
         #endregion
 
         #region Settings
-        private bool speedBoost = false;
-        private bool showFloorTexture = true;
-        private bool showCeilingTexture = true;
-        private bool showFloor = true;
-        private bool showCeiling = true;
-        private bool showWalls = true;
-        private bool showObjects = true;
-        private bool showWallColors = false;
-        private bool showObjectColors = false;
-        private bool noClip = false;
-        private bool showAsAutomap = false;
+        private Settings settings => settingsControl1.Settings;
+        private Settings._Settings3DView settings3D => settings.Settings3DView;
+        private Settings._Settings2DView settings2D => settings.Settings2DView;
+        private Settings._SettingsMisc settingsMisc => settings.SettingsMisc;
         #endregion
 
         #region 3D Player / Camera
@@ -63,8 +56,6 @@ namespace Ambermoon3DMapEditor
         private List<Texture>? objectTextures = null;
         private TextureAtlas? objectTextureAtlas = null;
         private readonly Dictionary<uint, Palette> palettes = new();
-        private Color4 floorColor = Color4.White;
-        private Color4 ceilingColor = Color4.White;
         private readonly Bitmap[][] automapGraphics;
         private Bitmap[] wallGraphics = Array.Empty<Bitmap>();
         private Bitmap[][] objectGraphics = Array.Empty<Bitmap[]>();
@@ -112,6 +103,28 @@ namespace Ambermoon3DMapEditor
 
             initialized = true;
             initTimer.Start();
+
+            void Changed2D()
+            {
+                Draw2DViewToImage();
+                Redraw2DView();
+            }
+
+            void Changed3D()
+            {
+                view3D.Refresh();
+            }
+
+            settings2D.ShowAsAutomap.Changed += _ => Changed2D();
+
+            settings3D.ShowFloor.Changed += _ => Changed3D();
+            settings3D.ShowCeiling.Changed += _ => Changed3D();
+            settings3D.ShowFloorTexture.Changed += _ => Changed3D();
+            settings3D.ShowCeilingTexture.Changed += _ => Changed3D();
+            settings3D.ShowWalls.Changed += _ => Changed3D();
+            settings3D.ShowObjects.Changed += _ => Changed3D();
+            settings3D.ShowWallTextures.Changed += _ => Changed3D();
+            settings3D.ShowObjectTextures.Changed += _ => Changed3D();
         }
 
         private void initTimer_Tick(object sender, EventArgs e)
@@ -240,11 +253,16 @@ namespace Ambermoon3DMapEditor
 
         private void DrawFloor(Color4 color)
         {
-            if (showFloorTexture)
+            if (settings3D.ShowFloorTexture.CurrentValue)
+            {
+                GL.Color4(Color4.White);
                 floorTextureAtlas?.Bind();
+            }
             else
+            {
+                GL.Color4(color);
                 GL.BindTexture(TextureTarget.Texture2D, 0);
-            GL.Color4(color);
+            }
 
             GL.Begin(PrimitiveType.Quads);
             GL.TexCoord2(0.0f, 0.0f);
@@ -260,11 +278,16 @@ namespace Ambermoon3DMapEditor
 
         private void DrawCeiling(Color4 color)
         {
-            if (showCeilingTexture)
+            if (settings3D.ShowCeilingTexture.CurrentValue)
+            {
+                GL.Color4(Color4.White);
                 ceilingTextureAtlas?.Bind();
+            }
             else
+            {
+                GL.Color4(color);
                 GL.BindTexture(TextureTarget.Texture2D, 0);
-            GL.Color4(color);
+            }              
 
             GL.Begin(PrimitiveType.Quads);
             GL.TexCoord2(0.0f, 0.0f);
@@ -281,7 +304,7 @@ namespace Ambermoon3DMapEditor
         private void DrawWall(int x, int y, Color4 color, Texture texture, bool transparency,
             bool renderUpFace, bool renderRightFace, bool renderDownFace, bool renderLeftFace)
         {
-            if (showWallColors)
+            if (!settings3D.ShowWallTextures.CurrentValue)
             {
                 GL.Color4(color);
                 GL.BindTexture(TextureTarget.Texture2D, 0);
@@ -462,7 +485,7 @@ namespace Ambermoon3DMapEditor
 
         private void DrawObject(int x, int y, Color4 color, Labdata.Object obj)
         {
-            if (showObjectColors)
+            if (!settings3D.ShowObjectTextures.CurrentValue)
             {
                 GL.Color4(color);
                 GL.BindTexture(TextureTarget.Texture2D, 0);
@@ -494,7 +517,7 @@ namespace Ambermoon3DMapEditor
 
                     if (index <= 100)
                     {
-                        if (showObjects)
+                        if (settings3D.ShowObjects.CurrentValue)
                         {
                             var obj = objects[index - 1];
                             if (obj.SubObjects.Count > 0)
@@ -507,7 +530,7 @@ namespace Ambermoon3DMapEditor
                     }
                     else
                     {
-                        if (showWalls)
+                        if (settings3D.ShowWalls.CurrentValue)
                         {
                             bool IsObjectOrNonBlocking(int blockIndex)
                             {
@@ -570,10 +593,10 @@ namespace Ambermoon3DMapEditor
             GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
 
             GL.DepthMask(false);
-            if (showFloor && floorTextureAtlas != null)
-                DrawFloor(floorColor);
-            if (showCeiling && ceilingTextureAtlas != null)
-                DrawCeiling(ceilingColor);
+            if (settings3D.ShowFloor.CurrentValue && floorTextureAtlas != null)
+                DrawFloor(palettes[paletteIndex][labdata?.FloorColorIndex ?? 0]);
+            if (settings3D.ShowCeiling.CurrentValue && ceilingTextureAtlas != null)
+                DrawCeiling(palettes[paletteIndex][labdata?.CeilingColorIndex ?? 0]);
             GL.DepthMask(true);
 
             if (labdata != null)
@@ -691,7 +714,7 @@ namespace Ambermoon3DMapEditor
             if (x < 0.5f || x >= mapWidth - 0.5f) allowX = false;
             if (y < 0.5f || y >= mapHeight - 0.5f) allowY = false;
 
-            if (!noClip && testBlocking)
+            if ((!settings3D.NoWallClip.CurrentValue || !settings3D.NoObjectClip.CurrentValue) && testBlocking)
             {
                 int ix = (int)Math.Floor(x + dx * PlayerSize);
                 int iy = (int)Math.Floor(y + dy * PlayerSize);
@@ -728,6 +751,9 @@ namespace Ambermoon3DMapEditor
                     {
                         if (index <= 100)
                         {
+                            if (settings3D.NoObjectClip.CurrentValue)
+                                return true;
+
                             var obj = labdata.Objects[index - 1];
                             if (obj.SubObjects.Any(so => so.Object.Flags.HasFlag(Tileset.TileFlags.BlockAllMovement) || !so.Object.Flags.HasFlag(Tileset.TileFlags.AllowMovementWalk)))
                             {
@@ -740,6 +766,9 @@ namespace Ambermoon3DMapEditor
                         }
                         else
                         {
+                            if (settings3D.NoWallClip.CurrentValue)
+                                return true;
+
                             var wall = labdata.Walls[index - 101];
                             if (wall.Flags.HasFlag(Tileset.TileFlags.BlockAllMovement) || !wall.Flags.HasFlag(Tileset.TileFlags.AllowMovementWalk))
                                 return false;
@@ -848,7 +877,7 @@ namespace Ambermoon3DMapEditor
                     if (index <= 100)
                     {
                         var obj = labdata.Objects[index - 1];
-                        if (showAsAutomap)
+                        if (settings2D.ShowAsAutomap.CurrentValue)
                         {
                             int numFrames = GetAutomapGraphicFrames(obj.AutomapType);
                             if (numFrames == 0)
@@ -874,7 +903,7 @@ namespace Ambermoon3DMapEditor
                     }
                     else
                     {
-                        if (showAsAutomap)
+                        if (settings2D.ShowAsAutomap.CurrentValue)
                         {
                             // TODO
                             DrawBlock(x, y, AutomapBackgroundColor, AutomapLineColor);

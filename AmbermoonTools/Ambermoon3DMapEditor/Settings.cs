@@ -41,9 +41,10 @@
             public Value<bool> ShowCeiling { get; } = true;
             public Value<bool> ShowWalls { get; } = true;
             public Value<bool> ShowObjects { get; } = true;
-            public Value<bool> ShowWallColors { get; } = false;
-            public Value<bool> ShowObjectColors { get; } = false;
-            public Value<bool> NoClip { get; } = false;
+            public Value<bool> ShowWallTextures { get; } = true;
+            public Value<bool> ShowObjectTextures { get; } = true;
+            public Value<bool> NoWallClip { get; } = false;
+            public Value<bool> NoObjectClip { get; } = false;
         }
 
         internal class _Settings2DView

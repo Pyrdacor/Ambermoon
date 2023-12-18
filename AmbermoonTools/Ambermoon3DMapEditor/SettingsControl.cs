@@ -2,7 +2,9 @@
 {
     public partial class SettingsControl : UserControl
     {
-        private readonly Settings settings = new();
+        internal Settings Settings { get; } = new();
+        private bool ignoreNoClipChange = false;
+        private bool lastNoClipChecked = false;
 
         public SettingsControl()
         {
@@ -15,6 +17,11 @@
             MapCheckbox(settings => settings.Settings3DView.ShowCeiling, checkBoxShowCeiling);
             MapCheckbox(settings => settings.Settings3DView.ShowWalls, checkBoxShowWalls);
             MapCheckbox(settings => settings.Settings3DView.ShowObjects, checkBoxShowObjects);
+            MapCheckbox(settings => settings.Settings3DView.ShowWallTextures, checkBoxShowWallTextures);
+            MapCheckbox(settings => settings.Settings3DView.ShowObjectTextures, checkBoxShowObjectTextures);
+            MapCheckbox(settings => settings.Settings3DView.SpeedBoost, checkBoxSpeedBoost);
+            MapCheckbox(settings => settings.Settings3DView.NoWallClip, checkBoxNoWallClip);
+            MapCheckbox(settings => settings.Settings3DView.NoObjectClip, checkBoxNoObjectClip);
 
             // 2D View
             MapRadioGroup(settings => settings.Settings2DView.ShowAsAutomap, radioButtonMiniatureMap, radioButtonDungeonMap);
@@ -24,8 +31,70 @@
 
         private void MapCheckbox(Func<Settings, Settings.Value<bool>> selector, CheckBox checkBox)
         {
-            var setting = selector(settings);
+            var setting = selector(Settings);
+            checkBox.Checked = setting.CurrentValue;
             checkBox.CheckedChanged += (object? sender, EventArgs e) => setting.CurrentValue = (sender as CheckBox)!.Checked;
+        }
+
+        private void checkBoxNoClip_CheckedChanged(object sender, EventArgs e)
+        {
+            if (ignoreNoClipChange)
+                return;
+
+            ignoreNoClipChange = true;
+
+            checkBoxNoWallClip.Checked = checkBoxNoClip.Checked;
+            checkBoxNoObjectClip.Checked = checkBoxNoClip.Checked;
+
+            ignoreNoClipChange = false;
+        }
+
+        private void checkBoxNoClip_CheckStateChanged(object sender, EventArgs e)
+        {
+            if (checkBoxNoClip.CheckState == CheckState.Indeterminate)
+            {
+                if (!ignoreNoClipChange)
+                    checkBoxNoClip.CheckState = lastNoClipChecked ? CheckState.Unchecked : CheckState.Checked;
+            }
+            else
+            {
+                lastNoClipChecked = checkBoxNoClip.CheckState == CheckState.Checked;
+            }
+        }
+
+        private void checkBoxNoWallClip_CheckedChanged(object sender, EventArgs e)
+        {
+            if (ignoreNoClipChange)
+                return;
+
+            ignoreNoClipChange = true;
+
+            if (checkBoxNoWallClip.Checked != checkBoxNoObjectClip.Checked)
+                checkBoxNoClip.CheckState = CheckState.Indeterminate;
+            else
+                checkBoxNoClip.CheckState = checkBoxNoWallClip.Checked ? CheckState.Checked : CheckState.Unchecked;
+
+            ignoreNoClipChange = false;
+        }
+
+        private void checkBoxNoObjectClip_CheckedChanged(object sender, EventArgs e)
+        {
+            if (ignoreNoClipChange)
+                return;
+
+            ignoreNoClipChange = true;
+
+            if (checkBoxNoWallClip.Checked != checkBoxNoObjectClip.Checked)
+                checkBoxNoClip.CheckState = CheckState.Indeterminate;
+            else
+                checkBoxNoClip.CheckState = checkBoxNoObjectClip.Checked ? CheckState.Checked : CheckState.Unchecked;
+
+            ignoreNoClipChange = false;
+        }
+
+        private void SettingsControl_Load(object sender, EventArgs e)
+        {
+
         }
 
         private void MapRadioGroup<T>(Func<Settings, Settings.Value<T>> selector, params RadioButton[] radioButtons) where T : struct, IEquatable<T>
@@ -33,7 +102,7 @@
             if (radioButtons.Length == 0)
                 throw new InvalidOperationException("No radio buttons given for radio group mapping.");
 
-            var setting = selector(settings);
+            var setting = selector(Settings);
 
             if (typeof(T) == typeof(bool))
             {
