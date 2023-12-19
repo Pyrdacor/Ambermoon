@@ -147,7 +147,7 @@ namespace System.Windows.Forms
 
                 if (valueRect.Key == Value)
                 {
-                    var sliderPath = CreateSliderPath(rect.X, rect.Y);
+                    using var sliderPath = CreateSliderPath(rect.X, rect.Y);
                     e.Graphics.FillPath(SystemBrushes.ControlLight, sliderPath);
                     e.Graphics.DrawPath(linePen, sliderPath);
                 }

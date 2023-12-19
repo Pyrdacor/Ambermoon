@@ -100,7 +100,8 @@ namespace Ambermoon3DMapEditor
 
         public MainForm()
         {
-            const string dataPath = @"C:\Users\Rober\Desktop\ambermoon_advanced_german_1.03_extracted\Amberfiles";
+            const string dataPath = @"C:\Users\flavia\Desktop\ambermoon_german_1.19_extracted\Amberfiles";
+            //const string dataPath = @"C:\Users\Rober\Desktop\ambermoon_advanced_german_1.03_extracted\Amberfiles";
             gameData = new GameData();
             gameData.Load(dataPath);
 
@@ -660,7 +661,11 @@ namespace Ambermoon3DMapEditor
         {
             // TODO
             if (e.KeyCode == Keys.F5)
-                new EventEditorForm().ShowDialog();
+            {
+                var foo = new EventEditorForm();
+                foo.Show();
+                foo.InitMap(map!);
+            }
 
             pressedKeys[e.KeyValue] = true;
         }

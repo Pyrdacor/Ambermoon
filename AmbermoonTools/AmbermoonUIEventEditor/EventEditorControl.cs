@@ -9,9 +9,14 @@ namespace AmbermoonUIEventEditor
             InitializeComponent();
         }
 
+        public void InitMap(Map map)
+        {
+            eventView.InitMap(map);
+        }
+
         private void eventBrowser_EventDoubleClicked(EventType arg1, Ambermoon.Data.Descriptions.EventDescription arg2)
         {
-            eventView.AddBlock(new Rectangle(10, 10, 200, 80), new ChestEvent() { });
+            eventView.AddBlock(new TeleportEvent() { Type = EventType.Teleport }, 0);
         }
     }
 }

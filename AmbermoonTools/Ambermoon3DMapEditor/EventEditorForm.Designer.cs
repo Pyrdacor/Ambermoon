@@ -28,23 +28,23 @@
         /// </summary>
         private void InitializeComponent()
         {
-            eventEditorControl1 = new AmbermoonUIEventEditor.EventEditorControl();
+            eventEditor = new AmbermoonUIEventEditor.EventEditorControl();
             SuspendLayout();
             // 
             // eventEditorControl1
             // 
-            eventEditorControl1.Dock = DockStyle.Fill;
-            eventEditorControl1.Location = new Point(0, 0);
-            eventEditorControl1.Name = "eventEditorControl1";
-            eventEditorControl1.Size = new Size(800, 450);
-            eventEditorControl1.TabIndex = 0;
+            eventEditor.Dock = DockStyle.Fill;
+            eventEditor.Location = new Point(0, 0);
+            eventEditor.Name = "eventEditorControl1";
+            eventEditor.Size = new Size(800, 450);
+            eventEditor.TabIndex = 0;
             // 
             // EventEditorForm
             // 
             AutoScaleDimensions = new SizeF(8F, 20F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(800, 450);
-            Controls.Add(eventEditorControl1);
+            Controls.Add(eventEditor);
             Name = "EventEditorForm";
             Text = "EventEditorForm";
             ResumeLayout(false);
@@ -52,6 +52,6 @@
 
         #endregion
 
-        private AmbermoonUIEventEditor.EventEditorControl eventEditorControl1;
+        private AmbermoonUIEventEditor.EventEditorControl eventEditor;
     }
 }
