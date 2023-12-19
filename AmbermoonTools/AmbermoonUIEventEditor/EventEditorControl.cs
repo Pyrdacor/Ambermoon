@@ -1,8 +1,8 @@
 ﻿namespace AmbermoonUIEventEditor
 {
-    public partial class UserControl1 : UserControl
+    public partial class EventEditorControl : UserControl
     {
-        public UserControl1()
+        public EventEditorControl()
         {
             InitializeComponent();
         }

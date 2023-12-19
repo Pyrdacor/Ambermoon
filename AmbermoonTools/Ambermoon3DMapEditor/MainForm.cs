@@ -658,6 +658,10 @@ namespace Ambermoon3DMapEditor
 
         private void MainForm_KeyDown(object sender, KeyEventArgs e)
         {
+            // TODO
+            if (e.KeyCode == Keys.F5)
+                new EventEditorForm().ShowDialog();
+
             pressedKeys[e.KeyValue] = true;
         }
 

@@ -1,6 +1,6 @@
 ﻿namespace AmbermoonUIEventEditor
 {
-    partial class UserControl1
+    partial class EventEditorControl
     {
         /// <summary>
         /// Required designer variable.
@@ -28,11 +28,29 @@
         /// </summary>
         private void InitializeComponent()
         {
-            components = new System.ComponentModel.Container();
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(800, 450);
+            eventBrowserControl1 = new EventBrowserControl();
+            SuspendLayout();
+            // 
+            // eventBrowserControl1
+            // 
+            eventBrowserControl1.Dock = DockStyle.Fill;
+            eventBrowserControl1.Location = new Point(0, 0);
+            eventBrowserControl1.Name = "eventBrowserControl1";
+            eventBrowserControl1.Size = new Size(800, 450);
+            eventBrowserControl1.TabIndex = 0;
+            // 
+            // EventEditorControl
+            // 
+            AutoScaleDimensions = new SizeF(8F, 20F);
+            AutoScaleMode = AutoScaleMode.Font;
+            Controls.Add(eventBrowserControl1);
+            Name = "EventEditorControl";
+            Size = new Size(800, 450);
+            ResumeLayout(false);
         }
 
         #endregion
+
+        private EventBrowserControl eventBrowserControl1;
     }
 }

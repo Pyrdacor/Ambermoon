@@ -9,8 +9,12 @@
   </PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Ambermoon.Data.Legacy" Version="10.9.3" />
+		<PackageReference Include="Ambermoon.Data.Legacy" Version="10.9.4" />
 		<PackageReference Include="OpenTK.WinForms" Version="4.0.0-pre.7" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <ProjectReference Include="..\AmbermoonUIEventEditor\AmbermoonUIEventEditor.csproj" />
 	</ItemGroup>
 
 	<ItemGroup>
