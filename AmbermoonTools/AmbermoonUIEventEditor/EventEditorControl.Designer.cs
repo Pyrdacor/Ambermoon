@@ -28,29 +28,44 @@
         /// </summary>
         private void InitializeComponent()
         {
-            eventBrowserControl1 = new EventBrowserControl();
-            SuspendLayout();
+            this.eventBrowser = new AmbermoonUIEventEditor.EventBrowserControl();
+            this.eventView = new AmbermoonUIEventEditor.EventViewControl();
+            this.SuspendLayout();
             // 
-            // eventBrowserControl1
+            // eventBrowser
             // 
-            eventBrowserControl1.Dock = DockStyle.Fill;
-            eventBrowserControl1.Location = new Point(0, 0);
-            eventBrowserControl1.Name = "eventBrowserControl1";
-            eventBrowserControl1.Size = new Size(800, 450);
-            eventBrowserControl1.TabIndex = 0;
+            this.eventBrowser.Dock = System.Windows.Forms.DockStyle.Left;
+            this.eventBrowser.Location = new System.Drawing.Point(0, 0);
+            this.eventBrowser.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
+            this.eventBrowser.Name = "eventBrowser";
+            this.eventBrowser.Size = new System.Drawing.Size(161, 338);
+            this.eventBrowser.TabIndex = 0;
+            this.eventBrowser.EventDoubleClicked += new System.Action<Ambermoon.Data.EventType, Ambermoon.Data.Descriptions.EventDescription>(this.eventBrowser_EventDoubleClicked);
+            // 
+            // eventView
+            // 
+            this.eventView.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.eventView.Location = new System.Drawing.Point(161, 0);
+            this.eventView.Name = "eventView";
+            this.eventView.Size = new System.Drawing.Size(539, 338);
+            this.eventView.TabIndex = 1;
             // 
             // EventEditorControl
             // 
-            AutoScaleDimensions = new SizeF(8F, 20F);
-            AutoScaleMode = AutoScaleMode.Font;
-            Controls.Add(eventBrowserControl1);
-            Name = "EventEditorControl";
-            Size = new Size(800, 450);
-            ResumeLayout(false);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
+            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.Controls.Add(this.eventView);
+            this.Controls.Add(this.eventBrowser);
+            this.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
+            this.Name = "EventEditorControl";
+            this.Size = new System.Drawing.Size(700, 338);
+            this.ResumeLayout(false);
+
         }
 
         #endregion
 
-        private EventBrowserControl eventBrowserControl1;
+        private EventBrowserControl eventBrowser;
+        private EventViewControl eventView;
     }
 }
