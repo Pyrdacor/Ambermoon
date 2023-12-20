@@ -1,24 +1,42 @@
 ﻿using Ambermoon.Data;
 using Ambermoon.Data.Descriptions;
 using System.Drawing.Drawing2D;
+using static Ambermoon.Data.Map;
 
 namespace AmbermoonUIEventEditor
 {
     public partial class EventViewControl : Panel
     {
-        protected override void Dispose(bool disposing)
+        
+        private class DropRequestResult
         {
-            base.Dispose(disposing);
-
-            titleFont?.Dispose();
-            font?.Dispose();
+            public bool Allow { get; set; }
+            public int X { get; set; }
+            public int Y { get; set; }
+            public int SmallX { get; set; }
+            public int SmallY { get; set; }
         }
 
         private class EventBlock
         {
-            public EventBlock(EventViewControl parent, Rectangle area, Event @event, List<Event> eventList, List<Event> events)
+            static EventBlock()
+            {
+                DraggedEventBlockChanged += (_, block) =>
+                {
+                    draggedBlockRenderArea = null;
+                    relativeDragPosition = null;
+                };
+                DraggedEventBlockPositionChanged += (block, x, y) =>
+                {
+                    relativeDragPosition ??= new Point(x - block.Area.X, y - block.Area.Y);
+                    draggedBlockRenderArea = new Rectangle(x - relativeDragPosition.Value.X, y - relativeDragPosition.Value.Y, block.UnzoomedArea.Width, block.UnzoomedArea.Height);
+                };
+            }
+
+            public EventBlock(EventViewControl parent, Rectangle area, Point smallPosition, Event @event, List<Event> eventList, List<Event> events)
             {
                 this.area = area;
+                this.smallPosition = smallPosition;
                 Event = @event;
                 this.parent = parent;
                 this.eventList = eventList;
@@ -29,38 +47,89 @@ namespace AmbermoonUIEventEditor
             private static readonly Color NormalColor = Color.FromArgb(0x55, 0x77, 0x88);
             private static readonly Color BranchColor = Color.FromArgb(0xaa, 0xaa, 0x44);
 
-            private static Rectangle? draggedBlockRenderArea = null;
+            private static Point? relativeDragPosition = null;
+            private static Rectangle? draggedBlockRenderArea = null; // Note: x and y must not be zoomed but width and height
             private static string? activeToolTipTitle = null; 
             private static string? activeToolTip = null;
             private readonly EventViewControl parent;
             private Rectangle area;
+            private Point smallPosition;
             private readonly List<Event> eventList;
             private readonly List<Event> events;
 
             public static EventBlock? DraggedEventBlock { get; private set; } = null;
-            public Rectangle Area => new Rectangle(area.X + parent.AutoScrollPosition.X, area.Y + parent.AutoScrollPosition.Y, area.Width, area.Height);
+            public static Point? DraggedEventBlockLocation => draggedBlockRenderArea?.Location;
+            public Rectangle Area => Zoom(UnzoomedArea);
+            public Rectangle UnzoomedArea => new(area.X + parent.AutoScrollPosition.X, area.Y + parent.AutoScrollPosition.Y, area.Width, area.Height);
             public EventType EventType => Event.Type;
             public Event Event { get; }
             private EventDescription EventDescription => EventDescriptions.Events[EventType];
+            public Point? PreviewOffset { get; set; } = null;
 
             public static event Action<EventBlock?, EventBlock?>? DraggedEventBlockChanged;
             public static event Action<EventBlock, int, int>? DraggedEventBlockPositionChanged;
+            public static event Func<EventBlock, int, int, DropRequestResult>? DraggedEventBlockDropRequested;
+            public static event Action? RedrawRequested;
+
+            private Rectangle Zoom(Rectangle defaultZoomArea)
+            {
+                int zoomLevel = parent.ZoomLevel;
+
+                if (zoomLevel < DefaultZoomLevel)
+                {
+                    defaultZoomArea.X = smallPosition.X;
+                    defaultZoomArea.Y = smallPosition.Y;
+                    defaultZoomArea.Height = BlockTitleLineHeight * 3;
+
+                    while (zoomLevel++ < DefaultZoomLevel)
+                    {
+                        defaultZoomArea.X >>= 1;
+                        defaultZoomArea.Y >>= 1;
+                        defaultZoomArea.Width >>= 1;
+                        defaultZoomArea.Height >>= 1;
+                    }
+                }
+                else if (zoomLevel > DefaultZoomLevel)
+                {
+                    while (zoomLevel-- > DefaultZoomLevel)
+                    {
+                        defaultZoomArea.X <<= 1;
+                        defaultZoomArea.Y <<= 1;
+                        defaultZoomArea.Width <<= 1;
+                        defaultZoomArea.Height <<= 1;
+                    }
+                }
+
+                return defaultZoomArea;
+            }
 
             private bool HandleMouseUp()
             {
                 if (DraggedEventBlock == this)
                 {
+                    var dropLocation = draggedBlockRenderArea!.Value.Location;
                     DraggedEventBlock = null;
                     DraggedEventBlockChanged?.Invoke(this, null);
+
+                    var dropResult = DraggedEventBlockDropRequested?.Invoke(this, dropLocation.X, dropLocation.Y);
+
+                    if (dropResult?.Allow == true)
+                    {
+                        MoveTo(dropResult.X, dropResult.Y, dropResult.SmallX, dropResult.SmallY);
+                        RedrawRequested?.Invoke();
+                    }
+
                     return true;
                 }
 
                 return false;
             }
 
-            public void MoveTo(int x, int y)
+            // Note: Those coordinates are unzoomed
+            public void MoveTo(int x, int y, int smallX, int smallY)
             {
                 area = new Rectangle(new Point(x, y), Area.Size);
+                smallPosition = new Point(smallX, smallY);
             }
 
             public bool TestMouseDown(int x, int y)
@@ -82,7 +151,7 @@ namespace AmbermoonUIEventEditor
 
             public void MouseUp()
             {
-                HandleMouseUp();                
+                HandleMouseUp();
             }
 
             public bool MouseMoveTo(int x, int y, bool mouseDown)
@@ -139,23 +208,38 @@ namespace AmbermoonUIEventEditor
 
             public void Render(Control control, PaintEventArgs e)
             {
+                var area = Area;
+
+                if (DraggedEventBlock == this && draggedBlockRenderArea != null)
+                {
+                    var placeholderArea = area;
+                    placeholderArea.Inflate(-4, -4);
+                    placeholderArea.Offset(1, 1);
+                    using var redBrush = new SolidBrush(Color.FromArgb(128, Color.Red));
+                    using var redPen = new Pen(Color.Red, 2);
+                    using var path = RoundedRectPath(placeholderArea, 6);
+                    e.Graphics.FillPath(redBrush, path);
+                    e.Graphics.DrawPath(redPen, path);
+
+                    int x = draggedBlockRenderArea.Value.X;
+                    int y = draggedBlockRenderArea.Value.Y;
+                    area = Zoom(draggedBlockRenderArea.Value);
+                    area.X = x;
+                    area.Y = y;
+                }
+                else if (PreviewOffset != null)
+                {
+                    var offset = Zoom(new Rectangle(PreviewOffset.Value, new Size(0, 0))).Location;
+                    area.X += offset.X;
+                    area.Y += offset.Y;
+                }
+
                 bool chainStart = eventList.Contains(Event);
                 bool branch = Event.Type == EventType.Condition || Event.Type == EventType.Decision || Event.Type == EventType.Dice100Roll;
 
                 var color = chainStart ? ChainStartColor : branch ? BranchColor : NormalColor;
 
-                DrawEventBlock(e.Graphics, Area, color, 255);                
-            }
-
-            public static void RenderDraggedBlock(Control control, PaintEventArgs e)
-            {
-                if (DraggedEventBlock == null)
-                {
-                    if (draggedBlockRenderArea != null)
-                    {
-
-                    }
-                }
+                DrawEventBlock(e.Graphics, area, color, (byte)(DraggedEventBlock == this ? 192 : 255));                
             }
 
             public static void RenderTooltip(EventViewControl parent, Point position, PaintEventArgs e)
@@ -195,17 +279,25 @@ namespace AmbermoonUIEventEditor
 
                 FillBlock(graphics, area, color);
 
-                var desc = EventDescription;
+                var titleFont = titleFonts![parent.ZoomLevel - MinZoomLevel];
+                
+                if (parent.ZoomLevel >= 3)
+                {
+                    DrawText(graphics, titleFont!, new Rectangle(area.X + 2, area.Y + 3, area.Width - 4, BlockTitleLineHeight - 6), EventType.ToString(), true);
 
-                DrawText(graphics, titleFont!, new Rectangle(area.X + 2, area.Y + 3, area.Width - 4, BlockTitleLineHeight - 6), EventType.ToString(), true);
+                    using var linePen = new Pen(Color.Black, 1);
+                    graphics.DrawLine(linePen, new Point(area.X, area.Y + BlockTitleLineHeight - 3), new Point(area.Right - 1, area.Y + BlockTitleLineHeight - 3));
 
-                using var linePen = new Pen(Color.Black, 1);
-                graphics.DrawLine(linePen, new Point(area.X, area.Y + BlockTitleLineHeight - 3), new Point(area.Right - 1, area.Y + BlockTitleLineHeight - 3));
+                    int line = 0;
+                    var font = fonts![parent.ZoomLevel - MinZoomLevel];
 
-                int line = 0;
-
-                foreach (var valueDesc in GetValueLines())
-                    DrawText(graphics, font!, new Rectangle(area.X + 2, area.Y + BlockTitleLineHeight + (line++) * BlockLineHeight + 1, area.Width - 4, BlockLineHeight - 2), valueDesc);
+                    foreach (var valueDesc in GetValueLines())
+                        DrawText(graphics, font!, new Rectangle(area.X + 2, area.Y + BlockTitleLineHeight + (line++) * BlockLineHeight + 1, area.Width - 4, BlockLineHeight - 2), valueDesc);
+                }
+                else
+                {
+                    DrawText(graphics, titleFont!, area, EventType.ToString(), true);
+                }
             }
 
             private static void DrawText(Graphics graphics, Font font, RectangleF bounds, string text, bool center = false)
@@ -227,7 +319,7 @@ namespace AmbermoonUIEventEditor
             private static void FillBlock(Graphics graphics, Rectangle area, Color color)
             {
                 using var fillBrush = new SolidBrush(color);
-                using GraphicsPath path = RoundedRectPath(area, 4);
+                using GraphicsPath path = RoundedRectPath(area, 6);
 
                 graphics.FillPath(fillBrush, path);
             }
@@ -269,8 +361,20 @@ namespace AmbermoonUIEventEditor
         {
             DoubleBuffered = true;
             AutoScroll = true;
-            titleFont ??= new Font(new FontFamily("Segoe UI"), 11, FontStyle.Bold);
-            font ??= new Font(new FontFamily("Segoe UI"), 9);
+            titleFonts ??= Enumerable.Range(MinZoomLevel, 1 + MaxZoomLevel - MinZoomLevel).Select(level => new Font(new FontFamily("Segoe UI"), 7 + (level - 1) * 2, FontStyle.Bold)).ToList();
+            fonts ??= Enumerable.Range(MinZoomLevel, 1 + MaxZoomLevel - MinZoomLevel).Select(level => new Font(new FontFamily("Segoe UI"), 5 + (level - 1) * 2)).ToList();
+
+            EventBlock.DraggedEventBlockChanged += (old, @new) =>
+            {
+                if (old != null && @new == null)
+                {
+                    eventBlocks.ForEach(b => b.PreviewOffset = null);
+                    Refresh();
+                }
+            };
+            EventBlock.DraggedEventBlockPositionChanged += DraggedEventBlockPositionChanged;
+            EventBlock.DraggedEventBlockDropRequested += CheckEventBlockDrop;
+            EventBlock.RedrawRequested += Refresh;
         }
 
         private const int BlockWidth = 180;
@@ -279,14 +383,19 @@ namespace AmbermoonUIEventEditor
         private const int BlockFooterHeight = 4;
         private const int HorizontalBlockGap = 8;
         private const int VerticalBlockGap = 4;
+        private const int MinZoomLevel = 1;
+        private const int MaxZoomLevel = 4;
+        private const int DefaultZoomLevel = 3;
         private readonly List<EventBlock> eventBlocks = new();
         private readonly List<List<EventBlock>> eventBlockColumns = new();
         private readonly List<Control> drawOverControls = new();
         private readonly List<Event> eventList = new();
         private readonly List<Event> events = new();
-        private static Font? titleFont;
-        private static Font? font;
+        private static List<Font>? titleFonts;
+        private static List<Font>? fonts;
+        private Rectangle? dropIndicatorArea = null;
 
+        public int ZoomLevel { get; private set; } = DefaultZoomLevel;
         public List<Control> DrawOverControls
         {
             set
@@ -302,6 +411,15 @@ namespace AmbermoonUIEventEditor
                 Refresh();
             }
         }
+
+        protected override void Dispose(bool disposing)
+        {
+            base.Dispose(disposing);
+
+            titleFonts?.ForEach(font => font.Dispose());
+            fonts?.ForEach(font => font.Dispose());
+        }
+
 
         public void InitMap(Map map)
         {
@@ -342,11 +460,13 @@ namespace AmbermoonUIEventEditor
                 eventBlockColumns.Add(new());
             }
 
-            int y = eventBlockColumns[column].Count == 0 ? VerticalBlockGap : eventBlockColumns[column][^1].Area.Bottom + VerticalBlockGap;
+            int x = HorizontalBlockGap + column * (HorizontalBlockGap + BlockWidth);
+            int smallY = eventBlockColumns[column].Count == 0 ? VerticalBlockGap : VerticalBlockGap + eventBlockColumns[column].Count * (VerticalBlockGap + BlockTitleLineHeight * 3);
+            int y = eventBlockColumns[column].Count == 0 ? VerticalBlockGap : eventBlockColumns[column][^1].UnzoomedArea.Bottom + VerticalBlockGap;
 
             if (addEvent)
                 events.Add(@event);
-            var eventBlock = new EventBlock(this, new Rectangle(column * (HorizontalBlockGap + BlockWidth), y, BlockWidth, height), @event, eventList, events);
+            var eventBlock = new EventBlock(this, new Rectangle(x, y, BlockWidth, height), new Point(x, smallY), @event, eventList, events);
             eventBlocks.Add(eventBlock);
             eventBlockColumns[column].Add(eventBlock);
             if (redraw)
@@ -355,9 +475,318 @@ namespace AmbermoonUIEventEditor
             AutoScrollMinSize = new Size(eventBlockColumns.Count * (HorizontalBlockGap + BlockWidth), eventBlockColumns.Where(c => c.Count > 0).Max(c => c[^1].Area.Bottom));
         }
 
+        private void DraggedEventBlockPositionChanged(EventBlock eventBlock, int _, int __)
+        {
+            eventBlocks.ForEach(b => b.PreviewOffset = null);
+
+            var location = EventBlock.DraggedEventBlockLocation!.Value;
+            int x = location.X;
+            int y = location.Y;
+            int zoomLevel = ZoomLevel;
+
+            if (zoomLevel < DefaultZoomLevel)
+            {
+                while (zoomLevel++ < DefaultZoomLevel)
+                {
+                    x <<= 1;
+                    y <<= 1;
+                }
+            }
+            else if (zoomLevel > DefaultZoomLevel)
+            {
+                while (zoomLevel-- > DefaultZoomLevel)
+                {
+                    x >>= 1;
+                    y >>= 1;
+                }
+            }
+
+            // Coordinates are now unzoomed so we can just work with default sizes
+
+            x += BlockWidth / 2; // we care about the center of the block
+            y += ZoomLevel < 3 ? BlockTitleLineHeight * 3 / 2 : eventBlock.UnzoomedArea.Height / 2;
+
+            int oldColumn = eventBlockColumns.FindIndex(column => column.Contains(eventBlock));
+            int columnWidth = BlockWidth + HorizontalBlockGap;
+            int columnStartX = HorizontalBlockGap / 2;
+            int column = Math.Max(0, (x - columnStartX) / columnWidth);
+
+            if (column == oldColumn)
+            {
+                if (ZoomLevel < 3)
+                {
+                    int currentRow = eventBlockColumns[oldColumn].IndexOf(eventBlock);
+                    int by = VerticalBlockGap + currentRow * (VerticalBlockGap + BlockTitleLineHeight * 3);
+                    if (y >= by - VerticalBlockGap / 2 && y < by + BlockTitleLineHeight * 3 + VerticalBlockGap / 2)
+                    {
+                        Refresh();
+                        return;
+                    }
+                }
+                else if (y >= eventBlock.UnzoomedArea.Y - VerticalBlockGap / 2 && y < eventBlock.UnzoomedArea.Bottom + VerticalBlockGap / 2)
+                {
+                    Refresh();
+                    return;
+                }
+            }
+
+            if (column < eventBlockColumns.Count)
+            {
+                var previewOffset = new Point(0, ZoomLevel < 3
+                    ? BlockTitleLineHeight * 3
+                    : eventBlock.UnzoomedArea.Height
+                );
+                int row = 0;
+
+                foreach (var block in eventBlockColumns[column])
+                {
+                    int blockY = ZoomLevel < 3
+                        ? VerticalBlockGap + row * (BlockTitleLineHeight * 3 + VerticalBlockGap)
+                        : block.UnzoomedArea.Y;
+                    int blockHeight = ZoomLevel < 3
+                        ? BlockTitleLineHeight * 3
+                        : block.UnzoomedArea.Height;
+
+                    if (y >= blockY + blockHeight / 2)
+                    {
+                        row++;
+                    }
+                    else
+                    {
+                        break;
+                    }
+                }
+
+                if (column != oldColumn || row == 0 || eventBlockColumns[column][row - 1] != eventBlock)
+                {
+                    for (int i = row; i < eventBlockColumns[column].Count; i++)
+                    {
+                        eventBlockColumns[column][i].PreviewOffset = previewOffset;
+                    }
+                }
+            }
+
+            Refresh();
+        }
+
+        // Note: dropX and dropY are the upper left coord of the dropped block
+        // Note: the result must provide unzoomed coords
+        private DropRequestResult CheckEventBlockDrop(EventBlock eventBlock, int dropX, int dropY)
+        {
+            int zoomLevel = ZoomLevel;
+
+            if (zoomLevel < DefaultZoomLevel)
+            {
+                while (zoomLevel++ < DefaultZoomLevel)
+                {
+                    dropX <<= 1;
+                    dropY <<= 1;
+                }
+            }
+            else if (zoomLevel > DefaultZoomLevel)
+            {
+                while (zoomLevel-- > DefaultZoomLevel)
+                {
+                    dropX >>= 1;
+                    dropY >>= 1;
+                }
+            }
+
+            // Drop coordinates are now unzoomed so we can just work with default sizes
+
+            dropX += BlockWidth / 2; // we care about the center of the block
+            dropY += ZoomLevel < 3 ? BlockTitleLineHeight * 3 / 2 : eventBlock.UnzoomedArea.Height / 2;
+
+            int oldColumn = eventBlockColumns.FindIndex(column => column.Contains(eventBlock));
+            int columnWidth = BlockWidth + HorizontalBlockGap;
+            int columnStartX = HorizontalBlockGap / 2;
+            int column = Math.Max(0, (dropX - columnStartX) / columnWidth);
+
+            if (column == oldColumn)
+            {
+                if (ZoomLevel < 3)
+                {
+                    int currentRow = eventBlockColumns[oldColumn].IndexOf(eventBlock);
+                    int by = VerticalBlockGap + currentRow * (VerticalBlockGap + BlockTitleLineHeight * 3);
+                    if (dropY >= by - VerticalBlockGap / 2 && dropY < by + BlockTitleLineHeight * 3 + VerticalBlockGap / 2)
+                        return new DropRequestResult { Allow = false }; // We are already at that place so avoid drop logic
+                }
+                else if (dropY >= eventBlock.UnzoomedArea.Y - VerticalBlockGap / 2 && dropY < eventBlock.UnzoomedArea.Bottom + VerticalBlockGap / 2)
+                    return new DropRequestResult { Allow = false }; // We are already at that place so avoid drop logic
+            }
+
+            if (column > eventBlockColumns.Count)
+                column = eventBlockColumns.Count;
+
+            var description = EventDescriptions.Events[eventBlock.EventType];
+
+            bool chainStart = column == eventBlockColumns.Count || eventBlockColumns[column].Count == 0 ||
+                dropY < eventBlockColumns[column][0].UnzoomedArea.Bottom;
+
+            if ((chainStart && !description.AllowAsFirst) || (!chainStart && description.AllowOnlyAsFirst))
+                return new DropRequestResult { Allow = false };
+
+            // TODO: Also check if the remaining column events are valid then
+            // TODO: AllowSingleItem checking is tricky as we should allow temporary states
+
+            void RearrangeColumn(int column)
+            {
+                var blocks = new List<EventBlock>(eventBlockColumns[column]);
+
+                eventBlockColumns[column].Clear(); // Will be re-added by AddBlock so we have to remove it here
+
+                foreach (var block in blocks)
+                    eventBlocks.Remove(block); // Will be re-added by AddBlock so we have to remove it here
+
+                blocks.ForEach(block => AddBlock(block.Event, column, false, false));
+            }
+
+            // There are a few drop scenarios:
+            //
+            // (1) dropColumn < oldColumn
+            // (2) dropColumn = oldColumn
+            // (3) dropColumn > oldColumn
+            //
+            // For (2) only important:
+            //
+            // (A) dropRow < oldRow
+            // (B) dropRow = oldRow
+            // (C) dropRow > oldRow
+            //
+            // Specials:
+            //
+            // (S) dropColumn = new appended column
+            // (X) oldColumn becomes empty
+
+            // Case (2)(B) is handled above. No drop logic is executed for this case.
+            // Cases (1)(S) and (2)(S) are not possible.
+            // Case (2) is not possible with (X).
+            //
+            // So we have:
+            //
+            // (1), (3), (2)(A), (2)(C), (3)(S), (1)(X), (3)(X) and (3)(S)(X)
+
+            eventBlockColumns[oldColumn].Remove(eventBlock);
+
+            #region Adjust old column events
+            int eventListIndex = eventList.IndexOf(eventBlock.Event);
+            int newEventListIndex = column;
+
+            if (eventListIndex >= 0)
+            {
+                if (eventBlock.Event.Next != null)
+                    eventList[eventListIndex] = eventBlock.Event.Next;
+                else
+                {
+                    eventList.RemoveAt(eventListIndex);
+
+                    if (newEventListIndex > oldColumn)
+                        newEventListIndex--;
+                }
+            }
+
+            if (eventBlockColumns[oldColumn].Count > 0)
+            {
+                var prev = eventBlockColumns[oldColumn].FirstOrDefault(b => b.Event.Next == eventBlock.Event);
+
+                if (prev != null)
+                    prev.Event.Next = eventBlock.Event.Next;
+            }
+
+            eventBlock.Event.Next = null;
+            #endregion
+
+            int x = HorizontalBlockGap + column * (HorizontalBlockGap + BlockWidth);
+            int y;
+            int smallY;
+
+            if (column == eventBlockColumns.Count) // (3)(S) or (3)(S)(X)
+            {
+                eventList.Add(eventBlock.Event);
+                eventBlockColumns.Add(new() { eventBlock });
+                y = VerticalBlockGap;
+                smallY = VerticalBlockGap;
+            }
+            else
+            {
+                y = VerticalBlockGap;
+                smallY = VerticalBlockGap;
+                int row = 0;
+
+                foreach (var block in eventBlockColumns[column])
+                {
+                    int blockY = ZoomLevel < 3
+                        ? VerticalBlockGap + row * (BlockTitleLineHeight * 3 + VerticalBlockGap)
+                        : block.UnzoomedArea.Y;
+                    int blockHeight = ZoomLevel < 3
+                        ? BlockTitleLineHeight * 3
+                        : block.UnzoomedArea.Height;
+
+                    if (dropY >= blockY + blockHeight / 2)
+                    {
+                        y = block.UnzoomedArea.Bottom + VerticalBlockGap;
+                        smallY += BlockTitleLineHeight * 3 + VerticalBlockGap;
+                        row++;
+                    }
+                    else
+                    {
+                        break;
+                    }
+                }
+
+                eventBlockColumns[column].Insert(row, eventBlock);
+                
+                if (row == 0)
+                {
+                    eventBlock.Event.Next = eventList[newEventListIndex];
+                    eventList[newEventListIndex] = eventBlock.Event;                    
+                }
+                else
+                {
+                    var prev = eventBlockColumns[column][row - 1].Event;
+                    eventBlock.Event.Next = prev.Next;
+                    prev.Next = eventBlock.Event;
+                }
+            }
+
+            if (eventBlockColumns[oldColumn].Count == 0)
+            {
+                eventBlockColumns.RemoveAt(oldColumn);
+
+                for (int i = oldColumn; i < eventBlockColumns.Count; i++)
+                {
+                    RearrangeColumn(i);
+                }
+
+                if (column < oldColumn && eventBlockColumns[column].Count > 1)
+                    RearrangeColumn(column);
+
+                if (column > oldColumn)
+                    x -= (BlockWidth + HorizontalBlockGap);
+            }
+            else
+            {
+                RearrangeColumn(oldColumn);
+
+                if (column != oldColumn && eventBlockColumns[column].Count > 1)
+                    RearrangeColumn(column);
+            }
+
+            return new DropRequestResult
+            {
+                Allow = true,
+                X = x,
+                Y = y,
+                SmallX = x,
+                SmallY = smallY
+            };
+        }
+
         private void OverDrawControl(object? sender, PaintEventArgs e)
         {
-            EventBlock.RenderDraggedBlock((sender as Control)!, e);
+            // TODO
+            //EventBlock.RenderDraggedBlock((sender as Control)!, e);
+            EventBlock.DraggedEventBlock?.Render((sender as Control)!, e);
         }
 
         protected override void OnScroll(ScrollEventArgs e)
@@ -369,17 +798,71 @@ namespace AmbermoonUIEventEditor
             Refresh();
         }
 
+        protected override void OnMouseWheel(MouseEventArgs e)
+        {
+            if (EventBlock.DraggedEventBlock != null)
+                return;
+
+            if (ModifierKeys.HasFlag(Keys.Control))
+            {
+                int zoomLevel = Ambermoon.Util.Limit(MinZoomLevel, ZoomLevel + Math.Sign(e.Delta), MaxZoomLevel);
+                
+                if (zoomLevel != ZoomLevel)
+                {
+                    ZoomLevel = zoomLevel;
+                    Refresh();
+                }
+            }
+            else
+            {
+                base.OnMouseWheel(e);
+            }
+        }
+
         protected override void OnPaint(PaintEventArgs e)
         {
             base.OnPaint(e);
 
             e.Graphics.FillRectangle(SystemBrushes.Window, DisplayRectangle);
 
-            eventBlocks.ForEach(eventBlock => eventBlock.Render(this, e));
+            foreach (var eventBlock in eventBlocks)
+            {
+                if (eventBlock != EventBlock.DraggedEventBlock)
+                    eventBlock.Render(this, e);
+            }
+
+            EventBlock.DraggedEventBlock?.Render(this, e);
 
             var tooltipPos = PointToClient(MousePosition);
             EventBlock.RenderTooltip(this, tooltipPos, e);
-            EventBlock.RenderDraggedBlock(this, e);
+        }
+
+        protected override void OnMouseDown(MouseEventArgs e)
+        {
+            base.OnMouseDown(e);
+
+            if (e.Button == MouseButtons.Left)
+            {
+                foreach (var eventBlock in eventBlocks)
+                {
+                    if (eventBlock.TestMouseDown(e.X, e.Y))
+                    {
+                        Refresh();
+                        break;
+                    }
+                }
+            }            
+        }
+
+        protected override void OnMouseUp(MouseEventArgs e)
+        {
+            base.OnMouseUp(e);
+
+            if (e.Button == MouseButtons.Left)
+            {
+                var blocks = new List<EventBlock>(eventBlocks); // we create a copy as the list might be changed by drop handling
+                blocks.ForEach(eventBlock => eventBlock.MouseUp());
+            }
         }
 
         protected override void OnMouseMove(MouseEventArgs e)
@@ -387,6 +870,17 @@ namespace AmbermoonUIEventEditor
             base.OnMouseMove(e);
 
             EventBlock.HideTooltips();
+
+            bool mouseDown = e.Button == MouseButtons.Left;
+
+            foreach (var eventBlock in eventBlocks)
+            {
+                if (eventBlock.MouseMoveTo(e.X, e.Y, mouseDown))
+                {
+                    Refresh();
+                    break;
+                }
+            }
         }
 
         protected override void OnMouseHover(EventArgs e)
@@ -395,18 +889,29 @@ namespace AmbermoonUIEventEditor
 
             EventBlock.HideTooltips();
 
-            var mousePos = PointToClient(MousePosition);
-
-            foreach (var eventBlock in eventBlocks)
+            if (EventBlock.DraggedEventBlock == null)
             {
-                if (eventBlock.TestHover(mousePos.X, mousePos.Y))
+                var mousePos = PointToClient(MousePosition);
+
+                foreach (var eventBlock in eventBlocks)
                 {
-                    Refresh();
-                    break;
+                    if (eventBlock.TestHover(mousePos.X, mousePos.Y))
+                    {
+                        Refresh();
+                        break;
+                    }
                 }
             }
 
             ResetMouseEventArgs();
+        }
+
+        protected override void OnMouseLeave(EventArgs e)
+        {
+            base.OnMouseLeave(e);
+
+            EventBlock.HideTooltips();
+            Refresh();
         }
     }
 }
