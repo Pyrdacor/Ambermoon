@@ -65,6 +65,7 @@ namespace AmbermoonUIEventEditor
             public Event Event { get; }
             private EventDescription EventDescription => EventDescriptions.Events[EventType];
             public Point? PreviewOffset { get; set; } = null;
+            public static Point? DropTargetPosition { get; set; } = null;
 
             public static event Action<EventBlock?, EventBlock?>? DraggedEventBlockChanged;
             public static event Action<EventBlock, int, int>? DraggedEventBlockPositionChanged;
@@ -228,6 +229,18 @@ namespace AmbermoonUIEventEditor
                     area = Zoom(draggedBlockRenderArea.Value);
                     area.X = x;
                     area.Y = y;
+
+                    if (DropTargetPosition != null)
+                    {
+                        placeholderArea = Zoom(new Rectangle(DropTargetPosition.Value, UnzoomedArea.Size));
+                        placeholderArea.Inflate(-4, -4);
+                        placeholderArea.Offset(1, 1);
+                        using var greenBrush = new SolidBrush(Color.FromArgb(128, Color.ForestGreen));
+                        using var greenPen = new Pen(Color.ForestGreen, 2);
+                        using var targetPath = RoundedRectPath(placeholderArea, 6);
+                        e.Graphics.FillPath(greenBrush, targetPath);
+                        e.Graphics.DrawPath(greenPen, targetPath);
+                    }
                 }
                 else if (PreviewOffset != null)
                 {
@@ -474,16 +487,17 @@ namespace AmbermoonUIEventEditor
             if (redraw)
                 Refresh();
 
-            AutoScrollMinSize = new Size(eventBlockColumns.Count * (HorizontalBlockGap + BlockWidth), eventBlockColumns.Where(c => c.Count > 0).Max(c => c[^1].Area.Bottom));
+            AutoScrollMinSize = new Size((eventBlockColumns.Count + 1) * (HorizontalBlockGap + BlockWidth), eventBlockColumns.Where(c => c.Count > 0).Max(c => c[^1].Area.Bottom));
         }
 
         private void DraggedEventBlockPositionChanged(EventBlock eventBlock, int _, int __)
         {
+            EventBlock.DropTargetPosition = null;
             eventBlocks.ForEach(b => b.PreviewOffset = null);
 
             var location = EventBlock.DraggedEventBlockLocation!.Value;
-            int x = location.X;
-            int y = location.Y;
+            int x = location.X - AutoScrollPosition.X;
+            int y = location.Y - AutoScrollPosition.Y;
             int zoomLevel = ZoomLevel;
 
             if (zoomLevel < DefaultZoomLevel)
@@ -515,6 +529,12 @@ namespace AmbermoonUIEventEditor
 
             if (column == oldColumn)
             {
+                if (eventBlockColumns[oldColumn].Count == 1)
+                {
+                    Refresh();
+                    return;
+                }
+
                 if (ZoomLevel < 3)
                 {
                     int currentRow = eventBlockColumns[oldColumn].IndexOf(eventBlock);
@@ -568,6 +588,16 @@ namespace AmbermoonUIEventEditor
                         eventBlockColumns[column][i].PreviewOffset = previewOffset;
                     }
                 }
+
+                x = HorizontalBlockGap + column * (BlockWidth + HorizontalBlockGap); 
+                y = row == 0 ? VerticalBlockGap : ZoomLevel < 3
+                    ? VerticalBlockGap + row * (VerticalBlockGap + BlockTitleLineHeight * 3)
+                    : eventBlockColumns[column][row - 1].UnzoomedArea.Bottom + VerticalBlockGap;
+                EventBlock.DropTargetPosition = new Point(x, y);
+            }
+            else
+            {
+                // TODO: show target position
             }
 
             Refresh();
@@ -577,6 +607,9 @@ namespace AmbermoonUIEventEditor
         // Note: the result must provide unzoomed coords
         private DropRequestResult CheckEventBlockDrop(EventBlock eventBlock, int dropX, int dropY)
         {
+            dropX -= AutoScrollPosition.X;
+            dropY -= AutoScrollPosition.Y;
+
             int zoomLevel = ZoomLevel;
 
             if (zoomLevel < DefaultZoomLevel)
@@ -608,6 +641,9 @@ namespace AmbermoonUIEventEditor
 
             if (column == oldColumn)
             {
+                if (eventBlockColumns[oldColumn].Count == 1)
+                    return new DropRequestResult { Allow = false }; // We are already at that place so avoid drop logic
+
                 if (ZoomLevel < 3)
                 {
                     int currentRow = eventBlockColumns[oldColumn].IndexOf(eventBlock);
