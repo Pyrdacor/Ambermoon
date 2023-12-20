@@ -215,6 +215,8 @@ namespace AmbermoonUIEventEditor
                     var placeholderArea = area;
                     placeholderArea.Inflate(-4, -4);
                     placeholderArea.Offset(1, 1);
+                    if (PreviewOffset != null)
+                        placeholderArea.Offset(Zoom(new Rectangle(PreviewOffset.Value, new Size(0, 0))).Location);
                     using var redBrush = new SolidBrush(Color.FromArgb(128, Color.Red));
                     using var redPen = new Pen(Color.Red, 2);
                     using var path = RoundedRectPath(placeholderArea, 6);
@@ -557,10 +559,12 @@ namespace AmbermoonUIEventEditor
                     }
                 }
 
-                if (column != oldColumn || row == 0 || eventBlockColumns[column][row - 1] != eventBlock)
+                if (column != oldColumn || row == 0 || (row < eventBlockColumns[column].Count && eventBlockColumns[column][row] != eventBlock))
                 {
                     for (int i = row; i < eventBlockColumns[column].Count; i++)
                     {
+                        if (eventBlockColumns[column][i] == eventBlock && row == i)
+                            continue;
                         eventBlockColumns[column][i].PreviewOffset = previewOffset;
                     }
                 }
@@ -735,17 +739,20 @@ namespace AmbermoonUIEventEditor
                 }
 
                 eventBlockColumns[column].Insert(row, eventBlock);
-                
-                if (row == 0)
+
+                if (eventBlockColumns[column].Count > 1 || column != oldColumn)
                 {
-                    eventBlock.Event.Next = eventList[newEventListIndex];
-                    eventList[newEventListIndex] = eventBlock.Event;                    
-                }
-                else
-                {
-                    var prev = eventBlockColumns[column][row - 1].Event;
-                    eventBlock.Event.Next = prev.Next;
-                    prev.Next = eventBlock.Event;
+                    if (row == 0)
+                    {
+                        eventBlock.Event.Next = eventList[newEventListIndex];
+                        eventList[newEventListIndex] = eventBlock.Event;
+                    }
+                    else
+                    {
+                        var prev = eventBlockColumns[column][row - 1].Event;
+                        eventBlock.Event.Next = prev.Next;
+                        prev.Next = eventBlock.Event;
+                    }
                 }
             }
 
