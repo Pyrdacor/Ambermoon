@@ -46,6 +46,7 @@ namespace AmbermoonUIEventEditor
             private static readonly Color ChainStartColor = Color.FromArgb(0xcc, 0x44, 0x33);
             private static readonly Color NormalColor = Color.FromArgb(0x55, 0x77, 0x88);
             private static readonly Color BranchColor = Color.FromArgb(0xaa, 0xaa, 0x44);
+            private static readonly Color ChainStartBranchColor = Color.FromArgb(0xcc, 0x66, 0x00);
 
             private static Point? relativeDragPosition = null;
             private static Rectangle? draggedBlockRenderArea = null; // Note: x and y must not be zoomed but width and height
@@ -59,12 +60,12 @@ namespace AmbermoonUIEventEditor
 
             public static EventBlock? DraggedEventBlock { get; private set; } = null;
             public static Point? DraggedEventBlockLocation => draggedBlockRenderArea?.Location;
-            public Rectangle Area => Zoom(UnzoomedArea);
+            public Rectangle Area => Zoom(UnzoomedArea, true);
             public Rectangle UnzoomedArea => new(area.X + parent.AutoScrollPosition.X, area.Y + parent.AutoScrollPosition.Y, area.Width, area.Height);
             public EventType EventType => Event.Type;
             public Event Event { get; }
             private EventDescription EventDescription => EventDescriptions.Events[EventType];
-            public Point? PreviewOffset { get; set; } = null;
+            public int? PreviewOffset { get; set; } = null;
             public static Point? DropTargetPosition { get; set; } = null;
 
             public static event Action<EventBlock?, EventBlock?>? DraggedEventBlockChanged;
@@ -72,14 +73,40 @@ namespace AmbermoonUIEventEditor
             public static event Func<EventBlock, int, int, DropRequestResult>? DraggedEventBlockDropRequested;
             public static event Action? RedrawRequested;
 
-            private Rectangle Zoom(Rectangle defaultZoomArea)
+            private int Zoom(int y)
             {
                 int zoomLevel = parent.ZoomLevel;
 
                 if (zoomLevel < DefaultZoomLevel)
                 {
-                    defaultZoomArea.X = smallPosition.X;
-                    defaultZoomArea.Y = smallPosition.Y;
+                    while (zoomLevel++ < DefaultZoomLevel)
+                    {
+                        y >>= 1;
+                    }
+                }
+                else if (zoomLevel > DefaultZoomLevel)
+                {
+                    while (zoomLevel-- > DefaultZoomLevel)
+                    {
+                        y <<= 1;
+                    }
+                }
+
+                return y;
+            }
+
+            private Rectangle Zoom(Rectangle defaultZoomArea, bool useSmallPosition = false)
+            {
+                int zoomLevel = parent.ZoomLevel;
+
+                if (zoomLevel < DefaultZoomLevel)
+                {
+                    if (useSmallPosition)
+                    {
+                        defaultZoomArea.X = smallPosition.X;
+                        defaultZoomArea.Y = smallPosition.Y;
+                    }
+
                     defaultZoomArea.Height = BlockTitleLineHeight * 3;
 
                     while (zoomLevel++ < DefaultZoomLevel)
@@ -214,10 +241,12 @@ namespace AmbermoonUIEventEditor
                 if (DraggedEventBlock == this && draggedBlockRenderArea != null)
                 {
                     var placeholderArea = area;
-                    placeholderArea.Inflate(-4, -4);
-                    placeholderArea.Offset(1, 1);
+                    int inflateAmount = -Zoom(4);
+                    int offsetAmount = parent.ZoomLevel / 2;
+                    placeholderArea.Inflate(inflateAmount, inflateAmount);
+                    placeholderArea.Offset(offsetAmount, offsetAmount);
                     if (PreviewOffset != null)
-                        placeholderArea.Offset(Zoom(new Rectangle(PreviewOffset.Value, new Size(0, 0))).Location);
+                        placeholderArea.Offset(0, Zoom(PreviewOffset.Value));
                     using var redBrush = new SolidBrush(Color.FromArgb(128, Color.Red));
                     using var redPen = new Pen(Color.Red, 2);
                     using var path = RoundedRectPath(placeholderArea, 6);
@@ -226,15 +255,15 @@ namespace AmbermoonUIEventEditor
 
                     int x = draggedBlockRenderArea.Value.X;
                     int y = draggedBlockRenderArea.Value.Y;
-                    area = Zoom(draggedBlockRenderArea.Value);
+                    area = Zoom(draggedBlockRenderArea.Value, true);
                     area.X = x;
                     area.Y = y;
 
                     if (DropTargetPosition != null)
                     {
                         placeholderArea = Zoom(new Rectangle(DropTargetPosition.Value, UnzoomedArea.Size));
-                        placeholderArea.Inflate(-4, -4);
-                        placeholderArea.Offset(1, 1);
+                        placeholderArea.Inflate(inflateAmount, inflateAmount);
+                        placeholderArea.Offset(offsetAmount, offsetAmount);
                         using var greenBrush = new SolidBrush(Color.FromArgb(128, Color.ForestGreen));
                         using var greenPen = new Pen(Color.ForestGreen, 2);
                         using var targetPath = RoundedRectPath(placeholderArea, 6);
@@ -244,15 +273,13 @@ namespace AmbermoonUIEventEditor
                 }
                 else if (PreviewOffset != null)
                 {
-                    var offset = Zoom(new Rectangle(PreviewOffset.Value, new Size(0, 0))).Location;
-                    area.X += offset.X;
-                    area.Y += offset.Y;
+                    area.Y += Zoom(PreviewOffset.Value);
                 }
 
                 bool chainStart = eventList.Contains(Event);
                 bool branch = Event.Type == EventType.Condition || Event.Type == EventType.Decision || Event.Type == EventType.Dice100Roll;
 
-                var color = chainStart ? ChainStartColor : branch ? BranchColor : NormalColor;
+                var color = chainStart ? (branch ? ChainStartBranchColor : ChainStartColor) : branch ? BranchColor : NormalColor;
 
                 DrawEventBlock(e.Graphics, area, color, (byte)(DraggedEventBlock == this ? 192 : 255));                
             }
@@ -554,10 +581,10 @@ namespace AmbermoonUIEventEditor
 
             if (column < eventBlockColumns.Count)
             {
-                var previewOffset = new Point(0, ZoomLevel < 3
+                var previewOffset = (ZoomLevel < 3
                     ? BlockTitleLineHeight * 3
-                    : eventBlock.UnzoomedArea.Height
-                );
+                    : eventBlock.UnzoomedArea.Height)
+                    + VerticalBlockGap;
                 int row = 0;
 
                 foreach (var block in eventBlockColumns[column])
@@ -579,21 +606,29 @@ namespace AmbermoonUIEventEditor
                     }
                 }
 
-                if (column != oldColumn || row == 0 || (row < eventBlockColumns[column].Count && eventBlockColumns[column][row] != eventBlock))
-                {
-                    for (int i = row; i < eventBlockColumns[column].Count; i++)
-                    {
-                        if (eventBlockColumns[column][i] == eventBlock && row == i)
-                            continue;
-                        eventBlockColumns[column][i].PreviewOffset = previewOffset;
-                    }
-                }
+                bool sameSpot = column == oldColumn &&
+                    (
+                        (row == 0 && eventBlockColumns[column][0] == eventBlock) ||
+                        (row > 0 && eventBlockColumns[column][row - 1] == eventBlock) ||
+                        (row > 0 && row < eventBlockColumns[column].Count && eventBlockColumns[column][row] == eventBlock)
+                    );
 
-                x = HorizontalBlockGap + column * (BlockWidth + HorizontalBlockGap); 
-                y = row == 0 ? VerticalBlockGap : ZoomLevel < 3
-                    ? VerticalBlockGap + row * (VerticalBlockGap + BlockTitleLineHeight * 3)
-                    : eventBlockColumns[column][row - 1].UnzoomedArea.Bottom + VerticalBlockGap;
-                EventBlock.DropTargetPosition = new Point(x, y);
+                if (!sameSpot)
+                {
+                    if (row < eventBlockColumns[column].Count)
+                    {
+                        for (int i = row; i < eventBlockColumns[column].Count; i++)
+                        {
+                            eventBlockColumns[column][i].PreviewOffset = previewOffset;
+                        }
+                    }
+
+                    x = HorizontalBlockGap + column * (BlockWidth + HorizontalBlockGap);
+                    y = row == 0 ? VerticalBlockGap : ZoomLevel < 3
+                        ? VerticalBlockGap + row * (VerticalBlockGap + BlockTitleLineHeight * 3)
+                        : eventBlockColumns[column][row - 1].UnzoomedArea.Bottom + VerticalBlockGap;
+                    EventBlock.DropTargetPosition = new Point(x, y);
+                }
             }
             else
             {
