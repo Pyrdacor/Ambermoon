@@ -627,12 +627,14 @@ namespace AmbermoonUIEventEditor
                     y = row == 0 ? VerticalBlockGap : ZoomLevel < 3
                         ? VerticalBlockGap + row * (VerticalBlockGap + BlockTitleLineHeight * 3)
                         : eventBlockColumns[column][row - 1].UnzoomedArea.Bottom + VerticalBlockGap;
-                    EventBlock.DropTargetPosition = new Point(x, y);
+                    EventBlock.DropTargetPosition = new Point(x + AutoScrollPosition.X, y + AutoScrollPosition.Y);
                 }
             }
             else
             {
-                // TODO: show target position
+                int tx = HorizontalBlockGap + eventBlockColumns.Count * (BlockWidth + HorizontalBlockGap);
+                int ty = VerticalBlockGap;
+                EventBlock.DropTargetPosition = new Point(tx + AutoScrollPosition.X, ty + AutoScrollPosition.Y);
             }
 
             Refresh();
