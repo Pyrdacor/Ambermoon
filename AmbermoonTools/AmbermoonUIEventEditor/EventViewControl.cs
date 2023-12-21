@@ -741,7 +741,8 @@ namespace AmbermoonUIEventEditor
             //
             // (1), (3), (2)(A), (2)(C), (3)(S), (1)(X), (3)(X) and (3)(S)(X)
 
-            eventBlockColumns[oldColumn].Remove(eventBlock);
+            int oldRow = eventBlockColumns[oldColumn].IndexOf(eventBlock);
+            eventBlockColumns[oldColumn].Remove(eventBlock);            
 
             #region Adjust old column events
             int eventListIndex = eventList.IndexOf(eventBlock.Event);
@@ -797,6 +798,10 @@ namespace AmbermoonUIEventEditor
                         ? BlockTitleLineHeight * 3
                         : block.UnzoomedArea.Height;
 
+                    // Account for the removed block height if same column and below remove row
+                    if (ZoomLevel < 3 && oldColumn == column && row >= oldRow)
+                        blockY += BlockTitleLineHeight * 3 + VerticalBlockGap;
+
                     if (dropY >= blockY + blockHeight / 2)
                     {
                         y = block.UnzoomedArea.Bottom + VerticalBlockGap;
@@ -849,6 +854,8 @@ namespace AmbermoonUIEventEditor
                 if (column != oldColumn && eventBlockColumns[column].Count > 1)
                     RearrangeColumn(column);
             }
+
+            EventBlock.HideTooltips();
 
             return new DropRequestResult
             {
