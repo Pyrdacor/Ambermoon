@@ -57,6 +57,7 @@
             // 
             listViewMaps.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
             listViewMaps.Columns.AddRange(new ColumnHeader[] { columnHeaderIndex, columnHeaderName });
+            listViewMaps.FullRowSelect = true;
             listViewMaps.Location = new Point(12, 39);
             listViewMaps.Name = "listViewMaps";
             listViewMaps.Size = new Size(460, 520);

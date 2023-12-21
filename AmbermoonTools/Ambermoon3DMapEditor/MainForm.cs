@@ -179,7 +179,6 @@ namespace Ambermoon3DMapEditor
         private void LoadMap(uint index)
         {
             LoadMap(gameData.MapManager.GetMap(index));
-            view3D.Refresh();
         }
 
         private void LoadMap(Map map)
@@ -248,12 +247,7 @@ namespace Ambermoon3DMapEditor
 
                         if (!dirSet)
                         {
-                            byte up = y > 0 ? blocks[i - mapWidth - 1] : (byte)255;
-
-                            if (up == 0)
-                            {
-                                playerViewAngle = 0;
-                            }
+                            playerViewAngle = 0;
                         }
 
                         playerPlaced = true;
@@ -262,7 +256,7 @@ namespace Ambermoon3DMapEditor
             }
 
             Draw2DViewToImage();
-            Redraw2DView();
+            UpdateModelView();
         }
 
         private void InitSky(Map map)
