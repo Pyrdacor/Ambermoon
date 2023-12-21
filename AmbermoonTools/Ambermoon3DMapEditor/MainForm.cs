@@ -176,7 +176,11 @@ namespace Ambermoon3DMapEditor
 
         private void LoadMap(uint index)
         {
-            map = gameData.MapManager.GetMap(index);
+            LoadMap(gameData.MapManager.GetMap(index));
+        }
+        private void LoadMap(Map map)
+        {
+            this.map = map;
             labdata = gameData.MapManager.GetLabdataForMap(map!);
             paletteIndex = map.PaletteIndex;
             InitLabdata(labdata, map.PaletteIndex);
@@ -450,15 +454,17 @@ namespace Ambermoon3DMapEditor
 
             int index = labdata!.ObjectInfos.IndexOf(obj.Object);
             var texture = objectTextures![index];
+            int frame = obj.Object.NumAnimationFrames <= 1 ? 0 : animationFrame % (int)obj.Object.NumAnimationFrames;
+            float textureX = texture.AtlasX + frame * obj.Object.TextureWidth;
             float textureWidth = obj.Object.TextureWidth;
             float textureHeight = obj.Object.TextureHeight;
             float atlasWidth = objectTextureAtlas!.Width;
             float atlasHeight = objectTextureAtlas!.Height;
 
-            void UpperLeftUv() => GL.TexCoord2(texture.AtlasX / atlasWidth, texture.AtlasY / atlasHeight);
-            void UpperRightUv() => GL.TexCoord2((texture.AtlasX + textureWidth) / atlasWidth, texture.AtlasY / atlasHeight);
-            void LowerRightUv() => GL.TexCoord2((texture.AtlasX + textureWidth) / atlasWidth, (texture.AtlasY + textureHeight) / atlasHeight);
-            void LowerLeftUv() => GL.TexCoord2(texture.AtlasX / atlasWidth, (texture.AtlasY + textureHeight) / atlasHeight);
+            void UpperLeftUv() => GL.TexCoord2(textureX / atlasWidth, texture.AtlasY / atlasHeight);
+            void UpperRightUv() => GL.TexCoord2((textureX + textureWidth) / atlasWidth, texture.AtlasY / atlasHeight);
+            void LowerRightUv() => GL.TexCoord2((textureX + textureWidth) / atlasWidth, (texture.AtlasY + textureHeight) / atlasHeight);
+            void LowerLeftUv() => GL.TexCoord2(textureX / atlasWidth, (texture.AtlasY + textureHeight) / atlasHeight);
 
             GL.Begin(PrimitiveType.Quads);
 
@@ -990,7 +996,7 @@ namespace Ambermoon3DMapEditor
 
                     if (index == 0)
                         continue;
-                    
+
                     if (index == 255)
                     {
                         DrawBlock(x, y, AutomapBackgroundColor, AutomapLineColor, "X");
@@ -1250,6 +1256,20 @@ namespace Ambermoon3DMapEditor
 
             Draw2DViewToImage();
             Redraw2DView();
+        }
+
+        private void exitToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            // TODO: confirmation
+            Close();
+        }
+
+        private void openToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            var openMapForm = new OpenMapForm(gameData);
+
+            if (openMapForm.ShowDialog() == DialogResult.OK && openMapForm.SelectedMap != null)
+                LoadMap(openMapForm.SelectedMap);
         }
     }
 }

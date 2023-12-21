@@ -7,6 +7,9 @@
     <Compile Update="MainForm.cs">
       <SubType>Form</SubType>
     </Compile>
+    <Compile Update="OpenMapForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
     <Compile Update="RenderPanel.cs">
       <SubType>Component</SubType>
     </Compile>
