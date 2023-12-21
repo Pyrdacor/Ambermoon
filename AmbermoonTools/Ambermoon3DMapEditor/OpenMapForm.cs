@@ -20,7 +20,7 @@ namespace Ambermoon3DMapEditor
             public MapListItem(Map map)
             {
                 Map = map;
-                Name = map.Index.ToString();
+                Text = map.Index.ToString();
                 SubItems.Add(map.Name);
             }
 
@@ -34,7 +34,7 @@ namespace Ambermoon3DMapEditor
         {
             var filteredMaps = textBoxFilter.Text.Length == 0
                 ? unfilteredMaps
-                : unfilteredMaps.Where(map => map.Index.ToString().Contains(textBoxFilter.Text) || map.Name.Contains(textBoxFilter.Text));
+                : unfilteredMaps.Where(map => map.Index.ToString().Contains(textBoxFilter.Text) || map.Name.Contains(textBoxFilter.Text, StringComparison.InvariantCultureIgnoreCase));
 
             listViewMaps.Items.Clear();
             listViewMaps.Items.AddRange(filteredMaps.Select(map => new MapListItem(map)).ToArray());

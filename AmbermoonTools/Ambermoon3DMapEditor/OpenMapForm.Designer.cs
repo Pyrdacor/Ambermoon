@@ -49,7 +49,7 @@
             textBoxFilter.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
             textBoxFilter.Location = new Point(63, 6);
             textBoxFilter.Name = "textBoxFilter";
-            textBoxFilter.Size = new Size(591, 27);
+            textBoxFilter.Size = new Size(409, 27);
             textBoxFilter.TabIndex = 1;
             textBoxFilter.TextChanged += textBoxFilter_TextChanged;
             // 
@@ -59,7 +59,7 @@
             listViewMaps.Columns.AddRange(new ColumnHeader[] { columnHeaderIndex, columnHeaderName });
             listViewMaps.Location = new Point(12, 39);
             listViewMaps.Name = "listViewMaps";
-            listViewMaps.Size = new Size(642, 141);
+            listViewMaps.Size = new Size(460, 520);
             listViewMaps.TabIndex = 2;
             listViewMaps.UseCompatibleStateImageBehavior = false;
             listViewMaps.View = View.Details;
@@ -77,7 +77,7 @@
             // 
             AutoScaleDimensions = new SizeF(8F, 20F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(666, 192);
+            ClientSize = new Size(484, 571);
             Controls.Add(listViewMaps);
             Controls.Add(textBoxFilter);
             Controls.Add(labelFilter);

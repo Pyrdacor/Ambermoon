@@ -36,7 +36,7 @@
             statusStrip1 = new StatusStrip();
             statusPosition = new ToolStripStatusLabel();
             initTimer = new System.Windows.Forms.Timer(components);
-            settingsControl1 = new SettingsControl();
+            settingsControl = new SettingsControl();
             animationTimer = new System.Windows.Forms.Timer(components);
             menuStrip1 = new MenuStrip();
             fileToolStripMenuItem = new ToolStripMenuItem();
@@ -129,13 +129,13 @@
             // 
             // settingsControl1
             // 
-            settingsControl1.Dock = DockStyle.Bottom;
-            settingsControl1.Location = new Point(0, 381);
-            settingsControl1.MaximumSize = new Size(8000, 172);
-            settingsControl1.MinimumSize = new Size(0, 172);
-            settingsControl1.Name = "settingsControl1";
-            settingsControl1.Size = new Size(800, 172);
-            settingsControl1.TabIndex = 2;
+            settingsControl.Dock = DockStyle.Bottom;
+            settingsControl.Location = new Point(0, 381);
+            settingsControl.MaximumSize = new Size(8000, 172);
+            settingsControl.MinimumSize = new Size(0, 172);
+            settingsControl.Name = "settingsControl1";
+            settingsControl.Size = new Size(800, 172);
+            settingsControl.TabIndex = 2;
             // 
             // animationTimer
             // 
@@ -211,7 +211,7 @@
             Controls.Add(splitContainer1);
             Controls.Add(statusStrip1);
             Controls.Add(menuStrip1);
-            Controls.Add(settingsControl1);
+            Controls.Add(settingsControl);
             KeyPreview = true;
             MainMenuStrip = menuStrip1;
             MinimumSize = new Size(800, 600);
@@ -242,7 +242,7 @@
         private StatusStrip statusStrip1;
         private ToolStripStatusLabel statusPosition;
         private System.Windows.Forms.Timer initTimer;
-        private SettingsControl settingsControl1;
+        private SettingsControl settingsControl;
         private System.Windows.Forms.Timer animationTimer;
         private MenuStrip menuStrip1;
         private ToolStripMenuItem fileToolStripMenuItem;

@@ -2,10 +2,9 @@ using Ambermoon;
 using Ambermoon.Data;
 using Ambermoon.Data.Enumerations;
 using Ambermoon.Data.Legacy;
+using Ambermoon.Data.Legacy.ExecutableData;
 using OpenTK.Graphics.OpenGL;
 using OpenTK.Mathematics;
-using System.Drawing;
-using static Ambermoon.Data.Map;
 using Color = System.Drawing.Color;
 
 namespace Ambermoon3DMapEditor
@@ -48,7 +47,7 @@ namespace Ambermoon3DMapEditor
         #endregion
 
         #region Settings
-        private Settings settings => settingsControl1.Settings;
+        private Settings settings => settingsControl.Settings;
         private Settings._Settings3DView settings3D => settings.Settings3DView;
         private Settings._Settings2DView settings2D => settings.Settings2DView;
         private Settings._SettingsMisc settingsMisc => settings.SettingsMisc;
@@ -72,12 +71,14 @@ namespace Ambermoon3DMapEditor
         private int mapWidth = 10;
         private int mapHeight = 10;
         private List<Texture>? wallTextures = null;
+        private HashSet<int> texturesWithSkyColors = new();
         private TextureAtlas? wallTextureAtlas = null;
         private TextureAtlas? transparentWallTextureAtlas = null;
         private TextureAtlas? floorTextureAtlas = null;
         private TextureAtlas? ceilingTextureAtlas = null;
         private List<Texture>? objectTextures = null;
         private TextureAtlas? objectTextureAtlas = null;
+        private TextureAtlas? skyTextureAtlas = null;
         private readonly Dictionary<uint, Palette> palettes = new();
         private readonly Bitmap[][] automapGraphics;
         private Bitmap[] wallGraphics = Array.Empty<Bitmap>();
@@ -172,18 +173,28 @@ namespace Ambermoon3DMapEditor
             floorTextureAtlas?.Dispose();
             ceilingTextureAtlas?.Dispose();
             objectTextureAtlas?.Dispose();
+            skyTextureAtlas?.Dispose();
         }
 
         private void LoadMap(uint index)
         {
             LoadMap(gameData.MapManager.GetMap(index));
+            view3D.Refresh();
         }
+
         private void LoadMap(Map map)
         {
             this.map = map;
             labdata = gameData.MapManager.GetLabdataForMap(map!);
             paletteIndex = map.PaletteIndex;
             InitLabdata(labdata, map.PaletteIndex);
+            if (map.Flags.HasFlag(MapFlags.Sky))
+                InitSky(map);
+            else
+            {
+                skyTextureAtlas?.Dispose();
+                skyTextureAtlas = null;
+            }
             mapWidth = map.Width;
             mapHeight = map.Height;
             blocks = new byte[mapWidth * mapHeight];
@@ -254,6 +265,34 @@ namespace Ambermoon3DMapEditor
             Redraw2DView();
         }
 
+        private void InitSky(Map map)
+        {
+            // TODO: for now we use day (9:00)
+            var skyParts = gameData.LightEffectProvider.GetSkyParts(map, 9, 0, gameData.GraphicProvider);
+            int width = 16;
+            int height = skyParts.Sum(part => part.Height);
+            int y = 0;
+            int offset = 0;
+            var data = new byte[width * height * 4];
+
+            foreach (var part in skyParts)
+            {
+                int count = width * part.Height;
+                var color = Color.FromArgb((int)(part.Color & 0xffffff));
+
+                for (int i = 0; i < count; i++)
+                {
+                    data[offset++] = color.R;
+                    data[offset++] = color.G;
+                    data[offset++] = color.B;
+                    data[offset++] = color.A;
+                }
+            }
+
+            skyTextureAtlas?.Dispose();
+            skyTextureAtlas = new TextureAtlas(width, height, data);
+        }
+
         private void InitLabdata(Labdata labdata, uint paletteIndex)
         {
             wallTextureAtlas?.Dispose();
@@ -263,12 +302,39 @@ namespace Ambermoon3DMapEditor
             objectTextureAtlas?.Dispose();
 
             wallTextures = TextureLoader.Load(labdata.WallGraphics, out var paletteTextureAtlas);
-            wallTextureAtlas = paletteTextureAtlas.ToTextureAtlas(palettes[paletteIndex], false);
+            Palette wallPalette;
+            texturesWithSkyColors.Clear();
+            if (map!.Flags.HasFlag(MapFlags.Sky))
+            {
+                var wallColors = palettes[paletteIndex].Colors;
+                wallColors[labdata.CeilingColorIndex] = Color.Transparent;
+                wallPalette = new Palette(wallColors);
+                
+                for (int i = 0; i < labdata.WallGraphics.Count; i++)
+                {
+                    if (labdata.WallGraphics[i].Data.Contains(labdata.CeilingColorIndex))
+                        texturesWithSkyColors.Add(i);
+                }
+            }
+            else
+            {
+                wallPalette = palettes[paletteIndex];
+            }
+            wallTextureAtlas = paletteTextureAtlas.ToTextureAtlas(wallPalette, false);
             transparentWallTextureAtlas = paletteTextureAtlas.ToTextureAtlas(palettes[paletteIndex], true);
             TextureLoader.Load((new[] { labdata.FloorGraphic }).ToList(), out paletteTextureAtlas);
             floorTextureAtlas = paletteTextureAtlas.ToTextureAtlas(palettes[paletteIndex], false);
-            TextureLoader.Load((new[] { labdata.CeilingGraphic }).ToList(), out paletteTextureAtlas);
-            ceilingTextureAtlas = paletteTextureAtlas.ToTextureAtlas(palettes[paletteIndex], false);
+            if (labdata.CeilingGraphic != null && !map!.Flags.HasFlag(MapFlags.Sky))
+            {
+                TextureLoader.Load((new[] { labdata.CeilingGraphic }).ToList(), out paletteTextureAtlas);
+                ceilingTextureAtlas = paletteTextureAtlas.ToTextureAtlas(palettes[paletteIndex], false);
+                settingsControl.EnableCeilingTexture(true);
+            }
+            else
+            {
+                ceilingTextureAtlas = null;
+                settingsControl.EnableCeilingTexture(false);
+            }
             objectTextures = TextureLoader.Load(labdata.ObjectGraphics, out paletteTextureAtlas);
             objectTextureAtlas = paletteTextureAtlas.ToTextureAtlas(palettes[paletteIndex], true);
 
@@ -318,6 +384,35 @@ namespace Ambermoon3DMapEditor
             GL.TexCoord2(0.0f, mapHeight);
             GL.Vertex3(0.0f, 0.0f, mapHeight * BlockSize);
             GL.End();
+        }
+
+        private void DrawSky()
+        {
+            GL.MatrixMode(MatrixMode.Projection);
+            GL.PushMatrix();
+            GL.LoadIdentity();
+            GL.Ortho(0, view3D.Width, view3D.Height, 0, -1, 1);
+            GL.MatrixMode(MatrixMode.Modelview);
+            GL.PushMatrix();
+            GL.LoadIdentity();            
+
+            GL.Color4(Color4.White);
+            skyTextureAtlas?.Bind();
+
+            GL.Begin(PrimitiveType.Quads);
+            GL.TexCoord2(0.0f, 0.0f);
+            GL.Vertex3(0, 0, 0);
+            GL.TexCoord2(1.0f, 0.0f);
+            GL.Vertex3(view3D.Width, 0, 0);
+            GL.TexCoord2(1.0f, 1.0f);
+            GL.Vertex3(view3D.Width, view3D.Height / 2, 0);
+            GL.TexCoord2(0.0f, 1.0f);
+            GL.Vertex3(0, view3D.Height / 2, 0);
+            GL.End();
+
+            GL.PopMatrix();
+            GL.MatrixMode(MatrixMode.Projection);
+            GL.PopMatrix();
         }
 
         private void DrawCeiling(Color4 color)
@@ -596,7 +691,10 @@ namespace Ambermoon3DMapEditor
                             bool renderDownFace = y < mapHeight - 1 && IsObjectOrNonBlocking(blockIndex + mapWidth);
                             bool renderLeftFace = x > 0 && IsObjectOrNonBlocking(blockIndex - 1);
                             var wall = walls[index - 101];
-                            if (!wall.Flags.HasFlag(Tileset.TileFlags.Transparency))
+                            bool transparency = wall.Flags.HasFlag(Tileset.TileFlags.Transparency);
+                            if (!transparency && map!.Flags.HasFlag(MapFlags.Sky))
+                                transparency = texturesWithSkyColors.Contains(labdata!.Walls.IndexOf(wall));
+                            if (!transparency)
                             {
                                 DrawWall(x, y, palette[wall.ColorIndex], wallTextures![index - 101], false,
                                     renderUpFace, renderRightFace, renderDownFace, renderLeftFace);
@@ -641,8 +739,13 @@ namespace Ambermoon3DMapEditor
             GL.DepthMask(false);
             if (settings3D.ShowFloor.CurrentValue && floorTextureAtlas != null)
                 DrawFloor(palettes[paletteIndex][labdata?.FloorColorIndex ?? 0]);
-            if (settings3D.ShowCeiling.CurrentValue && ceilingTextureAtlas != null)
-                DrawCeiling(palettes[paletteIndex][labdata?.CeilingColorIndex ?? 0]);
+            if (settings3D.ShowCeiling.CurrentValue)
+            {
+                if (skyTextureAtlas != null)
+                    DrawSky();
+                else if (ceilingTextureAtlas != null)
+                    DrawCeiling(palettes[paletteIndex][labdata?.CeilingColorIndex ?? 0]);
+            }
             GL.DepthMask(true);
 
             if (labdata != null)

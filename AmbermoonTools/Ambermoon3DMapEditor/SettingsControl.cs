@@ -33,6 +33,11 @@
             // Misc
         }
 
+        public void EnableCeilingTexture(bool enable)
+        {
+            checkBoxShowCeilingTexture.Enabled = enable;
+        }
+
         private void MapCheckbox(Func<Settings, Settings.Value<bool>> selector, CheckBox checkBox)
         {
             var setting = selector(Settings);
