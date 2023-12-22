@@ -206,7 +206,14 @@ namespace AmbermoonUIEventEditor
                 {
                     var desc = (input.Tag as ValueDescription)!;
                     var property = eventType.GetProperty(desc.Name)!;
-                    property.SetValue(@event, Convert.ChangeType(input.Value, property.PropertyType));
+                    object? value = input.Value;
+                    if (property.PropertyType.IsEnum)
+                        value = System.Enum.Parse(property.PropertyType, value.ToString()!);
+                    else if (property.PropertyType.IsGenericType && property.PropertyType.GetGenericTypeDefinition() == typeof(Nullable<>) && property.PropertyType.GetGenericArguments()[0].IsEnum)
+                        value = System.Enum.Parse(property.PropertyType.GetGenericArguments()[0], value.ToString()!);
+                    else
+                        value = Convert.ChangeType(value, property.PropertyType);
+                    property.SetValue(@event, value);
                 }
 
                 foreach (var dropdown in Controls.OfType<ComboBox>().Where(c => c.Tag is ValueDescription && c.Tag is IEnumValueDescription))
