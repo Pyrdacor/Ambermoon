@@ -171,21 +171,21 @@ namespace Ambermoon.Data.Descriptions
 
         public static EnumValueDescription<TEnum> Enum<TEnum>(string name, bool required, TEnum defaultValue = default(TEnum),
             params TEnum[] allowedValues)
-            where TEnum : System.Enum => new EnumValueDescription<TEnum>(name, required, false, defaultValue, false, false, allowedValues);
+            where TEnum : struct, System.Enum => new EnumValueDescription<TEnum>(name, required, false, defaultValue, false, false, allowedValues);
 
         public static EnumValueDescription<TEnum> Enum<TEnum>(string name, bool required, TEnum defaultValue, IEnumerable<TEnum> allowedValues)
-            where TEnum : System.Enum => new EnumValueDescription<TEnum>(name, required, false, defaultValue, false, false, allowedValues.ToArray());
+            where TEnum : struct, System.Enum => new EnumValueDescription<TEnum>(name, required, false, defaultValue, false, false, allowedValues.ToArray());
 
         public static EnumValueDescription<TEnum> HiddenEnum<TEnum>(TEnum defaultValue = default(TEnum))
-            where TEnum : System.Enum => new EnumValueDescription<TEnum>("Unknown", false, true, defaultValue, false, false, null);
+            where TEnum : struct, System.Enum => new EnumValueDescription<TEnum>("Unknown", false, true, defaultValue, false, false, null);
 
         public static EnumValueDescription<TEnum> Flags8<TEnum>(string name, bool required, TEnum defaultValue = default(TEnum),
             params TEnum[] allowedValues)
-            where TEnum : System.Enum => new EnumValueDescription<TEnum>(name, required, false, defaultValue, true, false, allowedValues);
+            where TEnum : struct, System.Enum => new EnumValueDescription<TEnum>(name, required, false, defaultValue, true, false, allowedValues);
 
         public static EnumValueDescription<TEnum> Flags16<TEnum>(string name, bool required, TEnum defaultValue = default(TEnum),
             params TEnum[] allowedValues)
-            where TEnum : System.Enum => new EnumValueDescription<TEnum>(name, required, false, defaultValue, true, true, allowedValues);
+            where TEnum : struct, System.Enum => new EnumValueDescription<TEnum>(name, required, false, defaultValue, true, true, allowedValues);
 
         public static ValueDescription[] Compound(params ValueDescription[] valueDescriptions) => valueDescriptions;
     }

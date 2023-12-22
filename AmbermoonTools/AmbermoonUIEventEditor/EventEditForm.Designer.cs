@@ -59,6 +59,7 @@
             Controls.Add(labelType);
             Name = "EventEditForm";
             Text = "EventEditForm";
+            FormClosing += EventEditForm_FormClosing;
             Load += EventEditForm_Load;
             ResumeLayout(false);
             PerformLayout();

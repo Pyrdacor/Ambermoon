@@ -8,23 +8,11 @@ namespace AmbermoonUIEventEditor
         public EventBrowserControl()
         {
             InitializeComponent();
-
-            listViewEvents.Groups.AddRange
-            (
-                new ListViewGroup[]
-                {
-                    new ListViewGroup("Map Events") { CollapsedState = ListViewGroupCollapsedState.Expanded },
-                    new ListViewGroup("Character Events") { CollapsedState = ListViewGroupCollapsedState.Expanded },
-                }
-            );
-
-            var mapEvents = EventDescriptions.Events.Where(e => e.Value.AllowMaps).Select(e => new EventListItem(e.Key, e.Value, listViewEvents.Groups[0]));
-            var charEvents = EventDescriptions.Events.Where(e => e.Value.AllowNPCs).Select(e => new EventListItem(e.Key, e.Value, listViewEvents.Groups[1]));
-
-            unfilteredItems = Enumerable.Concat(mapEvents, charEvents).ToArray();
         }
 
-        private readonly EventListItem[] unfilteredItems;
+        private EventListItem[] unfilteredItems = Array.Empty<EventListItem>();
+        public bool ShowMapEvents { get; set; } = true;
+        public bool ShowCharEvents { get; set; } = true;
         public event Action<EventType, EventDescription>? EventDoubleClicked;
         public event Action<EventType, EventDescription>? EventDragged;
 
@@ -34,17 +22,17 @@ namespace AmbermoonUIEventEditor
 
             foreach (EventListItem item in unfilteredItems)
             {
-                if (filter == "" || item.ToString().Contains(filter, StringComparison.InvariantCultureIgnoreCase))
+                if (filter == "" || item.Text.Contains(filter, StringComparison.InvariantCultureIgnoreCase))
                 {
                     listViewEvents.Items.Add(item);
-                    item.Group = (ListViewGroup)item.Tag;
+                    item.Group = (ListViewGroup?)item.Tag;
                 }
             }
         }
 
         private class EventListItem : ListViewItem
         {
-            public EventListItem(EventType eventType, EventDescription eventDescription, ListViewGroup group)
+            public EventListItem(EventType eventType, EventDescription eventDescription, ListViewGroup? group)
                 : base(eventType.ToString())
             {
                 EventType = eventType;
@@ -59,6 +47,35 @@ namespace AmbermoonUIEventEditor
 
         private void EventBrowserControl_Load(object sender, EventArgs e)
         {
+            if (ShowMapEvents && ShowCharEvents)
+            {
+                listViewEvents.Groups.AddRange
+                (
+                    new ListViewGroup[]
+                    {
+                        new ListViewGroup("Map Events") { CollapsedState = ListViewGroupCollapsedState.Expanded },
+                        new ListViewGroup("Character Events") { CollapsedState = ListViewGroupCollapsedState.Expanded },
+                    }
+                );
+
+                var mapEvents = EventDescriptions.Events.Where(e => e.Value.AllowMaps).Select(e => new EventListItem(e.Key, e.Value, listViewEvents.Groups[0]));
+                var charEvents = EventDescriptions.Events.Where(e => e.Value.AllowNPCs).Select(e => new EventListItem(e.Key, e.Value, listViewEvents.Groups[1]));
+
+                unfilteredItems = Enumerable.Concat(mapEvents, charEvents).ToArray();
+            }
+            else if (ShowMapEvents)
+            {
+                unfilteredItems = EventDescriptions.Events.Where(e => e.Value.AllowMaps).Select(e => new EventListItem(e.Key, e.Value, null)).ToArray();
+            }
+            else if (ShowCharEvents)
+            {
+                unfilteredItems = EventDescriptions.Events.Where(e => e.Value.AllowNPCs).Select(e => new EventListItem(e.Key, e.Value, null)).ToArray();
+            }
+            else
+            {
+                throw new InvalidOperationException("At least one of the event categories must be shown: Map or character events.");
+            }
+
             var column = listViewEvents.Columns.Add("Events");
             column.Width = listViewEvents.ClientSize.Width;
             listViewEvents.SizeChanged += (_, _) => column.Width = listViewEvents.ClientSize.Width;

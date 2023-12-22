@@ -36,6 +36,8 @@
             eventEditor.Dock = DockStyle.Fill;
             eventEditor.Location = new Point(0, 0);
             eventEditor.Name = "eventEditor";
+            eventEditor.ShowCharEvents = false;
+            eventEditor.ShowMapEvents = true;
             eventEditor.Size = new Size(800, 450);
             eventEditor.TabIndex = 0;
             // 

@@ -57,14 +57,53 @@ namespace AmbermoonUIEventEditor
                 AddEnumControl(enumValue.Name, enumDesc, enumValue.DefaultValue, enumValue);
             }
 
-            ClientSize = new System.Drawing.Size(ClientSize.Width, Controls.OfType<Control>().Max(c => c.Bounds.Bottom) + 8);
+            // TODO: Event Index, Flags8, Flags16
+
+            if (eventDesc.AllowAsFirst)
+            {
+                y += 2;
+                startNewEventChainCheckBox = new CheckBox();
+                startNewEventChainCheckBox.Text = "Start new event chain";
+                if (eventDesc.AllowOnlyAsFirst)
+                {
+                    startNewEventChainCheckBox.Checked = true;
+                    startNewEventChainCheckBox.Enabled = false;
+                }
+                else
+                {
+                    startNewEventChainCheckBox.Checked = false;
+                }
+                startNewEventChainCheckBox.Location = new Point(x, y);
+                startNewEventChainCheckBox.Width = comboBoxTypes.Bounds.Right - x;
+                Controls.Add(startNewEventChainCheckBox);
+                y += startNewEventChainCheckBox.Height + 6;
+            }
+
+            var okButton = new Button();
+            okButton.Text = "OK";
+            okButton.DialogResult = DialogResult.OK;
+            okButton.Width = 98;
+            okButton.Height = 28;
+            okButton.Location = new Point(comboBoxTypes.Bounds.Right - okButton.Width * 2 - 4, y);
+            Controls.Add(okButton);
+            var cancelButton = new Button();
+            cancelButton.Text = "Cancel";
+            cancelButton.DialogResult = DialogResult.Cancel;
+            cancelButton.Width = 98;
+            cancelButton.Height = okButton.Height;
+            cancelButton.Location = new Point(comboBoxTypes.Bounds.Right - cancelButton.Width, y);
+            Controls.Add(cancelButton);
+
+            ClientSize = new System.Drawing.Size(ClientSize.Width, cancelButton.Bottom + 8);
         }
 
+        private readonly CheckBox? startNewEventChainCheckBox = null;
         private readonly bool create;
         private readonly Event @event;
-        private int childX = 0;
+        private readonly int childX = 0;
         private int x = 0;
         private int y = 0;
+        public bool StartNewEventChain => startNewEventChainCheckBox?.Checked == true;
 
         private void AddBoolControl(string name, bool defaultValue, ValueDescription valueDescription)
         {
@@ -93,9 +132,9 @@ namespace AmbermoonUIEventEditor
             label.Width = comboBoxTypes.Bounds.Right - 64 - childX;
             Controls.Add(label);
             var input = new NumericUpDown();
-            input.Minimum = min;
-            input.Maximum = max;
-            input.Value = Util.Limit(min, defaultValue, max);
+            input.Minimum = Math.Max(min, valueDescription.MinValue);
+            input.Maximum = Math.Min(max, valueDescription.MaxValue);
+            input.Value = Util.Limit((int)input.Minimum, defaultValue, (int)input.Maximum);
             input.Location = new Point(label.Bounds.Right + 4, y);
             input.Width = 60;
             input.Tag = valueDescription;
@@ -107,7 +146,20 @@ namespace AmbermoonUIEventEditor
         {
             if (valueDescription.Type == Ambermoon.Data.Descriptions.ValueType.Enum)
             {
-                // TODO: Dropdown
+                var label = new Label();
+                label.Text = name;
+                label.Location = new Point(x, y + 2);
+                label.Width = comboBoxTypes.Bounds.Right - 204 - childX;
+                Controls.Add(label);
+                var dropdown = new ComboBox();
+                dropdown.DropDownStyle = ComboBoxStyle.DropDownList;
+                dropdown.Items.AddRange(enumDesc.AllowedValueNames.Select((name, index) => $"{(int)enumDesc.AllowedValues[index]}: {name}").ToArray());
+                dropdown.SelectedIndex = enumDesc.AllowedValues.Cast<int>().ToList().IndexOf(Convert.ToInt32(defaultValue));
+                dropdown.Location = new Point(label.Bounds.Right + 4, y);
+                dropdown.Width = 200;
+                dropdown.Tag = valueDescription;
+                Controls.Add(dropdown);
+                y += dropdown.Height + 4;
             }
             else // Flags
             {
@@ -134,9 +186,39 @@ namespace AmbermoonUIEventEditor
             {
                 labelType.Visible = false;
                 comboBoxTypes.Visible = false;
+            }
+        }
 
-                if (Controls.Count == 2)
-                    DialogResult = DialogResult.OK; // no input required
+        private void EventEditForm_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            if (DialogResult == DialogResult.OK)
+            {
+                var eventType = @event.GetType();
+
+                foreach (var checkBox in Controls.OfType<CheckBox>().Where(c => c.Tag is ValueDescription))
+                {
+                    var desc = (checkBox.Tag as ValueDescription)!;
+                    var property = eventType.GetProperty(desc.Name)!;
+                    property.SetValue(@event, Convert.ChangeType(checkBox.Checked, property.PropertyType));
+                }
+
+                foreach (var input in Controls.OfType<NumericUpDown>().Where(i => i.Tag is ValueDescription))
+                {
+                    var desc = (input.Tag as ValueDescription)!;
+                    var property = eventType.GetProperty(desc.Name)!;
+                    property.SetValue(@event, Convert.ChangeType(input.Value, property.PropertyType));
+                }
+
+                foreach (var dropdown in Controls.OfType<ComboBox>().Where(c => c.Tag is ValueDescription && c.Tag is IEnumValueDescription))
+                {
+                    var desc = (dropdown.Tag as ValueDescription)!;
+                    var enumDesc = (dropdown.Tag as IEnumValueDescription)!;
+                    var value = enumDesc.AllowedValues[dropdown.SelectedIndex];
+                    var property = eventType.GetProperty(desc.Name)!;
+                    property.SetValue(@event, Convert.ChangeType(value, property.PropertyType));
+                }
+
+                // TODO: Event Index, Flags8, Flags16
             }
         }
     }

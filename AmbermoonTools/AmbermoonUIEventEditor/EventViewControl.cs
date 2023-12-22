@@ -1,13 +1,13 @@
-﻿using Ambermoon.Data;
+﻿using Ambermoon;
+using Ambermoon.Data;
 using Ambermoon.Data.Descriptions;
 using System.Drawing.Drawing2D;
-using static Ambermoon.Data.Map;
+using Size = System.Drawing.Size;
 
 namespace AmbermoonUIEventEditor
 {
     public partial class EventViewControl : Panel
     {
-        
         private class DropRequestResult
         {
             public bool Allow { get; set; }
@@ -227,6 +227,14 @@ namespace AmbermoonUIEventEditor
                 string GetValue(ValueDescription valueDescription)
                 {
                     var value = Event.GetType().GetProperty(valueDescription.Name)?.GetValue(Event);
+
+                    if (valueDescription.Type == Ambermoon.Data.Descriptions.ValueType.Enum)
+                    {
+                        var enumDesc = (valueDescription as IEnumValueDescription)!;
+                        int index = enumDesc.AllowedValues.Cast<int>().ToList().IndexOf(Convert.ToInt32(value));
+                        value = enumDesc.AllowedValueNames[index];
+                    }
+
                     return value != null ? valueDescription.AsString(value) : valueDescription.DefaultValueText;
                 }
 
@@ -438,6 +446,8 @@ namespace AmbermoonUIEventEditor
         private Rectangle? dropIndicatorArea = null;
 
         public int ZoomLevel { get; private set; } = DefaultZoomLevel;
+        public int BlockColumnCount => eventBlockColumns.Count;
+        public int BlockCount => eventBlocks.Count;
         public List<Control> DrawOverControls
         {
             set
@@ -462,6 +472,10 @@ namespace AmbermoonUIEventEditor
             fonts?.ForEach(font => font.Dispose());
         }
 
+        public void InitNPC(IConversationPartner npc)
+        {
+            // TODO
+        }
 
         public void InitMap(Map map)
         {
@@ -516,6 +530,33 @@ namespace AmbermoonUIEventEditor
                 Refresh();
 
             AutoScrollMinSize = new Size((eventBlockColumns.Count + 1) * (HorizontalBlockGap + BlockWidth), eventBlockColumns.Where(c => c.Count > 0).Max(c => c[^1].Area.Bottom));
+        }
+
+        public void ScrollLastBlockIntoView()
+        {
+            var area = eventBlockColumns[^1][^1].Area;
+            int scrollX = -AutoScrollPosition.X;
+            int scrollY = -AutoScrollPosition.Y;
+            int areaX = area.X + scrollX;
+            int areaY = area.Y + scrollY;
+
+            if (HorizontalScroll.Visible)
+            {
+                int centerX = areaX + area.Width / 2;
+                int left = centerX - ClientSize.Width / 2;
+
+                scrollX = Util.Limit(0, left, AutoScrollMinSize.Width - ClientSize.Width);
+            }
+
+            if (VerticalScroll.Visible)
+            {
+                int centerY = areaY + area.Height / 2;
+                int top = centerY - ClientSize.Height / 2;
+
+                scrollY = Util.Limit(0, top, AutoScrollMinSize.Height - ClientSize.Height);
+            }
+
+            AutoScrollPosition = new Point(scrollX, scrollY);
         }
 
         private void DraggedEventBlockPositionChanged(EventBlock eventBlock, int _, int __)

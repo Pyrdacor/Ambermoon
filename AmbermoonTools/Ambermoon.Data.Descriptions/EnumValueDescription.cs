@@ -13,12 +13,29 @@ namespace Ambermoon.Data.Descriptions
         public bool Flags { get; }
     }
 
-    public record EnumValueDescription<TEnum> : ValueDescription, IEnumValueDescription where TEnum : System.Enum
+    internal record EnumValueDescriptionWithFilteredAllowedValues<TEnum> : EnumValueDescription<TEnum>, IEnumValueDescription where TEnum : struct, System.Enum
+    {
+        private readonly Func<object[], object[]> valueFilter;
+        private readonly Func<string[], string[]> valueNameFilter;
+
+        public override string[] AllowedValueNames => valueNameFilter(base.AllowedValueNames);
+        public override object[] AllowedValues => valueFilter(base.AllowedValues);
+
+        public EnumValueDescriptionWithFilteredAllowedValues(string name, bool required, bool hidden, TEnum defaultValue,
+            bool flags, bool word, TEnum[] allowedValues, Func<object[], object[]> valueFilter, Func<string[], string[]> valueNameFilter)
+            : base(name, required, hidden, defaultValue, flags, word, allowedValues)
+        {
+            this.valueFilter = valueFilter;
+            this.valueNameFilter = valueNameFilter;
+        }
+    }
+
+    public record EnumValueDescription<TEnum> : ValueDescription, IEnumValueDescription where TEnum : struct, System.Enum
     {
         public TEnum[] AllowedEnumValues { get; }
         public bool Flags { get; }
-        public string[] AllowedValueNames => AllowedEnumValues.Select(v => Enum.GetName(v)).ToArray();
-        public object[] AllowedValues => AllowedEnumValues.Select(v => (object)v).ToArray();
+        public virtual string[] AllowedValueNames => AllowedEnumValues.Distinct().OrderBy(e => e).SelectMany(v => System.Enum.GetNames<TEnum>().Where(name => System.Enum.Parse<TEnum>(name).Equals(v))).ToArray();
+        public virtual object[] AllowedValues => AllowedEnumValues.OrderBy(e => e).Select(v => (object)v).ToArray();
         public Dictionary<long, string> AllowedEntries => AllowedEnumValues.Distinct().ToDictionary(v => (long)Convert.ChangeType(v, typeof(long)), v => Enum.GetName(v));
 
         public EnumValueDescription(string name, bool required, bool hidden, TEnum defaultValue, bool flags, bool word, TEnum[] allowedValues)
@@ -68,6 +85,12 @@ namespace Ambermoon.Data.Descriptions
                 int value = DefaultValue;
                 return Unsafe.As<int, TEnum>(ref value).ToString();
             }
+        }
+
+        public EnumValueDescription<TEnum> WithFilteredAllowedValues(Func<object[], object[]> valueFilter, Func<string[], string[]> valueNameFilter)
+        {
+            return new EnumValueDescriptionWithFilteredAllowedValues<TEnum>(Name, Required, Hidden,
+                (TEnum)System.Enum.Parse(typeof(TEnum), DefaultValue.ToString()), Flags, Type == ValueType.Flag16, AllowedEnumValues, valueFilter, valueNameFilter);
         }
     }
 }

@@ -145,7 +145,11 @@ namespace Ambermoon.Data.Descriptions
                 true, true, true, true, false,
                 Use.Byte("X", true, 200),
                 Use.Byte("Y", true, 200),
-                Use.Enum("Direction", false, CharacterDirection.Random),
+                Use.Enum("Direction", false, CharacterDirection.Keep).WithFilteredAllowedValues
+                (
+                    values => values.Distinct().ToArray(),
+                    valueNames => valueNames.Where(name => name != "Random").ToArray()
+                ),
                 Use.HiddenByte(0xff),
                 Use.Enum<TeleportEvent.TransitionType>("Transition", false),
                 Use.Word("MapIndex", true, 1023),
@@ -189,7 +193,11 @@ namespace Ambermoon.Data.Descriptions
             { EventType.Spinner, new EventDescription
             (
                 true, false, true, true, false,
-                Use.Enum("Direction", true, CharacterDirection.Random),
+                Use.Enum("Direction", true, CharacterDirection.Random).WithFilteredAllowedValues
+                (
+                    values => values.Distinct().ToArray(),
+                    valueNames => valueNames.Where(name => name != "Keep").ToArray()
+                ),
                 Use.HiddenByte(),
                 Use.HiddenByte(),
                 Use.HiddenByte(),
