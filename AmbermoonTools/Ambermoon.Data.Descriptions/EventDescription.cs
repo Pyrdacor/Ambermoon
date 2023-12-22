@@ -143,48 +143,48 @@ namespace Ambermoon.Data.Descriptions
             { EventType.Teleport, new EventDescription
             (
                 true, true, true, true, false,
-                Use.Byte("X", true, 200),
-                Use.Byte("Y", true, 200),
-                Use.Enum("Direction", false, CharacterDirection.Keep).WithFilteredAllowedValues
+                Use.Byte(nameof(TeleportEvent.X), true, 200),
+                Use.Byte(nameof(TeleportEvent.Y), true, 200),
+                Use.Enum(nameof(TeleportEvent.Direction), false, CharacterDirection.Keep).WithFilteredAllowedValues
                 (
                     values => values.Distinct().ToArray(),
-                    valueNames => valueNames.Where(name => name != "Random").ToArray()
+                    valueNames => valueNames.Where(name => name != nameof(CharacterDirection.Random)).ToArray()
                 ),
                 Use.HiddenByte(0xff),
-                Use.Enum<TeleportEvent.TransitionType>("Transition", false),
-                Use.Word("MapIndex", true, 1023),
+                Use.Enum<TeleportEvent.TransitionType>(nameof(TeleportEvent.Transition), false),
+                Use.Word(nameof(TeleportEvent.MapIndex), true, 1023),
                 Use.HiddenByte(0x00),
                 Use.HiddenByte(0xff)
             )},
             { EventType.Door, new EventDescription
             (
                 true, false, true, true, false,
-                Use.Byte("LockpickingChanceReduction", false, 100),
-                Use.Byte("DoorIndex", true),
-                Use.Byte("TextIndex", false, 0xff, 0x00, 0xff),
-                Use.Byte("UnlockTextIndex", false, 0xff, 0x00, 0xff),
+                Use.Byte(nameof(DoorEvent.LockpickingChanceReduction), false, 100),
+                Use.Byte(nameof(DoorEvent.DoorIndex), true),
+                Use.Byte(nameof(DoorEvent.TextIndex), false, 0xff, 0x00, 0xff),
+                Use.Byte(nameof(DoorEvent.UnlockTextIndex), false, 0xff, 0x00, 0xff),
                 Use.HiddenByte(0x00),
-                Use.Word("KeyIndex", false),
-                Use.EventIndex("UnlockFailedEventIndex", false)
+                Use.Word(nameof(DoorEvent.KeyIndex), false),
+                Use.EventIndex(nameof(DoorEvent.UnlockFailedEventIndex), false)
             )},
             { EventType.Chest, new EventDescription
             (
                 true, false, true, true, false,
-                Use.Byte("LockpickingChanceReduction", false, 100),
-                Use.Flags8<ChestEvent.ChestFlags>("Flags", false),
-                Use.Byte("TextIndex", false, 0xff, 0x00, 0xff),
-                Use.Byte("ChestIndex", true),
-                Use.Flags8<ChestEvent.ChestLootFlags>("LootFlags", false),
-                Use.Word("KeyIndex", false),
-                Use.EventIndex("UnlockFailedEventIndex", false)
+                Use.Byte(nameof(ChestEvent.LockpickingChanceReduction), false, 100),
+                Use.Flags8<ChestEvent.ChestFlags>(nameof(ChestEvent.Flags), false),
+                Use.Byte(nameof(ChestEvent.TextIndex), false, 0xff, 0x00, 0xff),
+                Use.Byte(nameof(ChestEvent.ChestIndex), true),
+                Use.Flags8<ChestEvent.ChestLootFlags>(nameof(ChestEvent.LootFlags), false),
+                Use.Word(nameof(ChestEvent.KeyIndex), false),
+                Use.EventIndex(nameof(ChestEvent.UnlockFailedEventIndex), false)
             )},
             { EventType.PopupText, new EventDescription
             (
                 true, false, true, true, false,
-                Use.Byte("EventImageIndex", false, 0xff, 0x00, 0xff),
-                Use.Enum("PopupTrigger", false, EventTrigger.Always),
+                Use.Byte(nameof(PopupTextEvent.EventImageIndex), false, 0xff, 0x00, 0xff),
+                Use.Enum(nameof(PopupTextEvent.PopupTrigger), false, EventTrigger.Always),
                 Use.HiddenBool(),
-                Use.Word("TextIndex", true),
+                Use.Word(nameof(PopupTextEvent.TextIndex), true),
                 Use.HiddenByte(),
                 Use.HiddenByte(),
                 Use.HiddenByte(),
@@ -193,10 +193,10 @@ namespace Ambermoon.Data.Descriptions
             { EventType.Spinner, new EventDescription
             (
                 true, false, true, true, false,
-                Use.Enum("Direction", true, CharacterDirection.Random).WithFilteredAllowedValues
+                Use.Enum(nameof(SpinnerEvent.Direction), true, CharacterDirection.Random).WithFilteredAllowedValues
                 (
                     values => values.Distinct().ToArray(),
-                    valueNames => valueNames.Where(name => name != "Keep").ToArray()
+                    valueNames => valueNames.Where(name => name != nameof(CharacterDirection.Keep)).ToArray()
                 ),
                 Use.HiddenByte(),
                 Use.HiddenByte(),
@@ -210,10 +210,10 @@ namespace Ambermoon.Data.Descriptions
             { EventType.Trap, new EventDescription
             (
                 true, true, true, true, false,
-                Use.Enum("Ailment", false, TrapEvent.TrapAilment.None),
-                Use.Enum("Target", true, TrapEvent.TrapTarget.ActivePlayer),
-                Use.Enum("AffectedGenders", false, GenderFlag.Both),
-                Use.Byte("BaseDamage", true),
+                Use.Enum(nameof(TrapEvent.Ailment), false, TrapEvent.TrapAilment.None),
+                Use.Enum(nameof(TrapEvent.Target), true, TrapEvent.TrapTarget.ActivePlayer),
+                Use.Enum(nameof(TrapEvent.AffectedGenders), false, GenderFlag.Both),
+                Use.Byte(nameof(TrapEvent.BaseDamage), true),
                 Use.HiddenByte(),
                 Use.HiddenByte(),
                 Use.HiddenByte(),
@@ -223,35 +223,35 @@ namespace Ambermoon.Data.Descriptions
             { EventType.ChangeBuffs, new EventDescription
             (
                 true, true, true, true, false,
-                Use.Byte("AffectedBuff", false, 6),
-                Use.Bool("Add", false),
+                Use.Byte(nameof(ChangeBuffsEvent.AffectedBuff), false, 6),
+                Use.Bool(nameof(ChangeBuffsEvent.Add), false),
                 Use.HiddenByte(),
-                Use.Conditional<ChangeBuffsEvent>(() => Use.Word("Value", true, 100, 1), changeBuffEvent => changeBuffEvent.Add),
-                Use.Conditional<ChangeBuffsEvent>(() => Use.Word("Duration", true, 180, 1), changeBuffEvent => changeBuffEvent.Add),
+                Use.Conditional<ChangeBuffsEvent>(() => Use.Word(nameof(ChangeBuffsEvent.Value), true, 100, 1), changeBuffEvent => changeBuffEvent.Add),
+                Use.Conditional<ChangeBuffsEvent>(() => Use.Word(nameof(ChangeBuffsEvent.Duration), true, 180, 1), changeBuffEvent => changeBuffEvent.Add),
                 Use.HiddenByte(),
                 Use.HiddenByte()
             )},
             { EventType.Riddlemouth, new EventDescription
             (
                 true, false, true, true, false,
-                Use.Byte("RiddleTextIndex", true),
-                Use.Byte("SolutionTextIndex", true),
+                Use.Byte(nameof(RiddlemouthEvent.RiddleTextIndex), true),
+                Use.Byte(nameof(RiddlemouthEvent.SolutionTextIndex), true),
                 Use.HiddenByte(),
                 Use.HiddenByte(),
                 Use.HiddenByte(),
-                Use.Word("CorrectAnswerDictionaryIndex1", true),
-                Use.Word("CorrectAnswerDictionaryIndex2", false)
+                Use.Word(nameof(RiddlemouthEvent.CorrectAnswerDictionaryIndex1), true),
+                Use.Word(nameof(RiddlemouthEvent.CorrectAnswerDictionaryIndex2), false)
             )},
             { EventType.Reward, new EventDescription
             (
                 true, true, true, true, false,
-                Use.Enum<RewardEvent.RewardType>("TypeOfReward", true),
-                Use.Conditional<RewardEvent>(() => Use.Enum("Operation", true, RewardEvent.RewardOperation.Increase), rewardEvent =>
+                Use.Enum<RewardEvent.RewardType>(nameof(RewardEvent.TypeOfReward), true),
+                Use.Conditional<RewardEvent>(() => Use.Enum(nameof(RewardEvent.Operation), true, RewardEvent.RewardOperation.Increase), rewardEvent =>
                 {
                     return rewardEvent.TypeOfReward != RewardEvent.RewardType.ChangePortrait &&
                            rewardEvent.TypeOfReward != RewardEvent.RewardType.EmpowerSpells;
                 }),
-                Use.Conditional<RewardEvent>(() => Use.Bool("Random", true), rewardEvent =>
+                Use.Conditional<RewardEvent>(() => Use.Bool(nameof(RewardEvent.Random), true), rewardEvent =>
                 {
                     return rewardEvent.TypeOfReward != RewardEvent.RewardType.ChangePortrait &&
                            rewardEvent.TypeOfReward != RewardEvent.RewardType.Conditions &&
@@ -259,13 +259,13 @@ namespace Ambermoon.Data.Descriptions
                            rewardEvent.TypeOfReward != RewardEvent.RewardType.Languages &&
                            rewardEvent.TypeOfReward != RewardEvent.RewardType.UsableSpellTypes;
                 }),
-                Use.Enum("Target", true, RewardEvent.RewardTarget.ActivePlayer),
+                Use.Enum(nameof(RewardEvent.Target), true, RewardEvent.RewardTarget.ActivePlayer),
                 Use.HiddenByte(),
                 Use.Conditional<RewardEvent>
                 (
                     () => Use.WithDisplayMapping<RewardEvent>
                     (
-                        () => Use.Word("RewardTypeValue", false),
+                        () => Use.Word(nameof(RewardEvent.RewardTypeValue), false),
                         (rewardEvent, description) =>
                         {
                             ValueDescription displayDescription = null;
@@ -295,18 +295,18 @@ namespace Ambermoon.Data.Descriptions
                                rewardEvent.TypeOfReward == RewardEvent.RewardType.MaxSkill;
                     }
                 ),
-                Use.Word("Value", false)
+                Use.Word(nameof(RewardEvent.Value), false)
             )},
             { EventType.ChangeTile, new EventDescription
             (
                 true, true, true, true, false,
-                Use.Byte("X", true, 200),
-                Use.Byte("Y", true, 200),
+                Use.Byte(nameof(ChangeTileEvent.X), true, 200),
+                Use.Byte(nameof(ChangeTileEvent.Y), true, 200),
                 Use.HiddenByte(),
                 Use.HiddenByte(),
                 Use.HiddenByte(),
-                Use.Word("FrontTileIndex", true),
-                Use.Word("MapIndex", true, 1023)
+                Use.Word(nameof(ChangeTileEvent.FrontTileIndex), true),
+                Use.Word(nameof(ChangeTileEvent.MapIndex), true, 1023)
             )},
             { EventType.StartBattle, new EventDescription
             (
@@ -317,28 +317,28 @@ namespace Ambermoon.Data.Descriptions
                 Use.HiddenByte(),
                 Use.HiddenByte(),
                 Use.HiddenByte(),
-                Use.Byte("MonsterGroupIndex", true),
+                Use.Byte(nameof(StartBattleEvent.MonsterGroupIndex), true),
                 Use.HiddenByte(),
                 Use.HiddenByte()
             )},
             { EventType.EnterPlace, new EventDescription
             (
                 true, false, true, true, false,
-                Use.Byte("ClosedTextIndex", false, 0xff, 0x00, 0xff),
-                Use.Enum<PlaceType>("PlaceType", true),
-                Use.Byte("OpeningHour", true, 23),
-                Use.Byte("ClosingHour", true, 23),
-                Use.Byte("UsePlaceTextIndex", false, 0xff, 0, 0xff),
-                Use.Word("PlaceIndex", true),
-                Use.Conditional<EnterPlaceEvent>(() => Use.Word("MerchantDataIndex", false), enterPlaceEvent => enterPlaceEvent.PlaceType == PlaceType.Merchant)
+                Use.Byte(nameof(EnterPlaceEvent.ClosedTextIndex), false, 0xff, 0x00, 0xff),
+                Use.Enum<PlaceType>(nameof(EnterPlaceEvent.PlaceType), true),
+                Use.Byte(nameof(EnterPlaceEvent.OpeningHour), true, 23),
+                Use.Byte(nameof(EnterPlaceEvent.ClosingHour), true, 23),
+                Use.Byte(nameof(EnterPlaceEvent.UsePlaceTextIndex), false, 0xff, 0, 0xff),
+                Use.Word(nameof(EnterPlaceEvent.PlaceIndex), true),
+                Use.Conditional<EnterPlaceEvent>(() => Use.Word(nameof(EnterPlaceEvent.MerchantDataIndex), false), enterPlaceEvent => enterPlaceEvent.PlaceType == PlaceType.Merchant)
             )},
             { EventType.Condition, new EventDescription
             (
                 true, true, true, false, false,
-                Use.Enum<ConditionEvent.ConditionType>("TypeOfCondition", true),
-                Use.Byte("Value", true),
+                Use.Enum<ConditionEvent.ConditionType>(nameof(ConditionEvent.TypeOfCondition), true),
+                Use.Byte(nameof(ConditionEvent.Value), true),
                 Use.WithNameIf<ConditionEvent>(
-                    () => Use.Conditional<ConditionEvent>(() => Use.Byte("Count", false), conditionEvent =>
+                    () => Use.Conditional<ConditionEvent>(() => Use.Byte(nameof(ConditionEvent.Count), false), conditionEvent =>
                         conditionEvent.TypeOfCondition == ConditionEvent.ConditionType.ItemOwned ||
                         conditionEvent.TypeOfCondition == ConditionEvent.ConditionType.Attribute ||
                         conditionEvent.TypeOfCondition == ConditionEvent.ConditionType.Skill
@@ -347,8 +347,8 @@ namespace Ambermoon.Data.Descriptions
                         conditionEvent.TypeOfCondition == ConditionEvent.ConditionType.Attribute ||
                         conditionEvent.TypeOfCondition == ConditionEvent.ConditionType.Skill,
                     "Amount"),
-                Use.Conditional<ConditionEvent>(() => Use.Flags16<Condition>("DisallowedAilments", false), conditionEvent => conditionEvent.TypeOfCondition == ConditionEvent.ConditionType.PartyMember),
-                Use.Conditional<ConditionEvent>(() => Use.Word("ObjectIndex", true), conditionEvent =>
+                Use.Conditional<ConditionEvent>(() => Use.Flags16<Condition>(nameof(ConditionEvent.DisallowedAilments), false), conditionEvent => conditionEvent.TypeOfCondition == ConditionEvent.ConditionType.PartyMember),
+                Use.Conditional<ConditionEvent>(() => Use.Word(nameof(ConditionEvent.ObjectIndex), true), conditionEvent =>
                     conditionEvent.TypeOfCondition != ConditionEvent.ConditionType.CanSee &&
                     conditionEvent.TypeOfCondition != ConditionEvent.ConditionType.Eye &&
                     conditionEvent.TypeOfCondition != ConditionEvent.ConditionType.Hand &&
@@ -357,48 +357,48 @@ namespace Ambermoon.Data.Descriptions
                     conditionEvent.TypeOfCondition != ConditionEvent.ConditionType.Levitating &&
                     conditionEvent.TypeOfCondition != ConditionEvent.ConditionType.IsNight
                 ),
-                Use.EventIndex("ContinueIfFalseWithMapEventIndex", false)
+                Use.EventIndex(nameof(ConditionEvent.ContinueIfFalseWithMapEventIndex), false)
             )},
             { EventType.Action, new EventDescription
             (
                 true, true, true, true, false,
-                Use.Enum<ActionEvent.ActionType>("TypeOfAction", true),
-                Use.Byte("Value", true),
-                Use.Conditional<ActionEvent>(() => Use.Byte("Count", false), actionEvent => actionEvent.TypeOfAction == ActionEvent.ActionType.AddItem),
+                Use.Enum<ActionEvent.ActionType>(nameof(ActionEvent.TypeOfAction), true),
+                Use.Byte(nameof(ActionEvent.Value), true),
+                Use.Conditional<ActionEvent>(() => Use.Byte(nameof(ActionEvent.Count), false), actionEvent => actionEvent.TypeOfAction == ActionEvent.ActionType.AddItem),
                 Use.HiddenByte(),
                 Use.HiddenByte(),
-                Use.Word("ObjectIndex", true),
+                Use.Word(nameof(ActionEvent.ObjectIndex), true),
                 Use.HiddenByte(),
                 Use.HiddenByte()
             )},
             { EventType.Dice100Roll, new EventDescription
             (
                 true, true, true, false, false,
-                Use.Byte("Chance", true, 100, 1, 50),
+                Use.Byte(nameof(Dice100RollEvent.Chance), true, 100, 1, 50),
                 Use.HiddenByte(),
                 Use.HiddenByte(),
                 Use.HiddenByte(),
                 Use.HiddenByte(),
                 Use.HiddenByte(),
                 Use.HiddenByte(),
-                Use.EventIndex("ContinueIfFalseWithMapEventIndex", false)
+                Use.EventIndex(nameof(Dice100RollEvent.ContinueIfFalseWithMapEventIndex), false)
             )},
             { EventType.Conversation, new EventDescription
             (
                 false, true, true, false, true,
-                Use.Enum("Interaction", true, ConversationEvent.InteractionType.Talk),
+                Use.Enum(nameof(ConversationEvent.Interaction), true, ConversationEvent.InteractionType.Talk),
                 Use.HiddenByte(),
                 Use.HiddenByte(),
                 Use.HiddenByte(),
                 Use.HiddenByte(),
-                Use.Word("Value", false),
+                Use.Word(nameof(ConversationEvent.Value), false),
                 Use.HiddenByte(),
                 Use.HiddenByte()
             )},
             { EventType.PrintText, new EventDescription
             (
                 false, true, false, false, false,
-                Use.Byte("NPCTextIndex", true),
+                Use.Byte(nameof(PrintTextEvent.NPCTextIndex), true),
                 Use.HiddenByte(),
                 Use.HiddenByte(),
                 Use.HiddenByte(),
@@ -411,31 +411,31 @@ namespace Ambermoon.Data.Descriptions
             { EventType.Create, new EventDescription
             (
                 false, true, false, false, false,
-                Use.Enum("TypeOfCreation", false, CreateEvent.CreateType.Item),
+                Use.Enum(nameof(CreateEvent.TypeOfCreation), false, CreateEvent.CreateType.Item),
                 Use.HiddenByte(),
                 Use.HiddenByte(),
                 Use.HiddenByte(),
                 Use.HiddenByte(),
-                Use.Word("Amount", false, 0xffff, 1, 1),
-                Use.Word("ItemIndex", false)
+                Use.Word(nameof(CreateEvent.Amount), false, 0xffff, 1, 1),
+                Use.Word(nameof(CreateEvent.ItemIndex), false)
             )},
             { EventType.Decision, new EventDescription
             (
                 true, false, true, true, false,
-                Use.Byte("TextIndex", true),
+                Use.Byte(nameof(DecisionEvent.TextIndex), true),
                 Use.HiddenByte(),
                 Use.HiddenByte(),
                 Use.HiddenByte(),
                 Use.HiddenByte(),
                 Use.HiddenByte(),
                 Use.HiddenByte(),
-                Use.EventIndex("NoEventIndex", false)
+                Use.EventIndex(nameof(DecisionEvent.NoEventIndex), false)
             )},
             { EventType.ChangeMusic, new EventDescription
             (
                 true, true, true, true, false,
-                Use.Word("MusicIndex", true),
-                Use.Byte("Volume", false, 255, 0, 255, true),
+                Use.Word(nameof(ChangeMusicEvent.MusicIndex), true),
+                Use.Byte(nameof(ChangeMusicEvent.Volume), false, 255, 0, 255, true),
                 Use.HiddenByte(),
                 Use.HiddenByte(),
                 Use.HiddenByte(),
@@ -459,13 +459,13 @@ namespace Ambermoon.Data.Descriptions
             { EventType.Spawn, new EventDescription
             (
                 true, true, true, true, false,
-                Use.Byte("X", true, 200),
-                Use.Byte("Y", true, 200),
-                Use.Enum("TravelType", true, TravelType.Horse,
+                Use.Byte(nameof(SpawnEvent.X), true, 200),
+                Use.Byte(nameof(SpawnEvent.Y), true, 200),
+                Use.Enum(nameof(SpawnEvent.TravelType), true, TravelType.Horse,
                     TravelType.Horse, TravelType.Raft, TravelType.Ship, TravelType.SandLizard, TravelType.SandShip),
                 Use.HiddenByte(),
                 Use.HiddenByte(),
-                Use.Word("MapIndex", true, 1023),
+                Use.Word(nameof(SpawnEvent.MapIndex), true, 1023),
                 Use.HiddenByte(),
                 Use.HiddenByte()
             )},
@@ -485,9 +485,9 @@ namespace Ambermoon.Data.Descriptions
             { EventType.RemovePartyMember, new EventDescription
             (
                 true, true, true, true, false,
-                Use.Enum("Character", true, PartyMembers.Netsrak, Enum.GetValues<PartyMembers>().Skip(2)), // Skip "None" and "Hero"
-                Use.Byte("EquipmentChest", true),
-                Use.Byte("InventoryChest", true),
+                Use.Enum(nameof(RemovePartyMemberEvent.CharacterIndex), true, PartyMembers.Netsrak, Enum.GetValues<PartyMembers>().Skip(2)), // Skip "None" and "Hero"
+                Use.Byte(nameof(RemovePartyMemberEvent.ChestIndexEquipment), true),
+                Use.Byte(nameof(RemovePartyMemberEvent.ChestIndexInventory), true),
                 Use.HiddenByte(),
                 Use.HiddenByte(),
                 Use.HiddenWord(),
@@ -501,7 +501,7 @@ namespace Ambermoon.Data.Descriptions
                 Use.HiddenByte(),
                 Use.HiddenByte(),
                 Use.HiddenByte(),
-                Use.Word("Milliseconds", true),
+                Use.Word(nameof(DelayEvent.Milliseconds), true),
                 Use.HiddenWord()
             )}
         };
