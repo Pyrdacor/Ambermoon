@@ -226,16 +226,7 @@ namespace AmbermoonUIEventEditor
             {
                 string GetValue(ValueDescription valueDescription)
                 {
-                    var value = Event.GetType().GetProperty(valueDescription.Name)?.GetValue(Event);
-
-                    if (valueDescription.Type == Ambermoon.Data.Descriptions.ValueType.Enum)
-                    {
-                        var enumDesc = (valueDescription as IEnumValueDescription)!;
-                        int index = enumDesc.AllowedValues.Cast<int>().ToList().IndexOf(Convert.ToInt32(value));
-                        value = enumDesc.AllowedValueNames[index];
-                    }
-
-                    return value != null ? valueDescription.AsString(value) : valueDescription.DefaultValueText;
+                    return EventDescriptions.ValueToString(Event, valueDescription);
                 }
 
                 return EventDescription.ValueDescriptions.Where(d => !d.Hidden).Select(d =>

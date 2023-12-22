@@ -153,8 +153,8 @@ namespace AmbermoonUIEventEditor
                 Controls.Add(label);
                 var dropdown = new ComboBox();
                 dropdown.DropDownStyle = ComboBoxStyle.DropDownList;
-                dropdown.Items.AddRange(enumDesc.AllowedValueNames.Select((name, index) => $"{(int)enumDesc.AllowedValues[index]}: {name}").ToArray());
-                dropdown.SelectedIndex = enumDesc.AllowedValues.Cast<int>().ToList().IndexOf(Convert.ToInt32(defaultValue));
+                dropdown.Items.AddRange(enumDesc.AllowedValueNames.Select((name, index) => $"{Convert.ToInt32(enumDesc.AllowedValues[index])}: {name}").ToArray());
+                dropdown.SelectedIndex = enumDesc.AllowedValues.Select(Convert.ToInt32).ToList().IndexOf(Convert.ToInt32(defaultValue));
                 dropdown.Location = new Point(label.Bounds.Right + 4, y);
                 dropdown.Width = 200;
                 dropdown.Tag = valueDescription;

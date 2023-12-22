@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.RegularExpressions;
 
 namespace Ambermoon.Data.Descriptions
 {
@@ -51,7 +52,7 @@ namespace Ambermoon.Data.Descriptions
         private static string ToString(Type type, Event @event, ValueDescription value)
         {
             if (value.DisplayMapping != null)
-                return value.DisplayMapping(@event, value);
+                return value.DisplayMapping(@event, value) + ",";
 
             var property = type.GetProperty(value.Name).GetValue(@event);
 
@@ -83,11 +84,29 @@ namespace Ambermoon.Data.Descriptions
             }
             else
             {
-                if (value is IEnumValueDescription)
-                    return $" {value.DisplayName}={System.Enum.ToObject(value.GetType().GetGenericArguments()[0], property)},";
+                if (value is IEnumValueDescription enumDesc)
+                {
+                    int index = enumDesc.AllowedValues.Select(Convert.ToInt32).ToList().IndexOf(Convert.ToInt32(property));
+                    object enumValue;
+                    if (index >= 0 && index < enumDesc.AllowedValueNames.Length)
+                        enumValue = enumDesc.AllowedValueNames[index];
+                    else
+                        enumValue = System.Enum.ToObject(value.GetType().GetGenericArguments()[0], property);
+                    return $" {value.DisplayName}={enumValue},";
+                }
 
                 return $" {value.DisplayName}={property},";
             }
+        }
+
+        public static string ValueToString(Event @event, ValueDescription value)
+        {
+            var result = ToString(@event.GetType(), @event, value).TrimEnd(',');
+
+            if (result.Contains('='))
+                return Regex.Match(result, "([^=]*=)(.*)").Groups[^1].Value;
+
+            return result;
         }
 
         public static string ToString(Event @event, int identation, string subIdentation = "  ")
@@ -223,7 +242,11 @@ namespace Ambermoon.Data.Descriptions
             { EventType.ChangeBuffs, new EventDescription
             (
                 true, true, true, true, false,
-                Use.Byte(nameof(ChangeBuffsEvent.AffectedBuff), false, 6),
+                Use.WithDisplayMapping<ChangeBuffsEvent>
+                (
+                    () => Use.Byte(nameof(ChangeBuffsEvent.AffectedBuff), false, 6),
+                    (changeBuffsEvent, valueDescription) => (int)changeBuffsEvent.AffectedBuff == 6 ? "All" : EventDescriptions.ToString(changeBuffsEvent, valueDescription)
+                ),
                 Use.Bool(nameof(ChangeBuffsEvent.Add), false),
                 Use.HiddenByte(),
                 Use.Conditional<ChangeBuffsEvent>(() => Use.Word(nameof(ChangeBuffsEvent.Value), true, 100, 1), changeBuffEvent => changeBuffEvent.Add),
