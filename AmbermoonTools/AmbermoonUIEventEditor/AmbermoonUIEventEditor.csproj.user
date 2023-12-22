@@ -4,6 +4,9 @@
     <Compile Update="EventBrowserControl.cs">
       <SubType>UserControl</SubType>
     </Compile>
+    <Compile Update="EventEditForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
     <Compile Update="EventEditorControl.cs">
       <SubType>UserControl</SubType>
     </Compile>

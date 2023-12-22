@@ -31,11 +31,11 @@
             eventEditor = new AmbermoonUIEventEditor.EventEditorControl();
             SuspendLayout();
             // 
-            // eventEditorControl1
+            // eventEditor
             // 
             eventEditor.Dock = DockStyle.Fill;
             eventEditor.Location = new Point(0, 0);
-            eventEditor.Name = "eventEditorControl1";
+            eventEditor.Name = "eventEditor";
             eventEditor.Size = new Size(800, 450);
             eventEditor.TabIndex = 0;
             // 
@@ -45,8 +45,9 @@
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(800, 450);
             Controls.Add(eventEditor);
+            MinimumSize = new Size(400, 400);
             Name = "EventEditorForm";
-            Text = "EventEditorForm";
+            Text = "Event Editor";
             ResumeLayout(false);
         }
 

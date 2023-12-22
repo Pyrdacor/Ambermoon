@@ -497,5 +497,34 @@ namespace Ambermoon.Data.Descriptions
                 Use.HiddenWord()
             )}
         };
+
+        public static Dictionary<EventType, Func<Event>> EventFactories { get; } = new Dictionary<EventType, Func<Event>>
+        {
+            { EventType.Teleport, () => new TeleportEvent() },
+            { EventType.Door, () => new DoorEvent() },
+            { EventType.Chest, () => new ChestEvent() },
+            { EventType.PopupText, () => new PopupTextEvent() },
+            { EventType.Spinner, () => new SpinnerEvent() },
+            { EventType.Trap, () => new TrapEvent() },
+            { EventType.ChangeBuffs, () => new ChangeBuffsEvent() },
+            { EventType.Riddlemouth, () => new RiddlemouthEvent() },
+            { EventType.Reward, () => new RewardEvent() },
+            { EventType.ChangeTile, () => new ChangeTileEvent() },
+            { EventType.StartBattle, () => new StartBattleEvent() },
+            { EventType.EnterPlace, () => new EnterPlaceEvent() },
+            { EventType.Condition, () => new ConditionEvent() },            
+            { EventType.Action, () => new ActionEvent() },
+            { EventType.Dice100Roll, () => new Dice100RollEvent() },
+            { EventType.Conversation, () => new ConversationEvent() },
+            { EventType.PrintText, () => new PrintTextEvent() },
+            { EventType.Create, () => new CreateEvent() },
+            { EventType.Decision, () => new DecisionEvent() },
+            { EventType.ChangeMusic, () => new ChangeMusicEvent() },
+            { EventType.Exit, () => new ExitEvent() },
+            { EventType.Spawn, () => new SpawnEvent() },
+            { EventType.Interact, () => new InteractEvent() },
+            { EventType.RemovePartyMember, () => new RemovePartyMemberEvent() },
+            { EventType.Delay, () => new DelayEvent() }
+        };
     }
 }

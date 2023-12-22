@@ -47,6 +47,7 @@
             toolStripSeparator1 = new ToolStripSeparator();
             exitToolStripMenuItem = new ToolStripMenuItem();
             toolsToolStripMenuItem = new ToolStripMenuItem();
+            eventEditorToolStripMenuItem = new ToolStripMenuItem();
             ((System.ComponentModel.ISupportInitialize)splitContainer1).BeginInit();
             splitContainer1.Panel1.SuspendLayout();
             splitContainer1.Panel2.SuspendLayout();
@@ -68,8 +69,8 @@
             // splitContainer1.Panel2
             // 
             splitContainer1.Panel2.Controls.Add(view3D);
-            splitContainer1.Size = new Size(800, 327);
-            splitContainer1.SplitterDistance = 391;
+            splitContainer1.Size = new Size(1316, 615);
+            splitContainer1.SplitterDistance = 642;
             splitContainer1.TabIndex = 0;
             // 
             // view2D
@@ -79,7 +80,7 @@
             view2D.Dock = DockStyle.Fill;
             view2D.Location = new Point(0, 0);
             view2D.Name = "view2D";
-            view2D.Size = new Size(391, 327);
+            view2D.Size = new Size(642, 615);
             view2D.TabIndex = 1;
             view2D.Paint += view2D_Paint;
             // 
@@ -93,7 +94,7 @@
             view3D.Location = new Point(0, 0);
             view3D.Name = "view3D";
             view3D.Profile = OpenTK.Windowing.Common.ContextProfile.Compatability;
-            view3D.Size = new Size(405, 327);
+            view3D.Size = new Size(670, 615);
             view3D.TabIndex = 0;
             view3D.Text = "glControl1";
             view3D.Paint += view3D_Paint;
@@ -111,9 +112,9 @@
             // 
             statusStrip1.ImageScalingSize = new Size(20, 20);
             statusStrip1.Items.AddRange(new ToolStripItem[] { statusPosition });
-            statusStrip1.Location = new Point(0, 355);
+            statusStrip1.Location = new Point(0, 643);
             statusStrip1.Name = "statusStrip1";
-            statusStrip1.Size = new Size(800, 26);
+            statusStrip1.Size = new Size(1316, 26);
             statusStrip1.TabIndex = 1;
             statusStrip1.Text = "statusStrip1";
             // 
@@ -127,14 +128,14 @@
             // 
             initTimer.Tick += initTimer_Tick;
             // 
-            // settingsControl1
+            // settingsControl
             // 
             settingsControl.Dock = DockStyle.Bottom;
-            settingsControl.Location = new Point(0, 381);
+            settingsControl.Location = new Point(0, 669);
             settingsControl.MaximumSize = new Size(8000, 172);
             settingsControl.MinimumSize = new Size(0, 172);
-            settingsControl.Name = "settingsControl1";
-            settingsControl.Size = new Size(800, 172);
+            settingsControl.Name = "settingsControl";
+            settingsControl.Size = new Size(1316, 172);
             settingsControl.TabIndex = 2;
             // 
             // animationTimer
@@ -149,7 +150,7 @@
             menuStrip1.Items.AddRange(new ToolStripItem[] { fileToolStripMenuItem, toolsToolStripMenuItem });
             menuStrip1.Location = new Point(0, 0);
             menuStrip1.Name = "menuStrip1";
-            menuStrip1.Size = new Size(800, 28);
+            menuStrip1.Size = new Size(1316, 28);
             menuStrip1.TabIndex = 3;
             menuStrip1.Text = "menuStrip1";
             // 
@@ -163,51 +164,62 @@
             // newToolStripMenuItem
             // 
             newToolStripMenuItem.Name = "newToolStripMenuItem";
-            newToolStripMenuItem.Size = new Size(224, 26);
+            newToolStripMenuItem.Size = new Size(154, 26);
             newToolStripMenuItem.Text = "New";
+            newToolStripMenuItem.Click += newToolStripMenuItem_Click;
             // 
             // openToolStripMenuItem
             // 
             openToolStripMenuItem.Name = "openToolStripMenuItem";
-            openToolStripMenuItem.Size = new Size(224, 26);
+            openToolStripMenuItem.Size = new Size(154, 26);
             openToolStripMenuItem.Text = "Open";
             openToolStripMenuItem.Click += openToolStripMenuItem_Click;
             // 
             // saveToolStripMenuItem
             // 
             saveToolStripMenuItem.Name = "saveToolStripMenuItem";
-            saveToolStripMenuItem.Size = new Size(224, 26);
+            saveToolStripMenuItem.Size = new Size(154, 26);
             saveToolStripMenuItem.Text = "Save";
+            saveToolStripMenuItem.Click += saveToolStripMenuItem_Click;
             // 
             // saveAsToolStripMenuItem
             // 
             saveAsToolStripMenuItem.Name = "saveAsToolStripMenuItem";
-            saveAsToolStripMenuItem.Size = new Size(224, 26);
+            saveAsToolStripMenuItem.Size = new Size(154, 26);
             saveAsToolStripMenuItem.Text = "Save as ...";
+            saveAsToolStripMenuItem.Click += saveAsToolStripMenuItem_Click;
             // 
             // toolStripSeparator1
             // 
             toolStripSeparator1.Name = "toolStripSeparator1";
-            toolStripSeparator1.Size = new Size(221, 6);
+            toolStripSeparator1.Size = new Size(151, 6);
             // 
             // exitToolStripMenuItem
             // 
             exitToolStripMenuItem.Name = "exitToolStripMenuItem";
-            exitToolStripMenuItem.Size = new Size(224, 26);
+            exitToolStripMenuItem.Size = new Size(154, 26);
             exitToolStripMenuItem.Text = "Exit";
             exitToolStripMenuItem.Click += exitToolStripMenuItem_Click;
             // 
             // toolsToolStripMenuItem
             // 
+            toolsToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { eventEditorToolStripMenuItem });
             toolsToolStripMenuItem.Name = "toolsToolStripMenuItem";
             toolsToolStripMenuItem.Size = new Size(58, 24);
             toolsToolStripMenuItem.Text = "Tools";
+            // 
+            // eventEditorToolStripMenuItem
+            // 
+            eventEditorToolStripMenuItem.Name = "eventEditorToolStripMenuItem";
+            eventEditorToolStripMenuItem.Size = new Size(172, 26);
+            eventEditorToolStripMenuItem.Text = "Event Editor";
+            eventEditorToolStripMenuItem.Click += eventEditorToolStripMenuItem_Click;
             // 
             // MainForm
             // 
             AutoScaleDimensions = new SizeF(8F, 20F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(800, 553);
+            ClientSize = new Size(1316, 841);
             Controls.Add(splitContainer1);
             Controls.Add(statusStrip1);
             Controls.Add(menuStrip1);
@@ -253,5 +265,6 @@
         private ToolStripSeparator toolStripSeparator1;
         private ToolStripMenuItem exitToolStripMenuItem;
         private ToolStripMenuItem toolsToolStripMenuItem;
+        private ToolStripMenuItem eventEditorToolStripMenuItem;
     }
 }

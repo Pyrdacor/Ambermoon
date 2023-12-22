@@ -28,39 +28,38 @@
         /// </summary>
         private void InitializeComponent()
         {
-            this.eventBrowser = new AmbermoonUIEventEditor.EventBrowserControl();
-            this.eventView = new AmbermoonUIEventEditor.EventViewControl();
-            this.SuspendLayout();
+            eventBrowser = new EventBrowserControl();
+            eventView = new EventViewControl();
+            SuspendLayout();
             // 
             // eventBrowser
             // 
-            this.eventBrowser.Dock = System.Windows.Forms.DockStyle.Left;
-            this.eventBrowser.Location = new System.Drawing.Point(0, 0);
-            this.eventBrowser.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
-            this.eventBrowser.Name = "eventBrowser";
-            this.eventBrowser.Size = new System.Drawing.Size(161, 338);
-            this.eventBrowser.TabIndex = 0;
-            this.eventBrowser.EventDoubleClicked += new System.Action<Ambermoon.Data.EventType, Ambermoon.Data.Descriptions.EventDescription>(this.eventBrowser_EventDoubleClicked);
+            eventBrowser.Dock = DockStyle.Left;
+            eventBrowser.Location = new Point(0, 0);
+            eventBrowser.Name = "eventBrowser";
+            eventBrowser.Size = new Size(184, 451);
+            eventBrowser.TabIndex = 0;
+            eventBrowser.EventDoubleClicked += eventBrowser_EventDoubleClicked;
             // 
             // eventView
             // 
-            this.eventView.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.eventView.Location = new System.Drawing.Point(161, 0);
-            this.eventView.Name = "eventView";
-            this.eventView.Size = new System.Drawing.Size(539, 338);
-            this.eventView.TabIndex = 1;
+            eventView.AutoScroll = true;
+            eventView.Dock = DockStyle.Fill;
+            eventView.Location = new Point(184, 0);
+            eventView.Margin = new Padding(3, 4, 3, 4);
+            eventView.Name = "eventView";
+            eventView.Size = new Size(616, 451);
+            eventView.TabIndex = 1;
             // 
             // EventEditorControl
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.Controls.Add(this.eventView);
-            this.Controls.Add(this.eventBrowser);
-            this.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
-            this.Name = "EventEditorControl";
-            this.Size = new System.Drawing.Size(700, 338);
-            this.ResumeLayout(false);
-
+            AutoScaleDimensions = new SizeF(8F, 20F);
+            AutoScaleMode = AutoScaleMode.Font;
+            Controls.Add(eventView);
+            Controls.Add(eventBrowser);
+            Name = "EventEditorControl";
+            Size = new Size(800, 451);
+            ResumeLayout(false);
         }
 
         #endregion

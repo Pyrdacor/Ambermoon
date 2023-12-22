@@ -1,4 +1,5 @@
 ﻿using Ambermoon.Data;
+using Ambermoon.Data.Descriptions;
 
 namespace AmbermoonUIEventEditor
 {
@@ -9,14 +10,24 @@ namespace AmbermoonUIEventEditor
             InitializeComponent();
         }
 
+        private Map? map;
+
         public void InitMap(Map map)
         {
+            this.map = map;
             eventView.InitMap(map);
         }
 
-        private void eventBrowser_EventDoubleClicked(EventType arg1, Ambermoon.Data.Descriptions.EventDescription arg2)
+        private void eventBrowser_EventDoubleClicked(EventType eventType, EventDescription desc)
         {
-            eventView.AddBlock(new TeleportEvent() { Type = EventType.Teleport }, 0);
+            var @event = EventDescriptions.EventFactories[eventType]();
+            @event.Type = eventType;
+            var newEventForm = new EventEditForm(true, @event, map?.Events ?? new List<Event>());
+
+            if (newEventForm.ShowDialog() == DialogResult.OK)
+            {
+                eventView.AddBlock(@event);
+            }            
         }
     }
 }

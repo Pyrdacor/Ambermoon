@@ -97,6 +97,7 @@ namespace Ambermoon3DMapEditor
 
         #region UI
         private Bitmap mapView2D = new(1, 1);
+        private EventEditorForm? eventEditor;
         #endregion
 
         public MainForm()
@@ -257,6 +258,7 @@ namespace Ambermoon3DMapEditor
 
             Draw2DViewToImage();
             UpdateModelView();
+            eventEditor?.InitMap(map!);
         }
 
         private void InitSky(Map map)
@@ -303,7 +305,7 @@ namespace Ambermoon3DMapEditor
                 var wallColors = palettes[paletteIndex].Colors;
                 wallColors[labdata.CeilingColorIndex] = Color.Transparent;
                 wallPalette = new Palette(wallColors);
-                
+
                 for (int i = 0; i < labdata.WallGraphics.Count; i++)
                 {
                     if (labdata.WallGraphics[i].Data.Contains(labdata.CeilingColorIndex))
@@ -388,7 +390,7 @@ namespace Ambermoon3DMapEditor
             GL.Ortho(0, view3D.Width, view3D.Height, 0, -1, 1);
             GL.MatrixMode(MatrixMode.Modelview);
             GL.PushMatrix();
-            GL.LoadIdentity();            
+            GL.LoadIdentity();
 
             GL.Color4(Color4.White);
             skyTextureAtlas?.Bind();
@@ -765,9 +767,7 @@ namespace Ambermoon3DMapEditor
             // TODO
             if (e.KeyCode == Keys.F5)
             {
-                var foo = new EventEditorForm();
-                foo.Show();
-                foo.InitMap(map!);
+                ShowEventEditor();
             }
 
             pressedKeys[e.KeyValue] = true;
@@ -1367,6 +1367,52 @@ namespace Ambermoon3DMapEditor
 
             if (openMapForm.ShowDialog() == DialogResult.OK && openMapForm.SelectedMap != null)
                 LoadMap(openMapForm.SelectedMap);
+        }
+
+        private void newToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            // TODO
+            NotImplemented();
+        }
+
+        private void saveToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            // TODO
+            NotImplemented();
+        }
+
+        private void saveAsToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            // TODO
+            NotImplemented();
+        }
+
+        private void NotImplemented()
+        {
+            MessageBox.Show(this, "Not implemented yet :(");
+        }
+
+        private void eventEditorToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            ShowEventEditor();
+        }
+
+        private void ShowEventEditor()
+        {
+            if (eventEditor?.Visible != true)
+            {
+                eventEditor ??= new EventEditorForm();
+                eventEditor.FormClosing += EventEditor_FormClosing;
+                eventEditor.Show();
+            }
+
+            eventEditor.InitMap(map!);
+        }
+
+        private void EventEditor_FormClosing(object? sender, FormClosingEventArgs e)
+        {
+            eventEditor!.Hide();
+            e.Cancel = true;
         }
     }
 }

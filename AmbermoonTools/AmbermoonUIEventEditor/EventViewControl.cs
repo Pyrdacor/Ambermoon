@@ -468,6 +468,7 @@ namespace AmbermoonUIEventEditor
             eventList.Clear();
             events.Clear();
             eventBlocks.Clear();
+            eventBlockColumns.Clear();
             EventBlock.DraggedEventBlock?.MouseUp();
             Refresh();
             eventList.AddRange(map.EventList);
