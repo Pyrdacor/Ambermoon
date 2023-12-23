@@ -1418,7 +1418,7 @@ namespace Ambermoon3DMapEditor
         {
             var wallGraphicList = new List<Bitmap>(wallGraphics);
             var objectGraphicList = new List<List<Bitmap>>(objectGraphics.Select(g => g.ToList()));
-            new AssetForm(wallGraphicList, objectGraphicList).ShowDialog(this);
+            new AssetForm(wallGraphicList, objectGraphicList, labdata!.Walls, labdata.Objects, palettes[paletteIndex]).ShowDialog(this);
         }
     }
 }
