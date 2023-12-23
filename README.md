@@ -33,6 +33,11 @@ Version | Language | Type | Download | Release date
 
 Thanks to Wepl we now have a working WHDLoad slave for Ambermoon 1.16 and above. http://www.whdload.de/games/Ambermoon.html
 
+Version | Language | Download | Release date
+--- | --- | --- | ---
+1.19 | English | [link](https://github.com/Pyrdacor/Ambermoon/raw/master/Disks/English/Ambermoon-1_19-English-WHDLoad.lha) | 23-12-2023
+1.19 | German | [link](https://github.com/Pyrdacor/Ambermoon/raw/master/Disks/German/Ambermoon-1_19-German-WHDLoad.lha) | 23-12-2023
+1.19 | French | [link](https://github.com/Pyrdacor/Ambermoon/raw/master/Disks/French/Ambermoon-1_19-French-WHDLoad.lha) | 23-12-2023
 
 ### Patches
 
