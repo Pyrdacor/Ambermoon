@@ -44,6 +44,22 @@ namespace Ambermoon.Data.Descriptions
 
     public static class EventDescriptions
     {
+        public static bool IsBranchEvent(Event @event)
+        {
+            return @event.Type == EventType.Condition || @event.Type == EventType.Decision || @event.Type == EventType.Dice100Roll;
+        }
+
+        public static uint GetBranchEventIndex(Event branchEvent)
+        {
+            return branchEvent switch
+            {
+                ConditionEvent c => c.ContinueIfFalseWithMapEventIndex,
+                DecisionEvent d => d.NoEventIndex,
+                Dice100RollEvent d => d.ContinueIfFalseWithMapEventIndex,
+                _ => 0xffff
+            };
+        }
+
         internal static string ToString(Event @event, ValueDescription value)
         {
             return ToString(@event.GetType(), @event, value);

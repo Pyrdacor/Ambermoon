@@ -48,6 +48,7 @@
             exitToolStripMenuItem = new ToolStripMenuItem();
             toolsToolStripMenuItem = new ToolStripMenuItem();
             eventEditorToolStripMenuItem = new ToolStripMenuItem();
+            assetsToolStripMenuItem = new ToolStripMenuItem();
             ((System.ComponentModel.ISupportInitialize)splitContainer1).BeginInit();
             splitContainer1.Panel1.SuspendLayout();
             splitContainer1.Panel2.SuspendLayout();
@@ -203,7 +204,7 @@
             // 
             // toolsToolStripMenuItem
             // 
-            toolsToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { eventEditorToolStripMenuItem });
+            toolsToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { eventEditorToolStripMenuItem, assetsToolStripMenuItem });
             toolsToolStripMenuItem.Name = "toolsToolStripMenuItem";
             toolsToolStripMenuItem.Size = new Size(58, 24);
             toolsToolStripMenuItem.Text = "Tools";
@@ -211,9 +212,16 @@
             // eventEditorToolStripMenuItem
             // 
             eventEditorToolStripMenuItem.Name = "eventEditorToolStripMenuItem";
-            eventEditorToolStripMenuItem.Size = new Size(172, 26);
+            eventEditorToolStripMenuItem.Size = new Size(224, 26);
             eventEditorToolStripMenuItem.Text = "Event Editor";
             eventEditorToolStripMenuItem.Click += eventEditorToolStripMenuItem_Click;
+            // 
+            // assetsToolStripMenuItem
+            // 
+            assetsToolStripMenuItem.Name = "assetsToolStripMenuItem";
+            assetsToolStripMenuItem.Size = new Size(224, 26);
+            assetsToolStripMenuItem.Text = "Assets";
+            assetsToolStripMenuItem.Click += assetsToolStripMenuItem_Click;
             // 
             // MainForm
             // 
@@ -266,5 +274,6 @@
         private ToolStripMenuItem exitToolStripMenuItem;
         private ToolStripMenuItem toolsToolStripMenuItem;
         private ToolStripMenuItem eventEditorToolStripMenuItem;
+        private ToolStripMenuItem assetsToolStripMenuItem;
     }
 }

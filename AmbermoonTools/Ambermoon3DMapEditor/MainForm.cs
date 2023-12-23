@@ -2,7 +2,6 @@ using Ambermoon;
 using Ambermoon.Data;
 using Ambermoon.Data.Enumerations;
 using Ambermoon.Data.Legacy;
-using Ambermoon.Data.Legacy.ExecutableData;
 using OpenTK.Graphics.OpenGL;
 using OpenTK.Mathematics;
 using Color = System.Drawing.Color;
@@ -1413,6 +1412,13 @@ namespace Ambermoon3DMapEditor
         {
             eventEditor!.Hide();
             e.Cancel = true;
+        }
+
+        private void assetsToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            var wallGraphicList = new List<Bitmap>(wallGraphics);
+            var objectGraphicList = new List<List<Bitmap>>(objectGraphics.Select(g => g.ToList()));
+            new AssetForm(wallGraphicList, objectGraphicList).ShowDialog(this);
         }
     }
 }

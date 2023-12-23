@@ -6,9 +6,14 @@ using Size = System.Drawing.Size;
 
 namespace AmbermoonUIEventEditor
 {
+    // TODO: Branch parent must not be allowed to be placed in a child branch (any depth).
+    // Maybe disallow movement in any other column until the branch child is disconnected.
+    // Maybe disallow branch child movement to other columns as well.
+    // TODO: Allow easy cloning of blocks and columns. Maybe only chain columns.
+    // TODO: Disallow block deletion if there are branch links, if it is the chain start, etc.
     public partial class EventViewControl : Panel
     {
-        private class DropRequestResult
+        internal class DropRequestResult
         {
             public bool Allow { get; set; }
             public int X { get; set; }
@@ -17,7 +22,7 @@ namespace AmbermoonUIEventEditor
             public int SmallY { get; set; }
         }
 
-        private class EventBlock
+        internal class EventBlock
         {
             static EventBlock()
             {
@@ -33,7 +38,7 @@ namespace AmbermoonUIEventEditor
                 };
             }
 
-            public EventBlock(EventViewControl parent, Rectangle area, Point smallPosition, Event @event, List<Event> eventList, List<Event> events)
+            public EventBlock(EventViewControl parent, Rectangle area, Point smallPosition, Event @event, List<Event> eventList, List<Event> events, EventBlock? branchChild = null, EventBlock? branchParent = null)
             {
                 this.area = area;
                 this.smallPosition = smallPosition;
@@ -41,6 +46,8 @@ namespace AmbermoonUIEventEditor
                 this.parent = parent;
                 this.eventList = eventList;
                 this.events = events;
+                this.branchChild = branchChild;
+                this.branchParent = branchParent;
             }
 
             private static readonly Color ChainStartColor = Color.FromArgb(0xcc, 0x44, 0x33);
@@ -57,7 +64,10 @@ namespace AmbermoonUIEventEditor
             private Point smallPosition;
             private readonly List<Event> eventList;
             private readonly List<Event> events;
+            private readonly EventBlock? branchChild;
+            private readonly EventBlock? branchParent;
 
+            public static EventBlock? SelectedEventBlock { get; private set; } = null;
             public static EventBlock? DraggedEventBlock { get; private set; } = null;
             public static Point? DraggedEventBlockLocation => draggedBlockRenderArea?.Location;
             public Rectangle Area => Zoom(UnzoomedArea, true);
@@ -144,6 +154,15 @@ namespace AmbermoonUIEventEditor
                     if (dropResult?.Allow == true)
                     {
                         MoveTo(dropResult.X, dropResult.Y, dropResult.SmallX, dropResult.SmallY);
+
+                        if (SelectedEventBlock != this)
+                            SelectedEventBlock = this;
+
+                        RedrawRequested?.Invoke();
+                    }
+                    else if (SelectedEventBlock != this)
+                    {
+                        SelectedEventBlock = this;
                         RedrawRequested?.Invoke();
                     }
 
@@ -162,7 +181,7 @@ namespace AmbermoonUIEventEditor
 
             public bool TestMouseDown(int x, int y)
             {
-                if (Area.Contains(x, y))
+                if (Area.Contains(x, y) && branchParent == null)
                 {
                     if (DraggedEventBlock != this)
                     {
@@ -318,7 +337,7 @@ namespace AmbermoonUIEventEditor
             {
                 color = Color.FromArgb(alpha, color);
 
-                FillBlock(graphics, area, color);
+                FillBlock(graphics, area, color, SelectedEventBlock == this ? Color.Black : null);
 
                 var titleFont = titleFonts![parent.ZoomLevel - MinZoomLevel];
                 
@@ -357,12 +376,18 @@ namespace AmbermoonUIEventEditor
                 graphics.DrawString(text, font, textBrush, x, y);
             }
 
-            private static void FillBlock(Graphics graphics, Rectangle area, Color color)
+            private static void FillBlock(Graphics graphics, Rectangle area, Color color, Color? borderColor)
             {
                 using var fillBrush = new SolidBrush(color);
                 using GraphicsPath path = RoundedRectPath(area, 6);
 
                 graphics.FillPath(fillBrush, path);
+
+                if (borderColor != null)
+                {
+                    using var borderPen = new Pen(borderColor.Value, 4);
+                    graphics.DrawPath(borderPen, path);
+                }
             }
 
             private static GraphicsPath RoundedRectPath(Rectangle bounds, int radius)
@@ -400,6 +425,8 @@ namespace AmbermoonUIEventEditor
 
         public EventViewControl()
         {
+            SetStyle(ControlStyles.Selectable, true);
+            TabStop = true;
             DoubleBuffered = true;
             AutoScroll = true;
             titleFonts ??= Enumerable.Range(MinZoomLevel, 1 + MaxZoomLevel - MinZoomLevel).Select(level => new Font(new FontFamily("Segoe UI"), 7 + (level - 1) * 2, FontStyle.Bold)).ToList();
@@ -427,14 +454,19 @@ namespace AmbermoonUIEventEditor
         private const int MinZoomLevel = 1;
         private const int MaxZoomLevel = 4;
         private const int DefaultZoomLevel = 3;
+        private const int SmallBlockHeight = 3 * BlockTitleLineHeight;
+        private const int BackwardArrowWidth = 4;
+        private const int ForwardArrowWidth = 4;
+        private const int ColumnWidth = HorizontalBlockGap + BackwardArrowWidth + BlockWidth + ForwardArrowWidth;
+        private const int SmallColumnHeight = VerticalBlockGap + SmallBlockHeight;
         private readonly List<EventBlock> eventBlocks = new();
         private readonly List<List<EventBlock>> eventBlockColumns = new();
+        private readonly List<int> columnBlockOffsets = new();
         private readonly List<Control> drawOverControls = new();
         private readonly List<Event> eventList = new();
         private readonly List<Event> events = new();
         private static List<Font>? titleFonts;
         private static List<Font>? fonts;
-        private Rectangle? dropIndicatorArea = null;
 
         public int ZoomLevel { get; private set; } = DefaultZoomLevel;
         public int BlockColumnCount => eventBlockColumns.Count;
@@ -465,10 +497,15 @@ namespace AmbermoonUIEventEditor
 
         public void InitNPC(IConversationPartner npc)
         {
-            // TODO
+            InitEvents(npc.EventList, npc.Events);
         }
 
         public void InitMap(Map map)
+        {
+            InitEvents(map.EventList, map.Events);
+        }
+
+        private void InitEvents(List<Event> sourceEventList, List<Event> sourceEvents)
         {
             eventList.Clear();
             events.Clear();
@@ -476,28 +513,97 @@ namespace AmbermoonUIEventEditor
             eventBlockColumns.Clear();
             EventBlock.DraggedEventBlock?.MouseUp();
             Refresh();
-            eventList.AddRange(map.EventList);
-            events.AddRange(map.Events);
+            eventList.AddRange(sourceEventList);
+            events.AddRange(sourceEvents);
+            var addedEvents = new HashSet<int>();
 
             int column = 0;
 
-            foreach (var e in map.EventList)
+            foreach (var e in sourceEventList)
             {
+                var @event = e;
+                var referencedEvents = new Dictionary<Event, KeyValuePair<int, EventBlock>>();
+                int row = 0;
+
+                while (@event != null)
+                {
+                    if (referencedEvents.ContainsKey(@event))
+                        referencedEvents.Remove(@event);
+
+                    addedEvents.Add(sourceEvents.IndexOf(@event));
+                    var eventBlock = AddBlock(@event, column, false, false);
+
+                    if (EventDescriptions.IsBranchEvent(@event))
+                    {
+                        uint branchEventIndex = EventDescriptions.GetBranchEventIndex(@event);
+
+                        if (branchEventIndex != 0xffff)
+                        {
+                            var referencedEvent = sourceEvents[(int)branchEventIndex];
+
+                            if (!addedEvents.Contains((int)branchEventIndex) &&
+                                !sourceEventList.Contains(referencedEvent) &&
+                                !referencedEvents.ContainsKey(referencedEvent))
+                                referencedEvents.Add(referencedEvent, KeyValuePair.Create(row, eventBlock));
+                        }
+                    }
+
+                    @event = @event.Next;
+                    row++;
+                }
+
+                // TODO: Add later
+                /*foreach (var referencedEventChain in referencedEvents)
+                {
+                    var referencedEvent = referencedEventChain.Key;
+                    AddColumnWithOffset(referencedEventChain.Value.Key);
+                    column++;
+
+                    while (referencedEvent != null)
+                    {
+                        addedEvents.Add(sourceEvents.IndexOf(referencedEvent));
+
+                        AddBlock(referencedEvent, column, false, false, null, referencedEventChain.Value.Value);
+                        referencedEvent = referencedEvent.Next;
+                        // TODO: branches
+                        break; // TODO: Remove
+                        // TODO: Handle more reference chains
+                    }
+                }*/
+
+                column++;
+            }
+
+            // TODO: Add all non-referenced blocks
+            /*for (int i = 0; i < sourceEventList.Count; i++)
+            {
+                if (addedEvents.Contains(i))
+                    continue;
+
                 var @event = e;
 
                 while (@event != null)
                 {
+                    addedEvents.Add(sourceEvents.IndexOf(@event));
                     AddBlock(@event, column, false, false);
                     @event = @event.Next;
                 }
 
                 column++;
-            }
+            }*/
 
             Refresh();
         }
 
-        public void AddBlock(Event @event, int column = int.MaxValue, bool redraw = true, bool addEvent = true)
+        private static int GetColumnX(int column) => HorizontalBlockGap + column * ColumnWidth;
+
+        public void AddColumnWithOffset(int offset)
+        {
+            eventBlockColumns.Add(new());
+            columnBlockOffsets.Add(offset);
+        }
+
+        internal EventBlock AddBlock(Event @event, int column = int.MaxValue, bool redraw = true, bool addEvent = true, EventBlock? branchChild = null, EventBlock? branchParent = null)
         {
             var eventDescription = EventDescriptions.Events[@event.Type];
             int height = BlockTitleLineHeight + eventDescription.ValueDescriptions.Count(d => !d.Hidden) * BlockLineHeight + BlockFooterHeight;
@@ -506,21 +612,28 @@ namespace AmbermoonUIEventEditor
             {
                 column = eventBlockColumns.Count;
                 eventBlockColumns.Add(new());
+                columnBlockOffsets.Add(0);
             }
 
-            int x = HorizontalBlockGap + column * (HorizontalBlockGap + BlockWidth);
-            int smallY = eventBlockColumns[column].Count == 0 ? VerticalBlockGap : VerticalBlockGap + eventBlockColumns[column].Count * (VerticalBlockGap + BlockTitleLineHeight * 3);
-            int y = eventBlockColumns[column].Count == 0 ? VerticalBlockGap : eventBlockColumns[column][^1].UnzoomedArea.Bottom + VerticalBlockGap;
+            int x = GetColumnX(column) + BackwardArrowWidth;
+            int smallY = eventBlockColumns[column].Count == 0
+                ? VerticalBlockGap + columnBlockOffsets[column] * SmallColumnHeight
+                : VerticalBlockGap + (columnBlockOffsets[column] + eventBlockColumns[column].Count) * SmallColumnHeight;
+            int y = eventBlockColumns[column].Count == 0
+                ? (column == 0 || columnBlockOffsets[column] == 0 ? VerticalBlockGap : eventBlockColumns[column - 1][columnBlockOffsets[column]].UnzoomedArea.Top)
+                : eventBlockColumns[column][^1].UnzoomedArea.Bottom + VerticalBlockGap;
 
             if (addEvent)
                 events.Add(@event);
-            var eventBlock = new EventBlock(this, new Rectangle(x, y, BlockWidth, height), new Point(x, smallY), @event, eventList, events);
+            var eventBlock = new EventBlock(this, new Rectangle(x, y, BlockWidth, height), new Point(x, smallY), @event, eventList, events, branchChild, branchParent);
             eventBlocks.Add(eventBlock);
             eventBlockColumns[column].Add(eventBlock);
             if (redraw)
                 Refresh();
 
-            AutoScrollMinSize = new Size((eventBlockColumns.Count + 1) * (HorizontalBlockGap + BlockWidth), eventBlockColumns.Where(c => c.Count > 0).Max(c => c[^1].Area.Bottom));
+            AutoScrollMinSize = new Size(GetColumnX(eventBlockColumns.Count + 1), eventBlockColumns.Where(c => c.Count > 0).Max(c => c[^1].Area.Bottom));
+
+            return eventBlock;
         }
 
         public void ScrollLastBlockIntoView()
@@ -583,9 +696,8 @@ namespace AmbermoonUIEventEditor
             y += ZoomLevel < 3 ? BlockTitleLineHeight * 3 / 2 : eventBlock.UnzoomedArea.Height / 2;
 
             int oldColumn = eventBlockColumns.FindIndex(column => column.Contains(eventBlock));
-            int columnWidth = BlockWidth + HorizontalBlockGap;
             int columnStartX = HorizontalBlockGap / 2;
-            int column = Math.Max(0, (x - columnStartX) / columnWidth);
+            int column = Math.Max(0, (x - columnStartX) / ColumnWidth);
 
             if (column == oldColumn)
             {
@@ -656,7 +768,7 @@ namespace AmbermoonUIEventEditor
                         }
                     }
 
-                    x = HorizontalBlockGap + column * (BlockWidth + HorizontalBlockGap);
+                    x = GetColumnX(column) + BackwardArrowWidth;
                     y = row == 0 ? VerticalBlockGap : ZoomLevel < 3
                         ? VerticalBlockGap + row * (VerticalBlockGap + BlockTitleLineHeight * 3)
                         : eventBlockColumns[column][row - 1].UnzoomedArea.Bottom + VerticalBlockGap;
@@ -665,7 +777,7 @@ namespace AmbermoonUIEventEditor
             }
             else
             {
-                int tx = HorizontalBlockGap + eventBlockColumns.Count * (BlockWidth + HorizontalBlockGap);
+                int tx = GetColumnX(eventBlockColumns.Count) + BackwardArrowWidth;
                 int ty = VerticalBlockGap;
                 EventBlock.DropTargetPosition = new Point(tx + AutoScrollPosition.X, ty + AutoScrollPosition.Y);
             }
@@ -705,9 +817,11 @@ namespace AmbermoonUIEventEditor
             dropY += ZoomLevel < 3 ? BlockTitleLineHeight * 3 / 2 : eventBlock.UnzoomedArea.Height / 2;
 
             int oldColumn = eventBlockColumns.FindIndex(column => column.Contains(eventBlock));
-            int columnWidth = BlockWidth + HorizontalBlockGap;
             int columnStartX = HorizontalBlockGap / 2;
-            int column = Math.Max(0, (dropX - columnStartX) / columnWidth);
+            int column = Math.Max(0, (dropX - columnStartX) / ColumnWidth);
+
+            if (columnBlockOffsets[column] != 0)
+                return new DropRequestResult { Allow = false };
 
             if (column == oldColumn)
             {
@@ -807,7 +921,7 @@ namespace AmbermoonUIEventEditor
             eventBlock.Event.Next = null;
             #endregion
 
-            int x = HorizontalBlockGap + column * (HorizontalBlockGap + BlockWidth);
+            int x = GetColumnX(column);
             int y;
             int smallY;
 
@@ -815,6 +929,7 @@ namespace AmbermoonUIEventEditor
             {
                 eventList.Add(eventBlock.Event);
                 eventBlockColumns.Add(new() { eventBlock });
+                columnBlockOffsets.Add(0);
                 y = VerticalBlockGap;
                 smallY = VerticalBlockGap;
             }
@@ -850,6 +965,7 @@ namespace AmbermoonUIEventEditor
                 }
 
                 eventBlockColumns[column].Insert(row, eventBlock);
+                columnBlockOffsets.Insert(row, 0);
 
                 if (eventBlockColumns[column].Count > 1 || column != oldColumn)
                 {
@@ -870,6 +986,7 @@ namespace AmbermoonUIEventEditor
             if (eventBlockColumns[oldColumn].Count == 0)
             {
                 eventBlockColumns.RemoveAt(oldColumn);
+                columnBlockOffsets.RemoveAt(oldColumn);
 
                 for (int i = oldColumn; i < eventBlockColumns.Count; i++)
                 {
@@ -880,7 +997,7 @@ namespace AmbermoonUIEventEditor
                     RearrangeColumn(column);
 
                 if (column > oldColumn)
-                    x -= (BlockWidth + HorizontalBlockGap);
+                    x -= ColumnWidth;
             }
             else
             {
@@ -891,6 +1008,8 @@ namespace AmbermoonUIEventEditor
             }
 
             EventBlock.HideTooltips();
+
+            x += BackwardArrowWidth;
 
             return new DropRequestResult
             {
@@ -960,6 +1079,8 @@ namespace AmbermoonUIEventEditor
         protected override void OnMouseDown(MouseEventArgs e)
         {
             base.OnMouseDown(e);
+
+            Focus();
 
             if (e.Button == MouseButtons.Left)
             {
@@ -1032,6 +1153,24 @@ namespace AmbermoonUIEventEditor
 
             EventBlock.HideTooltips();
             Refresh();
+        }
+
+        protected override void OnKeyDown(KeyEventArgs e)
+        {
+            base.OnKeyDown(e);
+
+            if (e.KeyCode == Keys.Delete)
+            {
+                if (EventBlock.SelectedEventBlock != null)
+                {
+                    // TODO: Test if possible
+
+                    if (MessageBox.Show(this, "Do you really want to delete this event?", "Delete event", MessageBoxButtons.YesNo, MessageBoxIcon.Warning) == DialogResult.Yes)
+                    {
+                        // TODO
+                    }
+                }
+            }
         }
     }
 }

@@ -37,6 +37,8 @@
             eventBrowser.Dock = DockStyle.Left;
             eventBrowser.Location = new Point(0, 0);
             eventBrowser.Name = "eventBrowser";
+            eventBrowser.ShowCharEvents = true;
+            eventBrowser.ShowMapEvents = true;
             eventBrowser.Size = new Size(184, 451);
             eventBrowser.TabIndex = 0;
             eventBrowser.EventDoubleClicked += eventBrowser_EventDoubleClicked;
