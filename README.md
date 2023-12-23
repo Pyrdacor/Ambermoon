@@ -126,7 +126,7 @@ Section | Description
 
 ### Graphics
 
-- [Zip File with all graphics][https://github.com/Pyrdacor/Ambermoon/raw/master/Graphics/Graphics.zip]
+- [Zip File with all graphics](https://github.com/Pyrdacor/Ambermoon/raw/master/Graphics/Graphics.zip)
 - [Items](Graphics/Items)
 - [Portraits](Graphics/Portraits)
 - [Maps](Graphics/Maps)
