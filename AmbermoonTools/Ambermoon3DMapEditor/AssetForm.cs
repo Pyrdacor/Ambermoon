@@ -7,7 +7,7 @@ namespace Ambermoon3DMapEditor
     {
         public AssetForm(List<Bitmap> wallTextures, List<List<Bitmap>> objectTextures,
             List<Labdata.WallData> walls, List<Labdata.Object> objects, Palette palette,
-            List<Bitmap> allWallTextures, List<Bitmap> allObjectTextures, List<Bitmap> allOverlayTextures)
+            Dictionary<uint, Bitmap> allWallTextures, Dictionary<uint, Bitmap> allObjectTextures, Dictionary<uint, Bitmap> allOverlayTextures)
         {
             InitializeComponent();
 
@@ -25,9 +25,9 @@ namespace Ambermoon3DMapEditor
         private readonly List<List<Bitmap>> objectTextures;
         private readonly List<Labdata.WallData> walls;
         private readonly List<Labdata.Object> objects;
-        private readonly List<Bitmap> allWallTextures;
-        private readonly List<Bitmap> allObjectTextures;
-        private readonly List<Bitmap> allOverlayTextures;
+        private readonly Dictionary<uint, Bitmap> allWallTextures;
+        private readonly Dictionary<uint, Bitmap> allObjectTextures;
+        private readonly Dictionary<uint, Bitmap> allOverlayTextures;
         private readonly Palette palette;
         private bool ignoreTravelStateChange = false;
 
@@ -61,13 +61,17 @@ namespace Ambermoon3DMapEditor
             int selectedIndex = comboBoxWalls.SelectedIndex;
 
             if (selectedIndex != -1)
-                selectedIndex = (int)walls[selectedIndex].TextureIndex - 1;
+                selectedIndex = (int)walls[selectedIndex].TextureIndex;
+            else
+                selectedIndex = 0;
 
-            var textureBrowser = new TextureBrowser(allWallTextures, selectedIndex);
+            var textureBrowser = new TextureBrowser(allWallTextures, (uint)selectedIndex);
 
-            if (textureBrowser.ShowDialog(this) == DialogResult.OK)
+            /*if (*/
+            textureBrowser.ShowDialog(this)/* == DialogResult.OK)*/;
             {
-                UpdateWall((ref Labdata.WallData wall) => wall.TextureIndex = (uint)textureBrowser.SelectedIndex + 1);
+                UpdateWall((ref Labdata.WallData wall) => wall.TextureIndex = textureBrowser.SelectedIndex);
+                wallTextures[comboBoxWalls.SelectedIndex] = allWallTextures[textureBrowser.SelectedIndex];
                 panelWallTexture.Refresh();
             }
         }

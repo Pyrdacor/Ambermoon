@@ -16,7 +16,7 @@ namespace Ambermoon3DMapEditor
 
         private readonly Graphic palette;
         private readonly GameData gameData;
-        private readonly Dictionary<string, List<Bitmap>> cachedGraphics = new();
+        private readonly Dictionary<string, Dictionary<uint, Bitmap>> cachedGraphics = new();
         private static readonly Dictionary<string, Func<int, GraphicInfo>> graphicInfoProviders = new()
         {
             { "Wall3D.amb", _ => TextureGraphicInfos.WallGraphicInfo },
@@ -28,7 +28,7 @@ namespace Ambermoon3DMapEditor
 
         private static GraphicInfo GetOverlayGraphicInfo(int index) => TextureGraphicInfos.OverlayGraphicInfos[index - 1];
 
-        private List<Bitmap> LoadGraphics(Map map, string containerBaseName)
+        private Dictionary<uint, Bitmap> LoadGraphics(Map map, string containerBaseName)
         {
             int index = map!.Index >= 300 && map.Index < 400 ? 3 : 2;
             string containerName = $"{index}{containerBaseName}";
@@ -38,7 +38,7 @@ namespace Ambermoon3DMapEditor
 
             var graphicInfoProvider = graphicInfoProviders[containerBaseName];
 
-            graphics = gameData.Files[containerName].Files.Select(f => LoadGraphic(f.Value, graphicInfoProvider(f.Key))).ToList();
+            graphics = gameData.Files[containerName].Files.Where(f => f.Value.Size != 0).ToDictionary(f => (uint)f.Key, f => LoadGraphic(f.Value, graphicInfoProvider(f.Key)));
             cachedGraphics.Add(containerName, graphics);
 
             return graphics;
@@ -52,17 +52,17 @@ namespace Ambermoon3DMapEditor
             return GraphicHelper.GraphicToBitmap(graphic, palette, graphicInfo.Alpha);
         }
 
-        public List<Bitmap> GetWallGraphicsForMap(Map map)
+        public Dictionary<uint, Bitmap> GetWallGraphicsForMap(Map map)
         {
             return LoadGraphics(map, "Wall3D.amb");
         }
 
-        public List<Bitmap> GetObjectGraphicsForMap(Map map)
+        public Dictionary<uint, Bitmap> GetObjectGraphicsForMap(Map map)
         {
             return LoadGraphics(map, "Object3D.amb");
         }
 
-        public List<Bitmap> GetOverlayGraphicsForMap(Map map)
+        public Dictionary<uint, Bitmap> GetOverlayGraphicsForMap(Map map)
         {
             return LoadGraphics(map, "Overlay3D.amb");
         }

@@ -2,7 +2,7 @@
 {
     public partial class TextureBrowser : Form
     {
-        public TextureBrowser(List<Bitmap> textures, int selectedIndex)
+        public TextureBrowser(Dictionary<uint, Bitmap> textures, uint selectedIndex)
         {
             InitializeComponent();
 
@@ -10,11 +10,11 @@
             SelectedIndex = selectedIndex;
 
             panelTextures.Height = 168 + SystemInformation.HorizontalScrollBarHeight;
-            panelTextures.AutoScrollMinSize = new Size(textures.Count * 8 + textures.Sum(t => t.Width * 2), textures.Max(t => t.Height * 2) + 8);
+            panelTextures.AutoScrollMinSize = new Size(textures.Count * 8 + textures.Sum(t => t.Value.Width * 2), textures.Max(t => t.Value.Height * 2) + 8);
         }
 
-        private readonly List<Bitmap> textures;
-        public int SelectedIndex { get; set; } = 0;
+        private readonly Dictionary<uint, Bitmap> textures;
+        public uint SelectedIndex { get; set; } = 0;
 
         private void buttonAddTexture_Click(object sender, EventArgs e)
         {
@@ -34,17 +34,17 @@
 
             int x = 4;
 
-            for (int i = 0; i < textures.Count; i++)
+            foreach (var texture in textures.OrderBy(t => t.Key))
             {
-                int y = (panelTextures.AutoScrollMinSize.Height - textures[i].Height * 2) / 2;
+                int y = (panelTextures.AutoScrollMinSize.Height - texture.Value.Height * 2) / 2;
 
-                e.Graphics.DrawImage(textures[i], x + panelTextures.AutoScrollPosition.X, y + panelTextures.AutoScrollPosition.Y, textures[i].Width * 2, textures[i].Height * 2);
+                e.Graphics.DrawImage(texture.Value, x + panelTextures.AutoScrollPosition.X, y + panelTextures.AutoScrollPosition.Y, texture.Value.Width * 2, texture.Value.Height * 2);
 
-                if (i == SelectedIndex)
+                if (texture.Key == SelectedIndex)
                 {
                     using var selectPen1 = new Pen(Color.Black, 1);
                     using var selectPen2 = new Pen(Color.Yellow, 1);
-                    var area = new Rectangle(x + panelTextures.AutoScrollPosition.X - 2, y + panelTextures.AutoScrollPosition.Y - 2, textures[i].Width * 2 + 4, textures[i].Height * 2 + 4);
+                    var area = new Rectangle(x + panelTextures.AutoScrollPosition.X - 2, y + panelTextures.AutoScrollPosition.Y - 2, texture.Value.Width * 2 + 4, texture.Value.Height * 2 + 4);
                     e.Graphics.DrawRectangle(selectPen1, area);
                     area.Inflate(-1, -1);
                     e.Graphics.DrawRectangle(selectPen2, area);
@@ -54,7 +54,7 @@
                     e.Graphics.DrawRectangle(selectPen1, area);
                 }
 
-                x += textures[i].Width * 2 + 8;
+                x += texture.Value.Width * 2 + 8;
             }
         }
 
@@ -62,19 +62,19 @@
         {
             int x = panelTextures.AutoScrollPosition.X;
 
-            for (int i = 0; i < textures.Count; i++)
+            foreach (var texture in textures.OrderBy(t => t.Key))
             {
-                if (e.X < x + textures[i].Width * 2 + 8)
+                if (e.X < x + texture.Value.Width * 2 + 8)
                 {
-                    if (SelectedIndex != i)
+                    if (SelectedIndex != texture.Key)
                     {
-                        SelectedIndex = i;
+                        SelectedIndex = texture.Key;
                         Refresh();
                     }
                     return;
                 }
 
-                x += textures[i].Width * 2 + 8;
+                x += texture.Value.Width * 2 + 8;
             }
         }
 
@@ -87,8 +87,8 @@
         {
             int scrollX = 0;
 
-            for (int i = 0; i < SelectedIndex; i++)
-                scrollX += textures[i].Width * 2 + 8;
+            foreach (var texture in textures.OrderBy(t => t.Key).TakeWhile(t => t.Key < SelectedIndex))
+                scrollX += texture.Value.Width * 2 + 8;
 
             panelTextures.AutoScrollPosition = new Point(scrollX, -panelTextures.AutoScrollPosition.Y);
         }

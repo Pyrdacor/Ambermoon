@@ -24,7 +24,7 @@ namespace AmbermoonMapEditor2D
         {
             configuration = Configuration.Load(Configuration.FilePath);
 
-            BringToFront();            
+            BringToFront();
 
             if (OpenMap())
             {
@@ -272,7 +272,7 @@ namespace AmbermoonMapEditor2D
 
                         var tile = map.InitialTiles[x, y];
                         var backgroundTile = tile.BackTileIndex == 0 ? null : tile.BackTileIndex > tileset.Tiles.Length ? null : tileset.Tiles[tile.BackTileIndex - 1];
-                        var foregroundTile = tile.FrontTileIndex == 0 ? null : tile.FrontTileIndex > tileset.Tiles.Length ? null :  tileset.Tiles[tile.FrontTileIndex - 1];
+                        var foregroundTile = tile.FrontTileIndex == 0 ? null : tile.FrontTileIndex > tileset.Tiles.Length ? null : tileset.Tiles[tile.FrontTileIndex - 1];
                         var rect = new Rectangle(drawX, drawY, tileSize + (tileSize / 16 - 1), tileSize + (tileSize / 16 - 1));
 
                         if (toolStripMenuItemShowBackLayer.Checked && backgroundTile != null)
@@ -1161,7 +1161,7 @@ namespace AmbermoonMapEditor2D
                     var position = character.Positions[0];
                     UpdateMapCharacterPosition(position);
                 }
-            }            
+            }
         }
 
         void UpdateMapCharacterPosition(Ambermoon.Position position)

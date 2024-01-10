@@ -20,9 +20,9 @@ namespace AmbermoonMapCharEditor
 
         private void PositionEditorForm_Load(object sender, EventArgs e)
         {
-            (dataGridView1.Columns[1] as NumericUpDownColumn)!.MinValue = 1;
+            (dataGridView1.Columns[1] as NumericUpDownColumn)!.MinValue = 0;
             (dataGridView1.Columns[1] as NumericUpDownColumn)!.MaxValue = (uint)map.Width;
-            (dataGridView1.Columns[2] as NumericUpDownColumn)!.MinValue = 1;
+            (dataGridView1.Columns[2] as NumericUpDownColumn)!.MinValue = 0;
             (dataGridView1.Columns[2] as NumericUpDownColumn)!.MaxValue = (uint)map.Height;
 
             if (character.Positions.Count < 288)

@@ -28,135 +28,134 @@
         /// </summary>
         private void InitializeComponent()
         {
-            this.groupBoxCharProperties = new System.Windows.Forms.GroupBox();
-            this.buttonMore = new System.Windows.Forms.Button();
-            this.checkBoxOnlyMoveWhenSeePlayer = new System.Windows.Forms.CheckBox();
-            this.checkBoxStationary = new System.Windows.Forms.CheckBox();
-            this.checkBoxTextPopup = new System.Windows.Forms.CheckBox();
-            this.checkBoxUseTileset = new System.Windows.Forms.CheckBox();
-            this.checkBoxRandomMovement = new System.Windows.Forms.CheckBox();
-            this.buttonAdd = new System.Windows.Forms.Button();
-            this.buttonRemove = new System.Windows.Forms.Button();
-            this.groupBoxCharProperties.SuspendLayout();
-            this.SuspendLayout();
+            groupBoxCharProperties = new GroupBox();
+            buttonMore = new Button();
+            checkBoxOnlyMoveWhenSeePlayer = new CheckBox();
+            checkBoxStationary = new CheckBox();
+            checkBoxTextPopup = new CheckBox();
+            checkBoxUseTileset = new CheckBox();
+            checkBoxRandomMovement = new CheckBox();
+            buttonAdd = new Button();
+            buttonRemove = new Button();
+            groupBoxCharProperties.SuspendLayout();
+            SuspendLayout();
             // 
             // groupBoxCharProperties
             // 
-            this.groupBoxCharProperties.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.groupBoxCharProperties.Controls.Add(this.buttonMore);
-            this.groupBoxCharProperties.Controls.Add(this.checkBoxOnlyMoveWhenSeePlayer);
-            this.groupBoxCharProperties.Controls.Add(this.checkBoxStationary);
-            this.groupBoxCharProperties.Controls.Add(this.checkBoxTextPopup);
-            this.groupBoxCharProperties.Controls.Add(this.checkBoxUseTileset);
-            this.groupBoxCharProperties.Controls.Add(this.checkBoxRandomMovement);
-            this.groupBoxCharProperties.Location = new System.Drawing.Point(3, 135);
-            this.groupBoxCharProperties.Name = "groupBoxCharProperties";
-            this.groupBoxCharProperties.Size = new System.Drawing.Size(243, 96);
-            this.groupBoxCharProperties.TabIndex = 2;
-            this.groupBoxCharProperties.TabStop = false;
-            this.groupBoxCharProperties.Text = "Properties";
+            groupBoxCharProperties.Anchor = AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
+            groupBoxCharProperties.Controls.Add(buttonMore);
+            groupBoxCharProperties.Controls.Add(checkBoxOnlyMoveWhenSeePlayer);
+            groupBoxCharProperties.Controls.Add(checkBoxStationary);
+            groupBoxCharProperties.Controls.Add(checkBoxTextPopup);
+            groupBoxCharProperties.Controls.Add(checkBoxUseTileset);
+            groupBoxCharProperties.Controls.Add(checkBoxRandomMovement);
+            groupBoxCharProperties.Location = new Point(3, 127);
+            groupBoxCharProperties.Name = "groupBoxCharProperties";
+            groupBoxCharProperties.Size = new Size(305, 104);
+            groupBoxCharProperties.TabIndex = 2;
+            groupBoxCharProperties.TabStop = false;
+            groupBoxCharProperties.Text = "Properties";
             // 
             // buttonMore
             // 
-            this.buttonMore.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.buttonMore.Location = new System.Drawing.Point(180, 67);
-            this.buttonMore.Name = "buttonMore";
-            this.buttonMore.Size = new System.Drawing.Size(62, 26);
-            this.buttonMore.TabIndex = 5;
-            this.buttonMore.Text = "More ...";
-            this.buttonMore.UseVisualStyleBackColor = true;
-            this.buttonMore.Click += new System.EventHandler(this.buttonMore_Click);
+            buttonMore.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            buttonMore.Location = new Point(224, 71);
+            buttonMore.Name = "buttonMore";
+            buttonMore.Size = new Size(75, 27);
+            buttonMore.TabIndex = 5;
+            buttonMore.Text = "More ...";
+            buttonMore.UseVisualStyleBackColor = true;
+            buttonMore.Click += buttonMore_Click;
             // 
             // checkBoxOnlyMoveWhenSeePlayer
             // 
-            this.checkBoxOnlyMoveWhenSeePlayer.AutoSize = true;
-            this.checkBoxOnlyMoveWhenSeePlayer.Location = new System.Drawing.Point(6, 72);
-            this.checkBoxOnlyMoveWhenSeePlayer.Name = "checkBoxOnlyMoveWhenSeePlayer";
-            this.checkBoxOnlyMoveWhenSeePlayer.Size = new System.Drawing.Size(174, 19);
-            this.checkBoxOnlyMoveWhenSeePlayer.TabIndex = 9;
-            this.checkBoxOnlyMoveWhenSeePlayer.Text = "Only Move When See Player";
-            this.checkBoxOnlyMoveWhenSeePlayer.UseVisualStyleBackColor = true;
-            this.checkBoxOnlyMoveWhenSeePlayer.CheckedChanged += new System.EventHandler(this.checkBoxOnlyMoveWhenSeePlayer_CheckedChanged);
+            checkBoxOnlyMoveWhenSeePlayer.AutoSize = true;
+            checkBoxOnlyMoveWhenSeePlayer.Location = new Point(6, 72);
+            checkBoxOnlyMoveWhenSeePlayer.Name = "checkBoxOnlyMoveWhenSeePlayer";
+            checkBoxOnlyMoveWhenSeePlayer.Size = new Size(216, 24);
+            checkBoxOnlyMoveWhenSeePlayer.TabIndex = 9;
+            checkBoxOnlyMoveWhenSeePlayer.Text = "Only Move When See Player";
+            checkBoxOnlyMoveWhenSeePlayer.UseVisualStyleBackColor = true;
+            checkBoxOnlyMoveWhenSeePlayer.CheckedChanged += checkBoxOnlyMoveWhenSeePlayer_CheckedChanged;
             // 
             // checkBoxStationary
             // 
-            this.checkBoxStationary.AutoSize = true;
-            this.checkBoxStationary.Location = new System.Drawing.Point(144, 47);
-            this.checkBoxStationary.Name = "checkBoxStationary";
-            this.checkBoxStationary.Size = new System.Drawing.Size(79, 19);
-            this.checkBoxStationary.TabIndex = 8;
-            this.checkBoxStationary.Text = "Stationary";
-            this.checkBoxStationary.UseVisualStyleBackColor = true;
-            this.checkBoxStationary.CheckedChanged += new System.EventHandler(this.checkBoxStationary_CheckedChanged);
+            checkBoxStationary.AutoSize = true;
+            checkBoxStationary.Location = new Point(174, 47);
+            checkBoxStationary.Name = "checkBoxStationary";
+            checkBoxStationary.Size = new Size(98, 24);
+            checkBoxStationary.TabIndex = 8;
+            checkBoxStationary.Text = "Stationary";
+            checkBoxStationary.UseVisualStyleBackColor = true;
+            checkBoxStationary.CheckedChanged += checkBoxStationary_CheckedChanged;
             // 
             // checkBoxTextPopup
             // 
-            this.checkBoxTextPopup.AutoSize = true;
-            this.checkBoxTextPopup.Location = new System.Drawing.Point(6, 47);
-            this.checkBoxTextPopup.Name = "checkBoxTextPopup";
-            this.checkBoxTextPopup.Size = new System.Drawing.Size(86, 19);
-            this.checkBoxTextPopup.TabIndex = 7;
-            this.checkBoxTextPopup.Text = "Text Popup";
-            this.checkBoxTextPopup.UseVisualStyleBackColor = true;
-            this.checkBoxTextPopup.CheckedChanged += new System.EventHandler(this.checkBoxTextPopup_CheckedChanged);
+            checkBoxTextPopup.AutoSize = true;
+            checkBoxTextPopup.Location = new Point(6, 47);
+            checkBoxTextPopup.Name = "checkBoxTextPopup";
+            checkBoxTextPopup.Size = new Size(104, 24);
+            checkBoxTextPopup.TabIndex = 7;
+            checkBoxTextPopup.Text = "Text Popup";
+            checkBoxTextPopup.UseVisualStyleBackColor = true;
+            checkBoxTextPopup.CheckedChanged += checkBoxTextPopup_CheckedChanged;
             // 
             // checkBoxUseTileset
             // 
-            this.checkBoxUseTileset.AutoSize = true;
-            this.checkBoxUseTileset.Location = new System.Drawing.Point(144, 22);
-            this.checkBoxUseTileset.Name = "checkBoxUseTileset";
-            this.checkBoxUseTileset.Size = new System.Drawing.Size(82, 19);
-            this.checkBoxUseTileset.TabIndex = 6;
-            this.checkBoxUseTileset.Text = "Use Tileset";
-            this.checkBoxUseTileset.UseVisualStyleBackColor = true;
-            this.checkBoxUseTileset.CheckedChanged += new System.EventHandler(this.checkBoxUseTileset_CheckedChanged);
+            checkBoxUseTileset.AutoSize = true;
+            checkBoxUseTileset.Location = new Point(174, 22);
+            checkBoxUseTileset.Name = "checkBoxUseTileset";
+            checkBoxUseTileset.Size = new Size(102, 24);
+            checkBoxUseTileset.TabIndex = 6;
+            checkBoxUseTileset.Text = "Use Tileset";
+            checkBoxUseTileset.UseVisualStyleBackColor = true;
+            checkBoxUseTileset.CheckedChanged += checkBoxUseTileset_CheckedChanged;
             // 
             // checkBoxRandomMovement
             // 
-            this.checkBoxRandomMovement.AutoSize = true;
-            this.checkBoxRandomMovement.Location = new System.Drawing.Point(6, 22);
-            this.checkBoxRandomMovement.Name = "checkBoxRandomMovement";
-            this.checkBoxRandomMovement.Size = new System.Drawing.Size(132, 19);
-            this.checkBoxRandomMovement.TabIndex = 5;
-            this.checkBoxRandomMovement.Text = "Random Movement";
-            this.checkBoxRandomMovement.UseVisualStyleBackColor = true;
-            this.checkBoxRandomMovement.CheckedChanged += new System.EventHandler(this.checkBoxRandomMovement_CheckedChanged);
+            checkBoxRandomMovement.AutoSize = true;
+            checkBoxRandomMovement.Location = new Point(6, 22);
+            checkBoxRandomMovement.Name = "checkBoxRandomMovement";
+            checkBoxRandomMovement.Size = new Size(162, 24);
+            checkBoxRandomMovement.TabIndex = 5;
+            checkBoxRandomMovement.Text = "Random Movement";
+            checkBoxRandomMovement.UseVisualStyleBackColor = true;
+            checkBoxRandomMovement.CheckedChanged += checkBoxRandomMovement_CheckedChanged;
             // 
             // buttonAdd
             // 
-            this.buttonAdd.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.buttonAdd.Location = new System.Drawing.Point(91, 121);
-            this.buttonAdd.Name = "buttonAdd";
-            this.buttonAdd.Size = new System.Drawing.Size(75, 22);
-            this.buttonAdd.TabIndex = 4;
-            this.buttonAdd.Text = "Add";
-            this.buttonAdd.UseVisualStyleBackColor = true;
-            this.buttonAdd.Click += new System.EventHandler(this.buttonAdd_Click);
+            buttonAdd.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
+            buttonAdd.Location = new Point(151, 102);
+            buttonAdd.Name = "buttonAdd";
+            buttonAdd.Size = new Size(75, 29);
+            buttonAdd.TabIndex = 4;
+            buttonAdd.Text = "Add";
+            buttonAdd.UseVisualStyleBackColor = true;
+            buttonAdd.Click += buttonAdd_Click;
             // 
             // buttonRemove
             // 
-            this.buttonRemove.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.buttonRemove.Location = new System.Drawing.Point(170, 121);
-            this.buttonRemove.Name = "buttonRemove";
-            this.buttonRemove.Size = new System.Drawing.Size(75, 22);
-            this.buttonRemove.TabIndex = 3;
-            this.buttonRemove.Text = "Remove";
-            this.buttonRemove.UseVisualStyleBackColor = true;
-            this.buttonRemove.Click += new System.EventHandler(this.buttonRemove_Click);
+            buttonRemove.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
+            buttonRemove.Location = new Point(232, 102);
+            buttonRemove.Name = "buttonRemove";
+            buttonRemove.Size = new Size(75, 29);
+            buttonRemove.TabIndex = 3;
+            buttonRemove.Text = "Remove";
+            buttonRemove.UseVisualStyleBackColor = true;
+            buttonRemove.Click += buttonRemove_Click;
             // 
             // MapCharEditorControl
             // 
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.None;
-            this.Controls.Add(this.buttonAdd);
-            this.Controls.Add(this.buttonRemove);
-            this.Controls.Add(this.groupBoxCharProperties);
-            this.Name = "MapCharEditorControl";
-            this.Size = new System.Drawing.Size(249, 234);
-            this.groupBoxCharProperties.ResumeLayout(false);
-            this.groupBoxCharProperties.PerformLayout();
-            this.ResumeLayout(false);
-
+            AutoScaleMode = AutoScaleMode.None;
+            AutoSize = true;
+            Controls.Add(buttonAdd);
+            Controls.Add(buttonRemove);
+            Controls.Add(groupBoxCharProperties);
+            Name = "MapCharEditorControl";
+            Size = new Size(311, 234);
+            groupBoxCharProperties.ResumeLayout(false);
+            groupBoxCharProperties.PerformLayout();
+            ResumeLayout(false);
         }
 
         #endregion

@@ -12,7 +12,7 @@ namespace AmbermoonImageConverter
     {
         static void Usage()
         {
-            Console.WriteLine("USAGE: AmbermoonImageConverter <imageFile> <paletteFile> <outFile> <format> [frames] [palOffset] [tindex]");
+            Console.WriteLine("USAGE: AmbermoonImageConverter <imageFile> <paletteFile> <outFile> <format> [frames] [palOffset] [tindex] [findex]");
             Console.WriteLine("       AmbermoonImageConverter --help");
             Console.WriteLine();
             Console.WriteLine("Creates an image data file from a graphic and a palette. This file can then be used in Ambermoon.");
@@ -28,6 +28,7 @@ namespace AmbermoonImageConverter
             Console.WriteLine("[palOffset]   Palette offset (default: 0)");
             Console.WriteLine("              Based on <format> this is limited to 0 (5 bpp), 16 (4 bpp) or 24 (3 bpp).");
             Console.WriteLine("[tindex]      Transparent color index (default: 0)");
+            Console.WriteLine("[findex]      Forbidden color index (default: 32)");
             Console.WriteLine();
             Console.WriteLine("Note: The provided palette must be a decompressed/extracted single file like Palettes/001.");
             Console.WriteLine("      Do not pass the whole container Palettes.amb here!");
@@ -52,7 +53,7 @@ namespace AmbermoonImageConverter
                 return;
             }
 
-            if (args.Length < 4 || args.Length > 7)
+            if (args.Length < 4 || args.Length > 8)
             {
                 Console.WriteLine("Invalid number of arguments.");
                 Console.WriteLine();
@@ -117,6 +118,7 @@ namespace AmbermoonImageConverter
             int frames = args.Length < 5 ? 1 : int.Parse(args[4]);
             int paletteIndexOffset = args.Length < 6 ? 0 : Math.Max(0, int.Parse(args[5]));
             int transparentColorIndex = args.Length < 7 ? 0 : Math.Max(0, int.Parse(args[6]));
+            int forbiddenColorIndex = args.Length < 8 ? 32 : Math.Max(0, int.Parse(args[7]));
             if (bpp == 5)
                 paletteIndexOffset = 0;
             else if (bpp == 4)
@@ -143,7 +145,7 @@ namespace AmbermoonImageConverter
 
             for (int i = 0; i < palIndices.Length; ++i)
             {
-                palIndices[i] = FindPaletteIndex(palette, BitConverter.ToUInt32(imageData, i * 4), minIndex, maxIndex, (byte)transparentColorIndex);
+                palIndices[i] = FindPaletteIndex(palette, BitConverter.ToUInt32(imageData, i * 4), minIndex, maxIndex, (byte)transparentColorIndex, (byte)forbiddenColorIndex);
             }
 
             var outputData = new byte[height * bpp * width / 8];
@@ -199,14 +201,14 @@ namespace AmbermoonImageConverter
 
         static readonly Dictionary<uint, byte> mappedPaletteIndices = new();
 
-        static byte FindPaletteIndex(uint[] palette, uint color, byte min, byte max, byte transparentColorIndex)
+        static byte FindPaletteIndex(uint[] palette, uint color, byte min, byte max, byte transparentColorIndex, byte forbiddenColorIndex)
         {
             if (mappedPaletteIndices.TryGetValue(color, out var index))
                 return index;
 
             max = Math.Min(max, (byte)31);
 
-            if ((color >> 24) == transparentColorIndex) // transparent
+            if ((color >> 24) == transparentColorIndex && transparentColorIndex != forbiddenColorIndex) // transparent
                 return transparentColorIndex;
 
             uint r = (color >> 16) & 0xf0;
@@ -222,6 +224,9 @@ namespace AmbermoonImageConverter
 
             for (int i = min; i <= max; ++i)
             {
+                if (i == forbiddenColorIndex)
+                    continue;
+
                 if (palette[i] == color)
                 {
                     if (mappedPaletteIndices.TryAdd(color, (byte)i))
@@ -253,14 +258,35 @@ namespace AmbermoonImageConverter
 
         static uint[] LoadPalette(string filename)
         {
+            using var stream = File.OpenRead(filename);
             var palette = new uint[32];
-            using var binarReader = new BinaryReader(File.OpenRead(filename));
+            int a = 0xff;
+
+            if (stream.Length != 64)
+            {
+                using var image = (Bitmap)Image.FromStream(stream);
+                var data = image.LockBits(new Rectangle(0, 0, image.Width, image.Height), ImageLockMode.ReadOnly, PixelFormat.Format32bppArgb);
+                var buffer = new byte[32 * 4];
+                Marshal.Copy(data.Scan0, buffer, 0, 32 * 4);
+                image.UnlockBits(data);
+
+                for (int i = 0; i < 32; ++i)
+                {                    
+                    int r = buffer[i * 4 + 2];
+                    int g = buffer[i * 4 + 1];
+                    int b = buffer[i * 4 + 0];
+                    palette[i] = ((uint)a << 24) | ((uint)r << 16) | ((uint)g << 8) | (uint)b;
+                }
+
+                return palette;
+            }
+
+            using var binarReader = new BinaryReader(stream);
 
             for (int i = 0; i < 32; ++i)
             {
                 byte ar = binarReader.ReadByte();
                 byte gb = binarReader.ReadByte();
-                int a = 0xff;
                 int r = ((ar << 4) & 0xf0) | (ar & 0x0f);
                 int g = (gb >> 4) | (gb & 0xf0);
                 int b = ((gb << 4) & 0xf0) | (gb & 0x0f);

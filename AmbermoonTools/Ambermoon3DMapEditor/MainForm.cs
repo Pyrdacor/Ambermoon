@@ -1472,7 +1472,7 @@ namespace Ambermoon3DMapEditor
         {
             var wallGraphicList = new List<Bitmap>(wallGraphics);
             var objectGraphicList = new List<List<Bitmap>>(objectGraphics.Select(g => g.ToList()));
-            var allWallTextures = graphicCache.GetWallGraphicsForMap(map!);
+            var allWallTextures = graphicCache!.GetWallGraphicsForMap(map!);
             var allObjectTextures = graphicCache.GetObjectGraphicsForMap(map!);
             var allOverlayTextures = graphicCache.GetOverlayGraphicsForMap(map!);
             new AssetForm(wallGraphicList, objectGraphicList,

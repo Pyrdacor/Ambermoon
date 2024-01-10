@@ -29,1109 +29,1053 @@ namespace AmbermoonMapEditor2D
         /// </summary>
         private void InitializeComponent()
         {
-            this.components = new System.ComponentModel.Container();
+            components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MapEditorForm));
-            this.panelMap = new System.Windows.Forms.MapDrawPanel();
-            this.menuStrip = new System.Windows.Forms.MenuStrip();
-            this.toolStripMenuItemMap = new System.Windows.Forms.ToolStripMenuItem();
-            this.toolStripMenuItemMapNew = new System.Windows.Forms.ToolStripMenuItem();
-            this.toolStripMenuItemMapSave = new System.Windows.Forms.ToolStripMenuItem();
-            this.toolStripMenuItemMapSaveAs = new System.Windows.Forms.ToolStripMenuItem();
-            this.toolStripSeparatorMap1 = new System.Windows.Forms.ToolStripSeparator();
-            this.toolStripMenuItemMapQuit = new System.Windows.Forms.ToolStripMenuItem();
-            this.toolStripMenuItemEdit = new System.Windows.Forms.ToolStripMenuItem();
-            this.toolStripMenuItemEditUndo = new System.Windows.Forms.ToolStripMenuItem();
-            this.toolStripMenuItemEditRedo = new System.Windows.Forms.ToolStripMenuItem();
-            this.toolStripSeparatorEdit1 = new System.Windows.Forms.ToolStripSeparator();
-            this.groupBoxTileset = new System.Windows.Forms.GroupBox();
-            this.checkBoxMarkUnusedTiles = new System.Windows.Forms.CheckBox();
-            this.buttonExportTileset = new System.Windows.Forms.Button();
-            this.buttonEditTile = new System.Windows.Forms.Button();
-            this.comboBoxPalettes = new System.Windows.Forms.ComboBox();
-            this.comboBoxTilesets = new System.Windows.Forms.ComboBox();
-            this.buttonDuplicateTile = new System.Windows.Forms.Button();
-            this.panelTileset = new System.Windows.Forms.ScrollDrawPanel();
-            this.groupBoxProperties = new System.Windows.Forms.GroupBox();
-            this.comboBoxWorld = new System.Windows.Forms.ComboBox();
-            this.labelSizeCross = new System.Windows.Forms.Label();
-            this.numericUpDownHeight = new System.Windows.Forms.NumericUpDown();
-            this.labelSize = new System.Windows.Forms.Label();
-            this.numericUpDownWidth = new System.Windows.Forms.NumericUpDown();
-            this.buttonResize = new System.Windows.Forms.Button();
-            this.buttonToggleMusic = new System.Windows.Forms.Button();
-            this.comboBoxMusic = new System.Windows.Forms.ComboBox();
-            this.labelMusic = new System.Windows.Forms.Label();
-            this.checkBoxWorldSurface = new System.Windows.Forms.CheckBox();
-            this.checkBoxMagic = new System.Windows.Forms.CheckBox();
-            this.buttonIndoorDefaults = new System.Windows.Forms.Button();
-            this.buttonWorldMapDefaults = new System.Windows.Forms.Button();
-            this.checkBoxTravelGraphics = new System.Windows.Forms.CheckBox();
-            this.checkBoxNoSleepUntilDawn = new System.Windows.Forms.CheckBox();
-            this.checkBoxUnknown1 = new System.Windows.Forms.CheckBox();
-            this.checkBoxResting = new System.Windows.Forms.CheckBox();
-            this.radioButtonDungeon = new System.Windows.Forms.RadioButton();
-            this.radioButtonOutdoor = new System.Windows.Forms.RadioButton();
-            this.radioButtonIndoor = new System.Windows.Forms.RadioButton();
-            this.toolTipIndoor = new System.Windows.Forms.ToolTip(this.components);
-            this.toolTipOutdoor = new System.Windows.Forms.ToolTip(this.components);
-            this.toolTipDungeon = new System.Windows.Forms.ToolTip(this.components);
-            this.toolTipResting = new System.Windows.Forms.ToolTip(this.components);
-            this.toolTipNoSleepUntilDawn = new System.Windows.Forms.ToolTip(this.components);
-            this.toolTipMagic = new System.Windows.Forms.ToolTip(this.components);
-            this.toolTipWorldSurface = new System.Windows.Forms.ToolTip(this.components);
-            this.groupBoxCharacters = new System.Windows.Forms.GroupBox();
-            this.buttonPositions = new System.Windows.Forms.Button();
-            this.mapCharEditorControl = new AmbermoonMapCharEditor.MapCharEditorControl();
-            this.buttonPlaceCharacterOnMap = new System.Windows.Forms.Button();
-            this.labelCharacterPosition = new System.Windows.Forms.Label();
-            this.buttonToolBrush = new System.Windows.Forms.Button();
-            this.buttonToolColorPicker = new System.Windows.Forms.Button();
-            this.buttonToolLayers = new System.Windows.Forms.Button();
-            this.contextMenuStripLayers = new System.Windows.Forms.ContextMenuStrip(this.components);
-            this.toolStripMenuItemBackLayer = new System.Windows.Forms.ToolStripMenuItem();
-            this.toolStripMenuItemFrontLayer = new System.Windows.Forms.ToolStripMenuItem();
-            this.toolStripSeparatorLayers1 = new System.Windows.Forms.ToolStripSeparator();
-            this.toolStripMenuItemShowBackLayer = new System.Windows.Forms.ToolStripMenuItem();
-            this.toolStripMenuItemShowFrontLayer = new System.Windows.Forms.ToolStripMenuItem();
-            this.toolStripMenuShowAllowWalk = new System.Windows.Forms.ToolStripMenuItem();
-            this.toolStripMenuShowAllowHorse = new System.Windows.Forms.ToolStripMenuItem();
-            this.toolStripMenuShowAllowDisc = new System.Windows.Forms.ToolStripMenuItem();
-            this.toolStripMenuShowAllowRaft = new System.Windows.Forms.ToolStripMenuItem();
-            this.toolStripMenuShowAllowShip = new System.Windows.Forms.ToolStripMenuItem();
-            this.statusStrip = new System.Windows.Forms.StatusStrip();
-            this.toolStripStatusLabelTool = new System.Windows.Forms.ToolStripStatusLabel();
-            this.toolStripStatusLabelLayer = new System.Windows.Forms.ToolStripStatusLabel();
-            this.toolStripStatusLabelCurrentTile = new System.Windows.Forms.ToolStripStatusLabel();
-            this.toolStripStatusLabelCurrentTilesetTile = new System.Windows.Forms.ToolStripStatusLabel();
-            this.buttonToolBlocks = new System.Windows.Forms.Button();
-            this.contextMenuStripBlockModes = new System.Windows.Forms.ContextMenuStrip(this.components);
-            this.toolStripMenuItemBlocks2x2 = new System.Windows.Forms.ToolStripMenuItem();
-            this.toolStripMenuItemBlocks3x2 = new System.Windows.Forms.ToolStripMenuItem();
-            this.toolStripMenuItemBlocks3x3 = new System.Windows.Forms.ToolStripMenuItem();
-            this.buttonToolFill = new System.Windows.Forms.Button();
-            this.buttonToggleGrid = new System.Windows.Forms.Button();
-            this.toolTipBrush = new System.Windows.Forms.ToolTip(this.components);
-            this.toolTipBlocks = new System.Windows.Forms.ToolTip(this.components);
-            this.toolTipFill = new System.Windows.Forms.ToolTip(this.components);
-            this.toolTipColorPicker = new System.Windows.Forms.ToolTip(this.components);
-            this.toolTipLayers = new System.Windows.Forms.ToolTip(this.components);
-            this.toolTipGrid = new System.Windows.Forms.ToolTip(this.components);
-            this.buttonToggleTileMarker = new System.Windows.Forms.Button();
-            this.toolTipTileMarker = new System.Windows.Forms.ToolTip(this.components);
-            this.labelDivider = new System.Windows.Forms.Label();
-            this.buttonToolRemoveFrontLayer = new System.Windows.Forms.Button();
-            this.toolTipRemoveFrontLayer = new System.Windows.Forms.ToolTip(this.components);
-            this.groupBoxEvents = new System.Windows.Forms.GroupBox();
-            this.listViewEvents = new System.Windows.Forms.ListView();
-            this.columnHeaderEventId = new System.Windows.Forms.ColumnHeader();
-            this.columnHeaderEventDescription = new System.Windows.Forms.ColumnHeader();
-            this.buttonToggleEvents = new System.Windows.Forms.Button();
-            this.timerAnimation = new System.Windows.Forms.Timer(this.components);
-            this.trackBarZoom = new System.Windows.Forms.TrackBar();
-            this.buttonToolEventChanger = new System.Windows.Forms.Button();
-            this.menuStrip.SuspendLayout();
-            this.groupBoxTileset.SuspendLayout();
-            this.groupBoxProperties.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.numericUpDownHeight)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.numericUpDownWidth)).BeginInit();
-            this.groupBoxCharacters.SuspendLayout();
-            this.contextMenuStripLayers.SuspendLayout();
-            this.statusStrip.SuspendLayout();
-            this.contextMenuStripBlockModes.SuspendLayout();
-            this.groupBoxEvents.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.trackBarZoom)).BeginInit();
-            this.SuspendLayout();
+            panelMap = new System.Windows.Forms.MapDrawPanel();
+            menuStrip = new System.Windows.Forms.MenuStrip();
+            toolStripMenuItemMap = new System.Windows.Forms.ToolStripMenuItem();
+            toolStripMenuItemMapNew = new System.Windows.Forms.ToolStripMenuItem();
+            toolStripMenuItemMapSave = new System.Windows.Forms.ToolStripMenuItem();
+            toolStripMenuItemMapSaveAs = new System.Windows.Forms.ToolStripMenuItem();
+            toolStripSeparatorMap1 = new System.Windows.Forms.ToolStripSeparator();
+            toolStripMenuItemMapQuit = new System.Windows.Forms.ToolStripMenuItem();
+            toolStripMenuItemEdit = new System.Windows.Forms.ToolStripMenuItem();
+            toolStripMenuItemEditUndo = new System.Windows.Forms.ToolStripMenuItem();
+            toolStripMenuItemEditRedo = new System.Windows.Forms.ToolStripMenuItem();
+            toolStripSeparatorEdit1 = new System.Windows.Forms.ToolStripSeparator();
+            groupBoxTileset = new System.Windows.Forms.GroupBox();
+            checkBoxMarkUnusedTiles = new System.Windows.Forms.CheckBox();
+            buttonExportTileset = new System.Windows.Forms.Button();
+            buttonEditTile = new System.Windows.Forms.Button();
+            comboBoxPalettes = new System.Windows.Forms.ComboBox();
+            comboBoxTilesets = new System.Windows.Forms.ComboBox();
+            buttonDuplicateTile = new System.Windows.Forms.Button();
+            panelTileset = new System.Windows.Forms.ScrollDrawPanel();
+            groupBoxProperties = new System.Windows.Forms.GroupBox();
+            comboBoxWorld = new System.Windows.Forms.ComboBox();
+            labelSizeCross = new System.Windows.Forms.Label();
+            numericUpDownHeight = new System.Windows.Forms.NumericUpDown();
+            labelSize = new System.Windows.Forms.Label();
+            numericUpDownWidth = new System.Windows.Forms.NumericUpDown();
+            buttonResize = new System.Windows.Forms.Button();
+            buttonToggleMusic = new System.Windows.Forms.Button();
+            comboBoxMusic = new System.Windows.Forms.ComboBox();
+            labelMusic = new System.Windows.Forms.Label();
+            checkBoxWorldSurface = new System.Windows.Forms.CheckBox();
+            checkBoxMagic = new System.Windows.Forms.CheckBox();
+            buttonIndoorDefaults = new System.Windows.Forms.Button();
+            buttonWorldMapDefaults = new System.Windows.Forms.Button();
+            checkBoxTravelGraphics = new System.Windows.Forms.CheckBox();
+            checkBoxNoSleepUntilDawn = new System.Windows.Forms.CheckBox();
+            checkBoxUnknown1 = new System.Windows.Forms.CheckBox();
+            checkBoxResting = new System.Windows.Forms.CheckBox();
+            radioButtonDungeon = new System.Windows.Forms.RadioButton();
+            radioButtonOutdoor = new System.Windows.Forms.RadioButton();
+            radioButtonIndoor = new System.Windows.Forms.RadioButton();
+            toolTipIndoor = new System.Windows.Forms.ToolTip(components);
+            toolTipOutdoor = new System.Windows.Forms.ToolTip(components);
+            toolTipDungeon = new System.Windows.Forms.ToolTip(components);
+            toolTipResting = new System.Windows.Forms.ToolTip(components);
+            toolTipNoSleepUntilDawn = new System.Windows.Forms.ToolTip(components);
+            toolTipMagic = new System.Windows.Forms.ToolTip(components);
+            toolTipWorldSurface = new System.Windows.Forms.ToolTip(components);
+            groupBoxCharacters = new System.Windows.Forms.GroupBox();
+            buttonPositions = new System.Windows.Forms.Button();
+            mapCharEditorControl = new AmbermoonMapCharEditor.MapCharEditorControl();
+            buttonPlaceCharacterOnMap = new System.Windows.Forms.Button();
+            labelCharacterPosition = new System.Windows.Forms.Label();
+            buttonToolBrush = new System.Windows.Forms.Button();
+            buttonToolColorPicker = new System.Windows.Forms.Button();
+            buttonToolLayers = new System.Windows.Forms.Button();
+            contextMenuStripLayers = new System.Windows.Forms.ContextMenuStrip(components);
+            toolStripMenuItemBackLayer = new System.Windows.Forms.ToolStripMenuItem();
+            toolStripMenuItemFrontLayer = new System.Windows.Forms.ToolStripMenuItem();
+            toolStripSeparatorLayers1 = new System.Windows.Forms.ToolStripSeparator();
+            toolStripMenuItemShowBackLayer = new System.Windows.Forms.ToolStripMenuItem();
+            toolStripMenuItemShowFrontLayer = new System.Windows.Forms.ToolStripMenuItem();
+            toolStripMenuShowAllowWalk = new System.Windows.Forms.ToolStripMenuItem();
+            toolStripMenuShowAllowHorse = new System.Windows.Forms.ToolStripMenuItem();
+            toolStripMenuShowAllowDisc = new System.Windows.Forms.ToolStripMenuItem();
+            toolStripMenuShowAllowRaft = new System.Windows.Forms.ToolStripMenuItem();
+            toolStripMenuShowAllowShip = new System.Windows.Forms.ToolStripMenuItem();
+            statusStrip = new System.Windows.Forms.StatusStrip();
+            toolStripStatusLabelTool = new System.Windows.Forms.ToolStripStatusLabel();
+            toolStripStatusLabelLayer = new System.Windows.Forms.ToolStripStatusLabel();
+            toolStripStatusLabelCurrentTile = new System.Windows.Forms.ToolStripStatusLabel();
+            toolStripStatusLabelCurrentTilesetTile = new System.Windows.Forms.ToolStripStatusLabel();
+            buttonToolBlocks = new System.Windows.Forms.Button();
+            contextMenuStripBlockModes = new System.Windows.Forms.ContextMenuStrip(components);
+            toolStripMenuItemBlocks2x2 = new System.Windows.Forms.ToolStripMenuItem();
+            toolStripMenuItemBlocks3x2 = new System.Windows.Forms.ToolStripMenuItem();
+            toolStripMenuItemBlocks3x3 = new System.Windows.Forms.ToolStripMenuItem();
+            buttonToolFill = new System.Windows.Forms.Button();
+            buttonToggleGrid = new System.Windows.Forms.Button();
+            toolTipBrush = new System.Windows.Forms.ToolTip(components);
+            toolTipBlocks = new System.Windows.Forms.ToolTip(components);
+            toolTipFill = new System.Windows.Forms.ToolTip(components);
+            toolTipColorPicker = new System.Windows.Forms.ToolTip(components);
+            toolTipLayers = new System.Windows.Forms.ToolTip(components);
+            toolTipGrid = new System.Windows.Forms.ToolTip(components);
+            buttonToggleTileMarker = new System.Windows.Forms.Button();
+            toolTipTileMarker = new System.Windows.Forms.ToolTip(components);
+            labelDivider = new System.Windows.Forms.Label();
+            buttonToolRemoveFrontLayer = new System.Windows.Forms.Button();
+            toolTipRemoveFrontLayer = new System.Windows.Forms.ToolTip(components);
+            groupBoxEvents = new System.Windows.Forms.GroupBox();
+            listViewEvents = new System.Windows.Forms.ListView();
+            columnHeaderEventId = new System.Windows.Forms.ColumnHeader();
+            columnHeaderEventDescription = new System.Windows.Forms.ColumnHeader();
+            buttonToggleEvents = new System.Windows.Forms.Button();
+            timerAnimation = new System.Windows.Forms.Timer(components);
+            trackBarZoom = new System.Windows.Forms.TrackBar();
+            buttonToolEventChanger = new System.Windows.Forms.Button();
+            menuStrip.SuspendLayout();
+            groupBoxTileset.SuspendLayout();
+            groupBoxProperties.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)numericUpDownHeight).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)numericUpDownWidth).BeginInit();
+            groupBoxCharacters.SuspendLayout();
+            contextMenuStripLayers.SuspendLayout();
+            statusStrip.SuspendLayout();
+            contextMenuStripBlockModes.SuspendLayout();
+            groupBoxEvents.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)trackBarZoom).BeginInit();
+            SuspendLayout();
             // 
             // panelMap
             // 
-            this.panelMap.BackColor = System.Drawing.Color.Black;
-            this.panelMap.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
-            this.panelMap.Location = new System.Drawing.Point(0, 27);
-            this.panelMap.Margin = new System.Windows.Forms.Padding(2, 3, 2, 3);
-            this.panelMap.Name = "panelMap";
-            this.panelMap.Size = new System.Drawing.Size(772, 484);
-            this.panelMap.TabIndex = 0;
-            this.panelMap.Scroll += new System.Windows.Forms.ScrollEventHandler(this.panelMap_Scroll);
-            this.panelMap.Paint += new System.Windows.Forms.PaintEventHandler(this.panelMap_Paint);
-            this.panelMap.MouseDown += new System.Windows.Forms.MouseEventHandler(this.panelMap_MouseDown);
-            this.panelMap.MouseLeave += new System.EventHandler(this.panelMap_MouseLeave);
-            this.panelMap.MouseMove += new System.Windows.Forms.MouseEventHandler(this.panelMap_MouseMove);
+            panelMap.BackColor = System.Drawing.Color.Black;
+            panelMap.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
+            panelMap.Location = new System.Drawing.Point(0, 36);
+            panelMap.Margin = new System.Windows.Forms.Padding(2, 4, 2, 4);
+            panelMap.Name = "panelMap";
+            panelMap.Size = new System.Drawing.Size(882, 644);
+            panelMap.TabIndex = 0;
+            panelMap.Scroll += panelMap_Scroll;
+            panelMap.Paint += panelMap_Paint;
+            panelMap.MouseDown += panelMap_MouseDown;
+            panelMap.MouseLeave += panelMap_MouseLeave;
+            panelMap.MouseMove += panelMap_MouseMove;
             // 
             // menuStrip
             // 
-            this.menuStrip.ImageScalingSize = new System.Drawing.Size(20, 20);
-            this.menuStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.toolStripMenuItemMap,
-            this.toolStripMenuItemEdit});
-            this.menuStrip.Location = new System.Drawing.Point(0, 0);
-            this.menuStrip.Name = "menuStrip";
-            this.menuStrip.Size = new System.Drawing.Size(1153, 24);
-            this.menuStrip.TabIndex = 1;
-            this.menuStrip.Text = "menuStrip1";
+            menuStrip.ImageScalingSize = new System.Drawing.Size(20, 20);
+            menuStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { toolStripMenuItemMap, toolStripMenuItemEdit });
+            menuStrip.Location = new System.Drawing.Point(0, 0);
+            menuStrip.Name = "menuStrip";
+            menuStrip.Padding = new System.Windows.Forms.Padding(7, 3, 0, 3);
+            menuStrip.Size = new System.Drawing.Size(1318, 30);
+            menuStrip.TabIndex = 1;
+            menuStrip.Text = "menuStrip1";
             // 
             // toolStripMenuItemMap
             // 
-            this.toolStripMenuItemMap.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.toolStripMenuItemMapNew,
-            this.toolStripMenuItemMapSave,
-            this.toolStripMenuItemMapSaveAs,
-            this.toolStripSeparatorMap1,
-            this.toolStripMenuItemMapQuit});
-            this.toolStripMenuItemMap.Name = "toolStripMenuItemMap";
-            this.toolStripMenuItemMap.Size = new System.Drawing.Size(43, 20);
-            this.toolStripMenuItemMap.Text = "&Map";
+            toolStripMenuItemMap.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { toolStripMenuItemMapNew, toolStripMenuItemMapSave, toolStripMenuItemMapSaveAs, toolStripSeparatorMap1, toolStripMenuItemMapQuit });
+            toolStripMenuItemMap.Name = "toolStripMenuItemMap";
+            toolStripMenuItemMap.Size = new System.Drawing.Size(53, 24);
+            toolStripMenuItemMap.Text = "&Map";
             // 
             // toolStripMenuItemMapNew
             // 
-            this.toolStripMenuItemMapNew.Name = "toolStripMenuItemMapNew";
-            this.toolStripMenuItemMapNew.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.O)));
-            this.toolStripMenuItemMapNew.Size = new System.Drawing.Size(249, 22);
-            this.toolStripMenuItemMapNew.Text = "New/Load ...";
-            this.toolStripMenuItemMapNew.Click += new System.EventHandler(this.toolStripMenuItemMapNew_Click);
+            toolStripMenuItemMapNew.Name = "toolStripMenuItemMapNew";
+            toolStripMenuItemMapNew.ShortcutKeys = System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.O;
+            toolStripMenuItemMapNew.Size = new System.Drawing.Size(244, 26);
+            toolStripMenuItemMapNew.Text = "New/Load ...";
+            toolStripMenuItemMapNew.Click += toolStripMenuItemMapNew_Click;
             // 
             // toolStripMenuItemMapSave
             // 
-            this.toolStripMenuItemMapSave.Enabled = false;
-            this.toolStripMenuItemMapSave.Name = "toolStripMenuItemMapSave";
-            this.toolStripMenuItemMapSave.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.S)));
-            this.toolStripMenuItemMapSave.Size = new System.Drawing.Size(249, 22);
-            this.toolStripMenuItemMapSave.Text = "Save";
-            this.toolStripMenuItemMapSave.Click += new System.EventHandler(this.toolStripMenuItemMapSave_Click);
+            toolStripMenuItemMapSave.Enabled = false;
+            toolStripMenuItemMapSave.Name = "toolStripMenuItemMapSave";
+            toolStripMenuItemMapSave.ShortcutKeys = System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.S;
+            toolStripMenuItemMapSave.Size = new System.Drawing.Size(244, 26);
+            toolStripMenuItemMapSave.Text = "Save";
+            toolStripMenuItemMapSave.Click += toolStripMenuItemMapSave_Click;
             // 
             // toolStripMenuItemMapSaveAs
             // 
-            this.toolStripMenuItemMapSaveAs.Name = "toolStripMenuItemMapSaveAs";
-            this.toolStripMenuItemMapSaveAs.ShortcutKeys = ((System.Windows.Forms.Keys)(((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.Shift) 
-            | System.Windows.Forms.Keys.S)));
-            this.toolStripMenuItemMapSaveAs.Size = new System.Drawing.Size(249, 22);
-            this.toolStripMenuItemMapSaveAs.Text = "Save as ...";
-            this.toolStripMenuItemMapSaveAs.Click += new System.EventHandler(this.toolStripMenuItemMapSaveAs_Click);
+            toolStripMenuItemMapSaveAs.Name = "toolStripMenuItemMapSaveAs";
+            toolStripMenuItemMapSaveAs.ShortcutKeys = System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.Shift | System.Windows.Forms.Keys.S;
+            toolStripMenuItemMapSaveAs.Size = new System.Drawing.Size(244, 26);
+            toolStripMenuItemMapSaveAs.Text = "Save as ...";
+            toolStripMenuItemMapSaveAs.Click += toolStripMenuItemMapSaveAs_Click;
             // 
             // toolStripSeparatorMap1
             // 
-            this.toolStripSeparatorMap1.Name = "toolStripSeparatorMap1";
-            this.toolStripSeparatorMap1.Size = new System.Drawing.Size(246, 6);
+            toolStripSeparatorMap1.Name = "toolStripSeparatorMap1";
+            toolStripSeparatorMap1.Size = new System.Drawing.Size(241, 6);
             // 
             // toolStripMenuItemMapQuit
             // 
-            this.toolStripMenuItemMapQuit.Name = "toolStripMenuItemMapQuit";
-            this.toolStripMenuItemMapQuit.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Alt | System.Windows.Forms.Keys.F4)));
-            this.toolStripMenuItemMapQuit.Size = new System.Drawing.Size(249, 22);
-            this.toolStripMenuItemMapQuit.Text = "Quit";
-            this.toolStripMenuItemMapQuit.Click += new System.EventHandler(this.toolStripMenuItemMapQuit_Click);
+            toolStripMenuItemMapQuit.Name = "toolStripMenuItemMapQuit";
+            toolStripMenuItemMapQuit.ShortcutKeys = System.Windows.Forms.Keys.Alt | System.Windows.Forms.Keys.F4;
+            toolStripMenuItemMapQuit.Size = new System.Drawing.Size(244, 26);
+            toolStripMenuItemMapQuit.Text = "Quit";
+            toolStripMenuItemMapQuit.Click += toolStripMenuItemMapQuit_Click;
             // 
             // toolStripMenuItemEdit
             // 
-            this.toolStripMenuItemEdit.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.toolStripMenuItemEditUndo,
-            this.toolStripMenuItemEditRedo,
-            this.toolStripSeparatorEdit1});
-            this.toolStripMenuItemEdit.Name = "toolStripMenuItemEdit";
-            this.toolStripMenuItemEdit.Size = new System.Drawing.Size(39, 20);
-            this.toolStripMenuItemEdit.Text = "&Edit";
+            toolStripMenuItemEdit.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { toolStripMenuItemEditUndo, toolStripMenuItemEditRedo, toolStripSeparatorEdit1 });
+            toolStripMenuItemEdit.Name = "toolStripMenuItemEdit";
+            toolStripMenuItemEdit.Size = new System.Drawing.Size(49, 24);
+            toolStripMenuItemEdit.Text = "&Edit";
             // 
             // toolStripMenuItemEditUndo
             // 
-            this.toolStripMenuItemEditUndo.Enabled = false;
-            this.toolStripMenuItemEditUndo.Name = "toolStripMenuItemEditUndo";
-            this.toolStripMenuItemEditUndo.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.Z)));
-            this.toolStripMenuItemEditUndo.Size = new System.Drawing.Size(146, 22);
-            this.toolStripMenuItemEditUndo.Text = "Undo";
-            this.toolStripMenuItemEditUndo.Click += new System.EventHandler(this.toolStripMenuItemEditUndo_Click);
+            toolStripMenuItemEditUndo.Enabled = false;
+            toolStripMenuItemEditUndo.Name = "toolStripMenuItemEditUndo";
+            toolStripMenuItemEditUndo.ShortcutKeys = System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.Z;
+            toolStripMenuItemEditUndo.Size = new System.Drawing.Size(179, 26);
+            toolStripMenuItemEditUndo.Text = "Undo";
+            toolStripMenuItemEditUndo.Click += toolStripMenuItemEditUndo_Click;
             // 
             // toolStripMenuItemEditRedo
             // 
-            this.toolStripMenuItemEditRedo.Enabled = false;
-            this.toolStripMenuItemEditRedo.Name = "toolStripMenuItemEditRedo";
-            this.toolStripMenuItemEditRedo.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.Y)));
-            this.toolStripMenuItemEditRedo.Size = new System.Drawing.Size(146, 22);
-            this.toolStripMenuItemEditRedo.Text = "Redo";
-            this.toolStripMenuItemEditRedo.Click += new System.EventHandler(this.toolStripMenuItemEditRedo_Click);
+            toolStripMenuItemEditRedo.Enabled = false;
+            toolStripMenuItemEditRedo.Name = "toolStripMenuItemEditRedo";
+            toolStripMenuItemEditRedo.ShortcutKeys = System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.Y;
+            toolStripMenuItemEditRedo.Size = new System.Drawing.Size(179, 26);
+            toolStripMenuItemEditRedo.Text = "Redo";
+            toolStripMenuItemEditRedo.Click += toolStripMenuItemEditRedo_Click;
             // 
             // toolStripSeparatorEdit1
             // 
-            this.toolStripSeparatorEdit1.Name = "toolStripSeparatorEdit1";
-            this.toolStripSeparatorEdit1.Size = new System.Drawing.Size(143, 6);
+            toolStripSeparatorEdit1.Name = "toolStripSeparatorEdit1";
+            toolStripSeparatorEdit1.Size = new System.Drawing.Size(176, 6);
             // 
             // groupBoxTileset
             // 
-            this.groupBoxTileset.Controls.Add(this.checkBoxMarkUnusedTiles);
-            this.groupBoxTileset.Controls.Add(this.buttonExportTileset);
-            this.groupBoxTileset.Controls.Add(this.buttonEditTile);
-            this.groupBoxTileset.Controls.Add(this.comboBoxPalettes);
-            this.groupBoxTileset.Controls.Add(this.comboBoxTilesets);
-            this.groupBoxTileset.Controls.Add(this.buttonDuplicateTile);
-            this.groupBoxTileset.Controls.Add(this.panelTileset);
-            this.groupBoxTileset.Location = new System.Drawing.Point(2, 510);
-            this.groupBoxTileset.Margin = new System.Windows.Forms.Padding(2, 3, 2, 3);
-            this.groupBoxTileset.Name = "groupBoxTileset";
-            this.groupBoxTileset.Padding = new System.Windows.Forms.Padding(2, 3, 2, 3);
-            this.groupBoxTileset.Size = new System.Drawing.Size(803, 177);
-            this.groupBoxTileset.TabIndex = 2;
-            this.groupBoxTileset.TabStop = false;
-            this.groupBoxTileset.Text = "Tileset";
+            groupBoxTileset.Controls.Add(checkBoxMarkUnusedTiles);
+            groupBoxTileset.Controls.Add(buttonExportTileset);
+            groupBoxTileset.Controls.Add(buttonEditTile);
+            groupBoxTileset.Controls.Add(comboBoxPalettes);
+            groupBoxTileset.Controls.Add(comboBoxTilesets);
+            groupBoxTileset.Controls.Add(buttonDuplicateTile);
+            groupBoxTileset.Controls.Add(panelTileset);
+            groupBoxTileset.Location = new System.Drawing.Point(2, 680);
+            groupBoxTileset.Margin = new System.Windows.Forms.Padding(2, 4, 2, 4);
+            groupBoxTileset.Name = "groupBoxTileset";
+            groupBoxTileset.Padding = new System.Windows.Forms.Padding(2, 4, 2, 4);
+            groupBoxTileset.Size = new System.Drawing.Size(918, 236);
+            groupBoxTileset.TabIndex = 2;
+            groupBoxTileset.TabStop = false;
+            groupBoxTileset.Text = "Tileset";
             // 
             // checkBoxMarkUnusedTiles
             // 
-            this.checkBoxMarkUnusedTiles.AutoSize = true;
-            this.checkBoxMarkUnusedTiles.Location = new System.Drawing.Point(707, 73);
-            this.checkBoxMarkUnusedTiles.Name = "checkBoxMarkUnusedTiles";
-            this.checkBoxMarkUnusedTiles.Size = new System.Drawing.Size(95, 19);
-            this.checkBoxMarkUnusedTiles.TabIndex = 6;
-            this.checkBoxMarkUnusedTiles.Text = "Mark unused";
-            this.checkBoxMarkUnusedTiles.UseVisualStyleBackColor = true;
-            this.checkBoxMarkUnusedTiles.CheckedChanged += new System.EventHandler(this.checkBoxMarkUnusedTiles_CheckedChanged);
+            checkBoxMarkUnusedTiles.AutoSize = true;
+            checkBoxMarkUnusedTiles.Location = new System.Drawing.Point(808, 97);
+            checkBoxMarkUnusedTiles.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
+            checkBoxMarkUnusedTiles.Name = "checkBoxMarkUnusedTiles";
+            checkBoxMarkUnusedTiles.Size = new System.Drawing.Size(115, 24);
+            checkBoxMarkUnusedTiles.TabIndex = 6;
+            checkBoxMarkUnusedTiles.Text = "Mark unused";
+            checkBoxMarkUnusedTiles.UseVisualStyleBackColor = true;
+            checkBoxMarkUnusedTiles.CheckedChanged += checkBoxMarkUnusedTiles_CheckedChanged;
             // 
             // buttonExportTileset
             // 
-            this.buttonExportTileset.Location = new System.Drawing.Point(707, 148);
-            this.buttonExportTileset.Margin = new System.Windows.Forms.Padding(2, 3, 2, 3);
-            this.buttonExportTileset.Name = "buttonExportTileset";
-            this.buttonExportTileset.Size = new System.Drawing.Size(89, 24);
-            this.buttonExportTileset.TabIndex = 5;
-            this.buttonExportTileset.Text = "Export tileset ...";
-            this.buttonExportTileset.UseVisualStyleBackColor = true;
-            this.buttonExportTileset.Click += new System.EventHandler(this.buttonExportTileset_Click);
+            buttonExportTileset.Location = new System.Drawing.Point(808, 197);
+            buttonExportTileset.Margin = new System.Windows.Forms.Padding(2, 4, 2, 4);
+            buttonExportTileset.Name = "buttonExportTileset";
+            buttonExportTileset.Size = new System.Drawing.Size(102, 32);
+            buttonExportTileset.TabIndex = 5;
+            buttonExportTileset.Text = "Export tileset ...";
+            buttonExportTileset.UseVisualStyleBackColor = true;
+            buttonExportTileset.Click += buttonExportTileset_Click;
             // 
             // buttonEditTile
             // 
-            this.buttonEditTile.Location = new System.Drawing.Point(707, 94);
-            this.buttonEditTile.Margin = new System.Windows.Forms.Padding(2, 3, 2, 3);
-            this.buttonEditTile.Name = "buttonEditTile";
-            this.buttonEditTile.Size = new System.Drawing.Size(89, 24);
-            this.buttonEditTile.TabIndex = 4;
-            this.buttonEditTile.Text = "Edit tile ...";
-            this.buttonEditTile.UseVisualStyleBackColor = true;
-            this.buttonEditTile.Click += new System.EventHandler(this.buttonEditTile_Click);
+            buttonEditTile.Location = new System.Drawing.Point(808, 125);
+            buttonEditTile.Margin = new System.Windows.Forms.Padding(2, 4, 2, 4);
+            buttonEditTile.Name = "buttonEditTile";
+            buttonEditTile.Size = new System.Drawing.Size(102, 32);
+            buttonEditTile.TabIndex = 4;
+            buttonEditTile.Text = "Edit tile ...";
+            buttonEditTile.UseVisualStyleBackColor = true;
+            buttonEditTile.Click += buttonEditTile_Click;
             // 
             // comboBoxPalettes
             // 
-            this.comboBoxPalettes.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            this.comboBoxPalettes.FormattingEnabled = true;
-            this.comboBoxPalettes.Location = new System.Drawing.Point(707, 47);
-            this.comboBoxPalettes.Margin = new System.Windows.Forms.Padding(2, 3, 2, 3);
-            this.comboBoxPalettes.Name = "comboBoxPalettes";
-            this.comboBoxPalettes.Size = new System.Drawing.Size(89, 23);
-            this.comboBoxPalettes.TabIndex = 3;
-            this.comboBoxPalettes.SelectedIndexChanged += new System.EventHandler(this.comboBoxPalettes_SelectedIndexChanged);
+            comboBoxPalettes.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            comboBoxPalettes.FormattingEnabled = true;
+            comboBoxPalettes.Location = new System.Drawing.Point(808, 63);
+            comboBoxPalettes.Margin = new System.Windows.Forms.Padding(2, 4, 2, 4);
+            comboBoxPalettes.Name = "comboBoxPalettes";
+            comboBoxPalettes.Size = new System.Drawing.Size(101, 28);
+            comboBoxPalettes.TabIndex = 3;
+            comboBoxPalettes.SelectedIndexChanged += comboBoxPalettes_SelectedIndexChanged;
             // 
             // comboBoxTilesets
             // 
-            this.comboBoxTilesets.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            this.comboBoxTilesets.FormattingEnabled = true;
-            this.comboBoxTilesets.Location = new System.Drawing.Point(707, 21);
-            this.comboBoxTilesets.Margin = new System.Windows.Forms.Padding(2, 3, 2, 3);
-            this.comboBoxTilesets.Name = "comboBoxTilesets";
-            this.comboBoxTilesets.Size = new System.Drawing.Size(89, 23);
-            this.comboBoxTilesets.TabIndex = 2;
-            this.comboBoxTilesets.SelectedIndexChanged += new System.EventHandler(this.comboBoxTilesets_SelectedIndexChanged);
+            comboBoxTilesets.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            comboBoxTilesets.FormattingEnabled = true;
+            comboBoxTilesets.Location = new System.Drawing.Point(808, 28);
+            comboBoxTilesets.Margin = new System.Windows.Forms.Padding(2, 4, 2, 4);
+            comboBoxTilesets.Name = "comboBoxTilesets";
+            comboBoxTilesets.Size = new System.Drawing.Size(101, 28);
+            comboBoxTilesets.TabIndex = 2;
+            comboBoxTilesets.SelectedIndexChanged += comboBoxTilesets_SelectedIndexChanged;
             // 
             // buttonDuplicateTile
             // 
-            this.buttonDuplicateTile.Location = new System.Drawing.Point(707, 121);
-            this.buttonDuplicateTile.Margin = new System.Windows.Forms.Padding(2, 3, 2, 3);
-            this.buttonDuplicateTile.Name = "buttonDuplicateTile";
-            this.buttonDuplicateTile.Size = new System.Drawing.Size(89, 24);
-            this.buttonDuplicateTile.TabIndex = 1;
-            this.buttonDuplicateTile.Text = "Duplicate tile";
-            this.buttonDuplicateTile.UseVisualStyleBackColor = true;
-            this.buttonDuplicateTile.Click += new System.EventHandler(this.buttonDuplicateTile_Click);
+            buttonDuplicateTile.Location = new System.Drawing.Point(808, 161);
+            buttonDuplicateTile.Margin = new System.Windows.Forms.Padding(2, 4, 2, 4);
+            buttonDuplicateTile.Name = "buttonDuplicateTile";
+            buttonDuplicateTile.Size = new System.Drawing.Size(102, 32);
+            buttonDuplicateTile.TabIndex = 1;
+            buttonDuplicateTile.Text = "Duplicate tile";
+            buttonDuplicateTile.UseVisualStyleBackColor = true;
+            buttonDuplicateTile.Click += buttonDuplicateTile_Click;
             // 
             // panelTileset
             // 
-            this.panelTileset.AutoScroll = true;
-            this.panelTileset.BackColor = System.Drawing.Color.Black;
-            this.panelTileset.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
-            this.panelTileset.Location = new System.Drawing.Point(9, 21);
-            this.panelTileset.Margin = new System.Windows.Forms.Padding(2, 3, 2, 3);
-            this.panelTileset.Name = "panelTileset";
-            this.panelTileset.Size = new System.Drawing.Size(695, 149);
-            this.panelTileset.TabIndex = 0;
-            this.panelTileset.Paint += new System.Windows.Forms.PaintEventHandler(this.panelTileset_Paint);
-            this.panelTileset.MouseDown += new System.Windows.Forms.MouseEventHandler(this.panelTileset_MouseDown);
-            this.panelTileset.MouseLeave += new System.EventHandler(this.panelTileset_MouseLeave);
-            this.panelTileset.MouseMove += new System.Windows.Forms.MouseEventHandler(this.panelTileset_MouseMove);
+            panelTileset.AutoScroll = true;
+            panelTileset.BackColor = System.Drawing.Color.Black;
+            panelTileset.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
+            panelTileset.Location = new System.Drawing.Point(10, 28);
+            panelTileset.Margin = new System.Windows.Forms.Padding(2, 4, 2, 4);
+            panelTileset.Name = "panelTileset";
+            panelTileset.Size = new System.Drawing.Size(794, 197);
+            panelTileset.TabIndex = 0;
+            panelTileset.Paint += panelTileset_Paint;
+            panelTileset.MouseDown += panelTileset_MouseDown;
+            panelTileset.MouseLeave += panelTileset_MouseLeave;
+            panelTileset.MouseMove += panelTileset_MouseMove;
             // 
             // groupBoxProperties
             // 
-            this.groupBoxProperties.Controls.Add(this.comboBoxWorld);
-            this.groupBoxProperties.Controls.Add(this.labelSizeCross);
-            this.groupBoxProperties.Controls.Add(this.numericUpDownHeight);
-            this.groupBoxProperties.Controls.Add(this.labelSize);
-            this.groupBoxProperties.Controls.Add(this.numericUpDownWidth);
-            this.groupBoxProperties.Controls.Add(this.buttonResize);
-            this.groupBoxProperties.Controls.Add(this.buttonToggleMusic);
-            this.groupBoxProperties.Controls.Add(this.comboBoxMusic);
-            this.groupBoxProperties.Controls.Add(this.labelMusic);
-            this.groupBoxProperties.Controls.Add(this.checkBoxWorldSurface);
-            this.groupBoxProperties.Controls.Add(this.checkBoxMagic);
-            this.groupBoxProperties.Controls.Add(this.buttonIndoorDefaults);
-            this.groupBoxProperties.Controls.Add(this.buttonWorldMapDefaults);
-            this.groupBoxProperties.Controls.Add(this.checkBoxTravelGraphics);
-            this.groupBoxProperties.Controls.Add(this.checkBoxNoSleepUntilDawn);
-            this.groupBoxProperties.Controls.Add(this.checkBoxUnknown1);
-            this.groupBoxProperties.Controls.Add(this.checkBoxResting);
-            this.groupBoxProperties.Controls.Add(this.radioButtonDungeon);
-            this.groupBoxProperties.Controls.Add(this.radioButtonOutdoor);
-            this.groupBoxProperties.Controls.Add(this.radioButtonIndoor);
-            this.groupBoxProperties.Location = new System.Drawing.Point(807, 26);
-            this.groupBoxProperties.Margin = new System.Windows.Forms.Padding(2, 3, 2, 3);
-            this.groupBoxProperties.Name = "groupBoxProperties";
-            this.groupBoxProperties.Padding = new System.Windows.Forms.Padding(2, 3, 2, 3);
-            this.groupBoxProperties.Size = new System.Drawing.Size(338, 224);
-            this.groupBoxProperties.TabIndex = 3;
-            this.groupBoxProperties.TabStop = false;
-            this.groupBoxProperties.Text = "Properties";
+            groupBoxProperties.Controls.Add(comboBoxWorld);
+            groupBoxProperties.Controls.Add(labelSizeCross);
+            groupBoxProperties.Controls.Add(numericUpDownHeight);
+            groupBoxProperties.Controls.Add(labelSize);
+            groupBoxProperties.Controls.Add(numericUpDownWidth);
+            groupBoxProperties.Controls.Add(buttonResize);
+            groupBoxProperties.Controls.Add(buttonToggleMusic);
+            groupBoxProperties.Controls.Add(comboBoxMusic);
+            groupBoxProperties.Controls.Add(labelMusic);
+            groupBoxProperties.Controls.Add(checkBoxWorldSurface);
+            groupBoxProperties.Controls.Add(checkBoxMagic);
+            groupBoxProperties.Controls.Add(buttonIndoorDefaults);
+            groupBoxProperties.Controls.Add(buttonWorldMapDefaults);
+            groupBoxProperties.Controls.Add(checkBoxTravelGraphics);
+            groupBoxProperties.Controls.Add(checkBoxNoSleepUntilDawn);
+            groupBoxProperties.Controls.Add(checkBoxUnknown1);
+            groupBoxProperties.Controls.Add(checkBoxResting);
+            groupBoxProperties.Controls.Add(radioButtonDungeon);
+            groupBoxProperties.Controls.Add(radioButtonOutdoor);
+            groupBoxProperties.Controls.Add(radioButtonIndoor);
+            groupBoxProperties.Location = new System.Drawing.Point(922, 35);
+            groupBoxProperties.Margin = new System.Windows.Forms.Padding(2, 4, 2, 4);
+            groupBoxProperties.Name = "groupBoxProperties";
+            groupBoxProperties.Padding = new System.Windows.Forms.Padding(2, 4, 2, 4);
+            groupBoxProperties.Size = new System.Drawing.Size(386, 299);
+            groupBoxProperties.TabIndex = 3;
+            groupBoxProperties.TabStop = false;
+            groupBoxProperties.Text = "Properties";
             // 
             // comboBoxWorld
             // 
-            this.comboBoxWorld.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            this.comboBoxWorld.FormattingEnabled = true;
-            this.comboBoxWorld.Items.AddRange(new object[] {
-            "Lyramion",
-            "Forest Moon",
-            "Morag"});
-            this.comboBoxWorld.Location = new System.Drawing.Point(229, 45);
-            this.comboBoxWorld.Margin = new System.Windows.Forms.Padding(2, 3, 2, 3);
-            this.comboBoxWorld.Name = "comboBoxWorld";
-            this.comboBoxWorld.Size = new System.Drawing.Size(104, 23);
-            this.comboBoxWorld.TabIndex = 21;
-            this.comboBoxWorld.SelectedIndexChanged += new System.EventHandler(this.comboBoxWorld_SelectedIndexChanged);
+            comboBoxWorld.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            comboBoxWorld.FormattingEnabled = true;
+            comboBoxWorld.Items.AddRange(new object[] { "Lyramion", "Forest Moon", "Morag" });
+            comboBoxWorld.Location = new System.Drawing.Point(262, 60);
+            comboBoxWorld.Margin = new System.Windows.Forms.Padding(2, 4, 2, 4);
+            comboBoxWorld.Name = "comboBoxWorld";
+            comboBoxWorld.Size = new System.Drawing.Size(118, 28);
+            comboBoxWorld.TabIndex = 21;
+            comboBoxWorld.SelectedIndexChanged += comboBoxWorld_SelectedIndexChanged;
             // 
             // labelSizeCross
             // 
-            this.labelSizeCross.AutoSize = true;
-            this.labelSizeCross.Location = new System.Drawing.Point(90, 24);
-            this.labelSizeCross.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
-            this.labelSizeCross.Name = "labelSizeCross";
-            this.labelSizeCross.Size = new System.Drawing.Size(12, 15);
-            this.labelSizeCross.TabIndex = 20;
-            this.labelSizeCross.Text = "x";
+            labelSizeCross.AutoSize = true;
+            labelSizeCross.Location = new System.Drawing.Point(103, 32);
+            labelSizeCross.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
+            labelSizeCross.Name = "labelSizeCross";
+            labelSizeCross.Size = new System.Drawing.Size(16, 20);
+            labelSizeCross.TabIndex = 20;
+            labelSizeCross.Text = "x";
             // 
             // numericUpDownHeight
             // 
-            this.numericUpDownHeight.Enabled = false;
-            this.numericUpDownHeight.Location = new System.Drawing.Point(104, 21);
-            this.numericUpDownHeight.Margin = new System.Windows.Forms.Padding(2, 3, 2, 3);
-            this.numericUpDownHeight.Maximum = new decimal(new int[] {
-            200,
-            0,
-            0,
-            0});
-            this.numericUpDownHeight.Minimum = new decimal(new int[] {
-            9,
-            0,
-            0,
-            0});
-            this.numericUpDownHeight.Name = "numericUpDownHeight";
-            this.numericUpDownHeight.Size = new System.Drawing.Size(44, 23);
-            this.numericUpDownHeight.TabIndex = 19;
-            this.numericUpDownHeight.Value = new decimal(new int[] {
-            50,
-            0,
-            0,
-            0});
-            this.numericUpDownHeight.ValueChanged += new System.EventHandler(this.numericUpDownHeight_ValueChanged);
+            numericUpDownHeight.Enabled = false;
+            numericUpDownHeight.Location = new System.Drawing.Point(119, 28);
+            numericUpDownHeight.Margin = new System.Windows.Forms.Padding(2, 4, 2, 4);
+            numericUpDownHeight.Maximum = new decimal(new int[] { 200, 0, 0, 0 });
+            numericUpDownHeight.Minimum = new decimal(new int[] { 9, 0, 0, 0 });
+            numericUpDownHeight.Name = "numericUpDownHeight";
+            numericUpDownHeight.Size = new System.Drawing.Size(50, 27);
+            numericUpDownHeight.TabIndex = 19;
+            numericUpDownHeight.Value = new decimal(new int[] { 50, 0, 0, 0 });
+            numericUpDownHeight.ValueChanged += numericUpDownHeight_ValueChanged;
             // 
             // labelSize
             // 
-            this.labelSize.AutoSize = true;
-            this.labelSize.Location = new System.Drawing.Point(7, 24);
-            this.labelSize.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
-            this.labelSize.Name = "labelSize";
-            this.labelSize.Size = new System.Drawing.Size(30, 15);
-            this.labelSize.TabIndex = 18;
-            this.labelSize.Text = "Size:";
+            labelSize.AutoSize = true;
+            labelSize.Location = new System.Drawing.Point(8, 32);
+            labelSize.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
+            labelSize.Name = "labelSize";
+            labelSize.Size = new System.Drawing.Size(39, 20);
+            labelSize.TabIndex = 18;
+            labelSize.Text = "Size:";
             // 
             // numericUpDownWidth
             // 
-            this.numericUpDownWidth.Enabled = false;
-            this.numericUpDownWidth.Location = new System.Drawing.Point(43, 20);
-            this.numericUpDownWidth.Margin = new System.Windows.Forms.Padding(2, 3, 2, 3);
-            this.numericUpDownWidth.Maximum = new decimal(new int[] {
-            200,
-            0,
-            0,
-            0});
-            this.numericUpDownWidth.Minimum = new decimal(new int[] {
-            11,
-            0,
-            0,
-            0});
-            this.numericUpDownWidth.Name = "numericUpDownWidth";
-            this.numericUpDownWidth.Size = new System.Drawing.Size(44, 23);
-            this.numericUpDownWidth.TabIndex = 17;
-            this.numericUpDownWidth.Value = new decimal(new int[] {
-            50,
-            0,
-            0,
-            0});
-            this.numericUpDownWidth.ValueChanged += new System.EventHandler(this.numericUpDownWidth_ValueChanged);
+            numericUpDownWidth.Enabled = false;
+            numericUpDownWidth.Location = new System.Drawing.Point(49, 27);
+            numericUpDownWidth.Margin = new System.Windows.Forms.Padding(2, 4, 2, 4);
+            numericUpDownWidth.Maximum = new decimal(new int[] { 200, 0, 0, 0 });
+            numericUpDownWidth.Minimum = new decimal(new int[] { 11, 0, 0, 0 });
+            numericUpDownWidth.Name = "numericUpDownWidth";
+            numericUpDownWidth.Size = new System.Drawing.Size(50, 27);
+            numericUpDownWidth.TabIndex = 17;
+            numericUpDownWidth.Value = new decimal(new int[] { 50, 0, 0, 0 });
+            numericUpDownWidth.ValueChanged += numericUpDownWidth_ValueChanged;
             // 
             // buttonResize
             // 
-            this.buttonResize.Location = new System.Drawing.Point(154, 21);
-            this.buttonResize.Margin = new System.Windows.Forms.Padding(2, 3, 2, 3);
-            this.buttonResize.Name = "buttonResize";
-            this.buttonResize.Size = new System.Drawing.Size(104, 24);
-            this.buttonResize.TabIndex = 16;
-            this.buttonResize.Text = "Enable resizing";
-            this.buttonResize.UseVisualStyleBackColor = true;
-            this.buttonResize.Click += new System.EventHandler(this.buttonResize_Click);
+            buttonResize.Location = new System.Drawing.Point(176, 28);
+            buttonResize.Margin = new System.Windows.Forms.Padding(2, 4, 2, 4);
+            buttonResize.Name = "buttonResize";
+            buttonResize.Size = new System.Drawing.Size(119, 32);
+            buttonResize.TabIndex = 16;
+            buttonResize.Text = "Enable resizing";
+            buttonResize.UseVisualStyleBackColor = true;
+            buttonResize.Click += buttonResize_Click;
             // 
             // buttonToggleMusic
             // 
-            this.buttonToggleMusic.Image = global::AmbermoonMapEditor2D.Properties.Resources.round_play_arrow_black_24;
-            this.buttonToggleMusic.Location = new System.Drawing.Point(308, 186);
-            this.buttonToggleMusic.Margin = new System.Windows.Forms.Padding(2, 3, 2, 3);
-            this.buttonToggleMusic.Name = "buttonToggleMusic";
-            this.buttonToggleMusic.Size = new System.Drawing.Size(23, 24);
-            this.buttonToggleMusic.TabIndex = 15;
-            this.buttonToggleMusic.UseVisualStyleBackColor = true;
-            this.buttonToggleMusic.Click += new System.EventHandler(this.buttonToggleMusic_Click);
+            buttonToggleMusic.Image = Properties.Resources.round_play_arrow_black_24;
+            buttonToggleMusic.Location = new System.Drawing.Point(352, 248);
+            buttonToggleMusic.Margin = new System.Windows.Forms.Padding(2, 4, 2, 4);
+            buttonToggleMusic.Name = "buttonToggleMusic";
+            buttonToggleMusic.Size = new System.Drawing.Size(26, 32);
+            buttonToggleMusic.TabIndex = 15;
+            buttonToggleMusic.UseVisualStyleBackColor = true;
+            buttonToggleMusic.Click += buttonToggleMusic_Click;
             // 
             // comboBoxMusic
             // 
-            this.comboBoxMusic.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            this.comboBoxMusic.FormattingEnabled = true;
-            this.comboBoxMusic.Location = new System.Drawing.Point(55, 186);
-            this.comboBoxMusic.Margin = new System.Windows.Forms.Padding(2, 3, 2, 3);
-            this.comboBoxMusic.Name = "comboBoxMusic";
-            this.comboBoxMusic.Size = new System.Drawing.Size(250, 23);
-            this.comboBoxMusic.TabIndex = 14;
-            this.comboBoxMusic.SelectedIndexChanged += new System.EventHandler(this.comboBoxMusic_SelectedIndexChanged);
+            comboBoxMusic.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            comboBoxMusic.FormattingEnabled = true;
+            comboBoxMusic.Location = new System.Drawing.Point(63, 248);
+            comboBoxMusic.Margin = new System.Windows.Forms.Padding(2, 4, 2, 4);
+            comboBoxMusic.Name = "comboBoxMusic";
+            comboBoxMusic.Size = new System.Drawing.Size(285, 28);
+            comboBoxMusic.TabIndex = 14;
+            comboBoxMusic.SelectedIndexChanged += comboBoxMusic_SelectedIndexChanged;
             // 
             // labelMusic
             // 
-            this.labelMusic.AutoSize = true;
-            this.labelMusic.Location = new System.Drawing.Point(7, 190);
-            this.labelMusic.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
-            this.labelMusic.Name = "labelMusic";
-            this.labelMusic.Size = new System.Drawing.Size(42, 15);
-            this.labelMusic.TabIndex = 13;
-            this.labelMusic.Text = "Music:";
+            labelMusic.AutoSize = true;
+            labelMusic.Location = new System.Drawing.Point(8, 253);
+            labelMusic.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
+            labelMusic.Name = "labelMusic";
+            labelMusic.Size = new System.Drawing.Size(50, 20);
+            labelMusic.TabIndex = 13;
+            labelMusic.Text = "Music:";
             // 
             // checkBoxWorldSurface
             // 
-            this.checkBoxWorldSurface.AutoSize = true;
-            this.checkBoxWorldSurface.Enabled = false;
-            this.checkBoxWorldSurface.Location = new System.Drawing.Point(7, 71);
-            this.checkBoxWorldSurface.Margin = new System.Windows.Forms.Padding(2, 3, 2, 3);
-            this.checkBoxWorldSurface.Name = "checkBoxWorldSurface";
-            this.checkBoxWorldSurface.Size = new System.Drawing.Size(85, 19);
-            this.checkBoxWorldSurface.TabIndex = 12;
-            this.checkBoxWorldSurface.Text = "World Map";
-            this.checkBoxWorldSurface.UseVisualStyleBackColor = true;
-            this.checkBoxWorldSurface.CheckedChanged += new System.EventHandler(this.checkBoxWorldSurface_CheckedChanged);
+            checkBoxWorldSurface.AutoSize = true;
+            checkBoxWorldSurface.Enabled = false;
+            checkBoxWorldSurface.Location = new System.Drawing.Point(8, 95);
+            checkBoxWorldSurface.Margin = new System.Windows.Forms.Padding(2, 4, 2, 4);
+            checkBoxWorldSurface.Name = "checkBoxWorldSurface";
+            checkBoxWorldSurface.Size = new System.Drawing.Size(105, 24);
+            checkBoxWorldSurface.TabIndex = 12;
+            checkBoxWorldSurface.Text = "World Map";
+            checkBoxWorldSurface.UseVisualStyleBackColor = true;
+            checkBoxWorldSurface.CheckedChanged += checkBoxWorldSurface_CheckedChanged;
             // 
             // checkBoxMagic
             // 
-            this.checkBoxMagic.AutoSize = true;
-            this.checkBoxMagic.Checked = true;
-            this.checkBoxMagic.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.checkBoxMagic.Location = new System.Drawing.Point(7, 121);
-            this.checkBoxMagic.Margin = new System.Windows.Forms.Padding(2, 3, 2, 3);
-            this.checkBoxMagic.Name = "checkBoxMagic";
-            this.checkBoxMagic.Size = new System.Drawing.Size(92, 19);
-            this.checkBoxMagic.TabIndex = 11;
-            this.checkBoxMagic.Text = "Allow Magic";
-            this.checkBoxMagic.UseVisualStyleBackColor = true;
-            this.checkBoxMagic.CheckedChanged += new System.EventHandler(this.checkBoxMagic_CheckedChanged);
+            checkBoxMagic.AutoSize = true;
+            checkBoxMagic.Checked = true;
+            checkBoxMagic.CheckState = System.Windows.Forms.CheckState.Checked;
+            checkBoxMagic.Location = new System.Drawing.Point(8, 161);
+            checkBoxMagic.Margin = new System.Windows.Forms.Padding(2, 4, 2, 4);
+            checkBoxMagic.Name = "checkBoxMagic";
+            checkBoxMagic.Size = new System.Drawing.Size(114, 24);
+            checkBoxMagic.TabIndex = 11;
+            checkBoxMagic.Text = "Allow Magic";
+            checkBoxMagic.UseVisualStyleBackColor = true;
+            checkBoxMagic.CheckedChanged += checkBoxMagic_CheckedChanged;
             // 
             // buttonIndoorDefaults
             // 
-            this.buttonIndoorDefaults.Location = new System.Drawing.Point(173, 145);
-            this.buttonIndoorDefaults.Margin = new System.Windows.Forms.Padding(2, 3, 2, 3);
-            this.buttonIndoorDefaults.Name = "buttonIndoorDefaults";
-            this.buttonIndoorDefaults.Size = new System.Drawing.Size(160, 24);
-            this.buttonIndoorDefaults.TabIndex = 9;
-            this.buttonIndoorDefaults.Text = "Use Indoor Defaults";
-            this.buttonIndoorDefaults.UseVisualStyleBackColor = true;
-            this.buttonIndoorDefaults.Click += new System.EventHandler(this.buttonIndoorDefaults_Click);
+            buttonIndoorDefaults.Location = new System.Drawing.Point(198, 193);
+            buttonIndoorDefaults.Margin = new System.Windows.Forms.Padding(2, 4, 2, 4);
+            buttonIndoorDefaults.Name = "buttonIndoorDefaults";
+            buttonIndoorDefaults.Size = new System.Drawing.Size(183, 32);
+            buttonIndoorDefaults.TabIndex = 9;
+            buttonIndoorDefaults.Text = "Use Indoor Defaults";
+            buttonIndoorDefaults.UseVisualStyleBackColor = true;
+            buttonIndoorDefaults.Click += buttonIndoorDefaults_Click;
             // 
             // buttonWorldMapDefaults
             // 
-            this.buttonWorldMapDefaults.Location = new System.Drawing.Point(6, 145);
-            this.buttonWorldMapDefaults.Margin = new System.Windows.Forms.Padding(2, 3, 2, 3);
-            this.buttonWorldMapDefaults.Name = "buttonWorldMapDefaults";
-            this.buttonWorldMapDefaults.Size = new System.Drawing.Size(160, 24);
-            this.buttonWorldMapDefaults.TabIndex = 8;
-            this.buttonWorldMapDefaults.Text = "Use World Map Defaults";
-            this.buttonWorldMapDefaults.UseVisualStyleBackColor = true;
-            this.buttonWorldMapDefaults.Click += new System.EventHandler(this.buttonWorldMapDefaults_Click);
+            buttonWorldMapDefaults.Location = new System.Drawing.Point(7, 193);
+            buttonWorldMapDefaults.Margin = new System.Windows.Forms.Padding(2, 4, 2, 4);
+            buttonWorldMapDefaults.Name = "buttonWorldMapDefaults";
+            buttonWorldMapDefaults.Size = new System.Drawing.Size(183, 32);
+            buttonWorldMapDefaults.TabIndex = 8;
+            buttonWorldMapDefaults.Text = "Use World Map Defaults";
+            buttonWorldMapDefaults.UseVisualStyleBackColor = true;
+            buttonWorldMapDefaults.Click += buttonWorldMapDefaults_Click;
             // 
             // checkBoxTravelGraphics
             // 
-            this.checkBoxTravelGraphics.AutoSize = true;
-            this.checkBoxTravelGraphics.Enabled = false;
-            this.checkBoxTravelGraphics.Location = new System.Drawing.Point(111, 71);
-            this.checkBoxTravelGraphics.Margin = new System.Windows.Forms.Padding(2, 3, 2, 3);
-            this.checkBoxTravelGraphics.Name = "checkBoxTravelGraphics";
-            this.checkBoxTravelGraphics.Size = new System.Drawing.Size(107, 19);
-            this.checkBoxTravelGraphics.TabIndex = 7;
-            this.checkBoxTravelGraphics.Text = "Travel Graphics";
-            this.checkBoxTravelGraphics.UseVisualStyleBackColor = true;
-            this.checkBoxTravelGraphics.CheckedChanged += new System.EventHandler(this.checkBoxTravelGraphics_CheckedChanged);
+            checkBoxTravelGraphics.AutoSize = true;
+            checkBoxTravelGraphics.Enabled = false;
+            checkBoxTravelGraphics.Location = new System.Drawing.Point(127, 95);
+            checkBoxTravelGraphics.Margin = new System.Windows.Forms.Padding(2, 4, 2, 4);
+            checkBoxTravelGraphics.Name = "checkBoxTravelGraphics";
+            checkBoxTravelGraphics.Size = new System.Drawing.Size(131, 24);
+            checkBoxTravelGraphics.TabIndex = 7;
+            checkBoxTravelGraphics.Text = "Travel Graphics";
+            checkBoxTravelGraphics.UseVisualStyleBackColor = true;
+            checkBoxTravelGraphics.CheckedChanged += checkBoxTravelGraphics_CheckedChanged;
             // 
             // checkBoxNoSleepUntilDawn
             // 
-            this.checkBoxNoSleepUntilDawn.AutoSize = true;
-            this.checkBoxNoSleepUntilDawn.Location = new System.Drawing.Point(111, 96);
-            this.checkBoxNoSleepUntilDawn.Margin = new System.Windows.Forms.Padding(2, 3, 2, 3);
-            this.checkBoxNoSleepUntilDawn.Name = "checkBoxNoSleepUntilDawn";
-            this.checkBoxNoSleepUntilDawn.Size = new System.Drawing.Size(134, 19);
-            this.checkBoxNoSleepUntilDawn.TabIndex = 6;
-            this.checkBoxNoSleepUntilDawn.Text = "No Sleep Until Dawn";
-            this.checkBoxNoSleepUntilDawn.UseVisualStyleBackColor = true;
-            this.checkBoxNoSleepUntilDawn.CheckedChanged += new System.EventHandler(this.checkBoxNoSleepUntilDawn_CheckedChanged);
+            checkBoxNoSleepUntilDawn.AutoSize = true;
+            checkBoxNoSleepUntilDawn.Location = new System.Drawing.Point(127, 128);
+            checkBoxNoSleepUntilDawn.Margin = new System.Windows.Forms.Padding(2, 4, 2, 4);
+            checkBoxNoSleepUntilDawn.Name = "checkBoxNoSleepUntilDawn";
+            checkBoxNoSleepUntilDawn.Size = new System.Drawing.Size(169, 24);
+            checkBoxNoSleepUntilDawn.TabIndex = 6;
+            checkBoxNoSleepUntilDawn.Text = "No Sleep Until Dawn";
+            checkBoxNoSleepUntilDawn.UseVisualStyleBackColor = true;
+            checkBoxNoSleepUntilDawn.CheckedChanged += checkBoxNoSleepUntilDawn_CheckedChanged;
             // 
             // checkBoxUnknown1
             // 
-            this.checkBoxUnknown1.AutoSize = true;
-            this.checkBoxUnknown1.Enabled = false;
-            this.checkBoxUnknown1.Location = new System.Drawing.Point(111, 121);
-            this.checkBoxUnknown1.Margin = new System.Windows.Forms.Padding(2, 3, 2, 3);
-            this.checkBoxUnknown1.Name = "checkBoxUnknown1";
-            this.checkBoxUnknown1.Size = new System.Drawing.Size(77, 19);
-            this.checkBoxUnknown1.TabIndex = 5;
-            this.checkBoxUnknown1.Text = "Unknown";
-            this.checkBoxUnknown1.UseVisualStyleBackColor = true;
-            this.checkBoxUnknown1.CheckedChanged += new System.EventHandler(this.checkBoxUnknown1_CheckedChanged);
+            checkBoxUnknown1.AutoSize = true;
+            checkBoxUnknown1.Enabled = false;
+            checkBoxUnknown1.Location = new System.Drawing.Point(127, 161);
+            checkBoxUnknown1.Margin = new System.Windows.Forms.Padding(2, 4, 2, 4);
+            checkBoxUnknown1.Name = "checkBoxUnknown1";
+            checkBoxUnknown1.Size = new System.Drawing.Size(92, 24);
+            checkBoxUnknown1.TabIndex = 5;
+            checkBoxUnknown1.Text = "Unknown";
+            checkBoxUnknown1.UseVisualStyleBackColor = true;
+            checkBoxUnknown1.CheckedChanged += checkBoxUnknown1_CheckedChanged;
             // 
             // checkBoxResting
             // 
-            this.checkBoxResting.AutoSize = true;
-            this.checkBoxResting.Checked = true;
-            this.checkBoxResting.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.checkBoxResting.Location = new System.Drawing.Point(7, 96);
-            this.checkBoxResting.Margin = new System.Windows.Forms.Padding(2, 3, 2, 3);
-            this.checkBoxResting.Name = "checkBoxResting";
-            this.checkBoxResting.Size = new System.Drawing.Size(98, 19);
-            this.checkBoxResting.TabIndex = 4;
-            this.checkBoxResting.Text = "Allow Resting";
-            this.checkBoxResting.UseVisualStyleBackColor = true;
-            this.checkBoxResting.CheckedChanged += new System.EventHandler(this.checkBoxResting_CheckedChanged);
+            checkBoxResting.AutoSize = true;
+            checkBoxResting.Checked = true;
+            checkBoxResting.CheckState = System.Windows.Forms.CheckState.Checked;
+            checkBoxResting.Location = new System.Drawing.Point(8, 128);
+            checkBoxResting.Margin = new System.Windows.Forms.Padding(2, 4, 2, 4);
+            checkBoxResting.Name = "checkBoxResting";
+            checkBoxResting.Size = new System.Drawing.Size(122, 24);
+            checkBoxResting.TabIndex = 4;
+            checkBoxResting.Text = "Allow Resting";
+            checkBoxResting.UseVisualStyleBackColor = true;
+            checkBoxResting.CheckedChanged += checkBoxResting_CheckedChanged;
             // 
             // radioButtonDungeon
             // 
-            this.radioButtonDungeon.AutoSize = true;
-            this.radioButtonDungeon.Location = new System.Drawing.Point(148, 46);
-            this.radioButtonDungeon.Margin = new System.Windows.Forms.Padding(2, 3, 2, 3);
-            this.radioButtonDungeon.Name = "radioButtonDungeon";
-            this.radioButtonDungeon.Size = new System.Drawing.Size(74, 19);
-            this.radioButtonDungeon.TabIndex = 2;
-            this.radioButtonDungeon.Text = "Dungeon";
-            this.radioButtonDungeon.UseVisualStyleBackColor = true;
-            this.radioButtonDungeon.CheckedChanged += new System.EventHandler(this.radioButtonDungeon_CheckedChanged);
+            radioButtonDungeon.AutoSize = true;
+            radioButtonDungeon.Location = new System.Drawing.Point(169, 61);
+            radioButtonDungeon.Margin = new System.Windows.Forms.Padding(2, 4, 2, 4);
+            radioButtonDungeon.Name = "radioButtonDungeon";
+            radioButtonDungeon.Size = new System.Drawing.Size(91, 24);
+            radioButtonDungeon.TabIndex = 2;
+            radioButtonDungeon.Text = "Dungeon";
+            radioButtonDungeon.UseVisualStyleBackColor = true;
+            radioButtonDungeon.CheckedChanged += radioButtonDungeon_CheckedChanged;
             // 
             // radioButtonOutdoor
             // 
-            this.radioButtonOutdoor.AutoSize = true;
-            this.radioButtonOutdoor.Location = new System.Drawing.Point(72, 46);
-            this.radioButtonOutdoor.Margin = new System.Windows.Forms.Padding(2, 3, 2, 3);
-            this.radioButtonOutdoor.Name = "radioButtonOutdoor";
-            this.radioButtonOutdoor.Size = new System.Drawing.Size(70, 19);
-            this.radioButtonOutdoor.TabIndex = 1;
-            this.radioButtonOutdoor.Text = "Outdoor";
-            this.radioButtonOutdoor.UseVisualStyleBackColor = true;
-            this.radioButtonOutdoor.CheckedChanged += new System.EventHandler(this.radioButtonOutdoor_CheckedChanged);
+            radioButtonOutdoor.AutoSize = true;
+            radioButtonOutdoor.Location = new System.Drawing.Point(82, 61);
+            radioButtonOutdoor.Margin = new System.Windows.Forms.Padding(2, 4, 2, 4);
+            radioButtonOutdoor.Name = "radioButtonOutdoor";
+            radioButtonOutdoor.Size = new System.Drawing.Size(86, 24);
+            radioButtonOutdoor.TabIndex = 1;
+            radioButtonOutdoor.Text = "Outdoor";
+            radioButtonOutdoor.UseVisualStyleBackColor = true;
+            radioButtonOutdoor.CheckedChanged += radioButtonOutdoor_CheckedChanged;
             // 
             // radioButtonIndoor
             // 
-            this.radioButtonIndoor.AutoSize = true;
-            this.radioButtonIndoor.Checked = true;
-            this.radioButtonIndoor.Location = new System.Drawing.Point(6, 46);
-            this.radioButtonIndoor.Margin = new System.Windows.Forms.Padding(2, 3, 2, 3);
-            this.radioButtonIndoor.Name = "radioButtonIndoor";
-            this.radioButtonIndoor.Size = new System.Drawing.Size(60, 19);
-            this.radioButtonIndoor.TabIndex = 0;
-            this.radioButtonIndoor.TabStop = true;
-            this.radioButtonIndoor.Text = "Indoor";
-            this.radioButtonIndoor.UseVisualStyleBackColor = true;
-            this.radioButtonIndoor.CheckedChanged += new System.EventHandler(this.radioButtonIndoor_CheckedChanged);
+            radioButtonIndoor.AutoSize = true;
+            radioButtonIndoor.Checked = true;
+            radioButtonIndoor.Location = new System.Drawing.Point(7, 61);
+            radioButtonIndoor.Margin = new System.Windows.Forms.Padding(2, 4, 2, 4);
+            radioButtonIndoor.Name = "radioButtonIndoor";
+            radioButtonIndoor.Size = new System.Drawing.Size(74, 24);
+            radioButtonIndoor.TabIndex = 0;
+            radioButtonIndoor.TabStop = true;
+            radioButtonIndoor.Text = "Indoor";
+            radioButtonIndoor.UseVisualStyleBackColor = true;
+            radioButtonIndoor.CheckedChanged += radioButtonIndoor_CheckedChanged;
             // 
             // groupBoxCharacters
             // 
-            this.groupBoxCharacters.Controls.Add(this.buttonPositions);
-            this.groupBoxCharacters.Controls.Add(this.mapCharEditorControl);
-            this.groupBoxCharacters.Controls.Add(this.buttonPlaceCharacterOnMap);
-            this.groupBoxCharacters.Controls.Add(this.labelCharacterPosition);
-            this.groupBoxCharacters.Location = new System.Drawing.Point(807, 256);
-            this.groupBoxCharacters.Margin = new System.Windows.Forms.Padding(2, 3, 2, 3);
-            this.groupBoxCharacters.Name = "groupBoxCharacters";
-            this.groupBoxCharacters.Padding = new System.Windows.Forms.Padding(2, 3, 2, 3);
-            this.groupBoxCharacters.Size = new System.Drawing.Size(338, 291);
-            this.groupBoxCharacters.TabIndex = 4;
-            this.groupBoxCharacters.TabStop = false;
-            this.groupBoxCharacters.Text = "Monsters && NPCs";
+            groupBoxCharacters.Controls.Add(buttonPositions);
+            groupBoxCharacters.Controls.Add(mapCharEditorControl);
+            groupBoxCharacters.Controls.Add(buttonPlaceCharacterOnMap);
+            groupBoxCharacters.Controls.Add(labelCharacterPosition);
+            groupBoxCharacters.Location = new System.Drawing.Point(922, 341);
+            groupBoxCharacters.Margin = new System.Windows.Forms.Padding(2, 4, 2, 4);
+            groupBoxCharacters.Name = "groupBoxCharacters";
+            groupBoxCharacters.Padding = new System.Windows.Forms.Padding(2, 4, 2, 4);
+            groupBoxCharacters.Size = new System.Drawing.Size(386, 388);
+            groupBoxCharacters.TabIndex = 4;
+            groupBoxCharacters.TabStop = false;
+            groupBoxCharacters.Text = "Monsters && NPCs";
             // 
             // buttonPositions
             // 
-            this.buttonPositions.Location = new System.Drawing.Point(124, 261);
-            this.buttonPositions.Name = "buttonPositions";
-            this.buttonPositions.Size = new System.Drawing.Size(86, 24);
-            this.buttonPositions.TabIndex = 17;
-            this.buttonPositions.Text = "Positions ...";
-            this.buttonPositions.UseVisualStyleBackColor = true;
-            this.buttonPositions.Click += new System.EventHandler(this.buttonPositions_Click);
+            buttonPositions.Location = new System.Drawing.Point(142, 348);
+            buttonPositions.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
+            buttonPositions.Name = "buttonPositions";
+            buttonPositions.Size = new System.Drawing.Size(98, 32);
+            buttonPositions.TabIndex = 17;
+            buttonPositions.Text = "Positions ...";
+            buttonPositions.UseVisualStyleBackColor = true;
+            buttonPositions.Click += buttonPositions_Click;
             // 
             // mapCharEditorControl
             // 
-            this.mapCharEditorControl.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.mapCharEditorControl.Location = new System.Drawing.Point(7, 21);
-            this.mapCharEditorControl.Margin = new System.Windows.Forms.Padding(2, 4, 2, 4);
-            this.mapCharEditorControl.Name = "mapCharEditorControl";
-            this.mapCharEditorControl.Size = new System.Drawing.Size(322, 234);
-            this.mapCharEditorControl.TabIndex = 0;
-            this.mapCharEditorControl.Visible = false;
-            this.mapCharEditorControl.Load += new System.EventHandler(this.mapCharEditorControl_Load);
+            mapCharEditorControl.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right;
+            mapCharEditorControl.Location = new System.Drawing.Point(8, 28);
+            mapCharEditorControl.Margin = new System.Windows.Forms.Padding(2, 5, 2, 5);
+            mapCharEditorControl.Name = "mapCharEditorControl";
+            mapCharEditorControl.Size = new System.Drawing.Size(372, 312);
+            mapCharEditorControl.TabIndex = 0;
+            mapCharEditorControl.Visible = false;
+            mapCharEditorControl.Load += mapCharEditorControl_Load;
             // 
             // buttonPlaceCharacterOnMap
             // 
-            this.buttonPlaceCharacterOnMap.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.buttonPlaceCharacterOnMap.Image = global::AmbermoonMapEditor2D.Properties.Resources.round_control_camera_black_24;
-            this.buttonPlaceCharacterOnMap.Location = new System.Drawing.Point(215, 261);
-            this.buttonPlaceCharacterOnMap.Margin = new System.Windows.Forms.Padding(2, 3, 2, 3);
-            this.buttonPlaceCharacterOnMap.Name = "buttonPlaceCharacterOnMap";
-            this.buttonPlaceCharacterOnMap.Size = new System.Drawing.Size(23, 24);
-            this.buttonPlaceCharacterOnMap.TabIndex = 16;
-            this.buttonPlaceCharacterOnMap.UseVisualStyleBackColor = true;
-            this.buttonPlaceCharacterOnMap.EnabledChanged += new System.EventHandler(this.buttonPlaceCharacterOnMap_EnabledChanged);
-            this.buttonPlaceCharacterOnMap.Click += new System.EventHandler(this.buttonPlaceCharacterOnMap_Click);
+            buttonPlaceCharacterOnMap.Anchor = System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right;
+            buttonPlaceCharacterOnMap.Image = Properties.Resources.round_control_camera_black_24;
+            buttonPlaceCharacterOnMap.Location = new System.Drawing.Point(246, 348);
+            buttonPlaceCharacterOnMap.Margin = new System.Windows.Forms.Padding(2, 4, 2, 4);
+            buttonPlaceCharacterOnMap.Name = "buttonPlaceCharacterOnMap";
+            buttonPlaceCharacterOnMap.Size = new System.Drawing.Size(26, 32);
+            buttonPlaceCharacterOnMap.TabIndex = 16;
+            buttonPlaceCharacterOnMap.UseVisualStyleBackColor = true;
+            buttonPlaceCharacterOnMap.EnabledChanged += buttonPlaceCharacterOnMap_EnabledChanged;
+            buttonPlaceCharacterOnMap.Click += buttonPlaceCharacterOnMap_Click;
             // 
             // labelCharacterPosition
             // 
-            this.labelCharacterPosition.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.labelCharacterPosition.AutoSize = true;
-            this.labelCharacterPosition.Location = new System.Drawing.Point(240, 267);
-            this.labelCharacterPosition.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
-            this.labelCharacterPosition.Name = "labelCharacterPosition";
-            this.labelCharacterPosition.Size = new System.Drawing.Size(89, 15);
-            this.labelCharacterPosition.TabIndex = 4;
-            this.labelCharacterPosition.Text = "Location: 50, 50";
+            labelCharacterPosition.Anchor = System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right;
+            labelCharacterPosition.AutoSize = true;
+            labelCharacterPosition.Location = new System.Drawing.Point(274, 356);
+            labelCharacterPosition.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
+            labelCharacterPosition.Name = "labelCharacterPosition";
+            labelCharacterPosition.Size = new System.Drawing.Size(112, 20);
+            labelCharacterPosition.TabIndex = 4;
+            labelCharacterPosition.Text = "Location: 50, 50";
             // 
             // buttonToolBrush
             // 
-            this.buttonToolBrush.ForeColor = System.Drawing.SystemColors.ControlText;
-            this.buttonToolBrush.Image = global::AmbermoonMapEditor2D.Properties.Resources.round_brush_black_24;
-            this.buttonToolBrush.Location = new System.Drawing.Point(772, 27);
-            this.buttonToolBrush.Margin = new System.Windows.Forms.Padding(2, 3, 2, 3);
-            this.buttonToolBrush.Name = "buttonToolBrush";
-            this.buttonToolBrush.Size = new System.Drawing.Size(33, 32);
-            this.buttonToolBrush.TabIndex = 5;
-            this.buttonToolBrush.UseVisualStyleBackColor = true;
-            this.buttonToolBrush.Click += new System.EventHandler(this.buttonToolBrush_Click);
+            buttonToolBrush.ForeColor = System.Drawing.SystemColors.ControlText;
+            buttonToolBrush.Image = Properties.Resources.round_brush_black_24;
+            buttonToolBrush.Location = new System.Drawing.Point(882, 36);
+            buttonToolBrush.Margin = new System.Windows.Forms.Padding(2, 4, 2, 4);
+            buttonToolBrush.Name = "buttonToolBrush";
+            buttonToolBrush.Size = new System.Drawing.Size(38, 43);
+            buttonToolBrush.TabIndex = 5;
+            buttonToolBrush.UseVisualStyleBackColor = true;
+            buttonToolBrush.Click += buttonToolBrush_Click;
             // 
             // buttonToolColorPicker
             // 
-            this.buttonToolColorPicker.Image = global::AmbermoonMapEditor2D.Properties.Resources.round_colorize_black_24;
-            this.buttonToolColorPicker.Location = new System.Drawing.Point(772, 179);
-            this.buttonToolColorPicker.Margin = new System.Windows.Forms.Padding(2, 3, 2, 3);
-            this.buttonToolColorPicker.Name = "buttonToolColorPicker";
-            this.buttonToolColorPicker.Size = new System.Drawing.Size(33, 32);
-            this.buttonToolColorPicker.TabIndex = 6;
-            this.buttonToolColorPicker.UseVisualStyleBackColor = true;
-            this.buttonToolColorPicker.Click += new System.EventHandler(this.buttonToolColorPicker_Click);
+            buttonToolColorPicker.Image = Properties.Resources.round_colorize_black_24;
+            buttonToolColorPicker.Location = new System.Drawing.Point(882, 239);
+            buttonToolColorPicker.Margin = new System.Windows.Forms.Padding(2, 4, 2, 4);
+            buttonToolColorPicker.Name = "buttonToolColorPicker";
+            buttonToolColorPicker.Size = new System.Drawing.Size(38, 43);
+            buttonToolColorPicker.TabIndex = 6;
+            buttonToolColorPicker.UseVisualStyleBackColor = true;
+            buttonToolColorPicker.Click += buttonToolColorPicker_Click;
             // 
             // buttonToolLayers
             // 
-            this.buttonToolLayers.Image = global::AmbermoonMapEditor2D.Properties.Resources.round_layers_black_24;
-            this.buttonToolLayers.Location = new System.Drawing.Point(772, 264);
-            this.buttonToolLayers.Margin = new System.Windows.Forms.Padding(2, 3, 2, 3);
-            this.buttonToolLayers.Name = "buttonToolLayers";
-            this.buttonToolLayers.Size = new System.Drawing.Size(33, 32);
-            this.buttonToolLayers.TabIndex = 7;
-            this.buttonToolLayers.UseVisualStyleBackColor = true;
-            this.buttonToolLayers.Click += new System.EventHandler(this.buttonToolLayers_Click);
+            buttonToolLayers.Image = Properties.Resources.round_layers_black_24;
+            buttonToolLayers.Location = new System.Drawing.Point(882, 352);
+            buttonToolLayers.Margin = new System.Windows.Forms.Padding(2, 4, 2, 4);
+            buttonToolLayers.Name = "buttonToolLayers";
+            buttonToolLayers.Size = new System.Drawing.Size(38, 43);
+            buttonToolLayers.TabIndex = 7;
+            buttonToolLayers.UseVisualStyleBackColor = true;
+            buttonToolLayers.Click += buttonToolLayers_Click;
             // 
             // contextMenuStripLayers
             // 
-            this.contextMenuStripLayers.ImageScalingSize = new System.Drawing.Size(20, 20);
-            this.contextMenuStripLayers.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.toolStripMenuItemBackLayer,
-            this.toolStripMenuItemFrontLayer,
-            this.toolStripSeparatorLayers1,
-            this.toolStripMenuItemShowBackLayer,
-            this.toolStripMenuItemShowFrontLayer,
-            this.toolStripMenuShowAllowWalk,
-            this.toolStripMenuShowAllowHorse,
-            this.toolStripMenuShowAllowDisc,
-            this.toolStripMenuShowAllowRaft,
-            this.toolStripMenuShowAllowShip});
-            this.contextMenuStripLayers.Name = "contextMenuStripLayers";
-            this.contextMenuStripLayers.Size = new System.Drawing.Size(181, 230);
+            contextMenuStripLayers.ImageScalingSize = new System.Drawing.Size(20, 20);
+            contextMenuStripLayers.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { toolStripMenuItemBackLayer, toolStripMenuItemFrontLayer, toolStripSeparatorLayers1, toolStripMenuItemShowBackLayer, toolStripMenuItemShowFrontLayer, toolStripMenuShowAllowWalk, toolStripMenuShowAllowHorse, toolStripMenuShowAllowDisc, toolStripMenuShowAllowRaft, toolStripMenuShowAllowShip });
+            contextMenuStripLayers.Name = "contextMenuStripLayers";
+            contextMenuStripLayers.Size = new System.Drawing.Size(200, 244);
             // 
             // toolStripMenuItemBackLayer
             // 
-            this.toolStripMenuItemBackLayer.Checked = true;
-            this.toolStripMenuItemBackLayer.CheckOnClick = true;
-            this.toolStripMenuItemBackLayer.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.toolStripMenuItemBackLayer.Name = "toolStripMenuItemBackLayer";
-            this.toolStripMenuItemBackLayer.Size = new System.Drawing.Size(180, 22);
-            this.toolStripMenuItemBackLayer.Text = "Back Layer";
-            this.toolStripMenuItemBackLayer.Click += new System.EventHandler(this.toolStripMenuItemBackLayer_Click);
+            toolStripMenuItemBackLayer.Checked = true;
+            toolStripMenuItemBackLayer.CheckOnClick = true;
+            toolStripMenuItemBackLayer.CheckState = System.Windows.Forms.CheckState.Checked;
+            toolStripMenuItemBackLayer.Name = "toolStripMenuItemBackLayer";
+            toolStripMenuItemBackLayer.Size = new System.Drawing.Size(199, 26);
+            toolStripMenuItemBackLayer.Text = "Back Layer";
+            toolStripMenuItemBackLayer.Click += toolStripMenuItemBackLayer_Click;
             // 
             // toolStripMenuItemFrontLayer
             // 
-            this.toolStripMenuItemFrontLayer.CheckOnClick = true;
-            this.toolStripMenuItemFrontLayer.Name = "toolStripMenuItemFrontLayer";
-            this.toolStripMenuItemFrontLayer.Size = new System.Drawing.Size(180, 22);
-            this.toolStripMenuItemFrontLayer.Text = "Front Layer";
-            this.toolStripMenuItemFrontLayer.Click += new System.EventHandler(this.toolStripMenuItemFrontLayer_Click);
+            toolStripMenuItemFrontLayer.CheckOnClick = true;
+            toolStripMenuItemFrontLayer.Name = "toolStripMenuItemFrontLayer";
+            toolStripMenuItemFrontLayer.Size = new System.Drawing.Size(199, 26);
+            toolStripMenuItemFrontLayer.Text = "Front Layer";
+            toolStripMenuItemFrontLayer.Click += toolStripMenuItemFrontLayer_Click;
             // 
             // toolStripSeparatorLayers1
             // 
-            this.toolStripSeparatorLayers1.Name = "toolStripSeparatorLayers1";
-            this.toolStripSeparatorLayers1.Size = new System.Drawing.Size(177, 6);
+            toolStripSeparatorLayers1.Name = "toolStripSeparatorLayers1";
+            toolStripSeparatorLayers1.Size = new System.Drawing.Size(196, 6);
             // 
             // toolStripMenuItemShowBackLayer
             // 
-            this.toolStripMenuItemShowBackLayer.Checked = true;
-            this.toolStripMenuItemShowBackLayer.CheckOnClick = true;
-            this.toolStripMenuItemShowBackLayer.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.toolStripMenuItemShowBackLayer.Name = "toolStripMenuItemShowBackLayer";
-            this.toolStripMenuItemShowBackLayer.Size = new System.Drawing.Size(180, 22);
-            this.toolStripMenuItemShowBackLayer.Text = "Show Back Layer";
-            this.toolStripMenuItemShowBackLayer.Click += new System.EventHandler(this.toolStripMenuItemShowBackLayer_Click);
+            toolStripMenuItemShowBackLayer.Checked = true;
+            toolStripMenuItemShowBackLayer.CheckOnClick = true;
+            toolStripMenuItemShowBackLayer.CheckState = System.Windows.Forms.CheckState.Checked;
+            toolStripMenuItemShowBackLayer.Name = "toolStripMenuItemShowBackLayer";
+            toolStripMenuItemShowBackLayer.Size = new System.Drawing.Size(199, 26);
+            toolStripMenuItemShowBackLayer.Text = "Show Back Layer";
+            toolStripMenuItemShowBackLayer.Click += toolStripMenuItemShowBackLayer_Click;
             // 
             // toolStripMenuItemShowFrontLayer
             // 
-            this.toolStripMenuItemShowFrontLayer.Checked = true;
-            this.toolStripMenuItemShowFrontLayer.CheckOnClick = true;
-            this.toolStripMenuItemShowFrontLayer.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.toolStripMenuItemShowFrontLayer.Name = "toolStripMenuItemShowFrontLayer";
-            this.toolStripMenuItemShowFrontLayer.Size = new System.Drawing.Size(180, 22);
-            this.toolStripMenuItemShowFrontLayer.Text = "Show Front Layer";
-            this.toolStripMenuItemShowFrontLayer.Click += new System.EventHandler(this.toolStripMenuItemShowFrontLayer_Click);
+            toolStripMenuItemShowFrontLayer.Checked = true;
+            toolStripMenuItemShowFrontLayer.CheckOnClick = true;
+            toolStripMenuItemShowFrontLayer.CheckState = System.Windows.Forms.CheckState.Checked;
+            toolStripMenuItemShowFrontLayer.Name = "toolStripMenuItemShowFrontLayer";
+            toolStripMenuItemShowFrontLayer.Size = new System.Drawing.Size(199, 26);
+            toolStripMenuItemShowFrontLayer.Text = "Show Front Layer";
+            toolStripMenuItemShowFrontLayer.Click += toolStripMenuItemShowFrontLayer_Click;
             // 
             // toolStripMenuShowAllowWalk
             // 
-            this.toolStripMenuShowAllowWalk.CheckOnClick = true;
-            this.toolStripMenuShowAllowWalk.Name = "toolStripMenuShowAllowWalk";
-            this.toolStripMenuShowAllowWalk.Size = new System.Drawing.Size(180, 22);
-            this.toolStripMenuShowAllowWalk.Text = "Show Allow Walk";
-            this.toolStripMenuShowAllowWalk.Click += new System.EventHandler(this.toolStripMenuShowAllowWalk_Click);
+            toolStripMenuShowAllowWalk.CheckOnClick = true;
+            toolStripMenuShowAllowWalk.Name = "toolStripMenuShowAllowWalk";
+            toolStripMenuShowAllowWalk.Size = new System.Drawing.Size(199, 26);
+            toolStripMenuShowAllowWalk.Text = "Show Allow Walk";
+            toolStripMenuShowAllowWalk.Click += toolStripMenuShowAllowWalk_Click;
             // 
             // toolStripMenuShowAllowHorse
             // 
-            this.toolStripMenuShowAllowHorse.CheckOnClick = true;
-            this.toolStripMenuShowAllowHorse.Name = "toolStripMenuShowAllowHorse";
-            this.toolStripMenuShowAllowHorse.Size = new System.Drawing.Size(180, 22);
-            this.toolStripMenuShowAllowHorse.Text = "Show Allow Horse";
-            this.toolStripMenuShowAllowHorse.Click += new System.EventHandler(this.toolStripMenuShowAllowHorse_Click);
+            toolStripMenuShowAllowHorse.CheckOnClick = true;
+            toolStripMenuShowAllowHorse.Name = "toolStripMenuShowAllowHorse";
+            toolStripMenuShowAllowHorse.Size = new System.Drawing.Size(199, 26);
+            toolStripMenuShowAllowHorse.Text = "Show Allow Horse";
+            toolStripMenuShowAllowHorse.Click += toolStripMenuShowAllowHorse_Click;
             // 
             // toolStripMenuShowAllowDisc
             // 
-            this.toolStripMenuShowAllowDisc.CheckOnClick = true;
-            this.toolStripMenuShowAllowDisc.Name = "toolStripMenuShowAllowDisc";
-            this.toolStripMenuShowAllowDisc.Size = new System.Drawing.Size(180, 22);
-            this.toolStripMenuShowAllowDisc.Text = "Show Allow Disc";
-            this.toolStripMenuShowAllowDisc.Click += new System.EventHandler(this.toolStripMenuShowAllowDisc_Click);
+            toolStripMenuShowAllowDisc.CheckOnClick = true;
+            toolStripMenuShowAllowDisc.Name = "toolStripMenuShowAllowDisc";
+            toolStripMenuShowAllowDisc.Size = new System.Drawing.Size(199, 26);
+            toolStripMenuShowAllowDisc.Text = "Show Allow Disc";
+            toolStripMenuShowAllowDisc.Click += toolStripMenuShowAllowDisc_Click;
             // 
             // toolStripMenuShowAllowRaft
             // 
-            this.toolStripMenuShowAllowRaft.CheckOnClick = true;
-            this.toolStripMenuShowAllowRaft.Name = "toolStripMenuShowAllowRaft";
-            this.toolStripMenuShowAllowRaft.Size = new System.Drawing.Size(180, 22);
-            this.toolStripMenuShowAllowRaft.Text = "Show Allow Raft";
-            this.toolStripMenuShowAllowRaft.Click += new System.EventHandler(this.toolStripMenuShowAllowRaft_Click);
+            toolStripMenuShowAllowRaft.CheckOnClick = true;
+            toolStripMenuShowAllowRaft.Name = "toolStripMenuShowAllowRaft";
+            toolStripMenuShowAllowRaft.Size = new System.Drawing.Size(199, 26);
+            toolStripMenuShowAllowRaft.Text = "Show Allow Raft";
+            toolStripMenuShowAllowRaft.Click += toolStripMenuShowAllowRaft_Click;
             // 
             // toolStripMenuShowAllowShip
             // 
-            this.toolStripMenuShowAllowShip.CheckOnClick = true;
-            this.toolStripMenuShowAllowShip.Name = "toolStripMenuShowAllowShip";
-            this.toolStripMenuShowAllowShip.Size = new System.Drawing.Size(180, 22);
-            this.toolStripMenuShowAllowShip.Text = "Show Allow Ship";
-            this.toolStripMenuShowAllowShip.Click += new System.EventHandler(this.toolStripMenuShowAllowShip_Click);
+            toolStripMenuShowAllowShip.CheckOnClick = true;
+            toolStripMenuShowAllowShip.Name = "toolStripMenuShowAllowShip";
+            toolStripMenuShowAllowShip.Size = new System.Drawing.Size(199, 26);
+            toolStripMenuShowAllowShip.Text = "Show Allow Ship";
+            toolStripMenuShowAllowShip.Click += toolStripMenuShowAllowShip_Click;
             // 
             // statusStrip
             // 
-            this.statusStrip.ImageScalingSize = new System.Drawing.Size(20, 20);
-            this.statusStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.toolStripStatusLabelTool,
-            this.toolStripStatusLabelLayer,
-            this.toolStripStatusLabelCurrentTile,
-            this.toolStripStatusLabelCurrentTilesetTile});
-            this.statusStrip.Location = new System.Drawing.Point(0, 686);
-            this.statusStrip.Name = "statusStrip";
-            this.statusStrip.Size = new System.Drawing.Size(1153, 25);
-            this.statusStrip.SizingGrip = false;
-            this.statusStrip.TabIndex = 8;
-            this.statusStrip.Text = "statusStrip1";
+            statusStrip.ImageScalingSize = new System.Drawing.Size(20, 20);
+            statusStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { toolStripStatusLabelTool, toolStripStatusLabelLayer, toolStripStatusLabelCurrentTile, toolStripStatusLabelCurrentTilesetTile });
+            statusStrip.Location = new System.Drawing.Point(0, 918);
+            statusStrip.Name = "statusStrip";
+            statusStrip.Padding = new System.Windows.Forms.Padding(1, 0, 16, 0);
+            statusStrip.Size = new System.Drawing.Size(1318, 30);
+            statusStrip.SizingGrip = false;
+            statusStrip.TabIndex = 8;
+            statusStrip.Text = "statusStrip1";
             // 
             // toolStripStatusLabelTool
             // 
-            this.toolStripStatusLabelTool.Image = global::AmbermoonMapEditor2D.Properties.Resources.round_brush_black_24;
-            this.toolStripStatusLabelTool.Name = "toolStripStatusLabelTool";
-            this.toolStripStatusLabelTool.Size = new System.Drawing.Size(20, 20);
+            toolStripStatusLabelTool.Image = Properties.Resources.round_brush_black_24;
+            toolStripStatusLabelTool.Name = "toolStripStatusLabelTool";
+            toolStripStatusLabelTool.Size = new System.Drawing.Size(20, 24);
             // 
             // toolStripStatusLabelLayer
             // 
-            this.toolStripStatusLabelLayer.BorderSides = System.Windows.Forms.ToolStripStatusLabelBorderSides.Left;
-            this.toolStripStatusLabelLayer.BorderStyle = System.Windows.Forms.Border3DStyle.Etched;
-            this.toolStripStatusLabelLayer.Name = "toolStripStatusLabelLayer";
-            this.toolStripStatusLabelLayer.Size = new System.Drawing.Size(67, 20);
-            this.toolStripStatusLabelLayer.Text = "Back Layer";
+            toolStripStatusLabelLayer.BorderSides = System.Windows.Forms.ToolStripStatusLabelBorderSides.Left;
+            toolStripStatusLabelLayer.BorderStyle = System.Windows.Forms.Border3DStyle.Etched;
+            toolStripStatusLabelLayer.Name = "toolStripStatusLabelLayer";
+            toolStripStatusLabelLayer.Size = new System.Drawing.Size(83, 24);
+            toolStripStatusLabelLayer.Text = "Back Layer";
             // 
             // toolStripStatusLabelCurrentTile
             // 
-            this.toolStripStatusLabelCurrentTile.BorderSides = System.Windows.Forms.ToolStripStatusLabelBorderSides.Left;
-            this.toolStripStatusLabelCurrentTile.BorderStyle = System.Windows.Forms.Border3DStyle.Etched;
-            this.toolStripStatusLabelCurrentTile.Name = "toolStripStatusLabelCurrentTile";
-            this.toolStripStatusLabelCurrentTile.Size = new System.Drawing.Size(29, 20);
-            this.toolStripStatusLabelCurrentTile.Text = "0, 0";
-            this.toolStripStatusLabelCurrentTile.Visible = false;
+            toolStripStatusLabelCurrentTile.BorderSides = System.Windows.Forms.ToolStripStatusLabelBorderSides.Left;
+            toolStripStatusLabelCurrentTile.BorderStyle = System.Windows.Forms.Border3DStyle.Etched;
+            toolStripStatusLabelCurrentTile.Name = "toolStripStatusLabelCurrentTile";
+            toolStripStatusLabelCurrentTile.Size = new System.Drawing.Size(36, 24);
+            toolStripStatusLabelCurrentTile.Text = "0, 0";
+            toolStripStatusLabelCurrentTile.Visible = false;
             // 
             // toolStripStatusLabelCurrentTilesetTile
             // 
-            this.toolStripStatusLabelCurrentTilesetTile.BorderSides = System.Windows.Forms.ToolStripStatusLabelBorderSides.Left;
-            this.toolStripStatusLabelCurrentTilesetTile.BorderStyle = System.Windows.Forms.Border3DStyle.Etched;
-            this.toolStripStatusLabelCurrentTilesetTile.Name = "toolStripStatusLabelCurrentTilesetTile";
-            this.toolStripStatusLabelCurrentTilesetTile.Size = new System.Drawing.Size(29, 20);
-            this.toolStripStatusLabelCurrentTilesetTile.Text = "0, 0";
-            this.toolStripStatusLabelCurrentTilesetTile.Visible = false;
+            toolStripStatusLabelCurrentTilesetTile.BorderSides = System.Windows.Forms.ToolStripStatusLabelBorderSides.Left;
+            toolStripStatusLabelCurrentTilesetTile.BorderStyle = System.Windows.Forms.Border3DStyle.Etched;
+            toolStripStatusLabelCurrentTilesetTile.Name = "toolStripStatusLabelCurrentTilesetTile";
+            toolStripStatusLabelCurrentTilesetTile.Size = new System.Drawing.Size(36, 24);
+            toolStripStatusLabelCurrentTilesetTile.Text = "0, 0";
+            toolStripStatusLabelCurrentTilesetTile.Visible = false;
             // 
             // buttonToolBlocks
             // 
-            this.buttonToolBlocks.ContextMenuStrip = this.contextMenuStripBlockModes;
-            this.buttonToolBlocks.ForeColor = System.Drawing.SystemColors.ControlText;
-            this.buttonToolBlocks.Image = global::AmbermoonMapEditor2D.Properties.Resources.round_grid_view_black_24_with_arrow;
-            this.buttonToolBlocks.Location = new System.Drawing.Point(772, 65);
-            this.buttonToolBlocks.Margin = new System.Windows.Forms.Padding(2, 3, 2, 3);
-            this.buttonToolBlocks.Name = "buttonToolBlocks";
-            this.buttonToolBlocks.Size = new System.Drawing.Size(33, 32);
-            this.buttonToolBlocks.TabIndex = 9;
-            this.buttonToolBlocks.UseVisualStyleBackColor = true;
-            this.buttonToolBlocks.Click += new System.EventHandler(this.buttonToolBlocks_Click);
+            buttonToolBlocks.ContextMenuStrip = contextMenuStripBlockModes;
+            buttonToolBlocks.ForeColor = System.Drawing.SystemColors.ControlText;
+            buttonToolBlocks.Image = Properties.Resources.round_grid_view_black_24_with_arrow;
+            buttonToolBlocks.Location = new System.Drawing.Point(882, 87);
+            buttonToolBlocks.Margin = new System.Windows.Forms.Padding(2, 4, 2, 4);
+            buttonToolBlocks.Name = "buttonToolBlocks";
+            buttonToolBlocks.Size = new System.Drawing.Size(38, 43);
+            buttonToolBlocks.TabIndex = 9;
+            buttonToolBlocks.UseVisualStyleBackColor = true;
+            buttonToolBlocks.Click += buttonToolBlocks_Click;
             // 
             // contextMenuStripBlockModes
             // 
-            this.contextMenuStripBlockModes.ImageScalingSize = new System.Drawing.Size(20, 20);
-            this.contextMenuStripBlockModes.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.toolStripMenuItemBlocks2x2,
-            this.toolStripMenuItemBlocks3x2,
-            this.toolStripMenuItemBlocks3x3});
-            this.contextMenuStripBlockModes.Name = "contextMenuStripBlockModes";
-            this.contextMenuStripBlockModes.Size = new System.Drawing.Size(96, 82);
+            contextMenuStripBlockModes.ImageScalingSize = new System.Drawing.Size(20, 20);
+            contextMenuStripBlockModes.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { toolStripMenuItemBlocks2x2, toolStripMenuItemBlocks3x2, toolStripMenuItemBlocks3x3 });
+            contextMenuStripBlockModes.Name = "contextMenuStripBlockModes";
+            contextMenuStripBlockModes.Size = new System.Drawing.Size(106, 82);
             // 
             // toolStripMenuItemBlocks2x2
             // 
-            this.toolStripMenuItemBlocks2x2.Image = global::AmbermoonMapEditor2D.Properties.Resources.round_grid_view_black_24;
-            this.toolStripMenuItemBlocks2x2.Name = "toolStripMenuItemBlocks2x2";
-            this.toolStripMenuItemBlocks2x2.Size = new System.Drawing.Size(95, 26);
-            this.toolStripMenuItemBlocks2x2.Text = "2x2";
-            this.toolStripMenuItemBlocks2x2.Click += new System.EventHandler(this.toolStripMenuItemBlocks2x2_Click);
+            toolStripMenuItemBlocks2x2.Image = Properties.Resources.round_grid_view_black_24;
+            toolStripMenuItemBlocks2x2.Name = "toolStripMenuItemBlocks2x2";
+            toolStripMenuItemBlocks2x2.Size = new System.Drawing.Size(105, 26);
+            toolStripMenuItemBlocks2x2.Text = "2x2";
+            toolStripMenuItemBlocks2x2.Click += toolStripMenuItemBlocks2x2_Click;
             // 
             // toolStripMenuItemBlocks3x2
             // 
-            this.toolStripMenuItemBlocks3x2.Image = global::AmbermoonMapEditor2D.Properties.Resources.round_view_module_black_24;
-            this.toolStripMenuItemBlocks3x2.Name = "toolStripMenuItemBlocks3x2";
-            this.toolStripMenuItemBlocks3x2.Size = new System.Drawing.Size(95, 26);
-            this.toolStripMenuItemBlocks3x2.Text = "3x2";
-            this.toolStripMenuItemBlocks3x2.Click += new System.EventHandler(this.toolStripMenuItemBlocks3x2_Click);
+            toolStripMenuItemBlocks3x2.Image = Properties.Resources.round_view_module_black_24;
+            toolStripMenuItemBlocks3x2.Name = "toolStripMenuItemBlocks3x2";
+            toolStripMenuItemBlocks3x2.Size = new System.Drawing.Size(105, 26);
+            toolStripMenuItemBlocks3x2.Text = "3x2";
+            toolStripMenuItemBlocks3x2.Click += toolStripMenuItemBlocks3x2_Click;
             // 
             // toolStripMenuItemBlocks3x3
             // 
-            this.toolStripMenuItemBlocks3x3.Image = global::AmbermoonMapEditor2D.Properties.Resources.round_apps_black_24;
-            this.toolStripMenuItemBlocks3x3.Name = "toolStripMenuItemBlocks3x3";
-            this.toolStripMenuItemBlocks3x3.Size = new System.Drawing.Size(95, 26);
-            this.toolStripMenuItemBlocks3x3.Text = "3x3";
-            this.toolStripMenuItemBlocks3x3.Click += new System.EventHandler(this.toolStripMenuItemBlocks3x3_Click);
+            toolStripMenuItemBlocks3x3.Image = Properties.Resources.round_apps_black_24;
+            toolStripMenuItemBlocks3x3.Name = "toolStripMenuItemBlocks3x3";
+            toolStripMenuItemBlocks3x3.Size = new System.Drawing.Size(105, 26);
+            toolStripMenuItemBlocks3x3.Text = "3x3";
+            toolStripMenuItemBlocks3x3.Click += toolStripMenuItemBlocks3x3_Click;
             // 
             // buttonToolFill
             // 
-            this.buttonToolFill.ForeColor = System.Drawing.SystemColors.ControlText;
-            this.buttonToolFill.Image = global::AmbermoonMapEditor2D.Properties.Resources.round_format_color_fill_black_24;
-            this.buttonToolFill.Location = new System.Drawing.Point(772, 103);
-            this.buttonToolFill.Margin = new System.Windows.Forms.Padding(2, 3, 2, 3);
-            this.buttonToolFill.Name = "buttonToolFill";
-            this.buttonToolFill.Size = new System.Drawing.Size(33, 32);
-            this.buttonToolFill.TabIndex = 10;
-            this.buttonToolFill.UseVisualStyleBackColor = true;
-            this.buttonToolFill.Click += new System.EventHandler(this.buttonToolFill_Click);
+            buttonToolFill.ForeColor = System.Drawing.SystemColors.ControlText;
+            buttonToolFill.Image = Properties.Resources.round_format_color_fill_black_24;
+            buttonToolFill.Location = new System.Drawing.Point(882, 137);
+            buttonToolFill.Margin = new System.Windows.Forms.Padding(2, 4, 2, 4);
+            buttonToolFill.Name = "buttonToolFill";
+            buttonToolFill.Size = new System.Drawing.Size(38, 43);
+            buttonToolFill.TabIndex = 10;
+            buttonToolFill.UseVisualStyleBackColor = true;
+            buttonToolFill.Click += buttonToolFill_Click;
             // 
             // buttonToggleGrid
             // 
-            this.buttonToggleGrid.ForeColor = System.Drawing.SystemColors.ControlText;
-            this.buttonToggleGrid.Image = global::AmbermoonMapEditor2D.Properties.Resources.round_grid_off_black_24;
-            this.buttonToggleGrid.Location = new System.Drawing.Point(772, 302);
-            this.buttonToggleGrid.Margin = new System.Windows.Forms.Padding(2, 3, 2, 3);
-            this.buttonToggleGrid.Name = "buttonToggleGrid";
-            this.buttonToggleGrid.Size = new System.Drawing.Size(33, 32);
-            this.buttonToggleGrid.TabIndex = 11;
-            this.buttonToggleGrid.UseVisualStyleBackColor = true;
-            this.buttonToggleGrid.Click += new System.EventHandler(this.buttonToggleGrid_Click);
+            buttonToggleGrid.ForeColor = System.Drawing.SystemColors.ControlText;
+            buttonToggleGrid.Image = Properties.Resources.round_grid_off_black_24;
+            buttonToggleGrid.Location = new System.Drawing.Point(882, 403);
+            buttonToggleGrid.Margin = new System.Windows.Forms.Padding(2, 4, 2, 4);
+            buttonToggleGrid.Name = "buttonToggleGrid";
+            buttonToggleGrid.Size = new System.Drawing.Size(38, 43);
+            buttonToggleGrid.TabIndex = 11;
+            buttonToggleGrid.UseVisualStyleBackColor = true;
+            buttonToggleGrid.Click += buttonToggleGrid_Click;
             // 
             // buttonToggleTileMarker
             // 
-            this.buttonToggleTileMarker.ForeColor = System.Drawing.SystemColors.ControlText;
-            this.buttonToggleTileMarker.Image = global::AmbermoonMapEditor2D.Properties.Resources.round_select_all_black_24;
-            this.buttonToggleTileMarker.Location = new System.Drawing.Point(772, 340);
-            this.buttonToggleTileMarker.Margin = new System.Windows.Forms.Padding(2, 3, 2, 3);
-            this.buttonToggleTileMarker.Name = "buttonToggleTileMarker";
-            this.buttonToggleTileMarker.Size = new System.Drawing.Size(33, 32);
-            this.buttonToggleTileMarker.TabIndex = 12;
-            this.buttonToggleTileMarker.UseVisualStyleBackColor = true;
-            this.buttonToggleTileMarker.Click += new System.EventHandler(this.buttonToggleTileMarker_Click);
+            buttonToggleTileMarker.ForeColor = System.Drawing.SystemColors.ControlText;
+            buttonToggleTileMarker.Image = Properties.Resources.round_select_all_black_24;
+            buttonToggleTileMarker.Location = new System.Drawing.Point(882, 453);
+            buttonToggleTileMarker.Margin = new System.Windows.Forms.Padding(2, 4, 2, 4);
+            buttonToggleTileMarker.Name = "buttonToggleTileMarker";
+            buttonToggleTileMarker.Size = new System.Drawing.Size(38, 43);
+            buttonToggleTileMarker.TabIndex = 12;
+            buttonToggleTileMarker.UseVisualStyleBackColor = true;
+            buttonToggleTileMarker.Click += buttonToggleTileMarker_Click;
             // 
             // labelDivider
             // 
-            this.labelDivider.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
-            this.labelDivider.Location = new System.Drawing.Point(772, 255);
-            this.labelDivider.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
-            this.labelDivider.Name = "labelDivider";
-            this.labelDivider.Size = new System.Drawing.Size(33, 2);
-            this.labelDivider.TabIndex = 13;
+            labelDivider.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
+            labelDivider.Location = new System.Drawing.Point(882, 340);
+            labelDivider.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
+            labelDivider.Name = "labelDivider";
+            labelDivider.Size = new System.Drawing.Size(38, 3);
+            labelDivider.TabIndex = 13;
             // 
             // buttonToolRemoveFrontLayer
             // 
-            this.buttonToolRemoveFrontLayer.Image = global::AmbermoonMapEditor2D.Properties.Resources.round_layers_clear_black_24;
-            this.buttonToolRemoveFrontLayer.Location = new System.Drawing.Point(772, 141);
-            this.buttonToolRemoveFrontLayer.Margin = new System.Windows.Forms.Padding(2, 3, 2, 3);
-            this.buttonToolRemoveFrontLayer.Name = "buttonToolRemoveFrontLayer";
-            this.buttonToolRemoveFrontLayer.Size = new System.Drawing.Size(33, 32);
-            this.buttonToolRemoveFrontLayer.TabIndex = 14;
-            this.buttonToolRemoveFrontLayer.UseVisualStyleBackColor = true;
-            this.buttonToolRemoveFrontLayer.Click += new System.EventHandler(this.buttonToolRemoveFrontLayer_Click);
+            buttonToolRemoveFrontLayer.Image = Properties.Resources.round_layers_clear_black_24;
+            buttonToolRemoveFrontLayer.Location = new System.Drawing.Point(882, 188);
+            buttonToolRemoveFrontLayer.Margin = new System.Windows.Forms.Padding(2, 4, 2, 4);
+            buttonToolRemoveFrontLayer.Name = "buttonToolRemoveFrontLayer";
+            buttonToolRemoveFrontLayer.Size = new System.Drawing.Size(38, 43);
+            buttonToolRemoveFrontLayer.TabIndex = 14;
+            buttonToolRemoveFrontLayer.UseVisualStyleBackColor = true;
+            buttonToolRemoveFrontLayer.Click += buttonToolRemoveFrontLayer_Click;
             // 
             // groupBoxEvents
             // 
-            this.groupBoxEvents.Controls.Add(this.listViewEvents);
-            this.groupBoxEvents.Location = new System.Drawing.Point(807, 553);
-            this.groupBoxEvents.Margin = new System.Windows.Forms.Padding(2, 3, 2, 3);
-            this.groupBoxEvents.Name = "groupBoxEvents";
-            this.groupBoxEvents.Padding = new System.Windows.Forms.Padding(2, 3, 2, 3);
-            this.groupBoxEvents.Size = new System.Drawing.Size(338, 129);
-            this.groupBoxEvents.TabIndex = 15;
-            this.groupBoxEvents.TabStop = false;
-            this.groupBoxEvents.Text = "Events";
+            groupBoxEvents.Controls.Add(listViewEvents);
+            groupBoxEvents.Location = new System.Drawing.Point(922, 737);
+            groupBoxEvents.Margin = new System.Windows.Forms.Padding(2, 4, 2, 4);
+            groupBoxEvents.Name = "groupBoxEvents";
+            groupBoxEvents.Padding = new System.Windows.Forms.Padding(2, 4, 2, 4);
+            groupBoxEvents.Size = new System.Drawing.Size(386, 172);
+            groupBoxEvents.TabIndex = 15;
+            groupBoxEvents.TabStop = false;
+            groupBoxEvents.Text = "Events";
             // 
             // listViewEvents
             // 
-            this.listViewEvents.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
-            this.columnHeaderEventId,
-            this.columnHeaderEventDescription});
-            this.listViewEvents.FullRowSelect = true;
-            this.listViewEvents.GridLines = true;
-            this.listViewEvents.HeaderStyle = System.Windows.Forms.ColumnHeaderStyle.Nonclickable;
-            this.listViewEvents.Location = new System.Drawing.Point(6, 21);
-            this.listViewEvents.Margin = new System.Windows.Forms.Padding(2, 3, 2, 3);
-            this.listViewEvents.Name = "listViewEvents";
-            this.listViewEvents.Size = new System.Drawing.Size(326, 125);
-            this.listViewEvents.TabIndex = 0;
-            this.listViewEvents.UseCompatibleStateImageBehavior = false;
-            this.listViewEvents.View = System.Windows.Forms.View.Details;
+            listViewEvents.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] { columnHeaderEventId, columnHeaderEventDescription });
+            listViewEvents.FullRowSelect = true;
+            listViewEvents.GridLines = true;
+            listViewEvents.HeaderStyle = System.Windows.Forms.ColumnHeaderStyle.Nonclickable;
+            listViewEvents.Location = new System.Drawing.Point(7, 28);
+            listViewEvents.Margin = new System.Windows.Forms.Padding(2, 4, 2, 4);
+            listViewEvents.Name = "listViewEvents";
+            listViewEvents.Size = new System.Drawing.Size(372, 165);
+            listViewEvents.TabIndex = 0;
+            listViewEvents.UseCompatibleStateImageBehavior = false;
+            listViewEvents.View = System.Windows.Forms.View.Details;
             // 
             // columnHeaderEventId
             // 
-            this.columnHeaderEventId.Text = "ID";
-            this.columnHeaderEventId.Width = 30;
+            columnHeaderEventId.Text = "ID";
+            columnHeaderEventId.Width = 30;
             // 
             // columnHeaderEventDescription
             // 
-            this.columnHeaderEventDescription.Text = "Description";
-            this.columnHeaderEventDescription.Width = 292;
+            columnHeaderEventDescription.Text = "Description";
+            columnHeaderEventDescription.Width = 292;
             // 
             // buttonToggleEvents
             // 
-            this.buttonToggleEvents.ForeColor = System.Drawing.SystemColors.ControlText;
-            this.buttonToggleEvents.Image = global::AmbermoonMapEditor2D.Properties.Resources.round_vpn_key_black_24_off;
-            this.buttonToggleEvents.Location = new System.Drawing.Point(772, 378);
-            this.buttonToggleEvents.Margin = new System.Windows.Forms.Padding(2, 3, 2, 3);
-            this.buttonToggleEvents.Name = "buttonToggleEvents";
-            this.buttonToggleEvents.Size = new System.Drawing.Size(33, 32);
-            this.buttonToggleEvents.TabIndex = 16;
-            this.buttonToggleEvents.UseVisualStyleBackColor = true;
-            this.buttonToggleEvents.Click += new System.EventHandler(this.buttonToggleEvents_Click);
+            buttonToggleEvents.ForeColor = System.Drawing.SystemColors.ControlText;
+            buttonToggleEvents.Image = Properties.Resources.round_vpn_key_black_24_off;
+            buttonToggleEvents.Location = new System.Drawing.Point(882, 504);
+            buttonToggleEvents.Margin = new System.Windows.Forms.Padding(2, 4, 2, 4);
+            buttonToggleEvents.Name = "buttonToggleEvents";
+            buttonToggleEvents.Size = new System.Drawing.Size(38, 43);
+            buttonToggleEvents.TabIndex = 16;
+            buttonToggleEvents.UseVisualStyleBackColor = true;
+            buttonToggleEvents.Click += buttonToggleEvents_Click;
             // 
             // timerAnimation
             // 
-            this.timerAnimation.Interval = 166;
-            this.timerAnimation.Tick += new System.EventHandler(this.timerAnimation_Tick);
+            timerAnimation.Interval = 166;
+            timerAnimation.Tick += timerAnimation_Tick;
             // 
             // trackBarZoom
             // 
-            this.trackBarZoom.AutoSize = false;
-            this.trackBarZoom.LargeChange = 1;
-            this.trackBarZoom.Location = new System.Drawing.Point(779, 411);
-            this.trackBarZoom.Margin = new System.Windows.Forms.Padding(2, 3, 2, 3);
-            this.trackBarZoom.Maximum = 4;
-            this.trackBarZoom.Minimum = 1;
-            this.trackBarZoom.Name = "trackBarZoom";
-            this.trackBarZoom.Orientation = System.Windows.Forms.Orientation.Vertical;
-            this.trackBarZoom.Size = new System.Drawing.Size(26, 84);
-            this.trackBarZoom.TabIndex = 17;
-            this.trackBarZoom.TickStyle = System.Windows.Forms.TickStyle.None;
-            this.trackBarZoom.Value = 4;
-            this.trackBarZoom.Scroll += new System.EventHandler(this.trackBarZoom_Scroll);
+            trackBarZoom.AutoSize = false;
+            trackBarZoom.LargeChange = 1;
+            trackBarZoom.Location = new System.Drawing.Point(890, 548);
+            trackBarZoom.Margin = new System.Windows.Forms.Padding(2, 4, 2, 4);
+            trackBarZoom.Maximum = 4;
+            trackBarZoom.Minimum = 1;
+            trackBarZoom.Name = "trackBarZoom";
+            trackBarZoom.Orientation = System.Windows.Forms.Orientation.Vertical;
+            trackBarZoom.Size = new System.Drawing.Size(30, 112);
+            trackBarZoom.TabIndex = 17;
+            trackBarZoom.TickStyle = System.Windows.Forms.TickStyle.None;
+            trackBarZoom.Value = 4;
+            trackBarZoom.Scroll += trackBarZoom_Scroll;
             // 
             // buttonToolEventChanger
             // 
-            this.buttonToolEventChanger.Image = global::AmbermoonMapEditor2D.Properties.Resources.baseline_grade_black_24dp;
-            this.buttonToolEventChanger.Location = new System.Drawing.Point(772, 216);
-            this.buttonToolEventChanger.Margin = new System.Windows.Forms.Padding(2, 3, 2, 3);
-            this.buttonToolEventChanger.Name = "buttonToolEventChanger";
-            this.buttonToolEventChanger.Size = new System.Drawing.Size(33, 32);
-            this.buttonToolEventChanger.TabIndex = 18;
-            this.buttonToolEventChanger.UseVisualStyleBackColor = true;
-            this.buttonToolEventChanger.Click += new System.EventHandler(this.buttonToolEventChanger_Click);
+            buttonToolEventChanger.Image = Properties.Resources.baseline_grade_black_24dp;
+            buttonToolEventChanger.Location = new System.Drawing.Point(882, 288);
+            buttonToolEventChanger.Margin = new System.Windows.Forms.Padding(2, 4, 2, 4);
+            buttonToolEventChanger.Name = "buttonToolEventChanger";
+            buttonToolEventChanger.Size = new System.Drawing.Size(38, 43);
+            buttonToolEventChanger.TabIndex = 18;
+            buttonToolEventChanger.UseVisualStyleBackColor = true;
+            buttonToolEventChanger.Click += buttonToolEventChanger_Click;
             // 
             // MapEditorForm
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1153, 711);
-            this.Controls.Add(this.buttonToolEventChanger);
-            this.Controls.Add(this.buttonToggleEvents);
-            this.Controls.Add(this.groupBoxEvents);
-            this.Controls.Add(this.buttonToolRemoveFrontLayer);
-            this.Controls.Add(this.labelDivider);
-            this.Controls.Add(this.buttonToggleTileMarker);
-            this.Controls.Add(this.buttonToggleGrid);
-            this.Controls.Add(this.buttonToolFill);
-            this.Controls.Add(this.buttonToolBlocks);
-            this.Controls.Add(this.statusStrip);
-            this.Controls.Add(this.buttonToolLayers);
-            this.Controls.Add(this.buttonToolColorPicker);
-            this.Controls.Add(this.buttonToolBrush);
-            this.Controls.Add(this.groupBoxCharacters);
-            this.Controls.Add(this.groupBoxProperties);
-            this.Controls.Add(this.groupBoxTileset);
-            this.Controls.Add(this.panelMap);
-            this.Controls.Add(this.menuStrip);
-            this.Controls.Add(this.trackBarZoom);
-            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
-            this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
-            this.MainMenuStrip = this.menuStrip;
-            this.Margin = new System.Windows.Forms.Padding(2, 3, 2, 3);
-            this.MaximizeBox = false;
-            this.Name = "MapEditorForm";
-            this.Text = "Ambermoon Map Editor 2D";
-            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.MapEditorForm_FormClosing);
-            this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.MapEditorForm_FormClosed);
-            this.Load += new System.EventHandler(this.MapEditorForm_Load);
-            this.KeyDown += new System.Windows.Forms.KeyEventHandler(this.MapEditorForm_KeyDown);
-            this.menuStrip.ResumeLayout(false);
-            this.menuStrip.PerformLayout();
-            this.groupBoxTileset.ResumeLayout(false);
-            this.groupBoxTileset.PerformLayout();
-            this.groupBoxProperties.ResumeLayout(false);
-            this.groupBoxProperties.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.numericUpDownHeight)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.numericUpDownWidth)).EndInit();
-            this.groupBoxCharacters.ResumeLayout(false);
-            this.groupBoxCharacters.PerformLayout();
-            this.contextMenuStripLayers.ResumeLayout(false);
-            this.statusStrip.ResumeLayout(false);
-            this.statusStrip.PerformLayout();
-            this.contextMenuStripBlockModes.ResumeLayout(false);
-            this.groupBoxEvents.ResumeLayout(false);
-            ((System.ComponentModel.ISupportInitialize)(this.trackBarZoom)).EndInit();
-            this.ResumeLayout(false);
-            this.PerformLayout();
-
+            AutoScaleDimensions = new System.Drawing.SizeF(8F, 20F);
+            AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            ClientSize = new System.Drawing.Size(1318, 948);
+            Controls.Add(buttonToolEventChanger);
+            Controls.Add(buttonToggleEvents);
+            Controls.Add(groupBoxEvents);
+            Controls.Add(buttonToolRemoveFrontLayer);
+            Controls.Add(labelDivider);
+            Controls.Add(buttonToggleTileMarker);
+            Controls.Add(buttonToggleGrid);
+            Controls.Add(buttonToolFill);
+            Controls.Add(buttonToolBlocks);
+            Controls.Add(statusStrip);
+            Controls.Add(buttonToolLayers);
+            Controls.Add(buttonToolColorPicker);
+            Controls.Add(buttonToolBrush);
+            Controls.Add(groupBoxCharacters);
+            Controls.Add(groupBoxProperties);
+            Controls.Add(groupBoxTileset);
+            Controls.Add(panelMap);
+            Controls.Add(menuStrip);
+            Controls.Add(trackBarZoom);
+            FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
+            Icon = (System.Drawing.Icon)resources.GetObject("$this.Icon");
+            MainMenuStrip = menuStrip;
+            Margin = new System.Windows.Forms.Padding(2, 4, 2, 4);
+            MaximizeBox = false;
+            Name = "MapEditorForm";
+            Text = "Ambermoon Map Editor 2D";
+            FormClosing += MapEditorForm_FormClosing;
+            FormClosed += MapEditorForm_FormClosed;
+            Load += MapEditorForm_Load;
+            KeyDown += MapEditorForm_KeyDown;
+            menuStrip.ResumeLayout(false);
+            menuStrip.PerformLayout();
+            groupBoxTileset.ResumeLayout(false);
+            groupBoxTileset.PerformLayout();
+            groupBoxProperties.ResumeLayout(false);
+            groupBoxProperties.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)numericUpDownHeight).EndInit();
+            ((System.ComponentModel.ISupportInitialize)numericUpDownWidth).EndInit();
+            groupBoxCharacters.ResumeLayout(false);
+            groupBoxCharacters.PerformLayout();
+            contextMenuStripLayers.ResumeLayout(false);
+            statusStrip.ResumeLayout(false);
+            statusStrip.PerformLayout();
+            contextMenuStripBlockModes.ResumeLayout(false);
+            groupBoxEvents.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)trackBarZoom).EndInit();
+            ResumeLayout(false);
+            PerformLayout();
         }
 
         #endregion
