@@ -2,11 +2,12 @@
 {
     public partial class TextureBrowser : Form
     {
-        public TextureBrowser(List<Bitmap> textures)
+        public TextureBrowser(List<Bitmap> textures, int selectedIndex)
         {
             InitializeComponent();
 
             this.textures = textures;
+            SelectedIndex = selectedIndex;
 
             panelTextures.Height = 168 + SystemInformation.HorizontalScrollBarHeight;
             panelTextures.AutoScrollMinSize = new Size(textures.Count * 8 + textures.Sum(t => t.Width * 2), textures.Max(t => t.Height * 2) + 8);
@@ -80,6 +81,16 @@
         private void panelTextures_Scroll(object sender, ScrollEventArgs e)
         {
             Refresh();
+        }
+
+        private void TextureBrowser_Load(object sender, EventArgs e)
+        {
+            int scrollX = 0;
+
+            for (int i = 0; i < SelectedIndex; i++)
+                scrollX += textures[i].Width * 2 + 8;
+
+            panelTextures.AutoScrollPosition = new Point(scrollX, -panelTextures.AutoScrollPosition.Y);
         }
     }
 }

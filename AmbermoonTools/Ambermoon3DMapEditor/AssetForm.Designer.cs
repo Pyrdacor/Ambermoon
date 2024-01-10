@@ -29,8 +29,10 @@
         private void InitializeComponent()
         {
             groupBox1 = new GroupBox();
+            buttonLeftWall = new Button();
+            buttonRightWall = new Button();
             comboBoxWallTravelStates = new ComboBox();
-            checkBoxBlockAll = new CheckBox();
+            checkBoxWallBlockAll = new CheckBox();
             comboBoxWallTravelClass = new ComboBox();
             groupBoxOverlay = new GroupBox();
             checkBoxWallTransparency = new CheckBox();
@@ -46,8 +48,6 @@
             comboBoxWalls = new ComboBox();
             panelWallTexture = new RenderPanel();
             buttonTextures = new Button();
-            buttonRightWall = new Button();
-            buttonLeftWall = new Button();
             groupBox1.SuspendLayout();
             SuspendLayout();
             // 
@@ -56,7 +56,7 @@
             groupBox1.Controls.Add(buttonLeftWall);
             groupBox1.Controls.Add(buttonRightWall);
             groupBox1.Controls.Add(comboBoxWallTravelStates);
-            groupBox1.Controls.Add(checkBoxBlockAll);
+            groupBox1.Controls.Add(checkBoxWallBlockAll);
             groupBox1.Controls.Add(comboBoxWallTravelClass);
             groupBox1.Controls.Add(groupBoxOverlay);
             groupBox1.Controls.Add(checkBoxWallTransparency);
@@ -79,6 +79,28 @@
             groupBox1.TabStop = false;
             groupBox1.Text = "Walls";
             // 
+            // buttonLeftWall
+            // 
+            buttonLeftWall.Enabled = false;
+            buttonLeftWall.Location = new Point(0, 84);
+            buttonLeftWall.Name = "buttonLeftWall";
+            buttonLeftWall.Size = new Size(18, 48);
+            buttonLeftWall.TabIndex = 18;
+            buttonLeftWall.Text = "<";
+            buttonLeftWall.UseVisualStyleBackColor = true;
+            buttonLeftWall.Click += buttonLeftWall_Click;
+            // 
+            // buttonRightWall
+            // 
+            buttonRightWall.Enabled = false;
+            buttonRightWall.Location = new Point(272, 84);
+            buttonRightWall.Name = "buttonRightWall";
+            buttonRightWall.Size = new Size(18, 48);
+            buttonRightWall.TabIndex = 17;
+            buttonRightWall.Text = ">";
+            buttonRightWall.UseVisualStyleBackColor = true;
+            buttonRightWall.Click += buttonRightWall_Click;
+            // 
             // comboBoxWallTravelStates
             // 
             comboBoxWallTravelStates.DropDownStyle = ComboBoxStyle.DropDownList;
@@ -90,16 +112,16 @@
             comboBoxWallTravelStates.TabIndex = 16;
             comboBoxWallTravelStates.SelectedIndexChanged += comboBoxWallTravelStates_SelectedIndexChanged;
             // 
-            // checkBoxBlockAll
+            // checkBoxWallBlockAll
             // 
-            checkBoxBlockAll.AutoSize = true;
-            checkBoxBlockAll.Location = new Point(453, 162);
-            checkBoxBlockAll.Name = "checkBoxBlockAll";
-            checkBoxBlockAll.Size = new Size(89, 24);
-            checkBoxBlockAll.TabIndex = 15;
-            checkBoxBlockAll.Text = "Block All";
-            checkBoxBlockAll.UseVisualStyleBackColor = true;
-            checkBoxBlockAll.CheckedChanged += checkBoxBlockAll_CheckedChanged;
+            checkBoxWallBlockAll.AutoSize = true;
+            checkBoxWallBlockAll.Location = new Point(453, 162);
+            checkBoxWallBlockAll.Name = "checkBoxWallBlockAll";
+            checkBoxWallBlockAll.Size = new Size(89, 24);
+            checkBoxWallBlockAll.TabIndex = 15;
+            checkBoxWallBlockAll.Text = "Block All";
+            checkBoxWallBlockAll.UseVisualStyleBackColor = true;
+            checkBoxWallBlockAll.CheckedChanged += checkBoxBlockAll_CheckedChanged;
             // 
             // comboBoxWallTravelClass
             // 
@@ -141,6 +163,7 @@
             checkBoxWallBlockSight.TabIndex = 11;
             checkBoxWallBlockSight.Text = "Block Sight";
             checkBoxWallBlockSight.UseVisualStyleBackColor = true;
+            checkBoxWallBlockSight.CheckedChanged += checkBoxWallBlockSight_CheckedChanged;
             // 
             // panelWallColor
             // 
@@ -178,10 +201,11 @@
             comboBoxWallAutomapType.Name = "comboBoxWallAutomapType";
             comboBoxWallAutomapType.Size = new Size(146, 28);
             comboBoxWallAutomapType.TabIndex = 7;
+            comboBoxWallAutomapType.SelectedIndexChanged += comboBoxWallAutomapType_SelectedIndexChanged;
             // 
             // buttonOverlays
             // 
-            buttonOverlays.Location = new Point(152, 192);
+            buttonOverlays.Location = new Point(153, 192);
             buttonOverlays.Name = "buttonOverlays";
             buttonOverlays.Size = new Size(119, 29);
             buttonOverlays.TabIndex = 6;
@@ -233,8 +257,9 @@
             // 
             // panelWallTexture
             // 
+            panelWallTexture.BackColor = Color.Magenta;
             panelWallTexture.BorderStyle = BorderStyle.Fixed3D;
-            panelWallTexture.Location = new Point(17, 26);
+            panelWallTexture.Location = new Point(18, 26);
             panelWallTexture.Name = "panelWallTexture";
             panelWallTexture.Size = new Size(256, 160);
             panelWallTexture.TabIndex = 1;
@@ -242,35 +267,13 @@
             // 
             // buttonTextures
             // 
-            buttonTextures.Location = new Point(15, 192);
+            buttonTextures.Location = new Point(16, 192);
             buttonTextures.Name = "buttonTextures";
             buttonTextures.Size = new Size(119, 29);
             buttonTextures.TabIndex = 0;
             buttonTextures.Text = "Textures ...";
             buttonTextures.UseVisualStyleBackColor = true;
             buttonTextures.Click += buttonTextures_Click;
-            // 
-            // buttonRightWall
-            // 
-            buttonRightWall.Enabled = false;
-            buttonRightWall.Location = new Point(272, 84);
-            buttonRightWall.Name = "buttonRightWall";
-            buttonRightWall.Size = new Size(18, 48);
-            buttonRightWall.TabIndex = 17;
-            buttonRightWall.Text = ">";
-            buttonRightWall.UseVisualStyleBackColor = true;
-            buttonRightWall.Click += buttonRightWall_Click;
-            // 
-            // buttonLeftWall
-            // 
-            buttonLeftWall.Enabled = false;
-            buttonLeftWall.Location = new Point(0, 84);
-            buttonLeftWall.Name = "buttonLeftWall";
-            buttonLeftWall.Size = new Size(18, 48);
-            buttonLeftWall.TabIndex = 18;
-            buttonLeftWall.Text = "<";
-            buttonLeftWall.UseVisualStyleBackColor = true;
-            buttonLeftWall.Click += buttonLeftWall_Click;
             // 
             // AssetForm
             // 
@@ -306,7 +309,7 @@
         private CheckBox checkBoxWallTransparency;
         private GroupBox groupBoxOverlay;
         private ComboBox comboBoxWallTravelClass;
-        private CheckBox checkBoxBlockAll;
+        private CheckBox checkBoxWallBlockAll;
         private ComboBox comboBoxWallTravelStates;
         private Button buttonRightWall;
         private Button buttonLeftWall;

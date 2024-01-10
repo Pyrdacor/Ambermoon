@@ -78,6 +78,7 @@
             Name = "TextureBrowser";
             StartPosition = FormStartPosition.CenterParent;
             Text = "Texture Browser";
+            Load += TextureBrowser_Load;
             ResumeLayout(false);
         }
 

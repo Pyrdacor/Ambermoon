@@ -6,7 +6,8 @@ namespace Ambermoon3DMapEditor
     internal partial class AssetForm : Form
     {
         public AssetForm(List<Bitmap> wallTextures, List<List<Bitmap>> objectTextures,
-            List<Labdata.WallData> walls, List<Labdata.Object> objects, Palette palette)
+            List<Labdata.WallData> walls, List<Labdata.Object> objects, Palette palette,
+            List<Bitmap> allWallTextures, List<Bitmap> allObjectTextures, List<Bitmap> allOverlayTextures)
         {
             InitializeComponent();
 
@@ -15,17 +16,60 @@ namespace Ambermoon3DMapEditor
             this.walls = walls;
             this.objects = objects;
             this.palette = palette;
+            this.allWallTextures = allWallTextures;
+            this.allObjectTextures = allObjectTextures;
+            this.allOverlayTextures = allOverlayTextures;
         }
 
         private readonly List<Bitmap> wallTextures;
         private readonly List<List<Bitmap>> objectTextures;
         private readonly List<Labdata.WallData> walls;
         private readonly List<Labdata.Object> objects;
+        private readonly List<Bitmap> allWallTextures;
+        private readonly List<Bitmap> allObjectTextures;
+        private readonly List<Bitmap> allOverlayTextures;
         private readonly Palette palette;
+        private bool ignoreTravelStateChange = false;
+
+        private delegate void ActionRef<T>(ref T item);
+
+        private void UpdateWall(ActionRef<Labdata.WallData> wallUpdater)
+        {
+            int selectedIndex = comboBoxWalls.SelectedIndex;
+
+            if (selectedIndex == -1)
+                return;
+
+            var wall = walls[selectedIndex];
+            wallUpdater(ref wall);
+            walls[selectedIndex] = wall;
+        }
+
+        private void UpdateWallFlag(Tileset.TileFlags flag, bool set)
+        {
+            UpdateWall((ref Labdata.WallData wall) =>
+            {
+                if (set)
+                    wall.Flags |= flag;
+                else
+                    wall.Flags &= ~flag;
+            });
+        }
 
         private void buttonTextures_Click(object sender, EventArgs e)
         {
-            new TextureBrowser(wallTextures).ShowDialog(this);
+            int selectedIndex = comboBoxWalls.SelectedIndex;
+
+            if (selectedIndex != -1)
+                selectedIndex = (int)walls[selectedIndex].TextureIndex - 1;
+
+            var textureBrowser = new TextureBrowser(allWallTextures, selectedIndex);
+
+            if (textureBrowser.ShowDialog(this) == DialogResult.OK)
+            {
+                UpdateWall((ref Labdata.WallData wall) => wall.TextureIndex = (uint)textureBrowser.SelectedIndex + 1);
+                panelWallTexture.Refresh();
+            }
         }
 
         private void buttonOverlays_Click(object sender, EventArgs e)
@@ -51,8 +95,22 @@ namespace Ambermoon3DMapEditor
         private void comboBoxWalls_SelectedIndexChanged(object sender, EventArgs e)
         {
             int selectedIndex = comboBoxWalls.SelectedIndex;
+            var wall = walls[selectedIndex];
 
-            comboBoxWallAutomapType.SelectedIndex = (int)walls[selectedIndex].AutomapType;
+            comboBoxWallAutomapType.SelectedIndex = (int)wall.AutomapType;
+            checkBoxWallBlockAll.Checked = wall.Flags.HasFlag(Tileset.TileFlags.BlockAllMovement);
+            checkBoxWallBlockSight.Checked = wall.Flags.HasFlag(Tileset.TileFlags.BlockSight);
+            checkBoxWallTransparency.Checked = wall.Flags.HasFlag(Tileset.TileFlags.Transparency);
+
+            if (!checkBoxWallBlockAll.Checked)
+            {
+                int mask = 1 << (comboBoxWallTravelClass.SelectedIndex + 8);
+                comboBoxWallTravelStates.SelectedIndex = ((int)wall.Flags & mask) != 0 ? 1 : 0;
+            }
+            else
+            {
+                comboBoxWallTravelClass_SelectedIndexChanged(comboBoxWallTravelClass, EventArgs.Empty);
+            }
 
             buttonLeftWall.Enabled = comboBoxWalls.Items.Count != 0 && selectedIndex > 0;
             buttonRightWall.Enabled = comboBoxWalls.Items.Count != 0 && selectedIndex < comboBoxWalls.Items.Count - 1;
@@ -62,7 +120,8 @@ namespace Ambermoon3DMapEditor
 
         private void checkBoxWallTransparency_CheckedChanged(object sender, EventArgs e)
         {
-
+            UpdateWallFlag(Tileset.TileFlags.Transparency, checkBoxWallTransparency.Checked);
+            panelWallTexture.Refresh();
         }
 
         private void AssetForm_Load(object sender, EventArgs e)
@@ -70,28 +129,60 @@ namespace Ambermoon3DMapEditor
             comboBoxWallAutomapType.Items.AddRange(Enum.GetNames(typeof(AutomapType)));
             comboBoxWallAutomapType.SelectedIndex = 0;
 
+            comboBoxWallTravelClass.Items.Add("Player");
+            comboBoxWallTravelClass.Items.AddRange(Enumerable.Range(1, 14).Select(i => $"Monsters {i}").ToArray());
+            comboBoxWallTravelClass.SelectedIndex = 0;
+
+            comboBoxWallTravelStates.SelectedIndex = 0;
+
+            checkBoxWallBlockAll.Checked = true;
+
             comboBoxWalls.Items.AddRange(walls.Select((_, i) => $"Wall {i}").ToArray());
             comboBoxWalls.SelectedIndex = 0;
         }
 
         private void comboBoxWallTravelClass_SelectedIndexChanged(object sender, EventArgs e)
         {
+            int selectedIndex = comboBoxWalls.SelectedIndex;
 
+            if (selectedIndex == -1)
+                return;
+
+            var wall = walls[selectedIndex];
+            int mask = 1 << (comboBoxWallTravelClass.SelectedIndex + 8);
+            ignoreTravelStateChange = true;
+            comboBoxWallTravelStates.SelectedIndex = ((int)wall.Flags & mask) != 0 ? 1 : 0;
+            ignoreTravelStateChange = false;
         }
 
         private void comboBoxWallTravelStates_SelectedIndexChanged(object sender, EventArgs e)
         {
+            if (ignoreTravelStateChange)
+                return;
 
+            UpdateWall((ref Labdata.WallData wall) =>
+            {
+                uint mask = 1u << (comboBoxWallTravelClass.SelectedIndex + 8);
+
+                if (comboBoxWallTravelStates.SelectedIndex == 1)
+                    wall.Flags = (Tileset.TileFlags)((uint)wall.Flags | mask);
+                else
+                    wall.Flags = (Tileset.TileFlags)((uint)wall.Flags & ~mask);
+            });
         }
 
         private void checkBoxBlockAll_CheckedChanged(object sender, EventArgs e)
         {
-
+            comboBoxWallTravelClass.Enabled = !checkBoxWallBlockAll.Checked;
+            comboBoxWallTravelStates.Enabled = !checkBoxWallBlockAll.Checked;
+            UpdateWallFlag(Tileset.TileFlags.BlockAllMovement, checkBoxWallBlockAll.Checked);
         }
 
         private void panelWallTexture_Paint(object sender, PaintEventArgs e)
         {
-            var image = wallTextures[comboBoxWalls.SelectedIndex];
+            using var image = (Bitmap)wallTextures[comboBoxWalls.SelectedIndex].Clone();
+            if (checkBoxWallTransparency.Checked)
+                image.MakeTransparent(palette.Colors[0]);
             e.Graphics.DrawImage(image, 0, 0, image.Width * 2, image.Height * 2);
         }
 
@@ -103,7 +194,13 @@ namespace Ambermoon3DMapEditor
 
         private void panelWallColor_Click(object sender, EventArgs e)
         {
+            var colorPicker = new ColorPickerForm(palette, 16, 0, palette.Colors[walls[comboBoxWalls.SelectedIndex].ColorIndex]);
 
+            if (colorPicker.ShowDialog() == DialogResult.OK)
+            {
+                UpdateWall((ref Labdata.WallData wall) => wall.ColorIndex = (byte)palette.Colors.ToList().IndexOf(colorPicker!.Color));
+                panelWallColor.Refresh();
+            }
         }
 
         private void buttonLeftWall_Click(object sender, EventArgs e)
@@ -114,6 +211,16 @@ namespace Ambermoon3DMapEditor
         private void buttonRightWall_Click(object sender, EventArgs e)
         {
             comboBoxWalls.SelectedIndex++;
+        }
+
+        private void checkBoxWallBlockSight_CheckedChanged(object sender, EventArgs e)
+        {
+            UpdateWallFlag(Tileset.TileFlags.BlockSight, checkBoxWallBlockSight.Checked);
+        }
+
+        private void comboBoxWallAutomapType_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            UpdateWall((ref Labdata.WallData wall) => wall.AutomapType = (AutomapType)comboBoxWallAutomapType.SelectedIndex);
         }
     }
 }

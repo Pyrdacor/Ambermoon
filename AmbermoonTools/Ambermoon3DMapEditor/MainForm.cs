@@ -61,6 +61,7 @@ namespace Ambermoon3DMapEditor
 
         #region Data, Map, Lab
         private readonly GameData gameData;
+        private GraphicCache? graphicCache;
         private Map? map;
         private Labdata? labdata;
         private readonly Graphic automapPalette;
@@ -101,10 +102,62 @@ namespace Ambermoon3DMapEditor
 
         public MainForm()
         {
-            const string dataPath = @"C:\Users\flavia\Desktop\ambermoon_german_1.19_extracted\Amberfiles";
-            //const string dataPath = @"C:\Users\Rober\Desktop\ambermoon_advanced_german_1.03_extracted\Amberfiles";
-            gameData = new GameData();
-            gameData.Load(dataPath);
+            var dialog = new FolderBrowserDialog();
+
+            dialog.AutoUpgradeEnabled = true;
+            dialog.Description = "Where is your Ambermoon data folder (i.e. Amberfiles)?";
+            dialog.ShowNewFolderButton = false;
+            dialog.UseDescriptionForTitle = true;
+
+            if (dialog.ShowDialog(this) == DialogResult.OK)
+            {
+                gameData = new GameData(GameData.LoadPreference.PreferExtracted, null, true);
+                gameData.Load(dialog.SelectedPath);
+
+                bool CheckFile(string file, string name)
+                {
+                    if (!gameData.Files.ContainsKey(file))
+                    {
+                        MessageBox.Show($"No {name} ({file}) could be found at the given path.", $"Error loading {name}", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        Close();
+                        return false;
+                    }
+
+                    return true;
+                }
+
+                if (!CheckFile("2Wall3D.amb", "walls") || !CheckFile("3Wall3D.amb", "walls"))
+                    return;
+
+                if (!CheckFile("2Overlay3D.amb", "overlays") || !CheckFile("3Overlay3D.amb", "overlays"))
+                    return;
+
+                if (!CheckFile("2Object3D.amb", "objects") || !CheckFile("3Object3D.amb", "objects"))
+                    return;
+
+                if (!CheckFile("Floors.amb", "floors"))
+                    return;
+
+                if (!CheckFile("2Lab_data.amb", "lab data"))
+                    return;
+
+                if (!CheckFile("Palettes.amb", "palettes"))
+                    return;
+
+                if (!CheckFile("Automap_graphics", "dungeon map graphics"))
+                    return;
+
+                if (!CheckFile("2Map_data.amb", "maps") || !CheckFile("3Map_data.amb", "maps"))
+                    return;
+
+                if (!CheckFile("Portraits.amb", "portraits"))
+                    return;
+            }
+            else
+            {
+                Close();
+                return;
+            }
 
             foreach (var paletteGraphic in gameData.GraphicProvider.Palettes)
             {
@@ -187,6 +240,7 @@ namespace Ambermoon3DMapEditor
             labdata = gameData.MapManager.GetLabdataForMap(map!);
             paletteIndex = map.PaletteIndex;
             InitLabdata(labdata, map.PaletteIndex);
+            graphicCache = new GraphicCache(gameData.GraphicProvider.Palettes[(int)paletteIndex], gameData);
             if (map.Flags.HasFlag(MapFlags.Sky))
                 InitSky(map);
             else
@@ -1418,7 +1472,12 @@ namespace Ambermoon3DMapEditor
         {
             var wallGraphicList = new List<Bitmap>(wallGraphics);
             var objectGraphicList = new List<List<Bitmap>>(objectGraphics.Select(g => g.ToList()));
-            new AssetForm(wallGraphicList, objectGraphicList, labdata!.Walls, labdata.Objects, palettes[paletteIndex]).ShowDialog(this);
-        }
+            var allWallTextures = graphicCache.GetWallGraphicsForMap(map!);
+            var allObjectTextures = graphicCache.GetObjectGraphicsForMap(map!);
+            var allOverlayTextures = graphicCache.GetOverlayGraphicsForMap(map!);
+            new AssetForm(wallGraphicList, objectGraphicList,
+                labdata!.Walls, labdata.Objects, palettes[paletteIndex],
+                allWallTextures, allObjectTextures, allOverlayTextures).ShowDialog(this);
+        }        
     }
 }

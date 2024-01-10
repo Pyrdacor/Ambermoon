@@ -4,6 +4,9 @@
     <Compile Update="AssetForm.cs">
       <SubType>Form</SubType>
     </Compile>
+    <Compile Update="ColorPickerForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
     <Compile Update="EventEditorForm.cs">
       <SubType>Form</SubType>
     </Compile>
