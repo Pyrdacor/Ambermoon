@@ -1,0 +1,1 @@
+﻿Eine Tagesration kostet {0} GP.

@@ -1,0 +1,10 @@
+﻿Zu wenig freier Speicher! Das Programm wird nun einen
+Neustart versuchen. Ihre Spielposition wird dabei
+jedoch beibehalten.
+
+Bitte sehen Sie mit Hilfe des Installationprogrammes
+in das Troubleshoot-Dokument, wie Sie dieses Problem
+umgehen können.
+
+Drücken Sie nun bitte einen der Mausknöpfe.
+{{Click}}

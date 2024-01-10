@@ -1,0 +1,1 @@
+﻿{0} hat {1} Schadenspunkte angerichtet!

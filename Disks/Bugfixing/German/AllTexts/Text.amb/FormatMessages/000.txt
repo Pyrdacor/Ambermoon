@@ -1,0 +1,1 @@
+﻿Ein I/O-Fehler ist aufgetreten:^{0}^^Die aktuelle Datei: ^{1}^^Nochmal versuchen?

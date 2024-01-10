@@ -1,0 +1,1 @@
+﻿{0} beschwört den {1} - Zauber aus {2}!

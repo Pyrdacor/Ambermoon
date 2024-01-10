@@ -1,0 +1,1 @@
+﻿{0} hat keine Nahrung mehr und kann sich deshalb nicht erholen.

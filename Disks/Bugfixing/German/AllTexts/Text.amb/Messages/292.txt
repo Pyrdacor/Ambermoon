@@ -1,0 +1,1 @@
+﻿Da noch keine Spielstände gespeichert wurden, können Sie lediglich den Startspielstand laden.^Soll der Startspielstand geladen werden?

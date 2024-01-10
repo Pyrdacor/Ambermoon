@@ -1,0 +1,1 @@
+﻿Jeder bekommt {0} Erfahrungspunkte.

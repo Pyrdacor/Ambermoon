@@ -1,0 +1,9 @@
+﻿Wegen Mangel an Chip Memory wird das Programm nun
+die Musik deaktivieren.
+
+Bitte sehen Sie mit Hilfe des Installationprogrammes
+in das Troubleshoot-Dokument, wie Sie dieses Problem
+umgehen können.
+
+Drücken Sie nun bitte einen der Mausknöpfe.
+{{Click}}

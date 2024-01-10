@@ -1,0 +1,1 @@
+﻿{0} erholt sich um {1} LP und {2} SP.

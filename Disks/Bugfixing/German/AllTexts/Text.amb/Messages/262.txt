@@ -1,0 +1,1 @@
+﻿Versteinerte Monster können nicht verletzt werden!

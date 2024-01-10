@@ -1,0 +1,1 @@
+﻿Bitte legen Sie Diskette {0} in ein beliebiges Laufwerk ein.
