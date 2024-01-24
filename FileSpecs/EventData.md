@@ -112,6 +112,8 @@ Note: There is no explicit trigger for hand cursor. If this is needed, a conditi
 
 Note: In this context, the status "blind" means either the ailment or the fact that you have no light source in a dungeon.
 
+Note: In the original docs byte 0x04 was planned to be a search skill check similar to the one in the chest event. However this was never implemented in the original Ambermoon code, so it is safe to consider it as unused.
+
 
 ## Spinner event (0x05 / 5)
 
