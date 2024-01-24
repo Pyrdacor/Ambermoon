@@ -61,7 +61,7 @@ Offset | Type | Description
 0x02 | ubyte | Search check (0-100%) **bugged**
 0x03 | ubyte | Optional index of a map text to display when showing the opened chest (0xff means no text)
 0x04 | ubyte | Chest data index (also used for locked state in savegame)
-0x05 | ubyte | Chest loot flags
+0x05 | ubyte | Chest type and flags
 0x06 | uword | Key index if locked
 0x08 | uword | Unlock fail event index (0-based, 0xffff means none, this is basically the trap event chain)
 
@@ -76,18 +76,20 @@ Only one chest in Ambermoon uses the search check. It is a skull in the Antique 
 
 **Note:** The chest is always detected if the clairvoyance spell is active!
 
-### Chest loot flags
+### Chest type and flags
 
-- Bit0: Remove when empty
-- Bit1: No chest auto remove
+- Bit0: Chest type (0 = Chest, 1 = Junk pile)
+- Bit1: No save
 - Bit2: Extended chest (**Ambermoon Advanced** only)
 - Bit3-7: Unused
 
-Bit0 will actually close the chest when you have looted all items, gold and food. The chest event (chain) is then deactivated so that you can't access the chest again. This also disallows storing items in that chest.
+Bit 0 will actually close the chest when you have looted all items, gold and food. This also disallows storing items, gold or food in that chest. This is set for all non-stationary chests like barrels, junk and also other item pickups like flowers, etc.
 
-Bit1 is only used when Bit0 is set as well. If this is set, the event (chain) is not deactivated so that you can access the chest again after fully looting it. This is used for things like the flowers on Lyramion. You can loot them infinitely. Although the chest popup closes after looting and you can't of course store items there.
+Bit 1 determines if the chest contents should be saved to the savegame data when closing the chest window. The default (0) means that the chest contents are saved. This is basically the case for all normal stationary chests in the game. Otherwise a revisit of the chest would show the previous content again and you could loot forever.
 
-**Note:** The original specs state that the loot flags actually are the "chest type" and it can be chest (0), trashpile (1), chest no save (2) or trashpile no save (3). But it is compatible to the above interpretation. A value of 2 is never used in the original.
+For junk piles this bit is a bit more useful. Normal piles will store the contents of course. For example if you loot the content fully, the chest stays empty as it is updated in the savegame. When the pile is revisited it is already empty, so it is not shown again. It appears as the pile has gone.
+
+However in some cases the "chest" should be reused. For example when there are multiple flowers on the forest moon, they all share the same chest with one single item. Here the save-bit is set to 1 which means "no save". So when looting or leaving the chest without looting, the chest is reset. So approaching the flower again or another one, will show the item again. There are other mechanisms to ensure that the same flower is only looted once. This can be handled by the event chain on the map.
 
 In Ambermoon Advanced the limit of 256 chests was exceeded. As the event has only a byte for the chest index, we use a new flag to distinguish between the normal 256 chests and the extended chests. There are 128 possible additional chests in Ambermoon Advanced. See the [savegame documentation](Savegame.md) for more details.
 
