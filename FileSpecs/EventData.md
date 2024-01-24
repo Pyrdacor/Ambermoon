@@ -87,7 +87,7 @@ Bit0 will actually close the chest when you have looted all items, gold and food
 
 Bit1 is only used when Bit0 is set as well. If this is set, the event (chain) is not deactivated so that you can access the chest again after fully looting it. This is used for things like the flowers on Lyramion. You can loot them infinitely. Although the chest popup closes after looting and you can't of course store items there.
 
-**Note:** Rhe original specs state that the loot flags actually are the "chest type" and it can be chest (0), trashpile (1), chest no save (2) or trashpile no save (3). But it is compatible to the above interpretation. A value of 2 is never used in the original.
+**Note:** The original specs state that the loot flags actually are the "chest type" and it can be chest (0), trashpile (1), chest no save (2) or trashpile no save (3). But it is compatible to the above interpretation. A value of 2 is never used in the original.
 
 In Ambermoon Advanced the limit of 256 chests was exceeded. As the event has only a byte for the chest index, we use a new flag to distinguish between the normal 256 chests and the extended chests. There are 128 possible additional chests in Ambermoon Advanced. See the [savegame documentation](Savegame.md) for more details.
 
