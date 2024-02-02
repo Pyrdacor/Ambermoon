@@ -1,0 +1,1 @@
+﻿Vložte disk {0} do libovolné jednotky.

@@ -1,0 +1,1 @@
+﻿Došlo k chybě I/O: ^{0}^^Aktuální soubor: ^{1}^^Opakovat?

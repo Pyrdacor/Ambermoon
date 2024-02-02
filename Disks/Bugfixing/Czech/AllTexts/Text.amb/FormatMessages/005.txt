@@ -1,0 +1,10 @@
+﻿Programu došla paměť! Nyní bude proveden 
+pokus o restart. Vaše pozice ve hře nebude 
+poškozena, ale budete vráceni na obrazovku mapy.
+
+Pomocí instalačního programu si prosím přečtěte
+dokument o odstraňování problémů, abyste zjistili 
+proč se to stalo a jak tomu předejít.
+
+Pro pokračování klikněte na libovolné tlačítko myši.
+{{Click}}
