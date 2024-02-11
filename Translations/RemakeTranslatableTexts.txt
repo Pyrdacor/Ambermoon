@@ -1,0 +1,323 @@
+## Remake messages
+
+{ Index.ReallyStartNewGame, "Do you really want to start a new game?" },
+{ Index.FailedToLoadSavegame, "Failed to load savegame." },
+{ Index.FailedToLoadInitialSavegame, "Failed to load initial savegame." },
+{ Index.FailedToLoadSavegameUseInitial, "Failed to load savegame. Loaded initial savegame instead." },
+{ Index.StartNewGameOrQuit, "Do you want to start a new game or quit the game?" },
+{ Index.RuneTableUsage, "As long as you have the rune table in your inventory, all runes will automatically be displayed as text now." },
+{ Index.LoadCrashedGame, "A crash backup savegame was detected. Do you want to load it?" },
+{ Index.FailedToRemoveCrashSavegame, "The crash backup savegame could not be deleted automatically. Please do so yourself. It is stored in sub-folder 'Save.99'." },
+{ Index.GameSaved, "Saved as ~INK 22~'{0}'~INK 31~."},
+{ Index.GameLoaded, "~INK 22~Savegame {0}~INK 31~ was loaded."},
+{ Index.InitialGameLoaded, "~INK 22~Initial savegame~INK 31~ was loaded."}
+
+
+## Custom remake outro texts
+
+"Egil: It was an amazing adventure but now I have to say Goodbye.",
+"Egil: The dwarfs of Gemstone need volunteers to rebuild their capital.",
+"~HERO~: I hope we see each other again. Have a good trip my friend!",
+" ^~HERO~: ...",
+" ^Stranger: Not so fast ~HERO~!",
+" ^~HERO~: Who are you?",
+"Stranger: My name is ~INK17~Pyrdacor~INK31~. I don't have much time.",
+"Stranger: But I can tell you this: The adventure is not over yet.",
+" ^~HERO~: What are you talking about?",
+" ^~INK17~The third part of the Amber trilogy~INK31~ is planned.",
+" ^~HERO~: Awesome!",
+"Pyrdacor: Thank you for playing ~INK22~Ambermoon~INK31~! I hope you had fun."
+
+
+## Tutorial texts
+
+// Introduction
+"Hi ~SELF~ and welcome to the Ambermoon Remake.^^Do you need a little introduction?",
+// Tip 1
+"The buttons in the lower right area of the screen provide many useful functions of " +
+"the game. If you are on the main screen you can toggle the buttons by pressing the " +
+"right mouse button while hovering the area or hitting the Return key. It will unlock " +
+"additional functions.",
+// Tip 2
+"You can also use the NumPad on your keyboard to control those buttons. The layout " +
+"is exactly as the in-game buttons. So hitting the key 7 will be equivalent to pressing " +
+"the upper left button (the eye).",
+// Tip 3
+"In the upper area you see the character portraits. You can click on them to select the " +
+"active player or right click them to open the inventories. The keyboard keys 1-6 will select " +
+"a player as well and keys F1-F6 will open the inventories.",
+// Tip 4
+"You can move on maps by using the mouse, keys W, A, S, D or the cursor keys. In 2D you can " +
+"right click on the map to change the cursor into an action cursor to interact with objects " +
+"or characters like NPCs.",
+// End
+"Now I'm quiet. Have fun playing Ambermoon!"
+
+
+## Attribute tooltips
+
+// Strength
+"Strength^^Increases the max weight by 1kg per point.^Also increases damage by 1 every 25 points.^^Currently +{0}kg and +{1} damage",
+// Intelligence
+"Intelligence^^Adds 1 additional SP and SLP on^level up for every 25 points.^^Currently +{0} SP and SLP",
+// Dexterity
+"Dexterity^^Chance in percent to not trigger^a trap when messing with locks.^Adds, together with Luck,^to the chance of avoiding fights.^^Currently {0}% trap avoid chance^          {1}% fight avoid chance",
+// Speed
+"Speed^^Higher speed values let you act earlier in battle.^Every 80 points you can move 1 additional field^per round.^^Currently you can move {0} field(s).",
+// Stamina
+"Stamina^^Increases defense by 1 every 25 points.^^Currently +{0} defense",
+// Charisma
+"Charisma^^Increases the sell price by 1%^every full 10 points.^^Currently +{0}% sell price",
+// Luck
+"Luck^^Chance in percent to avoid the effect^of an already triggered trap.^Adds, together with Dexterity,^to the chance of avoiding fights.^^Currently {0}% trap effect avoid chance^          {1}% fight avoid chance",
+// Anti-Magic
+"Anti-Magic^^Chance in percent to block enemy spells.^^Currently {0}% spell block chance"
+
+
+## Skill tooltips
+
+// Attack
+"Attack^^Chance to hit an enemy.^^Currently {0}% hit chance",
+// Parry
+"Parry^^Chance to block an enemy attack.^The battle action 'Parry' is necessary for this.^^Currently {0}% block chance",
+// Swim
+"Swim^^Damage reduction while swimming.^^Currently {0}% damage reduction",
+// Crit
+"Critical Hit^^Chance to kill an opponent with a single strike.^Does not work against bosses.^^Current chance: {0}%",
+// Find traps
+"Find Traps^^Chance to find a lock trap.^^Current chance: {0}%",
+// Disarm traps
+"Disarm Traps^^Chance to disarm a found lock trap.^^Current chance: {0}%",
+// Lockpick
+"Lockpicking^^Chance to pick a lock without a lockpick.^Does not work for doors which require a key.^^Current chance: {0}%",
+// Search
+"Searching^^Chance to find secret treasures.^Higher values allow you to find specific chests.",
+// Read magic
+"Read Magic^^Chance to learn a spell from a scroll.^Otherwise the scroll is destroyed.^^Current chance: {0}%",
+// Use magic
+"Use Magic^^Chance to cast a spell successfully.^Some spells have negative effects if the cast fails.^^Current chance: {0}%",
+				
+
+## Condition tooltips
+		
+// Irritated
+{ Condition.Irritated,"The character can not cast spells.^^Only active during battle." },
+// Crazy
+{ Condition.Crazy, "The character performs random actions in battle.^His inventory is not accessible." },
+// Sleep
+{ Condition.Sleep, "The character can not perform battle actions.^Any damage will cancel the status.^^Only active during battle." },
+// Panic
+{ Condition.Panic, "The character tries to flee.^No battle action possible.^Inventory not accessible.^^Only active during battle." },
+// Blind
+{ Condition.Blind, "The character can not see.^Light radius on 2D maps is disabled.^Complete darkness on 3D maps." },
+// Drugged
+{ Condition.Drugged, "The charater is under the influence of drugs.^Complicated control and visual effects." },
+// Exhausted
+{ Condition.Exhausted, "All attributes halved temporarly.^Can be removed by sleeping." },
+// Unused
+{ Condition.Unused, "" },
+// Lamed
+{ Condition.Lamed, "No movement or attack is possible." },
+// Poisoned
+{ Condition.Poisoned, "The character receives damage^every battle round or hour." },
+// Petrified
+{ Condition.Petrified, "The inventory is not accessible.^The character can not take any^action and does not age." },
+// Diseased
+{ Condition.Diseased, "The character loses a point of^a random attribute every day." },
+// Aging
+{ Condition.Aging, "The character ages every day.^Dependent on his race he will^eventually die at a specific age.^^Max age: {0}" },
+// DeadCorpse
+{ Condition.DeadCorpse, "The character does not participate in battles.^He can not communicate." },
+// DeadAshes
+{ Condition.DeadAshes, "The character does not participate in battles.^He can not communicate.^His ashes must be converted to^flesh first to resurrect him." },
+// DeadDust
+{ Condition.DeadDust, "The character does not participate in battles.^He can not communicate.^His dust must be converted to ashes^and then to flesh to resurrect him." }
+
+
+## Stat tooltips
+
+// Age
+"Age of the character^^He dies at the max age of {0}.",
+// LP
+"Life Points^^When they reach 0^the character dies.",
+// SP
+"Spell Points^^Are used to cast spells.",
+// SLP
+"Spell Learning Points^^Are used to learn spells.",
+// TP
+"Training Points^^Are used to increase^skills at trainers.",
+// Gold
+"Gold^^Currency of Ambermoon.^Is used to buy goods.",
+// Food
+"Rations^^For every rest (besides sleeping at inns),^1 ration is consumed per character to^refill LP and SP.",
+// Damage
+"Damage^^Base value for damage in battles.^^Is composed of equipment and strength.",
+// Defense
+"Defense^^Base value for physical damage^reduction in battles.^^Is composed of equipment and stamina.",
+// EPPre50
+"Experience Points^^Are needed to gain levels.^^Next level at {0} EP.",
+// EP50
+"Experience Points^^Are needed to gain levels.^^Max level already reached.",
+// LevelWithAPRIncrease
+"Character Level^^Each level-up increases the^character's values by:^^ LP : {0,-10}{1} TP : {2}{3}^^Attacks per round increase^at specific levels:^^ {5}^^Attacks per round are {4}",
+// LevelWithoutAPRIncrease
+"Character Level^^Each level-up increases the^character's values by:^^ LP : {0,-10}{1} TP : {2}{3}^^Attacks per round are {4}",
+// MagicLevelUpValues
+" SP : {0}^ SLP: {1,-10}",
+// RangeOperator
+" to ",
+// MagicIntBonus
+"^ Bonus: SP and SLP +INT/25 ({0})"
+
+
+## Button tooltips
+
+"Close",
+"Quit game",
+"Options",
+"Save",
+"Load",
+"New game",
+"Examine",
+"Touch",
+"Speak",
+"Transport",
+"Spell book",
+"Camp",
+"Map",
+"Battle positions",
+"Wait",
+"Character stats",
+"Inventory",
+"Use item",
+"Examine item",
+"Store item in chest",
+"Store gold in chest",
+"Store food in chest",
+"Drop item",
+"Drop gold",
+"Drop food",
+"Hand over gold",
+"Hand over food",
+"Distribute gold",
+"Distribute food",
+"Buy",
+"Sell",
+"Train",
+"Heal person",
+"Remove curse",
+"Heal condition",
+"Stay for the night",
+"Identify equipment",
+"Identify items",
+"Repair item",
+"Recharge item",
+"Read spell scroll",
+"Sleep",
+"Lockpick",
+"Find trap",
+"Disarm trap",
+"Answer",
+"Rehear riddle",
+"Say something",
+"Show item",
+"Give item",
+"Give gold",
+"Give food",
+"Ask to join",
+"Ask to leave",
+"Flee",
+"Start round",
+"Move",
+"Advance",
+"Attack",
+"Defend",
+"Cast spell",
+"Determine required spell learning points"
+
+
+## Option names
+
+IMPORTANT: Try to limit those texts to the end marker at max!
+                             | <- end marker including the quotes
+// Page 1
+"Music",
+"Volume",
+"Resolution",
+"Fullscreen",
+"Graphic filter",
+"Graphic overlay",
+"Effect",
+// Page 2
+"Battle speed",
+"3D Movement",
+"Show button tooltips",
+"Show stats tooltips",
+"Show runes as text",
+"Enable cheats",
+"3D floor and ceiling",
+// Page 3
+"Additional saveslots",
+"External music",
+"Show Pyrdacor logo",
+"Show fantasy intro",
+"Show save/load info"
+// TODO
+//"Show intro",
+
+
+## Floor / ceiling display names
+
+"None",
+"Floor",
+"Ceiling",
+"Both"
+
+
+## Default battle speed name
+
+"Default"
+
+
+## Language names
+
+"German",
+"French",
+"English"
+
+
+## Version selector texts
+
+IMPORTANT: The (?) must be at the same position (fill with spaces)!
+
+"Select a game data version:        (?)"
+"The game data version relates to the Amiga base data. This version is independent of the Ambermoon.net version."
+"Savegames are stored next to the Ambermoon.net.exe inside the sub-folder 'Saves'."
+"Savegames are stored in the original data path and may overwrite original savegames!"
+
+IMPORTANT: The following 2 texts must not be longer than the first english text!
+                            | <- end marker including the 2 quotes
+
+"Save games in program path"
+"Save games in data path"
+
+
+## Starting texts
+
+"Starting game ...",
+"Preparing new game ..."
+
+
+## Patcher texts
+
+"Do you want to use the patcher? It slightly increases startup time and you need internet access. But new versions will then be detected automatically and can be installed directly.",
+"If you decide to use the patcher later, you can activate it in the config file 'ambermoon.cfg' manually.",
+"Click to continue",
+"A new version is available! Do you want to download and install it now?",
+"The new version was not found. Please report this to Pyrdacor (trobt(at)web.de).",
+"Failed to download the new version. Please try again later or download it manually.",
+"Downloading Ambermoon {0} ...",
+"{0} of {1}",
+"Done",
+"Cancel download",
+"Failed to apply patch. Please download the most recent version manually."
