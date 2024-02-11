@@ -10,7 +10,7 @@ Translate all the texts. Best use UTF-8 when opening and storing text files so a
 
 Inside the RemakeTranslatableTexts only translate texts inside quotes. Like "Some Text". Don't change other texts in the file!
 
-Always keep things like ~HERO~, ~SELF~, ~INK17~ and so on as they are. Those are placeholders. The same is true for the character '^' which is a newline and '$' which is a non-breaking space. Don't add newlines directly.
+Always keep things like \~HERO~, \~SELF~, \~INK17~ and so on as they are. Those are placeholders. The same is true for the character '^' which is a newline and '$' which is a non-breaking space. Don't add newlines directly.
 
 Things like {0} are also placeolders. Keep them as there will be values inserted in their place.
 
