@@ -1,1 +1,1 @@
-﻿Každý obdrží {0} zkušenostních bodů.
+﻿Každý získal {0} zkušenostních bodů.

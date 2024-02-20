@@ -1,1 +1,1 @@
-﻿Jeden příděl jídla vás bude stát {0} GP.
+﻿Jedna porce jídla vás bude stát {0} ZL.
