@@ -1,0 +1,629 @@
+
+D:\Projects\Ambermoon\Disks\Bugfixing\Czech>AmbermoonTextManager.exe -i Amberfiles AllTexts 
+Looking for text data in 'AllTexts\Dict.amb' ... done
+
+Reading all texts from Text.amb.
+Looking for text data in 'AllTexts\Text.amb\Messages' ... done
+
+Looking for text data in 'AllTexts\Text.amb\WorldNames' ... done
+
+Looking for text data in 'AllTexts\Text.amb\FormatMessages' ... done
+
+Looking for text data in 'AllTexts\Text.amb\AutomapTypeNames' ... done
+
+Looking for text data in 'AllTexts\Text.amb\OptionNames' ... done
+
+Looking for text data in 'AllTexts\Text.amb\MusicNames' ... done
+
+Looking for text data in 'AllTexts\Text.amb\SpellClassNames' ... done
+
+Looking for text data in 'AllTexts\Text.amb\SpellNames' ... done
+
+Looking for text data in 'AllTexts\Text.amb\LanguageNames' ... done
+
+Looking for text data in 'AllTexts\Text.amb\ClassNames' ... done
+
+Looking for text data in 'AllTexts\Text.amb\RaceNames' ... done
+
+Looking for text data in 'AllTexts\Text.amb\SkillNames' ... done
+
+Looking for text data in 'AllTexts\Text.amb\AttributeNames' ... done
+
+Looking for text data in 'AllTexts\Text.amb\SkillShortNames' ... done
+
+Looking for text data in 'AllTexts\Text.amb\AttributeShortNames' ... done
+
+Looking for text data in 'AllTexts\Text.amb\ItemTypeNames' ... done
+
+Looking for text data in 'AllTexts\Text.amb\ConditionNames' ... done
+
+Looking for text data in 'AllTexts\Text.amb\UITexts' ... done
+
+Looking for text data in 'AllTexts\Text.amb\DateAndLanguageString' ... done
+
+Looking for text data in 'AllTexts\Text.amb\VersionString' ... done
+
+Looking for text data in 'AllTexts\Monster_char.amb' ... WARNING: String 'VLÁDKYNĚ GIZZEK
+' was shortened to 'VLÁDKYNĚ GIZZEK' because the max size is 15 without terminating null.
+done
+
+Looking for text data in 'AllTexts\Save.00/Party_char.amb' ... done
+
+Looking for text data in 'AllTexts\NPC_char.amb' ... done
+
+Looking for text data in 'AllTexts\Place_data' ... WARNING: String 'VÝUKA ÚTOČNÝCH PRAKTIK MISTRA KARLA' was shortened to 'VÝUKA ÚTOČNÝCH PRAKTIK MISTRA ' because the max size is 30.
+WARNING: String 'VÝCVIK MISTRA ROLFA V BLOKOVÁNÍ' was shortened to 'VÝCVIK MISTRA ROLFA V BLOKOVÁN' because the max size is 30.
+WARNING: String 'NAGIERŮV VÝCVIK KRITICKÝCH ZÁSAHŮ' was shortened to 'NAGIERŮV VÝCVIK KRITICKÝCH ZÁS' because the max size is 30.
+WARNING: String 'DRELBOVO ŠKOLENÍ V OBLASTI VYHLEDÁVÁNÍ' was shortened to 'DRELBOVO ŠKOLENÍ V OBLASTI VYH' because the max size is 30.
+done
+
+Looking for text data in 'AllTexts\Objects.amb' ... WARNING: String 'LOKALIZAČNÍ ZAŘÍZENÍ' was shortened to 'LOKALIZAČNÍ ZAŘÍZEN' because the max size is 19 without terminating null.
+WARNING: String 'KŮŽE S ŽELEZNÝM TĚLEM' was shortened to 'KŮŽE S ŽELEZNÝM TĚL' because the max size is 19 without terminating null.
+WARNING: String 'KNIHA O PAVOUKOVCÍCH' was shortened to 'KNIHA O PAVOUKOVCÍC' because the max size is 19 without terminating null.
+WARNING: String 'LEKTVAR PROTI OTRAVĚ' was shortened to 'LEKTVAR PROTI OTRAV' because the max size is 19 without terminating null.
+WARNING: String 'PLÁŠTĚNKA NEVIDITELNOSTI' was shortened to 'PLÁŠTĚNKA NEVIDITEL' because the max size is 19 without terminating null.
+WARNING: String 'LEKTVAR PROTI KOUZLŮM' was shortened to 'LEKTVAR PROTI KOUZL' because the max size is 19 without terminating null.
+WARNING: String 'OBRAZ JANTAROVÉHO MĚSÍCE' was shortened to 'OBRAZ JANTAROVÉHO M' because the max size is 19 without terminating null.
+WARNING: String 'DÉMONICKÝ NAPICHOVAČ' was shortened to 'DÉMONICKÝ NAPICHOVA' because the max size is 19 without terminating null.
+WARNING: String 'KOUZELNÁ VRHACÍ SEKERA' was shortened to 'KOUZELNÁ VRHACÍ SEK' because the max size is 19 without terminating null.
+WARNING: String 'ŽLUTÝ VYŘEZÁVANÝ DISK' was shortened to 'ŽLUTÝ VYŘEZÁVANÝ DI' because the max size is 19 without terminating null.
+WARNING: String 'ČERVENÁ VYŘEZÁVANÁ SFÉRA' was shortened to 'ČERVENÁ VYŘEZÁVANÁ ' because the max size is 19 without terminating null.
+WARNING: String 'ŽLUTÁ VYŘEZÁVANÁ SFÉRA' was shortened to 'ŽLUTÁ VYŘEZÁVANÁ SF' because the max size is 19 without terminating null.
+WARNING: String 'ZELENÝ VYŘEZÁVANÝ DISK' was shortened to 'ZELENÝ VYŘEZÁVANÝ D' because the max size is 19 without terminating null.
+WARNING: String 'MODRÝ VYŘEZÁVANÝ DISK' was shortened to 'MODRÝ VYŘEZÁVANÝ DI' because the max size is 19 without terminating null.
+WARNING: String 'ROMÁN O JANTAROVÉM MĚSÍCI' was shortened to 'ROMÁN O JANTAROVÉM ' because the max size is 19 without terminating null.
+WARNING: String 'MODRÝ NAVIGAČNÍ KÁMEN' was shortened to 'MODRÝ NAVIGAČNÍ KÁM' because the max size is 19 without terminating null.
+WARNING: String 'ZELENÝ NAVIGAČNÍ KÁMEN' was shortened to 'ZELENÝ NAVIGAČNÍ KÁ' because the max size is 19 without terminating null.
+WARNING: String 'ŽLUTÝ NAVIGAČNÍ KÁMEN' was shortened to 'ŽLUTÝ NAVIGAČNÍ KÁM' because the max size is 19 without terminating null.
+WARNING: String 'OBJEDNÁVKA PÍSEČNÉ LODĚ' was shortened to 'OBJEDNÁVKA PÍSEČNÉ ' because the max size is 19 without terminating null.
+WARNING: String 'MORAGSKÁ LÁHEV NA VODU' was shortened to 'MORAGSKÁ LÁHEV NA V' because the max size is 19 without terminating null.
+done
+
+Looking for text data in 'AllTexts\2Map_data.amb\263' ... done
+
+Looking for text data in 'AllTexts\2Map_data.amb\265' ... done
+
+Looking for text data in 'AllTexts\2Map_data.amb\285' ... done
+
+Looking for text data in 'AllTexts\2Map_data.amb\416' ... done
+
+Looking for text data in 'AllTexts\2Map_data.amb\420' ... done
+
+Looking for text data in 'AllTexts\2Map_data.amb\425' ... done
+
+Looking for text data in 'AllTexts\2Map_data.amb\441' ... done
+
+WARNING: String 'OBCHOD SE ZBRANĚMI' was shortened to 'OBCHOD SE ZBRANĚ' because the max size is 16.
+Looking for text data in 'AllTexts\3Map_data.amb\339' ... done
+
+Looking for text data in 'AllTexts\3Map_data.amb\343' ... done
+
+WARNING: String 'KIREOVA REZIDENCE' was shortened to 'KIREOVA REZIDENC' because the max size is 16.
+Looking for text data in 'AllTexts\1Map_texts.amb\022' ... done
+
+Looking for text data in 'AllTexts\1Map_texts.amb\059' ... done
+
+Looking for text data in 'AllTexts\1Map_texts.amb\088' ... done
+
+Looking for text data in 'AllTexts\1Map_texts.amb\107' ... done
+
+Looking for text data in 'AllTexts\1Map_texts.amb\126' ... done
+
+Looking for text data in 'AllTexts\1Map_texts.amb\139' ... done
+
+Looking for text data in 'AllTexts\1Map_texts.amb\141' ... done
+
+Looking for text data in 'AllTexts\1Map_texts.amb\149' ... done
+
+Looking for text data in 'AllTexts\1Map_texts.amb\155' ... done
+
+Looking for text data in 'AllTexts\1Map_texts.amb\156' ... done
+
+Looking for text data in 'AllTexts\1Map_texts.amb\157' ... done
+
+Looking for text data in 'AllTexts\1Map_texts.amb\182' ... done
+
+Looking for text data in 'AllTexts\1Map_texts.amb\185' ... done
+
+Looking for text data in 'AllTexts\1Map_texts.amb\186' ... done
+
+Looking for text data in 'AllTexts\1Map_texts.amb\198' ... done
+
+Looking for text data in 'AllTexts\1Map_texts.amb\230' ... done
+
+Looking for text data in 'AllTexts\1Map_texts.amb\233' ... done
+
+Looking for text data in 'AllTexts\2Map_texts.amb\257' ... done
+
+Looking for text data in 'AllTexts\2Map_texts.amb\258' ... done
+
+Looking for text data in 'AllTexts\2Map_texts.amb\259' ... done
+
+Looking for text data in 'AllTexts\2Map_texts.amb\260' ... done
+
+Looking for text data in 'AllTexts\2Map_texts.amb\261' ... done
+
+Looking for text data in 'AllTexts\2Map_texts.amb\262' ... done
+
+Looking for text data in 'AllTexts\2Map_texts.amb\263' ... done
+
+Looking for text data in 'AllTexts\2Map_texts.amb\264' ... done
+
+Looking for text data in 'AllTexts\2Map_texts.amb\265' ... done
+
+Looking for text data in 'AllTexts\2Map_texts.amb\266' ... done
+
+Looking for text data in 'AllTexts\2Map_texts.amb\267' ... done
+
+Looking for text data in 'AllTexts\2Map_texts.amb\268' ... done
+
+Looking for text data in 'AllTexts\2Map_texts.amb\269' ... done
+
+Looking for text data in 'AllTexts\2Map_texts.amb\270' ... done
+
+Looking for text data in 'AllTexts\2Map_texts.amb\271' ... done
+
+Looking for text data in 'AllTexts\2Map_texts.amb\272' ... done
+
+Looking for text data in 'AllTexts\2Map_texts.amb\273' ... done
+
+Looking for text data in 'AllTexts\2Map_texts.amb\274' ... done
+
+Looking for text data in 'AllTexts\2Map_texts.amb\275' ... done
+
+Looking for text data in 'AllTexts\2Map_texts.amb\276' ... done
+
+Looking for text data in 'AllTexts\2Map_texts.amb\277' ... done
+
+Looking for text data in 'AllTexts\2Map_texts.amb\278' ... done
+
+Looking for text data in 'AllTexts\2Map_texts.amb\279' ... done
+
+Looking for text data in 'AllTexts\2Map_texts.amb\280' ... done
+
+Looking for text data in 'AllTexts\2Map_texts.amb\281' ... done
+
+Looking for text data in 'AllTexts\2Map_texts.amb\282' ... done
+
+Looking for text data in 'AllTexts\2Map_texts.amb\283' ... done
+
+Looking for text data in 'AllTexts\2Map_texts.amb\284' ... done
+
+Looking for text data in 'AllTexts\2Map_texts.amb\285' ... done
+
+Looking for text data in 'AllTexts\2Map_texts.amb\286' ... done
+
+Looking for text data in 'AllTexts\2Map_texts.amb\287' ... done
+
+Looking for text data in 'AllTexts\2Map_texts.amb\288' ... done
+
+Looking for text data in 'AllTexts\2Map_texts.amb\289' ... done
+
+Looking for text data in 'AllTexts\2Map_texts.amb\290' ... done
+
+Looking for text data in 'AllTexts\2Map_texts.amb\291' ... done
+
+Looking for text data in 'AllTexts\2Map_texts.amb\292' ... done
+
+Looking for text data in 'AllTexts\2Map_texts.amb\293' ... done
+
+Looking for text data in 'AllTexts\2Map_texts.amb\294' ... done
+
+Looking for text data in 'AllTexts\2Map_texts.amb\295' ... done
+
+Looking for text data in 'AllTexts\2Map_texts.amb\296' ... done
+
+Looking for text data in 'AllTexts\2Map_texts.amb\297' ... done
+
+Looking for text data in 'AllTexts\2Map_texts.amb\298' ... done
+
+Looking for text data in 'AllTexts\2Map_texts.amb\299' ... done
+
+Looking for text data in 'AllTexts\2Map_texts.amb\400' ... done
+
+Looking for text data in 'AllTexts\2Map_texts.amb\401' ... done
+
+Looking for text data in 'AllTexts\2Map_texts.amb\402' ... done
+
+Looking for text data in 'AllTexts\2Map_texts.amb\403' ... done
+
+Looking for text data in 'AllTexts\2Map_texts.amb\404' ... done
+
+Looking for text data in 'AllTexts\2Map_texts.amb\405' ... done
+
+Looking for text data in 'AllTexts\2Map_texts.amb\406' ... done
+
+Looking for text data in 'AllTexts\2Map_texts.amb\407' ... done
+
+Looking for text data in 'AllTexts\2Map_texts.amb\408' ... done
+
+Looking for text data in 'AllTexts\2Map_texts.amb\409' ... done
+
+Looking for text data in 'AllTexts\2Map_texts.amb\410' ... done
+
+Looking for text data in 'AllTexts\2Map_texts.amb\411' ... done
+
+Looking for text data in 'AllTexts\2Map_texts.amb\412' ... done
+
+Looking for text data in 'AllTexts\2Map_texts.amb\413' ... done
+
+Looking for text data in 'AllTexts\2Map_texts.amb\414' ... done
+
+Looking for text data in 'AllTexts\2Map_texts.amb\415' ... done
+
+Looking for text data in 'AllTexts\2Map_texts.amb\416' ... done
+
+Looking for text data in 'AllTexts\2Map_texts.amb\417' ... done
+
+Looking for text data in 'AllTexts\2Map_texts.amb\418' ... done
+
+Looking for text data in 'AllTexts\2Map_texts.amb\419' ... done
+
+Looking for text data in 'AllTexts\2Map_texts.amb\420' ... done
+
+Looking for text data in 'AllTexts\2Map_texts.amb\421' ... done
+
+Looking for text data in 'AllTexts\2Map_texts.amb\422' ... done
+
+Looking for text data in 'AllTexts\2Map_texts.amb\423' ... done
+
+Looking for text data in 'AllTexts\2Map_texts.amb\424' ... done
+
+Looking for text data in 'AllTexts\2Map_texts.amb\425' ... done
+
+Looking for text data in 'AllTexts\2Map_texts.amb\426' ... done
+
+Looking for text data in 'AllTexts\2Map_texts.amb\427' ... done
+
+Looking for text data in 'AllTexts\2Map_texts.amb\428' ... done
+
+Looking for text data in 'AllTexts\2Map_texts.amb\429' ... done
+
+Looking for text data in 'AllTexts\2Map_texts.amb\430' ... done
+
+Looking for text data in 'AllTexts\2Map_texts.amb\431' ... done
+
+Looking for text data in 'AllTexts\2Map_texts.amb\432' ... done
+
+Looking for text data in 'AllTexts\2Map_texts.amb\433' ... done
+
+Looking for text data in 'AllTexts\2Map_texts.amb\434' ... done
+
+Looking for text data in 'AllTexts\2Map_texts.amb\435' ... done
+
+Looking for text data in 'AllTexts\2Map_texts.amb\436' ... done
+
+Looking for text data in 'AllTexts\2Map_texts.amb\437' ... done
+
+Looking for text data in 'AllTexts\2Map_texts.amb\438' ... done
+
+Looking for text data in 'AllTexts\2Map_texts.amb\439' ... done
+
+Looking for text data in 'AllTexts\2Map_texts.amb\440' ... done
+
+Looking for text data in 'AllTexts\2Map_texts.amb\441' ... done
+
+Looking for text data in 'AllTexts\2Map_texts.amb\442' ... done
+
+Looking for text data in 'AllTexts\2Map_texts.amb\443' ... done
+
+Looking for text data in 'AllTexts\2Map_texts.amb\444' ... done
+
+Looking for text data in 'AllTexts\2Map_texts.amb\445' ... done
+
+Looking for text data in 'AllTexts\2Map_texts.amb\446' ... done
+
+Looking for text data in 'AllTexts\2Map_texts.amb\447' ... done
+
+Looking for text data in 'AllTexts\2Map_texts.amb\448' ... done
+
+Looking for text data in 'AllTexts\2Map_texts.amb\449' ... done
+
+Looking for text data in 'AllTexts\2Map_texts.amb\450' ... done
+
+Looking for text data in 'AllTexts\2Map_texts.amb\451' ... done
+
+Looking for text data in 'AllTexts\2Map_texts.amb\452' ... done
+
+Looking for text data in 'AllTexts\2Map_texts.amb\453' ... done
+
+Looking for text data in 'AllTexts\2Map_texts.amb\454' ... done
+
+Looking for text data in 'AllTexts\2Map_texts.amb\455' ... done
+
+Looking for text data in 'AllTexts\2Map_texts.amb\520' ... done
+
+Looking for text data in 'AllTexts\2Map_texts.amb\521' ... done
+
+Looking for text data in 'AllTexts\3Map_texts.amb\300' ... done
+
+Looking for text data in 'AllTexts\3Map_texts.amb\301' ... done
+
+Looking for text data in 'AllTexts\3Map_texts.amb\302' ... done
+
+Looking for text data in 'AllTexts\3Map_texts.amb\303' ... done
+
+Looking for text data in 'AllTexts\3Map_texts.amb\304' ... done
+
+Looking for text data in 'AllTexts\3Map_texts.amb\305' ... done
+
+Looking for text data in 'AllTexts\3Map_texts.amb\306' ... done
+
+Looking for text data in 'AllTexts\3Map_texts.amb\307' ... done
+
+Looking for text data in 'AllTexts\3Map_texts.amb\308' ... done
+
+Looking for text data in 'AllTexts\3Map_texts.amb\309' ... done
+
+Looking for text data in 'AllTexts\3Map_texts.amb\310' ... done
+
+Looking for text data in 'AllTexts\3Map_texts.amb\311' ... done
+
+Looking for text data in 'AllTexts\3Map_texts.amb\312' ... done
+
+Looking for text data in 'AllTexts\3Map_texts.amb\313' ... done
+
+Looking for text data in 'AllTexts\3Map_texts.amb\314' ... done
+
+Looking for text data in 'AllTexts\3Map_texts.amb\315' ... done
+
+Looking for text data in 'AllTexts\3Map_texts.amb\316' ... done
+
+Looking for text data in 'AllTexts\3Map_texts.amb\317' ... done
+
+Looking for text data in 'AllTexts\3Map_texts.amb\318' ... done
+
+Looking for text data in 'AllTexts\3Map_texts.amb\319' ... done
+
+Looking for text data in 'AllTexts\3Map_texts.amb\320' ... done
+
+Looking for text data in 'AllTexts\3Map_texts.amb\321' ... done
+
+Looking for text data in 'AllTexts\3Map_texts.amb\322' ... done
+
+Looking for text data in 'AllTexts\3Map_texts.amb\323' ... done
+
+Looking for text data in 'AllTexts\3Map_texts.amb\324' ... done
+
+Looking for text data in 'AllTexts\3Map_texts.amb\325' ... done
+
+Looking for text data in 'AllTexts\3Map_texts.amb\326' ... done
+
+Looking for text data in 'AllTexts\3Map_texts.amb\327' ... done
+
+Looking for text data in 'AllTexts\3Map_texts.amb\328' ... done
+
+Looking for text data in 'AllTexts\3Map_texts.amb\329' ... done
+
+Looking for text data in 'AllTexts\3Map_texts.amb\330' ... done
+
+Looking for text data in 'AllTexts\3Map_texts.amb\331' ... done
+
+Looking for text data in 'AllTexts\3Map_texts.amb\332' ... done
+
+Looking for text data in 'AllTexts\3Map_texts.amb\333' ... done
+
+Looking for text data in 'AllTexts\3Map_texts.amb\334' ... done
+
+Looking for text data in 'AllTexts\3Map_texts.amb\335' ... done
+
+Looking for text data in 'AllTexts\3Map_texts.amb\336' ... done
+
+Looking for text data in 'AllTexts\3Map_texts.amb\337' ... done
+
+Looking for text data in 'AllTexts\3Map_texts.amb\338' ... done
+
+Looking for text data in 'AllTexts\3Map_texts.amb\339' ... done
+
+Looking for text data in 'AllTexts\3Map_texts.amb\340' ... done
+
+Looking for text data in 'AllTexts\3Map_texts.amb\341' ... done
+
+Looking for text data in 'AllTexts\3Map_texts.amb\342' ... done
+
+Looking for text data in 'AllTexts\3Map_texts.amb\343' ... done
+
+Looking for text data in 'AllTexts\3Map_texts.amb\344' ... done
+
+Looking for text data in 'AllTexts\3Map_texts.amb\345' ... done
+
+Looking for text data in 'AllTexts\3Map_texts.amb\346' ... done
+
+Looking for text data in 'AllTexts\3Map_texts.amb\347' ... done
+
+Looking for text data in 'AllTexts\3Map_texts.amb\348' ... done
+
+Looking for text data in 'AllTexts\3Map_texts.amb\349' ... done
+
+Looking for text data in 'AllTexts\3Map_texts.amb\350' ... done
+
+Looking for text data in 'AllTexts\3Map_texts.amb\351' ... done
+
+Looking for text data in 'AllTexts\3Map_texts.amb\352' ... done
+
+Looking for text data in 'AllTexts\3Map_texts.amb\353' ... done
+
+Looking for text data in 'AllTexts\3Map_texts.amb\354' ... done
+
+Looking for text data in 'AllTexts\3Map_texts.amb\355' ... done
+
+Looking for text data in 'AllTexts\3Map_texts.amb\356' ... done
+
+Looking for text data in 'AllTexts\3Map_texts.amb\357' ... done
+
+Looking for text data in 'AllTexts\3Map_texts.amb\358' ... done
+
+Looking for text data in 'AllTexts\3Map_texts.amb\359' ... done
+
+Looking for text data in 'AllTexts\3Map_texts.amb\360' ... done
+
+Looking for text data in 'AllTexts\3Map_texts.amb\361' ... done
+
+Looking for text data in 'AllTexts\3Map_texts.amb\362' ... done
+
+Looking for text data in 'AllTexts\3Map_texts.amb\363' ... done
+
+Looking for text data in 'AllTexts\3Map_texts.amb\364' ... done
+
+Looking for text data in 'AllTexts\3Map_texts.amb\365' ... done
+
+Looking for text data in 'AllTexts\3Map_texts.amb\366' ... done
+
+Looking for text data in 'AllTexts\3Map_texts.amb\367' ... done
+
+Looking for text data in 'AllTexts\3Map_texts.amb\368' ... done
+
+Looking for text data in 'AllTexts\3Map_texts.amb\369' ... done
+
+Looking for text data in 'AllTexts\NPC_texts.amb\001' ... done
+
+Looking for text data in 'AllTexts\NPC_texts.amb\002' ... done
+
+Looking for text data in 'AllTexts\NPC_texts.amb\003' ... done
+
+Looking for text data in 'AllTexts\NPC_texts.amb\004' ... done
+
+Looking for text data in 'AllTexts\NPC_texts.amb\005' ... done
+
+Looking for text data in 'AllTexts\NPC_texts.amb\006' ... done
+
+Looking for text data in 'AllTexts\NPC_texts.amb\007' ... done
+
+Looking for text data in 'AllTexts\NPC_texts.amb\008' ... done
+
+Looking for text data in 'AllTexts\NPC_texts.amb\009' ... done
+
+Looking for text data in 'AllTexts\NPC_texts.amb\010' ... done
+
+Looking for text data in 'AllTexts\NPC_texts.amb\011' ... done
+
+Looking for text data in 'AllTexts\NPC_texts.amb\012' ... done
+
+Looking for text data in 'AllTexts\NPC_texts.amb\013' ... done
+
+Looking for text data in 'AllTexts\NPC_texts.amb\014' ... done
+
+Looking for text data in 'AllTexts\NPC_texts.amb\015' ... done
+
+Looking for text data in 'AllTexts\NPC_texts.amb\016' ... done
+
+Looking for text data in 'AllTexts\NPC_texts.amb\017' ... done
+
+Looking for text data in 'AllTexts\NPC_texts.amb\018' ... done
+
+Looking for text data in 'AllTexts\NPC_texts.amb\019' ... done
+
+Looking for text data in 'AllTexts\NPC_texts.amb\020' ... done
+
+Looking for text data in 'AllTexts\NPC_texts.amb\021' ... done
+
+Looking for text data in 'AllTexts\NPC_texts.amb\022' ... done
+
+Looking for text data in 'AllTexts\NPC_texts.amb\023' ... done
+
+Looking for text data in 'AllTexts\NPC_texts.amb\024' ... done
+
+Looking for text data in 'AllTexts\NPC_texts.amb\025' ... done
+
+Looking for text data in 'AllTexts\NPC_texts.amb\026' ... done
+
+Looking for text data in 'AllTexts\NPC_texts.amb\027' ... done
+
+Looking for text data in 'AllTexts\NPC_texts.amb\028' ... done
+
+Looking for text data in 'AllTexts\NPC_texts.amb\029' ... done
+
+Looking for text data in 'AllTexts\NPC_texts.amb\030' ... done
+
+Looking for text data in 'AllTexts\NPC_texts.amb\031' ... done
+
+Looking for text data in 'AllTexts\NPC_texts.amb\032' ... done
+
+Looking for text data in 'AllTexts\NPC_texts.amb\033' ... done
+
+Looking for text data in 'AllTexts\NPC_texts.amb\034' ... done
+
+Looking for text data in 'AllTexts\NPC_texts.amb\035' ... done
+
+Looking for text data in 'AllTexts\NPC_texts.amb\051' ... done
+
+Looking for text data in 'AllTexts\NPC_texts.amb\052' ... done
+
+Looking for text data in 'AllTexts\NPC_texts.amb\053' ... done
+
+Looking for text data in 'AllTexts\NPC_texts.amb\054' ... done
+
+Looking for text data in 'AllTexts\NPC_texts.amb\055' ... done
+
+Looking for text data in 'AllTexts\NPC_texts.amb\056' ... done
+
+Looking for text data in 'AllTexts\NPC_texts.amb\057' ... done
+
+Looking for text data in 'AllTexts\NPC_texts.amb\058' ... done
+
+Looking for text data in 'AllTexts\NPC_texts.amb\059' ... done
+
+Looking for text data in 'AllTexts\NPC_texts.amb\060' ... done
+
+Looking for text data in 'AllTexts\NPC_texts.amb\061' ... done
+
+Looking for text data in 'AllTexts\NPC_texts.amb\062' ... done
+
+Looking for text data in 'AllTexts\NPC_texts.amb\063' ... done
+
+Looking for text data in 'AllTexts\NPC_texts.amb\064' ... done
+
+Looking for text data in 'AllTexts\NPC_texts.amb\065' ... done
+
+Looking for text data in 'AllTexts\NPC_texts.amb\066' ... done
+
+Looking for text data in 'AllTexts\NPC_texts.amb\067' ... done
+
+Looking for text data in 'AllTexts\NPC_texts.amb\068' ... done
+
+Looking for text data in 'AllTexts\NPC_texts.amb\069' ... done
+
+Looking for text data in 'AllTexts\NPC_texts.amb\070' ... done
+
+Looking for text data in 'AllTexts\Object_texts.amb\001' ... done
+
+Looking for text data in 'AllTexts\Object_texts.amb\002' ... done
+
+Looking for text data in 'AllTexts\Object_texts.amb\003' ... done
+
+Looking for text data in 'AllTexts\Object_texts.amb\004' ... done
+
+Looking for text data in 'AllTexts\Object_texts.amb\005' ... done
+
+Looking for text data in 'AllTexts\Party_texts.amb\002' ... done
+
+Looking for text data in 'AllTexts\Party_texts.amb\003' ... done
+
+Looking for text data in 'AllTexts\Party_texts.amb\004' ... done
+
+Looking for text data in 'AllTexts\Party_texts.amb\005' ... done
+
+Looking for text data in 'AllTexts\Party_texts.amb\006' ... done
+
+Looking for text data in 'AllTexts\Party_texts.amb\007' ... done
+
+Looking for text data in 'AllTexts\Party_texts.amb\008' ... done
+
+Looking for text data in 'AllTexts\Party_texts.amb\009' ... done
+
+Looking for text data in 'AllTexts\Party_texts.amb\010' ... done
+
+Looking for text data in 'AllTexts\Party_texts.amb\011' ... done
+
+Looking for text data in 'AllTexts\Party_texts.amb\012' ... done
+
+Looking for text data in 'AllTexts\Party_texts.amb\013' ... done
+
+Looking for text data in 'AllTexts\Party_texts.amb\014' ... done
+
+Looking for text data in 'AllTexts\Party_texts.amb\015' ... done
+
+
+D:\Projects\Ambermoon\Disks\Bugfixing\Czech>pause
+Press any key to continue . . . 
+Terminate batch job (Y/N)? 

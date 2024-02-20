@@ -840,7 +840,7 @@ namespace AmbermoonTextImport
                 var files = Directory.GetFiles(directory, "*.txt")
                     .Select(f => new { path = f, name = Path.GetFileNameWithoutExtension(f) })
                     .Where(f => fileNameMatcher.IsMatch(f.name));
-                var fileEntries = new SortedDictionary<uint, string>(files.ToDictionary(f => indexAdjust(fileIndexParser(f.name)), f => File.ReadAllText(f.path, Encoding.UTF8)));
+                var fileEntries = new SortedDictionary<uint, string>(files.ToDictionary(f => indexAdjust(fileIndexParser(f.name)), f => File.ReadAllText(f.path, Encoding.UTF8).Trim()));
                 uint maxIndex = fileEntries.Keys.DefaultIfEmpty().Max();
                 
                 if (fileEntries.Count != maxIndex)

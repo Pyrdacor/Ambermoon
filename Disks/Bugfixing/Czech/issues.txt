@@ -1,0 +1,42 @@
+AllTexts\Monster_char.amb
+
+WARNING: String 'VLÁDKYNĚ GIZZEK
+' was shortened to 'VLÁDKYNĚ GIZZEK' because the max size is 15 without terminating null.
+
+AllTexts\Place_data
+
+WARNING: String 'VÝUKA ÚTOČNÝCH PRAKTIK MISTRA KARLA' was shortened to 'VÝUKA ÚTOČNÝCH PRAKTIK MISTRA ' because the max size is 30.
+WARNING: String 'VÝCVIK MISTRA ROLFA V BLOKOVÁNÍ' was shortened to 'VÝCVIK MISTRA ROLFA V BLOKOVÁN' because the max size is 30.
+WARNING: String 'NAGIERŮV VÝCVIK KRITICKÝCH ZÁSAHŮ' was shortened to 'NAGIERŮV VÝCVIK KRITICKÝCH ZÁS' because the max size is 30.
+WARNING: String 'DRELBOVO ŠKOLENÍ V OBLASTI VYHLEDÁVÁNÍ' was shortened to 'DRELBOVO ŠKOLENÍ V OBLASTI VYH' because the max size is 30.
+
+AllTexts\Objects.amb
+
+WARNING: String 'LOKALIZAČNÍ ZAŘÍZENÍ' was shortened to 'LOKALIZAČNÍ ZAŘÍZEN' because the max size is 19 without terminating null.
+WARNING: String 'KŮŽE S ŽELEZNÝM TĚLEM' was shortened to 'KŮŽE S ŽELEZNÝM TĚL' because the max size is 19 without terminating null.
+WARNING: String 'KNIHA O PAVOUKOVCÍCH' was shortened to 'KNIHA O PAVOUKOVCÍC' because the max size is 19 without terminating null.
+WARNING: String 'LEKTVAR PROTI OTRAVĚ' was shortened to 'LEKTVAR PROTI OTRAV' because the max size is 19 without terminating null.
+WARNING: String 'PLÁŠTĚNKA NEVIDITELNOSTI' was shortened to 'PLÁŠTĚNKA NEVIDITEL' because the max size is 19 without terminating null.
+WARNING: String 'LEKTVAR PROTI KOUZLŮM' was shortened to 'LEKTVAR PROTI KOUZL' because the max size is 19 without terminating null.
+WARNING: String 'OBRAZ JANTAROVÉHO MĚSÍCE' was shortened to 'OBRAZ JANTAROVÉHO M' because the max size is 19 without terminating null.
+WARNING: String 'DÉMONICKÝ NAPICHOVAČ' was shortened to 'DÉMONICKÝ NAPICHOVA' because the max size is 19 without terminating null.
+WARNING: String 'KOUZELNÁ VRHACÍ SEKERA' was shortened to 'KOUZELNÁ VRHACÍ SEK' because the max size is 19 without terminating null.
+WARNING: String 'ŽLUTÝ VYŘEZÁVANÝ DISK' was shortened to 'ŽLUTÝ VYŘEZÁVANÝ DI' because the max size is 19 without terminating null.
+WARNING: String 'ČERVENÁ VYŘEZÁVANÁ SFÉRA' was shortened to 'ČERVENÁ VYŘEZÁVANÁ ' because the max size is 19 without terminating null.
+WARNING: String 'ŽLUTÁ VYŘEZÁVANÁ SFÉRA' was shortened to 'ŽLUTÁ VYŘEZÁVANÁ SF' because the max size is 19 without terminating null.
+WARNING: String 'ZELENÝ VYŘEZÁVANÝ DISK' was shortened to 'ZELENÝ VYŘEZÁVANÝ D' because the max size is 19 without terminating null.
+WARNING: String 'MODRÝ VYŘEZÁVANÝ DISK' was shortened to 'MODRÝ VYŘEZÁVANÝ DI' because the max size is 19 without terminating null.
+WARNING: String 'ROMÁN O JANTAROVÉM MĚSÍCI' was shortened to 'ROMÁN O JANTAROVÉM ' because the max size is 19 without terminating null.
+WARNING: String 'MODRÝ NAVIGAČNÍ KÁMEN' was shortened to 'MODRÝ NAVIGAČNÍ KÁM' because the max size is 19 without terminating null.
+WARNING: String 'ZELENÝ NAVIGAČNÍ KÁMEN' was shortened to 'ZELENÝ NAVIGAČNÍ KÁ' because the max size is 19 without terminating null.
+WARNING: String 'ŽLUTÝ NAVIGAČNÍ KÁMEN' was shortened to 'ŽLUTÝ NAVIGAČNÍ KÁM' because the max size is 19 without terminating null.
+WARNING: String 'OBJEDNÁVKA PÍSEČNÉ LODĚ' was shortened to 'OBJEDNÁVKA PÍSEČNÉ ' because the max size is 19 without terminating null.
+WARNING: String 'MORAGSKÁ LÁHEV NA VODU' was shortened to 'MORAGSKÁ LÁHEV NA V' because the max size is 19 without terminating null.
+
+2Map_data.amb
+
+WARNING: String 'OBCHOD SE ZBRANĚMI' was shortened to 'OBCHOD SE ZBRANĚ' because the max size is 16.
+
+3Map_data.amb
+
+WARNING: String 'KIREOVA REZIDENCE' was shortened to 'KIREOVA REZIDENC' because the max size is 16.
