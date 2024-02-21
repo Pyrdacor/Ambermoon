@@ -257,11 +257,11 @@ IMPORTANT: Try to limit those texts to the end marker at max!
 "Povolit cheaty",
 "3D podlaha a strop",
 // Page 3
-"Dodatečné pozice pro ukládání",
+"Další pozice pro uložení",
 "Externí hudba",
 "Zobrazit logo Pyrdacor",
 "Zobrazit fantasy intro",
-"Zobrazit informace o uložení/nahrání"
+"Info o uložení/nahrání"
 // TODO
 //"Show intro",
 
