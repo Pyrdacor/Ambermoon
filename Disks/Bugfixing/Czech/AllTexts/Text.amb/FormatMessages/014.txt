@@ -1,1 +1,1 @@
-﻿{0} ZL. Souhlasíte?
+﻿ {0} ZL. Souhlasíte?
