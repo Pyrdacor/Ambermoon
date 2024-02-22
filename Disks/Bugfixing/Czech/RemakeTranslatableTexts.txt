@@ -59,7 +59,7 @@
 // Strength
 "Síla^^Zvyšuje maximální nosnost o 1 kg za bod.^Také zvyšuje poškození o 1 každých 25 bodů.^^V současné době +{0}kg a +{1} poškození",
 // Intelligence
-"Inteligence^^Přidává 1 další SP a SLP na^úrovni za každých 25 bodů.^^Současně +{0} BM a BUK",
+"Inteligence^^Přidává 1 další BM a BUK na^úrovni za každých 25 bodů.^^Současně +{0} BM a BUK",
 // Dexterity
 "Obratnost^^Šance v procentech nespustit^ past při manipulaci se zámky.^Přidává spolu se štěstím^ k šanci vyhnout se boji.^^V současné době {0}% šance vyhnout se pasti^ {1}% šance vyhnout se boji",
 // Speed
@@ -155,7 +155,7 @@
 // Defense
 "Obrana^^Základní hodnota pro snížení fyzického poškození^ v bitvách.^^Skládá se z vybavení a výdrže.",
 // EPPre50
-"Zkušenostní body^^Potřebné k získání úrovně.^^Další úroveň na {0} EP.",
+"Zkušenostní body^^Potřebné k získání úrovně.^^Další úroveň na {0} ZB.",
 // EP50
 "Zkušenostní body^^Jsou potřebné k získání úrovně.^^Max. úrovně již bylo dosaženo.",
 // LevelWithAPRIncrease
@@ -231,7 +231,7 @@
 "Pohyb",
 "Postup",
 "Útok",
-"Obrana",
+"Blokování",
 "Seslat kouzlo",
 "Určit požadované body učení kouzel"
 
