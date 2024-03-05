@@ -32,7 +32,7 @@
 ## Tutorial texts
 
 // Introduction
-"Ahoj ~SELF~ a vítej v remaku původního Ambermoon.^^ Potřebuješ hru trochu představit?",
+"Ahoj ~SELF~ a vítej v remaku původního Ambermoon.^^Potřebuješ hru trochu představit?",
 // Tip 1
 "Ikony v pravé dolní části obrazovky poskytují mnoho užitečných funkcí ve hře. " +
 "Pokud jsi na hlavní obrazovce, můžeš přepínat zobrazení ikon stiskem " +
@@ -95,13 +95,13 @@
 // Read magic
 "Čtení kouzel^^Šance naučit se kouzlo ze svitku.^Jinak je svitek zničen.^^Aktuální šance: {0}%",
 // Use magic
-"Použít magii^^Šance na úspěšné seslání kouzla.^Některá kouzla mají negativní účinky, pokud se seslání nezdaří.^^Aktuální šance: {0}%",
+"Použít magii^^Šance na úspěšné seslání kouzla.^Některá kouzla mají negativní účinky,^pokud se seslání nezdaří.^^Aktuální šance: {0}%",
 
 
 ## Condition tooltips
 
 // Irritated
-{ Condition.Irritated,"Postava nemůže sesílat kouzla.^^ Aktivní pouze během boje." },
+{ Condition.Irritated,"Postava nemůže sesílat kouzla.^^Aktivní pouze během boje." },
 // Crazy
 { Condition.Crazy, "Postava provádí v boji náhodné akce.^Inventář není přístupný." },
 // Sleep
@@ -127,11 +127,11 @@
 // Aging
 { Condition.Aging, "Postava stárne každým dnem.^Závisí to na její rase.^nakonec zemře v určitém věku.^^Max. věk: {0}" },
 // DeadCorpse
-{ Condition.DeadCorpse, "Postava se neúčastní bitev. ^Nemůže komunikovat." },
+{ Condition.DeadCorpse, "Postava se neúčastní bitev.^Nemůže komunikovat." },
 // DeadAshes
-{ Condition.DeadAshes, "Postava se neúčastní bitev. ^Nemůže komunikovat.^Jeho popel se musí nejprve přeměnit na^tělo, aby mohl být vzkříšen." },
+{ Condition.DeadAshes, "Postava se neúčastní bitev.^Nemůže komunikovat.^Její popel se musí nejprve přeměnit^na tělo, aby mohla být vzkříšena." },
 // DeadDust
-{ Condition.DeadDust, "Postava se neúčastní bitev. ^Nemůže komunikovat.^Jeho prach se musí přeměnit v popel^a pak na tělo, aby mohl být vzkříšen." }
+{ Condition.DeadDust, "Postava se neúčastní bitev.^Nemůže komunikovat.^Její prach se musí přeměnit v popel^a pak na tělo, aby mohla být vzkříšena." }
 
 
 ## Stat tooltips
@@ -139,7 +139,7 @@
 // Age
 "Věk postavy^^Umírá v maximálním věku {0}.",
 // LP
-"Body života^^Když dosáhnou 0^ postava umírá.",
+"Body života^^Když dosáhnou 0^postava umírá.",
 // SP
 "Body magie^^Slouží k sesílání kouzel.",
 // SLP
@@ -153,15 +153,15 @@
 // Damage
 "Poškození^^Základní hodnota poškození v bitvách.^^Skládá se z vybavení a síly.",
 // Defense
-"Obrana^^Základní hodnota pro snížení fyzického poškození^ v bitvách.^^Skládá se z vybavení a výdrže.",
+"Obrana^^Základní hodnota pro snížení fyzického poškození^v bitvách.^^Skládá se z vybavení a výdrže.",
 // EPPre50
 "Zkušenostní body^^Potřebné k získání úrovně.^^Další úroveň na {0} ZB.",
 // EP50
 "Zkušenostní body^^Jsou potřebné k získání úrovně.^^Max. úrovně již bylo dosaženo.",
 // LevelWithAPRIncrease
-"Úroveň postavy^^Každé zvýšení úrovně zvyšuje hodnoty^postavy o:^^ BŽ : {0,-10}{1} TB : {2}{3}^^Útoky za kolo se zvyšují^na určitých úrovních:^^ {5}^^Útoky v jednom kole jsou {4}",
+"Úroveň postavy^^Každé zvýšení úrovně zvyšuje hodnoty^postavy o:^^BŽ : {0,-10}{1} TB : {2}{3}^^Útoky za kolo se zvyšují^na určitých úrovních:^^ {5}^^Útoky v jednom kole jsou {4}",
 // LevelWithoutAPRIncrease
-"Úroveň postavy^^Každé zvýšení úrovně zvyšuje hodnoty^postavy o:^^ BŽ : {0,-10}{1} TB : {2}{3}^^Útoky v jednom kole jsou {4}",
+"Úroveň postavy^^Každé zvýšení úrovně zvyšuje hodnoty^postavy o:^^BŽ : {0,-10}{1} TB : {2}{3}^^Útoky v jednom kole jsou {4}",
 // MagicLevelUpValues
 " BM : {0}^ BUK: {1,-10}",
 // RangeOperator
@@ -183,7 +183,7 @@
 "Mluvit",
 "Přepravit",
 "Kniha kouzel",
-"Tábor",
+"Odpočinek",
 "Mapa",
 "Bojové pozice",
 "Čekat",
@@ -233,7 +233,7 @@
 "Útok",
 "Parírování",
 "Seslat kouzlo",
-"Určit požadované body učení kouzel"
+"Určit body kouzel"
 
 
 ## Option names
