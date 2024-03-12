@@ -1,1 +1,1 @@
-﻿Tělo ~SUBJ~ shoří a zůstane po něm malá hromádka popela!
+﻿~SUBJ~, ~SEX2~ tělo shoří a zůstane jen malá hromádka popela!

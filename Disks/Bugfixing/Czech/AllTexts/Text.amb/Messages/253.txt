@@ -1,1 +1,1 @@
-﻿Popel ~SUBJ~ byl přeměněn na tělo!
+﻿~SUBJ~, ~SEX2~ popel byl přeměněn na tělo!
