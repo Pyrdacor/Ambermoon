@@ -167,7 +167,7 @@
 // RangeOperator
 " na ",
 // MagicIntBonus
-"^ Bonus: BM and BUK +INT/25 ({0})"
+"^ Bonus: BM a BUK +INT/25 ({0})"
 
 
 ## Button tooltips
@@ -199,8 +199,8 @@
 "Zahodit jídlo",
 "Dát zlato",
 "Dát jídlo",
-"Vzít zlato",
-"Vzít jídlo",
+"Rozděl zlato",
+"Rozděl jídlo",
 "Nákup",
 "Prodej",
 "Trénink",
