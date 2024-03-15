@@ -1,1 +1,1 @@
-﻿~SUBJ~ neumožňuje nahlížet do batohu ~SEX2~.
+﻿~SUBJ~ nemůže prohlížet ~SEX2~ věci.
