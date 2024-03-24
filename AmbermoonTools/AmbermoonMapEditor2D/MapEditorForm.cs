@@ -3,7 +3,6 @@ using Ambermoon.Data;
 using Ambermoon.Data.Enumerations;
 using Ambermoon.Data.Legacy.Serialization;
 using System;
-using System.Configuration;
 using System.Drawing;
 using System.Linq;
 using System.Windows.Forms;
@@ -13,7 +12,9 @@ namespace AmbermoonMapEditor2D
 {
     public partial class MapEditorForm : Form
     {
-        public MapEditorForm()
+        private AmbermoonMapCharEditor.PositionEditorForm positionEditor = null;
+
+		public MapEditorForm()
         {
             InitializeComponent();
 
@@ -1098,12 +1099,21 @@ namespace AmbermoonMapEditor2D
             if (character == null)
                 return;
 
-            var positionEditor = new AmbermoonMapCharEditor.PositionEditorForm(map, character);
+            positionEditor ??= new AmbermoonMapCharEditor.PositionEditorForm(map, character);
 
-            positionEditor.ShowDialog();
+            positionEditor.Show();
 
-            if (positionEditor.Dirty)
-                MarkAsDirty();
+            void PositionEditorClosed(object s, EventArgs e)
+            {
+				positionEditor.FormClosed -= PositionEditorClosed;
+
+				if (positionEditor.Dirty)
+					MarkAsDirty();
+
+				positionEditor = null;
+			}
+
+            positionEditor.FormClosed += PositionEditorClosed;
         }
 
         private void buttonPlaceCharacterOnMap_Click(object sender, EventArgs e)

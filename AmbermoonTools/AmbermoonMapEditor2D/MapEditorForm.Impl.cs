@@ -370,7 +370,11 @@ namespace AmbermoonMapEditor2D
             if (musicCache.TryGetValue(song, out var waveStream))
                 return waveStream;
 
-            var sonicArrangerFile = new SonicArranger.SonicArrangerFile(gameData.Files["Music.amb"].Files[(int)song] as DataReader);
+            var songReader = gameData.Files["Music.amb"].Files[(int)song] as DataReader;
+
+            songReader.Position = 0;
+
+			var sonicArrangerFile = new SonicArranger.SonicArrangerFile(songReader);
             var sonicArrangerSong = new SonicArranger.Stream(sonicArrangerFile, 0, 44100, SonicArranger.Stream.ChannelMode.Mono);
             var stream = new System.IO.MemoryStream();
             sonicArrangerSong.WriteUnsignedTo(stream);
