@@ -18,4 +18,4 @@ RemakeTranslatableTexts.txt contains some hints as well inside the text file for
 
 
 
-Inside the extro texts there might be texts starting with '_' or '$'. Keep those markers. '_' denotes that the text uses the large font while '$' and '$$' mark the translator name of the english version. It will be replaced with your name later. You can add your name their but keep the dollar signs in front of it.
+Inside the extro texts there might be texts starting with '\_' or '$'. Keep those markers. '\_' denotes that the text uses the large font while '$' and '$$' mark the translator name of the english version. It will be replaced with your name later. You can add your name their but keep the dollar signs in front of it.
