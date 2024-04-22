@@ -147,7 +147,7 @@ namespace AmbermoonMapCharEditor
             characterList.CharacterChanged += CharacterList_CharacterChanged;
             characterList.SelectedIndexChanged += CharacterList_SelectedIndexChanged;
             characterList.RowCountChanged += CharacterList_RowCountChanged;
-            this.Controls.Add(characterList);
+            this.panel1.Controls.Add(characterList);
             this.characterList = characterList;
 
             if (characterList.Count != 0)
