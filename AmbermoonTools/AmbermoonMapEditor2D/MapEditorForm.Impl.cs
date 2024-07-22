@@ -28,7 +28,8 @@ namespace AmbermoonMapEditor2D
             ColorPicker,
             RemoveFrontLayer,
             EventChanger,
-            PositionPicker
+            PositionPicker,
+            EventRepeater
         }
 
         static readonly string[] LayerName = new string[2]
@@ -185,6 +186,7 @@ namespace AmbermoonMapEditor2D
         bool mapLoading = false;
         ulong frame = 0;
         int selectedMapCharacter = -1;
+        int lastUsedEventId = -1;
 
         History history = new History();
         Map map;
@@ -547,6 +549,8 @@ namespace AmbermoonMapEditor2D
                     return buttonToolEventChanger;
                 case Tool.PositionPicker:
                     return buttonPlaceCharacterOnMap;
+                case Tool.EventRepeater:
+                    return buttonToolEventRepeater;
                 default:
                     return null;
             }
@@ -558,6 +562,7 @@ namespace AmbermoonMapEditor2D
             {
                 case Tool.Brush:
                 case Tool.EventChanger:
+                case Tool.EventRepeater:
                     return cursorPointer;
                 case Tool.Blocks2x2:
                 case Tool.Blocks3x2:
@@ -594,6 +599,7 @@ namespace AmbermoonMapEditor2D
                 case Tool.RemoveFrontLayer:
                     return 1;
                 case Tool.EventChanger:
+                case Tool.EventRepeater:
                     return 1;
                 case Tool.PositionPicker:
                     return 1;
@@ -620,6 +626,7 @@ namespace AmbermoonMapEditor2D
                 case Tool.RemoveFrontLayer:
                     return 1;
                 case Tool.EventChanger:
+                case Tool.EventRepeater:
                     return 1;
                 case Tool.PositionPicker:
                     return 1;
@@ -697,6 +704,18 @@ namespace AmbermoonMapEditor2D
                 case Tool.PositionPicker:
                     PickPosition(x, y);
                     break;
+                case Tool.EventRepeater:
+                    if (lastUsedEventId >= 0)
+                    {
+						if (map.InitialTiles[x, y].MapEventId != lastUsedEventId)
+						{
+							map.InitialTiles[x, y].MapEventId = (uint)lastUsedEventId;
+
+							if (showEvents)
+								panelMap.Refresh();
+						}
+					}
+                    break;
             }
         }
 
@@ -711,7 +730,9 @@ namespace AmbermoonMapEditor2D
                     if (showEvents)
                         panelMap.Refresh();
                 }
-            }
+
+                lastUsedEventId = 0;
+			}
             else
             {
                 var eventIdSelector = new EventIdSelectionForm(map, map.InitialTiles[x, y].MapEventId);
@@ -727,7 +748,9 @@ namespace AmbermoonMapEditor2D
                         if (showEvents)
                             panelMap.Refresh();
                     }
-                }
+
+					lastUsedEventId = (int)newId;
+				}
             }            
         }
 
