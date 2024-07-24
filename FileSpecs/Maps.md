@@ -84,7 +84,7 @@ The upper 6 bits contain the flags:
 - Bit 3: Use tileset
 - Bit 4: Text popup
 - Bit 5: NPC talks to you (**Ambermoon Advanced** only)
-- Bit 6: Special movement (see below, **Ambermoon Advanced** only, ignored for monsters)
+- Bit 6: Hour movement (see below, **Ambermoon Advanced** only, ignored for monsters)
 - Bit 7: Stationary / Only move when see player (**Ambermoon Advanced** only)
 
 The base movement type has different meaning for monsters and NPCs/party members. For monsters a value of 0 means stationary and 1 means random moving and chasing the player. For NPCs and party members a value of 0 means using a predefined path of 288 positions (one for each 5 minute timeslot of the day) and 1 means random moving.
@@ -101,37 +101,9 @@ The stationary flag specifies that the NPC or party member stays at one position
 
 Bit 5 is only used if the character is a normal NPC. If the player approaches such NPC (reaching the same tile) the conversation window is opened automatically. This will lead to endless window opening in general so only use this if the NPC is immediately removed after the conversation! This is only used for some special story NPCs in Ambermoon Advanced. This is also only implemented for 3D NPCs.
 
-#### Special movements
+#### Hour movement
 
-If this bit is given, all other movement bits are ignored (random movement, stationary, only move when see player). Where usually you would find the position of the character there is now a single word. This is consistent in size with having one position (random or stationary). So it is easy to find other character positions.
-
-The word has the following meaning:
-
-- Bit12-15: Movement type
-  - 00: Cyclic path
-  - 01: Alternating path (forth and back)
-  - 02: Reuse cyclic path of other character with optional offset
-  - 03: Circle a center position
-  - Rest unused for now
-- Bit0-11: Additional parameter depending on the movement type
-    - Type 00, 01: Offset to the character path positions from the start of the character position data in bytes
-    - Type 02: Bit0-4: Index of the other character, Bit5-11: Offset (0 to 127)
-    - Type 03: Offset to the position data from the start of the character position data in bytes
-
-Path data is given with a header word which specifies the length of the path (number of positions). This must not exceed 288 (a full day).
-At the end of the day the path starts at index 0 in any case. So for all movement types the number of positions should be chosen wisely
-so that it does not look weird at the change of a day.
-
-Then as usual each position of the path is given by two bytes (x and y).
-
-For circling a center position the following data is used:
-
-- First the center position itself as two bytes (x and y)
-- Then the offset to start also as two bytes (x and y). These are relative signed values and dependent on them the circle radius is determined.
-
-All the additional data should be stored after all other map data to be compatible to old map formats as much as possible.
-
-**Note:** When reusing path data of other characters, they can't also reuse path data. So the referenced character has to provide real data somehow. Moreover this character has to use special movement as well and especially type 0. Other cases are not handled well in the Amiga version of Ambermoon Advanced! To ease things it is also assumed that the referenced character is handled beforehand (which means has a lower index).
+If this bit is set, only 12 positions are stored (all 5 minute chunks of an hour). This is then used for every hour of the day. So the 12 positions repeat for every hour.
 
 ### Map events
 
