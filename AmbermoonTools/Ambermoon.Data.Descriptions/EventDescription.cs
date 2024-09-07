@@ -68,7 +68,11 @@ namespace Ambermoon.Data.Descriptions
         private static string ToString(Type type, Event @event, ValueDescription value)
         {
             if (value.DisplayMapping != null)
-                return value.DisplayMapping(@event, value) + ",";
+            {
+                var displayMapping = value.DisplayMapping;
+                value.DisplayMapping = null; // avoid recursive loops
+                return displayMapping(@event, value) + ",";
+            }
 
             var property = type.GetProperty(value.Name).GetValue(@event);
 
