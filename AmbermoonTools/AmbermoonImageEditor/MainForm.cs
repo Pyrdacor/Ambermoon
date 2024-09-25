@@ -1,11 +1,7 @@
 using System.Drawing.Drawing2D;
 using System.Runtime.InteropServices;
-using System.Security.Cryptography;
 using Ambermoon.Data;
 using Ambermoon.Data.Legacy.Serialization;
-using Ambermoon.Data.Serialization;
-using static System.Runtime.InteropServices.JavaScript.JSType;
-using static System.Windows.Forms.DataFormats;
 
 namespace AmbermoonImageEditor
 {
@@ -545,7 +541,7 @@ namespace AmbermoonImageEditor
         {
             int frames = 1; // TODO
             format ??= GraphicFormat.Palette5Bit;
-            format = GraphicFormat.Texture4Bit;
+            //format = GraphicFormat.Texture4Bit;
             int maxColor = Math.Min(31, PaletteOffset + NumColors - 1);
 
             if (image == null || palette == null || image.Data.Any(i => i < PaletteOffset || i > maxColor))

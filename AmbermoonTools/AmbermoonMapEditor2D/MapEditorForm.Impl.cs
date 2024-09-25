@@ -233,7 +233,7 @@ namespace AmbermoonMapEditor2D
             {
                 var textContainer = new TextContainer();
                 new TextContainerReader().ReadTextContainer(textContainer, textAmbReader.Files[1], false);
-                songNames = Ambermoon.Enum.GetValues<Song>().Skip(1).Take(32).ToDictionary(song => song, song => textContainer.MusicNames[(int)song - 1]);
+                songNames = Ambermoon.EnumHelper.GetValues<Song>().Skip(1).Take(32).ToDictionary(song => song, song => textContainer.MusicNames[(int)song - 1]);
             }
             else if (gameData.Files.TryGetValue("AM2_CPU", out var asmReader))
             {
@@ -244,7 +244,7 @@ namespace AmbermoonMapEditor2D
             }
             else
             {
-                songNames = Ambermoon.Enum.GetValues<Song>().Skip(1).Take(32).ToDictionary(song => song, song => song.ToString());
+                songNames = Ambermoon.EnumHelper.GetValues<Song>().Skip(1).Take(32).ToDictionary(song => song, song => song.ToString());
             }
 
             foreach (var song in songNames)

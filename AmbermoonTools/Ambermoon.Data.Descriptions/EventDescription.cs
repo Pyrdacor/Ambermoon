@@ -93,7 +93,7 @@ namespace Ambermoon.Data.Descriptions
             }
             else if (value is IEnumValueDescription enumValueDescription && enumValueDescription.Flags)
             {
-                return $" {value.DisplayName}=" + Enum.GetFlagNames(value.GetType().GetGenericArguments()[0], property) + ",";
+                return $" {value.DisplayName}=" + EnumHelper.GetFlagNames(value.GetType().GetGenericArguments()[0], property) + ",";
             }
             else if (value.ShowAsHex)
             {
@@ -210,14 +210,14 @@ namespace Ambermoon.Data.Descriptions
             (
                 true, false, true, true, false,
                 Use.Byte(nameof(ChestEvent.LockpickingChanceReduction), false, 100),
-                Use.Flags8<ChestEvent.ChestFlags>(nameof(ChestEvent.Flags), false),
+                Use.Bool(nameof(ChestEvent.SearchSkillCheck), false),
                 Use.Byte(nameof(ChestEvent.TextIndex), false, 0xff, 0x00, 0xff),
                 Use.Byte(nameof(ChestEvent.ChestIndex), true),
-                Use.Flags8<ChestEvent.ChestLootFlags>(nameof(ChestEvent.LootFlags), false),
+                Use.Flags8<ChestEvent.ChestFlags>(nameof(ChestEvent.Flags), false),
                 Use.Word(nameof(ChestEvent.KeyIndex), false),
                 Use.EventIndex(nameof(ChestEvent.UnlockFailedEventIndex), false)
             )},
-            { EventType.PopupText, new EventDescription
+            { EventType.MapText, new EventDescription
             (
                 true, false, true, true, false,
                 Use.Byte(nameof(PopupTextEvent.EventImageIndex), false, 0xff, 0x00, 0xff),
@@ -373,7 +373,7 @@ namespace Ambermoon.Data.Descriptions
                 Use.Byte(nameof(EnterPlaceEvent.ClosingHour), true, 23),
                 Use.Byte(nameof(EnterPlaceEvent.UsePlaceTextIndex), false, 0xff, 0, 0xff),
                 Use.Word(nameof(EnterPlaceEvent.PlaceIndex), true),
-                Use.Conditional<EnterPlaceEvent>(() => Use.Word(nameof(EnterPlaceEvent.MerchantDataIndex), false), enterPlaceEvent => enterPlaceEvent.PlaceType == PlaceType.Merchant)
+                Use.Conditional<EnterPlaceEvent>(() => Use.Word(nameof(EnterPlaceEvent.MerchantDataIndex), false), enterPlaceEvent => enterPlaceEvent.PlaceType == PlaceType.Merchant || enterPlaceEvent.PlaceType == PlaceType.Library)
             )},
             { EventType.Condition, new EventDescription
             (
@@ -554,7 +554,7 @@ namespace Ambermoon.Data.Descriptions
             { EventType.Teleport, () => new TeleportEvent() },
             { EventType.Door, () => new DoorEvent() },
             { EventType.Chest, () => new ChestEvent() },
-            { EventType.PopupText, () => new PopupTextEvent() },
+            { EventType.MapText, () => new PopupTextEvent() },
             { EventType.Spinner, () => new SpinnerEvent() },
             { EventType.Trap, () => new TrapEvent() },
             { EventType.ChangeBuffs, () => new ChangeBuffsEvent() },

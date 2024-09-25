@@ -6,7 +6,6 @@ using WallFlags = Ambermoon.Data.Tileset.TileFlags;
 using ObjectFlags = Ambermoon.Data.Tileset.TileFlags;
 using Ambermoon.Data.Enumerations;
 using AmbermoonLabdataEditor;
-using static Ambermoon.Data.Labdata;
 
 Dictionary<WallFlags, string> AllWallFlags = new()
 {

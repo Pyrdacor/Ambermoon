@@ -85,7 +85,8 @@ namespace AmbermoonItemEditor
                 Console.WriteLine("S: Save items");
                 Console.WriteLine("I: Show items");
                 Console.WriteLine("P: List item properties");
-                Console.WriteLine("H: Show help");
+				Console.WriteLine("F: Find item id");
+				Console.WriteLine("H: Show help");
                 Console.WriteLine("Q: Quit");
                 PrintLine();
                 Console.Write("> ");
@@ -143,11 +144,18 @@ namespace AmbermoonItemEditor
                     case "list item properties":
                         ShowItem(items1);
                         break;
-                    default:
+					case "f":
+					case "find":
+					case "find item":
+					case "finditem":
+					case "find item id":
+					case "finditemid":
+						FindItem(items1);
+						break;
+					default:
                         Console.WriteLine();
                         Console.WriteLine("Invalid command.");
                         Console.WriteLine();
-                        ShowHelp();
                         break;
                 }
             }
@@ -226,6 +234,31 @@ namespace AmbermoonItemEditor
 
             return option ?? defaultOption;
         }
+
+        static void FindItem(ItemManager items)
+        {
+			Console.WriteLine();
+			Console.Write("Enter (partial) item name: ");
+            string name = Console.ReadLine();
+
+			Console.WriteLine();
+
+            var matchingItems = items.FindItems(name);
+
+            if (matchingItems.Count == 0)
+            {
+                Console.WriteLine("No matching items found.");
+			}
+            else
+            {
+                foreach (var item in matchingItems)
+                {
+                    Console.WriteLine($"{item.Index: 000}: {item.Name}");
+                }
+            }
+
+			Console.WriteLine();
+		}
 
         static void ShowItem(ItemManager items)
         {
