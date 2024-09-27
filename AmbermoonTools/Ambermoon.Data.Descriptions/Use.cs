@@ -31,7 +31,7 @@ namespace Ambermoon.Data.Descriptions
 
             string MapDisplay(Event @event, ValueDescription valueDescription)
             {
-                if (!(@event is TEvent specificEvent))
+                if (@event is not TEvent specificEvent)
                     return EventDescriptions.ToString(@event, valueDescription);
 
                 return displayMapping?.Invoke(specificEvent, valueDescription) ?? EventDescriptions.ToString(@event, valueDescription);
@@ -57,8 +57,8 @@ namespace Ambermoon.Data.Descriptions
             return description;
         }
 
-        public static ValueDescription Byte(string name, bool required, byte maxValue = 255, byte minValue = 0, byte defaultValue = 0, bool showAsHex = false) => new ValueDescription
-        {
+        public static ValueDescription Byte(string name, bool required, byte maxValue = 255, byte minValue = 0, byte defaultValue = 0, bool showAsHex = false) => new()
+		{
             Type = ValueType.Byte,
             Name = name,
             MinValue = minValue,
@@ -68,8 +68,8 @@ namespace Ambermoon.Data.Descriptions
             ShowAsHex = showAsHex
         };
 
-        public static ValueDescription HiddenByte(byte defaultValue = 0) => new ValueDescription
-        {
+        public static ValueDescription HiddenByte(byte defaultValue = 0) => new()
+		{
             Type = ValueType.Byte,
             Name = "Unknown",
             DefaultValue = defaultValue,
@@ -77,8 +77,8 @@ namespace Ambermoon.Data.Descriptions
             Hidden = true
         };
 
-        public static ValueDescription SByte(string name, bool required, sbyte maxValue = 127, sbyte minValue = -128, sbyte defaultValue = 0) => new ValueDescription
-        {
+        public static ValueDescription SByte(string name, bool required, sbyte maxValue = 127, sbyte minValue = -128, sbyte defaultValue = 0) => new()
+		{
             Type = ValueType.SByte,
             Name = name,
             MinValue = unchecked((byte)minValue),
@@ -88,8 +88,8 @@ namespace Ambermoon.Data.Descriptions
             ShowAsHex = false
         };
 
-        public static ValueDescription Word(string name, bool required, ushort maxValue = 65535, ushort minValue = 0, ushort defaultValue = 0, bool showAsHex = false) => new ValueDescription
-        {
+        public static ValueDescription Word(string name, bool required, ushort maxValue = 65535, ushort minValue = 0, ushort defaultValue = 0, bool showAsHex = false) => new()
+		{
             Type = ValueType.Word,
             Name = name,
             MinValue = minValue,
@@ -99,8 +99,8 @@ namespace Ambermoon.Data.Descriptions
             ShowAsHex = showAsHex
         };
 
-        public static ValueDescription HiddenWord(ushort defaultValue = 0) => new ValueDescription
-        {
+        public static ValueDescription HiddenWord(ushort defaultValue = 0) => new()
+		{
             Type = ValueType.Word,
             Name = "Unknown",
             DefaultValue = defaultValue,
@@ -108,8 +108,8 @@ namespace Ambermoon.Data.Descriptions
             Hidden = true
         };
 
-        public static ValueDescription Bool(string name, bool required, bool defaultValue = false) => new ValueDescription
-        {
+        public static ValueDescription Bool(string name, bool required, bool defaultValue = false) => new()
+		{
             Type = ValueType.Bool,
             Name = name,
             MinValue = 0,
@@ -118,8 +118,8 @@ namespace Ambermoon.Data.Descriptions
             Required = required
         };
 
-        public static ValueDescription HiddenBool(byte defaultValue = 0) => new ValueDescription
-        {
+        public static ValueDescription HiddenBool(byte defaultValue = 0) => new()
+		{
             Type = ValueType.Bool,
             Name = "Unknown",
             DefaultValue = defaultValue,
@@ -127,8 +127,8 @@ namespace Ambermoon.Data.Descriptions
             Hidden = true
         };
 
-        public static ValueDescription Flags8(string name, bool required, int flagDescriptionOffset, params string[] flagDescriptions) => new ValueDescription
-        {
+        public static ValueDescription Flags8(string name, bool required, int flagDescriptionOffset, params string[] flagDescriptions) => new()
+		{
             Type = ValueType.Flag8,
             Name = name,
             MinValue = 0,
@@ -139,8 +139,8 @@ namespace Ambermoon.Data.Descriptions
             FlagDescriptions = flagDescriptions
         };
 
-        public static ValueDescription HiddenFlags8(byte defaultValue = 0) => new ValueDescription
-        {
+        public static ValueDescription HiddenFlags8(byte defaultValue = 0) => new()
+		{
             Type = ValueType.Flag8,
             Name = "Unknown",
             DefaultValue = defaultValue,
@@ -148,7 +148,7 @@ namespace Ambermoon.Data.Descriptions
             Hidden = true
         };
 
-        public static ValueDescription Flags16(string name, bool required, int flagDescriptionOffset, params string[] flagDescriptions) => new ValueDescription
+        public static ValueDescription Flags16(string name, bool required, int flagDescriptionOffset, params string[] flagDescriptions) => new()
         {
             Type = ValueType.Flag16,
             Name = name,
@@ -160,7 +160,7 @@ namespace Ambermoon.Data.Descriptions
             FlagDescriptions = flagDescriptions
         };
 
-        public static ValueDescription HiddenFlags16(ushort defaultValue = 0) => new ValueDescription
+        public static ValueDescription HiddenFlags16(ushort defaultValue = 0) => new()
         {
             Type = ValueType.Flag16,
             Name = "Unknown",
@@ -169,23 +169,24 @@ namespace Ambermoon.Data.Descriptions
             Hidden = true
         };
 
-        public static EnumValueDescription<TEnum> Enum<TEnum>(string name, bool required, TEnum defaultValue = default(TEnum),
+        public static EnumValueDescription<TEnum> Enum<TEnum>(string name, bool required, TEnum defaultValue = default,
             params TEnum[] allowedValues)
-            where TEnum : struct, System.Enum => new EnumValueDescription<TEnum>(name, required, false, defaultValue, false, false, allowedValues);
+            where TEnum : struct, Enum => new(name, required, false, defaultValue, false, false, allowedValues, null);
 
-        public static EnumValueDescription<TEnum> Enum<TEnum>(string name, bool required, TEnum defaultValue, IEnumerable<TEnum> allowedValues)
-            where TEnum : struct, System.Enum => new EnumValueDescription<TEnum>(name, required, false, defaultValue, false, false, allowedValues.ToArray());
+        public static EnumValueDescription<TEnum> Enum<TEnum>(string name, bool required, TEnum defaultValue, IEnumerable<TEnum> allowedValues,
+            Func<TEnum, string> valueNameMapping = null)
+            where TEnum : struct, Enum => new(name, required, false, defaultValue, false, false, allowedValues.ToArray(), valueNameMapping);
 
-        public static EnumValueDescription<TEnum> HiddenEnum<TEnum>(TEnum defaultValue = default(TEnum))
-            where TEnum : struct, System.Enum => new EnumValueDescription<TEnum>("Unknown", false, true, defaultValue, false, false, null);
+        public static EnumValueDescription<TEnum> HiddenEnum<TEnum>(TEnum defaultValue = default)
+            where TEnum : struct, Enum => new("Unknown", false, true, defaultValue, false, false, null, null);
 
-        public static EnumValueDescription<TEnum> Flags8<TEnum>(string name, bool required, TEnum defaultValue = default(TEnum),
+        public static EnumValueDescription<TEnum> Flags8<TEnum>(string name, bool required, TEnum defaultValue = default,
             params TEnum[] allowedValues)
-            where TEnum : struct, System.Enum => new EnumValueDescription<TEnum>(name, required, false, defaultValue, true, false, allowedValues);
+            where TEnum : struct, Enum => new(name, required, false, defaultValue, true, false, allowedValues, null);
 
-        public static EnumValueDescription<TEnum> Flags16<TEnum>(string name, bool required, TEnum defaultValue = default(TEnum),
+        public static EnumValueDescription<TEnum> Flags16<TEnum>(string name, bool required, TEnum defaultValue = default,
             params TEnum[] allowedValues)
-            where TEnum : struct, System.Enum => new EnumValueDescription<TEnum>(name, required, false, defaultValue, true, true, allowedValues);
+            where TEnum : struct, Enum => new(name, required, false, defaultValue, true, true, allowedValues, null);
 
         public static ValueDescription[] Compound(params ValueDescription[] valueDescriptions) => valueDescriptions;
     }

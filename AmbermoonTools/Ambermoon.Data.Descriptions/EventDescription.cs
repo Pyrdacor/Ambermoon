@@ -111,7 +111,7 @@ namespace Ambermoon.Data.Descriptions
                     if (index >= 0 && index < enumDesc.AllowedValueNames.Length)
                         enumValue = enumDesc.AllowedValueNames[index];
                     else
-                        enumValue = System.Enum.ToObject(value.GetType().GetGenericArguments()[0], property);
+                        enumValue = Enum.ToObject(value.GetType().GetGenericArguments()[0], property);
                     return $" {value.DisplayName}={enumValue},";
                 }
 
@@ -300,9 +300,15 @@ namespace Ambermoon.Data.Descriptions
                            rewardEvent.TypeOfReward != RewardEvent.RewardType.Conditions &&
                            rewardEvent.TypeOfReward != RewardEvent.RewardType.EmpowerSpells &&
                            rewardEvent.TypeOfReward != RewardEvent.RewardType.Languages &&
-                           rewardEvent.TypeOfReward != RewardEvent.RewardType.UsableSpellTypes;
+                           rewardEvent.TypeOfReward != RewardEvent.RewardType.UsableSpellTypes &&
+						   rewardEvent.TypeOfReward != RewardEvent.RewardType.Spells;
                 }),
-                Use.Enum(nameof(RewardEvent.Target), true, RewardEvent.RewardTarget.ActivePlayer),
+				Use.Enum(nameof(RewardEvent.Target), true, RewardEvent.RewardTarget.ActivePlayer, Enum.GetValues<RewardEvent.RewardTarget>()
+                        .Where(t => (int)t < 100)
+                        .Concat(Enumerable.Range(100, (int)Enum.GetValues<PartyMembers>().Max()).Select(i => (RewardEvent.RewardTarget)i))
+                        .Concat(Enumerable.Range(200, (int)Enum.GetValues<PartyMembers>().Max()).Select(i => (RewardEvent.RewardTarget)i)),
+					(target) => (int)target >= 200 ? $"All but Party Member {(int)target - 199}" : (int)target >= 100 ? $"Party Member {(int)target - 99}" : Enum.GetName(target)
+				),
                 Use.HiddenByte(),
                 Use.Conditional<RewardEvent>
                 (
