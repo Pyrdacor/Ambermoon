@@ -244,6 +244,7 @@ Value | Meaning
 19 | Max skill (**Ambermoon Advanced** only)
 20 | M-B-A (magic armor level, **Ambermoon Advanced** only)
 21 | M-B-W (magic weapon level, **Ambermoon Advanced** only)
+22 | Spell (spell class is based on character, only use 1-based spell index, **Ambermoon Advanced** only)
 
 ### Reward operation
 
@@ -266,10 +267,11 @@ Value | Meaning
 1 | Whole party
 2 | Random player (**Ambermoon Advanced** only)
 3 | First animal (**Ambermoon Advanced** only)
+100+ | Party member with index `1 + 100 - value` (**Ambermoon Advanced** only)
 
 **Note:** Operation 'Fill' just sets the current value to the max value. The 3 bit operations should only be used for languages, ailments and spell schools. The percentage is in relation to the max value and should only be used for LP and SP I guess. Using percentage or fill operations on SLP, languages, ailments or spell schools might have strange effects.
 
-**Note:** There is no reward to add training points in Ambermoon. :(
+**Note:** There is no reward to add training points in original Ambermoon. :(
 
 
 ## Change tile event (0x0A / 10)
