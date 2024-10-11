@@ -184,7 +184,7 @@ namespace Ambermoon.Data.Descriptions
                 true, true, true, true, false,
                 Use.Byte(nameof(TeleportEvent.X), true, 200),
                 Use.Byte(nameof(TeleportEvent.Y), true, 200),
-                Use.Enum(nameof(TeleportEvent.Direction), false, CharacterDirection.Keep).WithFilteredAllowedValues
+                Use.Enum(nameof(TeleportEvent.Direction), false, CharacterDirection.Keep, Enum.GetValues<CharacterDirection>().Distinct(), value => value == CharacterDirection.Random ? nameof(CharacterDirection.Keep) : Enum.GetName(value)).WithFilteredAllowedValues
                 (
                     values => values.Distinct().ToArray(),
                     valueNames => valueNames.Where(name => name != nameof(CharacterDirection.Random)).ToArray()
@@ -232,7 +232,7 @@ namespace Ambermoon.Data.Descriptions
             { EventType.Spinner, new EventDescription
             (
                 true, false, true, true, false,
-                Use.Enum(nameof(SpinnerEvent.Direction), true, CharacterDirection.Random).WithFilteredAllowedValues
+                Use.Enum(nameof(SpinnerEvent.Direction), true, CharacterDirection.Random, Enum.GetValues<CharacterDirection>().Distinct(), value => value == CharacterDirection.Keep ? nameof(CharacterDirection.Random) : Enum.GetName(value)).WithFilteredAllowedValues
                 (
                     values => values.Distinct().ToArray(),
                     valueNames => valueNames.Where(name => name != nameof(CharacterDirection.Keep)).ToArray()

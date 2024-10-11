@@ -22,8 +22,8 @@ namespace Ambermoon.Data.Descriptions
         public override object[] AllowedValues => valueFilter(base.AllowedValues);
 
         public EnumValueDescriptionWithFilteredAllowedValues(string name, bool required, bool hidden, TEnum defaultValue,
-            bool flags, bool word, TEnum[] allowedValues, Func<object[], object[]> valueFilter, Func<string[], string[]> valueNameFilter)
-            : base(name, required, hidden, defaultValue, flags, word, allowedValues, null)
+            bool flags, bool word, TEnum[] allowedValues, Func<TEnum, string> valueNameMapping, Func<object[], object[]> valueFilter, Func<string[], string[]> valueNameFilter)
+            : base(name, required, hidden, defaultValue, flags, word, allowedValues, valueNameMapping)
         {
             this.valueFilter = valueFilter;
             this.valueNameFilter = valueNameFilter;
@@ -68,7 +68,7 @@ namespace Ambermoon.Data.Descriptions
         public override string GetPossibleValues()
         {
             if (AllowedEnumValues != null && AllowedEnumValues.Length != 0)
-                return string.Join("\r\n", AllowedEnumValues);
+                return string.Join("\r\n", AllowedValueNames);
 
             return string.Join("\r\n", Enum.GetValues(typeof(TEnum)));
         }
@@ -86,14 +86,14 @@ namespace Ambermoon.Data.Descriptions
             get
             {
                 int value = DefaultValue;
-                return Unsafe.As<int, TEnum>(ref value).ToString();
+                return GetEnumValueString(Unsafe.As<int, TEnum>(ref value));
             }
         }
 
         public EnumValueDescription<TEnum> WithFilteredAllowedValues(Func<object[], object[]> valueFilter, Func<string[], string[]> valueNameFilter)
         {
             return new EnumValueDescriptionWithFilteredAllowedValues<TEnum>(Name, Required, Hidden,
-                (TEnum)Enum.Parse(typeof(TEnum), DefaultValue.ToString()), Flags, Type == ValueType.Flag16, AllowedEnumValues, valueFilter, valueNameFilter);
+                (TEnum)Enum.Parse(typeof(TEnum), DefaultValue.ToString()), Flags, Type == ValueType.Flag16, AllowedEnumValues, valueNameMapping, valueFilter, valueNameFilter);
         }
 
         private string GetEnumValueString(TEnum value)
@@ -101,7 +101,12 @@ namespace Ambermoon.Data.Descriptions
 			if (valueNameMapping != null)
 				return valueNameMapping(value);
 
-			return Enum.GetName<TEnum>(value);
+			return Enum.GetName(value);
 		}
-    }
+
+		public override string AsString(object value)
+		{
+			return GetEnumValueString((TEnum)value);
+		}
+	}
 }
