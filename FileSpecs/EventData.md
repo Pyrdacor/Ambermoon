@@ -375,10 +375,15 @@ Value | Type
 23 | Multiple cursor interaction (hand, eye, mouth) (**Ambermoon Advanced only**)
 24 | Current travel type (**Ambermoon Advanced only**)
 25 | Active party member class (**Ambermoon Advanced only**)
+26 | Active party member has spell empowered (**Ambermoon Advanced only**)
+27 | Is night (**Ambermoon Advanced only**)
+28 | Active party member attribute (**Ambermoon Advanced only**)
+29 | Active party member skill (**Ambermoon Advanced only**)
 
 **Note:** In conversations the global variable 0 is checked to be value 0 before executing a PrintText event that
 should be executed in any case. I guess PrintText events always need a preceding Condition event and the global
-variable 0 is always 0. So this is like a "always true condition".
+variable 0 is always 0. So this is like a "always true condition". Or maybe conversation events have to be succeeded
+by condition events? This might also be some limitation of the tools to create NPC event chains.
 
 **Note:** For condition 22, the object index gives the [transport type](Enumerations/TravelType.md). But 0 is special and means "any".
 
