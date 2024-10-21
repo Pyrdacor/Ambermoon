@@ -686,4 +686,4 @@ For min/max/average only those members are considered which are not under the di
 
 For random, also only members without disallowed conditions are considered and the result is also false if there is no member to choose.
 
-For active member, the result is false if it is under any disallowed condition.
+For active member nad party member with index, the result is false if the target is under any disallowed condition.
