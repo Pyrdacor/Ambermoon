@@ -684,6 +684,6 @@ When `All members` is given, all members in the party have to fulfill the condit
 
 For min/max/average only those members are considered which are not under the disallowed conditions. If there is none, the result is false.
 
-For random, also members without disallowed conditions are considered and the result is also false if there is no member to choose.
+For random, also only members without disallowed conditions are considered and the result is also false if there is no member to choose.
 
 For active member, the result is false if it is under any disallowed condition.
