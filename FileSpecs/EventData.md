@@ -640,3 +640,50 @@ Offset | Type | Description
 0x01 | ubyte[5] | Unused
 0x06 | uword | Milliseconds
 0x08 | uword | Unused
+
+
+## Party member condition event (0x1A / 26) (Ambermoon Advanced only)
+
+Party member condition events represent conditions that control if following events (in the list) are executed or not. Multiple conditions can be chained which equals a logical AND conjunction. In contrast to the normal condition event, this one checks for party member properties.
+
+Offset | Type | Description
+--- | --- | ---
+0x00 | ubyte | Event type (= 0x1A)
+0x01 | ubyte | Condition type
+0x02 | ubyte | Condition type value (this specifies things like which attribute or skill to check)
+0x03 | ubyte | Target (see below)
+0x04 | uword | Not allowed party member ailments
+0x06 | uword | Value
+0x08 | uword | Map event index to continue with if condition was not fulfilled or 0xffff to stop the event list in this case.
+
+The specified value of the target party member is checked with the greater-or-equal operator against the given `Value`. For example if you check of the level and specify a `Value` of 20, the code will check if the target level is greater or equal than 20.
+
+### Condition types
+
+Value | Type
+--- | ---
+0 | Level
+1 | Attribute
+2 | Skill
+3 | TP
+
+### Target
+
+Value | Type
+--- | ---
+0 | Active member
+1 | All members
+2 | Any member
+3 | Min value of party
+4 | Max value of party
+5 | Average value of party
+6 | Random member
+7+ | Party member with index Value minus 7 (so 7 is the hero, 8 is Netsrak, etc). Note that this is not the index of the character slot but the index of the party member in data (basically the subfile index).
+
+When `All members` is given, all members in the party have to fulfill the condition and also must not be under any condition given in the `not allowed condition` value.
+
+For min/max/average only those members are considered which are not under the disallowed conditions. If there is none, the result is false.
+
+For random, also members without disallowed conditions are considered and the result is also false if there is no member to choose.
+
+For active member, the result is false if it is under any disallowed condition.
