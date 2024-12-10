@@ -268,6 +268,7 @@ Value | Meaning
 2 | Random player (**Ambermoon Advanced** only)
 3 | First animal (**Ambermoon Advanced** only)
 100+ | Party member with index `1 + 100 - value` (**Ambermoon Advanced** only)
+200+ | All but party member with index `1 + 200 - value` (**Ambermoon Advanced** only)
 
 **Note:** Operation 'Fill' just sets the current value to the max value. The 3 bit operations should only be used for languages, ailments and spell schools. The percentage is in relation to the max value and should only be used for LP and SP I guess. Using percentage or fill operations on SLP, languages, ailments or spell schools might have strange effects.
 
