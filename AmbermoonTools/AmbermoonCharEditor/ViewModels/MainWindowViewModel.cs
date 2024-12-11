@@ -1,9 +1,6 @@
 using Ambermoon.Data;
 using AmbermoonCharEditor.Views;
 using AutoMapper;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace AmbermoonCharEditor.ViewModels
 {

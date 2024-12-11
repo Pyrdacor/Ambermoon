@@ -593,8 +593,9 @@ namespace AmbermoonEventEditor
             var chests = events.Where(e => e is ChestEvent c && c.UnlockFailedEventIndex == index).Cast<ChestEvent>().ToList();
             var dices = events.Where(e => e is Dice100RollEvent r && r.ContinueIfFalseWithMapEventIndex == index).Cast<Dice100RollEvent>().ToList();
             var decisions = events.Where(e => e is DecisionEvent d && d.NoEventIndex == index).Cast<DecisionEvent>().ToList();
+			var pconds = events.Where(e => e is PartyMemberConditionEvent c && c.ContinueIfFalseWithMapEventIndex == index).Cast<PartyMemberConditionEvent>().ToList();
 
-            if (prevs.Count != 0 || conds.Count != 0 || doors.Count != 0 || chests.Count != 0 || dices.Count != 0 || decisions.Count != 0)
+			if (prevs.Count != 0 || conds.Count != 0 || doors.Count != 0 || chests.Count != 0 || dices.Count != 0 || decisions.Count != 0 || pconds.Count != 0)
             {
                 Event successor = null;
 
@@ -627,7 +628,9 @@ namespace AmbermoonEventEditor
                     dice.ContinueIfFalseWithMapEventIndex = successorIndex;
                 foreach (var decision in decisions)
                     decision.NoEventIndex = successorIndex;
-            }
+				foreach (var pcond in pconds)
+					pcond.ContinueIfFalseWithMapEventIndex = successorIndex;
+			}
 
             @event.Next = null;
 
@@ -639,8 +642,9 @@ namespace AmbermoonEventEditor
                 chests = events.Where(e => e is ChestEvent c && c.UnlockFailedEventIndex == i).Cast<ChestEvent>().ToList();
                 dices = events.Where(e => e is Dice100RollEvent r && r.ContinueIfFalseWithMapEventIndex == i).Cast<Dice100RollEvent>().ToList();
                 decisions = events.Where(e => e is DecisionEvent d && d.NoEventIndex == i).Cast<DecisionEvent>().ToList();
+				pconds = events.Where(e => e is PartyMemberConditionEvent c && c.ContinueIfFalseWithMapEventIndex == i).Cast<PartyMemberConditionEvent>().ToList();
 
-                foreach (var cond in conds)
+				foreach (var cond in conds)
                     --cond.ContinueIfFalseWithMapEventIndex;
                 foreach (var door in doors)
                     --door.UnlockFailedEventIndex;
@@ -650,7 +654,9 @@ namespace AmbermoonEventEditor
                     --dice.ContinueIfFalseWithMapEventIndex;
                 foreach (var decision in decisions)
                     --decision.NoEventIndex;
-            }
+				foreach (var pcond in pconds)
+					--pcond.ContinueIfFalseWithMapEventIndex;
+			}
 
             events.Remove(@event);
 
@@ -928,7 +934,7 @@ namespace AmbermoonEventEditor
                             value.DisplayName = value.DisplayNameMapping(@event, value);
                         var property = type.GetProperty(value.Name);
                         var currentValue = property.GetValue(@event);
-                        Console.Write($"> {value.DisplayName} ({value.AsString(currentValue)}): ");
+						Console.Write($"> {value.DisplayName} ({value.AsString(currentValue)}): ");
                         var input = ReadInt(value.ShowAsHex);
 
                         if (input == null || input < 0 || input > 0xffff || !value.Check((ushort)input))
@@ -1023,8 +1029,9 @@ namespace AmbermoonEventEditor
             var chests = events.Where(e => e is ChestEvent c && c.UnlockFailedEventIndex == index).Cast<ChestEvent>().ToList();
             var dices = events.Where(e => e is Dice100RollEvent r && r.ContinueIfFalseWithMapEventIndex == index).Cast<Dice100RollEvent>().ToList();
             var decisions = events.Where(e => e is DecisionEvent d && d.NoEventIndex == index).Cast<DecisionEvent>().ToList();
+			var pconds = events.Where(e => e is PartyMemberConditionEvent c && c.ContinueIfFalseWithMapEventIndex == index).Cast<PartyMemberConditionEvent>().ToList();
 
-            foreach (var prev in prevs)
+			foreach (var prev in prevs)
                 prev.Next = null;
 
             @event.Next = null;
@@ -1039,16 +1046,19 @@ namespace AmbermoonEventEditor
                 dc.ContinueIfFalseWithMapEventIndex = 0xffff;
             else if (@event is DecisionEvent dec)
                 dec.NoEventIndex = 0xffff;
+            else if (@event is PartyMemberConditionEvent pc)
+				pc.ContinueIfFalseWithMapEventIndex = 0xffff;
 
-            if (conds.Count != 0 || doors.Count != 0 || chests.Count != 0 || dices.Count != 0)
+			if (conds.Count != 0 || doors.Count != 0 || chests.Count != 0 || dices.Count != 0 || pconds.Count != 0)
             {
                 Console.WriteLine("There are events that chain the event through a failed condition. Should these also be disconnected?");
                 ListEvents(conds, 0, ev => events.IndexOf(ev), false, true);
                 ListEvents(doors, 0, ev => events.IndexOf(ev), true, true);
                 ListEvents(chests, 0, ev => events.IndexOf(ev), true, true);
-                ListEvents(dices, 0, ev => events.IndexOf(ev), true, false);
-                ListEvents(decisions, 0, ev => events.IndexOf(ev), true, false);
-                int option = ReadOption(0, "No", "Yes") ?? 0;
+                ListEvents(dices, 0, ev => events.IndexOf(ev), true, true);
+                ListEvents(decisions, 0, ev => events.IndexOf(ev), true, true);
+				ListEvents(pconds, 0, ev => events.IndexOf(ev), true, false);
+				int option = ReadOption(0, "No", "Yes") ?? 0;
 
                 if (option == 1)
                 {
@@ -1062,7 +1072,9 @@ namespace AmbermoonEventEditor
                         dice.ContinueIfFalseWithMapEventIndex = 0xffff;
                     foreach (var decision in decisions)
                         decision.NoEventIndex = 0xffff;
-                }
+					foreach (var pcond in pconds)
+						pcond.ContinueIfFalseWithMapEventIndex = 0xffff;
+				}
             }
 
             unsavedChanges = true;
@@ -1315,7 +1327,8 @@ namespace AmbermoonEventEditor
             {
                 if (valueDescription.Type == ValueType.Word ||
                     valueDescription.Type == ValueType.Flag16 ||
-                    valueDescription.Type == ValueType.EventIndex)
+                    valueDescription.Type == ValueType.EventIndex ||
+                    (valueDescription is IEnumValueDescription e && e.Word))
                     WriteWord(value);
                 else
                     eventData[dataIndex++] = (byte)(value & 0xff);
@@ -1635,8 +1648,10 @@ namespace AmbermoonEventEditor
                         branches.Enqueue(events[(int)chestEvent.UnlockFailedEventIndex]);
                     else if (ev is DecisionEvent decisionEvent && decisionEvent.NoEventIndex != 0xffff)
                         branches.Enqueue(events[(int)decisionEvent.NoEventIndex]);
+                    else if (ev is PartyMemberConditionEvent partyMemberConditionEvent && partyMemberConditionEvent.ContinueIfFalseWithMapEventIndex != 0xffff)
+                        branches.Enqueue(events[(int)partyMemberConditionEvent.ContinueIfFalseWithMapEventIndex]);
 
-                    return ev.Next;
+					return ev.Next;
                 }
 
                 while (@event != null)
@@ -1673,9 +1688,12 @@ namespace AmbermoonEventEditor
                     doorEvent.UnlockFailedEventIndex = idMapping[doorEvent.UnlockFailedEventIndex];
                 else if (ev is ChestEvent chestEvent && chestEvent.UnlockFailedEventIndex != 0xffff)
                     chestEvent.UnlockFailedEventIndex = idMapping[chestEvent.UnlockFailedEventIndex];
-            }
+                else if (ev is PartyMemberConditionEvent partyMemberConditionEvent && partyMemberConditionEvent.ContinueIfFalseWithMapEventIndex != 0xffff)
+					partyMemberConditionEvent.ContinueIfFalseWithMapEventIndex = idMapping[partyMemberConditionEvent.ContinueIfFalseWithMapEventIndex];
 
-            var reorderedList = idMapping.Keys.Select(i => events[(int)i]).ToList();
+			}
+
+			var reorderedList = idMapping.Keys.Select(i => events[(int)i]).ToList();
 
             events.Clear();
             events.AddRange(reorderedList);

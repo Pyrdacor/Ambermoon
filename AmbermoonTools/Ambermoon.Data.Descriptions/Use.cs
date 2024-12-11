@@ -15,7 +15,7 @@ namespace Ambermoon.Data.Descriptions
 
             bool CheckCondition(EventDescription eventDescription, Event @event)
             {
-                if (!(@event is TEvent specificEvent))
+                if (@event is not TEvent specificEvent)
                     return false;
 
                 return condition?.Invoke(specificEvent) ?? true;
@@ -47,7 +47,7 @@ namespace Ambermoon.Data.Descriptions
 
             string MapDisplayName(Event @event, ValueDescription valueDescription)
             {
-                if (!(@event is TEvent specificEvent) || condition(specificEvent) == false)
+                if (@event is not TEvent specificEvent || condition(specificEvent) == false)
                     return valueDescription.DisplayName;
 
                 return newName;
@@ -57,7 +57,7 @@ namespace Ambermoon.Data.Descriptions
             return description;
         }
 
-        public static ValueDescription Byte(string name, bool required, byte maxValue = 255, byte minValue = 0, byte defaultValue = 0, bool showAsHex = false) => new()
+		public static ValueDescription Byte(string name, bool required, byte maxValue = 255, byte minValue = 0, byte defaultValue = 0, bool showAsHex = false) => new()
 		{
             Type = ValueType.Byte,
             Name = name,
@@ -168,6 +168,10 @@ namespace Ambermoon.Data.Descriptions
             Required = false,
             Hidden = true
         };
+
+        public static EnumValueDescription<TEnum> WordEnum<TEnum>(string name, bool required, TEnum defaultValue = default,
+            params TEnum[] allowedValues)
+            where TEnum : struct, Enum => new(name, required, false, defaultValue, false, true, allowedValues, null);
 
         public static EnumValueDescription<TEnum> Enum<TEnum>(string name, bool required, TEnum defaultValue = default,
             params TEnum[] allowedValues)

@@ -49,7 +49,8 @@ namespace AmbermoonEventEditor
                    @event is Dice100RollEvent ||
                    @event is DecisionEvent ||
                    @event is DoorEvent ||
-                   @event is ChestEvent;
+                   @event is ChestEvent ||
+				   @event is PartyMemberConditionEvent;
         }
 
         public FlowChart(Event startEvent, List<Event> events)
@@ -110,7 +111,9 @@ namespace AmbermoonEventEditor
                         DecisionEvent d => EventFromIndex(d.NoEventIndex),
                         DoorEvent d => EventFromIndex(d.UnlockFailedEventIndex),
                         ChestEvent c => EventFromIndex(c.UnlockFailedEventIndex),
-                        _ => null
+						PartyMemberConditionEvent c => EventFromIndex(c.ContinueIfFalseWithMapEventIndex),
+
+						_ => null
                     };
 
                     if (branchEvent == null)

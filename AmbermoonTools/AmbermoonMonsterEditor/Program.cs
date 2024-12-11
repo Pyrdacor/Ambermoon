@@ -134,7 +134,7 @@ namespace AmbermoonMonsterEditor
 
         static Dictionary<int, Monster> LoadMonsters()
         {
-            var monsterReader = new MonsterReader(GameData, graphicProvider);
+            var monsterReader = new MonsterReader(GameData);
 
             try
             {
@@ -155,7 +155,7 @@ namespace AmbermoonMonsterEditor
 
         static Dictionary<int, Monster> LoadMonsters(out Dictionary<int, IDataReader> files)
         {
-            var monsterReader = new MonsterReader(GameData, graphicProvider);
+            var monsterReader = new MonsterReader(GameData);
             files = null;
 
             try

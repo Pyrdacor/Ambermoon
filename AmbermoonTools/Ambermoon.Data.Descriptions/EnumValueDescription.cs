@@ -11,6 +11,7 @@ namespace Ambermoon.Data.Descriptions
         public string[] AllowedValueNames { get; }
         public Dictionary<long, string> AllowedEntries { get; }
         public bool Flags { get; }
+        public bool Word { get; }
     }
 
     internal record EnumValueDescriptionWithFilteredAllowedValues<TEnum> : EnumValueDescription<TEnum>, IEnumValueDescription where TEnum : struct, Enum
@@ -36,6 +37,7 @@ namespace Ambermoon.Data.Descriptions
 
 		public TEnum[] AllowedEnumValues { get; }
         public bool Flags { get; }
+        public bool Word { get; }
         public virtual string[] AllowedValueNames => AllowedEnumValues.Distinct().OrderBy(e => e).Select(GetEnumValueString).ToArray();
         public virtual object[] AllowedValues => AllowedEnumValues.Distinct().OrderBy(e => e).Select(v => (object)v).ToArray();
         public Dictionary<long, string> AllowedEntries => AllowedValues.Select((v, index) => new { v, index }).ToDictionary(v => (long)Convert.ChangeType(v.v, typeof(long)), v => AllowedValueNames[v.index]);
@@ -44,6 +46,7 @@ namespace Ambermoon.Data.Descriptions
         {
             Type = flags ? (word ? ValueType.Flag16 : ValueType.Flag8) : ValueType.Enum;
             Name = name;
+            Word = word;
             Required = required;
             Hidden = !required && hidden;
             var values = (TEnum[])Enum.GetValues(typeof(TEnum));
