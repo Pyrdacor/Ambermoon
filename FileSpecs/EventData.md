@@ -218,6 +218,8 @@ If "Random" is set, the real value is a random value between 0 and "Value".
 
 The operation "Fill" will ignore the Value and fully fill. This is used for LP/SP filling.
 
+**NOTE**: For all bit-wise operations the bit is given by the "Reward type value" and not the "Value". This is true for reward type "Ailments", "Usable spell types", "Language" and "Spell". They all expect one of the three bit operations (clear, set or toggle) to work properly. 
+
 ### Reward type
 
 Value | Meaning
