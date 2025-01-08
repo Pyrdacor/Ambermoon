@@ -6,11 +6,10 @@ using WallFlags = Ambermoon.Data.Tileset.TileFlags;
 using ObjectFlags = Ambermoon.Data.Tileset.TileFlags;
 using Ambermoon.Data.Enumerations;
 using AmbermoonLabdataEditor;
-using static Ambermoon.Data.Labdata;
 
 Dictionary<WallFlags, string> AllWallFlags = new()
 {
-    { WallFlags.AlternateAnimation, "Alternate Animation" },
+    { WallFlags.WaveAnimation, "Alternate Animation" },
     { WallFlags.BlockSight, "Block Sight" },
     { WallFlags.Transparency, "Transparency" },
     { WallFlags.RandomAnimationStart, "Random Animation Start" },
@@ -22,7 +21,7 @@ Dictionary<WallFlags, string> AllWallFlags = new()
 
 Dictionary<ObjectFlags, string> AllObjectFlags = new()
 {
-    { ObjectFlags.AlternateAnimation, "Alternate Animation" },
+    { ObjectFlags.WaveAnimation, "Alternate Animation" },
     { ObjectFlags.BlockSight, "Block Sight" },
     { ObjectFlags.Floor, "Floor / Ceiling" },
     { ObjectFlags.RandomAnimationStart, "Random Animation Start" },

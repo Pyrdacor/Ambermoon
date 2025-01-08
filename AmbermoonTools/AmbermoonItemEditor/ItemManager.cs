@@ -59,6 +59,15 @@ namespace AmbermoonItemEditor
                 Console.WriteLine(row);
         }
 
+        public List<Item> FindItems(string partialName)
+        {
+            if (string.IsNullOrWhiteSpace(partialName))
+                return new List<Item>();
+
+            partialName = partialName.ToLower();
+            return items.Where(item => item.Name.ToLower().Contains(partialName)).ToList();
+        }
+
         public abstract void Save(System.IO.Stream stream);
     }
 }

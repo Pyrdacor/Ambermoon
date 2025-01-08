@@ -8,7 +8,7 @@ Note: Bits are numbered from least significant bit to most significant bit. As t
 Bits | As hex value | Meaning
 --- | --- | ---
 0 | 0x00000001 | Alternate animation (animations go back and forth)
-1 | 0x00000002 | Block sight?
+1 | 0x00000002 | Block sight
 2 | 0x00000004 | Render order
 3 | 0x00000008 | Floor (3D object) / Transparency (3D wall)
 4 | 0x00000010 | Random animation start (random frame offset)
@@ -88,3 +88,9 @@ In 2D the player is not drawn if on this tile. This is used by doors in 2D indoo
 ## Combat background index
 
 When an event on that tile triggers a battle event, this combat background will be used.
+
+
+
+# Ambermoon Advanced
+
+The "player invisible" bit is used in 3D to avoid animations. In this case the mid frame is shown.

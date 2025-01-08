@@ -161,7 +161,7 @@ namespace AmbermoonMapEditor3D
                     timer.Interval = 200;
                     timer.Tick += (object sender, EventArgs _) =>
                     {
-                        if (labdata.ObjectInfos[index].Flags.HasFlag(Tileset.TileFlags.AlternateAnimation))
+                        if (labdata.ObjectInfos[index].Flags.HasFlag(Tileset.TileFlags.WaveAnimation))
                         {
                             var timer = sender as System.Windows.Forms.Timer;
                             bool forward = (bool)timer.Tag;

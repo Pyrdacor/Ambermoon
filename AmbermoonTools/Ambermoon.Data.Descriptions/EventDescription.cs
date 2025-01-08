@@ -6,6 +6,47 @@ using System.Text.RegularExpressions;
 
 namespace Ambermoon.Data.Descriptions
 {
+    public enum LanguageIndex
+    {
+        Human = 1,
+        Elfish,
+        Dwarfish,
+        Gnomish,
+        Sylphic,
+        Felinic,
+        Morag,
+        Animal
+    }
+
+    public enum ConditionIndex
+    {
+        Irritated = 1,
+        Crazy,
+        Sleep,
+        Panic,
+        Blind,
+        Drugged,
+        Exhausted,
+        Fleeing,
+        Lamed,
+        Poisoned,
+        Petrified,
+        Diseased,
+        Aging,
+        DeadCorpse,
+        DeadAshes,
+        DeadDust
+    }
+
+    public enum SpellTypeIndex
+    {
+        Healing = 1,
+        Alchemistic = 2,
+        Mystic = 3,
+        Destruction = 4,
+        Function = 7
+    }
+
     public record EventIndexDescription : ValueDescription
     {
         public EventIndexDescription(string name, bool required)
@@ -68,7 +109,11 @@ namespace Ambermoon.Data.Descriptions
         private static string ToString(Type type, Event @event, ValueDescription value)
         {
             if (value.DisplayMapping != null)
-                return value.DisplayMapping(@event, value) + ",";
+            {
+                var displayMapping = value.DisplayMapping;
+                value.DisplayMapping = null; // avoid recursive loops
+                return displayMapping(@event, value) + ",";
+            }
 
             var property = type.GetProperty(value.Name).GetValue(@event);
 
@@ -89,7 +134,7 @@ namespace Ambermoon.Data.Descriptions
             }
             else if (value is IEnumValueDescription enumValueDescription && enumValueDescription.Flags)
             {
-                return $" {value.DisplayName}=" + Enum.GetFlagNames(value.GetType().GetGenericArguments()[0], property) + ",";
+                return $" {value.DisplayName}=" + EnumHelper.GetFlagNames(value.GetType().GetGenericArguments()[0], property) + ",";
             }
             else if (value.ShowAsHex)
             {
@@ -107,7 +152,7 @@ namespace Ambermoon.Data.Descriptions
                     if (index >= 0 && index < enumDesc.AllowedValueNames.Length)
                         enumValue = enumDesc.AllowedValueNames[index];
                     else
-                        enumValue = System.Enum.ToObject(value.GetType().GetGenericArguments()[0], property);
+                        enumValue = Enum.ToObject(value.GetType().GetGenericArguments()[0], property);
                     return $" {value.DisplayName}={enumValue},";
                 }
 
@@ -180,7 +225,7 @@ namespace Ambermoon.Data.Descriptions
                 true, true, true, true, false,
                 Use.Byte(nameof(TeleportEvent.X), true, 200),
                 Use.Byte(nameof(TeleportEvent.Y), true, 200),
-                Use.Enum(nameof(TeleportEvent.Direction), false, CharacterDirection.Keep).WithFilteredAllowedValues
+                Use.Enum(nameof(TeleportEvent.Direction), false, CharacterDirection.Keep, Enum.GetValues<CharacterDirection>().Distinct(), value => value == CharacterDirection.Random ? nameof(CharacterDirection.Keep) : Enum.GetName(value)).WithFilteredAllowedValues
                 (
                     values => values.Distinct().ToArray(),
                     valueNames => valueNames.Where(name => name != nameof(CharacterDirection.Random)).ToArray()
@@ -206,19 +251,19 @@ namespace Ambermoon.Data.Descriptions
             (
                 true, false, true, true, false,
                 Use.Byte(nameof(ChestEvent.LockpickingChanceReduction), false, 100),
-                Use.Flags8<ChestEvent.ChestFlags>(nameof(ChestEvent.Flags), false),
+                Use.Bool(nameof(ChestEvent.SearchSkillCheck), false),
                 Use.Byte(nameof(ChestEvent.TextIndex), false, 0xff, 0x00, 0xff),
                 Use.Byte(nameof(ChestEvent.ChestIndex), true),
-                Use.Flags8<ChestEvent.ChestLootFlags>(nameof(ChestEvent.LootFlags), false),
+                Use.Flags8<ChestEvent.ChestFlags>(nameof(ChestEvent.Flags), false),
                 Use.Word(nameof(ChestEvent.KeyIndex), false),
                 Use.EventIndex(nameof(ChestEvent.UnlockFailedEventIndex), false)
             )},
-            { EventType.PopupText, new EventDescription
+            { EventType.MapText, new EventDescription
             (
                 true, false, true, true, false,
                 Use.Byte(nameof(PopupTextEvent.EventImageIndex), false, 0xff, 0x00, 0xff),
                 Use.Enum(nameof(PopupTextEvent.PopupTrigger), false, EventTrigger.Always),
-                Use.HiddenBool(),
+                Use.Bool(nameof(PopupTextEvent.TriggerIfBlind), false),
                 Use.Word(nameof(PopupTextEvent.TextIndex), true),
                 Use.HiddenByte(),
                 Use.HiddenByte(),
@@ -228,7 +273,7 @@ namespace Ambermoon.Data.Descriptions
             { EventType.Spinner, new EventDescription
             (
                 true, false, true, true, false,
-                Use.Enum(nameof(SpinnerEvent.Direction), true, CharacterDirection.Random).WithFilteredAllowedValues
+                Use.Enum(nameof(SpinnerEvent.Direction), true, CharacterDirection.Random, Enum.GetValues<CharacterDirection>().Distinct(), value => value == CharacterDirection.Keep ? nameof(CharacterDirection.Random) : Enum.GetName(value)).WithFilteredAllowedValues
                 (
                     values => values.Distinct().ToArray(),
                     valueNames => valueNames.Where(name => name != nameof(CharacterDirection.Keep)).ToArray()
@@ -296,15 +341,21 @@ namespace Ambermoon.Data.Descriptions
                            rewardEvent.TypeOfReward != RewardEvent.RewardType.Conditions &&
                            rewardEvent.TypeOfReward != RewardEvent.RewardType.EmpowerSpells &&
                            rewardEvent.TypeOfReward != RewardEvent.RewardType.Languages &&
-                           rewardEvent.TypeOfReward != RewardEvent.RewardType.UsableSpellTypes;
+                           rewardEvent.TypeOfReward != RewardEvent.RewardType.UsableSpellTypes &&
+						   rewardEvent.TypeOfReward != RewardEvent.RewardType.Spells;
                 }),
-                Use.Enum(nameof(RewardEvent.Target), true, RewardEvent.RewardTarget.ActivePlayer),
+				Use.Enum(nameof(RewardEvent.Target), true, RewardEvent.RewardTarget.ActivePlayer, Enum.GetValues<RewardEvent.RewardTarget>()
+                        .Where(t => (int)t < 100)
+                        .Concat(Enumerable.Range(100, (int)Enum.GetValues<PartyMembers>().Max()).Select(i => (RewardEvent.RewardTarget)i))
+                        .Concat(Enumerable.Range(200, (int)Enum.GetValues<PartyMembers>().Max()).Select(i => (RewardEvent.RewardTarget)i)),
+					(target) => (int)target >= 200 ? $"All but Party Member {(int)target - 199}" : (int)target >= 100 ? $"Party Member {(int)target - 99}" : Enum.GetName(target)
+				),
                 Use.HiddenByte(),
                 Use.Conditional<RewardEvent>
                 (
                     () => Use.WithDisplayMapping<RewardEvent>
                     (
-                        () => Use.Word(nameof(RewardEvent.RewardTypeValue), false),
+                        () => Use.Word(nameof(RewardEvent.RewardTypeValue), true),
                         (rewardEvent, description) =>
                         {
                             ValueDescription displayDescription = null;
@@ -313,11 +364,23 @@ namespace Ambermoon.Data.Descriptions
                             {
                                 case RewardEvent.RewardType.Attribute:
                                 case RewardEvent.RewardType.MaxAttribute:
-                                    displayDescription = Use.Enum(description.Name, description.Required, default, Enum.GetValues<Attribute>().Take(8).ToArray());
+                                    displayDescription = Use.WordEnum(description.Name, description.Required, default, Enum.GetValues<Attribute>().Take(8).ToArray());
                                     break;
                                 case RewardEvent.RewardType.Skill:
                                 case RewardEvent.RewardType.MaxSkill:
-                                    displayDescription = Use.Enum(description.Name, description.Required, default, Enum.GetValues<Skill>().Take(10).ToArray());
+                                    displayDescription = Use.WordEnum(description.Name, description.Required, default, Enum.GetValues<Skill>().Take(10).ToArray());
+                                    break;
+                                case RewardEvent.RewardType.Conditions:
+                                    displayDescription = Use.WordEnum<ConditionIndex>(description.Name, description.Required);
+                                    break;
+                                case RewardEvent.RewardType.Languages:
+                                    displayDescription = Use.WordEnum<LanguageIndex>(description.Name, description.Required);
+                                    break;
+                                case RewardEvent.RewardType.UsableSpellTypes:
+                                    displayDescription = Use.WordEnum<SpellTypeIndex>(description.Name, description.Required);
+                                    break;
+                                case RewardEvent.RewardType.Spells:
+                                    displayDescription = Use.Word(description.Name, description.Required, 1, 30);
                                     break;
                                 default:
                                     return null;
@@ -331,10 +394,24 @@ namespace Ambermoon.Data.Descriptions
                         return rewardEvent.TypeOfReward == RewardEvent.RewardType.Attribute ||
                                rewardEvent.TypeOfReward == RewardEvent.RewardType.Skill ||
                                rewardEvent.TypeOfReward == RewardEvent.RewardType.MaxAttribute ||
-                               rewardEvent.TypeOfReward == RewardEvent.RewardType.MaxSkill;
+                               rewardEvent.TypeOfReward == RewardEvent.RewardType.MaxSkill ||
+                               rewardEvent.TypeOfReward == RewardEvent.RewardType.Conditions ||
+                               rewardEvent.TypeOfReward == RewardEvent.RewardType.Languages ||
+                               rewardEvent.TypeOfReward == RewardEvent.RewardType.UsableSpellTypes ||
+                               rewardEvent.TypeOfReward == RewardEvent.RewardType.Spells;
                     }
                 ),
-                Use.Word(nameof(RewardEvent.Value), false)
+                Use.Conditional<RewardEvent>
+                (
+                    () => Use.Word(nameof(RewardEvent.Value), false),
+                    rewardEvent =>
+                    {
+                        return rewardEvent.TypeOfReward != RewardEvent.RewardType.Conditions &&
+                               rewardEvent.TypeOfReward != RewardEvent.RewardType.Languages &&
+                               rewardEvent.TypeOfReward != RewardEvent.RewardType.UsableSpellTypes &&
+                               rewardEvent.TypeOfReward != RewardEvent.RewardType.Spells;
+                    }
+                )
             )},
             { EventType.ChangeTile, new EventDescription
             (
@@ -369,7 +446,7 @@ namespace Ambermoon.Data.Descriptions
                 Use.Byte(nameof(EnterPlaceEvent.ClosingHour), true, 23),
                 Use.Byte(nameof(EnterPlaceEvent.UsePlaceTextIndex), false, 0xff, 0, 0xff),
                 Use.Word(nameof(EnterPlaceEvent.PlaceIndex), true),
-                Use.Conditional<EnterPlaceEvent>(() => Use.Word(nameof(EnterPlaceEvent.MerchantDataIndex), false), enterPlaceEvent => enterPlaceEvent.PlaceType == PlaceType.Merchant)
+                Use.Conditional<EnterPlaceEvent>(() => Use.Word(nameof(EnterPlaceEvent.MerchantDataIndex), false), enterPlaceEvent => enterPlaceEvent.PlaceType == PlaceType.Merchant || enterPlaceEvent.PlaceType == PlaceType.Library)
             )},
             { EventType.Condition, new EventDescription
             (
@@ -542,15 +619,39 @@ namespace Ambermoon.Data.Descriptions
                 Use.HiddenByte(),
                 Use.Word(nameof(DelayEvent.Milliseconds), true),
                 Use.HiddenWord()
-            )}
-        };
+            )},
+			{ EventType.PartyMemberCondition, new EventDescription
+			(
+				true, true, true, false, false,
+				Use.Enum<PartyMemberConditionEvent.PartyMemberConditionType>(nameof(PartyMemberConditionEvent.TypeOfCondition), true),
+				Use.WithDisplayMapping<PartyMemberConditionEvent>(
+					() => Use.Conditional<PartyMemberConditionEvent>(() => Use.Byte(nameof(PartyMemberConditionEvent.ConditionValueIndex), false), conditionEvent =>
+						conditionEvent.TypeOfCondition == PartyMemberConditionEvent.PartyMemberConditionType.Attribute ||
+						conditionEvent.TypeOfCondition == PartyMemberConditionEvent.PartyMemberConditionType.Skill
+					),
+					(conditionEvent, valueDescription) => conditionEvent.TypeOfCondition switch
+                    {
+						PartyMemberConditionEvent.PartyMemberConditionType.Skill => "Skill",
+						PartyMemberConditionEvent.PartyMemberConditionType.Attribute => "Attribute",
+						_ => null
+
+					}),
+				Use.Enum<PartyMemberConditionEvent.PartyMemberConditionTarget>(nameof(PartyMemberConditionEvent.Target), true, PartyMemberConditionEvent.PartyMemberConditionTarget.ActivePlayer, Enum.GetValues<PartyMemberConditionEvent.PartyMemberConditionTarget>()
+						.Where(t => (int)t < (int)PartyMemberConditionEvent.PartyMemberConditionTarget.FirstCharacter)
+						.Concat(Enumerable.Range(7, (int)Enum.GetValues<PartyMembers>().Max()).Select(i => (PartyMemberConditionEvent.PartyMemberConditionTarget)i)),
+					(target) => (int)target >= 7 ? $"Party Member {(int)target - 6}" : Enum.GetName(target)),
+				Use.Flags16(nameof(ConditionEvent.DisallowedAilments), false, Condition.None),
+				Use.Word(nameof(PartyMemberConditionEvent.Value), true),
+				Use.EventIndex(nameof(ConditionEvent.ContinueIfFalseWithMapEventIndex), false)
+			)}
+		};
 
         public static Dictionary<EventType, Func<Event>> EventFactories { get; } = new Dictionary<EventType, Func<Event>>
         {
             { EventType.Teleport, () => new TeleportEvent() },
             { EventType.Door, () => new DoorEvent() },
             { EventType.Chest, () => new ChestEvent() },
-            { EventType.PopupText, () => new PopupTextEvent() },
+            { EventType.MapText, () => new PopupTextEvent() },
             { EventType.Spinner, () => new SpinnerEvent() },
             { EventType.Trap, () => new TrapEvent() },
             { EventType.ChangeBuffs, () => new ChangeBuffsEvent() },
@@ -571,7 +672,8 @@ namespace Ambermoon.Data.Descriptions
             { EventType.Spawn, () => new SpawnEvent() },
             { EventType.Interact, () => new InteractEvent() },
             { EventType.RemovePartyMember, () => new RemovePartyMemberEvent() },
-            { EventType.Delay, () => new DelayEvent() }
-        };
+            { EventType.Delay, () => new DelayEvent() },
+			{ EventType.PartyMemberCondition, () => new PartyMemberConditionEvent() }
+		};
     }
 }

@@ -235,7 +235,20 @@ namespace AmbermoonImageConverter
                         return mappedPaletteIndices[color];
                 }
 
-                var diffA = Math.Abs((int)(color >> 24) - (int)(palette[i] >> 24));
+                if (i == transparentColorIndex)
+                {
+                    if ((color >> 24) == 0)
+                    {
+						if (mappedPaletteIndices.TryAdd(color, (byte)i))
+							return (byte)i;
+						else
+							return mappedPaletteIndices[color];
+					}
+
+                    continue;
+                }
+
+				var diffA = Math.Abs((int)(color >> 24) - (int)(palette[i] >> 24));
                 var diffR = Math.Abs((int)((color >> 16) & 0xff) - (int)((palette[i] >> 16) & 0xff));
                 var diffG = Math.Abs((int)((color >> 8) & 0xff) - (int)((palette[i] >> 8)& 0xff));
                 var diffB = Math.Abs((int)((color & 0xff) - (int)(palette[i] & 0xff)));
@@ -245,9 +258,9 @@ namespace AmbermoonImageConverter
                     diffs.Add(diff, i);
             }
 
-            if (diffs.First().Key > 2 * 0x22 * 0x22)
+            /*if (diffs.First().Key > 2 * 0x22 * 0x22)
                 throw new Exception();
-            else
+            else*/
             {
                 uint paletteColor = palette[diffs.First().Value];
                 Console.WriteLine($"Warning: Color {color >> 24:x2}{r:x2}{g:x2}{b:x2} was changed to palette color {paletteColor >> 24:x2}{(paletteColor >> 16) & 0xff:x2}{(paletteColor >> 8) & 0xff:x2}{paletteColor & 0xff:x2}");

@@ -218,6 +218,8 @@ If "Random" is set, the real value is a random value between 0 and "Value".
 
 The operation "Fill" will ignore the Value and fully fill. This is used for LP/SP filling.
 
+**NOTE**: For all bit-wise operations the bit is given by the "Reward type value" and not the "Value". This is true for reward type "Ailments", "Usable spell types", "Language" and "Spell". They all expect one of the three bit operations (clear, set or toggle) to work properly. 
+
 ### Reward type
 
 Value | Meaning
@@ -244,6 +246,7 @@ Value | Meaning
 19 | Max skill (**Ambermoon Advanced** only)
 20 | M-B-A (magic armor level, **Ambermoon Advanced** only)
 21 | M-B-W (magic weapon level, **Ambermoon Advanced** only)
+22 | Spell (spell class is based on character, only use 1-based spell index, **Ambermoon Advanced** only)
 
 ### Reward operation
 
@@ -266,10 +269,12 @@ Value | Meaning
 1 | Whole party
 2 | Random player (**Ambermoon Advanced** only)
 3 | First animal (**Ambermoon Advanced** only)
+100+ | Party member with index `1 + 100 - value` (**Ambermoon Advanced** only)
+200+ | All but party member with index `1 + 200 - value` (**Ambermoon Advanced** only)
 
 **Note:** Operation 'Fill' just sets the current value to the max value. The 3 bit operations should only be used for languages, ailments and spell schools. The percentage is in relation to the max value and should only be used for LP and SP I guess. Using percentage or fill operations on SLP, languages, ailments or spell schools might have strange effects.
 
-**Note:** There is no reward to add training points in Ambermoon. :(
+**Note:** There is no reward to add training points in original Ambermoon. :(
 
 
 ## Change tile event (0x0A / 10)
@@ -373,10 +378,15 @@ Value | Type
 23 | Multiple cursor interaction (hand, eye, mouth) (**Ambermoon Advanced only**)
 24 | Current travel type (**Ambermoon Advanced only**)
 25 | Active party member class (**Ambermoon Advanced only**)
+26 | Active party member has spell empowered (**Ambermoon Advanced only**)
+27 | Is night (**Ambermoon Advanced only**)
+28 | Active party member attribute (**Ambermoon Advanced only**)
+29 | Active party member skill (**Ambermoon Advanced only**)
 
 **Note:** In conversations the global variable 0 is checked to be value 0 before executing a PrintText event that
 should be executed in any case. I guess PrintText events always need a preceding Condition event and the global
-variable 0 is always 0. So this is like a "always true condition".
+variable 0 is always 0. So this is like a "always true condition". Or maybe conversation events have to be succeeded
+by condition events? This might also be some limitation of the tools to create NPC event chains.
 
 **Note:** For condition 22, the object index gives the [transport type](Enumerations/TravelType.md). But 0 is special and means "any".
 
@@ -638,3 +648,50 @@ Offset | Type | Description
 0x01 | ubyte[5] | Unused
 0x06 | uword | Milliseconds
 0x08 | uword | Unused
+
+
+## Party member condition event (0x1A / 26) (Ambermoon Advanced only)
+
+Party member condition events represent conditions that control if following events (in the list) are executed or not. Multiple conditions can be chained which equals a logical AND conjunction. In contrast to the normal condition event, this one checks for party member properties.
+
+Offset | Type | Description
+--- | --- | ---
+0x00 | ubyte | Event type (= 0x1A)
+0x01 | ubyte | Condition type
+0x02 | ubyte | Condition type value (this specifies things like which attribute or skill to check)
+0x03 | ubyte | Target (see below)
+0x04 | uword | Not allowed party member ailments
+0x06 | uword | Value
+0x08 | uword | Map event index to continue with if condition was not fulfilled or 0xffff to stop the event list in this case.
+
+The specified value of the target party member is checked with the greater-or-equal operator against the given `Value`. For example if you check of the level and specify a `Value` of 20, the code will check if the target level is greater or equal than 20.
+
+### Condition types
+
+Value | Type
+--- | ---
+0 | Level
+1 | Attribute
+2 | Skill
+3 | TP
+
+### Target
+
+Value | Type
+--- | ---
+0 | Active member
+1 | All members
+2 | Any member
+3 | Min value of party
+4 | Max value of party
+5 | Average value of party
+6 | Random member
+7+ | Party member with index Value minus 7 (so 7 is the hero, 8 is Netsrak, etc). Note that this is not the index of the character slot but the index of the party member in data (basically the subfile index).
+
+When `All members` is given, all members in the party have to fulfill the condition and also must not be under any condition given in the `not allowed condition` value.
+
+For min/max/average only those members are considered which are not under the disallowed conditions. If there is none, the result is false.
+
+For random, also only members without disallowed conditions are considered and the result is also false if there is no member to choose.
+
+For active member nad party member with index, the result is false if the target is under any disallowed condition.

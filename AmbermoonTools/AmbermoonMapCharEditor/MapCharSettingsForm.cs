@@ -100,7 +100,7 @@ namespace AmbermoonMapCharEditor
             checkBoxAllowWalk.Checked = tileFlags.HasFlag(TileFlags.AllowMovementWalk);
 
             checkBoxBlockAllMovement.Checked = tileFlags.HasFlag(TileFlags.BlockAllMovement);
-            checkBoxAlternateAnimation.Checked = tileFlags.HasFlag(TileFlags.AlternateAnimation);
+            checkBoxAlternateAnimation.Checked = tileFlags.HasFlag(TileFlags.WaveAnimation);
             checkBoxBlockSight.Checked = tileFlags.HasFlag(TileFlags.BlockSight);
             checkBoxFloor.Checked = tileFlags.HasFlag(TileFlags.Floor);
         }
@@ -165,7 +165,7 @@ namespace AmbermoonMapCharEditor
             if (checkBoxAllowWalk.Checked)
                 TileFlags |= TileFlags.AllowMovementWalk;
             if (checkBoxAlternateAnimation.Checked)
-                TileFlags |= TileFlags.AlternateAnimation;
+                TileFlags |= TileFlags.WaveAnimation;
             if (!mapIs3D && checkBoxBackgroundFlags.Checked)
                 TileFlags |= TileFlags.UseBackgroundTileFlags;
             if (checkBoxBlockAllMovement.Checked)
