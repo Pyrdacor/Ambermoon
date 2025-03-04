@@ -1,10 +1,10 @@
 # Executables
 
-AM2_BLIT is the executable for Amiga 500, using the blitter.
+AM2_BLIT is the executable mainly for the Amiga 500, which uses the blitter.
 
-AM2_CPU is the executable for Amiga 1200, using the CPU.
+AM2_CPU is the executable for every Amiga where the CPU renders faster than the blitter.
 
-The Ambermoon main loader 'Ambermoon' (10kb) is performing a check at launch to determine which machine the game will run on.
+At the start of the program the main executable 'Ambermoon' will perform a speed test and dependent on it picks one of the two mentioned executables.
 
 They all use the [hunk](Hunks.md) file format.
 
