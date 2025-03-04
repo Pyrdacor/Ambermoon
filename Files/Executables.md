@@ -4,7 +4,7 @@ AM2_BLIT is the executable mainly for the Amiga 500, which uses the blitter.
 
 AM2_CPU is the executable for every Amiga where the CPU renders faster than the blitter.
 
-At the start of the program the main executable 'Ambermoon' will perform a speed test and dependent on it picks one of the two mentioned executables.
+At the start of the program the main executable 'Ambermoon' will perform a speed test and, dependent on its result, picks one of the two mentioned executables.
 
 They all use the [hunk](Hunks.md) file format.
 
