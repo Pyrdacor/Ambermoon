@@ -26,7 +26,7 @@ Offset | Type | Description
 0x0008 | ubyte | [Spoken languages](Enumerations/Languages.md)
 0x0009 | ubyte | Inventory inaccessible (0 means accessible, otherwise it's inaccessible)
 0x000A | ubyte | Portrait index
-0x000B | ubyte | Join percentage (0-100%). In Amberstar if you invite someone to your party this is the chance that he/she accepts. This is not used in Ambermoon.
+0x000B | ubyte | Join percentage (0-100%). In Amberstar if you invite someone to your party this is the chance that he/she accepts. This is not used in Ambermoon. In **Ambermoon Advanced** this stores advanced flags for monsters (see below).
 0x000C | ubyte | Combat graphic index (only used for monsters)
 0x000D | ubyte | Spell chance percentage (only used for monsters, not used in Ambermoon)
 0x000E | ubyte | Magic bonus to hit (0-255, only used for monsters, not used in Ambermoon)
@@ -208,3 +208,19 @@ For example if a level 40 monster has values 10 (base bonus) and 5 (max bonus) a
 - Maximum damage is 20 + 10 + 5 = 35
 
 The third value (damage reduction) of the target is subtracted after the final damage calculation. It can reduce the damage down to 1. It is also a signed percentage value. So a value of 50 would reduce the received damage by 50%, while a value of -50% will even increase the received magic damage by 50%.
+
+
+## Advanced monster flags
+
+In **Ambermoon Advanced** advanced monster flags can be provided.
+
+Bit | Property
+----|----
+0 | Immune to attack without element (misses everytime)
+1 | Immune to attack with ghost element (misses everytime)
+2 | Immune to attack with undead element (misses everytime)
+3 | tbd
+4 | Immune to attack with earth element (misses everytime)
+5 | Immune to attack with wind element (misses everytime)
+6 | Immune to attack with fire element (misses everytime)
+7 | Immune to attack with water element (misses everytime)
