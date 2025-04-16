@@ -217,9 +217,9 @@ In **Ambermoon Advanced** advanced monster flags can be provided.
 Bit | Property
 ----|----
 0 | Immune to attack without element (misses everytime)
-1 | Immune to attack with ghost element (misses everytime)
-2 | Immune to attack with undead element (misses everytime)
-3 | tbd
+1 | Unused for now
+2 | Immune to attack with ghost element (misses everytime)
+3 | Immune to attack with undead element (misses everytime)
 4 | Immune to attack with earth element (misses everytime)
 5 | Immune to attack with wind element (misses everytime)
 6 | Immune to attack with fire element (misses everytime)
