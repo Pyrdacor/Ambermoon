@@ -113,7 +113,7 @@ The backup value stores the current value if a temporary effect is active which 
 
 There is a value which determines when the number of attacks per round increases. It's called APRIncreaseLevels here.
 
-The number of attacks per round is 1 if APRIncreaseLevels is 0. Otherwise it is `1 + floor(Level / APRIncreaseLevels)`.
+The number of attacks per round is 1 if APRIncreaseLevels is 0. Otherwise it is `max(1, Level / APRIncreaseLevels)`.
 
 Hit points and training points are increased on each level up by the given "per level" value. Spell points and spell learning points are increased by their "per level" value plus `floor(INT/25)`. Note that Ambermoon only uses the base INT value without bonus. This might be a bug. Spell points and spell learning points are only increased for magical classes which can have SP. So not for warriors, thieves or animals.
 
