@@ -695,3 +695,21 @@ For min/max/average only those members are considered which are not under the di
 For random, also only members without disallowed conditions are considered and the result is also false if there is no member to choose.
 
 For active member nad party member with index, the result is false if the target is under any disallowed condition.
+
+
+## Shake event (0x1B / 27) (Ambermoon Advanced only)
+
+Let's the screen shake for a certain amount of shakes.
+
+Each shake has a fixed duration of 1 second.
+
+The shake sequence will displace the window in vertical direction by n pixels where n is:
+
+`-1, 0, +3, +1, -3, 0, 1, ...`
+
+Offset | Type | Description
+--- | --- | ---
+0x00 | ubyte | Event type (= 0x19)
+0x01 | ubyte[5] | Unused
+0x06 | uword | Number of shakes
+0x08 | uword | Unused
