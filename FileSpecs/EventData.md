@@ -699,13 +699,15 @@ For active member nad party member with index, the result is false if the target
 
 ## Shake event (0x1B / 27) (Ambermoon Advanced only)
 
-Let's the screen shake for a certain amount of shakes.
+Lets the screen shake for a certain amount of shakes.
 
 Each shake has a fixed duration of 1 second.
 
 The shake sequence will displace the window in vertical direction by n pixels where n is:
 
-`-1, 0, +3, +1, -3, 0, 1, ...`
+`-1, 0, +3, +1, -3, 0, +1`
+
+And then repeats from the first one.
 
 Offset | Type | Description
 --- | --- | ---
