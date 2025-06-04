@@ -643,8 +643,19 @@ namespace Ambermoon.Data.Descriptions
 				Use.Flags16(nameof(ConditionEvent.DisallowedAilments), false, Condition.None),
 				Use.Word(nameof(PartyMemberConditionEvent.Value), true),
 				Use.EventIndex(nameof(ConditionEvent.ContinueIfFalseWithMapEventIndex), false)
-			)}
-		};
+			)},
+            { EventType.Shake, new EventDescription
+            (
+                true, true, true, true, false,
+                Use.HiddenByte(),
+                Use.HiddenByte(),
+                Use.HiddenByte(),
+                Use.HiddenByte(),
+                Use.HiddenByte(),
+                Use.Word(nameof(ShakeEvent.Shakes), true),
+                Use.HiddenWord()
+            )},
+        };
 
         public static Dictionary<EventType, Func<Event>> EventFactories { get; } = new Dictionary<EventType, Func<Event>>
         {
@@ -673,7 +684,8 @@ namespace Ambermoon.Data.Descriptions
             { EventType.Interact, () => new InteractEvent() },
             { EventType.RemovePartyMember, () => new RemovePartyMemberEvent() },
             { EventType.Delay, () => new DelayEvent() },
-			{ EventType.PartyMemberCondition, () => new PartyMemberConditionEvent() }
-		};
+			{ EventType.PartyMemberCondition, () => new PartyMemberConditionEvent() },
+            { EventType.Shake, () => new ShakeEvent() },
+        };
     }
 }
