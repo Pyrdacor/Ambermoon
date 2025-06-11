@@ -113,7 +113,7 @@
 // Drugged
 { Condition.Drugged, "Postava je pod vlivem.^Závratě a nekoordinovanost pohybů." },
 // Exhausted
-{ Condition.Exhausted, "Všechny atributy se dočasně sníží na polovinu.^Může být odstraněno spánkem." },
+{ Condition.Exhausted, "Všechny vlastnosti se dočasně sníží na polovinu.^Může být odstraněno spánkem." },
 // Unused
 { Condition.Unused, "" },
 // Lamed
@@ -123,7 +123,7 @@
 // Petrified
 { Condition.Petrified, "Inventář není přístupný.^Postava nemůže provádět žádné^akce a nestárne." },
 // Diseased
-{ Condition.Diseased, "Postava ztrácí každý den bod^náhodného atributu." },
+{ Condition.Diseased, "Postava ztrácí každý den bod^náhodné vlastnosti." },
 // Aging
 { Condition.Aging, "Postava stárne každým dnem.^Závisí to na její rase.^nakonec zemře v určitém věku.^^Max. věk: {0}" },
 // DeadCorpse
