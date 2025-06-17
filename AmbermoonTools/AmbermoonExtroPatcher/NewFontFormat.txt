@@ -1,0 +1,16 @@
+byte NumChars (max 256 - 32 = 224)
+byte NumGlyphs
+byte[n] GlyphMapping (starting with index for $20, entries of -1 means ignore)
+padding byte if needed
+foreach font
+ byte LargeGlyph (if 0, small (16px wide), else large (32px wide))
+ byte GlyphHeight
+ byte UsedGlyphHeight
+ byte LineHeight
+ byte SizePerGlyph (in bytes)
+ byte SpaceAdvance 
+ byte[n] Advances (for each glyph)
+ padding byte if needed
+ byte* GlyphData (of all glyphs)
+ padding byte if needed
+ 

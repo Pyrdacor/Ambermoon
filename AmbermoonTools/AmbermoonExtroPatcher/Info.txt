@@ -1,0 +1,33 @@
+Zero palette (64 zero bytes)
+
+Then 3 sections:
+- dword actionListOffset (into this hunk)
+- dword imageOffset (into other hunk)
+(This is basically a change picture action)
+This repeats until a null ptr for the actionListOffset
+Then the next section starts
+
+After the 3rd section there is:
+
+80 00 00 00 80 00 00 00 FF
+
+Most likely some default action like:
+- 128 scroll
+- X = 0
+- Not large
+- No text (only terminating 0)
+
+Twice this action and then a wait for click.
+Such actions are basically just scrolls without text.
+
+
+
+At the actionListOffsets there are the text actions:
+
+- byte scrollOffset (if 0xff it is the end of the click group and means wait for click)
+- byte textX
+- byte largeText (0 = no, 1 = true)
+- byte[x] null terminated text
+
+
+At the end of the hunk it is filled with zeros to a full long offset!
