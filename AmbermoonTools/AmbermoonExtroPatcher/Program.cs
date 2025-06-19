@@ -1,10 +1,13 @@
-﻿using Ambermoon.Data;
+﻿using Ambermoon;
+using Ambermoon.Data;
 using Ambermoon.Data.Legacy;
 using Ambermoon.Data.Legacy.Serialization;
 using Ambermoon.Data.Serialization;
 using Ambermoon.Data.Text.Patching;
 using System.Data;
 using System.Text;
+
+namespace AmbermoonExtroPatcher;
 
 // The extro texts are grouped by sections which
 // are divided by clicks.
@@ -46,69 +49,170 @@ using System.Text;
 
 public static class Program
 {
-    // args[0]: Game data directory
-    // args[1]: Path for Ambermoon_extro to save
-    public static void Main(string[] args)
+    static void Usage()
     {
+        Console.WriteLine("Usage: AmbermoonExtroPatcher.exe <extro_path> <text_path> <output_path> <font_file> [enc] [click_text] [tr1_name] [...]");
+        Console.WriteLine("       AmbermoonExtroPatcher.exe <config_file>");
+        Console.WriteLine("       AmbermoonExtroPatcher.exe --help");
+        Console.WriteLine();
+        Console.WriteLine("config_file:      Configuration file (see 'example-config.json')");
+        Console.WriteLine("extro_path:       Path to the extro template which should be patched");
+        Console.WriteLine("text_path:        Directory which contains the text directories and files");
+        Console.WriteLine("output_path:      Path where the patched extro will be stored");
+        Console.WriteLine("font_file:        Path to the font file");
+        Console.WriteLine("enc:              Encoding name or codepage number");
+        Console.WriteLine("click_text:       Text to be used for the click text (default: <CLICK>)");
+        Console.WriteLine("tr1_name:         Name of the first translator (default: keep original)");
+        Console.WriteLine("                  You can specify more translators if needed.");
+        Console.WriteLine("Ensure quotes around click text and translator names if they contain spaces!");
+        Console.WriteLine();
+        Console.WriteLine("Example: AmbermoonExtroPatcher.exe C:\\CzechTranslation\\Ambermoon_extro_translation_base C:\\CzechTranslation\\texts");
+        Console.WriteLine("                                   C:\\CzechTranslation\\Ambermoon_extro C:\\CzechTranslation\\CzechFont 852");
+        Console.WriteLine("                                   <CLICK> \"DANIEL ZIMA\"");
+        Console.WriteLine();
+        Console.WriteLine("This tool patches the fonts and texts into the extro template and creates a working Ambermoon extro.");
+        Console.WriteLine();
+        Console.WriteLine("It expects the extro text groups to be organized in directories under a specified path.");
+        Console.WriteLine("The directory structure should be as follows:");
+        Console.WriteLine("<text_path>\\");
+        Console.WriteLine("  000\\");
+        Console.WriteLine("    000\\");
+        Console.WriteLine("      000.txt");
+        Console.WriteLine("      ...");
+        Console.WriteLine("    ...");
+        Console.WriteLine("  001\\");
+        Console.WriteLine("    ...");
+        Console.WriteLine("  002\\");
+        Console.WriteLine("    ...");
+        Console.WriteLine("  003\\");
+        Console.WriteLine("    ...");
+        Console.WriteLine("  004\\");
+        Console.WriteLine("    ...");
+        Console.WriteLine("  005\\");
+        Console.WriteLine("    ...");
+        Console.WriteLine();
+    }
+
+    public static int Main(string[] args)
+    {
+        if (args.Length == 1 && (args[0] == "--help" || args[0] == "-h" || args[0] == "/?"))
+        {
+            Usage();
+            return 0;
+        }
+
+        if (args.Length != 1 && args.Length < 4)
+        {
+            Usage();
+            return 1;
+        }
+
+        static int Error(string message)
+        {
+            Console.Error.WriteLine(message);
+            Console.Error.WriteLine();
+            Usage();
+            return 1;
+        }
+
+        Config config;
+
+        if (args.Length == 1)
+        {
+            if (!File.Exists(args[0]))
+            {
+                return Error($"Config file '{args[0]}' does not exist.");
+            }
+
+            config = Config.Load(args[0]);
+        }
+        else
+        {
+            config = new()
+            {
+                ExtroPath = args[0],
+                TextPath = args[1],
+                OutputPath = args[2],
+                FontFile = args[3],
+                ClickText = args.Length >= 6 ? args[5] : "<CLICK>",
+                Translators = args.Length >= 7 ? args.Skip(6).ToList() : new List<string>()
+            };
+
+            if (args.Length >= 5)
+            {
+                if (int.TryParse(args[4], out int codePage))
+                {
+                    config.CodePage = codePage;
+                }
+                else if (args.Length >= 5 && !string.IsNullOrEmpty(args[4]))
+                {
+                    config.Encoding = args[4];
+                }
+            }
+        }
+
+        static int CheckPathNullOrNonExistent(string name, string? path, bool directory)
+        {
+            if (string.IsNullOrWhiteSpace(path))
+                return Error($"{name} was not given.");
+
+            if (!directory && !File.Exists(path))
+                return Error($"{name} '{path}' does not exist.");
+
+            if (directory && !Directory.Exists(path))
+                return Error($"{name} '{path}' does not exist.");
+
+            return 0;
+        }
+
+        int result = CheckPathNullOrNonExistent("Extro path", config.ExtroPath, false);
+
+        if (result != 0)
+            return result;
+
+        result = CheckPathNullOrNonExistent("Font file", config.FontFile, false);
+
+        if (result != 0)
+            return result;
+
+        result = CheckPathNullOrNonExistent("Text path", config.TextPath, true);
+
+        if (result != 0)
+            return result;
+
+        if (string.IsNullOrWhiteSpace(config.OutputPath))
+            return Error("Output path was not given.");
+
+        if (Directory.Exists(config.OutputPath))
+        {
+            config.OutputPath = Path.Combine(config.OutputPath, "Ambermoon_extro");
+        }
+
+        if (File.Exists(config.OutputPath))
+        {
+            Console.Error.WriteLine($"Output file '{config.OutputPath}' already exists. Do you want to override it? (y/N)");
+            string? input = Console.ReadLine();
+
+            if (input == null || !input.Equals("y", StringComparison.InvariantCultureIgnoreCase))
+            {
+                Console.Error.WriteLine("Aborting.");
+                return 0;
+            }
+        }
+        else
+        {
+            Directory.CreateDirectory(Path.GetDirectoryName(config.OutputPath) ?? ".");
+        }
+
+        config.ClickText ??= "<CLICK>";
+
         Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
 
-        /*var outroHunks2 = AmigaExecutable.Read(new FileReader().ReadFile("Ambermoon_extro", new DataReader(File.ReadAllBytes(@"D:\Projects\AmbermoonInternalTools\AmbermoonExtroPatcher\CzechGlyphs\Ambermoon_extro_translation_base"))).Files[1]);
+        var fileReader = new FileReader();
 
-        var foo = File.ReadAllBytes(@"D:\Projects\AmbermoonInternalTools\AmbermoonExtroPatcher\CzechGlyphs\Extro_fonts");
-
-        int index = outroHunks2.FindLastIndex(h => h.Type == AmigaExecutable.HunkType.Data);
-        var h = outroHunks2[index];
-        outroHunks2[index] = new AmigaExecutable.Hunk(AmigaExecutable.HunkType.Data, h.MemoryFlags, foo);
-
-        var w = new DataWriter();
-
-        AmigaExecutable.Write(w, outroHunks2);
-
-        File.WriteAllBytes(@"D:\Projects\AmbermoonInternalTools\AmbermoonExtroPatcher\CzechGlyphs\Ambermoon_extro_patched", w.ToArray());
-
-        return;*/
-
-        /*var outroHunks2 = AmigaExecutable.Read(new FileReader().ReadFile("Ambermoon_extro", new DataReader(File.ReadAllBytes(@"D:\Projects\AmbermoonInternalTools\AmbermoonExtroPatcher\Ambermoon_extro_new"))).Files[1]);
-
-        var foo = File.ReadAllBytes(@"D:\Projects\AmbermoonInternalTools\AmbermoonExtroPatcher\Extro_fonts");
-
-        int index = outroHunks2.FindLastIndex(h => h.Type == AmigaExecutable.HunkType.Data);
-        var h = outroHunks2[index];
-        outroHunks2[index] = new AmigaExecutable.Hunk(AmigaExecutable.HunkType.Data, h.MemoryFlags, foo);
-
-        var w = new DataWriter();
-
-        AmigaExecutable.Write(w, outroHunks2);
-
-        File.WriteAllBytes(@"D:\Projects\AmbermoonInternalTools\AmbermoonExtroPatcher\Ambermoon_extro_patched", w.ToArray());
-
-        return;*/
-
-        var outroHunks2 = AmigaExecutable.Read(new FileReader().ReadFile("Ambermoon_intro", new DataReader(File.ReadAllBytes(@"D:\Projects\Ambermoon\Translations\Ambermoon_intro_translation_base"))).Files[1]);
-
-        var foo = File.ReadAllBytes(@"D:\Projects\AmbermoonInternalTools\AmbermoonExtroPatcher\CzechGlyphs\Extro_fonts");
-
-        int index = outroHunks2.FindLastIndex(h => h.Type == AmigaExecutable.HunkType.Data);
-        var h = outroHunks2[index];
-        outroHunks2[index] = new AmigaExecutable.Hunk(AmigaExecutable.HunkType.Data, h.MemoryFlags, foo);
-
-        var w = new DataWriter();
-
-        AmigaExecutable.Write(w, outroHunks2);
-
-        File.WriteAllBytes(@"D:\Projects\Ambermoon\Translations\Ambermoon_intro_patched", w.ToArray());
-
-        return;
-
-        var gameData = new GameData(GameData.LoadPreference.ForceExtracted, null, false, GameData.VersionPreference.Post114);
-
-        gameData.Load(args[0]);
-
-        var outroHunks = AmigaExecutable.Read(gameData.Files["Ambermoon_extro"].Files[1]);
-        var codeHunks = outroHunks.Where(h => h.Type == AmigaExecutable.HunkType.Code)
-            .Select(h => new DataReader(((AmigaExecutable.Hunk)h).Data))
-            .ToList();
-        var dataHunks = outroHunks
+        var extro = fileReader.ReadFile("Ambermoon_extro", new DataReader(File.ReadAllBytes(config.ExtroPath!)));
+        var extroHunks = AmigaExecutable.Read(extro.Files[1]);
+        var dataHunks = extroHunks
             .Where(h => h.Type == AmigaExecutable.HunkType.Data)
             .Select(h => new DataReader(((AmigaExecutable.Hunk)h).Data))
             .ToList();
@@ -116,12 +220,12 @@ public static class Program
         var actionCache = new Dictionary<uint, List<OutroAction>>();
         var imageDataOffsets = new List<uint>();
         var texts = new List<string>();
-        var outroActions = new Dictionary<OutroOption, List<OutroAction>>(3);
+        var extroActions = new Dictionary<OutroOption, List<OutroAction>>(3);
 
         // Skip initial palette (all zeros)
         dataHunk.Position += 64;
 
-        // There are actually 3 outro sequence lists dependent on if Valdyn
+        // There are actually 3 extro sequence lists dependent on if Valdyn
         // is in the party and if you found the yellow teleporter sphere.
         for (int i = 0; i < 3; ++i)
         {
@@ -192,103 +296,65 @@ public static class Program
                 }
             }
 
-            outroActions.Add((OutroOption)i, sequence);
+            extroActions.Add((OutroOption)i, sequence);
         }
 
         int afterListPosition = dataHunk.Position;
 
-        // Special handling of the new "remake-only" Extro_texts.amb
-        var fileReader = new FileReader();
+        // Process texts
+        var extroTexts = new List<List<string>>[6] { [], [], [], [], [], [] };
+        int clickGroupIndex = 0;
 
-        var outroTextsContainer = fileReader.ReadFile("Extro_texts.amb", new DataReader(File.ReadAllBytes(Path.Combine(args[0], "Extro_texts.amb"))));
-
-        if (outroTextsContainer != null)
+        foreach (var clickGroup in Directory.GetDirectories(config.TextPath!).OrderBy(d => int.Parse(Path.GetFileName(d)[0..3])))
         {
-            var outroTextsReader = outroTextsContainer.Files[1];
-            outroTextsReader.Position = 0;
-            int clickGroupCount = outroTextsReader.ReadWord();
-            var clickGroupSizes = new int[clickGroupCount];
-            var newTextClickGroups = new List<List<string>>[clickGroupCount];
+            var clickGroupTexts = extroTexts[clickGroupIndex++];
 
-            for (int i = 0; i < clickGroupCount; ++i)
+            foreach (var group in Directory.GetDirectories(clickGroup).OrderBy(d => int.Parse(Path.GetFileName(d)[0..3])))
             {
-                int count = clickGroupSizes[i] = outroTextsReader.ReadWord();
-                newTextClickGroups[i] = new(count);
-            }
+                var groupTexts = new List<string>();
 
-            for (int i = 0; i < clickGroupCount; ++i)
-            {
-                int groupCount = clickGroupSizes[i];
-                var groupSizes = new int[groupCount];
-
-                for (int g = 0; g < groupCount; ++g)
+                foreach (var file in Directory.GetFiles(group).OrderBy(f => int.Parse(Path.GetFileName(f)[0..3])))
                 {
-                    int count = groupSizes[g] = outroTextsReader.ReadWord();
-                    newTextClickGroups[i].Add(new(count));
+                    string text = File.ReadAllText(file, Encoding.UTF8).TrimEnd();
+                    groupTexts.Add(text);
                 }
 
-                for (int g = 0; g < groupCount; ++g)
-                {
-                    var newTextGroups = newTextClickGroups[i][g];
-                    int count = groupSizes[g];
-
-                    for (int t = 0; t < count; ++t)
-                        newTextGroups.Add(outroTextsReader.ReadNullTerminatedString(System.Text.Encoding.UTF8));
-
-                    newTextClickGroups[i].Add(newTextGroups);
-                }
-
-                if (outroTextsReader.Position % 2 == 1)
-                    ++outroTextsReader.Position;
+                clickGroupTexts.Add(groupTexts);
             }
-
-            int translatorCount = outroTextsReader.ReadWord();
-            var translators = new List<string>();
-
-            for (int i = 0; i < translatorCount; ++i)
-                translators.Add(outroTextsReader.ReadNullTerminatedString(System.Text.Encoding.UTF8));
-
-            var clickText = outroTextsReader.ReadNullTerminatedString(System.Text.Encoding.UTF8);
-
-            if (outroTextsReader.Position % 2 == 1)
-                ++outroTextsReader.Position;
-
-            var fontsData = File.ReadAllBytes(Path.Combine(args[0], "Extro_fonts"));
-
-            var encoding = Encoding.GetEncoding(852);//Encoding.GetEncoding("ISO-8859-2");
-
-            try
-            {
-                PatchTexts(outroActions, texts, newTextClickGroups, translators, clickText, new Fonts(new DataReader(fontsData)), encoding);
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.ToString());
-
-                Environment.Exit(-1);
-
-                return;
-            }
-
-            dataHunk.Position = 0;
-            var newDataHunk = BuildActionHunk(afterListPosition, outroActions, texts, dataHunk, encoding);
-
-            int hunkIndex = outroHunks.FindIndex(hunk => hunk.Type == AmigaExecutable.HunkType.Data);
-            var hunk = outroHunks[hunkIndex];
-            outroHunks[hunkIndex] = new AmigaExecutable.Hunk(AmigaExecutable.HunkType.Data, hunk.MemoryFlags, newDataHunk);
-
-            var writer = new DataWriter();
-            AmigaExecutable.Write(writer, outroHunks);
-            File.WriteAllBytes(args[1], writer.ToArray());
-
-            Environment.Exit(0);
         }
-        else
+
+        var fonts = new Fonts(new DataReader(File.ReadAllBytes(config.FontFile!)));
+
+        var encoding = !string.IsNullOrWhiteSpace(config.Encoding)
+            ? Encoding.GetEncoding(config.Encoding)
+            : config.CodePage != null
+                ? Encoding.GetEncoding(config.CodePage.Value)
+                : new AmbermoonEncoding();
+
+        try
         {
-            Console.WriteLine("No outro_texts.amb was found.");
-
-            Environment.Exit(1);
+            PatchTexts(extroActions, texts, extroTexts, config.Translators, config.ClickText, fonts, encoding);
         }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.ToString());
+            return 1;
+        }
+
+        dataHunk.Position = 0;
+        var newDataHunk = BuildActionHunk(afterListPosition, extroActions, texts, dataHunk, encoding);
+
+        int hunkIndex = extroHunks.FindIndex(hunk => hunk.Type == AmigaExecutable.HunkType.Data);
+        var hunk = extroHunks[hunkIndex];
+        extroHunks[hunkIndex] = new AmigaExecutable.Hunk(AmigaExecutable.HunkType.Data, hunk.MemoryFlags, newDataHunk);
+
+        Patch.Font(extroHunks, fonts);
+
+        var writer = new DataWriter();
+        AmigaExecutable.Write(writer, extroHunks);
+        File.WriteAllBytes(config.OutputPath, writer.ToArray());
+
+        return 0;
     }
 
     static byte[] BuildActionHunk
@@ -658,6 +724,14 @@ public static class Program
                 if (textGroup.ChangePictureAction != null)
                     newActions.Add(textGroup.ChangePictureAction.Value);
 
+                if (groupIndex == newTexts.Count)
+                {
+                    if (textGroup.TextActions.Count != 1 || textGroup.TextActions[0].Command != OutroCommand.WaitForClick)
+                        throw new AmbermoonException(ExceptionScope.Data, "Invalid extro data");
+
+                    break;
+                }
+
                 var texts = newTexts[groupIndex++];
                 int t;
 
@@ -706,12 +780,28 @@ public static class Program
                     }
                     else
                     {
-                        oldTexts.Add(ProcessText(texts[t]));
+                        var text = texts[t];
+
+                        if (text == "<CLICK>")
+                        {
+                            oldTexts.Add(clickText);
+
+                            int oldWidth = MeasureTextWidth(text);
+                            int newWidth = MeasureTextWidth(clickText);
+
+                            if (oldWidth != newWidth)
+                                textAction = textAction with { TextDisplayX = textAction.TextDisplayX + (oldWidth - newWidth) / 2 };
+                        }
+                        else
+                        {
+                            oldTexts.Add(ProcessText(text));
+                        }
+
                         newActions.Add(textAction);
                     }
 
                     if (t != 0 && largeText)
-                        throw new Exception("Invalid text patch data.");
+                        throw new AmbermoonException(ExceptionScope.Data, "Invalid text patch data.");
                 }
 
                 int preT = t;
@@ -766,7 +856,7 @@ public static class Program
         // Re-assign the new action lists
         for (int i = 0; i < 3; ++i)
         {
-            outroActions[(OutroOption)i] = groupMappings[i].SelectMany(index => newActionLists[index]).ToList();
+            outroActions[(OutroOption)i] = [.. groupMappings[i].SelectMany(index => newActionLists[index])];
         }
     }
 

@@ -53,7 +53,7 @@ internal class Program
         string clickText = args.Length < 2 ? "<CLICK>" : args[1];
         string[] translatorNames = args.Length < 3 ? [] : args.Skip(2).ToArray();
 
-        var outroTexts = new List<List<string>>[6] { new(), new(), new(), new(), new(), new() };
+        var outroTexts = new List<List<string>>[6] { [], [], [], [], [], [] };
         int clickGroupIndex = 0;
 
         var path = Path.Combine(workingDirectory, "ExtroTextGroups");
@@ -87,7 +87,7 @@ internal class Program
 
                 clickGroupTexts.Add(groupTexts);
             }
-        }            
+        }
 
         var dataWriter = new DataWriter();
 

@@ -1,0 +1,12 @@
+{
+  "extro_path": "MyDir/Ambermoon_extro_translation_base",
+  "text_path": "MyDir/MyLang/ExtroTexts",
+  "output_path": "MyDir/Ambermoon_extro",
+  "font_file": "MyDir/MyFontFile",
+  "codepage": 852,
+  "encoding": "cp852",
+  "click_text": "<CLICK>",
+  "translators": [
+    "Pyrdacor"
+  ]
+}
