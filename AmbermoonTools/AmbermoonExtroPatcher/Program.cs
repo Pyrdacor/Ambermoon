@@ -6,6 +6,7 @@ using Ambermoon.Data.Serialization;
 using Ambermoon.Data.Text.Patching;
 using System.Data;
 using System.Text;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace AmbermoonExtroPatcher;
 
@@ -225,6 +226,9 @@ public static class Program
         // Skip initial palette (all zeros)
         dataHunk.Position += 64;
 
+        List<int> clickTextIndices = [];
+        int theEndTextIndex = -1;
+
         // There are actually 3 extro sequence lists dependent on if Valdyn
         // is in the party and if you found the yellow teleporter sphere.
         for (int i = 0; i < 3; ++i)
@@ -288,6 +292,15 @@ public static class Program
                             ScrollAmount = scrollAmount + 1,
                             TextDisplayX = textDisplayX
                         });
+
+                        if (largeText && theEndTextIndex == -1 && text == "T H E   E N D")
+                        {
+                            theEndTextIndex = textIndex ?? -1;
+                        }
+                        else if (!largeText && textIndex != null && text == "<CLICK>")
+                        {
+                            clickTextIndices.Add(textIndex.Value);
+                        }
                     }
 
                     sequence.AddRange(actions);
@@ -333,7 +346,7 @@ public static class Program
 
         try
         {
-            PatchTexts(extroActions, texts, extroTexts, config.Translators, config.ClickText, fonts, encoding);
+            PatchTexts(extroActions, texts, extroTexts, config.Translators, config.ClickText, fonts, encoding, clickTextIndices, theEndTextIndex);
         }
         catch (Exception ex)
         {
@@ -499,13 +512,14 @@ public static class Program
         Dictionary<OutroOption, List<OutroAction>> outroActions,
         List<string> oldTexts, List<List<string>>[] newTextGroups,
         List<string> translators, string clickText,
-        Fonts fonts, Encoding encoding
+        Fonts fonts, Encoding encoding, List<int> clickTextIndices,
+        int theEndTextIndex
     )
     {
-        int MeasureTextWidth(string text)
+        int MeasureTextWidth(string text, bool large = false)
         {
-            int spaceAdvance = fonts.SmallSpaceAdvance;
-            byte[] advanceValues = fonts.SmallAdvanceValues;
+            int spaceAdvance = large ? fonts.LargeSpaceAdvance : fonts.SmallSpaceAdvance;
+            byte[] advanceValues = large ? fonts.LargeAdvanceValues : fonts.SmallAdvanceValues;
             int width = 0;
 
             foreach (var ch in encoding.GetBytes(text))
@@ -699,6 +713,8 @@ public static class Program
             baseTextGroups[OutroOption.ValdynInPartyNoYellowSphere][4]
         };
         var newActionLists = new List<OutroAction>[6] { [], [], [], [], [], [] };
+        var oldTheEndText = oldTexts[theEndTextIndex];
+        var oldClickText = clickTextIndices.Count == 0 ? "<CLICK>" : oldTexts[clickTextIndices[0]];
         oldTexts.Clear();
 
         static string ProcessText(string text)
@@ -753,6 +769,43 @@ public static class Program
                         textAction.TextIndex == null)
                         break;
 
+                    if (textAction.TextIndex == theEndTextIndex)
+                    {
+                        var text = ProcessText(texts[t]);
+
+                        oldTexts.Add(text);
+
+                        int oldWidth = MeasureTextWidth(oldTheEndText, true);
+                        int newWidth = MeasureTextWidth(text, true);
+
+                        if (oldWidth != newWidth)
+                            textAction = textAction with { TextIndex = oldTexts.Count - 1, TextDisplayX = textAction.TextDisplayX + (oldWidth - newWidth) / 2 };
+                        else
+                            textAction = textAction with { TextIndex = oldTexts.Count - 1 };
+
+                        newActions.Add(textAction);
+
+                        continue;
+                    }
+                    else if (textAction.TextIndex != null && clickTextIndices.Contains(textAction.TextIndex.Value))
+                    {
+                        var text = clickText;
+
+                        oldTexts.Add(text);
+
+                        int oldWidth = MeasureTextWidth(oldClickText, true);
+                        int newWidth = MeasureTextWidth(text, true);
+
+                        if (oldWidth != newWidth)
+                            textAction = textAction with { TextIndex = oldTexts.Count - 1, TextDisplayX = textAction.TextDisplayX + (oldWidth - newWidth) / 2 };
+                        else
+                            textAction = textAction with { TextIndex = oldTexts.Count - 1 };
+
+                        newActions.Add(textAction);
+
+                        continue;
+                    }
+
                     bool largeText = texts[t][0] == '_';
 
                     if (largeText && !textAction.LargeText)
@@ -780,23 +833,7 @@ public static class Program
                     }
                     else
                     {
-                        var text = texts[t];
-
-                        if (text == "<CLICK>")
-                        {
-                            oldTexts.Add(clickText);
-
-                            int oldWidth = MeasureTextWidth(text);
-                            int newWidth = MeasureTextWidth(clickText);
-
-                            if (oldWidth != newWidth)
-                                textAction = textAction with { TextDisplayX = textAction.TextDisplayX + (oldWidth - newWidth) / 2 };
-                        }
-                        else
-                        {
-                            oldTexts.Add(ProcessText(text));
-                        }
-
+                        oldTexts.Add(ProcessText(texts[t]));
                         newActions.Add(textAction);
                     }
 
