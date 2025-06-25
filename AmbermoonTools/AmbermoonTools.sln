@@ -72,6 +72,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AmbermoonIntroPatcher", "Am
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Ambermoon.Data.Text.Patching", "Ambermoon.Data.Text.Patching\Ambermoon.Data.Text.Patching.csproj", "{7B22D2CD-A126-48DC-AAE3-B0776ED1DC85}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AmbermoonReleaseCreator", "AmbermoonReleaseCreator\AmbermoonReleaseCreator.csproj", "{31211EEB-1873-477C-9283-568D77442575}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AmbermoonFontCreator", "AmbermoonFontCreator\AmbermoonFontCreator.csproj", "{B4C7019F-46B2-4285-A83D-A17FBF211E1E}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -447,6 +451,30 @@ Global
 		{7B22D2CD-A126-48DC-AAE3-B0776ED1DC85}.ReleaseES|Any CPU.Build.0 = Release|Any CPU
 		{7B22D2CD-A126-48DC-AAE3-B0776ED1DC85}.ReleaseLinux|Any CPU.ActiveCfg = Release|Any CPU
 		{7B22D2CD-A126-48DC-AAE3-B0776ED1DC85}.ReleaseLinux|Any CPU.Build.0 = Release|Any CPU
+		{31211EEB-1873-477C-9283-568D77442575}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{31211EEB-1873-477C-9283-568D77442575}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{31211EEB-1873-477C-9283-568D77442575}.DebugAndroid|Any CPU.ActiveCfg = Debug|Any CPU
+		{31211EEB-1873-477C-9283-568D77442575}.DebugAndroid|Any CPU.Build.0 = Debug|Any CPU
+		{31211EEB-1873-477C-9283-568D77442575}.DebugES|Any CPU.ActiveCfg = Debug|Any CPU
+		{31211EEB-1873-477C-9283-568D77442575}.DebugES|Any CPU.Build.0 = Debug|Any CPU
+		{31211EEB-1873-477C-9283-568D77442575}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{31211EEB-1873-477C-9283-568D77442575}.Release|Any CPU.Build.0 = Release|Any CPU
+		{31211EEB-1873-477C-9283-568D77442575}.ReleaseES|Any CPU.ActiveCfg = Release|Any CPU
+		{31211EEB-1873-477C-9283-568D77442575}.ReleaseES|Any CPU.Build.0 = Release|Any CPU
+		{31211EEB-1873-477C-9283-568D77442575}.ReleaseLinux|Any CPU.ActiveCfg = Release|Any CPU
+		{31211EEB-1873-477C-9283-568D77442575}.ReleaseLinux|Any CPU.Build.0 = Release|Any CPU
+		{B4C7019F-46B2-4285-A83D-A17FBF211E1E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B4C7019F-46B2-4285-A83D-A17FBF211E1E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B4C7019F-46B2-4285-A83D-A17FBF211E1E}.DebugAndroid|Any CPU.ActiveCfg = Debug|Any CPU
+		{B4C7019F-46B2-4285-A83D-A17FBF211E1E}.DebugAndroid|Any CPU.Build.0 = Debug|Any CPU
+		{B4C7019F-46B2-4285-A83D-A17FBF211E1E}.DebugES|Any CPU.ActiveCfg = Debug|Any CPU
+		{B4C7019F-46B2-4285-A83D-A17FBF211E1E}.DebugES|Any CPU.Build.0 = Debug|Any CPU
+		{B4C7019F-46B2-4285-A83D-A17FBF211E1E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B4C7019F-46B2-4285-A83D-A17FBF211E1E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B4C7019F-46B2-4285-A83D-A17FBF211E1E}.ReleaseES|Any CPU.ActiveCfg = Release|Any CPU
+		{B4C7019F-46B2-4285-A83D-A17FBF211E1E}.ReleaseES|Any CPU.Build.0 = Release|Any CPU
+		{B4C7019F-46B2-4285-A83D-A17FBF211E1E}.ReleaseLinux|Any CPU.ActiveCfg = Release|Any CPU
+		{B4C7019F-46B2-4285-A83D-A17FBF211E1E}.ReleaseLinux|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

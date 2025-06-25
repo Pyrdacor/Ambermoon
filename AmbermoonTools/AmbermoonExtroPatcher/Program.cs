@@ -6,7 +6,6 @@ using Ambermoon.Data.Serialization;
 using Ambermoon.Data.Text.Patching;
 using System.Data;
 using System.Text;
-using static System.Net.Mime.MediaTypeNames;
 
 namespace AmbermoonExtroPatcher;
 

@@ -1,0 +1,2 @@
+# You can specify more people (one in each line)
+DANIEL ZIMA
