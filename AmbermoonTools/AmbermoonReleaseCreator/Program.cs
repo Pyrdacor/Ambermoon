@@ -1,7 +1,10 @@
-﻿using System.Diagnostics;
+﻿using System;
+using System.Diagnostics;
 using System.IO.Compression;
 using System.Text;
 using System.Text.RegularExpressions;
+using AmbermoonReleaseCreator;
+using Amiga.FileFormats.ADF;
 
 static void Usage()
 {
@@ -72,8 +75,11 @@ if (!versionRegex.IsMatch(version))
     return 1;
 }
 
+var solutionDirectory = Environment.CurrentDirectory;
+
 var tempDir = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
 Directory.CreateDirectory(tempDir);
+using var deleteTempDir = new Defer(() => Directory.Delete(tempDir, true));
 
 // TODO: REMOVE
 Console.WriteLine($"Using temporary directory: {tempDir}");
@@ -93,6 +99,12 @@ if (language != "German")
 
     var tempFiles = new List<string>();
     var tempDirs = new List<string>();
+
+    tempFiles.Add("liesmich.txt"); // only for german
+
+    var readmeLines = File.ReadLines(Path.Combine(tempDir, "readme.txt")).ToArray();
+    readmeLines[0] = $"Ambermoon {language} {version} by Pyrdacor ({DateTime.Now:dd-MM-yyyy})";
+    File.WriteAllLines(Path.Combine(tempDir, "readme.txt"), readmeLines);
 
     void CopyAndTrackDir(string source, string dest)
     {
@@ -182,10 +194,209 @@ if (language != "German")
     }
 }
 
-// TODO: Delete temp dir
+// Create ADF disk images
+var adfTempPath = Path.Combine(tempDir, "ADFTemp");
+Directory.CreateDirectory(adfTempPath);
 
+string LocalPath(string path)
+{
+    if (path.ToLower().StartsWith(tempDir.ToLower()))
+        return path[(tempDir.Length + 1)..];
+
+    return path;
+}
+
+IEnumerable<AdfFileInfo> AllFilesIn(string folder, string targetDirectory = "", bool recursive = true)
+{
+    return Directory
+        .GetFiles(folder, "*.*", recursive ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly)
+        .Select(filePath => new AdfFileInfo(LocalPath(filePath), targetDirectory));
+}
+
+// Disk A
+// TODO: copy files and folders like C, Devs, Trouble.doc etc
+CreateADF(adfTempPath, 'A',
+[
+    "Ambermoon",
+    "Ambermoon.info",
+    "Ambermoon_install",
+    "Ambermoon_install.info",
+    "readme.txt",
+    ..AllFilesIn("Amberfiles\\Save.00", "Initial"),
+    "Amberfiles\\AM2_CPU",
+    "Amberfiles\\Button_graphics",
+    "Amberfiles\\Objects.amb",
+    "Amberfiles\\Text.amb",
+]);
+// Disk B
+CreateADF(adfTempPath, 'B',
+[
+    "Amberfiles\\Ambermoon_intro",
+    "Amberfiles\\Fantasy_intro",
+    "Amberfiles\\Intro_music",
+]);
+// Disk C
+CreateADF(adfTempPath, 'C',
+[
+    "Amberfiles\\1Icon_gfx.amb",
+    "Amberfiles\\1Map_data.amb",
+    "Amberfiles\\1Map_texts.amb",
+]);
+// Disk D
+CreateADF(adfTempPath, 'D',
+[
+    "Amberfiles\\2Icon_gfx.amb",
+    "Amberfiles\\2Lab_data.amb",
+    "Amberfiles\\2Map_data.amb",
+    "Amberfiles\\2Map_texts.amb",
+    "Amberfiles\\2Object3D.amb",
+]);
+// Disk E
+CreateADF(adfTempPath, 'E',
+[
+    "Amberfiles\\2Overlay3D.amb",
+    "Amberfiles\\2Wall3D.amb",
+]);
+// Disk F
+CreateADF(adfTempPath, 'F',
+[
+    "Amberfiles\\3Icon_gfx.amb",
+    "Amberfiles\\3Lab_data.amb",
+    "Amberfiles\\3Map_data.amb",
+    "Amberfiles\\3Map_texts.amb",
+    "Amberfiles\\3Object3D.amb",
+    "Amberfiles\\3Overlay3D.amb",
+    "Amberfiles\\3Wall3D.amb",
+]);
+// Disk G
+CreateADF(adfTempPath, 'G',
+[
+    "Amberfiles\\Automap_graphics",
+    "Amberfiles\\Combat_graphics",
+    "Amberfiles\\Dict.amb",
+    "Amberfiles\\Event_pix.amb",
+    "Amberfiles\\Floors.amb",
+    "Amberfiles\\Icon_data.amb",
+    "Amberfiles\\Lab_background.amb",
+    "Amberfiles\\Layouts.amb",
+    "Amberfiles\\NPC_char.amb",
+    "Amberfiles\\NPC_gfx.amb",
+    "Amberfiles\\NPC_texts.amb",
+    "Amberfiles\\Object_icons",
+    "Amberfiles\\Object_texts.amb",
+    "Amberfiles\\Palettes.amb",
+    "Amberfiles\\Party_gfx.amb",
+    "Amberfiles\\Party_texts.amb",
+    "Amberfiles\\Pics_80x80.amb",
+    "Amberfiles\\Place_data",
+    "Amberfiles\\Portraits.amb",
+    "Amberfiles\\Riddlemouth_graphics",
+    "Amberfiles\\Stationary",
+    "Amberfiles\\Travel_gfx.amb",
+]);
+// Disk H
+CreateADF(adfTempPath, 'H',
+[
+    "Amberfiles\\Combat_background.amb",
+    "Amberfiles\\Monster_char.amb",
+    "Amberfiles\\Monster_gfx.amb",
+    "Amberfiles\\Monster_groups.amb",
+]);
+// Disk I
+CreateADF(adfTempPath, 'I',
+[
+    "Amberfiles\\Ambermoon_extro",
+    "Amberfiles\\Extro_music",
+    "Amberfiles\\Music.amb",
+]);
+// Disk J
+CreateADF(adfTempPath, 'J',
+[
+    ..AllFilesIn("Amberfiles\\Save.00", ""),
+    ..AllFilesIn("Amberfiles\\Save.00", "Save.00"),
+    ..AllFilesIn("Amberfiles\\Save.00", "Save.01"),
+    ..AllFilesIn("Amberfiles\\Save.00", "Save.02"),
+    ..AllFilesIn("Amberfiles\\Save.00", "Save.03"),
+    ..AllFilesIn("Amberfiles\\Save.00", "Save.04"),
+    ..AllFilesIn("Amberfiles\\Save.00", "Save.05"),
+    ..AllFilesIn("Amberfiles\\Save.00", "Save.06"),
+    ..AllFilesIn("Amberfiles\\Save.00", "Save.07"),
+    ..AllFilesIn("Amberfiles\\Save.00", "Save.08"),
+    ..AllFilesIn("Amberfiles\\Save.00", "Save.09"),
+    ..AllFilesIn("Amberfiles\\Save.00", "Save.10"),
+]);
+
+// Create release archives
+var releasePath = Path.Combine(solutionDirectory, "Disks", language);
+var releaseName = $"ambermoon_{language.ToLower()}_{version}";
+var adfArchiveName = $"{releaseName}_adf";
+var extractedArchiveName = $"{releaseName}_extracted";
+
+Directory.CreateDirectory(releasePath);
+
+// ADF releases
+Console.WriteLine($"Creating ADF releases in {releasePath}");
+try
+{
+    Package.CreateZip(adfTempPath, Path.Combine(releasePath, $"{adfArchiveName}.zip"));
+    Package.CreateTarball(adfTempPath, Path.Combine(releasePath, $"{adfArchiveName}.tar.gz"));
+    Package.CreateLha(adfTempPath, Path.Combine(releasePath, $"{adfArchiveName}.lha"));
+}
+catch (Exception ex)
+{
+    Console.Error.WriteLine($"Failed to create ADF releases: {ex.Message}");
+    return 1;
+}
+
+Directory.Delete(adfTempPath, true);
+
+Console.WriteLine();
+Console.WriteLine("Current files in the temporary directory:");
+ShowFiles();
+
+// Extracted releases
+Console.WriteLine($"Creating extracted releases in {releasePath}");
+try
+{
+    Package.CreateZip(tempDir, Path.Combine(releasePath, $"{extractedArchiveName}.zip"));
+    Package.CreateTarball(tempDir, Path.Combine(releasePath, $"{extractedArchiveName}.tar.gz"));
+    Package.CreateLha(tempDir, Path.Combine(releasePath, $"{extractedArchiveName}.lha"));
+}
+catch (Exception ex)
+{
+    Console.Error.WriteLine($"Failed to create extracted releases: {ex.Message}");
+    return 1;
+}
+
+Thread.Sleep(2000); // Wait before trying to delete the temp directory
 
 return 0;
+
+
+string TargetPath(AdfFileInfo fileInfo)
+{
+    var filename = Path.GetFileName(fileInfo.Path);
+
+    return string.IsNullOrEmpty(fileInfo.TargetDirectory) ? filename : fileInfo.TargetDirectory.Replace('\\', '/').TrimEnd('\\', '/') + "/" + filename;
+}
+
+void CreateADF(string directory, char letter, List<AdfFileInfo> fileInfos)
+{
+    var fileStreams = fileInfos
+        .Select(fileInfo =>
+        (
+            TargetPath(fileInfo),
+            (Stream)File.OpenRead(Path.Combine(tempDir, fileInfo.Path))
+        ))
+        .ToDictionary(file => file.Item1, file => file.Item2);
+
+    using var stream = File.Create(Path.Combine(directory, $"AMBER_{letter}.adf"));
+
+    ADFWriter.WriteADFFile(stream, $"AMBER_{letter}", FileSystem.OFS, letter == 'A', false, false, fileStreams);
+
+    foreach (var fileStream in fileStreams.Values)
+        fileStream.Close();
+}
 
 static void CopyDirectory(string sourceDir, string targetDir, bool recursive)
 {
@@ -214,7 +425,19 @@ static void CopyDirectory(string sourceDir, string targetDir, bool recursive)
 
 void Publish(string name)
 {
-    Exec("dotnet", $"publish -c Release \"./AmbermoonTools/{name}/{name}.csproj\" -p:PublishSingleFile=true -p:IncludeAllContentForSelfExtract=true -p:DebugType=None -p:DebugSymbols=false -p:NoWarn=NU1900;CA1416 -r win-x64 --no-self-contained --nologo -o \"{tempDir}\"", KeyValuePair.Create("HTTP_PROXY", ""), KeyValuePair.Create("HTTPS_PROXY", ""), KeyValuePair.Create("DOTNET_CLI_WORKLOAD_UPDATE_NOTIFICATION", "0"));
+    Exec("dotnet", $"publish -c Release \"./AmbermoonTools/{name}/{name}.csproj\" -p:PublishSingleFile=true -p:IncludeAllContentForSelfExtract=true -p:DebugType=None -p:DebugSymbols=false -p:NoWarn=NU1900 -p:WarningLevel=0 -r win-x64 --no-self-contained --nologo -o \"{tempDir}\"", KeyValuePair.Create("HTTP_PROXY", ""), KeyValuePair.Create("HTTPS_PROXY", ""), KeyValuePair.Create("DOTNET_CLI_WORKLOAD_UPDATE_NOTIFICATION", "0"));
+}
+
+void ShowFiles()
+{
+    if (OperatingSystem.IsWindows())
+    {
+        Exec("cmd.exe", "/c dir /s /b");
+    }
+    else
+    {
+        Exec("ls", "-R -l");
+    }
 }
 
 static void Exec(string command, string args, params List<KeyValuePair<string, string>> environmentVariables)
@@ -272,6 +495,11 @@ static void Exec(string command, string args, params List<KeyValuePair<string, s
     {
         Console.Error.WriteLine($"Process '{command}' failed with exit code {process.ExitCode}.");
     }
+}
+
+file record AdfFileInfo(string Path, string TargetDirectory = "")
+{
+    public static implicit operator AdfFileInfo(string path) => new(path, "");
 }
 
 partial class Program

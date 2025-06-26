@@ -133,19 +133,19 @@ static int CreateFonts(string filename, FontSpec fontSpec, string smallGlyphImag
 
     using var writer = new BinaryWriter(File.Create(filename));
 
-    writer.Write(fontSpec.NumChars);
-    writer.Write(fontSpec.NumGlyphs);
-    writer.Write(fontSpec.SmallGlyphHeight);
-    writer.Write(fontSpec.LargeGlyphHeight);
+    writer.Write((byte)fontSpec.NumChars);
+    writer.Write((byte)fontSpec.NumGlyphs);
+    writer.Write((byte)fontSpec.SmallGlyphHeight);
+    writer.Write((byte)fontSpec.LargeGlyphHeight);
     // Used heights
-    writer.Write(fontSpec.SmallUsedGlyphHeight);
-    writer.Write(fontSpec.LargeUsedGlyphHeight);
+    writer.Write((byte)fontSpec.SmallUsedGlyphHeight);
+    writer.Write((byte)fontSpec.LargeUsedGlyphHeight);
     // Line heights
-    writer.Write(fontSpec.SmallLineHeight);
-    writer.Write(fontSpec.LargeLineHeight);
+    writer.Write((byte)fontSpec.SmallLineHeight);
+    writer.Write((byte)fontSpec.LargeLineHeight);
     // Space advances
-    writer.Write(fontSpec.SmallSpaceAdvance);
-    writer.Write(fontSpec.LargeSpaceAdvance);
+    writer.Write((byte)fontSpec.SmallSpaceAdvance);
+    writer.Write((byte)fontSpec.LargeSpaceAdvance);
 
     writer.Write([..fontSpec.GlyphMapping]);
 
