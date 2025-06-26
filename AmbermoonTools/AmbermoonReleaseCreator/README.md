@@ -26,6 +26,8 @@ You can also create a `launch.Settings.json` manually inside the folder `Propert
 
 ## Requirements
 
+You will need a recent version of .NET (dotnet CLI) installed to run the tool.
+
 For the german release just make sure you update all files inside the folder `Disks\Bugfixing\German`.
 Then run `AmbermoonReleaseCreator.exe German X.X` where X.X is the version number of the release.
 The current files from `Disks\Bugfixing\German` will be used and as a base the most recent previous

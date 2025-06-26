@@ -79,7 +79,7 @@ var solutionDirectory = Environment.CurrentDirectory;
 
 var tempDir = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
 Directory.CreateDirectory(tempDir);
-using var deleteTempDir = new Defer(() => Directory.Delete(tempDir, true));
+using var deleteTempDir = new Defer(() => { try { Directory.Delete(tempDir, true); } catch { /* ignore */ } });
 
 // TODO: REMOVE
 Console.WriteLine($"Using temporary directory: {tempDir}");

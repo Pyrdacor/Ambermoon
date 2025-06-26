@@ -9,11 +9,17 @@ internal static class Package
 {
     public static void CreateZip(string sourceDirectory, string outputFilePath)
     {
+        if (File.Exists(outputFilePath))
+            File.Delete(outputFilePath);
+
         ZipFile.CreateFromDirectory(sourceDirectory, outputFilePath, CompressionLevel.SmallestSize, false);
     }
 
     public static void CreateTarball(string sourceDirectory, string outputFilePath)
     {
+        if (File.Exists(outputFilePath))
+            File.Delete(outputFilePath);
+
         using var outStream = File.Create(outputFilePath);
         using var gzipStream = new GZipOutputStream(outStream);
         using var tarArchive = TarArchive.CreateOutputTarArchive(gzipStream);
@@ -27,6 +33,9 @@ internal static class Package
 
     public static void CreateLha(string sourceDirectory, string outputFilePath)
     {
+        if (File.Exists(outputFilePath))
+            File.Delete(outputFilePath);
+
         var result = LHAWriter.WriteLHAFile(outputFilePath, sourceDirectory);
 
         if (result != LHAWriteResult.Success)
