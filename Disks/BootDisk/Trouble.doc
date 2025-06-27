@@ -1,0 +1,170 @@
+                *** AMBERMOON Troubleshooting Document ***
+                       Version 1.0 / 15-10-1993
+
+
+****************************************************************************
+*                    WHEN PLAYING FROM FLOPPY DISK                         *
+****************************************************************************
+
+THE PROGRAM ASKS FOR THE SAVE-GAME DISK (DISK J)!
+  Before you start playing you must use the installation program to create a
+disk which is used to save your positions during the game. You can use any
+disks you like, but since this disk will be accessed very often, we advise
+you to use a high-quality disk. The installation program will automatically
+format and prepare the disk. All the old contents of the disk will be deleted!
+After you have created the save-game disk, load AMBERMOON by re-booting your
+computer. Insert the save-game disk (disk J), when the program asks for it.
+
+ALL THAT DISK-SWAPPING IS STARTING TO IRRITATE ME!
+  Sorry, but please believe us when we tell you that we went through a lot of
+trouble to reduce the disk-swapping to a minimum. But AMBERMOON really is a
+gigantic program with huge amounts of data and thus the swapping of disks
+cannot be avoided completely. Nevertheless, here are some tips that will make
+the playing from floppy disk a bit easier :
+
+- Disable the music in the options menu. Matthias Steinwachs, our musician,
+  won't be pleased about that, but it will save you some disk-swapping.
+  Because all scenarios in the game access the same music-file, this disk is
+  required very often.
+
+- If you use more than one disk-drive, leave the save-game disk in one of
+  them (all changes in the game and the automaps are saved here) and/or
+  disk G, which also contains often-used files.
+
+- Consider buying a hard-disk. Small hard-disks can be bought for a small
+  amount of money.
+
+AND THE LOADING TIMES COULD BE A BIT SHORTER TOO!
+
+  If you have an Amiga which has a Kickstart version 2.0 or higher, or you
+have installed a FFS(Fast-File-System)- driver, something can be done. Format
+nine disks using FFS, then copy all the files from the original AMBERMOON-
+disks to the right FFS-disk. THEN rename all the disks so they have the same
+names as the AMBERMOON-disks (take care that you give the right name to the
+right disk). You will find an exact description of how to do this in your
+Amiga manual. When everything worked out, the game will load everything quite
+a bit faster than before. Sadly, we were unable to bring out the game on FFS-
+disks, since computers with a Kickstart version below 2.0 (and without an
+FFS-driver) would be unable to read these disks.
+
+
+****************************************************************************
+*                     GENERAL TECHNICAL INFORMATION                        *
+****************************************************************************
+
+SAVED GAMES
+  If you want to backup your saved games or impress a friend with your amazing
+party, here's how to do it :
+
+  If you play from disk, just copy your save-game disk (disk J).
+
+  If you play from hard-disk, you must copy the following files and
+directories, which you will find in the >Amberfiles<-directory (which itself
+is in the >Ambermoon<-directory) :
+
+- All directories beginning with >Save.<, i.e. >Save.00< to >Save.10<.
+- The file called >Saves<.
+
+
+****************************************************************************
+*                       ERRORS AND HOW TO AVOID THEM                       *
+****************************************************************************
+
+NOT ENOUGH MEMORY
+
+Error reported :
+>There is not enough free memory.<
+>There is not enough CHIP memory available.<
+>There is not enough memory available.<
+
+During the game :
+>A restart will now be attempted.<
+>The program will now deactivate the music.<
+
+If the program complains about lack of memory, there are several ways to
+create more free memory :
+
+- Hard-disk :
+  Use the installation program's option >Create a boot disk<. The program
+  will create a disk (deleting all the previous contents in the progress),
+  which will load AMBERMOON from the hard-disk as soon as you turn on your
+  computer. All memory-gobbling additional programs are skipped, and there is
+  no need for you to change anything on your hard-disk.
+
+- Hard-disk :
+  You cand deactive memory-intensive programs from you startup-sequence or
+  WBStartup-directory. The above-mentioned method is easier though.
+
+- Floppy and hard-disk :
+  If you regularly encounter the above-mentioned in-game reports, switch
+  off the music in the options menu.
+
+- Floppy disk :
+  If have only 1Mb memory but 3 or more disk-drives, memory can be tight.
+  Remove one of the drives.
+
+
+FILE ERROR
+
+Error reported :
+>Directory not found.<
+>File not found.<
+>Read error< or >Checksum error< during installation.
+
+If you're playing from hard-disk :
+  The best solution is to re-install the game. To avoid having to start all
+over again, backup your saved games to disk or to another directory. You
+can find out how to do this in the document under the header SAVED GAMES.
+  If you have re-installed, the current saved game can be damaged. In this
+case select START NEW QUEST in the main menu. In the game you can then try
+to load one of your other saved games.
+
+If you're playing from floppy disk :
+
+  ...one of your disks is probably defect. When you have made a backup of
+your original disks, make a new copy of the bad disk. If you haven't, send
+is your original disks together with a description of your problems and we'll
+working disks back to you.
+
+During installation to hard-disk :
+
+  If the OS reports an error during installation, your original disks are
+probably defect. Send us the original disks and we'll send working disks
+back to you.
+
+
+INTERNAL ERROR
+
+Error reported :
+>The OS reported an error during the game.<
+>68000 address error exception.<
+>68000 illegal exception.<
+>68000 divide by zero exception.<
+>A text is too long after merging.<
+>A text is too long after processing.<
+>There's an endless loop in the event chain.<
+>UNKNOWN ERROR.<
+
+  Errors of this kind shouldn't occur at all. If they do, we apologize. A
+bug has eluded our testplayers. Please restart your computer and just try to
+play on. It is possible that this kind of error doesn't occur every time.
+If the error is persistent and you are unable to continue, please send us the
+following in a padded envelope :
+
+- The exact error report.
+- Your original disk A.
+- An exact description of your actions in the game before the error occurs.
+- An exact description of your hardware
+  (which Amiga model, how much memory, which peripherals, Kickstart-version,
+  etc.)
+- If you're playing from floppy disk, a copy of your save-game disk.
+- If you're playing from hard-disk, a backup of your saved games
+  (see above : SAVED GAMES).
+
+We will send you a new version as soon as possible.
+Our address :
+
+Thalion Software U.K. Ltd.
+120 Anderton Park Road
+Mosely
+Birmingham B13 9DQ

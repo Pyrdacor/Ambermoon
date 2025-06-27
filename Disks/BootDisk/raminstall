@@ -1,0 +1,93 @@
+ram:
+
+echo Installing 7 disks to RAM...
+
+makedir ambermoon
+
+set continue 1
+
+copy amber_c: all to ram:ambermoon
+set code $RC
+if "$code" = "103"
+  set continue 0
+  echo amber_c: up to amber_i: not copied — will use floppies later
+else
+  assign amber_c: ram:ambermoon
+endif
+
+if "$continue" = "1"
+  copy amber_d: all to ram:ambermoon
+  set code $RC
+  if "$code" = "103"
+    set continue 0
+    echo amber_d: up to amber_i: not copied — will use floppies later
+  else
+    assign amber_d: ram:ambermoon
+  endif
+endif
+
+if "$continue" = "1"
+  copy amber_e: all to ram:ambermoon
+  set code $RC
+  if "$code" = "103"
+    set continue 0
+    echo amber_e: up to amber_i: not copied — will use floppies later
+  else
+    assign amber_e: ram:ambermoon
+  endif
+endif
+
+if "$continue" = "1"
+  copy amber_f: all to ram:ambermoon
+  set code $RC
+  if "$code" = "103"
+    set continue 0
+    echo amber_f: up to amber_i: not copied — will use floppies later
+  else
+    assign amber_f: ram:ambermoon
+  endif
+endif
+
+if "$continue" = "1"
+  copy amber_g: all to ram:ambermoon
+  set code $RC
+  if "$code" = "103"
+    set continue 0
+    echo amber_g: up to amber_i: not copied — will use floppies later
+  else
+    assign amber_g: ram:ambermoon
+  endif
+endif
+
+if "$continue" = "1"
+  copy amber_h: all to ram:ambermoon
+  set code $RC
+  if "$code" = "103"
+    set continue 0
+    echo amber_h: and amber_i: not copied — will use floppies later
+  else
+    assign amber_h: ram:ambermoon
+  endif
+endif
+
+if "$continue" = "1"
+  copy amber_i: all to ram:ambermoon
+  set code $RC
+  if "$code" = "103"
+    set continue 0
+    echo amber_i: not copied — will use floppy later
+  else
+    assign amber_i: ram:ambermoon
+  endif
+endif
+
+ask "Remove all disks now ! Except Amber_A, Amber_B and Amber_J (Put them in)"
+
+ask "Ready."
+echo Running now...
+execute s/startup-original
+
+
+
+
+

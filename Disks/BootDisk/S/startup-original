@@ -1,0 +1,14 @@
+Version >NIL: exec.library 36
+if WARN
+   System/SetMap gb
+endif
+
+
+Ambermoon BOOT1
+if WARN
+   System/SetMap gb
+   dir >NIL: RAM:
+   Ambermoon_install
+else
+   EndCLI
+endif
