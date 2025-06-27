@@ -79,9 +79,8 @@ var solutionDirectory = Environment.CurrentDirectory;
 
 var tempDir = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
 Directory.CreateDirectory(tempDir);
-using var deleteTempDir = new Defer(() => { try { Directory.Delete(tempDir, true); } catch { /* ignore */ } });
+//using var deleteTempDir = new Defer(() => { try { Directory.Delete(tempDir, true); } catch { /* ignore */ } });
 
-// TODO: REMOVE
 Console.WriteLine($"Using temporary directory: {tempDir}");
 
 if (language != "German")
@@ -108,14 +107,14 @@ if (language != "German")
 
     void CopyAndTrackDir(string source, string dest)
     {
-        Console.WriteLine($"Copying directory from '{source}' to '{dest}'");
+        Console.WriteLine($"Copying directory from '{source}' to '{LocalPath(dest)}'");
         CopyDirectory(source, dest, true);
         tempDirs.Add(dest);
     }
 
     void CopyAndTrackFile(string source, string dest)
     {
-        Console.WriteLine($"Copying file from '{source}' to '{dest}'");
+        Console.WriteLine($"Copying file from '{source}' to '{LocalPath(dest)}'");
         File.Copy(source, dest, true);
         tempFiles.Add(dest);
     }
@@ -198,6 +197,8 @@ if (language != "German")
 var adfTempPath = Path.Combine(tempDir, "ADFTemp");
 Directory.CreateDirectory(adfTempPath);
 
+
+
 string LocalPath(string path)
 {
     if (path.ToLower().StartsWith(tempDir.ToLower()))
@@ -206,17 +207,26 @@ string LocalPath(string path)
     return path;
 }
 
-IEnumerable<AdfFileInfo> AllFilesIn(string folder, string targetDirectory = "", bool recursive = true)
+IEnumerable<AdfFileInfo> AllFilesIn(string folder, string targetDirectory = "", bool recursive = true, bool keepHierarchy = false)
 {
     return Directory
         .GetFiles(folder, "*.*", recursive ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly)
-        .Select(filePath => new AdfFileInfo(LocalPath(filePath), targetDirectory));
+        .Select(filePath => new AdfFileInfo(LocalPath(filePath),
+            keepHierarchy
+                ? Path.GetDirectoryName((string.IsNullOrEmpty(targetDirectory) ? LocalPath(filePath) : Path.Combine(targetDirectory, LocalPath(filePath)))) ?? ""
+                : targetDirectory));
 }
+
+var bootDiskSourcePath = Path.Combine(solutionDirectory, "Disks", "BootDisk");
+var bootDiskDirPath = Path.Combine(tempDir, "BootDisk");
+Console.WriteLine($"Copying directory from '{bootDiskSourcePath}' to 'BootDisk'");
+CopyDirectory(bootDiskSourcePath, bootDiskDirPath, true);
 
 // Disk A
 // TODO: copy files and folders like C, Devs, Trouble.doc etc
 CreateADF(adfTempPath, 'A',
 [
+    ..AllFilesIn("BootDisk", "", true, true),
     "Ambermoon",
     "Ambermoon.info",
     "Ambermoon_install",
@@ -227,7 +237,8 @@ CreateADF(adfTempPath, 'A',
     "Amberfiles\\Button_graphics",
     "Amberfiles\\Objects.amb",
     "Amberfiles\\Text.amb",
-]);
+]);Directory.Delete(bootDiskDirPath, true);
+
 // Disk B
 CreateADF(adfTempPath, 'B',
 [
@@ -312,6 +323,7 @@ CreateADF(adfTempPath, 'I',
 // Disk J
 CreateADF(adfTempPath, 'J',
 [
+    "Amberfiles\\Saves",
     ..AllFilesIn("Amberfiles\\Save.00", ""),
     ..AllFilesIn("Amberfiles\\Save.00", "Save.00"),
     ..AllFilesIn("Amberfiles\\Save.00", "Save.01"),
