@@ -10,7 +10,7 @@ copy amber_c: all to ram:ambermoon
 set code $RC
 if "$code" = "103"
   set continue 0
-  echo amber_c: up to amber_i: not copied â€” will use floppies later
+  echo amber_c: up to amber_i: not copied — will use floppies later
 else
   assign amber_c: ram:ambermoon
 endif
@@ -20,7 +20,7 @@ if "$continue" = "1"
   set code $RC
   if "$code" = "103"
     set continue 0
-    echo amber_d: up to amber_i: not copied â€” will use floppies later
+    echo amber_d: up to amber_i: not copied — will use floppies later
   else
     assign amber_d: ram:ambermoon
   endif
@@ -31,7 +31,7 @@ if "$continue" = "1"
   set code $RC
   if "$code" = "103"
     set continue 0
-    echo amber_e: up to amber_i: not copied â€” will use floppies later
+    echo amber_e: up to amber_i: not copied — will use floppies later
   else
     assign amber_e: ram:ambermoon
   endif
@@ -42,7 +42,7 @@ if "$continue" = "1"
   set code $RC
   if "$code" = "103"
     set continue 0
-    echo amber_f: up to amber_i: not copied â€” will use floppies later
+    echo amber_f: up to amber_i: not copied — will use floppies later
   else
     assign amber_f: ram:ambermoon
   endif
@@ -53,7 +53,7 @@ if "$continue" = "1"
   set code $RC
   if "$code" = "103"
     set continue 0
-    echo amber_g: up to amber_i: not copied â€” will use floppies later
+    echo amber_g: up to amber_i: not copied — will use floppies later
   else
     assign amber_g: ram:ambermoon
   endif
@@ -64,7 +64,7 @@ if "$continue" = "1"
   set code $RC
   if "$code" = "103"
     set continue 0
-    echo amber_h: and amber_i: not copied â€” will use floppies later
+    echo amber_h: and amber_i: not copied — will use floppies later
   else
     assign amber_h: ram:ambermoon
   endif
@@ -75,7 +75,7 @@ if "$continue" = "1"
   set code $RC
   if "$code" = "103"
     set continue 0
-    echo amber_i: not copied â€” will use floppy later
+    echo amber_i: not copied — will use floppy later
   else
     assign amber_i: ram:ambermoon
   endif
