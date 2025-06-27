@@ -209,11 +209,22 @@ string LocalPath(string path)
 
 IEnumerable<AdfFileInfo> AllFilesIn(string folder, string targetDirectory = "", bool recursive = true, bool keepHierarchy = false)
 {
+    string LocalDirectory(string filePath)
+    {
+        if (filePath.ToLower().StartsWith(tempDir.ToLower()))
+            filePath = filePath[(tempDir.Length + 1)..];
+
+        if (filePath.ToLower().StartsWith(folder.ToLower()))
+            filePath = filePath[(folder.Length + 1)..];
+
+        return Path.GetDirectoryName(filePath) ?? "";
+    }
+
     return Directory
         .GetFiles(folder, "*.*", recursive ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly)
         .Select(filePath => new AdfFileInfo(LocalPath(filePath),
             keepHierarchy
-                ? Path.GetDirectoryName((string.IsNullOrEmpty(targetDirectory) ? LocalPath(filePath) : Path.Combine(targetDirectory, LocalPath(filePath)))) ?? ""
+                ? string.IsNullOrEmpty(targetDirectory) ? LocalDirectory(filePath) : Path.Combine(targetDirectory, LocalDirectory(filePath))
                 : targetDirectory));
 }
 
