@@ -99,9 +99,9 @@ if (language != "German")
     var tempFiles = new List<string>();
     var tempDirs = new List<string>();
 
-    tempFiles.Add("liesmich.txt"); // only for german
+    tempFiles.Add("liesmich.txt"); // it's only for german
 
-    var readmeLines = File.ReadLines(Path.Combine(tempDir, "readme.txt")).ToArray();
+    var readmeLines = File.ReadAllLines(Path.Combine(tempDir, "readme.txt"));
     readmeLines[0] = $"Ambermoon {language} {version} by Pyrdacor ({DateTime.Now:dd-MM-yyyy})";
     File.WriteAllLines(Path.Combine(tempDir, "readme.txt"), readmeLines);
 
@@ -189,6 +189,85 @@ if (language != "German")
         if (Directory.Exists(dir))
         {
             Directory.Delete(dir, true);
+        }
+    }
+}
+else
+{
+    // Copy the previous german version to the temp directory
+    var currentVersionMatch = versionRegex.Match(version);
+    var versionMajor = int.Parse(currentVersionMatch.Groups[1].Value);
+    var versionMinor = int.Parse(currentVersionMatch.Groups[2].Value);
+    var germanSourcePath = Path.Combine(Environment.CurrentDirectory, "Disks", "German");
+    var regex = GermanReleaseFileRegex();
+    var previousRelease = Directory.GetFiles(germanSourcePath, "*.zip", SearchOption.TopDirectoryOnly)
+        .Where(f => regex.IsMatch(Path.GetFileName(f)))
+        .Select(f => new { Path = f, Match = regex.Match(Path.GetFileName(f)) })
+        .Select(f => new { f.Path, Major = int.Parse(f.Match.Groups[1].Value), Minor = int.Parse(f.Match.Groups[2].Value) })
+        .Where(f => f.Major < versionMajor || (f.Major == versionMajor && f.Minor < versionMinor))
+        .OrderByDescending(f => f.Major).ThenByDescending(f => f.Minor)
+        .LastOrDefault();
+
+    if (previousRelease == null)
+    {
+        Console.Error.WriteLine($"No previous German release found in '{germanSourcePath}'.");
+        return 1;
+    }
+
+    Console.WriteLine($"Using German release '{previousRelease.Path}' as a basis.");
+
+    ZipFile.ExtractToDirectory(previousRelease.Path, tempDir);
+
+    var germanBugfixPath = Path.Combine(Environment.CurrentDirectory, "Disks", "Bugfixing", "German");
+
+    CopyDir(Path.Combine(germanBugfixPath, "Amberfiles"), Path.Combine(tempDir, "Amberfiles"));
+    CopyFiles(germanBugfixPath, tempDir, "Ambermoon", "Ambermoon_install");
+    CopyFiles(germanSourcePath, tempDir, "readme.txt", "liesmich.txt");
+
+    var readmeLines = File.ReadAllLines(Path.Combine(tempDir, "readme.txt"));
+    readmeLines[0] = $"Ambermoon German {version} by Pyrdacor ({DateTime.Now:dd-MM-yyyy})";
+    File.WriteAllLines(Path.Combine(tempDir, "readme.txt"), readmeLines);
+
+    var liesmichLines = File.ReadAllLines(Path.Combine(tempDir, "liesmich.txt"));
+    liesmichLines[0] = readmeLines[0]; // same header
+    File.WriteAllLines(Path.Combine(tempDir, "liesmich.txt"), liesmichLines);
+
+    var allTextsDir = CopyDir(Path.Combine(germanBugfixPath, "AllTexts"), Path.Combine(tempDir, "AllTexts"));
+    using var deleteAllTextsDir = new Defer(() => Directory.Delete(allTextsDir, true));
+
+    // Create needed tools
+    Publish("AmbermoonTextManager");
+
+    // Adjust release date
+    File.WriteAllText(Path.Combine(tempDir, "AllTexts", "Text.amb", "DateAndLanguageString", "000.txt"), DateTime.Now.ToString("dd-MM-yyyy") + $" / Deutsch");
+
+    // Adjust version
+    File.WriteAllText(Path.Combine(tempDir, "AllTexts", "Text.amb", "VersionString", "000.txt"), $"Ambermoon v{version}");
+
+    // From now on work inside the temp directory
+    Environment.CurrentDirectory = tempDir;
+
+    // Patch game texts
+    Exec("AmbermoonTextManager.exe", "-i Amberfiles AllTexts");
+
+    string CopyDir(string source, string dest)
+    {
+        Console.WriteLine($"Copying directory from '{source}' to '{LocalPath(dest)}'");
+        CopyDirectory(source, dest, true);
+        return dest;
+    }
+
+    void CopyFiles(string sourceDir, string destDir, params string[] files)
+    {
+        if (files == null)
+            return;
+
+        foreach (var file in files)
+        {
+            string source = Path.Combine(sourceDir, file);
+            string dest = Path.Combine(destDir, file);
+            Console.WriteLine($"Copying file from '{source}' to '{LocalPath(dest)}'");
+            File.Copy(source, dest, true);
         }
     }
 }
@@ -524,6 +603,11 @@ file record AdfFileInfo(string Path, string TargetDirectory = "")
 
 partial class Program
 {
-    [GeneratedRegex("^[1-9][.][0-9]{2}$")]
+    [GeneratedRegex("^([1-9])[.]([0-9]{2})$")]
     private static partial Regex VersionRegex();
+}
+partial class Program
+{
+    [GeneratedRegex("ambermoon_german_([0-9])[.]([0-9]+)_extracted.zip", RegexOptions.Compiled)]
+    private static partial Regex GermanReleaseFileRegex();
 }
