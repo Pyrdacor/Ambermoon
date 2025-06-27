@@ -17,9 +17,7 @@ copy amber_c: all to ram:ambermoon
 set code $RC
 if "$code" eq "103"
   set continue 0
-  echo amber_c: up to amber_i: not copied — will use floppies later
 else
-  echo amber_c: copied successfully to ram disk
   set assign_c 1
 endif
 
@@ -28,9 +26,7 @@ if "$continue" eq "1"
   set code $RC
   if "$code" eq "103"
     set continue 0
-    echo amber_d: up to amber_i: not copied — will use floppies later
   else
-    echo amber_d: copied successfully to ram disk
     set assign_d 1
   endif
 endif
@@ -40,9 +36,7 @@ if "$continue" eq "1"
   set code $RC
   if "$code" eq "103"
     set continue 0
-    echo amber_e: up to amber_i: not copied — will use floppies later
   else
-    echo amber_e: copied successfully to ram disk
     set assign_e 1
   endif
 endif
@@ -52,9 +46,7 @@ if "$continue" eq "1"
   set code $RC
   if "$code" eq "103"
     set continue 0
-    echo amber_f: up to amber_i: not copied — will use floppies later
   else
-    echo amber_f: copied successfully to ram disk
     set assign_f 1
   endif
 endif
@@ -64,9 +56,7 @@ if "$continue" eq "1"
   set code $RC
   if "$code" eq "103"
     set continue 0
-    echo amber_g: up to amber_i: not copied — will use floppies later
   else
-    echo amber_g: copied successfully to ram disk
     set assign_g 1
   endif
 endif
@@ -76,9 +66,7 @@ if "$continue" eq "1"
   set code $RC
   if "$code" eq "103"
     set continue 0
-    echo amber_h: and amber_i: not copied — will use floppies later
   else
-    echo amber_h: copied successfully to ram disk
     set assign_h 1
   endif
 endif
@@ -88,9 +76,7 @@ if "$continue" eq "1"
   set code $RC
   if "$code" eq "103"
     set continue 0
-    echo amber_i: not copied — will use floppy later
   else
-    echo amber_i: copied successfully to ram disk
     set assign_i 1
   endif
 endif
@@ -121,7 +107,8 @@ endif
 
 ask "Ready."
 echo Running now...
-execute s/startup-original
+amber_a:c/protect amber_a:s/startup-original +s
+execute amber_a:s/startup-original
 
 
 
