@@ -79,7 +79,7 @@ var solutionDirectory = Environment.CurrentDirectory;
 
 var tempDir = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
 Directory.CreateDirectory(tempDir);
-//using var deleteTempDir = new Defer(() => { try { Directory.Delete(tempDir, true); } catch { /* ignore */ } });
+using var deleteTempDir = new Defer(() => { try { Directory.Delete(tempDir, true); } catch { /* ignore */ } });
 
 Console.WriteLine($"Using temporary directory: {tempDir}");
 
@@ -196,8 +196,6 @@ if (language != "German")
 // Create ADF disk images
 var adfTempPath = Path.Combine(tempDir, "ADFTemp");
 Directory.CreateDirectory(adfTempPath);
-
-
 
 string LocalPath(string path)
 {

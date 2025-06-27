@@ -17,7 +17,7 @@ You can also create a `launch.Settings.json` manually inside the folder `Propert
     "AmbermoonReleaseCreator": {
       "commandName": "Project",
       "commandLineArgs": "Czech 1.19",
-      "workingDirectory": "C:\MyProjects\Ambermoon"
+      "workingDirectory": "C:\\MyProjects\\Ambermoon"
     }
   }
 }
@@ -81,6 +81,7 @@ Moreover you need to prepare some things:
   - click-text.txt
   - LargeGlyphs.png
   - SmallGlyphs.png
+- Also make sure that there is a valid boot disk in `Disks\BootDisk`.
 
 Then you can run `AmbermoonReleaseCreator.exe <language> X.X` where X.X is the version number of the release.
 
