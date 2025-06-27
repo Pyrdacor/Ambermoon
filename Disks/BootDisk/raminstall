@@ -1,6 +1,16 @@
-ram:
+ask "Do you want to copy some files to the RAM disk? (y/n)"
+
+if not WARN
+  echo Running now from floppies...
+  amber_a:
+  protect s/startup-original +s
+  execute s/startup-original
+  quit 0
+endif
 
 echo Installing 7 disks to RAM...
+
+ram:
 
 makedir ambermoon
 
@@ -107,8 +117,9 @@ endif
 
 ask "Ready."
 echo Running now...
-amber_a:c/protect amber_a:s/startup-original +s
-execute amber_a:s/startup-original
+amber_a:
+protect s/startup-original +s
+execute s/startup-original
 
 
 

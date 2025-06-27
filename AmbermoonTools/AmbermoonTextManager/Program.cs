@@ -1020,7 +1020,7 @@ namespace AmbermoonTextImport
                     var containerWriter = new DataWriter();
                     bool newComp = options.Contains(Option.NewCompression);
                     FileWriter.WriteContainer(containerWriter, files,
-                        filename.ToLower().StartsWith("party") ? FileType.AMBR : FileType.AMPC, null,
+                        Path.GetFileName(filename).ToLower().StartsWith("party") ? FileType.AMBR : FileType.AMPC, null,
                         newComp ? LobCompression.LobType.TakeBest : LobCompression.LobType.Ambermoon,
                         newComp ? FileDictionaryCompression.UseBest : FileDictionaryCompression.None);
                     return containerWriter.ToArray();

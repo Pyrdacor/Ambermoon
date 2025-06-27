@@ -333,7 +333,6 @@ CreateADF(adfTempPath, 'I',
 CreateADF(adfTempPath, 'J',
 [
     "Amberfiles\\Saves",
-    ..AllFilesIn("Amberfiles\\Save.00", ""),
     ..AllFilesIn("Amberfiles\\Save.00", "Save.00"),
     ..AllFilesIn("Amberfiles\\Save.00", "Save.01"),
     ..AllFilesIn("Amberfiles\\Save.00", "Save.02"),
