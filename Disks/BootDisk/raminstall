@@ -5,83 +5,119 @@ echo Installing 7 disks to RAM...
 makedir ambermoon
 
 set continue 1
+set assign_c 0
+set assign_d 0
+set assign_e 0
+set assign_f 0
+set assign_g 0
+set assign_h 0
+set assign_i 0
 
 copy amber_c: all to ram:ambermoon
 set code $RC
-if "$code" = "103"
+if "$code" eq "103"
   set continue 0
   echo amber_c: up to amber_i: not copied — will use floppies later
 else
-  assign amber_c: ram:ambermoon
+  echo amber_c: copied successfully to ram disk
+  set assign_c 1
 endif
 
-if "$continue" = "1"
+if "$continue" eq "1"
   copy amber_d: all to ram:ambermoon
   set code $RC
-  if "$code" = "103"
+  if "$code" eq "103"
     set continue 0
     echo amber_d: up to amber_i: not copied — will use floppies later
   else
-    assign amber_d: ram:ambermoon
+    echo amber_d: copied successfully to ram disk
+    set assign_d 1
   endif
 endif
 
-if "$continue" = "1"
+if "$continue" eq "1"
   copy amber_e: all to ram:ambermoon
   set code $RC
-  if "$code" = "103"
+  if "$code" eq "103"
     set continue 0
     echo amber_e: up to amber_i: not copied — will use floppies later
   else
-    assign amber_e: ram:ambermoon
+    echo amber_e: copied successfully to ram disk
+    set assign_e 1
   endif
 endif
 
-if "$continue" = "1"
+if "$continue" eq "1"
   copy amber_f: all to ram:ambermoon
   set code $RC
-  if "$code" = "103"
+  if "$code" eq "103"
     set continue 0
     echo amber_f: up to amber_i: not copied — will use floppies later
   else
-    assign amber_f: ram:ambermoon
+    echo amber_f: copied successfully to ram disk
+    set assign_f 1
   endif
 endif
 
-if "$continue" = "1"
+if "$continue" eq "1"
   copy amber_g: all to ram:ambermoon
   set code $RC
-  if "$code" = "103"
+  if "$code" eq "103"
     set continue 0
     echo amber_g: up to amber_i: not copied — will use floppies later
   else
-    assign amber_g: ram:ambermoon
+    echo amber_g: copied successfully to ram disk
+    set assign_g 1
   endif
 endif
 
-if "$continue" = "1"
+if "$continue" eq "1"
   copy amber_h: all to ram:ambermoon
   set code $RC
-  if "$code" = "103"
+  if "$code" eq "103"
     set continue 0
     echo amber_h: and amber_i: not copied — will use floppies later
   else
-    assign amber_h: ram:ambermoon
+    echo amber_h: copied successfully to ram disk
+    set assign_h 1
   endif
 endif
 
-if "$continue" = "1"
+if "$continue" eq "1"
   copy amber_i: all to ram:ambermoon
   set code $RC
-  if "$code" = "103"
+  if "$code" eq "103"
     set continue 0
     echo amber_i: not copied — will use floppy later
   else
-    assign amber_i: ram:ambermoon
+    echo amber_i: copied successfully to ram disk
+    set assign_i 1
   endif
 endif
 
 ask "Remove all disks now ! Except Amber_A, Amber_B and Amber_J (Put them in)"
+
+if "assign_c" eq "1"
+	assign amber_c: ram:ambermoon
+endif
+if "assign_d" eq "1"
+	assign amber_d: ram:ambermoon
+endif
+if "assign_e" eq "1"
+	assign amber_e: ram:ambermoon
+endif
+if "assign_f" eq "1"
+	assign amber_f: ram:ambermoon
+endif
+if "assign_g" eq "1"
+	assign amber_g: ram:ambermoon
+endif
+if "assign_h" eq "1"
+	assign amber_h: ram:ambermoon
+endif
+if "assign_i" eq "1"
+	assign amber_i: ram:ambermoon
+endif
 
 ask "Ready."
 echo Running now...
