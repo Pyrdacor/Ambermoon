@@ -79,7 +79,12 @@ var solutionDirectory = Environment.CurrentDirectory;
 
 var tempDir = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
 Directory.CreateDirectory(tempDir);
-using var deleteTempDir = new Defer(() => { try { Directory.Delete(tempDir, true); } catch { /* ignore */ } });
+using var deleteTempDir = new Defer(() =>
+{
+    Environment.CurrentDirectory = solutionDirectory;
+
+    try { Directory.Delete(tempDir, true); } catch { /* ignore */ }
+});
 
 Console.WriteLine($"Using temporary directory: {tempDir}");
 
@@ -112,11 +117,13 @@ if (language != "German")
         tempDirs.Add(dest);
     }
 
-    void CopyAndTrackFile(string source, string dest)
+    void CopyAndTrackFile(string source, string dest, bool noTrack = false)
     {
         Console.WriteLine($"Copying file from '{source}' to '{LocalPath(dest)}'");
         File.Copy(source, dest, true);
-        tempFiles.Add(dest);
+
+        if (!noTrack)
+            tempFiles.Add(dest);
     }
 
     // Copy the language specific directories
@@ -133,6 +140,7 @@ if (language != "German")
     CopyAndTrackDir(Path.Combine(languageSourcePath, "AllTexts"), Path.Combine(tempDir, "AllTexts"));
     CopyAndTrackDir(Path.Combine(languageSourcePath, "IntroTexts"), Path.Combine(tempDir, "IntroTexts"));
     CopyAndTrackDir(Path.Combine(languageSourcePath, "ExtroTexts"), Path.Combine(tempDir, "ExtroTexts"));
+    CopyAndTrackFile(Path.Combine(languageSourcePath, "Amberfiles\\Button_graphics"), Path.Combine(tempDir, "Amberfiles\\Button_graphics"), true);
     CopyAndTrackFile(Path.Combine(translationSourcePath, "Ambermoon_intro_translation_base"), Path.Combine(tempDir, "Ambermoon_intro_translation_base"));
     CopyAndTrackFile(Path.Combine(translationSourcePath, "Ambermoon_extro_translation_base"), Path.Combine(tempDir, "Ambermoon_extro_translation_base"));
     CopyAndTrackFile(Path.Combine(languageTranslationSourcePath, "font.json"), Path.Combine(tempDir, "font.json"));
@@ -311,7 +319,6 @@ Console.WriteLine($"Copying directory from '{bootDiskSourcePath}' to 'BootDisk'"
 CopyDirectory(bootDiskSourcePath, bootDiskDirPath, true);
 
 // Disk A
-// TODO: copy files and folders like C, Devs, Trouble.doc etc
 CreateADF(adfTempPath, 'A',
 [
     ..AllFilesIn("BootDisk", "", true, true),
@@ -325,8 +332,8 @@ CreateADF(adfTempPath, 'A',
     "Amberfiles\\Button_graphics",
     "Amberfiles\\Objects.amb",
     "Amberfiles\\Text.amb",
-]);Directory.Delete(bootDiskDirPath, true);
-
+]);
+Directory.Delete(bootDiskDirPath, true);
 // Disk B
 CreateADF(adfTempPath, 'B',
 [

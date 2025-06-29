@@ -737,7 +737,7 @@ namespace AmbermoonTextImport
                 }
             }
 
-            bool WriteSingleFile(string outputFileName, byte[] data)
+            bool WriteSingleFile(string outputFileName, byte[] data, bool useLob = false)
             {
                 return WriteFile(outputFileName, (string fileName, byte[] data) =>
                 {
@@ -755,7 +755,7 @@ namespace AmbermoonTextImport
                     else
                     {
                         var compressWriter = new DataWriter();
-                        FileWriter.WriteJH(compressWriter, data, 0xd2e7, false);
+                        FileWriter.WriteJH(compressWriter, data, 0xd2e7, useLob);
                         File.WriteAllBytes(fileName, compressWriter.ToArray());
                     }
                     return true;
@@ -962,7 +962,7 @@ namespace AmbermoonTextImport
 
                 string outputFileName = Path.Combine(gameDataPath, "Text.amb");
 
-                WriteSingleFile(outputFileName, writer.ToArray());
+                WriteSingleFile(outputFileName, writer.ToArray(), true);
             }
 
             static string SizeString(int size, string str, bool trimStart = true, bool needsTermNull = true)
@@ -1062,7 +1062,7 @@ namespace AmbermoonTextImport
                     {
                         writer.WriteWithoutLength(SizeString(30, entries[i], true, false));
                     }
-                    return WriteSingleFile(outputFileName, writer.ToArray());
+                    return WriteSingleFile(outputFileName, writer.ToArray(), true);
                 }, true);
             }
 
@@ -1094,7 +1094,7 @@ namespace AmbermoonTextImport
                         file.Position += 20;
                         writer.WriteWithoutLength(SizeString(20, entries[i]));
                     }
-                    return WriteSingleFile(outputFileName, writer.ToArray());
+                    return WriteSingleFile(outputFileName, writer.ToArray(), true);
                 }, true);
             }
 
