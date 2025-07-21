@@ -104,6 +104,8 @@ Offset | Type | Description
 
 If blending is off the overlay will just override the wall data. This means that even transparent pixels are integrated into the wall. If blending is on, transparent pixels will be discarded from the overlay or more precisely the overlay pixels are blended over the wall.
 
+Note that the Amiga version will use the last full 8-pixel boundary (bitwise AND by 0xf8) for the relative X offset, so always use a multiple of 8 for this value.
+
 
 ## Notes
 
