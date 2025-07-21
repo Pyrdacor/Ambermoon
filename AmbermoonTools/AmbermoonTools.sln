@@ -76,6 +76,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AmbermoonReleaseCreator", "
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AmbermoonFontCreator", "AmbermoonFontCreator\AmbermoonFontCreator.csproj", "{B4C7019F-46B2-4285-A83D-A17FBF211E1E}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AmbermoonButtonGraphicsDesigner", "AmbermoonButtonGraphicsDesigner\AmbermoonButtonGraphicsDesigner.csproj", "{0B836948-8052-4A52-9691-7E036DD337E5}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AmbermoonBitmaps", "AmbermoonBitmaps\AmbermoonBitmaps.csproj", "{FE3599C3-7CF4-4DDC-ACA8-4C243E5D2291}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -475,6 +479,30 @@ Global
 		{B4C7019F-46B2-4285-A83D-A17FBF211E1E}.ReleaseES|Any CPU.Build.0 = Release|Any CPU
 		{B4C7019F-46B2-4285-A83D-A17FBF211E1E}.ReleaseLinux|Any CPU.ActiveCfg = Release|Any CPU
 		{B4C7019F-46B2-4285-A83D-A17FBF211E1E}.ReleaseLinux|Any CPU.Build.0 = Release|Any CPU
+		{0B836948-8052-4A52-9691-7E036DD337E5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0B836948-8052-4A52-9691-7E036DD337E5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0B836948-8052-4A52-9691-7E036DD337E5}.DebugAndroid|Any CPU.ActiveCfg = Debug|Any CPU
+		{0B836948-8052-4A52-9691-7E036DD337E5}.DebugAndroid|Any CPU.Build.0 = Debug|Any CPU
+		{0B836948-8052-4A52-9691-7E036DD337E5}.DebugES|Any CPU.ActiveCfg = Debug|Any CPU
+		{0B836948-8052-4A52-9691-7E036DD337E5}.DebugES|Any CPU.Build.0 = Debug|Any CPU
+		{0B836948-8052-4A52-9691-7E036DD337E5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0B836948-8052-4A52-9691-7E036DD337E5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0B836948-8052-4A52-9691-7E036DD337E5}.ReleaseES|Any CPU.ActiveCfg = Release|Any CPU
+		{0B836948-8052-4A52-9691-7E036DD337E5}.ReleaseES|Any CPU.Build.0 = Release|Any CPU
+		{0B836948-8052-4A52-9691-7E036DD337E5}.ReleaseLinux|Any CPU.ActiveCfg = Release|Any CPU
+		{0B836948-8052-4A52-9691-7E036DD337E5}.ReleaseLinux|Any CPU.Build.0 = Release|Any CPU
+		{FE3599C3-7CF4-4DDC-ACA8-4C243E5D2291}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FE3599C3-7CF4-4DDC-ACA8-4C243E5D2291}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FE3599C3-7CF4-4DDC-ACA8-4C243E5D2291}.DebugAndroid|Any CPU.ActiveCfg = Debug|Any CPU
+		{FE3599C3-7CF4-4DDC-ACA8-4C243E5D2291}.DebugAndroid|Any CPU.Build.0 = Debug|Any CPU
+		{FE3599C3-7CF4-4DDC-ACA8-4C243E5D2291}.DebugES|Any CPU.ActiveCfg = Debug|Any CPU
+		{FE3599C3-7CF4-4DDC-ACA8-4C243E5D2291}.DebugES|Any CPU.Build.0 = Debug|Any CPU
+		{FE3599C3-7CF4-4DDC-ACA8-4C243E5D2291}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FE3599C3-7CF4-4DDC-ACA8-4C243E5D2291}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FE3599C3-7CF4-4DDC-ACA8-4C243E5D2291}.ReleaseES|Any CPU.ActiveCfg = Release|Any CPU
+		{FE3599C3-7CF4-4DDC-ACA8-4C243E5D2291}.ReleaseES|Any CPU.Build.0 = Release|Any CPU
+		{FE3599C3-7CF4-4DDC-ACA8-4C243E5D2291}.ReleaseLinux|Any CPU.ActiveCfg = Release|Any CPU
+		{FE3599C3-7CF4-4DDC-ACA8-4C243E5D2291}.ReleaseLinux|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

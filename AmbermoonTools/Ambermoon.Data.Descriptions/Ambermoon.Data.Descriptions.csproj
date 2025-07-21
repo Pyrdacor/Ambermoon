@@ -1,12 +1,12 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net7.0</TargetFramework>
+    <TargetFramework>net9.0</TargetFramework>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Ambermoon.Data.Common" Version="10.10.1" />
-    <PackageReference Include="System.Runtime.CompilerServices.Unsafe" Version="6.0.0" />
+    <PackageReference Include="Ambermoon.Data.Common" Version="10.10.2" />
+    <PackageReference Include="System.Runtime.CompilerServices.Unsafe" Version="6.1.2" />
   </ItemGroup>
 
 </Project>

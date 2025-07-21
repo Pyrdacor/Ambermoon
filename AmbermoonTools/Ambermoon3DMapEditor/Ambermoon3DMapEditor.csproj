@@ -2,14 +2,14 @@
 
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
-    <TargetFramework>net7.0-windows</TargetFramework>
+    <TargetFramework>net9.0-windows</TargetFramework>
     <Nullable>enable</Nullable>
     <UseWindowsForms>true</UseWindowsForms>
     <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Ambermoon.Data.Legacy" Version="10.10.1" />
+		<PackageReference Include="Ambermoon.Data.Legacy" Version="10.10.2" />
 		<PackageReference Include="OpenTK.WinForms" Version="4.0.0-pre.7" />
 	</ItemGroup>
 

@@ -17,6 +17,12 @@ public static partial class Program
     // args[4]: Optional code page of the encoding to write
     public static void Main(string[] args)
     {
+        /*if (args.Length == 1 && (args[0] == "--help" || args[0] == "-h" || args[0] == "/?"))
+        {
+            Usage();
+            return 0;
+        }*/
+
         Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
 
         if (args.Length < 4 || args.Length > 5)

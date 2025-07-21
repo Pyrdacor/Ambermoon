@@ -637,9 +637,9 @@ namespace Ambermoon.Data.Descriptions
 
 					}),
 				Use.Enum<PartyMemberConditionEvent.PartyMemberConditionTarget>(nameof(PartyMemberConditionEvent.Target), true, PartyMemberConditionEvent.PartyMemberConditionTarget.ActivePlayer, Enum.GetValues<PartyMemberConditionEvent.PartyMemberConditionTarget>()
-						.Where(t => (int)t < (int)PartyMemberConditionEvent.PartyMemberConditionTarget.FirstCharacter)
+						.Where(t => (int)t == (int)PartyMemberConditionEvent.PartyMemberConditionTarget.ActiveInventory || (int)t < (int)PartyMemberConditionEvent.PartyMemberConditionTarget.FirstCharacter)
 						.Concat(Enumerable.Range(7, (int)Enum.GetValues<PartyMembers>().Max()).Select(i => (PartyMemberConditionEvent.PartyMemberConditionTarget)i)),
-					(target) => (int)target >= 7 ? $"Party Member {(int)target - 6}" : Enum.GetName(target)),
+					(target) => (int)target != 255 && (int)target >= 7 ? $"Party Member {(int)target - 6}" : Enum.GetName(target)),
 				Use.Flags16(nameof(ConditionEvent.DisallowedAilments), false, Condition.None),
 				Use.Word(nameof(PartyMemberConditionEvent.Value), true),
 				Use.EventIndex(nameof(ConditionEvent.ContinueIfFalseWithMapEventIndex), false)
