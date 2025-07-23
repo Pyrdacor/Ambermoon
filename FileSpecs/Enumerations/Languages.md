@@ -15,3 +15,9 @@ Value | Name
 0x20 | Felinic
 0x40 | Morag
 0x80 | Animal
+
+In **Ambermoon Advanced** there are additional languages in character byte 0x22.
+
+Value | Name
+----|----
+0x01 | Old language
