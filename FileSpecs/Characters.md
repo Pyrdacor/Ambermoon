@@ -28,7 +28,7 @@ Offset | Type | Description
 0x000A | ubyte | Portrait index
 0x000B | ubyte | Join percentage (0-100%). In Amberstar if you invite someone to your party this is the chance that he/she accepts. This is not used in Ambermoon. In **Ambermoon Advanced** this stores advanced flags for monsters (see below).
 0x000C | ubyte | Combat graphic index (only used for monsters)
-0x000D | ubyte | Spell chance percentage (only used for monsters, not used in Ambermoon)
+0x000D | ubyte | Spell chance percentage (only used for monsters, not used in Ambermoon), in **Ambermoon Advanced** this is for additional languages
 0x000E | ubyte | Magic bonus to hit (0-255, only used for monsters, not used in Ambermoon)
 0x000F | ubyte | Monster morale, retreat percentage (0-100%), in **Ambermoon Advanced** this is used for party members as well to state if they exchanged experience already.
 0x0010 | ubyte | Immunity to [spell types](Enumerations/SpellTypes.md)
@@ -42,7 +42,7 @@ Offset | Type | Description
 0x001C | uword | Character bit index. This bit is changed when a party member leaves the party or a conversation is left without taking the person with you. Initial this is set for Selena, Sabine and Valdyn. They will wait for you at different locations than when you first met them. Selena goes to the Sylph cave, Sabine and Valdyn go to Burnville. Gryban has an initial value of 0x0000. This is a bug. Gryban will vanish forever when he leaves the party or you won't take him with you. The correct value would be 0x35c0 or 0xffff. The value 0xffff means "not used" or "use initial location/use initial map character".
 0x001E | uword | [Conditions](Enumerations/Conditions.md)
 0x0020 | uword | Monster experience (gained when defeating it)
-0x0022 | uword | Battle round spell point usage (not used in Ambermoon), in **Ambermoon Advanced** this is for additional languages
+0x0022 | uword | Battle round spell point usage (not used in Ambermoon)
 0x0024 | uword | Mark of return x-coordinate (1-based, party member only)
 0x0026 | uword | Mark of return y-coordinate (1-based, party member only)
 0x0028 | uword | Mark of return map index (party member only)
