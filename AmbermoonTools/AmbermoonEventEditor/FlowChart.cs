@@ -216,7 +216,7 @@ namespace AmbermoonEventEditor
         {
             printLine ??= Console.WriteLine;
 
-            string identation = new string(' ', BackReferenceTargets.Count);
+            string identation = new string(' ', Math.Max(BackReferenceSources.Count, BackReferenceTargets.Count));
             int branchSpace = BranchReferenceTargets.Count;
             int maxLabelSize = 78 - identation.Length - branchSpace;
             var backRefSpans = BackReferenceSources.Select(r => new Range(r.Key, r.Value));
