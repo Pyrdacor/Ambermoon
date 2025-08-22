@@ -28,7 +28,7 @@ Offset | Type | Description
 0x000A | ubyte | Portrait index
 0x000B | ubyte | Join percentage (0-100%). In Amberstar if you invite someone to your party this is the chance that he/she accepts. This is not used in Ambermoon. In **Ambermoon Advanced** this stores advanced flags for monsters (see below).
 0x000C | ubyte | Combat graphic index (only used for monsters)
-0x000D | ubyte | Spell chance percentage (only used for monsters, not used in Ambermoon)
+0x000D | ubyte | Spell chance percentage (only used for monsters, not used in Ambermoon), in **Ambermoon Advanced** this is for additional languages
 0x000E | ubyte | Magic bonus to hit (0-255, only used for monsters, not used in Ambermoon)
 0x000F | ubyte | Monster morale, retreat percentage (0-100%), in **Ambermoon Advanced** this is used for party members as well to state if they exchanged experience already.
 0x0010 | ubyte | Immunity to [spell types](Enumerations/SpellTypes.md)
