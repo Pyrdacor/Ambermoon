@@ -16,4 +16,13 @@ internal static class ControlExtensions
             lowerRight.Y - upperLeftPosition.Y
         );
     }
+
+    public static ToolTip SetTooltip(this Control control, string tooltipText)
+    {
+        var tooltip = new ToolTip();
+
+        tooltip.SetToolTip(control, tooltipText);
+
+        return tooltip;
+    }
 }

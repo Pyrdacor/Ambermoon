@@ -53,5 +53,15 @@ public partial class CharacterStatsControl : UserControl
         labelSearch.Text = "Sea: " + character.Skills[Skill.Searching].FormatCharacterValue(CharacterValueType.Skill);
         labelReadMagic.Text = "R-M: " + character.Skills[Skill.ReadMagic].FormatCharacterValue(CharacterValueType.Skill);
         labelUseMagic.Text = "U-M: " + character.Skills[Skill.UseMagic].FormatCharacterValue(CharacterValueType.Skill);
+
+        // Hidden Stats
+        labelHPLevel.Text = "HP/Lvl: " + character.HitPointsPerLevel.ToString();
+        labelSPLevel.Text = "SP/Lvl: " + character.SpellPointsPerLevel.ToString();
+        labelSLPLevel.Text = "SLP/Lvl: " + character.SpellLearningPointsPerLevel.ToString();
+        labelTPLevel.Text = "TP/Lvl: " + character.TrainingPointsPerLevel.ToString();
+        labelAPR.Text = "APR: " + character.AttacksPerRound.ToString();
+        labelAPRLevel.Text = "APR Lvl: " + character.AttacksPerRoundIncreaseLevels.ToString();
+
+        labelAPRLevel.SetTooltip("APR = max(1, Level / APR Level)");
     }
 }

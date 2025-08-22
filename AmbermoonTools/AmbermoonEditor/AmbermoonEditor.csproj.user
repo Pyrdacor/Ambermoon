@@ -5,6 +5,12 @@
     <Compile Update="CharacterControl.cs">
       <SubType>UserControl</SubType>
     </Compile>
+    <Compile Update="Controls\CharacterStatsControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Update="Controls\MultiPageControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
     <Compile Update="DataControl.cs">
       <SubType>UserControl</SubType>
     </Compile>
@@ -27,6 +33,9 @@
       <SubType>UserControl</SubType>
     </Compile>
     <Compile Update="OverviewControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Update="PartyMemberControl.cs">
       <SubType>UserControl</SubType>
     </Compile>
   </ItemGroup>
