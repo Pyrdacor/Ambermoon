@@ -3,6 +3,7 @@ using LoadPreference = Ambermoon.Data.Legacy.GameData.LoadPreference;
 using System;
 using System.IO;
 using System.Windows.Forms;
+using System.ComponentModel;
 
 namespace AmbermoonEditor
 {
@@ -13,6 +14,7 @@ namespace AmbermoonEditor
             InitializeComponent();
         }
 
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public GameData GameData { get; private set; }
 
         private void UpdateGameData()

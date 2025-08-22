@@ -28,171 +28,174 @@
         /// </summary>
         private void InitializeComponent()
         {
-            this.groupBoxLoad = new System.Windows.Forms.GroupBox();
-            this.buttonContinue = new System.Windows.Forms.Button();
-            this.radioButtonAny = new System.Windows.Forms.RadioButton();
-            this.labelLoadInfo = new System.Windows.Forms.Label();
-            this.textBoxLoadInfo = new System.Windows.Forms.TextBox();
-            this.buttonBrowse = new System.Windows.Forms.Button();
-            this.labelPath = new System.Windows.Forms.Label();
-            this.textBoxPath = new System.Windows.Forms.TextBox();
-            this.radioButtonExtracted = new System.Windows.Forms.RadioButton();
-            this.radioButtonADF = new System.Windows.Forms.RadioButton();
-            this.labelHeadline = new System.Windows.Forms.Label();
-            this.groupBoxLoad.SuspendLayout();
-            this.SuspendLayout();
+            groupBoxLoad = new System.Windows.Forms.GroupBox();
+            buttonContinue = new System.Windows.Forms.Button();
+            radioButtonAny = new System.Windows.Forms.RadioButton();
+            labelLoadInfo = new System.Windows.Forms.Label();
+            textBoxLoadInfo = new System.Windows.Forms.TextBox();
+            buttonBrowse = new System.Windows.Forms.Button();
+            labelPath = new System.Windows.Forms.Label();
+            textBoxPath = new System.Windows.Forms.TextBox();
+            radioButtonExtracted = new System.Windows.Forms.RadioButton();
+            radioButtonADF = new System.Windows.Forms.RadioButton();
+            labelHeadline = new System.Windows.Forms.Label();
+            groupBoxLoad.SuspendLayout();
+            SuspendLayout();
             // 
             // groupBoxLoad
             // 
-            this.groupBoxLoad.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.groupBoxLoad.Controls.Add(this.buttonContinue);
-            this.groupBoxLoad.Controls.Add(this.radioButtonAny);
-            this.groupBoxLoad.Controls.Add(this.labelLoadInfo);
-            this.groupBoxLoad.Controls.Add(this.textBoxLoadInfo);
-            this.groupBoxLoad.Controls.Add(this.buttonBrowse);
-            this.groupBoxLoad.Controls.Add(this.labelPath);
-            this.groupBoxLoad.Controls.Add(this.textBoxPath);
-            this.groupBoxLoad.Controls.Add(this.radioButtonExtracted);
-            this.groupBoxLoad.Controls.Add(this.radioButtonADF);
-            this.groupBoxLoad.Location = new System.Drawing.Point(12, 54);
-            this.groupBoxLoad.Name = "groupBoxLoad";
-            this.groupBoxLoad.Size = new System.Drawing.Size(776, 384);
-            this.groupBoxLoad.TabIndex = 0;
-            this.groupBoxLoad.TabStop = false;
-            this.groupBoxLoad.Text = "Load game data";
+            groupBoxLoad.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right;
+            groupBoxLoad.Controls.Add(buttonContinue);
+            groupBoxLoad.Controls.Add(radioButtonAny);
+            groupBoxLoad.Controls.Add(labelLoadInfo);
+            groupBoxLoad.Controls.Add(textBoxLoadInfo);
+            groupBoxLoad.Controls.Add(buttonBrowse);
+            groupBoxLoad.Controls.Add(labelPath);
+            groupBoxLoad.Controls.Add(textBoxPath);
+            groupBoxLoad.Controls.Add(radioButtonExtracted);
+            groupBoxLoad.Controls.Add(radioButtonADF);
+            groupBoxLoad.Location = new System.Drawing.Point(10, 40);
+            groupBoxLoad.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
+            groupBoxLoad.Name = "groupBoxLoad";
+            groupBoxLoad.Padding = new System.Windows.Forms.Padding(3, 2, 3, 2);
+            groupBoxLoad.Size = new System.Drawing.Size(679, 288);
+            groupBoxLoad.TabIndex = 0;
+            groupBoxLoad.TabStop = false;
+            groupBoxLoad.Text = "Load game data";
             // 
             // buttonContinue
             // 
-            this.buttonContinue.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.buttonContinue.BackColor = System.Drawing.SystemColors.Control;
-            this.buttonContinue.Enabled = false;
-            this.buttonContinue.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
-            this.buttonContinue.Location = new System.Drawing.Point(20, 349);
-            this.buttonContinue.Name = "buttonContinue";
-            this.buttonContinue.Size = new System.Drawing.Size(738, 29);
-            this.buttonContinue.TabIndex = 6;
-            this.buttonContinue.Text = "> Continue <";
-            this.buttonContinue.UseVisualStyleBackColor = false;
-            this.buttonContinue.Click += new System.EventHandler(this.buttonContinue_Click);
+            buttonContinue.Anchor = System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right;
+            buttonContinue.BackColor = System.Drawing.SystemColors.Control;
+            buttonContinue.Enabled = false;
+            buttonContinue.Font = new System.Drawing.Font("Consolas", 9F, System.Drawing.FontStyle.Bold);
+            buttonContinue.Location = new System.Drawing.Point(18, 262);
+            buttonContinue.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
+            buttonContinue.Name = "buttonContinue";
+            buttonContinue.Size = new System.Drawing.Size(646, 22);
+            buttonContinue.TabIndex = 6;
+            buttonContinue.Text = "> Continue <";
+            buttonContinue.UseVisualStyleBackColor = false;
+            buttonContinue.Click += buttonContinue_Click;
             // 
             // radioButtonAny
             // 
-            this.radioButtonAny.AutoSize = true;
-            this.radioButtonAny.Location = new System.Drawing.Point(320, 34);
-            this.radioButtonAny.Name = "radioButtonAny";
-            this.radioButtonAny.Size = new System.Drawing.Size(242, 24);
-            this.radioButtonAny.TabIndex = 0;
-            this.radioButtonAny.Text = "From any files (prefer extracted)";
-            this.radioButtonAny.UseVisualStyleBackColor = true;
-            this.radioButtonAny.CheckedChanged += new System.EventHandler(this.RadioButtonAny_CheckedChanged);
+            radioButtonAny.AutoSize = true;
+            radioButtonAny.Location = new System.Drawing.Point(280, 26);
+            radioButtonAny.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
+            radioButtonAny.Name = "radioButtonAny";
+            radioButtonAny.Size = new System.Drawing.Size(192, 19);
+            radioButtonAny.TabIndex = 0;
+            radioButtonAny.Text = "From any files (prefer extracted)";
+            radioButtonAny.UseVisualStyleBackColor = true;
+            radioButtonAny.CheckedChanged += RadioButtonAny_CheckedChanged;
             // 
             // labelLoadInfo
             // 
-            this.labelLoadInfo.AutoSize = true;
-            this.labelLoadInfo.Enabled = false;
-            this.labelLoadInfo.Location = new System.Drawing.Point(20, 107);
-            this.labelLoadInfo.Name = "labelLoadInfo";
-            this.labelLoadInfo.Size = new System.Drawing.Size(124, 20);
-            this.labelLoadInfo.TabIndex = 5;
-            this.labelLoadInfo.Text = "Load information";
+            labelLoadInfo.AutoSize = true;
+            labelLoadInfo.Enabled = false;
+            labelLoadInfo.Location = new System.Drawing.Point(18, 80);
+            labelLoadInfo.Name = "labelLoadInfo";
+            labelLoadInfo.Size = new System.Drawing.Size(99, 15);
+            labelLoadInfo.TabIndex = 5;
+            labelLoadInfo.Text = "Load information";
             // 
             // textBoxLoadInfo
             // 
-            this.textBoxLoadInfo.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.textBoxLoadInfo.BackColor = System.Drawing.SystemColors.Info;
-            this.textBoxLoadInfo.Enabled = false;
-            this.textBoxLoadInfo.Location = new System.Drawing.Point(20, 130);
-            this.textBoxLoadInfo.Multiline = true;
-            this.textBoxLoadInfo.Name = "textBoxLoadInfo";
-            this.textBoxLoadInfo.ReadOnly = true;
-            this.textBoxLoadInfo.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.textBoxLoadInfo.Size = new System.Drawing.Size(738, 218);
-            this.textBoxLoadInfo.TabIndex = 4;
+            textBoxLoadInfo.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right;
+            textBoxLoadInfo.BackColor = System.Drawing.SystemColors.Info;
+            textBoxLoadInfo.Enabled = false;
+            textBoxLoadInfo.Location = new System.Drawing.Point(18, 98);
+            textBoxLoadInfo.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
+            textBoxLoadInfo.Multiline = true;
+            textBoxLoadInfo.Name = "textBoxLoadInfo";
+            textBoxLoadInfo.ReadOnly = true;
+            textBoxLoadInfo.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
+            textBoxLoadInfo.Size = new System.Drawing.Size(646, 164);
+            textBoxLoadInfo.TabIndex = 4;
             // 
             // buttonBrowse
             // 
-            this.buttonBrowse.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.buttonBrowse.Location = new System.Drawing.Point(657, 63);
-            this.buttonBrowse.Name = "buttonBrowse";
-            this.buttonBrowse.Size = new System.Drawing.Size(101, 29);
-            this.buttonBrowse.TabIndex = 3;
-            this.buttonBrowse.Text = "Browse ...";
-            this.buttonBrowse.UseVisualStyleBackColor = true;
-            this.buttonBrowse.Click += new System.EventHandler(this.ButtonBrowse_Click);
+            buttonBrowse.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right;
+            buttonBrowse.Location = new System.Drawing.Point(575, 47);
+            buttonBrowse.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
+            buttonBrowse.Name = "buttonBrowse";
+            buttonBrowse.Size = new System.Drawing.Size(88, 22);
+            buttonBrowse.TabIndex = 3;
+            buttonBrowse.Text = "Browse ...";
+            buttonBrowse.UseVisualStyleBackColor = true;
+            buttonBrowse.Click += ButtonBrowse_Click;
             // 
             // labelPath
             // 
-            this.labelPath.AutoSize = true;
-            this.labelPath.Location = new System.Drawing.Point(20, 67);
-            this.labelPath.Name = "labelPath";
-            this.labelPath.Size = new System.Drawing.Size(40, 20);
-            this.labelPath.TabIndex = 2;
-            this.labelPath.Text = "Path:";
+            labelPath.AutoSize = true;
+            labelPath.Location = new System.Drawing.Point(18, 50);
+            labelPath.Name = "labelPath";
+            labelPath.Size = new System.Drawing.Size(34, 15);
+            labelPath.TabIndex = 2;
+            labelPath.Text = "Path:";
             // 
             // textBoxPath
             // 
-            this.textBoxPath.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.textBoxPath.Location = new System.Drawing.Point(66, 64);
-            this.textBoxPath.Name = "textBoxPath";
-            this.textBoxPath.Size = new System.Drawing.Size(585, 27);
-            this.textBoxPath.TabIndex = 1;
-            this.textBoxPath.TextChanged += new System.EventHandler(this.TextBoxPath_TextChanged);
+            textBoxPath.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right;
+            textBoxPath.Location = new System.Drawing.Point(58, 48);
+            textBoxPath.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
+            textBoxPath.Name = "textBoxPath";
+            textBoxPath.Size = new System.Drawing.Size(512, 23);
+            textBoxPath.TabIndex = 1;
+            textBoxPath.TextChanged += TextBoxPath_TextChanged;
             // 
             // radioButtonExtracted
             // 
-            this.radioButtonExtracted.AutoSize = true;
-            this.radioButtonExtracted.Location = new System.Drawing.Point(153, 34);
-            this.radioButtonExtracted.Name = "radioButtonExtracted";
-            this.radioButtonExtracted.Size = new System.Drawing.Size(161, 24);
-            this.radioButtonExtracted.TabIndex = 0;
-            this.radioButtonExtracted.Text = "From extracted files";
-            this.radioButtonExtracted.UseVisualStyleBackColor = true;
-            this.radioButtonExtracted.CheckedChanged += new System.EventHandler(this.RadioButtonExtracted_CheckedChanged);
+            radioButtonExtracted.AutoSize = true;
+            radioButtonExtracted.Checked = true;
+            radioButtonExtracted.Location = new System.Drawing.Point(134, 26);
+            radioButtonExtracted.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
+            radioButtonExtracted.Name = "radioButtonExtracted";
+            radioButtonExtracted.Size = new System.Drawing.Size(128, 19);
+            radioButtonExtracted.TabIndex = 0;
+            radioButtonExtracted.TabStop = true;
+            radioButtonExtracted.Text = "From extracted files";
+            radioButtonExtracted.UseVisualStyleBackColor = true;
+            radioButtonExtracted.CheckedChanged += RadioButtonExtracted_CheckedChanged;
             // 
             // radioButtonADF
             // 
-            this.radioButtonADF.AutoSize = true;
-            this.radioButtonADF.Checked = true;
-            this.radioButtonADF.Location = new System.Drawing.Point(20, 34);
-            this.radioButtonADF.Name = "radioButtonADF";
-            this.radioButtonADF.Size = new System.Drawing.Size(127, 24);
-            this.radioButtonADF.TabIndex = 0;
-            this.radioButtonADF.TabStop = true;
-            this.radioButtonADF.Text = "From ADF files";
-            this.radioButtonADF.UseVisualStyleBackColor = true;
-            this.radioButtonADF.CheckedChanged += new System.EventHandler(this.RadioButtonADF_CheckedChanged);
+            radioButtonADF.AutoSize = true;
+            radioButtonADF.Location = new System.Drawing.Point(18, 26);
+            radioButtonADF.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
+            radioButtonADF.Name = "radioButtonADF";
+            radioButtonADF.Size = new System.Drawing.Size(102, 19);
+            radioButtonADF.TabIndex = 0;
+            radioButtonADF.Text = "From ADF files";
+            radioButtonADF.UseVisualStyleBackColor = true;
+            radioButtonADF.CheckedChanged += RadioButtonADF_CheckedChanged;
             // 
             // labelHeadline
             // 
-            this.labelHeadline.AutoSize = true;
-            this.labelHeadline.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
-            this.labelHeadline.Location = new System.Drawing.Point(22, 20);
-            this.labelHeadline.Name = "labelHeadline";
-            this.labelHeadline.Size = new System.Drawing.Size(724, 20);
-            this.labelHeadline.TabIndex = 6;
-            this.labelHeadline.Text = "Welcome to Ambermoon Editor. Just pick a data source: directory with ADF files or" +
-    " the extracted files.";
+            labelHeadline.AutoSize = true;
+            labelHeadline.Font = new System.Drawing.Font("Consolas", 9F, System.Drawing.FontStyle.Bold);
+            labelHeadline.Location = new System.Drawing.Point(19, 15);
+            labelHeadline.Name = "labelHeadline";
+            labelHeadline.Size = new System.Drawing.Size(574, 15);
+            labelHeadline.TabIndex = 6;
+            labelHeadline.Text = "Welcome to Ambermoon Editor. Just pick a data source: directory with ADF files or the extracted files.";
             // 
             // LoadForm
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 20F);
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(800, 450);
-            this.Controls.Add(this.labelHeadline);
-            this.Controls.Add(this.groupBoxLoad);
-            this.MinimumSize = new System.Drawing.Size(810, 460);
-            this.Name = "LoadForm";
-            this.Text = "Ambermoon Editor";
-            this.groupBoxLoad.ResumeLayout(false);
-            this.groupBoxLoad.PerformLayout();
-            this.ResumeLayout(false);
-            this.PerformLayout();
+            AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
+            AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            ClientSize = new System.Drawing.Size(700, 338);
+            Controls.Add(labelHeadline);
+            Controls.Add(groupBoxLoad);
+            Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
+            MinimumSize = new System.Drawing.Size(711, 355);
+            Name = "LoadForm";
+            Text = "Ambermoon Editor";
+            groupBoxLoad.ResumeLayout(false);
+            groupBoxLoad.PerformLayout();
+            ResumeLayout(false);
+            PerformLayout();
 
         }
 

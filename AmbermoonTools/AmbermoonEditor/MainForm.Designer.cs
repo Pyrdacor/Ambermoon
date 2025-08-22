@@ -28,97 +28,107 @@
         /// </summary>
         private void InitializeComponent()
         {
-            this.tabControlMain = new System.Windows.Forms.TabControl();
-            this.TabPageOverview = new System.Windows.Forms.TabPage();
-            this.TabPageItems = new System.Windows.Forms.TabPage();
-            this.TabPageMapTexts = new System.Windows.Forms.TabPage();
-            this.TabPageCharacters = new System.Windows.Forms.TabPage();
-            this.TabPageMonsters = new System.Windows.Forms.TabPage();
-            this.TabPageNPCs = new System.Windows.Forms.TabPage();
-            this.tabControlMain.SuspendLayout();
-            this.SuspendLayout();
+            tabControlMain = new System.Windows.Forms.TabControl();
+            TabPageOverview = new System.Windows.Forms.TabPage();
+            TabPageItems = new System.Windows.Forms.TabPage();
+            TabPageMapTexts = new System.Windows.Forms.TabPage();
+            TabPagePartyMembers = new System.Windows.Forms.TabPage();
+            TabPageMonsters = new System.Windows.Forms.TabPage();
+            TabPageNPCs = new System.Windows.Forms.TabPage();
+            tabControlMain.SuspendLayout();
+            SuspendLayout();
             // 
             // tabControlMain
             // 
-            this.tabControlMain.Controls.Add(this.TabPageOverview);
-            this.tabControlMain.Controls.Add(this.TabPageItems);
-            this.tabControlMain.Controls.Add(this.TabPageMapTexts);
-            this.tabControlMain.Controls.Add(this.TabPageCharacters);
-            this.tabControlMain.Controls.Add(this.TabPageMonsters);
-            this.tabControlMain.Controls.Add(this.TabPageNPCs);
-            this.tabControlMain.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.tabControlMain.Location = new System.Drawing.Point(0, 0);
-            this.tabControlMain.Name = "tabControlMain";
-            this.tabControlMain.SelectedIndex = 2;
-            this.tabControlMain.Size = new System.Drawing.Size(1263, 740);
-            this.tabControlMain.TabIndex = 0;
-            this.tabControlMain.SelectedIndexChanged += new System.EventHandler(this.TabControlMain_SelectedIndexChanged);
+            tabControlMain.Controls.Add(TabPageOverview);
+            tabControlMain.Controls.Add(TabPageItems);
+            tabControlMain.Controls.Add(TabPageMapTexts);
+            tabControlMain.Controls.Add(TabPagePartyMembers);
+            tabControlMain.Controls.Add(TabPageMonsters);
+            tabControlMain.Controls.Add(TabPageNPCs);
+            tabControlMain.Dock = System.Windows.Forms.DockStyle.Fill;
+            tabControlMain.Location = new System.Drawing.Point(0, 0);
+            tabControlMain.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
+            tabControlMain.Name = "tabControlMain";
+            tabControlMain.SelectedIndex = 2;
+            tabControlMain.Size = new System.Drawing.Size(1105, 555);
+            tabControlMain.TabIndex = 0;
+            tabControlMain.SelectedIndexChanged += TabControlMain_SelectedIndexChanged;
             // 
             // TabPageOverview
             // 
-            this.TabPageOverview.Location = new System.Drawing.Point(4, 29);
-            this.TabPageOverview.Name = "TabPageOverview";
-            this.TabPageOverview.Padding = new System.Windows.Forms.Padding(3);
-            this.TabPageOverview.Size = new System.Drawing.Size(1255, 707);
-            this.TabPageOverview.TabIndex = 0;
-            this.TabPageOverview.Text = "Overview";
-            this.TabPageOverview.UseVisualStyleBackColor = true;
+            TabPageOverview.Font = new System.Drawing.Font("Consolas", 9F);
+            TabPageOverview.Location = new System.Drawing.Point(4, 24);
+            TabPageOverview.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
+            TabPageOverview.Name = "TabPageOverview";
+            TabPageOverview.Padding = new System.Windows.Forms.Padding(3, 2, 3, 2);
+            TabPageOverview.Size = new System.Drawing.Size(1097, 527);
+            TabPageOverview.TabIndex = 0;
+            TabPageOverview.Text = "Overview";
+            TabPageOverview.UseVisualStyleBackColor = true;
             // 
             // TabPageItems
             // 
-            this.TabPageItems.Location = new System.Drawing.Point(4, 29);
-            this.TabPageItems.Name = "TabPageItems";
-            this.TabPageItems.Padding = new System.Windows.Forms.Padding(3);
-            this.TabPageItems.Size = new System.Drawing.Size(1255, 707);
-            this.TabPageItems.TabIndex = 1;
-            this.TabPageItems.Text = "Items";
-            this.TabPageItems.UseVisualStyleBackColor = true;
+            TabPageItems.Location = new System.Drawing.Point(4, 24);
+            TabPageItems.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
+            TabPageItems.Name = "TabPageItems";
+            TabPageItems.Padding = new System.Windows.Forms.Padding(3, 2, 3, 2);
+            TabPageItems.Size = new System.Drawing.Size(1097, 527);
+            TabPageItems.TabIndex = 1;
+            TabPageItems.Text = "Items";
+            TabPageItems.UseVisualStyleBackColor = true;
             // 
             // TabPageMapTexts
             // 
-            this.TabPageMapTexts.Location = new System.Drawing.Point(4, 29);
-            this.TabPageMapTexts.Name = "TabPageMapTexts";
-            this.TabPageMapTexts.Padding = new System.Windows.Forms.Padding(3);
-            this.TabPageMapTexts.Size = new System.Drawing.Size(1255, 707);
-            this.TabPageMapTexts.TabIndex = 2;
-            this.TabPageMapTexts.Text = "Map texts";
-            this.TabPageMapTexts.UseVisualStyleBackColor = true;
+            TabPageMapTexts.Location = new System.Drawing.Point(4, 24);
+            TabPageMapTexts.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
+            TabPageMapTexts.Name = "TabPageMapTexts";
+            TabPageMapTexts.Padding = new System.Windows.Forms.Padding(3, 2, 3, 2);
+            TabPageMapTexts.Size = new System.Drawing.Size(1097, 527);
+            TabPageMapTexts.TabIndex = 2;
+            TabPageMapTexts.Text = "Map texts";
+            TabPageMapTexts.UseVisualStyleBackColor = true;
             // 
-            // TabPageCharacters
+            // TabPagePartyMembers
             // 
-            this.TabPageCharacters.Location = new System.Drawing.Point(4, 29);
-            this.TabPageCharacters.Name = "TabPageCharacters";
-            this.TabPageCharacters.Size = new System.Drawing.Size(1255, 707);
-            this.TabPageCharacters.TabIndex = 4;
-            this.TabPageCharacters.Text = "Characters";
+            TabPagePartyMembers.Location = new System.Drawing.Point(4, 24);
+            TabPagePartyMembers.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
+            TabPagePartyMembers.Name = "TabPagePartyMembers";
+            TabPagePartyMembers.Size = new System.Drawing.Size(1097, 527);
+            TabPagePartyMembers.TabIndex = 4;
+            TabPagePartyMembers.Text = "Party";
             // 
             // TabPageMonsters
             // 
-            this.TabPageMonsters.Location = new System.Drawing.Point(4, 29);
-            this.TabPageMonsters.Name = "TabPageMonsters";
-            this.TabPageMonsters.Size = new System.Drawing.Size(1255, 707);
-            this.TabPageMonsters.TabIndex = 3;
-            this.TabPageMonsters.Text = "Monsters";
+            TabPageMonsters.Location = new System.Drawing.Point(4, 24);
+            TabPageMonsters.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
+            TabPageMonsters.Name = "TabPageMonsters";
+            TabPageMonsters.Size = new System.Drawing.Size(1097, 527);
+            TabPageMonsters.TabIndex = 3;
+            TabPageMonsters.Text = "Monsters";
             // 
             // TabPageNPCs
             // 
-            this.TabPageNPCs.Location = new System.Drawing.Point(4, 29);
-            this.TabPageNPCs.Name = "TabPageNPCs";
-            this.TabPageNPCs.Size = new System.Drawing.Size(1255, 707);
-            this.TabPageNPCs.TabIndex = 5;
-            this.TabPageNPCs.Text = "NPCs";
+            TabPageNPCs.Location = new System.Drawing.Point(4, 24);
+            TabPageNPCs.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
+            TabPageNPCs.Name = "TabPageNPCs";
+            TabPageNPCs.Size = new System.Drawing.Size(1097, 527);
+            TabPageNPCs.TabIndex = 5;
+            TabPageNPCs.Text = "NPCs";
             // 
             // MainForm
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 20F);
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1263, 740);
-            this.Controls.Add(this.tabControlMain);
-            this.Name = "MainForm";
-            this.Text = "Ambermoon Editor";
-            this.Load += new System.EventHandler(this.MainForm_Load);
-            this.tabControlMain.ResumeLayout(false);
-            this.ResumeLayout(false);
+            AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
+            AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            ClientSize = new System.Drawing.Size(1105, 555);
+            Controls.Add(tabControlMain);
+            Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
+            MinimumSize = new System.Drawing.Size(780, 440);
+            Name = "MainForm";
+            Text = "Ambermoon Editor";
+            Load += MainForm_Load;
+            tabControlMain.ResumeLayout(false);
+            ResumeLayout(false);
 
         }
 
@@ -128,7 +138,7 @@
         private System.Windows.Forms.TabPage TabPageOverview;
         private System.Windows.Forms.TabPage TabPageItems;
         private System.Windows.Forms.TabPage TabPageMapTexts;
-        private System.Windows.Forms.TabPage TabPageCharacters;
+        private System.Windows.Forms.TabPage TabPagePartyMembers;
         private System.Windows.Forms.TabPage TabPageMonsters;
         private System.Windows.Forms.TabPage TabPageNPCs;
     }

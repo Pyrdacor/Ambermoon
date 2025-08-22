@@ -1,5 +1,7 @@
-﻿using Ambermoon.Data.Legacy;
+﻿using Ambermoon.Data;
+using Ambermoon.Data.Legacy;
 using System;
+using System.Drawing;
 using System.Windows.Forms;
 
 namespace AmbermoonEditor
@@ -19,6 +21,8 @@ namespace AmbermoonEditor
                 Close();
 
             InitializeData(loadForm.GameData);
+
+            tabControlMain.SelectedIndex = 0;
         }
 
         private void InitializeData(GameData gameData)
@@ -26,7 +30,7 @@ namespace AmbermoonEditor
             InitializeTabPage(TabPageOverview, new OverviewControl(), gameData);
             InitializeTabPage(TabPageItems, new ItemControl(), gameData);
             InitializeTabPage(TabPageMapTexts, new MapTextControl(), gameData);
-            InitializeTabPage(TabPageCharacters, new CharacterControl(), gameData);
+            InitializeTabPage(TabPagePartyMembers, new PartyMemberControl(), gameData);
             InitializeTabPage(TabPageMonsters, new MonsterControl(), gameData);
             InitializeTabPage(TabPageNPCs, new NPCControl(), gameData);
 
@@ -37,7 +41,7 @@ namespace AmbermoonEditor
         {
             mainControl.GameData = gameData;
             mainControl.Dock = DockStyle.Fill;
-            page.Controls.Add(mainControl);
+            page.Controls.Add(mainControl);           
         }
 
         private void TabControlMain_SelectedIndexChanged(object sender, EventArgs e)
