@@ -627,8 +627,9 @@ namespace Ambermoon.Data.Descriptions
 				Use.WithDisplayMapping<PartyMemberConditionEvent>(
 					() => Use.Conditional<PartyMemberConditionEvent>(() => Use.Byte(nameof(PartyMemberConditionEvent.ConditionValueIndex), false), conditionEvent =>
 						conditionEvent.TypeOfCondition == PartyMemberConditionEvent.PartyMemberConditionType.Attribute ||
-						conditionEvent.TypeOfCondition == PartyMemberConditionEvent.PartyMemberConditionType.Skill
-					),
+						conditionEvent.TypeOfCondition == PartyMemberConditionEvent.PartyMemberConditionType.Skill ||
+                        conditionEvent.TypeOfCondition == PartyMemberConditionEvent.PartyMemberConditionType.Language
+                    ),
 					(conditionEvent, valueDescription) => conditionEvent.TypeOfCondition switch
                     {
 						PartyMemberConditionEvent.PartyMemberConditionType.Skill => "Skill",
@@ -641,8 +642,10 @@ namespace Ambermoon.Data.Descriptions
 						.Concat(Enumerable.Range(7, (int)Enum.GetValues<PartyMembers>().Max()).Select(i => (PartyMemberConditionEvent.PartyMemberConditionTarget)i)),
 					(target) => (int)target != 255 && (int)target >= 7 ? $"Party Member {(int)target - 6}" : Enum.GetName(target)),
 				Use.Flags16(nameof(ConditionEvent.DisallowedAilments), false, Condition.None),
-				Use.Word(nameof(PartyMemberConditionEvent.Value), true),
-				Use.EventIndex(nameof(ConditionEvent.ContinueIfFalseWithMapEventIndex), false)
+                Use.Conditional<PartyMemberConditionEvent>(() => Use.Word(nameof(PartyMemberConditionEvent.Value), true), conditionEvent =>
+                        conditionEvent.TypeOfCondition != PartyMemberConditionEvent.PartyMemberConditionType.Language
+                ),
+                Use.EventIndex(nameof(ConditionEvent.ContinueIfFalseWithMapEventIndex), false)
 			)},
             { EventType.Shake, new EventDescription
             (

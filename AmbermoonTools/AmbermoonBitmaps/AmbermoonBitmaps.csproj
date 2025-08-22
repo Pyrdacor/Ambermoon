@@ -7,8 +7,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Ambermoon.Data.Legacy" Version="10.10.2" />
-    <PackageReference Include="System.Drawing.Common" Version="9.0.7" />
+    <PackageReference Include="Ambermoon.Data.Legacy" Version="10.10.3" />
+    <PackageReference Include="System.Drawing.Common" Version="9.0.8" />
   </ItemGroup>
 
 </Project>
