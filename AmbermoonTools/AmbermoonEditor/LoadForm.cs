@@ -14,6 +14,28 @@ namespace AmbermoonEditor
             InitializeComponent();
         }
 
+        protected override void OnLoad(EventArgs e)
+        {
+            base.OnLoad(e);        
+        }
+
+        protected override void OnShown(EventArgs e)
+        {
+            base.OnShown(e);
+
+            BeginInvoke(() =>
+            {
+                Refresh();
+
+                radioButtonADF.Checked = Properties.Settings.Default.LoadFromDisks;
+
+                if (!string.IsNullOrWhiteSpace(Properties.Settings.Default.GameDataPath))
+                {
+                    textBoxPath.Text = Properties.Settings.Default.GameDataPath;
+                }
+            });
+        }
+
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public GameData GameData { get; private set; }
 
@@ -55,6 +77,10 @@ namespace AmbermoonEditor
 
                     GameData = new GameData(loadPreference, this, false);
                     GameData.Load(path);
+
+                    Properties.Settings.Default.GameDataPath = path;
+                    Properties.Settings.Default.LoadFromDisks = radioButtonADF.Checked;
+                    Properties.Settings.Default.Save();
                 }
                 catch (Exception ex)
                 {
@@ -109,6 +135,8 @@ namespace AmbermoonEditor
 
         private void TextBoxPath_TextChanged(object sender, EventArgs e)
         {
+            textBoxPath.Refresh();
+
             UpdateGameData();
         }
 
@@ -127,7 +155,7 @@ namespace AmbermoonEditor
             UpdateGameData();
         }
 
-        private void buttonContinue_Click(object sender, EventArgs e)
+        private void ButtonContinue_Click(object sender, EventArgs e)
         {
             DialogResult = DialogResult.OK;
         }
