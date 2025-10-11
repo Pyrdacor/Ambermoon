@@ -30,7 +30,7 @@ Offset | Type | Description
 0x000C | ubyte | Combat graphic index (only used for monsters)
 0x000D | ubyte | Spell chance percentage (only used for monsters, not used in Ambermoon), in **Ambermoon Advanced** this is for additional languages
 0x000E | ubyte | Magic bonus to hit (0-255, only used for monsters, not used in Ambermoon)
-0x000F | ubyte | Monster morale, retreat percentage (0-100%), in **Ambermoon Advanced** this is used for party members as well to state if they exchanged experience already.
+0x000F | ubyte | Monster morale, retreat percentage (0-100%), in **Ambermoon Advanced** this is used for party members as well to store the max level the character ever had. When exchanging experience, the level can decrease but rewards like TP and SLP remain. To avoid exploits the max reached level is stored and the character gets only SLP/TP when he levels beyond that level.
 0x0010 | ubyte | Immunity to [spell types](Enumerations/SpellTypes.md)
 0x0011 | ubyte | Attacks per round (APR)
 0x0012 | ubyte | [Battle flags](Enumerations/BattleFlags.md) (monsters only in Ambermoon, party members as well in **Ambermoon Advanced**)
