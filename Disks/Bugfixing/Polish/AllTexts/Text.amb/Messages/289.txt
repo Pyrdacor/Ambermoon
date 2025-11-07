@@ -1,1 +1,1 @@
-Magiczne zakłócenia sprawiają, że automapper jest bezużyteczny.
+Magiczne zakłócenia sprawiają, że automaper jest bezużyteczny.
