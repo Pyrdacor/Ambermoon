@@ -135,7 +135,7 @@ if (language != "German")
     var clickTextFile = Path.Combine(languageTranslationSourcePath, "click-text.txt");
     var clickTextString = File.Exists(clickTextFile) ? File.ReadAllText(clickTextFile).Trim() : "<CLICK>";
     var translatorsFile = Path.Combine(languageTranslationSourcePath, "translators.txt");
-    var translators = File.Exists(translatorsFile) ? string.Join(' ', File.ReadAllLines(translatorsFile).Select(line => line.Trim()).Where(line => !line.StartsWith('#') && !string.IsNullOrWhiteSpace(line))) : "";
+    var translators = File.Exists(translatorsFile) ? string.Join(' ', File.ReadAllLines(translatorsFile).Select(line => line.Trim()).Where(line => !line.StartsWith('#') && !string.IsNullOrWhiteSpace(line)).Select(t => $"\"{t}\"")) : "";
 
     CopyAndTrackDir(Path.Combine(languageSourcePath, "AllTexts"), Path.Combine(tempDir, "AllTexts"));
     CopyAndTrackDir(Path.Combine(languageSourcePath, "IntroTexts"), Path.Combine(tempDir, "IntroTexts"));
@@ -171,11 +171,11 @@ if (language != "German")
 
     // Patch Intro
     File.Delete(Path.Combine(tempDir, "Amberfiles", "Ambermoon_intro"));
-    Exec("AmbermoonIntroPatcher.exe", $"Ambermoon_intro_translation_base IntroTexts Amberfiles\\Ambermoon_intro Fonts {encodingString}");
+    Exec("AmbermoonIntroPatcher.exe", $"Ambermoon_intro_translation_base IntroTexts Amberfiles\\Ambermoon_intro Fonts \"{encodingString}\"");
 
     // Patch Extro
     File.Delete(Path.Combine(tempDir, "Amberfiles", "Ambermoon_extro"));
-    Exec("AmbermoonExtroPatcher.exe", $"Ambermoon_extro_translation_base ExtroTexts Amberfiles\\Ambermoon_extro Fonts {encodingString} {clickTextString} {translators}");
+    Exec("AmbermoonExtroPatcher.exe", $"Ambermoon_extro_translation_base ExtroTexts Amberfiles\\Ambermoon_extro Fonts \"{encodingString}\" \"{clickTextString}\" {translators}");
 
     // Delete tools
     File.Delete(Path.Combine(tempDir, "AmbermoonTextManager.exe"));
