@@ -317,7 +317,7 @@ public static class Program
         var extroTexts = new List<List<string>>[6] { [], [], [], [], [], [] };
         int clickGroupIndex = 0;
 
-        foreach (var clickGroup in Directory.GetDirectories(config.TextPath!).OrderBy(d => int.Parse(Path.GetFileName(d)[0..3])))
+        foreach (var clickGroup in Directory.GetDirectories(config.TextPath!).Where(d => int.TryParse(Path.GetFileName(d)[0..3], out _)).OrderBy(d => int.Parse(Path.GetFileName(d)[0..3])))
         {
             var clickGroupTexts = extroTexts[clickGroupIndex++];
 

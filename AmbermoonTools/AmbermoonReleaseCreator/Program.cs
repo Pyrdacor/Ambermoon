@@ -1,5 +1,4 @@
-﻿using System;
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using System.IO.Compression;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -135,7 +134,7 @@ if (language != "German")
     var clickTextFile = Path.Combine(languageTranslationSourcePath, "click-text.txt");
     var clickTextString = File.Exists(clickTextFile) ? File.ReadAllText(clickTextFile).Trim() : "<CLICK>";
     var translatorsFile = Path.Combine(languageTranslationSourcePath, "translators.txt");
-    var translators = File.Exists(translatorsFile) ? string.Join(' ', File.ReadAllLines(translatorsFile).Select(line => line.Trim()).Where(line => !line.StartsWith('#') && !string.IsNullOrWhiteSpace(line)).Select(t => $"\"{t}\"")) : "";
+    var translators = File.Exists(translatorsFile) ? string.Join(' ', File.ReadAllLines(translatorsFile, Encoding.UTF8).Select(line => line.Trim()).Where(line => !line.StartsWith('#') && !string.IsNullOrWhiteSpace(line)).Select(t => $"\"{t}\"")) : "";
 
     CopyAndTrackDir(Path.Combine(languageSourcePath, "AllTexts"), Path.Combine(tempDir, "AllTexts"));
     CopyAndTrackDir(Path.Combine(languageSourcePath, "IntroTexts"), Path.Combine(tempDir, "IntroTexts"));
