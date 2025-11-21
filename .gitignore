@@ -3,3 +3,7 @@ obj
 /.vs
 /AmbermoonTools/.vs
 launchSettings.json
+/AmbermoonTools/AmbermoonPack/Properties/PublishProfiles/FolderProfile.pubxml.user
+/AmbermoonTools/AmbermoonPack/AmbermoonPack.csproj.user
+/AmbermoonTools/AmbermoonEventEditor/AmbermoonEventEditor.csproj.user
+/AmbermoonTools/AmbermoonEventEditor/Properties/PublishProfiles/FolderProfile.pubxml.user
