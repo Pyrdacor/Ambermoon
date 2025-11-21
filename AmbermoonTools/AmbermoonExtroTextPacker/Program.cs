@@ -71,7 +71,7 @@ internal class Program
             return 1;
         }
 
-        foreach (var clickGroup in Directory.GetDirectories(path).OrderBy(d => int.Parse(Path.GetFileName(d)[0..3])))
+        foreach (var clickGroup in Directory.GetDirectories(path).Where(d => int.TryParse(Path.GetFileName(d)[0..3], out _)).OrderBy(d => int.Parse(Path.GetFileName(d)[0..3])))
         {
             var clickGroupTexts = outroTexts[clickGroupIndex++];
 
