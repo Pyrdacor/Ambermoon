@@ -158,6 +158,9 @@ if (language != "German")
     // Adjust version
     File.WriteAllText(Path.Combine(tempDir, "AllTexts", "Text.amb", "VersionString", "000.txt"), $"Ambermoon v{version}");
 
+    // Ensure empty 1Map_data.amb directory in AllTexts
+    Directory.CreateDirectory(Path.Combine(tempDir, "AllTexts", "1Map_data.amb"));
+
     // From now on work inside the temp directory
     Environment.CurrentDirectory = tempDir;
 
@@ -213,7 +216,7 @@ else
         .Select(f => new { f.Path, Major = int.Parse(f.Match.Groups[1].Value), Minor = int.Parse(f.Match.Groups[2].Value) })
         .Where(f => f.Major < versionMajor || (f.Major == versionMajor && f.Minor < versionMinor))
         .OrderByDescending(f => f.Major).ThenByDescending(f => f.Minor)
-        .LastOrDefault();
+        .FirstOrDefault();
 
     if (previousRelease == null)
     {
@@ -225,11 +228,16 @@ else
 
     ZipFile.ExtractToDirectory(previousRelease.Path, tempDir);
 
-    var germanBugfixPath = Path.Combine(Environment.CurrentDirectory, "Disks", "Bugfixing", "German");
+    int tempDirLength = tempDir.EndsWith('/') || tempDir.EndsWith('\\') ? tempDir.Length : tempDir.Length + 1;
+    var filenames = Directory.GetFiles(tempDir, "*.*", SearchOption.AllDirectories).Select(f => f[tempDirLength..]).ToHashSet();
+    var directories = Directory.GetDirectories(tempDir, "*", SearchOption.AllDirectories).Select(f => f[tempDirLength..]).ToHashSet();
 
-    CopyDir(Path.Combine(germanBugfixPath, "Amberfiles"), Path.Combine(tempDir, "Amberfiles"));
+    var germanBugfixPath = Path.Combine(Environment.CurrentDirectory, "Disks", "Bugfixing", "German");
+    var changelogPath = Path.Combine(Environment.CurrentDirectory, "Disks", "Bugfixing", "Changelog");
+
+    CopyDir(Path.Combine(germanBugfixPath, "Amberfiles"), Path.Combine(tempDir, "Amberfiles"), tempDir, filenames, directories);
     CopyFiles(germanBugfixPath, tempDir, "Ambermoon", "Ambermoon_install");
-    CopyFiles(germanSourcePath, tempDir, "readme.txt", "liesmich.txt");
+    CopyFiles(changelogPath, tempDir, "readme.txt", "liesmich.txt");
 
     var readmeLines = File.ReadAllLines(Path.Combine(tempDir, "readme.txt"));
     readmeLines[0] = $"Ambermoon German {version} by Pyrdacor ({DateTime.Now:dd-MM-yyyy})";
@@ -251,16 +259,19 @@ else
     // Adjust version
     File.WriteAllText(Path.Combine(tempDir, "AllTexts", "Text.amb", "VersionString", "000.txt"), $"Ambermoon v{version}");
 
+    // Ensure empty 1Map_data.amb directory in AllTexts
+    Directory.CreateDirectory(Path.Combine(tempDir, "AllTexts", "1Map_data.amb"));
+
     // From now on work inside the temp directory
     Environment.CurrentDirectory = tempDir;
 
     // Patch game texts
     Exec("AmbermoonTextManager.exe", "-i Amberfiles AllTexts");
 
-    string CopyDir(string source, string dest)
+    string CopyDir(string source, string dest, string? rootTargetPath = null, HashSet<string>? allowedTargetFilenames = null, HashSet<string>? allowedTargetDirectories = null)
     {
         Console.WriteLine($"Copying directory from '{source}' to '{LocalPath(dest)}'");
-        CopyDirectory(source, dest, true);
+        CopyDirectory(source, dest, true, rootTargetPath, allowedTargetFilenames, allowedTargetDirectories);
         return dest;
     }
 
@@ -503,19 +514,29 @@ void CreateADF(string directory, char letter, List<AdfFileInfo> fileInfos)
         fileStream.Close();
 }
 
-static void CopyDirectory(string sourceDir, string targetDir, bool recursive)
+static void CopyDirectory(string sourceDir, string targetDir, bool recursive, string? rootTargetPath = null, HashSet<string>? allowedTargetFilenames = null, HashSet<string>? allowedTargetDirectories = null)
 {
     if (!Directory.Exists(sourceDir))
     {
         throw new DirectoryNotFoundException($"Source directory '{sourceDir}' does not exist.");
     }
 
-    Directory.CreateDirectory(targetDir);
+    int rootPathLength = (rootTargetPath?.TrimEnd('\\', '/').Length ?? 0) + 1;
+
+    string LocalPath(string path)
+    {
+        return path[rootPathLength..];
+    }
+
+    if (allowedTargetDirectories == null || allowedTargetDirectories.Contains(LocalPath(targetDir)))
+        Directory.CreateDirectory(targetDir);
 
     foreach (var file in Directory.GetFiles(sourceDir))
     {
         var targetFile = Path.Combine(targetDir, Path.GetFileName(file));
-        File.Copy(file, targetFile, true);
+
+        if (allowedTargetFilenames == null || allowedTargetFilenames.Contains(LocalPath(targetFile)))
+            File.Copy(file, targetFile, true);
     }
 
     if (recursive)
@@ -523,7 +544,9 @@ static void CopyDirectory(string sourceDir, string targetDir, bool recursive)
         foreach (var dir in Directory.GetDirectories(sourceDir))
         {
             var targetSubDir = Path.Combine(targetDir, Path.GetFileName(dir));
-            CopyDirectory(dir, targetSubDir, true);
+
+            if (allowedTargetDirectories == null || allowedTargetDirectories.Contains(LocalPath(targetSubDir)))
+                CopyDirectory(dir, targetSubDir, true, rootTargetPath, allowedTargetFilenames, allowedTargetDirectories);
         }
     }
 }
