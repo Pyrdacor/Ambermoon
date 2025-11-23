@@ -129,28 +129,48 @@ if (language != "German")
     var languageSourcePath = Path.Combine(Environment.CurrentDirectory, "Disks", "Bugfixing", language);
     var translationSourcePath = Path.Combine(Environment.CurrentDirectory, "Translations");
     var languageTranslationSourcePath = Path.Combine(translationSourcePath, language);
-    var encodingFile = Path.Combine(languageTranslationSourcePath, "encoding.txt");
-    var encodingString = File.Exists(encodingFile) ? File.ReadAllText(encodingFile).Trim() : Encoding.Latin1.EncodingName;
-    var clickTextFile = Path.Combine(languageTranslationSourcePath, "click-text.txt");
-    var clickTextString = File.Exists(clickTextFile) ? File.ReadAllText(clickTextFile).Trim() : "<CLICK>";
-    var translatorsFile = Path.Combine(languageTranslationSourcePath, "translators.txt");
-    var translators = File.Exists(translatorsFile) ? string.Join(' ', File.ReadAllLines(translatorsFile, Encoding.UTF8).Select(line => line.Trim()).Where(line => !line.StartsWith('#') && !string.IsNullOrWhiteSpace(line)).Select(t => $"\"{t}\"")) : "";
 
-    CopyAndTrackDir(Path.Combine(languageSourcePath, "AllTexts"), Path.Combine(tempDir, "AllTexts"));
-    CopyAndTrackDir(Path.Combine(languageSourcePath, "IntroTexts"), Path.Combine(tempDir, "IntroTexts"));
-    CopyAndTrackDir(Path.Combine(languageSourcePath, "ExtroTexts"), Path.Combine(tempDir, "ExtroTexts"));
-    CopyAndTrackFile(Path.Combine(languageSourcePath, "Amberfiles\\Button_graphics"), Path.Combine(tempDir, "Amberfiles\\Button_graphics"), true);
-    CopyAndTrackFile(Path.Combine(translationSourcePath, "Ambermoon_intro_translation_base"), Path.Combine(tempDir, "Ambermoon_intro_translation_base"));
-    CopyAndTrackFile(Path.Combine(translationSourcePath, "Ambermoon_extro_translation_base"), Path.Combine(tempDir, "Ambermoon_extro_translation_base"));
-    CopyAndTrackFile(Path.Combine(languageTranslationSourcePath, "font.json"), Path.Combine(tempDir, "font.json"));
-    CopyAndTrackFile(Path.Combine(languageTranslationSourcePath, "SmallGlyphs.png"), Path.Combine(tempDir, "SmallGlyphs.png"));
-    CopyAndTrackFile(Path.Combine(languageTranslationSourcePath, "LargeGlyphs.png"), Path.Combine(tempDir, "LargeGlyphs.png"));
+    bool createIntroAndExtro = true;
+    string encodingString = "";
+    string clickTextString = "";
+    string translators = "";
+
+    if (!Directory.Exists(languageTranslationSourcePath))
+    {
+        CopyAndTrackFile(Path.Combine(languageSourcePath, "Amberfiles\\Ambermoon_intro"), Path.Combine(tempDir, "Amberfiles\\Ambermoon_intro"), true);
+        CopyAndTrackFile(Path.Combine(languageSourcePath, "Amberfiles\\Ambermoon_extro"), Path.Combine(tempDir, "Amberfiles\\Ambermoon_extro"), true);
+
+        createIntroAndExtro = false;
+    }
+    else
+    {
+        
+        var encodingFile = Path.Combine(languageTranslationSourcePath, "encoding.txt");
+        encodingString = File.Exists(encodingFile) ? File.ReadAllText(encodingFile).Trim() : Encoding.Latin1.EncodingName;
+        var clickTextFile = Path.Combine(languageTranslationSourcePath, "click-text.txt");
+        clickTextString = File.Exists(clickTextFile) ? File.ReadAllText(clickTextFile).Trim() : "<CLICK>";
+        var translatorsFile = Path.Combine(languageTranslationSourcePath, "translators.txt");
+        translators = File.Exists(translatorsFile) ? string.Join(' ', File.ReadAllLines(translatorsFile, Encoding.UTF8).Select(line => line.Trim()).Where(line => !line.StartsWith('#') && !string.IsNullOrWhiteSpace(line)).Select(t => $"\"{t}\"")) : "";
+
+        CopyAndTrackDir(Path.Combine(languageSourcePath, "IntroTexts"), Path.Combine(tempDir, "IntroTexts"));
+        CopyAndTrackDir(Path.Combine(languageSourcePath, "ExtroTexts"), Path.Combine(tempDir, "ExtroTexts"));
+        CopyAndTrackFile(Path.Combine(translationSourcePath, "Ambermoon_intro_translation_base"), Path.Combine(tempDir, "Ambermoon_intro_translation_base"));
+        CopyAndTrackFile(Path.Combine(translationSourcePath, "Ambermoon_extro_translation_base"), Path.Combine(tempDir, "Ambermoon_extro_translation_base"));
+        CopyAndTrackFile(Path.Combine(languageTranslationSourcePath, "font.json"), Path.Combine(tempDir, "font.json"));
+        CopyAndTrackFile(Path.Combine(languageTranslationSourcePath, "SmallGlyphs.png"), Path.Combine(tempDir, "SmallGlyphs.png"));
+        CopyAndTrackFile(Path.Combine(languageTranslationSourcePath, "LargeGlyphs.png"), Path.Combine(tempDir, "LargeGlyphs.png"));
+
+        // Create needed tools
+        Publish("AmbermoonIntroPatcher");
+        Publish("AmbermoonExtroPatcher");
+        Publish("AmbermoonFontCreator");
+    }
+
+    CopyAndTrackDir(Path.Combine(languageSourcePath, "AllTexts"), Path.Combine(tempDir, "AllTexts"));    
+    CopyAndTrackFile(Path.Combine(languageSourcePath, "Amberfiles\\Button_graphics"), Path.Combine(tempDir, "Amberfiles\\Button_graphics"), true);    
 
     // Create needed tools
     Publish("AmbermoonTextManager");
-    Publish("AmbermoonIntroPatcher");
-    Publish("AmbermoonExtroPatcher");
-    Publish("AmbermoonFontCreator");
 
     // Adjust release date
     File.WriteAllText(Path.Combine(tempDir, "AllTexts", "Text.amb", "DateAndLanguageString", "000.txt"), DateTime.Now.ToString("dd-MM-yyyy") + $" / {language}");
@@ -167,23 +187,28 @@ if (language != "German")
     // Patch game texts
     Exec("AmbermoonTextManager.exe", "-i Amberfiles AllTexts");
 
-    // Create fonts
-    Exec("AmbermoonFontCreator.exe", "font.json SmallGlyphs.png LargeGlyphs.png Fonts");
-    tempFiles.Add(Path.Combine(tempDir, "Fonts"));
+    if (createIntroAndExtro)
+    {
+        // Create fonts
+        Exec("AmbermoonFontCreator.exe", "font.json SmallGlyphs.png LargeGlyphs.png Fonts");
+        tempFiles.Add(Path.Combine(tempDir, "Fonts"));
 
-    // Patch Intro
-    File.Delete(Path.Combine(tempDir, "Amberfiles", "Ambermoon_intro"));
-    Exec("AmbermoonIntroPatcher.exe", $"Ambermoon_intro_translation_base IntroTexts Amberfiles\\Ambermoon_intro Fonts \"{encodingString}\"");
+        // Patch Intro
+        File.Delete(Path.Combine(tempDir, "Amberfiles", "Ambermoon_intro"));
+        Exec("AmbermoonIntroPatcher.exe", $"Ambermoon_intro_translation_base IntroTexts Amberfiles\\Ambermoon_intro Fonts \"{encodingString}\"");
 
-    // Patch Extro
-    File.Delete(Path.Combine(tempDir, "Amberfiles", "Ambermoon_extro"));
-    Exec("AmbermoonExtroPatcher.exe", $"Ambermoon_extro_translation_base ExtroTexts Amberfiles\\Ambermoon_extro Fonts \"{encodingString}\" \"{clickTextString}\" {translators}");
+        // Patch Extro
+        File.Delete(Path.Combine(tempDir, "Amberfiles", "Ambermoon_extro"));
+        Exec("AmbermoonExtroPatcher.exe", $"Ambermoon_extro_translation_base ExtroTexts Amberfiles\\Ambermoon_extro Fonts \"{encodingString}\" \"{clickTextString}\" {translators}");
+
+        // Delete tools
+        File.Delete(Path.Combine(tempDir, "AmbermoonIntroPatcher.exe"));
+        File.Delete(Path.Combine(tempDir, "AmbermoonExtroPatcher.exe"));
+        File.Delete(Path.Combine(tempDir, "AmbermoonFontCreator.exe"));
+    }
 
     // Delete tools
     File.Delete(Path.Combine(tempDir, "AmbermoonTextManager.exe"));
-    File.Delete(Path.Combine(tempDir, "AmbermoonIntroPatcher.exe"));
-    File.Delete(Path.Combine(tempDir, "AmbermoonExtroPatcher.exe"));
-    File.Delete(Path.Combine(tempDir, "AmbermoonFontCreator.exe"));
 
     // Delete temp files and directories
     foreach (var file in tempFiles)
