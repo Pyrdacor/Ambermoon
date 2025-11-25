@@ -33,9 +33,9 @@ namespace AmbermoonEventEditor
             Console.WriteLine();
             Console.WriteLine("Examples:");
             Console.WriteLine();
-            Console.WriteLine(" AmbermoonEventEditor \"1Map_data\\extracted\\001\" 0");
-            Console.WriteLine(" AmbermoonEventEditor \"Party_char\\extracted\\001\" 1");
-            Console.WriteLine(" AmbermoonEventEditor \"NPC_char\\extracted\\001\" 2");
+            Console.WriteLine(" AmbermoonEventEditor \"1Map_data\\extracted\\001\" 0");            
+            Console.WriteLine(" AmbermoonEventEditor \"NPC_char\\extracted\\001\" 1");
+            Console.WriteLine(" AmbermoonEventEditor \"Save.00\\Party_char\\extracted\\001\" 2");
             Console.WriteLine();
         }
 
