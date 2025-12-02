@@ -95,14 +95,14 @@
             this.newToolStripMenuItem.Name = "newToolStripMenuItem";
             this.newToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             this.newToolStripMenuItem.Text = "New";
-            this.newToolStripMenuItem.Click += new System.EventHandler(this.newToolStripMenuItem_Click);
+            this.newToolStripMenuItem.Click += new System.EventHandler(this.NewToolStripMenuItem_Click);
             // 
             // openToolStripMenuItem
             // 
             this.openToolStripMenuItem.Name = "openToolStripMenuItem";
             this.openToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             this.openToolStripMenuItem.Text = "Open";
-            this.openToolStripMenuItem.Click += new System.EventHandler(this.openToolStripMenuItem_Click);
+            this.openToolStripMenuItem.Click += new System.EventHandler(this.OpenToolStripMenuItem_Click);
             // 
             // saveToolStripMenuItem
             // 
@@ -110,7 +110,7 @@
             this.saveToolStripMenuItem.Name = "saveToolStripMenuItem";
             this.saveToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             this.saveToolStripMenuItem.Text = "Save as";
-            this.saveToolStripMenuItem.Click += new System.EventHandler(this.saveToolStripMenuItem_Click);
+            this.saveToolStripMenuItem.Click += new System.EventHandler(this.SaveToolStripMenuItem_Click);
             // 
             // editToolStripMenuItem
             // 
@@ -351,7 +351,7 @@
             this.openPaletteToolStripMenuItem.Name = "openPaletteToolStripMenuItem";
             this.openPaletteToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             this.openPaletteToolStripMenuItem.Text = "Open Palette";
-            this.openPaletteToolStripMenuItem.Click += new System.EventHandler(this.openPaletteToolStripMenuItem_Click);
+            this.openPaletteToolStripMenuItem.Click += new System.EventHandler(this.OpenPaletteToolStripMenuItem_Click);
             // 
             // MainForm
             // 

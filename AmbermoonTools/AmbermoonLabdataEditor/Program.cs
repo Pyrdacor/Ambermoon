@@ -737,75 +737,79 @@ void Edit()
             wallCopy.Overlays = overlays.ToArray();
             labdata.Walls[index - 1] = wallCopy;
         }
+        else
+        {
+            labdata.Walls[index - 1] = wall.Value;
+        }
 
         void AddOverlay(int editIndex = -1)
-        {
-            var overlay = new Reference<Labdata.OverlayData>();
-            Labdata.OverlayData old = default;
+            {
+                var overlay = new Reference<Labdata.OverlayData>();
+                Labdata.OverlayData old = default;
 
-            if (editIndex != -1)
-                old = overlay.Value = overlays[editIndex];
+                if (editIndex != -1)
+                    old = overlay.Value = overlays[editIndex];
 
-            string name = editIndex == -1 ? "Blending" : $"Blending ({old.Blend})";
-            if (!QueryInt(overlay, name, (overlay, blend) => { overlay.Blend = blend != 0; return overlay; }, 0, 1))
-            {
-                if (editIndex == -1)
+                string name = editIndex == -1 ? "Blending" : $"Blending ({old.Blend})";
+                if (!QueryInt(overlay, name, (overlay, blend) => { overlay.Blend = blend != 0; return overlay; }, 0, 1))
                 {
-                    Error();
-                    return;
+                    if (editIndex == -1)
+                    {
+                        Error();
+                        return;
+                    }
                 }
-            }
-            name = editIndex == -1 ? "TextureIndex" : $"TextureIndex ({old.TextureIndex})";
-            if (!QueryInt(overlay, name, (overlay, textureIndex) => { overlay.TextureIndex = (uint)textureIndex; return overlay; }, 1, 255))
-            {
-                if (editIndex == -1)
+                name = editIndex == -1 ? "TextureIndex" : $"TextureIndex ({old.TextureIndex})";
+                if (!QueryInt(overlay, name, (overlay, textureIndex) => { overlay.TextureIndex = (uint)textureIndex; return overlay; }, 1, 255))
                 {
-                    Error();
-                    return;
+                    if (editIndex == -1)
+                    {
+                        Error();
+                        return;
+                    }
                 }
-            }
-            name = editIndex == -1 ? "PositionX" : $"PositionX ({old.PositionX})";
-            if (!QueryInt(overlay, name, (overlay, x) => { overlay.PositionX = (uint)x; return overlay; }, 0, 255))
-            {
-                if (editIndex == -1)
+                name = editIndex == -1 ? "PositionX" : $"PositionX ({old.PositionX})";
+                if (!QueryInt(overlay, name, (overlay, x) => { overlay.PositionX = (uint)x; return overlay; }, 0, 255))
                 {
-                    Error();
-                    return;
+                    if (editIndex == -1)
+                    {
+                        Error();
+                        return;
+                    }
                 }
-            }
-            name = editIndex == -1 ? "PositionY" : $"PositionY ({old.PositionY})";
-            if (!QueryInt(overlay, name, (overlay, y) => { overlay.PositionY = (uint)y; return overlay; }, 0, 255))
-            {
-                if (editIndex == -1)
+                name = editIndex == -1 ? "PositionY" : $"PositionY ({old.PositionY})";
+                if (!QueryInt(overlay, name, (overlay, y) => { overlay.PositionY = (uint)y; return overlay; }, 0, 255))
                 {
-                    Error();
-                    return;
+                    if (editIndex == -1)
+                    {
+                        Error();
+                        return;
+                    }
                 }
-            }
-            name = editIndex == -1 ? "TextureWidth" : $"TextureWidth ({old.TextureWidth})";
-            if (!QueryInt(overlay, name, (overlay, textureWidth) => { overlay.TextureWidth = (uint)textureWidth; return overlay; }, 1, 255))
-            {
-                if (editIndex == -1)
+                name = editIndex == -1 ? "TextureWidth" : $"TextureWidth ({old.TextureWidth})";
+                if (!QueryInt(overlay, name, (overlay, textureWidth) => { overlay.TextureWidth = (uint)textureWidth; return overlay; }, 1, 255))
                 {
-                    Error();
-                    return;
+                    if (editIndex == -1)
+                    {
+                        Error();
+                        return;
+                    }
                 }
-            }
-            name = editIndex == -1 ? "TextureHeight" : $"TextureHeight ({old.TextureHeight})";
-            if (!QueryInt(overlay, name, (overlay, textureHeight) => { overlay.TextureHeight = (uint)textureHeight; return overlay; }, 1, 255))
-            {
-                if (editIndex == -1)
+                name = editIndex == -1 ? "TextureHeight" : $"TextureHeight ({old.TextureHeight})";
+                if (!QueryInt(overlay, name, (overlay, textureHeight) => { overlay.TextureHeight = (uint)textureHeight; return overlay; }, 1, 255))
                 {
-                    Error();
-                    return;
+                    if (editIndex == -1)
+                    {
+                        Error();
+                        return;
+                    }
                 }
-            }
 
-            if (editIndex == -1)
-                overlays.Add(overlay.Value);
-            else
-                overlays[editIndex] = overlay.Value;
-        }
+                if (editIndex == -1)
+                    overlays.Add(overlay.Value);
+                else
+                    overlays[editIndex] = overlay.Value;
+            }
     }
 
     void EditObject()

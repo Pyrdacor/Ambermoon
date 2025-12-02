@@ -59,7 +59,7 @@ namespace AmbermoonImageEditor
             }
         }
 
-        private void panelPalette_Paint(object sender, PaintEventArgs e)
+        private void PanelPalette_Paint(object sender, PaintEventArgs e)
         {
             if (palette.Length != 32)
                 return;
@@ -87,17 +87,23 @@ namespace AmbermoonImageEditor
             e.Graphics.DrawRectangle(borderPen2, column * 32 + 3, row * 32 + 3, 26, 26);
         }
 
-        private void panelPalette_Click(object sender, EventArgs e)
+        private void PanelPalette_Click(object sender, EventArgs e)
         {
-            
+
         }
 
-        private void panelPalette_MouseDown(object sender, MouseEventArgs e)
+        private void PanelPalette_MouseDown(object sender, MouseEventArgs e)
         {
             int column = e.X / 32;
             int row = e.Y / 32;
 
             SelectColor(column + row * 8);
+        }
+
+        private void PaletteForm_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            e.Cancel = true;
+            Visible = false;
         }
     }
 }

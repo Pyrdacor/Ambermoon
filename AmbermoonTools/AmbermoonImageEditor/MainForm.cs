@@ -45,7 +45,7 @@ namespace AmbermoonImageEditor
             }
         }
 
-        private void newToolStripMenuItem_Click(object sender, EventArgs e)
+        private void NewToolStripMenuItem_Click(object sender, EventArgs e)
         {
 
         }
@@ -60,11 +60,15 @@ namespace AmbermoonImageEditor
                 Filter = "All files (*.*)|*.*",
                 FilterIndex = 0,
                 Multiselect = false,
-                Title = "Open Ambermoon palette"
+                Title = "Open Ambermoon palette",
+                FileName = Properties.Settings.Default.PalettePath
             };
 
             if (ofd.ShowDialog(this) == DialogResult.OK)
             {
+                Properties.Settings.Default.PalettePath = ofd.FileName;
+                Properties.Settings.Default.Save();
+
                 var graphicReader = new GraphicReader();
                 var paletteInfo = new GraphicInfo
                 {
@@ -80,7 +84,7 @@ namespace AmbermoonImageEditor
             return null;
         }
 
-        private void openToolStripMenuItem_Click(object sender, EventArgs e)
+        private void OpenToolStripMenuItem_Click(object sender, EventArgs e)
         {
             var ofd = new OpenFileDialog
             {
@@ -90,12 +94,16 @@ namespace AmbermoonImageEditor
                 Filter = "All files (*.*)|*.*",
                 FilterIndex = 0,
                 Multiselect = false,
-                Title = "Open Ambermoon image"
+                Title = "Open Ambermoon image",
+                FileName = Properties.Settings.Default.LoadImagePath
             };
 
             if (ofd.ShowDialog(this) == DialogResult.OK) 
             {
                 var file = ofd.FileName;
+                Properties.Settings.Default.LoadImagePath = file;
+                Properties.Settings.Default.Save();
+
                 var palette = LoadPalette();
 
                 if (palette != null)
@@ -537,7 +545,7 @@ namespace AmbermoonImageEditor
             }
         }
 
-        private void saveToolStripMenuItem_Click(object sender, EventArgs e)
+        private void SaveToolStripMenuItem_Click(object sender, EventArgs e)
         {
             int frames = 1; // TODO
             format ??= GraphicFormat.Palette5Bit;
@@ -559,11 +567,15 @@ namespace AmbermoonImageEditor
             var sfd = new SaveFileDialog
             {
                 OverwritePrompt = true,
-                Title = "Save image"
+                Title = "Save image",
+                FileName = Properties.Settings.Default.SaveImagePath
             };
 
             if (sfd.ShowDialog() == DialogResult.OK)
             {
+                Properties.Settings.Default.SaveImagePath = sfd.FileName;
+                Properties.Settings.Default.Save();
+
                 var imageToSave = image;
 
                 if (format!.Value == GraphicFormat.Texture4Bit && imageToSave.Width % 8 != 0)
@@ -829,7 +841,7 @@ namespace AmbermoonImageEditor
             }
         }
 
-        private void openPaletteToolStripMenuItem_Click(object sender, EventArgs e)
+        private void OpenPaletteToolStripMenuItem_Click(object sender, EventArgs e)
         {
             var palette = LoadPalette();
 

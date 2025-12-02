@@ -4,6 +4,7 @@ using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
+using System.Numerics;
 using System.Runtime.InteropServices;
 
 namespace AmbermoonImageConverter
@@ -24,6 +25,7 @@ namespace AmbermoonImageConverter
             Console.WriteLine("              4: 4 bit planes (floors, lab background, intro, etc)");
             Console.WriteLine("              5: 5 bit planes (items, monsters, tile graphics, etc)");
             Console.WriteLine("              0: 4 bit 3D textures (walls, overlays, objects)");
+            Console.WriteLine("              1: multi-tile graphic (16x16 parts with 5bpp");
             Console.WriteLine("[frames]      Number of frames (default: 1)");
             Console.WriteLine("[palOffset]   Palette offset (default: 0)");
             Console.WriteLine("              Based on <format> this is limited to 0 (5 bpp), 16 (4 bpp) or 24 (3 bpp).");
@@ -41,7 +43,7 @@ namespace AmbermoonImageConverter
         // args[0]: Image
         // args[1]: Palette file
         // args[2]: Output image
-        // args[3]: Format (5: 5bit, 4: 4bit, 3: 3bit, 0: 4bit texture)
+        // args[3]: Format (5: 5bit, 4: 4bit, 3: 3bit, 0: 4bit texture, 1: multi-tile image)
         // args[4]: Frames (default 1)
         // args[5]: Palette index offset (default: 0)
         // args[6]: Transparent color index (default: 0)
@@ -107,6 +109,8 @@ namespace AmbermoonImageConverter
 
             if (bpp == 0)
                 bpp = 4;
+            else if (bpp == 1)
+                bpp = 5;
             else if (bpp < 3 || bpp > 5)
             {
                 Console.WriteLine("Invalid format given.");
@@ -135,10 +139,24 @@ namespace AmbermoonImageConverter
                 Usage();
                 return;
             }
+            else if (frames == 1 && format == 1)
+            {
+                Console.WriteLine("You should specify more than 1 frame if using format 1 (multi-tile).");
+                Console.WriteLine();
+                Usage();
+                return;
+            }
 
             if (width == 0 || height == 0)
             {
                 Console.WriteLine("Image dimensions are invalid.");
+                Console.WriteLine();
+                return;
+            }
+
+            if (format == 1 && (width % 16 != 0 || height % 16 != 0))
+            {
+                Console.WriteLine("Image dimensions must be a multiple of 16 for multi-tile images.");
                 Console.WriteLine();
                 return;
             }
@@ -149,33 +167,74 @@ namespace AmbermoonImageConverter
             }
 
             var outputData = new byte[height * bpp * width / 8];
-            int frameWidth = width / frames;
-            int sizePerFrame = height * bpp * frameWidth / 8;
+            int frameWidth = format == 1 ? 16 : width / frames;
+            int frameHeight = format == 1 ? 16 : height;
+            int sizePerFrame = frameHeight * bpp * frameWidth / 8;
             int scanLine = format == 0 ? 8 : frameWidth;
             int scans = format == 0 ? (frameWidth + 7) / 8 : 1;
 
-            for (int f = 0; f < frames; ++f)
+            if (format == 1) // multi-tile image for 2D maps
             {
-                for (int y = 0; y < height; ++y)
-                {
-                    int baseIndex = f * sizePerFrame + y * bpp * frameWidth / 8;
-                    int xoff = 0;
+                int rows = height / 16;
+                int framesPerRow = width / 16;
+                int lastRowFrames = frames % framesPerRow;
 
-                    for (int s = 0; s < scans; ++s)
+                if (lastRowFrames == 0)
+                    lastRowFrames = framesPerRow;
+
+                int totalFrameIndex = 0;
+
+                for (int r = 0; r < rows; r++)
+                {
+                    int frameCount = r == rows - 1 ? lastRowFrames : framesPerRow;
+
+                    for (int f = 0; f < frameCount; ++f)
                     {
-                        for (int p = 0; p < bpp; ++p)
+                        for (int y = 0; y < frameHeight; ++y)
                         {
-                            for (int x = 0; x < scanLine; ++x)
+                            int baseIndex = totalFrameIndex * sizePerFrame + y * bpp * 2; // 2 = 16px / 8bits
+
+                            for (int p = 0; p < bpp; ++p)
                             {
-                                int bitIndex = x % 8;
-                                int bit = (palIndices[y * width + f * frameWidth + x + xoff] >> p) & 0x1;
-                                bit <<= (7 - bitIndex);
-                                outputData[baseIndex + p * scanLine / 8 + x / 8] |= (byte)bit;
+                                for (int x = 0; x < scanLine; ++x)
+                                {
+                                    int bitIndex = x % 8;
+                                    int bit = (palIndices[(r * 16 + y) * width + f * frameWidth + x] >> p) & 0x1;
+                                    bit <<= (7 - bitIndex);
+                                    outputData[baseIndex + p * scanLine / 8 + x / 8] |= (byte)bit;
+                                }
                             }
                         }
 
-                        baseIndex += 4;
-                        xoff += 8;
+                        totalFrameIndex++;
+                    }
+                }
+            }
+            else
+            {
+                for (int f = 0; f < frames; ++f)
+                {
+                    for (int y = 0; y < frameHeight; ++y)
+                    {
+                        int baseIndex = f * sizePerFrame + y * bpp * frameWidth / 8;
+                        int xoff = 0;
+
+                        for (int s = 0; s < scans; ++s)
+                        {
+                            for (int p = 0; p < bpp; ++p)
+                            {
+                                for (int x = 0; x < scanLine; ++x)
+                                {
+                                    int bitIndex = x % 8;
+                                    int bit = (palIndices[y * width + f * frameWidth + x + xoff] >> p) & 0x1;
+                                    bit <<= (7 - bitIndex);
+                                    outputData[baseIndex + p * scanLine / 8 + x / 8] |= (byte)bit;
+                                }
+                            }
+
+                            baseIndex += 4;
+                            xoff += 8;
+                        }
                     }
                 }
             }

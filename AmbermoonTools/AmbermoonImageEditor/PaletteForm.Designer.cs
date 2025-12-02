@@ -28,38 +28,39 @@
         /// </summary>
         private void InitializeComponent()
         {
-            this.panelPalette = new System.Windows.Forms.Panel();
-            this.SuspendLayout();
+            panelPalette = new Panel();
+            SuspendLayout();
             // 
             // panelPalette
             // 
-            this.panelPalette.BackColor = System.Drawing.Color.Black;
-            this.panelPalette.Location = new System.Drawing.Point(0, 0);
-            this.panelPalette.Name = "panelPalette";
-            this.panelPalette.Size = new System.Drawing.Size(256, 128);
-            this.panelPalette.TabIndex = 0;
-            this.panelPalette.Click += new System.EventHandler(this.panelPalette_Click);
-            this.panelPalette.Paint += new System.Windows.Forms.PaintEventHandler(this.panelPalette_Paint);
-            this.panelPalette.MouseDown += new System.Windows.Forms.MouseEventHandler(this.panelPalette_MouseDown);
+            panelPalette.BackColor = Color.Black;
+            panelPalette.Location = new Point(0, 0);
+            panelPalette.Name = "panelPalette";
+            panelPalette.Size = new Size(256, 128);
+            panelPalette.TabIndex = 0;
+            panelPalette.Click += PanelPalette_Click;
+            panelPalette.Paint += PanelPalette_Paint;
+            panelPalette.MouseDown += PanelPalette_MouseDown;
             // 
             // PaletteForm
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.AutoSize = true;
-            this.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
-            this.ClientSize = new System.Drawing.Size(256, 128);
-            this.Controls.Add(this.panelPalette);
-            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedToolWindow;
-            this.MaximizeBox = false;
-            this.MinimizeBox = false;
-            this.Name = "PaletteForm";
-            this.ShowIcon = false;
-            this.ShowInTaskbar = false;
-            this.SizeGripStyle = System.Windows.Forms.SizeGripStyle.Hide;
-            this.StartPosition = System.Windows.Forms.FormStartPosition.Manual;
-            this.Text = "Palette";
-            this.ResumeLayout(false);
+            AutoScaleDimensions = new SizeF(7F, 15F);
+            AutoScaleMode = AutoScaleMode.Font;
+            AutoSize = true;
+            AutoSizeMode = AutoSizeMode.GrowAndShrink;
+            ClientSize = new Size(256, 128);
+            Controls.Add(panelPalette);
+            FormBorderStyle = FormBorderStyle.FixedToolWindow;
+            MaximizeBox = false;
+            MinimizeBox = false;
+            Name = "PaletteForm";
+            ShowIcon = false;
+            ShowInTaskbar = false;
+            SizeGripStyle = SizeGripStyle.Hide;
+            StartPosition = FormStartPosition.Manual;
+            Text = "Palette";
+            FormClosing += PaletteForm_FormClosing;
+            ResumeLayout(false);
 
         }
 
