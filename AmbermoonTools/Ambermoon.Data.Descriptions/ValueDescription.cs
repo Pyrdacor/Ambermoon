@@ -12,7 +12,9 @@ namespace Ambermoon.Data.Descriptions
         Flag8,
         Flag16,
         EventIndex,
-        SByte
+        SByte,
+        ByteList,
+        TenBits
     }
 
     public record ValueDescription
@@ -145,6 +147,34 @@ namespace Ambermoon.Data.Descriptions
             }
 
             return false;
+        }
+
+        public virtual int Read(byte[] data, ref int dataIndex)
+        {
+            if (Type == ValueType.Word ||
+                Type == ValueType.Flag16 ||
+                Type == ValueType.EventIndex)
+            {
+                int index = dataIndex;
+                dataIndex += 2;
+                return (ushort)((data[index] << 8) | data[index + 1]);
+            }
+            else if (Type == ValueType.SByte)
+                return unchecked((sbyte)data[dataIndex++]);
+            else
+                return data[dataIndex++];
+        }
+
+        public virtual void Write(byte[] data, ref int dataIndex, ushort value)
+        {
+            if (Type == ValueType.Word ||
+                Type == ValueType.Flag16 ||
+                Type == ValueType.EventIndex)
+            {
+                data[dataIndex++] = (byte)((value >> 8) & 0xff);
+            }
+
+            data[dataIndex++] = (byte)(value & 0xff);
         }
 
         public virtual string DefaultValueText => Type == ValueType.SByte

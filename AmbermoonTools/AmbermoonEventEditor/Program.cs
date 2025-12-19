@@ -879,7 +879,7 @@ namespace AmbermoonEventEditor
             else
             {
                 var writer = new DataWriter();
-                EventWriter.SaveEvent(writer, @event);
+                EventWriter.WriteEventData(writer, @event);
                 var eventData = new byte[12];
                 eventData[0] = (byte)@event.Type;
                 var next = @event.Next;
@@ -891,18 +891,7 @@ namespace AmbermoonEventEditor
 
                 void Write(ValueDescription valueDescription, ushort value)
                 {
-                    if (valueDescription.Type == ValueType.Word ||
-                        valueDescription.Type == ValueType.Flag16 ||
-                        valueDescription.Type == ValueType.EventIndex)
-                        WriteWord(value);
-                    else
-                        eventData[dataIndex++] = (byte)(value & 0xff);
-                }
-
-                void WriteWord(ushort value)
-                {
-                    eventData[dataIndex++] = (byte)((value >> 8) & 0xff);
-                    eventData[dataIndex++] = (byte)(value & 0xff);
+                    valueDescription.Write(eventData, ref dataIndex, value);
                 }
 
                 var eventDescription = EventDescriptions.Events[@event.Type];
@@ -932,8 +921,19 @@ namespace AmbermoonEventEditor
 
                         if (value.DisplayNameMapping != null)
                             value.DisplayName = value.DisplayNameMapping(@event, value);
-                        var property = type.GetProperty(value.Name);
-                        var currentValue = property.GetValue(@event);
+
+                        object currentValue;
+
+                        if (value is TenBitValueDescription tenBitValueDescription)
+                        {
+                            currentValue = tenBitValueDescription.Read(eventData);
+                        }
+                        else
+                        {
+                            var property = type.GetProperty(value.Name);
+                            currentValue = property.GetValue(@event);
+                        }
+
 						Console.Write($"> {value.DisplayName} ({value.AsString(currentValue)}): ");
                         var input = ReadInt(value.ShowAsHex);
 
@@ -1325,19 +1325,7 @@ namespace AmbermoonEventEditor
 
             void Write(ValueDescription valueDescription, ushort value)
             {
-                if (valueDescription.Type == ValueType.Word ||
-                    valueDescription.Type == ValueType.Flag16 ||
-                    valueDescription.Type == ValueType.EventIndex ||
-                    (valueDescription is IEnumValueDescription e && e.Word))
-                    WriteWord(value);
-                else
-                    eventData[dataIndex++] = (byte)(value & 0xff);
-            }
-
-            void WriteWord(ushort value)
-            {
-                eventData[dataIndex++] = (byte)((value >> 8) & 0xff);
-                eventData[dataIndex++] = (byte)(value & 0xff);
+                valueDescription.Write(eventData, ref dataIndex, value);
             }
 
             foreach (var value in eventDescription.ValueDescriptions)

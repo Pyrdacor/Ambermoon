@@ -295,14 +295,7 @@ namespace AmbermoonItemEditor
 
             int Read(ValueDescription valueDescription)
             {
-                if (valueDescription.Type == ValueType.Word ||
-                    valueDescription.Type == ValueType.Flag16 ||
-                    valueDescription.Type == ValueType.EventIndex)
-                    return ReadWord();
-                else if (valueDescription.Type == ValueType.SByte)
-                    return unchecked((sbyte)data[dataIndex++]);
-                else
-                    return data[dataIndex++];
+                return valueDescription.Read(data, ref dataIndex);
             }
 
             Console.WriteLine();
@@ -406,39 +399,14 @@ namespace AmbermoonItemEditor
 
                 void Write(ValueDescription valueDescription, ushort value)
                 {
-                    if (valueDescription.Type == ValueType.Word ||
-                        valueDescription.Type == ValueType.Flag16 ||
-                        valueDescription.Type == ValueType.EventIndex)
-                        WriteWord(value);
-                    else if (valueDescription.Type == ValueType.SByte)
-                        data[dataIndex++] = unchecked((byte)(sbyte)value);
-                    else
-                        data[dataIndex++] = (byte)(value & 0xff);
+                    valueDescription.Write(data, ref dataIndex, value);
                 }
 
                 int Read(ValueDescription valueDescription)
                 {
-                    if (valueDescription.Type == ValueType.Word ||
-                        valueDescription.Type == ValueType.Flag16 ||
-                        valueDescription.Type == ValueType.EventIndex)
-                        return ReadWord();
-                    else if (valueDescription.Type == ValueType.SByte)
-                        return unchecked((sbyte)data[dataIndex]);
-                    else
-                        return data[dataIndex];
+                    return valueDescription.Read(data, ref dataIndex);
                 }
-
-                void WriteWord(ushort value)
-                {
-                    data[dataIndex++] = (byte)((value >> 8) & 0xff);
-                    data[dataIndex++] = (byte)(value & 0xff);
-                }
-                
-                ushort ReadWord()
-                {
-                    return (ushort)(((ushort)data[dataIndex] << 8) | data[dataIndex + 1]);
-                }
-
+ 
                 foreach (var value in ItemDescription.ValueDescriptions)
                 {
                     if (value.Required)

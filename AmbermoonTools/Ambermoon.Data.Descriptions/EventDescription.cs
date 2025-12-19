@@ -1,4 +1,5 @@
 ﻿using Ambermoon.Data.Enumerations;
+using Ambermoon.Data.Legacy.Serialization;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -113,6 +114,17 @@ namespace Ambermoon.Data.Descriptions
                 var displayMapping = value.DisplayMapping;
                 value.DisplayMapping = null; // avoid recursive loops
                 return displayMapping(@event, value) + ",";
+            }
+
+
+            if (value is TenBitValueDescription tenBitValueDescription)
+            {
+                var writer = new DataWriter();
+                writer.Write((byte)0); // Needed to have correct data offsets
+                EventWriter.WriteEventData(writer, @event);
+                var propertyValue = tenBitValueDescription.Read(writer.ToArray());
+
+                return $" {value.DisplayName}={propertyValue},";
             }
 
             var property = type.GetProperty(value.Name).GetValue(@event);
@@ -658,6 +670,27 @@ namespace Ambermoon.Data.Descriptions
                 Use.Word(nameof(ShakeEvent.Shakes), true),
                 Use.HiddenWord()
             )},
+            { EventType.ShowMap, new EventDescription
+            (
+                true, false, true, true, false,
+                Use.Flags8<ShowMapEvent.MapOptions>(nameof(ShowMapEvent.Options), true),
+                Use.HiddenByte(),
+                Use.HiddenByte(),
+                Use.HiddenByte(),
+                Use.HiddenByte(),
+                Use.HiddenWord(),
+                Use.HiddenWord()
+            )},
+            { EventType.ToggleSwitch, new EventDescription
+            (
+                true, false, true, true, false,
+                Use.TenBits("GlobalVar1", 1, 0, false),
+                Use.TenBits("GlobalVar2", 2, 2, false),
+                Use.TenBits("GlobalVar3", 3, 4, false),
+                Use.TenBits("GlobalVar4", 4, 6, false),
+                Use.Word(nameof(ToggleSwitchEvent.FrontTileIndexOff), true),
+                Use.Word(nameof(ToggleSwitchEvent.FrontTileIndexOn), true)
+            )},
         };
 
         public static Dictionary<EventType, Func<Event>> EventFactories { get; } = new Dictionary<EventType, Func<Event>>
@@ -689,6 +722,7 @@ namespace Ambermoon.Data.Descriptions
             { EventType.Delay, () => new DelayEvent() },
 			{ EventType.PartyMemberCondition, () => new PartyMemberConditionEvent() },
             { EventType.Shake, () => new ShakeEvent() },
+            { EventType.ShowMap, () => new ShowMapEvent() },
         };
     }
 }

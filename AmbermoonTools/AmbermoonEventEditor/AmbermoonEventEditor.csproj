@@ -16,7 +16,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Ambermoon.Data.Legacy" Version="10.10.3" />
+    <PackageReference Include="Ambermoon.Data.Legacy" Version="10.12.1" />
   </ItemGroup>
 
   <ItemGroup>
