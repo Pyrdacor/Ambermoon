@@ -715,3 +715,42 @@ Offset | Type | Description
 0x01 | ubyte[5] | Unused
 0x06 | uword | Number of shakes
 0x08 | uword | Unused
+
+
+## Show map event (0x1C / 28) (Ambermoon Advanced only)
+
+Opens the dungeon map. It is used on maps where the normal dungeon map is disabled
+but you can view it through a map event (e.g. a real map interface on the wall).
+
+Offset | Type | Description
+--- | --- | ---
+0x00 | ubyte | Event type (= 0x19)
+0x01 | ubyte | Map options (see below)
+0x02 | ubyte[8] | Unused
+
+### Map options
+
+Combinations of the following or 0x00 to hide them all.
+
+Value | Type
+--- | ---
+0x01 | Show secret doors
+0x02 | Show monsters
+0x04 | Show persons
+0x08 | Show traps
+
+
+## Toggle switch event (0x1D / 29) (Ambermoon Advanced only)
+
+Automatically toggles a switch appearance and also optionally
+toggles up to 4 global variables.
+
+Offset | Type | Description
+--- | --- | ---
+0x00 | ubyte | Event type (= 0x19)
+0x01 | ubyte[5] | Up to 4 global variables to toggle. Each is given by 10 bits: 11111111 11222222 22223333 33333344 44444444.
+0x06 | uword | Switch off front tile index
+0x08 | uword | Switch on front tile index
+
+Note: If a global variable is 0 (which is normally a valid index), nothing is toggled as global variable 0 is meant as a dummy
+and is expected to always have value 0.
