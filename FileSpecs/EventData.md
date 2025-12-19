@@ -715,3 +715,27 @@ Offset | Type | Description
 0x01 | ubyte[5] | Unused
 0x06 | uword | Number of shakes
 0x08 | uword | Unused
+
+
+## Show map event (0x1C / 28) (Ambermoon Advanced only)
+
+Opens the dungeon map. It is used on maps where the normal dungeon map is disabled
+but you can view it through a map event (e.g. a real map interface on the wall).
+
+Offset | Type | Description
+--- | --- | ---
+0x00 | ubyte | Event type (= 0x19)
+0x01 | ubyte | Map options (see below)
+0x02 | ubyte[8] | Unused
+
+### Map options
+
+Combinations of the following or 0x00 to hide them all.
+
+Value | Type
+--- | ---
+0x01 | Show secret doors
+0x02 | Show monsters
+0x04 | Show persons
+0x08 | Show traps
+
