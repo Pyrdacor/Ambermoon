@@ -739,3 +739,18 @@ Value | Type
 0x04 | Show persons
 0x08 | Show traps
 
+
+## Toggle switch event (0x1D / 29) (Ambermoon Advanced only)
+
+Automatically toggles a switch appearance and also optionally
+toggles up to 4 global variables.
+
+Offset | Type | Description
+--- | --- | ---
+0x00 | ubyte | Event type (= 0x19)
+0x01 | ubyte[5] | Up to 4 global variables to toggle. Each is given by 10 bits: 11111111 11222222 22223333 33333344 44444444.
+0x01 | uword | Switch off front tile index
+0x02 | uword | Switch on front tile index
+
+Note: If a global variable is 0 (which is normally a valid index), nothing is toggled as global variable 0 is meant as a dummy
+and is expected to always have value 0.
