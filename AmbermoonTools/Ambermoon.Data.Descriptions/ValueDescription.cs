@@ -14,7 +14,8 @@ namespace Ambermoon.Data.Descriptions
         EventIndex,
         SByte,
         ByteList,
-        TenBits
+        TenBits,
+        TwelveBits
     }
 
     public record ValueDescription

@@ -196,6 +196,10 @@ namespace Ambermoon.Data.Descriptions
             ushort minValue = 0, ushort maxValue = 1023, bool showAsHex = false)
             => new(name, byteOffset, bitOffset, required, false, defaultValue, minValue, maxValue, showAsHex);
 
+        public static TwelveBitValueDescription TwelveBits(string name, int byteOffset, int bitOffset, bool required, ushort defaultValue = default,
+            ushort minValue = 0, ushort maxValue = 4095, bool showAsHex = false)
+            => new(name, byteOffset, bitOffset, required, false, defaultValue, minValue, maxValue, showAsHex);
+
         public static ValueDescription[] Compound(params ValueDescription[] valueDescriptions) => valueDescriptions;
     }
 }

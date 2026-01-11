@@ -691,6 +691,16 @@ namespace Ambermoon.Data.Descriptions
                 Use.Word(nameof(ToggleSwitchEvent.FrontTileIndexOff), true),
                 Use.Word(nameof(ToggleSwitchEvent.FrontTileIndexOn), true)
             )},
+            { EventType.DynamicChangeTile, new EventDescription
+            (
+                true, true, true, true, false,
+                Use.Byte(nameof(DynamicChangeTileEvent.X), true, 200),
+                Use.Byte(nameof(DynamicChangeTileEvent.Y), true, 200),
+                Use.Word(nameof(DynamicChangeTileEvent.GlobalVariable), true, 1023),
+                Use.TwelveBits(nameof(DynamicChangeTileEvent.FrontTileIndexOff), 5, 0, true),
+                Use.TwelveBits(nameof(DynamicChangeTileEvent.FrontTileIndexOn), 6, 4, true),
+                Use.Word(nameof(DynamicChangeTileEvent.MapIndex), true, 1023)
+            )},
         };
 
         public static Dictionary<EventType, Func<Event>> EventFactories { get; } = new Dictionary<EventType, Func<Event>>
@@ -723,6 +733,7 @@ namespace Ambermoon.Data.Descriptions
 			{ EventType.PartyMemberCondition, () => new PartyMemberConditionEvent() },
             { EventType.Shake, () => new ShakeEvent() },
             { EventType.ShowMap, () => new ShowMapEvent() },
+            { EventType.DynamicChangeTile, () => new DynamicChangeTileEvent() },
         };
     }
 }
