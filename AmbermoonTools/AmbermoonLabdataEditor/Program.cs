@@ -993,17 +993,24 @@ void Delete()
 
         if (typeof(T) == typeof(Labdata.ObjectInfo))
         {
+            var objectsToRemove = new List<Labdata.Object>();
+
             foreach (var obj in labdata.Objects)
             {
-                for (int i = 0; i < 8; ++i)
+                for (int i = obj.SubObjects.Count - 1; i >= 0; --i)
                 {
-                    if (i >= obj.SubObjects.Count)
-                        break;
-
                     if (obj.SubObjects[i].Object.Equals((Labdata.ObjectInfo)(object)backup))
+                    {
                         obj.SubObjects.RemoveAt(i);
+
+                        if (obj.SubObjects.Count == 0)
+                            objectsToRemove.Add(obj);
+                    }
                 }
             }
+
+            foreach (var objectToRemove in objectsToRemove)
+                labdata.Objects.Remove(objectToRemove);
         }
     }
 }
