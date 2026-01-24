@@ -9,7 +9,7 @@
 
   <ItemGroup>
     <PackageReference Include="Ambermoon.Data.GameDataRepository" Version="0.1.13" />
-    <PackageReference Include="System.Drawing.Common" Version="10.0.1" />
+    <PackageReference Include="System.Drawing.Common" Version="10.0.2" />
   </ItemGroup>
 
 </Project>

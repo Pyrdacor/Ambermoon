@@ -354,14 +354,14 @@ namespace Ambermoon.Data.Descriptions
                            rewardEvent.TypeOfReward != RewardEvent.RewardType.EmpowerSpells &&
                            rewardEvent.TypeOfReward != RewardEvent.RewardType.Languages &&
                            rewardEvent.TypeOfReward != RewardEvent.RewardType.UsableSpellTypes &&
-						   rewardEvent.TypeOfReward != RewardEvent.RewardType.Spells;
+                           rewardEvent.TypeOfReward != RewardEvent.RewardType.Spells;
                 }),
-				Use.Enum(nameof(RewardEvent.Target), true, RewardEvent.RewardTarget.ActivePlayer, Enum.GetValues<RewardEvent.RewardTarget>()
+                Use.Enum(nameof(RewardEvent.Target), true, RewardEvent.RewardTarget.ActivePlayer, Enum.GetValues<RewardEvent.RewardTarget>()
                         .Where(t => (int)t < 100)
                         .Concat(Enumerable.Range(100, (int)Enum.GetValues<PartyMembers>().Max()).Select(i => (RewardEvent.RewardTarget)i))
                         .Concat(Enumerable.Range(200, (int)Enum.GetValues<PartyMembers>().Max()).Select(i => (RewardEvent.RewardTarget)i)),
-					(target) => (int)target >= 200 ? $"All but Party Member {(int)target - 199}" : (int)target >= 100 ? $"Party Member {(int)target - 99}" : Enum.GetName(target)
-				),
+                    (target) => (int)target >= 200 ? $"All but Party Member {(int)target - 199}" : (int)target >= 100 ? $"Party Member {(int)target - 99}" : Enum.GetName(target)
+                ),
                 Use.HiddenByte(),
                 Use.Conditional<RewardEvent>
                 (
@@ -632,33 +632,33 @@ namespace Ambermoon.Data.Descriptions
                 Use.Word(nameof(DelayEvent.Milliseconds), true),
                 Use.HiddenWord()
             )},
-			{ EventType.PartyMemberCondition, new EventDescription
-			(
-				true, true, true, false, false,
-				Use.Enum<PartyMemberConditionEvent.PartyMemberConditionType>(nameof(PartyMemberConditionEvent.TypeOfCondition), true),
-				Use.WithDisplayMapping<PartyMemberConditionEvent>(
-					() => Use.Conditional<PartyMemberConditionEvent>(() => Use.Byte(nameof(PartyMemberConditionEvent.ConditionValueIndex), false), conditionEvent =>
-						conditionEvent.TypeOfCondition == PartyMemberConditionEvent.PartyMemberConditionType.Attribute ||
-						conditionEvent.TypeOfCondition == PartyMemberConditionEvent.PartyMemberConditionType.Skill ||
+            { EventType.PartyMemberCondition, new EventDescription
+            (
+                true, true, true, false, false,
+                Use.Enum<PartyMemberConditionEvent.PartyMemberConditionType>(nameof(PartyMemberConditionEvent.TypeOfCondition), true),
+                Use.WithDisplayMapping<PartyMemberConditionEvent>(
+                    () => Use.Conditional<PartyMemberConditionEvent>(() => Use.Byte(nameof(PartyMemberConditionEvent.ConditionValueIndex), false), conditionEvent =>
+                        conditionEvent.TypeOfCondition == PartyMemberConditionEvent.PartyMemberConditionType.Attribute ||
+                        conditionEvent.TypeOfCondition == PartyMemberConditionEvent.PartyMemberConditionType.Skill ||
                         conditionEvent.TypeOfCondition == PartyMemberConditionEvent.PartyMemberConditionType.Language
                     ),
-					(conditionEvent, valueDescription) => conditionEvent.TypeOfCondition switch
+                    (conditionEvent, valueDescription) => conditionEvent.TypeOfCondition switch
                     {
-						PartyMemberConditionEvent.PartyMemberConditionType.Skill => "Skill",
-						PartyMemberConditionEvent.PartyMemberConditionType.Attribute => "Attribute",
-						_ => null
+                        PartyMemberConditionEvent.PartyMemberConditionType.Skill => "Skill",
+                        PartyMemberConditionEvent.PartyMemberConditionType.Attribute => "Attribute",
+                        _ => null
 
-					}),
-				Use.Enum<PartyMemberConditionEvent.PartyMemberConditionTarget>(nameof(PartyMemberConditionEvent.Target), true, PartyMemberConditionEvent.PartyMemberConditionTarget.ActivePlayer, Enum.GetValues<PartyMemberConditionEvent.PartyMemberConditionTarget>()
-						.Where(t => (int)t == (int)PartyMemberConditionEvent.PartyMemberConditionTarget.ActiveInventory || (int)t < (int)PartyMemberConditionEvent.PartyMemberConditionTarget.FirstCharacter)
-						.Concat(Enumerable.Range(7, (int)Enum.GetValues<PartyMembers>().Max()).Select(i => (PartyMemberConditionEvent.PartyMemberConditionTarget)i)),
-					(target) => (int)target != 255 && (int)target >= 7 ? $"Party Member {(int)target - 6}" : Enum.GetName(target)),
-				Use.Flags16(nameof(ConditionEvent.DisallowedAilments), false, Condition.None),
+                    }),
+                Use.Enum<PartyMemberConditionEvent.PartyMemberConditionTarget>(nameof(PartyMemberConditionEvent.Target), true, PartyMemberConditionEvent.PartyMemberConditionTarget.ActivePlayer, Enum.GetValues<PartyMemberConditionEvent.PartyMemberConditionTarget>()
+                        .Where(t => (int)t == (int)PartyMemberConditionEvent.PartyMemberConditionTarget.ActiveInventory || (int)t < (int)PartyMemberConditionEvent.PartyMemberConditionTarget.FirstCharacter)
+                        .Concat(Enumerable.Range(7, (int)Enum.GetValues<PartyMembers>().Max()).Select(i => (PartyMemberConditionEvent.PartyMemberConditionTarget)i)),
+                    (target) => (int)target != 255 && (int)target >= 7 ? $"Party Member {(int)target - 6}" : Enum.GetName(target)),
+                Use.Flags16(nameof(ConditionEvent.DisallowedAilments), false, Condition.None),
                 Use.Conditional<PartyMemberConditionEvent>(() => Use.Word(nameof(PartyMemberConditionEvent.Value), true), conditionEvent =>
                         conditionEvent.TypeOfCondition != PartyMemberConditionEvent.PartyMemberConditionType.Language
                 ),
                 Use.EventIndex(nameof(ConditionEvent.ContinueIfFalseWithMapEventIndex), false)
-			)},
+            )},
             { EventType.Shake, new EventDescription
             (
                 true, true, true, true, false,
@@ -701,6 +701,30 @@ namespace Ambermoon.Data.Descriptions
                 Use.TwelveBits(nameof(DynamicChangeTileEvent.FrontTileIndexOn), 6, 4, true),
                 Use.Word(nameof(DynamicChangeTileEvent.MapIndex), true, 1023)
             )},
+            { EventType.RectangularExploration, new EventDescription
+            (
+                true, true, true, true, false,
+                Use.Byte(nameof(RectangularExplorationEvent.X), true, 200, 1),
+                Use.Byte(nameof(RectangularExplorationEvent.Y), true, 200, 1),
+                Use.Byte(nameof(RectangularExplorationEvent.Width), true, 200, 1),
+                Use.Byte(nameof(RectangularExplorationEvent.Height), true, 200, 1),
+                Use.Enum(nameof(RectangularExplorationEvent.Exploration), true, RectangularExplorationEvent.ExplorationType.Reveal),
+                Use.Word(nameof(RectangularExplorationEvent.MapIndex), true, 1023),
+                Use.HiddenWord()
+            )},
+            { EventType.VerticalLineReveal, new EventDescription
+            (
+                true, true, true, true, false,
+                Use.Byte(nameof(VerticalLineRevealEvent.X1), true, 200, 1),
+                Use.Byte(nameof(VerticalLineRevealEvent.Y1), true, 200, 1),
+                Use.Byte(nameof(VerticalLineRevealEvent.Height1), true, 200, 1),
+                Use.Byte(nameof(VerticalLineRevealEvent.X2), false, 200),
+                Use.Byte(nameof(VerticalLineRevealEvent.Y2), false, 200),
+                Use.Byte(nameof(VerticalLineRevealEvent.Height2), false, 200),
+                Use.Byte(nameof(VerticalLineRevealEvent.X3), false, 200),
+                Use.Byte(nameof(VerticalLineRevealEvent.Y3), false, 200),
+                Use.Byte(nameof(VerticalLineRevealEvent.Height3), false, 200)
+            )}
         };
 
         public static Dictionary<EventType, Func<Event>> EventFactories { get; } = new Dictionary<EventType, Func<Event>>

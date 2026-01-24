@@ -795,10 +795,10 @@ namespace AmbermoonEventEditor
         {
             Console.WriteLine();
             Console.WriteLine("You want to copy the whole chain or only some part of it?");
-            var option = ReadOption(0, "Whole chain", "Only a part (cut off the rest)", "Only a part (keep the rest from original)");
+            var option = ReadOption(0, "Whole chain (copy branches)", "Whole chain (keep branches)", "Only a part (cut off the rest)", "Only a part (keep the rest from original)");
             int? copyCount = null;
 
-            if (option != 0)
+            if (option > 1)
             {
                 ShowChain(eventList, events, index);
                 Console.WriteLine();
@@ -814,19 +814,40 @@ namespace AmbermoonEventEditor
                 }
             }
 
+            bool copyBranches = option == 0;
+            Dictionary<Event, Event> processedEvents = [];
+
             var @event = eventList[index];
             var clone = @event.Clone(false);
+            processedEvents.Add(@event, clone);
             @event = @event.Next;
 
             eventList.Add(clone);
             events.Add(clone);
 
             int numCopies = 1;
+            Event Clone(Event e)
+            {
+                if (processedEvents.TryGetValue(e, out var clone))
+                    return clone;
+
+                clone = e.Clone(false);
+                processedEvents.Add(e, clone);
+
+                return clone;
+            }
+
+            // Key: Branch root event, Value: Alternative branch event 
+            Queue<KeyValuePair<IBranchEvent, Event>> branchStarts = [];
 
             while (@event != null && (copyCount == null || numCopies < copyCount))
             {
                 var parent = clone;
-                clone = @event.Clone(false);
+                clone = Clone(@event);
+
+                if (copyBranches && @event is IBranchEvent branchEvent && branchEvent.AlternativeBranchEventIndex != 0xffff)
+                    branchStarts.Enqueue(KeyValuePair.Create(clone as IBranchEvent, events[(int)branchEvent.AlternativeBranchEventIndex]));
+                
                 @event = @event.Next;
 
                 parent.Next = clone;
@@ -834,8 +855,46 @@ namespace AmbermoonEventEditor
                 ++numCopies;
             }
 
-            if (option == 2)
+            if (option == 3)
                 clone.Next = @event;
+
+            uint CopyBranch(Event branchStart)
+            {
+                if (processedEvents.TryGetValue(branchStart, out var clone))
+                    return (uint)events.IndexOf(clone);
+
+                clone = branchStart.Clone(false);
+                processedEvents.Add(@event, clone);
+                var ev = branchStart.Next;
+
+                uint index = (uint)events.Count;
+                events.Add(clone);
+
+                while (ev != null)
+                {
+                    var parent = clone;
+                    clone = Clone(ev);
+
+                    if (ev is IBranchEvent branchEvent && branchEvent.AlternativeBranchEventIndex != 0xffff)
+                        branchStarts.Enqueue(KeyValuePair.Create(clone as IBranchEvent, events[(int)branchEvent.AlternativeBranchEventIndex]));
+
+                    ev = ev.Next;
+
+                    parent.Next = clone;
+                    events.Add(clone);
+                }
+
+                return index;
+            }
+
+            while (branchStarts.Count > 0)
+            {
+                var (branchRoot, branchStart) = branchStarts.Dequeue();
+
+                var copiedBranchIndex = CopyBranch(branchStart);
+
+                branchRoot.AlternativeBranchEventIndex = copiedBranchIndex;
+            }
 
             Console.WriteLine();
             Console.WriteLine("Chain successfully created.");
