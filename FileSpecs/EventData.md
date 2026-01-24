@@ -783,3 +783,27 @@ Then you can chain 3 events:
 - Hand interaction (for triggering with hand cursor)
 - Toggle switch event (changes appearance of the switch itself and toggles a global variable)
 - Dynamic tile change event (based on the same global variable changes the tile to "hidden" (index 0) or "visible" (some wall index))
+
+
+## Rectangular exploration event (0x1F / 31) (Ambermoon Advanced only)
+
+Changes exploration of a 3D map (rectangular) area.
+
+Offset | Type | Description
+--- | --- | ---
+0x00 | ubyte | Event type (= 0x1F)
+0x01 | ubyte | X coordinate (usually 1 to 200)
+0x02 | ubyte | Y coordinate (usually 1 to 200)
+0x03 | ubyte | Width (usually 1 to 200)
+0x04 | ubyte | Height (usually 1 to 200)
+0x05 | ubyte | Exploration type (see below)
+0x06 | uword | Map index
+0x08 | uword | Unused
+
+### Exploration type
+
+Value | Type
+--- | ---
+0 | Reveal / Explore
+1 | Hide / Remove exploration
+2 | Invert
