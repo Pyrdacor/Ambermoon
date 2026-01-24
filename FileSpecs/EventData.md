@@ -711,7 +711,7 @@ And then repeats from the first one.
 
 Offset | Type | Description
 --- | --- | ---
-0x00 | ubyte | Event type (= 0x19)
+0x00 | ubyte | Event type (= 0x1B)
 0x01 | ubyte[5] | Unused
 0x06 | uword | Number of shakes
 0x08 | uword | Unused
@@ -724,7 +724,7 @@ but you can view it through a map event (e.g. a real map interface on the wall).
 
 Offset | Type | Description
 --- | --- | ---
-0x00 | ubyte | Event type (= 0x19)
+0x00 | ubyte | Event type (= 0x1C)
 0x01 | ubyte | Map options (see below)
 0x02 | ubyte[8] | Unused
 
@@ -747,10 +747,39 @@ toggles up to 4 global variables.
 
 Offset | Type | Description
 --- | --- | ---
-0x00 | ubyte | Event type (= 0x19)
+0x00 | ubyte | Event type (= 0x1D)
 0x01 | ubyte[5] | Up to 4 global variables to toggle. Each is given by 10 bits: 11111111 11222222 22223333 33333344 44444444.
 0x06 | uword | Switch off front tile index
 0x08 | uword | Switch on front tile index
 
 Note: If a global variable is 0 (which is normally a valid index), nothing is toggled as global variable 0 is meant as a dummy
 and is expected to always have value 0.
+
+
+## Dynamic tile change event (0x1E / 30) (Ambermoon Advanced only)
+
+Dynamically changes a tile based on the value of a global variable.
+This is mostly useful when chained to a toggle switch event so it
+will automatically a tile appearance based on the toggle. But in
+theory it can be used with other events as well.
+
+Offset | Type | Description
+--- | --- | ---
+0x00 | ubyte | Event type (= 0x1E)
+0x01 | ubyte | X coordinate (usually 1 to 200)
+0x02 | ubyte | Y coordinate (usually 1 to 200)
+0x03 | uword | Global variable (1 to 1023)
+0x05 | ubyte[3] | 12 bits for off front tile index and 12 bits for on front tile index (11111111 11112222 22222222)
+0x08 | uword | Map index
+
+This basically triggers a normal tile change event but dynamically picks the front tile index based on the value of
+the given global variable.
+
+Example:
+
+Let's say you want to remove a wall if a switch is activated but add the wall back if the switch is deactivated.
+Then you can chain 3 events:
+
+- Hand interaction (for triggering with hand cursor)
+- Toggle switch event (changes appearance of the switch itself and toggles a global variable)
+- Dynamic tile change event (based on the same global variable changes the tile to "hidden" (index 0) or "visible" (some wall index))
