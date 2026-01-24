@@ -807,3 +807,30 @@ Value | Type
 0 | Reveal / Explore
 1 | Hide / Remove exploration
 2 | Invert
+
+
+## Vertical line reveal event (0x20 / 32) (Ambermoon Advanced only)
+
+Reveals up to 3 vertical lines on the dungeon map.
+
+This is used to explore areas which are not rectangular, like circular
+areas. Here you would need many rectangular reveal events so this
+event allows 3 vertical lines in a single event. If your area is
+rectangular, you should use event type 0x1F instead.
+
+This event also can't remove exploration or invert it. It is limited
+to revealing / exploring map areas. And it is also fixed to the
+current map.
+
+Offset | Type | Description
+--- | --- | ---
+0x00 | ubyte | Event type (= 0x20)
+0x01 | ubyte | X1 coordinate (usually 1 to 200)
+0x02 | ubyte | Y1 coordinate (usually 1 to 200)
+0x03 | ubyte | Height 1 (usually 1 to 200)
+0x04 | ubyte | X2 coordinate (usually 1 to 200)
+0x05 | ubyte | Y2 coordinate (usually 1 to 200)
+0x06 | ubyte | Height 2 (usually 1 to 200)
+0x07 | ubyte | X3 coordinate (usually 1 to 200)
+0x08 | ubyte | Y3 coordinate (usually 1 to 200)
+0x09 | ubyte | Height 3 (usually 1 to 200)
