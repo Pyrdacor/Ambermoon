@@ -350,8 +350,15 @@ IEnumerable<AdfFileInfo> AllFilesIn(string folder, string targetDirectory = "", 
 
 var bootDiskSourcePath = Path.Combine(solutionDirectory, "Disks", "BootDisk");
 var bootDiskDirPath = Path.Combine(tempDir, "BootDisk");
+
 Console.WriteLine($"Copying directory from '{bootDiskSourcePath}' to 'BootDisk'");
 CopyDirectory(bootDiskSourcePath, bootDiskDirPath, true);
+
+if (language != "English")
+{
+    Console.WriteLine($"Patch english boot disk files to {language.ToLower()}");
+    PatchBootDiskFiles(bootDiskDirPath, language);
+}
 
 // Disk A
 CreateADF(adfTempPath, 'A',
@@ -537,6 +544,86 @@ void CreateADF(string directory, char letter, List<AdfFileInfo> fileInfos)
 
     foreach (var fileStream in fileStreams.Values)
         fileStream.Close();
+}
+
+static void PatchBootDiskFiles(string sourceDir, string language)
+{
+    void PatchFile(string relativePath, Func<string, string> patcher)
+    {
+        var path = Path.Combine(sourceDir, relativePath);
+        File.WriteAllText(path, patcher(File.ReadAllText(path)));
+    }
+
+    PatchFile("raminstall", content =>
+    {
+        var replacements = new Dictionary<string, Dictionary<string, string>>()
+        {
+            { "Do you want to copy some files to the RAM disk?", new Dictionary<string, string>()
+                {
+                    { "German", "Moechten Sie Dateien in die RAM Disk kopieren?" },
+                    { "French", "Voulez vous copier les fichiers sur le disque RAM ?" },
+                    { "Czech", "Chcete kopirovat soubory na RAM disk ?" },
+                    { "Polish", "Czy skopiowac pliki na RAM dysk ?" },
+                }
+            },
+            { "Installing 7 disks to RAM...", new Dictionary<string, string>()
+                {
+                    { "German", "Installiere 7 Disketten in RAM..." },
+                    { "French", "Installation de 7 disquettes en RAM..." },
+                    { "Czech", "Instaluji 7 disket do RAM..." },
+                    { "Polish", "Instalowanie 7 dyskow do RAM..." },
+                }
+            },
+            { "Remove all disks now ! Except Amber_A, Amber_B and Amber_J (Put them in)", new Dictionary<string, string>()
+                {
+                    { "German", "Entferne jetzt alle Disketten! Ausser Amber_A, Amber_B und Amber_J (Lege sie ein)" },
+                    { "French", "Retire tous les disques maintenant ! Sauf Amber_A, Amber_B et Amber_J (Mets les)" },
+                    { "Czech", "Odeber vsechny diskety ted ! Krome Amber_A, Amber_B a Amber_J (Vloz je)" },
+                    { "Polish", "Usun wszystkie dyski teraz! Z wyjatkiem Amber_A, Amber_B i Amber_J (Wloz je)" },
+                }
+            },
+            { "Ready.", new Dictionary<string, string>()
+                {
+                    { "German", "Fertig." },
+                    { "French", "Pret." },
+                    { "Czech", "Hotovo." },
+                    { "Polish", "Gotowe." },
+                }
+            },
+            { "Running now...", new Dictionary<string, string>()
+                {
+                    { "German", "Starte jetzt..." },
+                    { "French", "Execution maintenant..." },
+                    { "Czech", "Teraz dziala..." },
+                    { "Polish", "Prave bezi..." },
+                }
+            },
+        };
+
+        foreach (var replacement in replacements)
+        {
+            content = content.Replace(replacement.Key, replacement.Value[language]);
+        }
+
+        return content;
+    });
+
+    PatchFile(@"S\startup-orginal", content =>
+    {
+        if (language == "German")
+        {
+            return content.Replace("gb", "d");
+        }
+        else if (language == "French")
+        {
+            return content.Replace("gb", "f");
+        }
+        else
+        {
+            // All other languages use the english keymap (gb)
+            return content;
+        }
+    });
 }
 
 static void CopyDirectory(string sourceDir, string targetDir, bool recursive, string? rootTargetPath = null, HashSet<string>? allowedTargetFilenames = null, HashSet<string>? allowedTargetDirectories = null)
