@@ -815,11 +815,18 @@ namespace AmbermoonEventEditor
             }
 
             bool copyBranches = option == 0;
-            Dictionary<Event, Event> processedEvents = [];
+            Dictionary<int, Event> processedEvents = [];
 
             var @event = eventList[index];
             var clone = @event.Clone(false);
-            processedEvents.Add(@event, clone);
+            processedEvents.Add(events.IndexOf(@event), clone);
+
+            // Key: Branch root event, Value: Alternative branch event 
+            Queue<KeyValuePair<IBranchEvent, Event>> branchStarts = [];
+
+            if (copyBranches && @event is IBranchEvent directBranchEvent && directBranchEvent.AlternativeBranchEventIndex != 0xffff)
+                branchStarts.Enqueue(KeyValuePair.Create(clone as IBranchEvent, events[(int)directBranchEvent.AlternativeBranchEventIndex]));
+
             @event = @event.Next;
 
             eventList.Add(clone);
@@ -828,20 +835,27 @@ namespace AmbermoonEventEditor
             int numCopies = 1;
             Event Clone(Event e)
             {
-                if (processedEvents.TryGetValue(e, out var clone))
+                int index = events.IndexOf(e);
+
+                if (processedEvents.TryGetValue(index, out var clone))
                     return clone;
 
                 clone = e.Clone(false);
-                processedEvents.Add(e, clone);
+                processedEvents.Add(index, clone);
 
                 return clone;
             }
 
-            // Key: Branch root event, Value: Alternative branch event 
-            Queue<KeyValuePair<IBranchEvent, Event>> branchStarts = [];
-
             while (@event != null && (copyCount == null || numCopies < copyCount))
             {
+                index = events.IndexOf(@event);
+
+                if (processedEvents.TryGetValue(index, out var evClone))
+                {
+                    clone.Next = evClone;
+                    break;
+                }
+
                 var parent = clone;
                 clone = Clone(@event);
 
@@ -860,18 +874,31 @@ namespace AmbermoonEventEditor
 
             uint CopyBranch(Event branchStart)
             {
-                if (processedEvents.TryGetValue(branchStart, out var clone))
+                int index = events.IndexOf(branchStart);
+
+                if (processedEvents.TryGetValue(index, out var clone))
                     return (uint)events.IndexOf(clone);
 
                 clone = branchStart.Clone(false);
-                processedEvents.Add(@event, clone);
+                processedEvents.Add(index, clone);
                 var ev = branchStart.Next;
 
-                uint index = (uint)events.Count;
+                uint branchIndex = (uint)events.Count;
                 events.Add(clone);
+
+                if (branchStart is IBranchEvent directBranchEvent && directBranchEvent.AlternativeBranchEventIndex != 0xffff)
+                    branchStarts.Enqueue(KeyValuePair.Create(clone as IBranchEvent, events[(int)directBranchEvent.AlternativeBranchEventIndex]));
 
                 while (ev != null)
                 {
+                    index = events.IndexOf(ev);
+
+                    if (processedEvents.TryGetValue(index, out var evClone))
+                    {
+                        clone.Next = evClone;
+                        break;
+                    }
+
                     var parent = clone;
                     clone = Clone(ev);
 
@@ -884,7 +911,7 @@ namespace AmbermoonEventEditor
                     events.Add(clone);
                 }
 
-                return index;
+                return branchIndex;
             }
 
             while (branchStarts.Count > 0)
