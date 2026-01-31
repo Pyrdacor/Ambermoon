@@ -684,10 +684,10 @@ namespace Ambermoon.Data.Descriptions
             { EventType.ToggleSwitch, new EventDescription
             (
                 true, false, true, true, false,
-                Use.TenBits("GlobalVar1", 1, 0, false),
-                Use.TenBits("GlobalVar2", 2, 2, false),
-                Use.TenBits("GlobalVar3", 3, 4, false),
-                Use.TenBits("GlobalVar4", 4, 6, false),
+                Use.TenBits("GlobalVar1", nameof(ToggleSwitchEvent.GlobalVariableBytes), 1, 0, false),
+                Use.TenBits("GlobalVar2", nameof(ToggleSwitchEvent.GlobalVariableBytes), 2, 2, false),
+                Use.TenBits("GlobalVar3", nameof(ToggleSwitchEvent.GlobalVariableBytes), 3, 4, false),
+                Use.TenBits("GlobalVar4", nameof(ToggleSwitchEvent.GlobalVariableBytes), 4, 6, false),
                 Use.Word(nameof(ToggleSwitchEvent.FrontTileIndexOff), true),
                 Use.Word(nameof(ToggleSwitchEvent.FrontTileIndexOn), true)
             )},
@@ -697,8 +697,8 @@ namespace Ambermoon.Data.Descriptions
                 Use.Byte(nameof(DynamicChangeTileEvent.X), true, 200),
                 Use.Byte(nameof(DynamicChangeTileEvent.Y), true, 200),
                 Use.Word(nameof(DynamicChangeTileEvent.GlobalVariable), true, 1023),
-                Use.TwelveBits(nameof(DynamicChangeTileEvent.FrontTileIndexOff), 5, 0, true),
-                Use.TwelveBits(nameof(DynamicChangeTileEvent.FrontTileIndexOn), 6, 4, true),
+                Use.TwelveBits(nameof(DynamicChangeTileEvent.FrontTileIndexOff), nameof(DynamicChangeTileEvent.FrontTileIndexOff), 5, 0, true),
+                Use.TwelveBits(nameof(DynamicChangeTileEvent.FrontTileIndexOn), nameof(DynamicChangeTileEvent.FrontTileIndexOn), 6, 4, true),
                 Use.Word(nameof(DynamicChangeTileEvent.MapIndex), true, 1023)
             )},
             { EventType.RectangularExploration, new EventDescription
@@ -757,7 +757,10 @@ namespace Ambermoon.Data.Descriptions
 			{ EventType.PartyMemberCondition, () => new PartyMemberConditionEvent() },
             { EventType.Shake, () => new ShakeEvent() },
             { EventType.ShowMap, () => new ShowMapEvent() },
+            { EventType.ToggleSwitch, () => new ToggleSwitchEvent() },
             { EventType.DynamicChangeTile, () => new DynamicChangeTileEvent() },
+            { EventType.RectangularExploration, () => new RectangularExplorationEvent() },
+            { EventType.VerticalLineReveal, () => new VerticalLineRevealEvent() },
         };
     }
 }

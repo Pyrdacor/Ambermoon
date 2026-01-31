@@ -5,8 +5,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Ambermoon.Data.Common" Version="10.12.4" />
-    <PackageReference Include="Ambermoon.Data.Legacy" Version="10.12.5" />
+    <PackageReference Include="Ambermoon.Data.Common" Version="10.12.7" />
+    <PackageReference Include="Ambermoon.Data.Legacy" Version="10.12.8" />
     <PackageReference Include="System.Runtime.CompilerServices.Unsafe" Version="6.1.2" />
   </ItemGroup>
 

@@ -1,5 +1,6 @@
 ﻿using Ambermoon.Data;
 using Ambermoon.Data.Descriptions;
+using System.ComponentModel;
 
 namespace AmbermoonUIEventEditor
 {
@@ -13,11 +14,13 @@ namespace AmbermoonUIEventEditor
         private Map? map;
         private IConversationPartner? npc;
 
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public bool ShowMapEvents
         {
             get => eventBrowser.ShowMapEvents;
             set => eventBrowser.ShowMapEvents = value;
         }
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public bool ShowCharEvents
         {
             get => eventBrowser.ShowCharEvents;
@@ -49,7 +52,7 @@ namespace AmbermoonUIEventEditor
 
             if (desc.ValueDescriptions.Any(d => !d.Hidden) || (desc.AllowAsFirst && !desc.AllowOnlyAsFirst))
             {
-                var newEventForm = new EventEditForm(true, @event, map?.Events ?? new List<Event>());
+                var newEventForm = new EventEditForm(true, @event, map?.Events ?? npc?.Events ?? []);
 
                 if (newEventForm.ShowDialog() == DialogResult.OK)
                 {

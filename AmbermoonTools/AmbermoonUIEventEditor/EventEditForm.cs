@@ -1,6 +1,7 @@
 ﻿using Ambermoon;
 using Ambermoon.Data;
 using Ambermoon.Data.Descriptions;
+using Ambermoon.Data.Legacy.Serialization;
 using System.Data;
 
 namespace AmbermoonUIEventEditor
@@ -23,7 +24,9 @@ namespace AmbermoonUIEventEditor
             var boolValues = shownValues.Where(d => d.Type == Ambermoon.Data.Descriptions.ValueType.Bool);
             var intValues = shownValues.Where(d => d.Type == Ambermoon.Data.Descriptions.ValueType.Byte ||
                 d.Type == Ambermoon.Data.Descriptions.ValueType.SByte ||
-                d.Type == Ambermoon.Data.Descriptions.ValueType.Word);
+                d.Type == Ambermoon.Data.Descriptions.ValueType.Word ||
+                d.Type == Ambermoon.Data.Descriptions.ValueType.TenBits ||
+                d.Type == Ambermoon.Data.Descriptions.ValueType.TwelveBits);
             var enumValues = shownValues.Where(d => d.Type == Ambermoon.Data.Descriptions.ValueType.Enum ||
                 d.Type == Ambermoon.Data.Descriptions.ValueType.Flag8 ||
                 d.Type == Ambermoon.Data.Descriptions.ValueType.Flag16);
@@ -46,6 +49,8 @@ namespace AmbermoonUIEventEditor
                     Ambermoon.Data.Descriptions.ValueType.SByte => Tuple.Create<int, int>(sbyte.MinValue, sbyte.MaxValue),
                     Ambermoon.Data.Descriptions.ValueType.Byte => Tuple.Create<int, int>(byte.MinValue, byte.MaxValue),
                     Ambermoon.Data.Descriptions.ValueType.Word => Tuple.Create<int, int>(ushort.MinValue, ushort.MaxValue),
+                    Ambermoon.Data.Descriptions.ValueType.TenBits => Tuple.Create<int, int>(ushort.MinValue, 1023),
+                    Ambermoon.Data.Descriptions.ValueType.TwelveBits => Tuple.Create<int, int>(ushort.MinValue, 4095),
                     _ => throw new NotSupportedException("Unsupported integer value type.")
                 };
                 AddIntControl(intValue.Name, minMax.Item1, minMax.Item2, intValue.DefaultValue, intValue);
@@ -205,15 +210,41 @@ namespace AmbermoonUIEventEditor
                 foreach (var input in Controls.OfType<NumericUpDown>().Where(i => i.Tag is ValueDescription))
                 {
                     var desc = (input.Tag as ValueDescription)!;
-                    var property = eventType.GetProperty(desc.Name)!;
-                    object? value = input.Value;
-                    if (property.PropertyType.IsEnum)
-                        value = System.Enum.Parse(property.PropertyType, value.ToString()!);
-                    else if (property.PropertyType.IsGenericType && property.PropertyType.GetGenericTypeDefinition() == typeof(Nullable<>) && property.PropertyType.GetGenericArguments()[0].IsEnum)
-                        value = System.Enum.Parse(property.PropertyType.GetGenericArguments()[0], value.ToString()!);
+
+                    if (desc is TenBitValueDescription tenBitValueDescription)
+                    {
+                        var eventDataWriter = new DataWriter();
+                        EventWriter.WriteEventData(eventDataWriter, @event);
+                        byte[] eventData = [(byte)@event.Type, .. eventDataWriter.ToArray()];
+                        tenBitValueDescription.Write(eventData, (ushort)Convert.ChangeType(input.Value, typeof(ushort)));
+                        var updatedEvent = EventReader.ParseEvent(new DataReader(eventData));
+
+                        var property = eventType.GetProperty(tenBitValueDescription.PropertyName)!;
+                        property.SetValue(@event, property.GetValue(updatedEvent));
+                    }
+                    else if (desc is TwelveBitValueDescription twelveBitValueDescription)
+                    {
+                        var eventDataWriter = new DataWriter();
+                        EventWriter.WriteEventData(eventDataWriter, @event);
+                        byte[] eventData = [(byte)@event.Type, .. eventDataWriter.ToArray()];
+                        twelveBitValueDescription.Write(eventData, (ushort)Convert.ChangeType(input.Value, typeof(ushort)));
+                        var updatedEvent = EventReader.ParseEvent(new DataReader(eventData));
+
+                        var property = eventType.GetProperty(twelveBitValueDescription.PropertyName)!;
+                        property.SetValue(@event, property.GetValue(updatedEvent));
+                    }
                     else
-                        value = Convert.ChangeType(value, property.PropertyType);
-                    property.SetValue(@event, value);
+                    {
+                        var property = eventType.GetProperty(desc.Name)!;
+                        object? value = input.Value;
+                        if (property.PropertyType.IsEnum)
+                            value = System.Enum.Parse(property.PropertyType, value.ToString()!);
+                        else if (property.PropertyType.IsGenericType && property.PropertyType.GetGenericTypeDefinition() == typeof(Nullable<>) && property.PropertyType.GetGenericArguments()[0].IsEnum)
+                            value = System.Enum.Parse(property.PropertyType.GetGenericArguments()[0], value.ToString()!);
+                        else
+                            value = Convert.ChangeType(value, property.PropertyType);
+                        property.SetValue(@event, value);
+                    }
                 }
 
                 foreach (var dropdown in Controls.OfType<ComboBox>().Where(c => c.Tag is ValueDescription && c.Tag is IEnumValueDescription))

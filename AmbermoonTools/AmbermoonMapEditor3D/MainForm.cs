@@ -256,6 +256,8 @@ namespace AmbermoonMapEditor3D
 
         static Graphic ReadPalette(IDataReader dataReader)
         {
+            dataReader.Position = 0;
+
             var graphic = new Graphic();
             graphicReader.ReadGraphic(graphic, dataReader, PaletteGraphicInfo);
             return graphic;

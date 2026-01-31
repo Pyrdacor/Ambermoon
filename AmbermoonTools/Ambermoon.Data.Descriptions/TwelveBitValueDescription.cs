@@ -8,7 +8,9 @@ namespace Ambermoon.Data.Descriptions
         private readonly int bitOffset;
         private readonly int byteOffset;
 
-        public TwelveBitValueDescription(string name, int byteOffset, int bitOffset, bool required, bool hidden, ushort defaultValue, ushort minValue = 0, ushort maxValue = 4095, bool showAsHex = false)
+        public string PropertyName { get; }
+
+        public TwelveBitValueDescription(string name, string propertyName, int byteOffset, int bitOffset, bool required, bool hidden, ushort defaultValue, ushort minValue = 0, ushort maxValue = 4095, bool showAsHex = false)
         {
             if (minValue > 4095)
                 throw new ArgumentOutOfRangeException(nameof(minValue));
@@ -19,6 +21,7 @@ namespace Ambermoon.Data.Descriptions
 
             Type = ValueType.TwelveBits;
             Name = name;
+            PropertyName = propertyName;
             Required = required;
             Hidden = !required && hidden;
             MinValue = minValue;

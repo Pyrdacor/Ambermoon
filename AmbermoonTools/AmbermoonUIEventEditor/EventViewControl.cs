@@ -553,7 +553,7 @@ namespace AmbermoonUIEventEditor
                 }
 
                 // TODO: Add later
-                /*foreach (var referencedEventChain in referencedEvents)
+                foreach (var referencedEventChain in referencedEvents)
                 {
                     var referencedEvent = referencedEventChain.Key;
                     AddColumnWithOffset(referencedEventChain.Value.Key);
@@ -565,11 +565,12 @@ namespace AmbermoonUIEventEditor
 
                         AddBlock(referencedEvent, column, false, false, null, referencedEventChain.Value.Value);
                         referencedEvent = referencedEvent.Next;
-                        // TODO: branches
-                        break; // TODO: Remove
-                        // TODO: Handle more reference chains
+                        // TODO: branches                        
                     }
-                }*/
+
+                    break; // TODO: Remove
+                           // TODO: Handle more reference chains
+                }
 
                 column++;
             }

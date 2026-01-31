@@ -1014,6 +1014,10 @@ namespace AmbermoonEventEditor
                         {
                             currentValue = tenBitValueDescription.Read(eventData);
                         }
+                        else if (value is TwelveBitValueDescription twelveBitValueDescription)
+                        {
+                            currentValue = twelveBitValueDescription.Read(eventData);
+                        }
                         else
                         {
                             var property = type.GetProperty(value.Name);

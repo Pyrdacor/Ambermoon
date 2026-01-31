@@ -723,13 +723,13 @@ LAB_0021f9d6:
 	tst.b (A1)
 	bne.b LAB_0021f9d6
 	moveq #$00000000,D0
-	move.b (A0),D0
-	subi.b #$00000030,D0
-	cmp.w #$000a,D0
-	bcs.b LAB_0021f9f4
-	moveq #-$00000001,D0
+	move.b (A0),D0 ; After reading "BOOT", read the next byte
+	subi.b #$00000030,D0 ; Minus '0' so we have an integer ("BOOT1" -> 1)
+	cmp.w #$000a,D0 ; Compare against 10
+	bcs.b LAB_0021f9f4 ; Branch if lower (e.g. 1)
+	moveq #-$00000001,D0 ; otherwise set to invalid (10+ = invalid, 0-9 seems valid)
 LAB_0021f9f4:
-	move.w D0,DAT_0022104c
+	move.w D0,DAT_0022104c ; Move the number (or -1 if invalid)
 LAB_0021f9fa:
 	movem.l (SP)+,D0/A0/A1
 	rts
@@ -1500,7 +1500,7 @@ s_ConsoleDevice:
 	dc.b "NIL:",0
 DAT_00220cd1:
 	; undefined1
-	dc.b $42
+	dc.b $42 ; // "BOOT"
 DAT_00220cd2:
 	; undefined1
 	dc.b $4f
