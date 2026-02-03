@@ -185,7 +185,8 @@ if (language != "German")
     Environment.CurrentDirectory = tempDir;
 
     // Patch game texts
-    Exec("AmbermoonTextManager.exe", "-i Amberfiles AllTexts");
+    string additionalOptions = language != "German" && language != "English" ? " -u" : "";
+    Exec("AmbermoonTextManager.exe", "-i Amberfiles AllTexts" + additionalOptions);
 
     if (createIntroAndExtro)
     {
@@ -608,7 +609,7 @@ static void PatchBootDiskFiles(string sourceDir, string language)
         return content;
     });
 
-    PatchFile(@"S\startup-orginal", content =>
+    PatchFile(@"S\startup-original", content =>
     {
         if (language == "German")
         {
