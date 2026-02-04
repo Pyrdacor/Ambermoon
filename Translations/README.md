@@ -2,6 +2,7 @@
 
 Download the following files:
 
+- [AllTexts.zip](AllTexts.zip)
 - [EnglishExtroTextGroups.zip](EnglishExtroTextGroups.zip)
 - [IntroTexts.zip](IntroTexts.zip)
 - [RemakeTranslatableTexts.txt](RemakeTranslatableTexts.txt)
