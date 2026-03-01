@@ -1,0 +1,9 @@
+﻿####################
+# Script
+- Version: 5.1
+- Type: Map
+- Index: 259
+
+####################
+# Seq 1
+- MapChange(mapIndex = 258, x = 7, y = 9, dir = Right)

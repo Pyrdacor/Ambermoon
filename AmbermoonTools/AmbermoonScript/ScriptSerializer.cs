@@ -4,7 +4,7 @@ using Ambermoon.Data;
 
 namespace AmbermoonScript;
 
-public class ScriptSerializer
+/*public class ScriptSerializer
 {
     private const uint LockpickItemIndex = 138;
 
@@ -155,4 +155,4 @@ public class ScriptSerializer
 
         return builder.ToString();
     }
-}
+}*/

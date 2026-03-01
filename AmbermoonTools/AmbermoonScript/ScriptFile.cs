@@ -60,6 +60,8 @@ public partial record ScriptFileHeader(ScriptType Type, uint Index, string Versi
 
                 parser.EnterContext(ParseContext.ScriptLine);
 
+                header = new(type!.Value, index!.Value, version);
+
                 return true;
             }
 
@@ -87,6 +89,7 @@ public partial record ScriptFileHeader(ScriptType Type, uint Index, string Versi
                     }
 
                     version = value;
+                    parser.ConsumePeekedLine();
                 }
                 else if (property == "index")
                 {
@@ -97,6 +100,7 @@ public partial record ScriptFileHeader(ScriptType Type, uint Index, string Versi
                     }
 
                     index = i;
+                    parser.ConsumePeekedLine();
                 }
                 else if (property == "type")
                 {
@@ -107,6 +111,7 @@ public partial record ScriptFileHeader(ScriptType Type, uint Index, string Versi
                     }
 
                     type = t;
+                    parser.ConsumePeekedLine();
                 }
                 else
                 {
@@ -121,6 +126,7 @@ public partial record ScriptFileHeader(ScriptType Type, uint Index, string Versi
 
                 parser.EnterContext(ParseContext.HeaderLine);
                 readProperties = true;
+                parser.ConsumePeekedLine();
             }
         }
 

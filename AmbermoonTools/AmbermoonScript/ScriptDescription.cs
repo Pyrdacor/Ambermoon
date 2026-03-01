@@ -14,6 +14,15 @@ public record Parameter(string Name, bool Optional, int MinValue = 0, int MaxVal
     string? IParameter.DefaultValue => DefaultValue?.ToString();
 }
 
+public record BooleanParameter : Parameter
+{
+    public BooleanParameter(string Name, bool Optional, bool? DefaultValue = null)
+        : base(Name, Optional, 0, 1, DefaultValue == null ? null : (DefaultValue.Value ? 1 : 0))
+    {
+
+    }
+}
+
 public record EnumParameter<T>(string Name, bool Optional, T? DefaultValue, params T[] AllowedValues) : IParameter
     where T : struct, Enum
 {
@@ -118,6 +127,11 @@ public partial record ScriptDescription(string Name, params IParameter[] Paramet
 
             if (commentIndex != -1)
                 line = line[..commentIndex].TrimEnd();
+
+            if (!line.StartsWith(ScriptParser.EventPrefix))
+                return false;
+
+            line = line[2..];
 
             int openBracketCount = line.Count('(');
             int closeBracketCount = line.Count(')');

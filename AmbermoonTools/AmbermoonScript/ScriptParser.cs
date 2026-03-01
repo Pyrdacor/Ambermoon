@@ -6,6 +6,7 @@ public enum ParseContext
 {
     Header,
     HeaderLine,
+    Constant,
     SequenceHeader,
     ScriptLine,
     ScriptLineAfterIf
@@ -43,6 +44,11 @@ public class ScriptParser
         CurrentContext = context;
     }
 
+    public string[] GetWarnings()
+    {
+        return warnings[CurrentContext][currentFile].Select(e => $"[Line {e.Key}]: {e.Value.Message}{(e.Value.Position == null ? "" : $"(Pos {e.Value.Position})")}").ToArray();
+    }
+
     public bool TryParseFile(string file, out ScriptFile? scriptFile)
     {
         if (!parsedFiles.TryGetValue(file, out scriptFile))
@@ -60,20 +66,24 @@ public class ScriptParser
 
             try
             {
-                // TODO: parse
-                var header = new ScriptFileHeader(ScriptType.Map, 1, "1.0");
+                if (!ScriptFileHeader.TryParse(this, out var header))
+                    return false;
+
                 // TODO: parse
                 var constants = new List<ScriptConstant>();
+                var constantDict = constants.ToDictionary(c => c.Name, c => long.Parse(c.Value)); // TODO: constant values can be other constant names! We need to resolve them.
 
                 var sequences = new List<ScriptEventSequence>();
 
-                while (ScriptEventSequence.TryParse(this, out var sequence))
+                EnterContext(ParseContext.SequenceHeader);
+
+                while (ScriptEventSequence.TryParse(this, constantDict, out var sequence))
                     sequences.Add(sequence!);
 
                 if (!EndOfFile) // TODO: error message
                     return false;
 
-                scriptFile = new(file, header, constants, sequences);
+                scriptFile = new(file, header!, constants, sequences);
             }
             finally
             {
