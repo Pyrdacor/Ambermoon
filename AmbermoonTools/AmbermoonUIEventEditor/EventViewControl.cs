@@ -201,6 +201,14 @@ namespace AmbermoonUIEventEditor
                 HandleMouseUp();
             }
 
+            // Return true if processed, false if not (e.g. block disabled)
+            public bool DoubleClick()
+            {
+                new EventEditForm(false, Event, events).ShowDialog();
+
+                return true;
+            }
+
             public bool MouseMoveTo(int x, int y, bool mouseDown)
             {
                 if (!mouseDown)
@@ -1154,6 +1162,25 @@ namespace AmbermoonUIEventEditor
 
             EventBlock.HideTooltips();
             Refresh();
+        }
+
+        protected override void OnMouseDoubleClick(MouseEventArgs e)
+        {
+            if (e.Button == MouseButtons.Left)
+            {
+                foreach (var eventBlock in eventBlocks)
+                {
+                    if (eventBlock.Area.Contains(e.X, e.Y))
+                    {
+                        if (!eventBlock.DoubleClick())
+                            base.OnMouseDoubleClick(e);
+
+                        break;
+                    }
+                }
+            }
+
+            base.OnMouseDoubleClick(e);
         }
 
         protected override void OnKeyDown(KeyEventArgs e)
