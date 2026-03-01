@@ -1,4 +1,5 @@
 ﻿using System.Text.RegularExpressions;
+using Ambermoon.Data;
 
 namespace AmbermoonScript;
 
@@ -49,7 +50,7 @@ public record NullableParameter(IParameter BaseParameter, string NullValueLitera
 
 public partial record ScriptDescription(string Name, params IParameter[] Parameters)
 {
-    public static bool TryParse(ScriptParser parser, out string? name, out Dictionary<string, string> parameters, out bool error)
+    public static bool TryParse(ScriptParser parser, out string? name, out Dictionary<string, string> parameters, out bool error, IScriptEvent? lastEvent)
     {
         name = null;
         parameters = [];
@@ -73,53 +74,98 @@ public partial record ScriptDescription(string Name, params IParameter[] Paramet
             if (line.StartsWith(ScriptParser.HeaderCommentPrefix) || line.StartsWith(ScriptParser.HeaderPrefix))
                 return false;
 
-            if (line.StartsWith(ScriptParser.SuccessPrefix))
+            if (line.StartsWith(ScriptParser.BranchPrefix))
             {
-                if (parser.CurrentContext != ParseContext.ScriptLineAfterIf)
+                if (parser.CurrentContext != ParseContext.ScriptLineAfterBranch || lastEvent is not IBranchScriptEvent lastBranchEvent)
                 {
-                    parser.TrackParserWarning("Conditional jumps (?) are only allowed after if statements.",
-                        originalLine.IndexOf(ScriptParser.SuccessPrefix));
+                    parser.TrackParserWarning("Conditional jumps (->) are only allowed after branch events.",
+                        originalLine.IndexOf(ScriptParser.BranchPrefix));
                     error = true;
                     return false;
                 }
 
-                string label = line[ScriptParser.SuccessPrefix.Length..].Trim();
+                // Valid syntax:
+                // -> TrapTriggered: JumpTo(event123)
+                // -> TrapTriggered: End()
+                // TrapTriggered is the IBranchScriptEvent.BranchExpressionString and depends on the event.
+                int dividerPosition = line.IndexOf(ScriptParser.BranchDivider);
 
-                if (!LabelNameRegex().IsMatch(label))
+                if (dividerPosition == -1)
                 {
-                    parser.TrackParserWarning("Invalid conditional jump. Must be of form: ? label",
-                        originalLine.IndexOf(label, originalLine.IndexOf(ScriptParser.SuccessPrefix) + ScriptParser.SuccessPrefix.Length));
+                    parser.TrackParserWarning("Wrong conditional jump format. Use something like this: -> TrapTriggered: JumpTo(event123)",
+                        originalLine.IndexOf(ScriptParser.BranchPrefix) + ScriptParser.BranchPrefix.Length);
                     error = true;
                     return false;
                 }
 
-                name = "?";
-                parameters.Add("label", label);
-                return true;
-            }
+                string expression = line[ScriptParser.BranchPrefix.Length..dividerPosition].Trim();                
 
-            if (line.StartsWith(ScriptParser.FailPrefix))
-            {
-                if (parser.CurrentContext != ParseContext.ScriptLineAfterIf)
+                if (!expression.Equals(lastBranchEvent.BranchExpressionString, StringComparison.CurrentCultureIgnoreCase))
                 {
-                    parser.TrackParserWarning("Conditional jumps (!) are only allowed after if statements.",
-                        originalLine.IndexOf(ScriptParser.FailPrefix));
+                    parser.TrackParserWarning($"Invalid condition name: {expression}. Must be: {lastBranchEvent.BranchExpressionString}.",
+                        originalLine.IndexOf(ScriptParser.BranchPrefix) + ScriptParser.BranchPrefix.Length);
                     error = true;
                     return false;
                 }
 
-                string label = line[ScriptParser.FailPrefix.Length..].Trim();
+                string jumpExpression = line[(dividerPosition + 1)..].Trim();
 
-                if (!LabelNameRegex().IsMatch(label))
+                if (jumpExpression.Length == 0)
                 {
-                    parser.TrackParserWarning("Invalid conditional jump. Must be of form: ! label",
-                        originalLine.IndexOf(label, originalLine.IndexOf(ScriptParser.FailPrefix) + ScriptParser.FailPrefix.Length));
+                    parser.TrackParserWarning($"Missing jump expression after ':'. Use something like JumpTo(event123) or End().",
+                        originalLine.IndexOf(ScriptParser.BranchDivider) + ScriptParser.BranchDivider.Length);
                     error = true;
                     return false;
                 }
 
-                name = "!";
-                parameters.Add("label", label);
+                int openBracketPosition = jumpExpression.IndexOf('(');
+                int closeBracketPosition = jumpExpression.IndexOf(')');
+
+                if (openBracketPosition == -1 || closeBracketPosition == -1 || openBracketPosition > closeBracketPosition || closeBracketPosition + 1 != jumpExpression.Length)
+                {
+                    parser.TrackParserWarning($"Invalid jump expression: {jumpExpression}. Use something like JumpTo(event123) or End().",
+                        originalLine.IndexOf(ScriptParser.BranchDivider) + ScriptParser.BranchDivider.Length);
+                    error = true;
+                    return false;
+                }
+
+                string jumpCommand = jumpExpression[..openBracketPosition].Trim();
+                bool jumpTo = jumpCommand.Equals(ScriptEventSequence.JumpTo, StringComparison.OrdinalIgnoreCase);
+                bool end = jumpCommand.Equals(ScriptEventSequence.End, StringComparison.OrdinalIgnoreCase);
+
+                if (!jumpTo && !end)
+                {
+                    parser.TrackParserWarning($"Invalid jump expression: {jumpExpression}. Use something like JumpTo(event123) or End().",
+                        originalLine.IndexOf(ScriptParser.BranchDivider) + ScriptParser.BranchDivider.Length);
+                    error = true;
+                    return false;
+                }
+
+                string arg = jumpExpression[(openBracketPosition + 1)..closeBracketPosition].Trim();
+
+                if (end && arg.Length != 0)
+                {
+                    parser.TrackParserWarning($"Invalid jump expression: {jumpExpression}. End() should not have arguments.",
+                        originalLine.IndexOf(ScriptParser.BranchDivider) + ScriptParser.BranchDivider.Length);
+                    error = true;
+                    return false;
+                }
+
+                if (jumpTo && (arg.Length == 0 || !LabelNameRegex().IsMatch(arg)))
+                {
+                    parser.TrackParserWarning($"Invalid jump expression: {jumpExpression}. JumpTo(label) should have a valid label name as argument.",
+                        originalLine.IndexOf(ScriptParser.BranchDivider) + ScriptParser.BranchDivider.Length);
+                    error = true;
+                    return false;
+                }
+
+                name = $"{ScriptParser.BranchPrefix}{lastBranchEvent.BranchExpressionString}";
+
+                if (jumpTo)
+                    parameters.Add(ScriptParser.JumpTargetParam, arg);
+
+                parser.ConsumePeekedLine();
+
                 return true;
             }
 

@@ -9,7 +9,7 @@ public enum ParseContext
     Constant,
     SequenceHeader,
     ScriptLine,
-    ScriptLineAfterIf
+    ScriptLineAfterBranch
 }
 
 public class ScriptParser
@@ -18,8 +18,9 @@ public class ScriptParser
     public const string HeaderCommentPrefix = "##";
     public const string HeaderPrefix = "# ";
     public const string EventPrefix = "- ";
-    public const string SuccessPrefix = "? ";
-    public const string FailPrefix = "! ";
+    public const string BranchPrefix = "-> ";
+    public const string BranchDivider = ":";
+    public const string JumpTargetParam = "jumpTarget";
     public const string HeaderName = "script";
     public const string SequenceName = "sequence";
     public const string SequenceShortName = "seq";
@@ -46,7 +47,7 @@ public class ScriptParser
 
     public string[] GetWarnings()
     {
-        return warnings[CurrentContext][currentFile].Select(e => $"[Line {e.Key}]: {e.Value.Message}{(e.Value.Position == null ? "" : $"(Pos {e.Value.Position})")}").ToArray();
+        return warnings[CurrentContext][currentFile].Select(e => $"[Line {e.Key}{(e.Value.Position == null ? "" : $", Pos {e.Value.Position}")}]: {e.Value.Message}").ToArray();
     }
 
     public bool TryParseFile(string file, out ScriptFile? scriptFile)

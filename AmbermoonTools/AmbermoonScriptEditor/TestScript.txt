@@ -7,3 +7,7 @@
 ####################
 # Seq 1
 - MapChange(mapIndex = 258, x = 7, y = 9, dir = Right)
+- Door(doorIndex = 2, keyIndex = 5, textIndex = 3)
+-> traptriggered:end()
+- Chest(chestIndex = 2, keyIndex = 5, textIndex = 3, alwaysOpen = false, lockpickChanceReduction = 3)
+-> traptriggered:jumpTo(event6)

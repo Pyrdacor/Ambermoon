@@ -17,8 +17,11 @@ public interface IScriptEventType
     static abstract IScriptEvent Parse(Dictionary<string, string> parameterValues, Dictionary<string, long> constants);
 }
 
-public record ScriptEventSequence(uint Index, ICollection<IScriptEvent> Events)
+public record ScriptEventSequence(uint Index, ICollection<IScriptEvent> Events, List<(IBranchScriptEvent BranchEvent, string AlternativeJumpLabel)> AlternativeJumpLabels)
 {
+    public const string JumpTo = "JumpTo";
+    public const string End = "End";
+
     public delegate IScriptEvent Factory(Dictionary<string, string> parameterValues, Dictionary<string, long> constants);
 
     private static readonly Dictionary<string, Factory> eventPool = [];
@@ -60,6 +63,7 @@ public record ScriptEventSequence(uint Index, ICollection<IScriptEvent> Events)
         AddEvent<TreasureScriptEvent>();
         // # Spinners and traps
         AddEvent<SpinnerScriptEvent>();
+        AddEvent<TrapScriptEvent>();
         // TODO ...
     }
 
@@ -132,10 +136,11 @@ public record ScriptEventSequence(uint Index, ICollection<IScriptEvent> Events)
             parser.ConsumePeekedLine();
 
             List<IScriptEvent> events = [];
+            List<(IBranchScriptEvent BranchEvent, string AlternativeJumpLabel)> alternativeJumpLabels = [];
 
             while (true)
             {
-                if (!ScriptDescription.TryParse(parser, out var name, out var parameters, out bool error))
+                if (!ScriptDescription.TryParse(parser, out var name, out var parameters, out bool error, events.Count == 0 ? null : events[^1]))
                 {
                     if (error)
                         return false;
@@ -144,16 +149,33 @@ public record ScriptEventSequence(uint Index, ICollection<IScriptEvent> Events)
                     break;
                 }
 
+                if (name!.StartsWith(ScriptParser.BranchPrefix))
+                {
+                    if (parameters.TryGetValue(ScriptParser.JumpTargetParam, out var jumpTarget))
+                        alternativeJumpLabels.Add(((events[^1] as IBranchScriptEvent)!, jumpTarget));
+
+                    parser.EnterContext(ParseContext.ScriptLine);
+
+                    continue;
+                }
+
                 if (!eventPool.TryGetValue(name!.ToLower(), out var factory))
                 {
                     parser.TrackParserWarning($"Unrecognized event name: {name}");
                     return false;
                 }
 
-                events.Add(factory(parameters, constants));
+                var scriptEvent = factory(parameters, constants);
+
+                events.Add(scriptEvent);
+
+                if (scriptEvent is IBranchScriptEvent)
+                    parser.EnterContext(ParseContext.ScriptLineAfterBranch);
+                else
+                    parser.EnterContext(ParseContext.ScriptLine);
             }
 
-            sequence = new(index, events);
+            sequence = new(index, events, alternativeJumpLabels);
 
             return true;
         }
@@ -175,6 +197,8 @@ public interface IScriptEvent
 public interface IBranchScriptEvent : IScriptEvent
 {
     uint? AlternativeBranchIndex { get; }
+
+    string BranchExpressionString { get; }
 }
 
 file class EnumParameterBuilder<T> where T : struct, Enum
@@ -266,9 +290,11 @@ public abstract class ScriptEvent : IScriptEvent
 
     public Event ToEvent() => Event ?? throw new InvalidOperationException("No event data parsed or loaded");
 
+    protected delegate void SetParameter(IParameter parameter, string value, bool fromDefault);
+
     protected static void Parse(ScriptDescription description,
         Dictionary<string, string> parameterValues,
-        Action<IParameter, string> setParameter)
+        SetParameter setParameter)
     {
         foreach (var parameter in description.Parameters)
         {
@@ -277,11 +303,11 @@ public abstract class ScriptEvent : IScriptEvent
             if (parameterValues.TryGetValue(lowerName, out var value))
             {
                 parameterValues.Remove(lowerName);
-                setParameter(parameter, value);
+                setParameter(parameter, value, false);
             }
             else if (parameter.Optional)
             {
-                setParameter(parameter, parameter.DefaultValue!);
+                setParameter(parameter, parameter.DefaultValue!, true);
             }
             else
             {
@@ -408,6 +434,7 @@ public abstract class ScriptEvent : IScriptEvent
 public abstract class BranchScriptEvent(EventType eventType) : ScriptEvent(eventType), IBranchScriptEvent
 {
     public abstract uint? AlternativeBranchIndex { get; }
+    public abstract string BranchExpressionString { get; }
 }
 
 
@@ -475,7 +502,7 @@ internal class MapChangeScriptEvent : TeleportBaseScriptEvent, IScriptEventType
             Event = teleportEvent
         };
 
-        Parse(description, parameterValues, (parameter, value) =>
+        Parse(description, parameterValues, (parameter, value, _) =>
         {
             string name = parameter.Name;
 
@@ -540,7 +567,7 @@ internal class TeleportScriptEvent : TeleportBaseScriptEvent, IScriptEventType
             Event = teleportEvent
         };
 
-        Parse(description, parameterValues, (parameter, value) =>
+        Parse(description, parameterValues, (parameter, value, _) =>
         {
             string name = parameter.Name;
 
@@ -603,7 +630,7 @@ internal class WindGateScriptEvent : TeleportBaseScriptEvent, IScriptEventType
             Event = teleportEvent
         };
 
-        Parse(description, parameterValues, (parameter, value) =>
+        Parse(description, parameterValues, (parameter, value, _) =>
         {
             string name = parameter.Name;
 
@@ -668,7 +695,7 @@ internal class ClimbScriptEvent : TeleportBaseScriptEvent, IScriptEventType
             Event = teleportEvent
         };
 
-        Parse(description, parameterValues, (parameter, value) =>
+        Parse(description, parameterValues, (parameter, value, _) =>
         {
             string name = parameter.Name;
 
@@ -733,7 +760,7 @@ internal class FallScriptEvent : TeleportBaseScriptEvent, IScriptEventType
             Event = teleportEvent
         };
 
-        Parse(description, parameterValues, (parameter, value) =>
+        Parse(description, parameterValues, (parameter, value, _) =>
         {
             string name = parameter.Name;
 
@@ -806,20 +833,32 @@ internal class OutroScriptEvent() : ScriptEvent(EventType.Teleport), IScriptEven
 
 #region Doors and chests
 
-internal abstract class LockedBaseScriptEvent(EventType eventType) : ScriptEvent(eventType)
+internal abstract class LockedBaseScriptEvent(EventType eventType) : BranchScriptEvent(eventType)
 {
     protected static readonly Parameter keyIndex = New.Arg("KeyIndex", 0, 1023);
     protected static readonly Parameter unlockTextIndex = New.Opt("UnlockTextIndex", 0xff);
     protected static readonly Parameter textIndex = New.Opt("TextIndex", 0xff);
-    protected static readonly Parameter lockpickChanceReduction = New.Opt("LockpickChanceReduction", 1, 1, 100);
 }
 
 internal class DoorScriptEvent() : LockedBaseScriptEvent(EventType.Door), IScriptEventType
 {
     static readonly Parameter doorIndex = New.Arg("DoorIndex");
+    protected static readonly Parameter lockpickChanceReduction = New.Opt("LockpickChanceReduction", 100, 1, 100);
 
     static readonly ScriptDescription description = new("Door", doorIndex, keyIndex, unlockTextIndex,
         textIndex, lockpickChanceReduction);
+
+    public override uint? AlternativeBranchIndex
+    {
+        get
+        {
+            var alternativeBranchIndex = (Event as DoorEvent)?.UnlockFailedEventIndex;
+
+            return alternativeBranchIndex == null || alternativeBranchIndex == 0xffff ? null : alternativeBranchIndex.Value;
+        }
+    }
+
+    public override string BranchExpressionString => "TrapTriggered";
 
     public static EventType GetEventType() => EventType.Door;
 
@@ -850,6 +889,9 @@ internal class DoorScriptEvent() : LockedBaseScriptEvent(EventType.Door), IScrip
                 (textIndex, doorEvent.TextIndex == 0xff ? None : doorEvent.TextIndex.ToString()),
                 (lockpickChanceReduction, hideLockpickingChanceReduction ? null : doorEvent.LockpickingChanceReduction.ToString()));
 
+            if (doorEvent.UnlockFailedEventIndex != 0xffff)
+                writer.WriteLine($"-> {BranchExpressionString}: {ScriptEventSequence.JumpTo}(event{doorEvent.UnlockFailedEventIndex})");
+
             return true;
         }
 
@@ -873,7 +915,7 @@ internal class DoorScriptEvent() : LockedBaseScriptEvent(EventType.Door), IScrip
             Event = doorEvent
         };
 
-        Parse(description, parameterValues, (parameter, value) =>
+        Parse(description, parameterValues, (parameter, value, _) =>
         {
             string name = parameter.Name;
 
@@ -897,9 +939,22 @@ internal class ChestScriptEvent() : LockedBaseScriptEvent(EventType.Chest), IScr
 {
     static readonly Parameter chestIndex = New.Arg("ChestIndex", 1, 256 + 128);
     static readonly BooleanParameter alwaysOpen = New.BooleanOpt("AlwaysOpen", false);
+    protected static readonly Parameter lockpickChanceReduction = New.Opt("LockpickChanceReduction", 0, 0, 100);
 
     static readonly ScriptDescription description = new("Chest", chestIndex, keyIndex,
         textIndex, alwaysOpen, lockpickChanceReduction);
+
+    public override uint? AlternativeBranchIndex
+    {
+        get
+        {
+            var alternativeBranchIndex = (Event as DoorEvent)?.UnlockFailedEventIndex;
+
+            return alternativeBranchIndex == null || alternativeBranchIndex == 0xffff ? null : alternativeBranchIndex.Value;
+        }
+    }
+
+    public override string BranchExpressionString => "TrapTriggered";
 
     public static EventType GetEventType() => EventType.Chest;
 
@@ -935,6 +990,9 @@ internal class ChestScriptEvent() : LockedBaseScriptEvent(EventType.Chest), IScr
                 (alwaysOpen, hideAlwaysOpen ? null : chestEvent.LockpickingChanceReduction == 0 ? True : False),
                 (lockpickChanceReduction, hideLockpickingChanceReduction ? null : chestEvent.LockpickingChanceReduction.ToString()));
 
+            if (chestEvent.UnlockFailedEventIndex != 0xffff && chestEvent.UnlockFailedEventIndex != 0)
+                writer.WriteLine($"-> {BranchExpressionString}: {ScriptEventSequence.JumpTo}(event{chestEvent.UnlockFailedEventIndex})");
+
             return true;
         }
 
@@ -958,11 +1016,11 @@ internal class ChestScriptEvent() : LockedBaseScriptEvent(EventType.Chest), IScr
             Event = chestEvent
         };
 
-        bool alwaysOpenSet = false;
+        bool? alwaysOpenSet = null;
         bool lockpickChangeReductionGiven = false;
         bool keyIndexGiven = false;
 
-        Parse(description, parameterValues, (parameter, value) =>
+        Parse(description, parameterValues, (parameter, value, fromDefault) =>
         {
             string name = parameter.Name;
 
@@ -987,20 +1045,25 @@ internal class ChestScriptEvent() : LockedBaseScriptEvent(EventType.Chest), IScr
 
                 chestEvent.KeyIndex = keyIndex;
 
-                if (alwaysOpenSet && keyIndex != 0)
+                if (alwaysOpenSet == true && keyIndex != 0)
                     throw new InvalidOperationException("AlwaysOpen must not be set to true if a KeyIndex is specified.");
 
                 keyIndexGiven = keyIndex != 0;
-
             }
             else if (name == textIndex.Name)
                 chestEvent.TextIndex = EnsureLimits(ParseByte(value, constants, noneValue: 0xff), parameter);
             else if (name == lockpickChanceReduction.Name)
             {
+                if (fromDefault)
+                    return;
+
                 var reduction = EnsureLimits(ParseByte(value, constants, noneValue: 0), parameter);
 
-                if (alwaysOpenSet && reduction != 0)
+                if (alwaysOpenSet == true && reduction != 0)
                     throw new FormatException("LockpickChanceReduction must be 0 if AlwaysOpen is set to true.");
+
+                if (alwaysOpenSet == false && reduction == 0)
+                    throw new FormatException("LockpickChanceReduction must not be 0 if AlwaysOpen is set to false.");
 
                 chestEvent.LockpickingChanceReduction = reduction;
 
@@ -1008,16 +1071,20 @@ internal class ChestScriptEvent() : LockedBaseScriptEvent(EventType.Chest), IScr
             }
             else if (name == alwaysOpen.Name)
             {
-                alwaysOpenSet = ParseBool(value, constants);
+                var isAlwaysOpenSet = ParseBool(value, constants);
 
-                if (alwaysOpenSet && (lockpickChangeReductionGiven && chestEvent.LockpickingChanceReduction != 0))
+                if (isAlwaysOpenSet && (lockpickChangeReductionGiven && chestEvent.LockpickingChanceReduction != 0))
                     throw new FormatException("LockpickChanceReduction must be 0 if AlwaysOpen is set to true.");
 
-                if (alwaysOpenSet && keyIndexGiven)
+                if (isAlwaysOpenSet && keyIndexGiven)
                     throw new FormatException("AlwaysOpen must not be set to true if a KeyIndex is specified.");
 
-                if (alwaysOpenSet)
+                if (isAlwaysOpenSet)
                     chestEvent.LockpickingChanceReduction = 0;
+                else if (chestEvent.LockpickingChanceReduction == 0)
+                    chestEvent.LockpickingChanceReduction = 1;
+
+                alwaysOpenSet = isAlwaysOpenSet;
             }
         });
 
@@ -1031,8 +1098,11 @@ internal class TreasureScriptEvent() : LockedBaseScriptEvent(EventType.Chest), I
     static readonly BooleanParameter searchSkillCheck = New.BooleanOpt("SearchSkillCheck", false);
     static readonly BooleanParameter saveChestContents = New.BooleanOpt("SaveContents", false);
 
-    static readonly ScriptDescription description = new("Chest", chestIndex,
+    static readonly ScriptDescription description = new("Treasure", chestIndex,
         textIndex, searchSkillCheck, saveChestContents);
+
+    public override uint? AlternativeBranchIndex => null; // Treasures can not be unlocked!
+    public override string BranchExpressionString => throw new NotSupportedException("Treasures do not support trap triggering conditions.");
 
     public static EventType GetEventType() => EventType.Chest;
 
@@ -1082,7 +1152,7 @@ internal class TreasureScriptEvent() : LockedBaseScriptEvent(EventType.Chest), I
             Event = chestEvent
         };
 
-        Parse(description, parameterValues, (parameter, value) =>
+        Parse(description, parameterValues, (parameter, value, _) =>
         {
             string name = parameter.Name;
 
@@ -1121,7 +1191,7 @@ internal class TreasureScriptEvent() : LockedBaseScriptEvent(EventType.Chest), I
 
 #region Spinners and traps
 
-internal class SpinnerScriptEvent() : LockedBaseScriptEvent(EventType.Spinner), IScriptEventType
+internal class SpinnerScriptEvent() : ScriptEvent(EventType.Spinner), IScriptEventType
 {
     static readonly EnumParameter<CharacterDirection> spinDir = New.BuildEnum<CharacterDirection>("dir",
         build => build
@@ -1174,7 +1244,7 @@ internal class SpinnerScriptEvent() : LockedBaseScriptEvent(EventType.Spinner), 
             Event = spinnerEvent
         };
 
-        Parse(description, parameterValues, (parameter, value) =>
+        Parse(description, parameterValues, (parameter, value, _) =>
         {
             string name = parameter.Name;
 
@@ -1183,6 +1253,79 @@ internal class SpinnerScriptEvent() : LockedBaseScriptEvent(EventType.Spinner), 
         });
 
         return spinnerScriptEvent;
+    }
+}
+
+internal class TrapScriptEvent() : ScriptEvent(EventType.Spinner), IScriptEventType
+{
+    static readonly Parameter baseDamage = New.Arg("baseDamage");
+    static readonly EnumParameter<TrapEvent.TrapTarget> target = New.Enum<TrapEvent.TrapTarget>("target");
+    static readonly EnumParameter<TrapEvent.TrapAilment> ailment = New.Enum<TrapEvent.TrapAilment>("ailment");
+    static readonly EnumParameter<GenderFlag> affectedGenders = New.Enum("affectedGenders", GenderFlag.Male, GenderFlag.Female, GenderFlag.Both);
+
+    static readonly ScriptDescription description = new("Trap", baseDamage, target, ailment, affectedGenders);
+
+    public static EventType GetEventType() => EventType.Trap;
+
+    public static ScriptDescription GetDescription() => description;
+
+    public static IScriptEvent FromEvent(Event @event) => new TrapScriptEvent()
+    {
+        Event = @event
+    };
+
+    public static bool MatchesEvent(Event @event)
+    {
+        return @event.Type == EventType.Trap;
+    }
+
+    public override bool Print(Event @event, StreamWriter writer)
+    {
+        if (@event is TrapEvent trapEvent)
+        {
+            Print(writer, description.Name,
+                (baseDamage, trapEvent.BaseDamage.ToString()),
+                (target, trapEvent.Target.ToString()),
+                (ailment, trapEvent.Ailment.ToString()),                
+                (affectedGenders, trapEvent.AffectedGenders.ToString())); // TODO: Is it working with flags? ("Both" instead of "Male | Female")
+
+            return true;
+        }
+
+        return false;
+    }
+
+    public static IScriptEvent Parse(Dictionary<string, string> parameterValues, Dictionary<string, long> constants)
+    {
+        var trapEvent = new TrapEvent()
+        {
+            Type = EventType.Trap,
+            BaseDamage = 0,
+            Ailment = TrapEvent.TrapAilment.None,
+            Target = TrapEvent.TrapTarget.ActivePlayer,
+            AffectedGenders = GenderFlag.Both,
+            Unused = [0, 0, 0, 0, 0],
+        };
+        var trapScriptEvent = new TrapScriptEvent()
+        {
+            Event = trapEvent
+        };
+
+        Parse(description, parameterValues, (parameter, value, _) =>
+        {
+            string name = parameter.Name;
+
+            if (name == baseDamage.Name)
+                trapEvent.BaseDamage = EnsureLimits(ParseByte(value, constants), parameter);
+            else if (name == target.Name)
+                trapEvent.Target = EnsureValidValues(Enum.Parse<TrapEvent.TrapTarget>(value, true), parameter);
+            else if (name == ailment.Name)
+                trapEvent.Ailment = EnsureValidValues(Enum.Parse<TrapEvent.TrapAilment>(value, true), parameter);
+            else if (name == affectedGenders.Name)
+                trapEvent.AffectedGenders = EnsureValidValues(Enum.Parse<GenderFlag>(value, true), parameter);
+        });
+
+        return trapScriptEvent;
     }
 }
 
