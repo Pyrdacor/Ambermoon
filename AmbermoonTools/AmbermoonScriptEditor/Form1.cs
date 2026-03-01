@@ -58,14 +58,44 @@ public partial class Form1 : Form
         var events = new List<Event>();
         EventReader.ReadEvents(reader, events, eventList);
 
-        var scriptEvent = ScriptEventSequence.GetScriptEvent(events[1]);
-
         using var writer = new StreamWriter(new MemoryStream());
-        scriptEvent.Print(events[1], writer);
+        uint seq = 1;
+        var eventIndexByStreamIndex = new Dictionary<long, uint>();
 
-        writer.Flush();
+        foreach (var ev in eventList)
+        {
+            writer.WriteLine($"# Sequence {seq++}");
+
+            var next = ev;
+            var processedEvents = new List<Event>();
+
+            while (next != null && !processedEvents.Contains(next))
+            {
+                processedEvents.Add(next);
+                writer.Flush();
+                eventIndexByStreamIndex.Add(writer.BaseStream.Position, next.Index);
+
+                try
+                {
+                    var scriptEvent = ScriptEventSequence.GetScriptEvent(next);
+
+                    writer.Write("- ");
+                    scriptEvent.Print(next, writer);
+                }
+                catch
+                {
+                    writer.WriteLine($"- Invalid event type: {next.Type}");
+                }
+
+                next = ev.Next;
+            }
+
+            writer.WriteLine();
+        }
+
         writer.BaseStream.Position = 0;
 
-        MessageBox.Show(Encoding.UTF8.GetString(new DataReader(writer.BaseStream).ReadToEnd()));
+        textBox1.Text = Encoding.UTF8.GetString(new DataReader(writer.BaseStream).ReadToEnd());
+        textBox1.Enabled = true;
     }
 }

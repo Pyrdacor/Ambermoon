@@ -32,10 +32,12 @@ partial class Form1
         button1 = new Button();
         textBoxMap = new TextBox();
         button2 = new Button();
+        textBox1 = new TextBox();
         SuspendLayout();
         // 
         // textBoxScript
         // 
+        textBoxScript.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
         textBoxScript.Location = new Point(8, 2);
         textBoxScript.Margin = new Padding(2);
         textBoxScript.Name = "textBoxScript";
@@ -45,6 +47,7 @@ partial class Form1
         // 
         // button1
         // 
+        button1.Anchor = AnchorStyles.Top | AnchorStyles.Right;
         button1.Location = new Point(473, 0);
         button1.Margin = new Padding(2);
         button1.Name = "button1";
@@ -56,7 +59,8 @@ partial class Form1
         // 
         // textBoxMap
         // 
-        textBoxMap.Location = new Point(11, 61);
+        textBoxMap.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
+        textBoxMap.Location = new Point(8, 29);
         textBoxMap.Margin = new Padding(2);
         textBoxMap.Name = "textBoxMap";
         textBoxMap.Size = new Size(462, 23);
@@ -65,7 +69,8 @@ partial class Form1
         // 
         // button2
         // 
-        button2.Location = new Point(477, 59);
+        button2.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+        button2.Location = new Point(473, 29);
         button2.Margin = new Padding(2);
         button2.Name = "button2";
         button2.Size = new Size(78, 25);
@@ -74,11 +79,24 @@ partial class Form1
         button2.UseVisualStyleBackColor = true;
         button2.Click += button2_Click;
         // 
+        // textBox1
+        // 
+        textBox1.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
+        textBox1.Enabled = false;
+        textBox1.Location = new Point(8, 56);
+        textBox1.Margin = new Padding(2);
+        textBox1.Multiline = true;
+        textBox1.Name = "textBox1";
+        textBox1.ScrollBars = ScrollBars.Vertical;
+        textBox1.Size = new Size(541, 203);
+        textBox1.TabIndex = 4;
+        // 
         // Form1
         // 
         AutoScaleDimensions = new SizeF(7F, 15F);
         AutoScaleMode = AutoScaleMode.Font;
         ClientSize = new Size(560, 270);
+        Controls.Add(textBox1);
         Controls.Add(button2);
         Controls.Add(textBoxMap);
         Controls.Add(button1);
@@ -97,4 +115,5 @@ partial class Form1
     private Button button1;
     private TextBox textBoxMap;
     private Button button2;
+    private TextBox textBox1;
 }
