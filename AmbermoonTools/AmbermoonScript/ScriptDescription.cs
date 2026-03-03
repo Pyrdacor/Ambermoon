@@ -1,5 +1,4 @@
 ﻿using System.Text.RegularExpressions;
-using Ambermoon.Data;
 
 namespace AmbermoonScript;
 
@@ -36,7 +35,7 @@ public record EnumParameter<T>(string Name, bool Optional, T? DefaultValue, para
             if (DefaultValue == null)
                 return null;
 
-            return ValueToString?.Invoke(DefaultValue.Value) ?? DefaultValue.ToString();
+            return ValueToString?.Invoke(DefaultValue.Value) ?? DefaultValue.ToString()?.ToLower();
         }
     }
 }

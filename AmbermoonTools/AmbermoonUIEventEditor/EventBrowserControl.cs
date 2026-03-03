@@ -1,5 +1,6 @@
 ﻿using Ambermoon.Data;
 using Ambermoon.Data.Descriptions;
+using System.ComponentModel;
 
 namespace AmbermoonUIEventEditor
 {
@@ -11,7 +12,9 @@ namespace AmbermoonUIEventEditor
         }
 
         private EventListItem[] unfilteredItems = Array.Empty<EventListItem>();
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public bool ShowMapEvents { get; set; } = true;
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public bool ShowCharEvents { get; set; } = true;
         public event Action<EventType, EventDescription>? EventDoubleClicked;
         public event Action<EventType, EventDescription>? EventDragged;

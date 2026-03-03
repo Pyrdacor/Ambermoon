@@ -3,6 +3,7 @@ using Ambermoon.Data;
 using Ambermoon.Data.Descriptions;
 using System.Drawing.Drawing2D;
 using Size = System.Drawing.Size;
+using System.ComponentModel;
 
 namespace AmbermoonUIEventEditor
 {
@@ -479,6 +480,7 @@ namespace AmbermoonUIEventEditor
         public int ZoomLevel { get; private set; } = DefaultZoomLevel;
         public int BlockColumnCount => eventBlockColumns.Count;
         public int BlockCount => eventBlocks.Count;
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public List<Control> DrawOverControls
         {
             set

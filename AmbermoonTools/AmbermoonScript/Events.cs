@@ -64,6 +64,10 @@ public record ScriptEventSequence(uint Index, ICollection<IScriptEvent> Events, 
         // # Spinners and traps
         AddEvent<SpinnerScriptEvent>();
         AddEvent<TrapScriptEvent>();
+        // # Print, picture and ask
+        AddEvent<PrintScriptEvent>();
+        AddEvent<PictureScriptEvent>();
+        AddEvent<AskScriptEvent>();
         // TODO ...
     }
 
@@ -201,6 +205,9 @@ public interface IBranchScriptEvent : IScriptEvent
     string BranchExpressionString { get; }
 }
 
+
+#region Helpers
+
 file class EnumParameterBuilder<T> where T : struct, Enum
 {
     public record EnumParameterBuilderWithMappings(string Name, bool Optional, T? DefaultValue)
@@ -220,7 +227,7 @@ file class EnumParameterBuilder<T> where T : struct, Enum
         {
             foreach (var value in values)
             {
-                var name = value.ToString();
+                var name = value.ToString().ToLower();
 
                 fromStringMappings.Add(name, value);
                 toStringMappings.Add(value, name);
@@ -272,6 +279,9 @@ file static class EventHelper
         return b.Build();
     }
 }
+
+#endregion
+
 
 public abstract class ScriptEvent : IScriptEvent
 {
@@ -481,7 +491,7 @@ internal class MapChangeScriptEvent : TeleportBaseScriptEvent, IScriptEventType
                 (mapIndex, teleportEvent.MapIndex.ToString()),
                 (x, teleportEvent.X.ToString()),
                 (y, teleportEvent.Y.ToString()),
-                (teleportDir, teleportEvent.Direction == CharacterDirection.Keep ? "Keep" : teleportEvent.Direction.ToString()));
+                (teleportDir, teleportEvent.Direction == CharacterDirection.Keep ? "keep" : teleportEvent.Direction.ToPrintString()));
 
             return true;
         }
@@ -545,7 +555,7 @@ internal class TeleportScriptEvent : TeleportBaseScriptEvent, IScriptEventType
             Print(writer, description.Name,
                 (x, teleportEvent.X.ToString()),
                 (y, teleportEvent.Y.ToString()),
-                (teleportDir, teleportEvent.Direction == CharacterDirection.Keep ? "Keep" : teleportEvent.Direction.ToString()));
+                (teleportDir, teleportEvent.Direction == CharacterDirection.Keep ? "keep" : teleportEvent.Direction.ToPrintString()));
 
             return true;
         }
@@ -609,7 +619,7 @@ internal class WindGateScriptEvent : TeleportBaseScriptEvent, IScriptEventType
                 (mapIndex, teleportEvent.MapIndex.ToString()),
                 (x, teleportEvent.X.ToString()),
                 (y, teleportEvent.Y.ToString()),
-                (teleportDir, teleportEvent.Direction == CharacterDirection.Keep ? "Keep" : teleportEvent.Direction.ToString()));
+                (teleportDir, teleportEvent.Direction == CharacterDirection.Keep ? "keep" : teleportEvent.Direction.ToPrintString()));
 
             return true;
         }
@@ -674,7 +684,7 @@ internal class ClimbScriptEvent : TeleportBaseScriptEvent, IScriptEventType
                 (mapIndex, teleportEvent.MapIndex.ToString()),
                 (x, teleportEvent.X.ToString()),
                 (y, teleportEvent.Y.ToString()),
-                (teleportDir, teleportEvent.Direction == CharacterDirection.Keep ? "Keep" : teleportEvent.Direction.ToString()));
+                (teleportDir, teleportEvent.Direction == CharacterDirection.Keep ? "Keep" : teleportEvent.Direction.ToPrintString()));
 
             return true;
         }
@@ -739,7 +749,7 @@ internal class FallScriptEvent : TeleportBaseScriptEvent, IScriptEventType
                 (mapIndex, teleportEvent.MapIndex.ToString()),
                 (x, teleportEvent.X.ToString()),
                 (y, teleportEvent.Y.ToString()),
-                (teleportDir, teleportEvent.Direction == CharacterDirection.Keep ? "Keep" : teleportEvent.Direction.ToString()));
+                (teleportDir, teleportEvent.Direction == CharacterDirection.Keep ? "Keep" : teleportEvent.Direction.ToPrintString()));
 
             return true;
         }
@@ -835,15 +845,15 @@ internal class OutroScriptEvent() : ScriptEvent(EventType.Teleport), IScriptEven
 
 internal abstract class LockedBaseScriptEvent(EventType eventType) : BranchScriptEvent(eventType)
 {
-    protected static readonly Parameter keyIndex = New.Arg("KeyIndex", 0, 1023);
-    protected static readonly Parameter unlockTextIndex = New.Opt("UnlockTextIndex", 0xff);
-    protected static readonly Parameter textIndex = New.Opt("TextIndex", 0xff);
+    protected static readonly Parameter keyIndex = New.Arg("keyIndex", 0, 1023);
+    protected static readonly Parameter unlockTextIndex = New.Opt("unlockTextIndex", 0xff);
+    protected static readonly Parameter textIndex = New.Opt("textIndex", 0xff);
 }
 
 internal class DoorScriptEvent() : LockedBaseScriptEvent(EventType.Door), IScriptEventType
 {
-    static readonly Parameter doorIndex = New.Arg("DoorIndex");
-    protected static readonly Parameter lockpickChanceReduction = New.Opt("LockpickChanceReduction", 100, 1, 100);
+    static readonly Parameter doorIndex = New.Arg("doorIndex");
+    static readonly Parameter lockpickChanceReduction = New.Opt("lockpickChanceReduction", 100, 1, 100);
 
     static readonly ScriptDescription description = new("Door", doorIndex, keyIndex, unlockTextIndex,
         textIndex, lockpickChanceReduction);
@@ -937,9 +947,9 @@ internal class DoorScriptEvent() : LockedBaseScriptEvent(EventType.Door), IScrip
 
 internal class ChestScriptEvent() : LockedBaseScriptEvent(EventType.Chest), IScriptEventType
 {
-    static readonly Parameter chestIndex = New.Arg("ChestIndex", 1, 256 + 128);
-    static readonly BooleanParameter alwaysOpen = New.BooleanOpt("AlwaysOpen", false);
-    protected static readonly Parameter lockpickChanceReduction = New.Opt("LockpickChanceReduction", 0, 0, 100);
+    static readonly Parameter chestIndex = New.Arg("chestIndex", 1, 256 + 128);
+    static readonly BooleanParameter alwaysOpen = New.BooleanOpt("alwaysOpen", false);
+    static readonly Parameter lockpickChanceReduction = New.Opt("lockpickChanceReduction", 0, 0, 100);
 
     static readonly ScriptDescription description = new("Chest", chestIndex, keyIndex,
         textIndex, alwaysOpen, lockpickChanceReduction);
@@ -1094,9 +1104,9 @@ internal class ChestScriptEvent() : LockedBaseScriptEvent(EventType.Chest), IScr
 
 internal class TreasureScriptEvent() : LockedBaseScriptEvent(EventType.Chest), IScriptEventType
 {
-    static readonly Parameter chestIndex = New.Arg("ChestIndex", 1, 256 + 128);
-    static readonly BooleanParameter searchSkillCheck = New.BooleanOpt("SearchSkillCheck", false);
-    static readonly BooleanParameter saveChestContents = New.BooleanOpt("SaveContents", false);
+    static readonly Parameter chestIndex = New.Arg("chestIndex", 1, 256 + 128);
+    static readonly BooleanParameter searchSkillCheck = New.BooleanOpt("searchSkillCheck", false);
+    static readonly BooleanParameter saveChestContents = New.BooleanOpt("saveContents", false);
 
     static readonly ScriptDescription description = new("Treasure", chestIndex,
         textIndex, searchSkillCheck, saveChestContents);
@@ -1128,7 +1138,7 @@ internal class TreasureScriptEvent() : LockedBaseScriptEvent(EventType.Chest), I
             Print(writer, description.Name,
                 (chestIndex, realChestIndex.ToString()),
                 (textIndex, chestEvent.TextIndex == 0xff ? None : chestEvent.TextIndex.ToString()),
-                (searchSkillCheck, chestEvent.SearchSkillCheck ? True : False),
+                (searchSkillCheck, chestEvent.SearchSkillCheck.ToPrintString()),
                 (saveChestContents, chestEvent.Flags.HasFlag(ChestEvent.ChestFlags.NoSave) ? False : True));
 
             return true;
@@ -1199,7 +1209,7 @@ internal class SpinnerScriptEvent() : ScriptEvent(EventType.Spinner), IScriptEve
                 CharacterDirection.Right,
                 CharacterDirection.Down,
                 CharacterDirection.Left)
-            .Map(CharacterDirection.Random, "Random")
+            .Map(CharacterDirection.Random, "random")
     );
 
     static readonly ScriptDescription description = new("Spinner", spinDir);
@@ -1223,7 +1233,7 @@ internal class SpinnerScriptEvent() : ScriptEvent(EventType.Spinner), IScriptEve
         if (@event is SpinnerEvent spinnerEvent)
         {
             Print(writer, description.Name,
-                (spinDir, spinnerEvent.Direction == CharacterDirection.Random ? "Random" : spinnerEvent.Direction.ToString()));
+                (spinDir, spinnerEvent.Direction == CharacterDirection.Random ? "random" : spinnerEvent.Direction.ToPrintString()));
 
             return true;
         }
@@ -1285,9 +1295,9 @@ internal class TrapScriptEvent() : ScriptEvent(EventType.Spinner), IScriptEventT
         {
             Print(writer, description.Name,
                 (baseDamage, trapEvent.BaseDamage.ToString()),
-                (target, trapEvent.Target.ToString()),
-                (ailment, trapEvent.Ailment.ToString()),                
-                (affectedGenders, trapEvent.AffectedGenders.ToString())); // TODO: Is it working with flags? ("Both" instead of "Male | Female")
+                (target, trapEvent.Target.ToPrintString()),
+                (ailment, trapEvent.Ailment.ToPrintString()),                
+                (affectedGenders, trapEvent.AffectedGenders.ToPrintString())); // TODO: Is it working with flags? ("Both" instead of "Male | Female")
 
             return true;
         }
@@ -1326,6 +1336,218 @@ internal class TrapScriptEvent() : ScriptEvent(EventType.Spinner), IScriptEventT
         });
 
         return trapScriptEvent;
+    }
+}
+
+#endregion
+
+
+#region Print, Picture and Ask
+
+internal abstract class TextBaseScriptEvent() : ScriptEvent(EventType.MapText)
+{
+    protected static readonly Parameter textIndex = New.Arg("textIndex");
+    protected static readonly Parameter triggerIfBlind = New.BooleanOpt("triggerIfBlind", false);
+    protected static readonly EnumParameter<EventTrigger> printTrigger = New.Enum("trigger", EventTrigger.Move, EventTrigger.EyeCursor, EventTrigger.Always);
+}
+
+internal class PrintScriptEvent : TextBaseScriptEvent, IScriptEventType
+{
+    static readonly ScriptDescription description = new("Print", textIndex, printTrigger, triggerIfBlind);
+
+    public static EventType GetEventType() => EventType.MapText;
+
+    public static ScriptDescription GetDescription() => description;
+
+    public static IScriptEvent FromEvent(Event @event) => new PrintScriptEvent()
+    {
+        Event = @event
+    };
+
+    public static bool MatchesEvent(Event @event)
+    {
+        return @event is PopupTextEvent textEvent && textEvent.EventImageIndex == 0xff;
+    }
+
+    public override bool Print(Event @event, StreamWriter writer)
+    {
+        if (@event is PopupTextEvent textEvent)
+        {
+            Print(writer, description.Name,
+                (textIndex, textEvent.TextIndex.ToString()),
+                (printTrigger, textEvent.PopupTrigger.ToPrintString()),
+                (triggerIfBlind, textEvent.TriggerIfBlind.ToPrintString()));
+
+            return true;
+        }
+
+        return false;
+    }
+
+    public static IScriptEvent Parse(Dictionary<string, string> parameterValues, Dictionary<string, long> constants)
+    {
+        var textEvent = new PopupTextEvent()
+        {
+            Type = EventType.MapText,
+            EventImageIndex = 0xff,
+            PopupTrigger = EventTrigger.Always,
+            TriggerIfBlind = false,
+            Unknown = [0, 0, 0, 0]
+        };
+        var printScriptEvent = new PrintScriptEvent()
+        {
+            Event = textEvent
+        };
+
+        Parse(description, parameterValues, (parameter, value, fromDefault) =>
+        {
+            string name = parameter.Name;
+
+            if (name == textIndex.Name)
+                textEvent.TextIndex = EnsureLimits(ParseByte(value, constants, noneValue: 0xff), parameter);
+            else if (name == triggerIfBlind.Name)
+                textEvent.TriggerIfBlind = ParseBool(value, constants);
+            else if (name == printTrigger.Name)
+                textEvent.PopupTrigger = EnsureValidValues(Enum.Parse<EventTrigger>(value, true), parameter);
+        });
+
+        return printScriptEvent;
+    }
+}
+
+internal class PictureScriptEvent : TextBaseScriptEvent, IScriptEventType
+{
+    static readonly Parameter pictureIndex = New.Arg("pictureIndex", 0, 254);
+    static readonly ScriptDescription description = new("Picture", pictureIndex, textIndex, printTrigger, triggerIfBlind);
+
+    public static EventType GetEventType() => EventType.MapText;
+
+    public static ScriptDescription GetDescription() => description;
+
+    public static IScriptEvent FromEvent(Event @event) => new PictureScriptEvent()
+    {
+        Event = @event
+    };
+
+    public static bool MatchesEvent(Event @event)
+    {
+        return @event is PopupTextEvent textEvent && textEvent.EventImageIndex != 0xff;
+    }
+
+    public override bool Print(Event @event, StreamWriter writer)
+    {
+        if (@event is PopupTextEvent textEvent)
+        {
+            Print(writer, description.Name,
+                (pictureIndex, textEvent.EventImageIndex.ToString()),
+                (textIndex, textEvent.TextIndex.ToString()),
+                (printTrigger, textEvent.PopupTrigger.ToPrintString()),
+                (triggerIfBlind, textEvent.TriggerIfBlind.ToPrintString()));
+
+            return true;
+        }
+
+        return false;
+    }
+
+    public static IScriptEvent Parse(Dictionary<string, string> parameterValues, Dictionary<string, long> constants)
+    {
+        var textEvent = new PopupTextEvent()
+        {
+            Type = EventType.MapText,
+            PopupTrigger = EventTrigger.Always,
+            TriggerIfBlind = false,
+            Unknown = [0, 0, 0, 0]
+        };
+        var pictureScriptEvent = new PictureScriptEvent()
+        {
+            Event = textEvent
+        };
+
+        Parse(description, parameterValues, (parameter, value, fromDefault) =>
+        {
+            string name = parameter.Name;
+
+            if (name == pictureIndex.Name)
+                textEvent.EventImageIndex = EnsureLimits(ParseByte(value, constants), parameter);
+            else if (name == textIndex.Name)
+                textEvent.TextIndex = EnsureLimits(ParseByte(value, constants, noneValue: 0xff), parameter);
+            else if (name == triggerIfBlind.Name)
+                textEvent.TriggerIfBlind = ParseBool(value, constants);
+            else if (name == printTrigger.Name)
+                textEvent.PopupTrigger = EnsureValidValues(Enum.Parse<EventTrigger>(value, true), parameter);
+        });
+
+        return pictureScriptEvent;
+    }
+}
+
+internal class AskScriptEvent() : BranchScriptEvent(EventType.Decision), IScriptEventType
+{
+    static readonly Parameter textIndex = New.Arg("textIndex");
+
+    static readonly ScriptDescription description = new("Ask", textIndex);
+
+    public override uint? AlternativeBranchIndex
+    {
+        get
+        {
+            var alternativeBranchIndex = (Event as DecisionEvent)?.NoEventIndex;
+
+            return alternativeBranchIndex == null || alternativeBranchIndex == 0xffff ? null : alternativeBranchIndex.Value;
+        }
+    }
+
+    public override string BranchExpressionString => "Denied";
+
+    public static EventType GetEventType() => EventType.Decision;
+
+    public static ScriptDescription GetDescription() => description;
+
+    public static IScriptEvent FromEvent(Event @event) => new AskScriptEvent()
+    {
+        Event = @event
+    };
+
+    public static bool MatchesEvent(Event @event)
+    {
+        return @event.Type == EventType.Decision;
+    }
+
+    public override bool Print(Event @event, StreamWriter writer)
+    {
+        if (@event is DecisionEvent decisionEvent)
+        {
+            Print(writer, description.Name,
+                (textIndex, decisionEvent.TextIndex.ToString()));
+
+            return true;
+        }
+
+        return false;
+    }
+
+    public static IScriptEvent Parse(Dictionary<string, string> parameterValues, Dictionary<string, long> constants)
+    {
+        var decisionEvent = new DecisionEvent()
+        {
+            Type = EventType.Decision,
+            Unknown1 = [0, 0, 0, 0, 0, 0]
+        };
+        var askScriptEvent = new AskScriptEvent()
+        {
+            Event = decisionEvent
+        };
+
+        Parse(description, parameterValues, (parameter, value, fromDefault) =>
+        {
+            string name = parameter.Name;
+
+            if (name == textIndex.Name)
+                decisionEvent.TextIndex = EnsureLimits(ParseByte(value, constants, noneValue: 0xff), parameter);
+        });
+
+        return askScriptEvent;
     }
 }
 
