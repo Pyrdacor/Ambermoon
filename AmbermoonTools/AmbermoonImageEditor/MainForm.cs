@@ -98,7 +98,7 @@ namespace AmbermoonImageEditor
                 FileName = Properties.Settings.Default.LoadImagePath
             };
 
-            if (ofd.ShowDialog(this) == DialogResult.OK) 
+            if (ofd.ShowDialog(this) == DialogResult.OK)
             {
                 var file = ofd.FileName;
                 Properties.Settings.Default.LoadImagePath = file;
@@ -165,7 +165,7 @@ namespace AmbermoonImageEditor
                         }
 
                         switch (graphicInfo.PaletteOffset)
-                        {                            
+                        {
                             case 16:
                                 toolStripMenuItemPalOffset16.Checked = true;
                                 break;
@@ -246,10 +246,10 @@ namespace AmbermoonImageEditor
                 format = GraphicFormat.Palette5Bit;
             else if (format == GraphicFormat.Palette3Bit)
             {
-                 if ((colorRange <= 8 && minColorIndexBesideZero >= 24) ||
-                     (colorRange <= 7 && minColorIndexBesideZero + colorRange <= 8))
+                if ((colorRange <= 8 && minColorIndexBesideZero >= 24) ||
+                    (colorRange <= 7 && minColorIndexBesideZero + colorRange <= 8))
                     format = GraphicFormat.Palette3Bit;
-                 else
+                else
                     format = GraphicFormat.Palette4Bit;
             }
 
@@ -466,7 +466,7 @@ namespace AmbermoonImageEditor
             int minY = SnapCoord(Math.Min(y1, y2));
             int maxX = SnapCoord(Math.Max(x1, x2)) + 1;
             int maxY = SnapCoord(Math.Max(y1, y2)) + 1;
-     
+
 
             return Rectangle.FromLTRB(Math.Max(0, minX), Math.Max(0, minY), Math.Min(imagePanel.Width - 1, maxX), Math.Min(imagePanel.Height - 1, maxY));
         }
@@ -854,6 +854,12 @@ namespace AmbermoonImageEditor
                     UpdateImageFromBitmapAndPalette();
                 OpenPalette();
             }
+        }
+
+        private void MainForm_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            paletteForm.Dispose();
+            e.Cancel = false;
         }
     }
 }

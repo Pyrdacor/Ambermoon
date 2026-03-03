@@ -1297,7 +1297,7 @@ internal class TrapScriptEvent() : ScriptEvent(EventType.Spinner), IScriptEventT
                 (baseDamage, trapEvent.BaseDamage.ToString()),
                 (target, trapEvent.Target.ToPrintString()),
                 (ailment, trapEvent.Ailment.ToPrintString()),                
-                (affectedGenders, trapEvent.AffectedGenders.ToPrintString())); // TODO: Is it working with flags? ("Both" instead of "Male | Female")
+                (affectedGenders, trapEvent.AffectedGenders.ToFlagsPrintString(bytes: 1)));
 
             return true;
         }
@@ -1550,5 +1550,182 @@ internal class AskScriptEvent() : BranchScriptEvent(EventType.Decision), IScript
         return askScriptEvent;
     }
 }
+
+#endregion
+
+
+#region Conditions
+
+[Flags]
+public enum Trigger
+{
+    Hand = 1,
+    Eye = 2,
+    Mouth = 4,
+}
+
+internal abstract class ConditionBaseScriptEvent() : BranchScriptEvent(EventType.Condition)
+{
+    protected static readonly Parameter keyIndex = New.Arg("keyIndex", 0, 1023);
+    protected static readonly Parameter unlockTextIndex = New.Opt("unlockTextIndex", 0xff);
+    protected static readonly Parameter textIndex = New.Opt("textIndex", 0xff);
+}
+
+/*internal class TriggerScriptEvent() : LockedBaseScriptEvent(EventType.Chest), IScriptEventType
+{
+    static readonly EnumParameter<Trigger> trigger = New.Enum<Trigger>("trigger",);
+    static readonly BooleanParameter alwaysOpen = New.BooleanOpt("alwaysOpen", false);
+    static readonly Parameter lockpickChanceReduction = New.Opt("lockpickChanceReduction", 0, 0, 100);
+
+    static readonly ScriptDescription description = new("Chest", chestIndex, keyIndex,
+        textIndex, alwaysOpen, lockpickChanceReduction);
+
+    public override uint? AlternativeBranchIndex
+    {
+        get
+        {
+            var alternativeBranchIndex = (Event as DoorEvent)?.UnlockFailedEventIndex;
+
+            return alternativeBranchIndex == null || alternativeBranchIndex == 0xffff ? null : alternativeBranchIndex.Value;
+        }
+    }
+
+    public override string BranchExpressionString => "TrapTriggered";
+
+    public static EventType GetEventType() => EventType.Chest;
+
+    public static ScriptDescription GetDescription() => description;
+
+    public static IScriptEvent FromEvent(Event @event) => new ChestScriptEvent()
+    {
+        Event = @event
+    };
+
+    public static bool MatchesEvent(Event @event)
+    {
+        return @event is ChestEvent chestEvent && !chestEvent.Flags.HasFlag(ChestEvent.ChestFlags.JunkPile);
+    }
+
+    public override bool Print(Event @event, StreamWriter writer)
+    {
+        if (@event is ChestEvent chestEvent)
+        {
+            bool extendedChest = chestEvent.Flags.HasFlag(ChestEvent.ChestFlags.ExtendedChest);
+            uint realChestIndex = 1 + (extendedChest ? 256 + chestEvent.ChestIndex : chestEvent.ChestIndex);
+            bool hideLockpickingChanceReduction =
+                chestEvent.LockpickingChanceReduction == 0 ||
+                (chestEvent.KeyIndex == 0 && chestEvent.LockpickingChanceReduction == 1) ||
+                (chestEvent.KeyIndex != 0 && chestEvent.LockpickingChanceReduction == 100);
+            bool hideKey = chestEvent.LockpickingChanceReduction == 0;
+            bool hideAlwaysOpen = chestEvent.LockpickingChanceReduction != 0 && chestEvent.KeyIndex != 0;
+
+            Print(writer, description.Name,
+                (chestIndex, realChestIndex.ToString()),
+                (keyIndex, hideKey ? null : chestEvent.KeyIndex == 0 ? None : chestEvent.KeyIndex.ToString()),
+                (textIndex, chestEvent.TextIndex == 0xff ? None : chestEvent.TextIndex.ToString()),
+                (alwaysOpen, hideAlwaysOpen ? null : chestEvent.LockpickingChanceReduction == 0 ? True : False),
+                (lockpickChanceReduction, hideLockpickingChanceReduction ? null : chestEvent.LockpickingChanceReduction.ToString()));
+
+            if (chestEvent.UnlockFailedEventIndex != 0xffff && chestEvent.UnlockFailedEventIndex != 0)
+                writer.WriteLine($"-> {BranchExpressionString}: {ScriptEventSequence.JumpTo}(event{chestEvent.UnlockFailedEventIndex})");
+
+            return true;
+        }
+
+        return false;
+    }
+
+    public static IScriptEvent Parse(Dictionary<string, string> parameterValues, Dictionary<string, long> constants)
+    {
+        bool hasKey = parameterValues.TryGetValue(keyIndex.Name.ToLower(), out var key) && key != "0" && key != None;
+
+        var chestEvent = new ChestEvent()
+        {
+            Type = EventType.Chest,
+            TextIndex = 0xff,
+            LockpickingChanceReduction = hasKey ? 100u : 1u,
+            UnlockFailedEventIndex = 0xffff,
+            Flags = ChestEvent.ChestFlags.None
+        };
+        var chestScriptEvent = new ChestScriptEvent()
+        {
+            Event = chestEvent
+        };
+
+        bool? alwaysOpenSet = null;
+        bool lockpickChangeReductionGiven = false;
+        bool keyIndexGiven = false;
+
+        Parse(description, parameterValues, (parameter, value, fromDefault) =>
+        {
+            string name = parameter.Name;
+
+            if (name == chestIndex.Name)
+            {
+                uint chestIndex = EnsureLimits(ParseWord(value, constants), parameter);
+
+                if (chestIndex > 256)
+                {
+                    chestEvent.Flags = ChestEvent.ChestFlags.ExtendedChest;
+                    chestEvent.ChestIndex = chestIndex - 257;
+                }
+                else
+                {
+                    chestEvent.Flags = ChestEvent.ChestFlags.None;
+                    chestEvent.ChestIndex = chestIndex - 1;
+                }
+            }
+            else if (name == keyIndex.Name)
+            {
+                var keyIndex = EnsureLimits(ParseWord(value, constants, noneValue: 0), parameter);
+
+                chestEvent.KeyIndex = keyIndex;
+
+                if (alwaysOpenSet == true && keyIndex != 0)
+                    throw new InvalidOperationException("AlwaysOpen must not be set to true if a KeyIndex is specified.");
+
+                keyIndexGiven = keyIndex != 0;
+            }
+            else if (name == textIndex.Name)
+                chestEvent.TextIndex = EnsureLimits(ParseByte(value, constants, noneValue: 0xff), parameter);
+            else if (name == lockpickChanceReduction.Name)
+            {
+                if (fromDefault)
+                    return;
+
+                var reduction = EnsureLimits(ParseByte(value, constants, noneValue: 0), parameter);
+
+                if (alwaysOpenSet == true && reduction != 0)
+                    throw new FormatException("LockpickChanceReduction must be 0 if AlwaysOpen is set to true.");
+
+                if (alwaysOpenSet == false && reduction == 0)
+                    throw new FormatException("LockpickChanceReduction must not be 0 if AlwaysOpen is set to false.");
+
+                chestEvent.LockpickingChanceReduction = reduction;
+
+                lockpickChangeReductionGiven = true;
+            }
+            else if (name == alwaysOpen.Name)
+            {
+                var isAlwaysOpenSet = ParseBool(value, constants);
+
+                if (isAlwaysOpenSet && (lockpickChangeReductionGiven && chestEvent.LockpickingChanceReduction != 0))
+                    throw new FormatException("LockpickChanceReduction must be 0 if AlwaysOpen is set to true.");
+
+                if (isAlwaysOpenSet && keyIndexGiven)
+                    throw new FormatException("AlwaysOpen must not be set to true if a KeyIndex is specified.");
+
+                if (isAlwaysOpenSet)
+                    chestEvent.LockpickingChanceReduction = 0;
+                else if (chestEvent.LockpickingChanceReduction == 0)
+                    chestEvent.LockpickingChanceReduction = 1;
+
+                alwaysOpenSet = isAlwaysOpenSet;
+            }
+        });
+
+        return chestScriptEvent;
+    }
+}*/
 
 #endregion

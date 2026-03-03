@@ -1,4 +1,5 @@
 ﻿using System.Text.RegularExpressions;
+using Ambermoon;
 
 namespace AmbermoonScript;
 
@@ -37,6 +38,17 @@ public record EnumParameter<T>(string Name, bool Optional, T? DefaultValue, para
 
             return ValueToString?.Invoke(DefaultValue.Value) ?? DefaultValue.ToString()?.ToLower();
         }
+    }
+}
+
+public record FlagsParameter<T> : EnumParameter<T>
+    where T : struct, Enum
+{
+    public FlagsParameter(string name, bool optional, int bytes, T? defaultValue, params T[] allowedValues)
+        : base(name, optional, defaultValue, allowedValues)
+    {
+        ValueToString = (value) => value.ToFlagsPrintString(bytes);
+        StringToValue = (str) => EnumHelper.ParseFlagsEnum<T>(str, true);
     }
 }
 
