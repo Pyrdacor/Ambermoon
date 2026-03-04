@@ -1557,20 +1557,8 @@ internal class AskScriptEvent() : BranchScriptEvent(EventType.Decision), IScript
 
 #region Conditions
 
-[Flags]
-public enum Trigger : byte
+internal abstract class ConditionBasedScriptEvent() : BranchScriptEvent(EventType.Condition)
 {
-    Hand = 1,
-    Eye = 2,
-    Mouth = 4,
-}
-
-internal class TriggerScriptEvent() : BranchScriptEvent(EventType.Condition), IScriptEventType
-{
-    static readonly EnumParameter<Trigger> trigger = New.Flags<Trigger>("trigger", bytes: 1);
-
-    static readonly ScriptDescription description = new("Trigger", trigger);
-
     public override uint? AlternativeBranchIndex
     {
         get
@@ -1580,6 +1568,24 @@ internal class TriggerScriptEvent() : BranchScriptEvent(EventType.Condition), IS
             return alternativeBranchIndex == null || alternativeBranchIndex == 0xffff ? null : alternativeBranchIndex.Value;
         }
     }
+}
+
+[Flags]
+public enum Trigger : byte
+{
+    Hand = 1,
+    Eye = 2,
+    Mouth = 4,
+}
+
+/// <summary>
+/// Hand, eye and mouth cursor
+/// </summary>
+internal class TriggerScriptEvent() : ConditionBasedScriptEvent, IScriptEventType
+{
+    static readonly EnumParameter<Trigger> trigger = New.Flags<Trigger>("trigger", bytes: 1);
+
+    static readonly ScriptDescription description = new("Trigger", trigger);
 
     public override string BranchExpressionString => "WrongTrigger";
 
@@ -1675,6 +1681,151 @@ internal class TriggerScriptEvent() : BranchScriptEvent(EventType.Condition), IS
         });
 
         return triggerScriptEvent;
+    }
+}
+
+public enum InputType : byte
+{
+    Number,
+    Word
+}
+
+/// <summary>
+/// Say word or enter number
+/// </summary>
+internal class InputScriptEvent : ConditionBasedScriptEvent, IScriptEventType
+{
+    static readonly EnumParameter<InputType> inputType = New.Enum<InputType>("inputType");
+
+    static readonly Parameter number = New.Opt("number", 0, 0, ushort.MaxValue);
+
+    static readonly Parameter wordIndex = New.Opt("wordIndex", 0, 0, 1023);
+
+    static readonly ScriptDescription description = new("Trigger", inputType, number, wordIndex);
+
+    public override string BranchExpressionString => "WrongInput";
+
+    public static EventType GetEventType() => EventType.Condition;
+
+    public static ScriptDescription GetDescription() => description;
+
+    public static IScriptEvent FromEvent(Event @event) => new InputScriptEvent()
+    {
+        Event = @event
+    };
+
+    public static bool MatchesEvent(Event @event)
+    {
+        return @event is ConditionEvent conditionEvent && conditionEvent.TypeOfCondition switch
+        {
+            ConditionEvent.ConditionType.SayWord or
+            ConditionEvent.ConditionType.EnterNumber => true,
+            _ => false
+        };
+    }
+
+    public override bool Print(Event @event, StreamWriter writer)
+    {
+        if (@event is ConditionEvent conditionEvent)
+        {
+            var input = conditionEvent.TypeOfCondition switch
+            {
+                ConditionEvent.ConditionType.SayWord => Trigger.Hand,
+                ConditionEvent.ConditionType.Eye => Trigger.Eye,
+                ConditionEvent.ConditionType.Mouth => Trigger.Mouth,
+                ConditionEvent.ConditionType.MultiCursor => (Trigger)conditionEvent.ObjectIndex,
+                _ => throw new InvalidOperationException($"Invalid condition type for trigger script event: {conditionEvent.TypeOfCondition}")
+            };
+
+            if (conditionEvent.TypeOfCondition == ConditionEvent.ConditionType.SayWord)
+            {
+                Print(writer, description.Name,
+                    (inputType, nameof(InputType.Word)),
+                    (wordIndex, conditionEvent.ObjectIndex.ToString()));
+            }
+            else
+            {
+                Print(writer, description.Name,
+                    (inputType, nameof(InputType.Number)),
+                    (number, conditionEvent.ObjectIndex.ToString()));
+            }
+
+            if (conditionEvent.ContinueIfFalseWithMapEventIndex != 0xffff)
+                writer.WriteLine($"-> {BranchExpressionString}: {ScriptEventSequence.JumpTo}(event{conditionEvent.ContinueIfFalseWithMapEventIndex})");
+
+            return true;
+        }
+
+        return false;
+    }
+
+    public static IScriptEvent Parse(Dictionary<string, string> parameterValues, Dictionary<string, long> constants)
+    {
+        var conditionEvent = new ConditionEvent()
+        {
+            Type = EventType.Condition,
+            TypeOfCondition = ConditionEvent.ConditionType.EnterNumber, // might change below
+            Value = 1,
+            ObjectIndex = 0,
+            ContinueIfFalseWithMapEventIndex = 0xffff,
+        };
+        var inputScriptEvent = new InputScriptEvent()
+        {
+            Event = conditionEvent
+        };
+
+        bool inputTypeSet = false;
+
+        Parse(description, parameterValues, (parameter, value, fromDefault) =>
+        {
+            string name = parameter.Name;
+
+            if (name == inputType.Name)
+            {
+                var input = EnsureValidValues(Enum.Parse<InputType>(value, true), parameter);
+
+                if (input == InputType.Number)
+                {
+                    conditionEvent.TypeOfCondition = ConditionEvent.ConditionType.EnterNumber;
+                }
+                else if (input == InputType.Word)
+                {
+                    conditionEvent.TypeOfCondition = ConditionEvent.ConditionType.SayWord;
+                }
+                else
+                {
+                    throw new FormatException($"Invalid input type: {value}");
+                }
+
+                inputTypeSet = true;
+            }
+            else if (name == number.Name)
+            {
+                if (inputTypeSet && conditionEvent.TypeOfCondition != ConditionEvent.ConditionType.EnterNumber)
+                {
+                    if (fromDefault)
+                        return;
+
+                    throw new FormatException($"Parameter '{number.Name}' should not be used for input type '{nameof(InputType.Word)}'.");
+                }
+
+                conditionEvent.ObjectIndex = EnsureLimits(ParseWord(value, constants), parameter);
+            }
+            else if (name == wordIndex.Name)
+            {
+                if (inputTypeSet && conditionEvent.TypeOfCondition != ConditionEvent.ConditionType.SayWord)
+                {
+                    if (fromDefault)
+                        return;
+
+                    throw new FormatException($"Parameter '{wordIndex.Name}' should not be used for input type '{nameof(InputType.Number)}'.");
+                }
+
+                conditionEvent.ObjectIndex = EnsureLimits(ParseWord(value, constants), parameter);
+            }
+        });
+
+        return inputScriptEvent;
     }
 }
 
