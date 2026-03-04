@@ -278,12 +278,18 @@ file static class EventHelper
         builder(b);
         return b.Build();
     }
+    public static FlagsParameter<T> Flags<T>(string name, int bytes, params T[] allowedValues)
+        where T : struct, Enum
+        => new(name, false, bytes, allowedValues?.Length is > 0 ? allowedValues[0] : null, allowedValues!);
+    public static FlagsParameter<T> OptFlags<T>(string name, int bytes, T defaultValue, params T[] allowedValues)
+        where T : struct, Enum
+        => new(name, true, bytes, defaultValue, allowedValues);
 }
 
 #endregion
 
 
-public abstract class ScriptEvent : IScriptEvent
+public abstract class ScriptEvent(EventType eventType) : IScriptEvent
 {
     public const string None = "none";
     public const string True = "true";
@@ -291,12 +297,7 @@ public abstract class ScriptEvent : IScriptEvent
 
     protected Event? Event { get; set; }
 
-    public EventType EventType { get; }
-
-    protected ScriptEvent(EventType eventType)
-    {
-        EventType = eventType;
-    }
+    public EventType EventType { get; } = eventType;
 
     public Event ToEvent() => Event ?? throw new InvalidOperationException("No event data parsed or loaded");
 
@@ -958,7 +959,7 @@ internal class ChestScriptEvent() : LockedBaseScriptEvent(EventType.Chest), IScr
     {
         get
         {
-            var alternativeBranchIndex = (Event as DoorEvent)?.UnlockFailedEventIndex;
+            var alternativeBranchIndex = (Event as ChestEvent)?.UnlockFailedEventIndex;
 
             return alternativeBranchIndex == null || alternativeBranchIndex == 0xffff ? null : alternativeBranchIndex.Value;
         }
@@ -1000,7 +1001,7 @@ internal class ChestScriptEvent() : LockedBaseScriptEvent(EventType.Chest), IScr
                 (alwaysOpen, hideAlwaysOpen ? null : chestEvent.LockpickingChanceReduction == 0 ? True : False),
                 (lockpickChanceReduction, hideLockpickingChanceReduction ? null : chestEvent.LockpickingChanceReduction.ToString()));
 
-            if (chestEvent.UnlockFailedEventIndex != 0xffff && chestEvent.UnlockFailedEventIndex != 0)
+            if (chestEvent.UnlockFailedEventIndex != 0xffff)
                 writer.WriteLine($"-> {BranchExpressionString}: {ScriptEventSequence.JumpTo}(event{chestEvent.UnlockFailedEventIndex})");
 
             return true;
@@ -1271,7 +1272,7 @@ internal class TrapScriptEvent() : ScriptEvent(EventType.Spinner), IScriptEventT
     static readonly Parameter baseDamage = New.Arg("baseDamage");
     static readonly EnumParameter<TrapEvent.TrapTarget> target = New.Enum<TrapEvent.TrapTarget>("target");
     static readonly EnumParameter<TrapEvent.TrapAilment> ailment = New.Enum<TrapEvent.TrapAilment>("ailment");
-    static readonly EnumParameter<GenderFlag> affectedGenders = New.Enum("affectedGenders", GenderFlag.Male, GenderFlag.Female, GenderFlag.Both);
+    static readonly EnumParameter<GenderFlag> affectedGenders = New.Flags("affectedGenders", bytes: 1, GenderFlag.Male, GenderFlag.Female, GenderFlag.Both);
 
     static readonly ScriptDescription description = new("Trap", baseDamage, target, ailment, affectedGenders);
 
@@ -1332,7 +1333,7 @@ internal class TrapScriptEvent() : ScriptEvent(EventType.Spinner), IScriptEventT
             else if (name == ailment.Name)
                 trapEvent.Ailment = EnsureValidValues(Enum.Parse<TrapEvent.TrapAilment>(value, true), parameter);
             else if (name == affectedGenders.Name)
-                trapEvent.AffectedGenders = EnsureValidValues(Enum.Parse<GenderFlag>(value, true), parameter);
+                trapEvent.AffectedGenders = EnsureValidValues(EnumHelper.ParseFlagsEnum<GenderFlag>(value, true), parameter);
         });
 
         return trapScriptEvent;
@@ -1557,77 +1558,70 @@ internal class AskScriptEvent() : BranchScriptEvent(EventType.Decision), IScript
 #region Conditions
 
 [Flags]
-public enum Trigger
+public enum Trigger : byte
 {
     Hand = 1,
     Eye = 2,
     Mouth = 4,
 }
 
-internal abstract class ConditionBaseScriptEvent() : BranchScriptEvent(EventType.Condition)
+internal class TriggerScriptEvent() : BranchScriptEvent(EventType.Condition), IScriptEventType
 {
-    protected static readonly Parameter keyIndex = New.Arg("keyIndex", 0, 1023);
-    protected static readonly Parameter unlockTextIndex = New.Opt("unlockTextIndex", 0xff);
-    protected static readonly Parameter textIndex = New.Opt("textIndex", 0xff);
-}
+    static readonly EnumParameter<Trigger> trigger = New.Flags<Trigger>("trigger", bytes: 1);
 
-/*internal class TriggerScriptEvent() : LockedBaseScriptEvent(EventType.Chest), IScriptEventType
-{
-    static readonly EnumParameter<Trigger> trigger = New.Enum<Trigger>("trigger",);
-    static readonly BooleanParameter alwaysOpen = New.BooleanOpt("alwaysOpen", false);
-    static readonly Parameter lockpickChanceReduction = New.Opt("lockpickChanceReduction", 0, 0, 100);
-
-    static readonly ScriptDescription description = new("Chest", chestIndex, keyIndex,
-        textIndex, alwaysOpen, lockpickChanceReduction);
+    static readonly ScriptDescription description = new("Trigger", trigger);
 
     public override uint? AlternativeBranchIndex
     {
         get
         {
-            var alternativeBranchIndex = (Event as DoorEvent)?.UnlockFailedEventIndex;
+            var alternativeBranchIndex = (Event as ConditionEvent)?.ContinueIfFalseWithMapEventIndex;
 
             return alternativeBranchIndex == null || alternativeBranchIndex == 0xffff ? null : alternativeBranchIndex.Value;
         }
     }
 
-    public override string BranchExpressionString => "TrapTriggered";
+    public override string BranchExpressionString => "WrongTrigger";
 
-    public static EventType GetEventType() => EventType.Chest;
+    public static EventType GetEventType() => EventType.Condition;
 
     public static ScriptDescription GetDescription() => description;
 
-    public static IScriptEvent FromEvent(Event @event) => new ChestScriptEvent()
+    public static IScriptEvent FromEvent(Event @event) => new TriggerScriptEvent()
     {
         Event = @event
     };
 
     public static bool MatchesEvent(Event @event)
     {
-        return @event is ChestEvent chestEvent && !chestEvent.Flags.HasFlag(ChestEvent.ChestFlags.JunkPile);
+        return @event is ConditionEvent conditionEvent && conditionEvent.TypeOfCondition switch
+        {
+            ConditionEvent.ConditionType.Hand or
+            ConditionEvent.ConditionType.Eye or
+            ConditionEvent.ConditionType.Mouth or
+            ConditionEvent.ConditionType.MultiCursor => true,
+            _ => false
+        };
     }
 
     public override bool Print(Event @event, StreamWriter writer)
     {
-        if (@event is ChestEvent chestEvent)
+        if (@event is ConditionEvent conditionEvent)
         {
-            bool extendedChest = chestEvent.Flags.HasFlag(ChestEvent.ChestFlags.ExtendedChest);
-            uint realChestIndex = 1 + (extendedChest ? 256 + chestEvent.ChestIndex : chestEvent.ChestIndex);
-            bool hideLockpickingChanceReduction =
-                chestEvent.LockpickingChanceReduction == 0 ||
-                (chestEvent.KeyIndex == 0 && chestEvent.LockpickingChanceReduction == 1) ||
-                (chestEvent.KeyIndex != 0 && chestEvent.LockpickingChanceReduction == 100);
-            bool hideKey = chestEvent.LockpickingChanceReduction == 0;
-            bool hideAlwaysOpen = chestEvent.LockpickingChanceReduction != 0 && chestEvent.KeyIndex != 0;
+            var triggers = conditionEvent.TypeOfCondition switch
+            {
+                ConditionEvent.ConditionType.Hand => Trigger.Hand,
+                ConditionEvent.ConditionType.Eye => Trigger.Eye,
+                ConditionEvent.ConditionType.Mouth => Trigger.Mouth,
+                ConditionEvent.ConditionType.MultiCursor => (Trigger)conditionEvent.ObjectIndex,
+                _ => throw new InvalidOperationException($"Invalid condition type for trigger script event: {conditionEvent.TypeOfCondition}")
+            };
 
             Print(writer, description.Name,
-                (chestIndex, realChestIndex.ToString()),
-                (keyIndex, hideKey ? null : chestEvent.KeyIndex == 0 ? None : chestEvent.KeyIndex.ToString()),
-                (textIndex, chestEvent.TextIndex == 0xff ? None : chestEvent.TextIndex.ToString()),
-                (alwaysOpen, hideAlwaysOpen ? null : chestEvent.LockpickingChanceReduction == 0 ? True : False),
-                (lockpickChanceReduction, hideLockpickingChanceReduction ? null : chestEvent.LockpickingChanceReduction.ToString()));
+                (trigger, triggers.ToString());
 
-            if (chestEvent.UnlockFailedEventIndex != 0xffff && chestEvent.UnlockFailedEventIndex != 0)
-                writer.WriteLine($"-> {BranchExpressionString}: {ScriptEventSequence.JumpTo}(event{chestEvent.UnlockFailedEventIndex})");
+            if (conditionEvent.ContinueIfFalseWithMapEventIndex != 0xffff)
+                writer.WriteLine($"-> {BranchExpressionString}: {ScriptEventSequence.JumpTo}(event{conditionEvent.ContinueIfFalseWithMapEventIndex})");
 
             return true;
         }
@@ -1637,95 +1631,51 @@ internal abstract class ConditionBaseScriptEvent() : BranchScriptEvent(EventType
 
     public static IScriptEvent Parse(Dictionary<string, string> parameterValues, Dictionary<string, long> constants)
     {
-        bool hasKey = parameterValues.TryGetValue(keyIndex.Name.ToLower(), out var key) && key != "0" && key != None;
-
-        var chestEvent = new ChestEvent()
+        var conditionEvent = new ConditionEvent()
         {
-            Type = EventType.Chest,
-            TextIndex = 0xff,
-            LockpickingChanceReduction = hasKey ? 100u : 1u,
-            UnlockFailedEventIndex = 0xffff,
-            Flags = ChestEvent.ChestFlags.None
+            Type = EventType.Condition,
+            TypeOfCondition = ConditionEvent.ConditionType.MultiCursor, // might change below
+            Value = 1,
+            ContinueIfFalseWithMapEventIndex = 0xffff,
         };
-        var chestScriptEvent = new ChestScriptEvent()
+        var triggerScriptEvent = new TriggerScriptEvent()
         {
-            Event = chestEvent
+            Event = conditionEvent
         };
-
-        bool? alwaysOpenSet = null;
-        bool lockpickChangeReductionGiven = false;
-        bool keyIndexGiven = false;
 
         Parse(description, parameterValues, (parameter, value, fromDefault) =>
         {
             string name = parameter.Name;
 
-            if (name == chestIndex.Name)
+            if (name == trigger.Name)
             {
-                uint chestIndex = EnsureLimits(ParseWord(value, constants), parameter);
+                var triggers = EnsureValidValues(EnumHelper.ParseFlagsEnum<Trigger>(value, true), parameter);
 
-                if (chestIndex > 256)
+                if (triggers == Trigger.Hand)
                 {
-                    chestEvent.Flags = ChestEvent.ChestFlags.ExtendedChest;
-                    chestEvent.ChestIndex = chestIndex - 257;
+                    conditionEvent.TypeOfCondition = ConditionEvent.ConditionType.Hand;
+                    conditionEvent.ObjectIndex = 0;
+                }
+                else if (triggers == Trigger.Eye)
+                {
+                    conditionEvent.TypeOfCondition = ConditionEvent.ConditionType.Eye;
+                    conditionEvent.ObjectIndex = 0;
+                }
+                else if (triggers == Trigger.Mouth)
+                {
+                    conditionEvent.TypeOfCondition = ConditionEvent.ConditionType.Mouth;
+                    conditionEvent.ObjectIndex = 0;
                 }
                 else
                 {
-                    chestEvent.Flags = ChestEvent.ChestFlags.None;
-                    chestEvent.ChestIndex = chestIndex - 1;
+                    conditionEvent.TypeOfCondition = ConditionEvent.ConditionType.MultiCursor;
+                    conditionEvent.ObjectIndex = (byte)triggers;
                 }
-            }
-            else if (name == keyIndex.Name)
-            {
-                var keyIndex = EnsureLimits(ParseWord(value, constants, noneValue: 0), parameter);
-
-                chestEvent.KeyIndex = keyIndex;
-
-                if (alwaysOpenSet == true && keyIndex != 0)
-                    throw new InvalidOperationException("AlwaysOpen must not be set to true if a KeyIndex is specified.");
-
-                keyIndexGiven = keyIndex != 0;
-            }
-            else if (name == textIndex.Name)
-                chestEvent.TextIndex = EnsureLimits(ParseByte(value, constants, noneValue: 0xff), parameter);
-            else if (name == lockpickChanceReduction.Name)
-            {
-                if (fromDefault)
-                    return;
-
-                var reduction = EnsureLimits(ParseByte(value, constants, noneValue: 0), parameter);
-
-                if (alwaysOpenSet == true && reduction != 0)
-                    throw new FormatException("LockpickChanceReduction must be 0 if AlwaysOpen is set to true.");
-
-                if (alwaysOpenSet == false && reduction == 0)
-                    throw new FormatException("LockpickChanceReduction must not be 0 if AlwaysOpen is set to false.");
-
-                chestEvent.LockpickingChanceReduction = reduction;
-
-                lockpickChangeReductionGiven = true;
-            }
-            else if (name == alwaysOpen.Name)
-            {
-                var isAlwaysOpenSet = ParseBool(value, constants);
-
-                if (isAlwaysOpenSet && (lockpickChangeReductionGiven && chestEvent.LockpickingChanceReduction != 0))
-                    throw new FormatException("LockpickChanceReduction must be 0 if AlwaysOpen is set to true.");
-
-                if (isAlwaysOpenSet && keyIndexGiven)
-                    throw new FormatException("AlwaysOpen must not be set to true if a KeyIndex is specified.");
-
-                if (isAlwaysOpenSet)
-                    chestEvent.LockpickingChanceReduction = 0;
-                else if (chestEvent.LockpickingChanceReduction == 0)
-                    chestEvent.LockpickingChanceReduction = 1;
-
-                alwaysOpenSet = isAlwaysOpenSet;
             }
         });
 
-        return chestScriptEvent;
+        return triggerScriptEvent;
     }
-}*/
+}
 
 #endregion
