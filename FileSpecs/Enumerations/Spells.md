@@ -44,7 +44,7 @@ Index | Name | SP | SLP | Area | Target | Description
 3 | Magical torch | 10 | 5 | Everywhere | None | Adds 1 light radius for 300 ingame minutes (5:00)
 4 | Magical lantern | 25 | 10 | Everywhere | None | Adds 2 light radius for 600 ingame minutes (10:00)
 5 | Magical sun | 50 | 15 | Everywhere | None | Adds 3 light radius for 900 ingame minutes (15:00)
-6 | Ghost weapon | 10 | 5 | Battle | Enemy | Deals 25 damage to a single enemy
+6 | Ghost weapon | 10 | 5 | Battle | Enemy | Deals damage to a single enemy equal to the bonus attack damage of the caster (i.e., the damage granted by equipment), excluding damage granted by strength and buffs
 7 | Create food | 25 | 10 | Everywhere | All friends | Creates 1 food for each living party member
 8 | Remove curses | 100 | 20 | Camp | Item | Removes a curse from an equipped item and destroys the item
 9 | Blink | 20 | 5 | Battle | Friend | Teleports an ally in a fight
