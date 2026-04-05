@@ -68,6 +68,9 @@ public record ScriptEventSequence(uint Index, ICollection<IScriptEvent> Events, 
         AddEvent<PrintScriptEvent>();
         AddEvent<PictureScriptEvent>();
         AddEvent<AskScriptEvent>();
+        // # Conditions
+        AddEvent<TriggerScriptEvent>();
+        AddEvent<InputScriptEvent>();
         // TODO ...
     }
 
@@ -141,10 +144,12 @@ public record ScriptEventSequence(uint Index, ICollection<IScriptEvent> Events, 
 
             List<IScriptEvent> events = [];
             List<(IBranchScriptEvent BranchEvent, string AlternativeJumpLabel)> alternativeJumpLabels = [];
+            Dictionary<string, IScriptEvent> labeledEvents = [];
+            string? currentLabel = null;
 
             while (true)
             {
-                if (!ScriptDescription.TryParse(parser, out var name, out var parameters, out bool error, events.Count == 0 ? null : events[^1]))
+                if (!ScriptDescription.TryParse(parser, out var name, out var parameters, out bool error, events.Count == 0 ? null : events[^1], out bool isLabel))
                 {
                     if (error)
                         return false;
@@ -153,8 +158,26 @@ public record ScriptEventSequence(uint Index, ICollection<IScriptEvent> Events, 
                     break;
                 }
 
+                if (isLabel)
+                {
+                    if (currentLabel != null)
+                    {
+                        parser.TrackParserWarning($"Labels cannot follow other labels directly: {currentLabel} -> {name}");
+                        return false;
+                    }
+
+                    currentLabel = name;
+                    continue;
+                }
+
                 if (name!.StartsWith(ScriptParser.BranchPrefix))
                 {
+                    if (currentLabel != null)
+                    {
+                        parser.TrackParserWarning($"Branches cannot directly follow a label: {currentLabel}");
+                        return false;
+                    }
+
                     if (parameters.TryGetValue(ScriptParser.JumpTargetParam, out var jumpTarget))
                         alternativeJumpLabels.Add(((events[^1] as IBranchScriptEvent)!, jumpTarget));
 
@@ -172,6 +195,12 @@ public record ScriptEventSequence(uint Index, ICollection<IScriptEvent> Events, 
                 var scriptEvent = factory(parameters, constants);
 
                 events.Add(scriptEvent);
+
+                if (currentLabel != null)
+                {
+                    labeledEvents.Add(currentLabel, scriptEvent);
+                    currentLabel = null;
+                }
 
                 if (scriptEvent is IBranchScriptEvent)
                     parser.EnterContext(ParseContext.ScriptLineAfterBranch);
@@ -284,6 +313,7 @@ file static class EventHelper
     public static FlagsParameter<T> OptFlags<T>(string name, int bytes, T defaultValue, params T[] allowedValues)
         where T : struct, Enum
         => new(name, true, bytes, defaultValue, allowedValues);
+    public static ConditionExpressionParameter ConditionExpr(string name) => new(name, false);
 }
 
 #endregion
@@ -1624,7 +1654,7 @@ internal class TriggerScriptEvent() : ConditionBasedScriptEvent, IScriptEventTyp
             };
 
             Print(writer, description.Name,
-                (trigger, triggers.ToString());
+                (trigger, triggers.ToString()));
 
             if (conditionEvent.ContinueIfFalseWithMapEventIndex != 0xffff)
                 writer.WriteLine($"-> {BranchExpressionString}: {ScriptEventSequence.JumpTo}(event{conditionEvent.ContinueIfFalseWithMapEventIndex})");
@@ -1781,6 +1811,181 @@ internal class InputScriptEvent : ConditionBasedScriptEvent, IScriptEventType
             string name = parameter.Name;
 
             if (name == inputType.Name)
+            {
+                var input = EnsureValidValues(Enum.Parse<InputType>(value, true), parameter);
+
+                if (input == InputType.Number)
+                {
+                    conditionEvent.TypeOfCondition = ConditionEvent.ConditionType.EnterNumber;
+                }
+                else if (input == InputType.Word)
+                {
+                    conditionEvent.TypeOfCondition = ConditionEvent.ConditionType.SayWord;
+                }
+                else
+                {
+                    throw new FormatException($"Invalid input type: {value}");
+                }
+
+                inputTypeSet = true;
+            }
+            else if (name == number.Name)
+            {
+                if (inputTypeSet && conditionEvent.TypeOfCondition != ConditionEvent.ConditionType.EnterNumber)
+                {
+                    if (fromDefault)
+                        return;
+
+                    throw new FormatException($"Parameter '{number.Name}' should not be used for input type '{nameof(InputType.Word)}'.");
+                }
+
+                conditionEvent.ObjectIndex = EnsureLimits(ParseWord(value, constants), parameter);
+            }
+            else if (name == wordIndex.Name)
+            {
+                if (inputTypeSet && conditionEvent.TypeOfCondition != ConditionEvent.ConditionType.SayWord)
+                {
+                    if (fromDefault)
+                        return;
+
+                    throw new FormatException($"Parameter '{wordIndex.Name}' should not be used for input type '{nameof(InputType.Number)}'.");
+                }
+
+                conditionEvent.ObjectIndex = EnsureLimits(ParseWord(value, constants), parameter);
+            }
+        });
+
+        return inputScriptEvent;
+    }
+}
+
+/*GlobalVariable,
+        EventBit,
+        DoorOpen,
+        ChestOpen,
+        CharacterBit,
+        PartyMember,
+        ItemOwned,
+        UseItem,
+        KnowsKeyword,
+        LastEventResult,
+        GameOptionSet,
+        CanSee,
+        Direction,
+        HasCondition,
+        Levitating,
+        HasGold,
+        HasFood,
+        TransportAtLocation,
+        TravelType,
+        LeadClass,
+        SpellEmpowered,
+        IsNight,
+        Attribute,
+        Skill*/
+/// <summary>
+/// This should have this format: If(SomeProperty = value)
+/// For many cases value can only be true or false.
+/// </summary>
+internal class IfScriptEvent : ConditionBasedScriptEvent, IScriptEventType
+{
+    static readonly Dictionary<ConditionEvent.ConditionType, string> propertyNamesByType = [];
+    static readonly ConditionExpressionParameter conditionExpression = New.ConditionExpr("Expr");
+
+    static readonly ScriptDescription description = new("If", conditionExpression);
+
+    static IfScriptEvent()
+    {
+
+    }
+
+    public override string BranchExpressionString => "False";
+
+    public static EventType GetEventType() => EventType.Condition;
+
+    public static ScriptDescription GetDescription() => description;
+
+    public static IScriptEvent FromEvent(Event @event) => new IfScriptEvent()
+    {
+        Event = @event
+    };
+
+    public static bool MatchesEvent(Event @event)
+    {
+        return @event is ConditionEvent conditionEvent && conditionEvent.TypeOfCondition switch
+        {
+            ConditionEvent.ConditionType.Attribute or // ?
+            ConditionEvent.ConditionType.Direction or
+            ConditionEvent.ConditionType.HasFood or
+            ConditionEvent.ConditionType.HasGold or
+            ConditionEvent.ConditionType.KnowsKeyword or
+            ConditionEvent.ConditionType.LeadClass or
+            ConditionEvent.ConditionType.Skill or // ?
+            ConditionEvent.ConditionType.TravelType => true,
+            _ => false
+        };
+    }
+
+    public override bool Print(Event @event, StreamWriter writer)
+    {
+        if (@event is ConditionEvent conditionEvent)
+        {
+            var input = conditionEvent.TypeOfCondition switch
+            {
+                ConditionEvent.ConditionType.SayWord => Trigger.Hand,
+                ConditionEvent.ConditionType.Eye => Trigger.Eye,
+                ConditionEvent.ConditionType.Mouth => Trigger.Mouth,
+                ConditionEvent.ConditionType.MultiCursor => (Trigger)conditionEvent.ObjectIndex,
+                _ => throw new InvalidOperationException($"Invalid condition type for trigger script event: {conditionEvent.TypeOfCondition}")
+            };
+
+            if (conditionEvent.TypeOfCondition == ConditionEvent.ConditionType.SayWord)
+            {
+                ScriptEvent.Print(writer, description.Name,
+                    (conditionExpression, nameof(InputType.Word)),
+                    (wordIndex, conditionEvent.ObjectIndex.ToString()));
+            }
+            else
+            {
+                Print(writer, description.Name,
+                    (conditionExpression, nameof(InputType.Number)),
+                    (number, conditionEvent.ObjectIndex.ToString()));
+            }
+
+            if (conditionEvent.ContinueIfFalseWithMapEventIndex != 0xffff)
+                writer.WriteLine($"-> {BranchExpressionString}: {ScriptEventSequence.JumpTo}(event{conditionEvent.ContinueIfFalseWithMapEventIndex})");
+
+            return true;
+        }
+
+        return false;
+    }
+
+    public static IScriptEvent Parse(Dictionary<string, string> parameterValues, Dictionary<string, long> constants)
+    {
+        if (parameterValues.Count != 1)
+            throw new FormatException($"{description.Name} should have exactly one parameter, like this: If(Property = value)");
+
+        var conditionEvent = new ConditionEvent()
+        {
+            Type = EventType.Condition,
+            TypeOfCondition = ConditionEvent.ConditionType.EnterNumber, // might change below
+            Value = 1,
+            ObjectIndex = 0,
+            ContinueIfFalseWithMapEventIndex = 0xffff,
+        };
+        var inputScriptEvent = new InputScriptEvent()
+        {
+            Event = conditionEvent
+        };
+
+        bool inputTypeSet = false;
+
+        Parse(description, parameterValues, (parameter, value, fromDefault) =>
+        {
+            string name = parameter.Name;
+
+            if (name == conditionExpression.Name)
             {
                 var input = EnsureValidValues(Enum.Parse<InputType>(value, true), parameter);
 

@@ -21,14 +21,14 @@
     <TrimmableAssembly Include="Avalonia.Themes.Default" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Ambermoon.Data.Legacy" Version="10.12.10" />
-    <PackageReference Include="AutoMapper" Version="16.0.0" />
-    <PackageReference Include="Avalonia" Version="11.3.12" />
-    <PackageReference Include="Avalonia.Desktop" Version="11.3.12" />
+    <PackageReference Include="Ambermoon.Data.Legacy" Version="10.12.11" />
+    <PackageReference Include="AutoMapper" Version="16.1.1" />
+    <PackageReference Include="Avalonia" Version="11.3.13" />
+    <PackageReference Include="Avalonia.Desktop" Version="11.3.13" />
     <!--Condition below is needed to remove Avalonia.Diagnostics package from build output in Release configuration.-->
-    <PackageReference Condition="'$(Configuration)' == 'Debug'" Include="Avalonia.Diagnostics" Version="11.3.12" />
+    <PackageReference Condition="'$(Configuration)' == 'Debug'" Include="Avalonia.Diagnostics" Version="11.3.13" />
     <PackageReference Include="Avalonia.ReactiveUI" Version="11.3.8" />
-    <PackageReference Include="Material.Avalonia" Version="3.13.4" />
+    <PackageReference Include="Material.Avalonia" Version="3.14.2" />
     <PackageReference Include="XamlNameReferenceGenerator" Version="1.6.1" />
   </ItemGroup>
 </Project>

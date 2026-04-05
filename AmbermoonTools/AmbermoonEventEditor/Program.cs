@@ -974,6 +974,7 @@ namespace AmbermoonEventEditor
                 eventData[11] = (byte)(nextIndex & 0xff);
                 System.Array.Copy(writer.ToArray(), 0, eventData, 1, 9);
                 int dataIndex = 1;
+                int dataBitIndex = 0;
 
                 void Write(ValueDescription valueDescription, ushort value)
                 {
@@ -985,12 +986,22 @@ namespace AmbermoonEventEditor
 
                 foreach (var value in eventDescription.ValueDescriptions)
                 {
+                    if (dataBitIndex != 0 && value.Type != ValueType.TenBits && value.Type != ValueType.TwelveBits)
+                    {
+                        dataIndex += (dataBitIndex + 7) / 8;
+                        dataBitIndex = 0;
+                    }
+
                     if (value.Hidden || value.Condition?.Invoke(eventDescription, @event) == false)
                     {
                         if (value.Type == ValueType.Word ||
                             value.Type == ValueType.Flag16 ||
                             value.Type == ValueType.EventIndex)
                             dataIndex += 2;
+                        else if (value.Type == ValueType.TenBits)
+                            dataBitIndex += 10;
+                        else if (value.Type == ValueType.TwelveBits)
+                            dataBitIndex += 12;
                         else
                             ++dataIndex;
                     }
@@ -1033,6 +1044,10 @@ namespace AmbermoonEventEditor
                                 value.Type == ValueType.Flag16 ||
                                 value.Type == ValueType.EventIndex)
                                 dataIndex += 2;
+                            else if (value.Type == ValueType.TenBits)
+                                dataBitIndex += 10;
+                            else if (value.Type == ValueType.TwelveBits)
+                                dataBitIndex += 12;
                             else
                                 ++dataIndex;
                         }

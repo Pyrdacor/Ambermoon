@@ -24,6 +24,11 @@ public record BooleanParameter : Parameter
     }
 }
 
+public record ConditionExpressionParameter(string Name, bool Optional = false) : IParameter
+{
+    public string? DefaultValue { get; } = null;
+}
+
 public record EnumParameter<T>(string Name, bool Optional, T? DefaultValue, params T[] AllowedValues) : IParameter
     where T : struct, Enum
 {
@@ -61,11 +66,12 @@ public record NullableParameter(IParameter BaseParameter, string NullValueLitera
 
 public partial record ScriptDescription(string Name, params IParameter[] Parameters)
 {
-    public static bool TryParse(ScriptParser parser, out string? name, out Dictionary<string, string> parameters, out bool error, IScriptEvent? lastEvent)
+    public static bool TryParse(ScriptParser parser, out string? name, out Dictionary<string, string> parameters, out bool error, IScriptEvent? lastEvent, out bool isLabel)
     {
         name = null;
         parameters = [];
         error = false;
+        isLabel = false;
 
         string? line;
 
@@ -184,6 +190,16 @@ public partial record ScriptDescription(string Name, params IParameter[] Paramet
 
             if (commentIndex != -1)
                 line = line[..commentIndex].TrimEnd();
+
+            var labelRegex = LabelRegex();
+            var labelMatch = labelRegex.Match(line);
+
+            if (labelMatch.Success)
+            {
+                isLabel = true;
+                name = labelMatch.Groups[1].Value;
+                return true;
+            }
 
             if (!line.StartsWith(ScriptParser.EventPrefix))
                 return false;
@@ -330,6 +346,8 @@ public partial record ScriptDescription(string Name, params IParameter[] Paramet
 
     [GeneratedRegex(@"^[.]?[a-z][a-z0-9]*$", RegexOptions.Compiled | RegexOptions.IgnoreCase)]
     private static partial Regex LabelNameRegex();
+    [GeneratedRegex(@"^([.]?[a-z][a-z0-9]*):$", RegexOptions.Compiled | RegexOptions.IgnoreCase)]
+    private static partial Regex LabelRegex();
 }
 
 public enum EmpoweredSpellType
