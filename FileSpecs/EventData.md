@@ -382,6 +382,7 @@ Value | Type
 27 | Is night (**Ambermoon Advanced only**)
 28 | Active party member attribute (**Ambermoon Advanced only**)
 29 | Active party member skill (**Ambermoon Advanced only**)
+30 | Current Minute (0, 5, 10, ..., 55) (**Ambermoon Advanced only**)
 
 **Note:** In conversations the global variable 0 is checked to be value 0 before executing a PrintText event that
 should be executed in any case. I guess PrintText events always need a preceding Condition event and the global
