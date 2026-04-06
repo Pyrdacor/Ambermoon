@@ -89,8 +89,21 @@ In 2D the player is not drawn if on this tile. This is used by doors in 2D indoo
 
 When an event on that tile triggers a battle event, this combat background will be used.
 
-
-
 # Ambermoon Advanced
 
 The "player invisible" bit is used in 3D to avoid animations. In this case the mid frame is shown.
+
+# Tile flags logic in the original
+
+There is a central function to retrieve the tile flags for a given map position. For world maps there is some logic to get the correct tile as there might be up to 4 maps visible on the screen at the same time. After that the logic is the same for all 2D maps.
+
+Get the map tile's back and front tile index and determine their tile flags. If a back or front tile index is 0, the tile flags are 0 as well. Otherwise the map's tileset is used to get the corresponding tileset tile data and the tile flags are retrieved from there.
+
+If there are no front tile flags or they have the "Use background tile flags" bit set, the back tile flags are used (otherwise the front tile flags.
+
+For 3D maps, if a block is empty (index 0) or map border (index 255), the tile flags are just 0. For walls, the wall tile flags are used. For objects the tile flags are constructed. The combat background index is just taken from the labdata header and then all "allow movement" bits are set. So objects will never block.
+
+For both 2D and 3D maps (but not world maps), if the source of interaction was a map character it is also checked if the map character is on the current tile and if so, it's tile flags are used (if they are not 0).
+
+Map characters can therefore specify combat background indices or collision flags, while for example 3D objects can't.
+
