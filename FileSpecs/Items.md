@@ -97,7 +97,7 @@ Bit | Description
 4 | Destroy after usage
 5 | Indestructable
 6 | Clonable
-7 | Unused
+7 | Extended item graphic (**Advanced only**)
 
 Item stacks can hold up to 99 items. Merchant item slots can stack all items even without that flag
 and they can provide unlimited amounts if the item amount is set to 255.
@@ -118,6 +118,9 @@ spell (Repair, Duplicate, Charge) fails, it destroys the targeted item. The fail
 so this can also happen to items that couldn't be targeted by the spell (i.e. repair non-broken items).
 This way you can cast Repair on an important item and if it fails due to a low magic ability the
 important item can be destroyed.
+
+In Ambermoon Advanced we have more than 256 item graphics which can't be stored in the single byte.
+Therefore a new item flag was introduced. If it is set, the real graphic index is `256 + graphicIndex` instead.
 
 ### Price formula
 
