@@ -1,6 +1,7 @@
 ## Unreleased
 
 - Added the missing text in Luminor's tower 5 which is shown when pressing the button while the fire demons are still alive.
+- Fixed collision of two beds and a log in the corridor map (267), you could walk onto them (fixes #146).
 
 ## Version 1.19
 

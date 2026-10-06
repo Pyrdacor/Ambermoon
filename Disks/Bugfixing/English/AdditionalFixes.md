@@ -1,3 +1,7 @@
+## Unreleased
+
+- Fixed collision of two beds and a log in the corridor map (267), you could walk onto them (fixes #146).
+
 ## Version 1.19
 
 - Fixed wrong magic weapon level for Mando.
