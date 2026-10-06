@@ -5,6 +5,7 @@
 - The enchanter now uses the item specific price per charge if the item has one (fixes #125).
 - Fixed walkable curtains in the wall of the trainer house in Spannenberg (fixes #123).
 - The pieces of amber in the mine of Dor Kiredon (level 1 and 2) are no longer empty after the first one was taken (fixes #103).
+- The jump spell no longer jumps over locked doors, places and riddlemouths (fixes #98).
 
 ## Version 1.19
 

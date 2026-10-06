@@ -13201,21 +13201,15 @@ LAB_0022a20c:
 	jsr FUN_OffsetPositionsByDirection2D
 	move.w D0,D6
 	move.w D1,D7
-	jsr FUN_GetTileFlagsAtPos
-	btst.l #$00000007,D0
+	jsr FUN_CheckIfJumpTargetIsBlocking ; FIX: also checks for locked doors, places and riddlemouths (#98)
 	bne.b LAB_0022a260
-	btst.l D3,D0
-	beq.b LAB_0022a260
 	move.w D6,D0
 	move.w D7,D1
 	jsr FUN_OffsetPositionsByDirection2D
 	move.w D0,D6
 	move.w D1,D7
-	jsr FUN_GetTileFlagsAtPos
-	btst.l #$00000007,D0
+	jsr FUN_CheckIfJumpTargetIsBlocking
 	bne.b LAB_0022a260
-	btst.l D3,D0
-	beq.b LAB_0022a260
 	move.w D6,DAT_CurrentPartyX
 	move.w D7,DAT_CurrentPartyY
 	jsr Jumped
@@ -13225,6 +13219,73 @@ LAB_0022a260:
 	move.w #$0042,D0
 	jsr FUN_DisplayInventoryMessage
 LAB_0022a26a:
+	rts
+; FIX: Jumping over locked doors, places and riddlemouths was possible (#98)
+; D0=X, D1=Y, D3=TravelType, D6=X, D7=Y
+; Returns 0 if not blocking, otherwise non-zero
+FUN_CheckIfJumpTargetIsBlocking:
+	movem.l D1-D7/A0-A6,-(SP) ; event processing might change registers
+	; First check for blocking walls/objects
+	jsr FUN_GetTileFlagsAtPos
+	btst.l #$00000007,D0 ; block all bit set?
+	bne.b .Block ; if so, block
+	btst.l D3,D0 ; check if travel type allow bit is set
+	beq.b .Block ; if not, block
+	; Check for specific events
+	move.w D6,D0 ; X
+	move.w D7,D1 ; Y
+	jsr FUN_GetMapEventFromPosition
+	bmi.w .NoBlock
+	jsr FUN_CheckIfMapEventIsActive
+	bne.w .NoBlock
+	lea DAT_CurrentEventData,A5
+	jsr FUN_ExecuteConditionEvents
+	tst.b Bool_MapEventResult
+	bne.b .NoBlock
+	; If we are here, there is some non-condition event in A5.
+	cmpi.b #$0000000c,(A5) ; place event?
+	beq.b .Block ; always block
+	cmpi.b #$00000008,(A5) ; riddlemouth event?
+	beq.b .Block ; always block
+	cmpi.b #$00000002,(A5) ; door event?
+	bne.b .NoBlock ; else don't block
+	; For doors we have to check if it was already unlocked
+	moveq #$00000000,D0
+	move.b DAT_0027b636,D0 ; door index
+	moveq #$00000002,D1 ; type = 2 (door bits)
+	moveq #$00000003,D2 ; operation = test bit
+	jsr FUN_ChangeOrTestSavegameVar ; check if bit is set (if so, door is unlocked)
+	beq.b .Block ; locked, so block, otherwise proceed to .NoBlock
+.NoBlock:
+	sf Bool_MapEventResult
+	moveq #0,D0
+	bra.b .End
+.Block:
+	sf Bool_MapEventResult
+	moveq #-$00000001,D0
+.End:
+	movem.l (SP)+,D1-D7/A0-A6 ; does not change the condition codes
+	rts
+; Executes all condition events until some other
+; event is reached, the end of chain is reached
+; or the condition was not fulfilled and had no
+; false-branch.
+FUN_ExecuteConditionEvents:
+	sf Bool_LastEventResult
+	st Bool_ProcessingMapEventChain
+.NextEvent:
+	sf Bool_MapEventResult
+	cmpi.b #$0000000d,(A5) ; condition event?
+	bne.b .End ; no? end
+	jsr FUN_ProcessMapEvent
+	tst.b Bool_MapEventResult
+	bne.b .End
+	jsr FUN_FillNextEventData
+	bpl.b .NextEvent
+	st Bool_MapEventResult
+.End:
+	sf Bool_LastEventResult
+	sf Bool_ProcessingMapEventChain
 	rts
 FUN_SpellWordOfMarking:
 	jsr FUN_CheckSpellCast_ReduceSPAndCharges
