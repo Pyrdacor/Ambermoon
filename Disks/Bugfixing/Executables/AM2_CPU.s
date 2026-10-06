@@ -27600,12 +27600,7 @@ FUN_00235cba:
 	jsr FUN_00221d4a
 	jmp FUN_00234f34
 FUN_EnchanterRecharge:
-	move.w DAT_CurrentWindowGold,D0
-	cmp.w DAT_PlaceCost,D0
-	bcc.b LAB_00235cf6 ; FIX: Unsigned gold fix
-	move.w #$0096,D0
-	jsr FUN_ShowMessageInCurrentWindow
-	bra.w LAB_00235e7a
+	; FIX: The gold check moved behind the item selection as the price depends on the item now (#125).
 LAB_00235cf6:
 	move.w #$009b,DAT_0027ab34
 	move.b DAT_CurrentPartyMemberIndex,DAT_0027a83c
@@ -27653,12 +27648,24 @@ LAB_00235da6:
 	jsr FUN_ShowMessageInCurrentWindow
 	bra.w LAB_00235e5e
 LAB_00235dbe:
+	moveq #$00000000,D0
+	move.b ($001d,A1),D0 ; FIX: item specific price per charge (#125)
+	bne.b LAB_EnchantItemHasPrice
+	move.w DAT_PlaceCost,D0 ; otherwise use the enchanter base price
+LAB_EnchantItemHasPrice:
+	move.w D0,DAT_EnchantPricePerCharge
+	cmp.w DAT_CurrentWindowGold,D0
+	bls.b LAB_EnchantEnoughGold ; price <= gold (unsigned)
+	move.w #$0096,D0 ; not enough gold
+	jsr FUN_ShowMessageInCurrentWindow
+	bra.w LAB_00235e5e
+LAB_EnchantEnoughGold:
 	moveq #$00000000,D1
 	move.b ($001c,A1),D1
 	sub.b ($0001,A2),D1
 	moveq #$00000000,D0
 	move.w DAT_CurrentWindowGold,D0
-	divu.w DAT_PlaceCost,D0
+	divu.w DAT_EnchantPricePerCharge,D0
 	cmp.w D1,D0
 	bmi.b LAB_00235ddc
 	move.w D1,D0
@@ -27673,7 +27680,7 @@ LAB_00235ddc:
 	move.l DAT_EnteredNumber,D1
 	beq.w LAB_00235e5e
 	move.w #$00a6,D0
-	mulu.w DAT_PlaceCost,D1
+	mulu.w DAT_EnchantPricePerCharge,D1
 	jsr FUN_ShowPlacePriceYesNoMessage
 	tst.b D0
 	beq.b LAB_00235e5e
@@ -289715,6 +289722,8 @@ DAT_PlaceIndex:
 	dx.w 1
 DAT_PlaceCost:
 	; undefined2
+	dx.w 1
+DAT_EnchantPricePerCharge:
 	dx.w 1
 DAT_0027aa20:
 	; undefined2
