@@ -2,6 +2,7 @@
 
 - Fixed collision of two beds and a log in the corridor map (267), you could walk onto them (fixes #146).
 - Random animations of 3D objects now use the real map width for their position hash (fixes #127).
+- The enchanter now uses the item specific price per charge if the item has one (fixes #125).
 
 ## Version 1.19
 
