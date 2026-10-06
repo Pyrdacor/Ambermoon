@@ -370,6 +370,7 @@ CreateADF(adfTempPath, 'A',
     "Ambermoon_install",
     "Ambermoon_install.info",
     "readme.txt",
+    ..(language == "German" ? new AdfFileInfo[] { "liesmich.txt" } : []), // the german installer copies it as well
     ..AllFilesIn("Amberfiles\\Save.00", "Initial"),
     "Amberfiles\\AM2_CPU",
     "Amberfiles\\Button_graphics",
