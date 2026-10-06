@@ -21057,8 +21057,8 @@ LAB_002306b2:
 	move.w DAT_CurrentRenderBlockX,D5
 	move.w DAT_CurrentRenderBlockY,D6
 	move.w D6,D0
-	mulu.w $4,D0 ; TODO: Is this meant to be *4?
-	add.w D5,D0 ; Num blocks to render
+	mulu.w DAT_MapWidth,D0 ; FIX: was 'mulu.w $4,D0' which read address 4 instead of the map width (#127)
+	add.w D5,D0 ; + map square x = hash for random object animations
 	move.b D0,DAT_NumWallBlocksToRender
 	moveq #$00000009,D0
 	subq.w #$00000001,D5
