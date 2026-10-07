@@ -4,7 +4,7 @@
 - Random animations of 3D objects now use the real map width for their position hash (fixes #127).
 - The enchanter now uses the item specific price per charge if the item has one (fixes #125).
 - Fixed walkable curtains in the wall of the trainer house in Spannenberg (fixes #123).
-- The pieces of amber in the mine of Dor Kiredon (level 1 and 2) are no longer empty after the first one was taken (fixes #103).
+- The pieces of amber in the mine of Dor Kiredon (level 1 and 2) and in Ferrin's storage cellar are no longer empty after the first one was taken. This was broken since german 1.08 / english 1.09 (fixes #103).
 - The jump spell no longer jumps over locked doors, places and riddlemouths (fixes #98).
 - Fixed many more places where you could walk into walls (windows, curtains, wall decorations and stairs in several houses and taverns, #123).
 
