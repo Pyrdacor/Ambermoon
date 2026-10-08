@@ -1965,6 +1965,17 @@ Allocate_system_memory:
 	movem.l	d0-d3/d5/d6/a0/a1,-(sp)
 	moveq.l	#0,d4
 .Loop:
+	cmp.w	#10,d7		; FIX: Check the limit BEFORE allocating.
+	bpl.s	.Skip		; The block counter d7 counts the CHIP and
+					; FAST blocks together and the table
+					; File_info_pointers only has room for 10.
+					; If the CHIP memory was fragmented into
+					; 10 blocks (e.g. when started from
+					; Workbench), one FAST block was stored
+					; behind the table (in Sub_file_pointers).
+					; This entry was overwritten during the
+					; game and Free_all_memory then freed a
+					; wrong block -> Guru 8100 0005 on exit.
 	move.l	d6,d1		; Allocate flags
 	ori.l	#$20000,d1		; MEMF_LARGEST
 	move.l	a6,-(sp)

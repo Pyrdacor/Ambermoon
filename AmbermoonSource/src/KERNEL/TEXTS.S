@@ -228,12 +228,13 @@ Copy_data:
 	move.l	(a2)+,(a3)+
 .Skip:
 	dbra	d6,.Loop
-	btst.b	d7,#1
-	beq.s	.Skip2
-	move.w	(a2)+,(a3)+
-.Skip2:
-	btst.b	d7,#0
-	beq.s	.Exit
+	btst	#1,d7		; FIX: Was "btst d7,#1" (operands swapped), which tests
+	beq.s	.Skip2		; bit (d7 & 7) of the constant 1. So if the size was
+	move.w	(a2)+,(a3)+	; a multiple of 8, one word too much was copied.
+.Skip2:				; Load_button_graphics copies 12168 bytes into
+	btst	#0,d7		; Control_icons, which fills its hunk completely, so
+	beq.s	.Exit		; 2 bytes behind the hunk were overwritten (memory
+				; list corrupted -> Guru 8100 0005 on exit).
 	move.b	(a2)+,(a3)+
 .Exit:
 	movem.l	(sp)+,d6/d7/a2/a3

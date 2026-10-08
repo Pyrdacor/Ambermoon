@@ -13,7 +13,8 @@ versions were merged into them, and the parts which are missing in the original 
 "kernel": system, graphics, memory and file management, 3D renderer, music player, …) were
 reconstructed from the disassembly, using the names the original code uses wherever possible.
 
-**The source assembles to an executable which is byte-identical to `AM2_CPU` (1.21).**
+**The source assembled to an executable which was byte-identical to `AM2_CPU` (1.21).** Since then,
+new bugfixes were added (see the findings below), so the current build differs from 1.21.
 
 ## Building
 
@@ -108,6 +109,15 @@ Besides that, two changes were applied to all original modules:
   322 bytes could be saved. `Blit_zoomshape_tables` differs from `CPU_zoomshape_tables` on purpose.
   Everything else (`put_dpoly`, `draw_zoomshape`, `Insert_horizon` and the variables) is shared or
   selected via `Blitter_or_CPU` as it should be. This was left unchanged to keep the build identical.
+* **Guru 8100 0005 on exit (fixed)** – `Copy_data` (`KERNEL/TEXTS.S`) used `btst d7,#1` instead of
+  `btst #1,d7`, so for sizes which are a multiple of 8 one word too much was copied.
+  `Load_button_graphics` copies 12168 bytes into `Control_icons`, which fills its hunk completely, so 2
+  bytes behind the hunk were overwritten. This corrupted the memory list and the system crashed when
+  the loader unloaded AM2.
+* **Memory block table overflow (fixed)** – `Allocate_system_memory` (`KERNEL/MEMORY.S`) checked the limit of
+  10 memory blocks only after allocating. The counter covers CHIP and FAST blocks together, so with 10
+  CHIP blocks one FAST block was stored behind `File_info_pointers` (in `Sub_file_pointers`), was
+  overwritten during the game, and `Free_all_memory` then freed a wrong block.
 * **Game data size** – When `Charge_price` was added in 1.21, the size of the game data which is cleared
   at the start (`Init_program`) was not adapted. The last word (`Casting_participant+2`) is not cleared.
   This is harmless (see `MAIN.S`).
