@@ -1,0 +1,13 @@
+# The cases of the HexValueChanger test: a session (hex/sessions/) and the arguments (run in a copy of hex/files/).
+# Only offsets inside of all files (the original ends with an exception for the others).
+s1.txt      a.bin
+s2.txt      . *.bin
+s3.txt      -r . *
+s4.txt      a.bin
+s5.txt      . ?.bin
+s6.txt      a b c d
+s7.txt      . -x *
+s8.txt      a.bin
+s9.txt      . -r *
+s10.txt     c.txt
+s2.txt      sub/d.bin

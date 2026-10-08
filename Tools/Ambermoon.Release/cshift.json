@@ -1,0 +1,6 @@
+{
+	"name": "Ambermoon.Release",
+	"type": "library",
+	"sources": ["src"],
+	"dependencies": ["../Ambermoon.Common", "../Amiga.FileFormats"]
+}

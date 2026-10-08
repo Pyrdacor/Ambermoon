@@ -1,0 +1,12 @@
+diff -ru -x obj -x out -x bin -x '*.csproj' AmbermoonIntroPatcher/Program.cs AmbermoonIntroPatcher/Program.cs
+--- AmbermoonIntroPatcher/Program.cs	2026-10-06 17:50:39.490292311 +0000
++++ AmbermoonIntroPatcher/Program.cs	2026-10-07 08:49:41.904100515 +0000
+@@ -94,7 +94,7 @@
+ 
+         var regex = TextFileRegex();
+         var texts = Directory.GetFiles(textPath, "*.txt")
+-            .Where(f => regex.IsMatch(Path.GetFileName(f)))
++            .Where(f => regex.IsMatch(Path.GetFileName(f))).OrderBy(f => f, StringComparer.Ordinal) // PATCH: in the order of the names
+             .Select(f => File.ReadAllText(f, Encoding.UTF8).TrimEnd())
+             .ToList();
+ 

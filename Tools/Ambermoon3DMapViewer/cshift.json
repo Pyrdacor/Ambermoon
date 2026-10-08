@@ -1,0 +1,7 @@
+{
+	"name": "Ambermoon3DMapViewer",
+	"sources": ["src"],
+	"output": "bin/Ambermoon3DMapViewer",
+	"optimize": 2,
+	"dependencies": ["../Ambermoon.Common", "../Ambermoon.Data.Common", "../Ambermoon.Data.Legacy"]
+}

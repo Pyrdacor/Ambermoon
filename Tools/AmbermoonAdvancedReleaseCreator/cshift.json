@@ -1,0 +1,7 @@
+{
+	"name": "AmbermoonAdvancedReleaseCreator",
+	"sources": ["src"],
+	"output": "bin/AmbermoonAdvancedReleaseCreator",
+	"optimize": 2,
+	"dependencies": ["../Ambermoon.Common", "../Ambermoon.Release"]
+}

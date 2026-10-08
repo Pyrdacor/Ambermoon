@@ -1,0 +1,91 @@
+chain 1f
+0
+0
+
+$a
+6
+chain 11
+3
+13
+ffff
+copyrange a
+1
+ffff
+39
+
+0
+1
+71
+ffff
+$6
+2
+17
+3
+chain
+$27
+2
+$6
+1d
+19
+graph 1b
+2
+31
+130
+3
+0x17
+0
+disconnect 26
+0
+connections e
+31249
+0
+1
+e
+
+3
+4
+2
+50
+0
+ffff
+chain 12
+19
+29798
+125
+3
+e
+b
+remove 1b
+remove 24
+2
+0
+14
+0x4
+128
+1
+16
+add
+1
+255
+0
+0
+0x22
+2
+0
+8
+
+
+
+
+
+
+
+
+
+
+
+
+save
+1
+@OUT@
+exit

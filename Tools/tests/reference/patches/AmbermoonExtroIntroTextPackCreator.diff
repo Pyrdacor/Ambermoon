@@ -1,0 +1,29 @@
+diff -ru -x obj -x out -x bin -x '*.csproj' AmbermoonExtroIntroTextPackCreator/Program.cs AmbermoonExtroIntroTextPackCreator/Program.cs
+--- AmbermoonExtroIntroTextPackCreator/Program.cs	2026-10-06 17:50:39.477129164 +0000
++++ AmbermoonExtroIntroTextPackCreator/Program.cs	2026-10-07 02:55:49.520070720 +0000
+@@ -158,10 +158,10 @@
+ Environment.CurrentDirectory = tempDir;
+ 
+ // Create Intro Text Pack
+-Exec("AmbermoonIntroTextPacker.exe", $"\"{tempDir}\"");
++Exec("dotnet", $"/home/user/ref/tools/AmbermoonIntroTextPacker/out/AmbermoonIntroTextPacker.dll \"{tempDir}\"");
+ 
+ // Create Extro Text Pack
+-Exec("AmbermoonExtroTextPacker.exe", $"\"{tempDir}\" \"{clickTextString}\" {translators}");
++Exec("dotnet", $"/home/user/ref/tools/AmbermoonExtroTextPacker/out/AmbermoonExtroTextPacker.dll \"{tempDir}\" \"{clickTextString}\" {translators}");
+ 
+ var outputDirectory = args[2];
+ 
+@@ -220,10 +220,11 @@
+ 
+ void Publish(string name)
+ {
++    return;
+     Exec("dotnet", $"publish -c Release \"./AmbermoonTools/{name}/{name}.csproj\" -p:PublishSingleFile=true -p:IncludeAllContentForSelfExtract=true -p:DebugType=None -p:DebugSymbols=false -p:NoWarn=NU1900 -p:WarningLevel=0 -r win-x64 --no-self-contained --nologo -o \"{tempDir}\"", KeyValuePair.Create("HTTP_PROXY", ""), KeyValuePair.Create("HTTPS_PROXY", ""), KeyValuePair.Create("DOTNET_CLI_WORKLOAD_UPDATE_NOTIFICATION", "0"));
+ }
+ 
+-static void Exec(string command, string args, params List<KeyValuePair<string, string>> environmentVariables)
++static void Exec(string command, string args, params KeyValuePair<string, string>[] environmentVariables)
+ {
+     Console.WriteLine();
+     Console.WriteLine($"Executing: {command} {args}");

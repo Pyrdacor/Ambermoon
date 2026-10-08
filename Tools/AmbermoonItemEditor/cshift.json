@@ -1,0 +1,7 @@
+{
+	"name": "AmbermoonItemEditor",
+	"sources": ["src"],
+	"output": "bin/AmbermoonItemEditor",
+	"optimize": 2,
+	"dependencies": ["../Ambermoon.Common", "../Ambermoon.Data.Common", "../Ambermoon.Data.Legacy", "../Ambermoon.Data.Descriptions"]
+}

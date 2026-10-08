@@ -1,0 +1,12 @@
+diff -ru -x obj -x out -x bin -x '*.csproj' Ambermoon.Data.Descriptions/EventDescription.cs Ambermoon.Data.Descriptions/EventDescription.cs
+--- Ambermoon.Data.Descriptions/EventDescription.cs	2026-10-06 17:50:39.467171057 +0000
++++ Ambermoon.Data.Descriptions/EventDescription.cs	2026-10-06 18:55:09.904328300 +0000
+@@ -318,7 +318,7 @@
+                 Use.WithDisplayMapping<ChangeBuffsEvent>
+                 (
+                     () => Use.Byte(nameof(ChangeBuffsEvent.AffectedBuff), false, 6),
+-                    (changeBuffsEvent, valueDescription) => (int)changeBuffsEvent.AffectedBuff == 6 ? "All" : EventDescriptions.ToString(changeBuffsEvent, valueDescription)
++                    (changeBuffsEvent, valueDescription) => changeBuffsEvent.AffectedBuff == null || (int)changeBuffsEvent.AffectedBuff == 6 ? "All" : EventDescriptions.ToString(changeBuffsEvent, valueDescription)
+                 ),
+                 Use.Bool(nameof(ChangeBuffsEvent.Add), false),
+                 Use.HiddenByte(),

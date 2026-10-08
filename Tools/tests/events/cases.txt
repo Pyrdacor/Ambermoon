@@ -1,0 +1,27 @@
+# The cases of the AmbermoonEventEditor test: a session (events/sessions/), the file and its type (0: map, 1: NPC).
+view.txt     map/300 0
+view.txt     npc 1
+random1.txt map/300 0
+random2.txt map/300 0
+random3.txt map/300 0
+random4.txt map/300 0
+random5.txt map/300 0
+random6.txt map/300 0
+random7.txt map/300 0
+random8.txt map/300 0
+random9.txt map/300 0
+random10.txt map/300 0
+random11.txt map/300 0
+random12.txt map/300 0
+random13.txt map/300 0
+random14.txt map/300 0
+random15.txt map/300 0
+random16.txt map/300 0
+random17.txt npc 1
+random18.txt npc 1
+random19.txt npc 1
+random20.txt npc 1
+random21.txt npc 1
+random22.txt npc 1
+random23.txt npc 1
+random24.txt npc 1

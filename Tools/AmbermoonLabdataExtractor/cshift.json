@@ -1,0 +1,7 @@
+{
+	"name": "AmbermoonLabdataExtractor",
+	"sources": ["src"],
+	"output": "bin/AmbermoonLabdataExtractor",
+	"optimize": 2,
+	"dependencies": ["../Ambermoon.Common", "../Ambermoon.Data.Common", "../Ambermoon.Data.Legacy"]
+}

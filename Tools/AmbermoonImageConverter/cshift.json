@@ -1,0 +1,7 @@
+{
+	"name": "AmbermoonImageConverter",
+	"sources": ["src"],
+	"output": "bin/AmbermoonImageConverter",
+	"optimize": 2,
+	"dependencies": ["../Ambermoon.Common"]
+}

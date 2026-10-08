@@ -1,0 +1,7 @@
+{
+	"name": "AmbermoonEventEditor",
+	"sources": ["src"],
+	"output": "bin/AmbermoonEventEditor",
+	"optimize": 2,
+	"dependencies": ["../Ambermoon.Common", "../Ambermoon.Data.Common", "../Ambermoon.Data.Legacy", "../Ambermoon.Data.Descriptions"]
+}

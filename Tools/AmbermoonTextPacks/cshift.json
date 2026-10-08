@@ -1,0 +1,6 @@
+{
+	"name": "AmbermoonTextPacks",
+	"type": "library",
+	"sources": ["src"],
+	"dependencies": ["../Ambermoon.Common", "../Ambermoon.Data.Legacy"]
+}

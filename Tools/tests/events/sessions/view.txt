@@ -1,0 +1,24 @@
+list
+events
+short
+summary
+chain 1
+chain 2
+chain 3
+chain 4
+chain 5
+chain 6
+graph 1
+graph 2
+graph 3
+graph 4
+graph 5
+graph 6
+connections 0
+connections 5
+connections 10
+help
+help list
+help copychain
+usage
+exit

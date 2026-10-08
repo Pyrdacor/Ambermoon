@@ -1,0 +1,6 @@
+{
+	"name": "Ambermoon.Data.Text.Patching",
+	"type": "library",
+	"sources": ["src"],
+	"dependencies": ["../Ambermoon.Common", "../Ambermoon.Data.Common", "../Ambermoon.Data.Legacy"]
+}

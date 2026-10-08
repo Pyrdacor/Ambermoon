@@ -1,0 +1,3 @@
+# the programs (build.sh, build.ps1, cshiftc build <tool>) and the downloaded compiler (get-cshift.sh)
+bin/
+.cshift/

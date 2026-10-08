@@ -2,6 +2,10 @@
 
 Pyrdacor's suite of tools for editing Ambermoon data files.
 
+> **Deprecated:** the command line tools of this folder are replaced by the [new Ambermoon Tools](../Tools/README.md):
+> the same tools as native programs written in CShift (no .NET needed), with the bugs of these fixed. The tools with a
+> user interface are still here.
+
 ## Use it
 
 The most recent version can be found here:

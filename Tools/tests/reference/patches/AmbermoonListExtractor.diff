@@ -1,0 +1,14 @@
+diff -ru -x obj -x out -x bin -x '*.csproj' AmbermoonListExtractor/Program.cs AmbermoonListExtractor/Program.cs
+--- AmbermoonListExtractor/Program.cs	2026-10-06 17:50:39.491508804 +0000
++++ AmbermoonListExtractor/Program.cs	2026-10-07 03:36:33.368728251 +0000
+@@ -141,8 +141,8 @@
+                 AddColumn("Spell Types", GetFlagsText(partyMember.SpellMastery, 1));
+                 AddColumn("Languages", GetFlagsText(partyMember.SpokenLanguages, 1));
+ 
+-                AddColumn("Occupied hands", partyMember.NumberOfFreeHands);
+-                AddColumn("Occupied fingers", partyMember.NumberOfFreeFingers);
++                AddColumn("Occupied hands", partyMember.NumberOfOccupiedHands);
++                AddColumn("Occupied fingers", partyMember.NumberOfOccupiedFingers);
+ 
+                 AddColumn("APR", partyMember.AttacksPerRound);
+                 AddColumn("Increase Levels", partyMember.AttacksPerRoundIncreaseLevels);

@@ -1,0 +1,6 @@
+{
+	"name": "Ambermoon.Data.Common",
+	"type": "library",
+	"sources": ["src"],
+	"dependencies": ["../Ambermoon.Common"]
+}

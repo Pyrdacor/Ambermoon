@@ -1,0 +1,6 @@
+# The cases of the AmbermoonDiskExtract test: a name and the arguments (@ADF@ is the folder adf/, @OUT@ the output
+# folder in the work folder).
+encoded     @ADF@ @OUT@
+raw         -u @ADF@ @OUT@
+usage       -x @ADF@ @OUT@
+none        @OUT@ @OUT@
