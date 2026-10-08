@@ -12,28 +12,18 @@ I will provide some helpful tools too.
 
 ### Full versions
 
-**Note:** The downloads also contain the save folders so if you just overwrite your own folders you might lose your savegames. So either back them up or don't copy folders Save.01 to Save.10 over.
-
-**Note:** Some fixes will only work for new games as they are bound to the savegame. This includes all non-text party member fixes, chest fixes and merchant fixes.
-
-**Note:** From english 1.10 and german 1.09 onwards, the versions will also work with 68000 CPUs (A500 etc).
-
-**Note:** From english 1.14 and german 1.13 onwards, the two main executables have been merged and all ingame texts, item data and button graphics have been moved to external data files. Moreover the language-dependent dictionary files "Dictionary.english" and "Dictionary.german" now are called "Dict.amb" in both languages. The file "Monster_char_data.amb" is now called "Monster_char.amb". The installer won't work from 1.14 to 1.16 but was fixed in 1.17. However booting directly from the floppies to play won't work from 1.14 to 1.18 but was fixed in 1.19! Since 1.19, french, polish and czech releases are also provided.
-
-**Note:** The complete source code for the Amiga is now available [here](https://github.com/Pyrdacor/Ambermoon/blob/master/AmbermoonSource). It was based on Jurie Horneman's source release and my own disassembled sources. It contains everything which the main executable AM2_CPU contained and also the parts which were originally in AM2_BLIT. It can be compiled with vasm to the AM2_CPU and will be the base for future bugfixes or extensions.
-
-| Version | Language | Type            | Download                                                                                                                                                                                                                                                                                                                               | Release date |
-| ------- | -------- | --------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------ |
-| 1.20    | English  | Extracted Files | [zip](https://github.com/Pyrdacor/Ambermoon/raw/master/Disks/English/ambermoon_english_1.20_extracted.zip) [lha](https://github.com/Pyrdacor/Ambermoon/raw/master/Disks/English/ambermoon_english_1.20_extracted.lha) [tar.gz](https://github.com/Pyrdacor/Ambermoon/raw/master/Disks/English/ambermoon_english_1.20_extracted.tar.gz) | 23-11-2025   |
-| 1.20    | English  | ADF Disk Images | [zip](https://github.com/Pyrdacor/Ambermoon/raw/master/Disks/English/ambermoon_english_1.20_adf.zip) [lha](https://github.com/Pyrdacor/Ambermoon/raw/master/Disks/English/ambermoon_english_1.20_adf.lha) [tar.gz](https://github.com/Pyrdacor/Ambermoon/raw/master/Disks/English/ambermoon_english_1.20_adf.tar.gz)                   | 23-11-2025   |
-| 1.20    | German   | Extracted Files | [zip](https://github.com/Pyrdacor/Ambermoon/raw/master/Disks/German/ambermoon_german_1.20_extracted.zip) [lha](https://github.com/Pyrdacor/Ambermoon/raw/master/Disks/German/ambermoon_german_1.20_extracted.lha) [tar.gz](https://github.com/Pyrdacor/Ambermoon/raw/master/Disks/German/ambermoon_german_1.20_extracted.tar.gz)       | 23-11-2025   |
-| 1.20    | German   | ADF Disk Images | [zip](https://github.com/Pyrdacor/Ambermoon/raw/master/Disks/German/ambermoon_german_1.20_adf.zip) [lha](https://github.com/Pyrdacor/Ambermoon/raw/master/Disks/German/ambermoon_german_1.20_adf.lha) [tar.gz](https://github.com/Pyrdacor/Ambermoon/raw/master/Disks/German/ambermoon_german_1.20_adf.tar.gz)                         | 23-11-2025   |
-| 1.20    | French   | Extracted Files | [zip](https://github.com/Pyrdacor/Ambermoon/raw/master/Disks/French/ambermoon_french_1.20_extracted.zip) [lha](https://github.com/Pyrdacor/Ambermoon/raw/master/Disks/French/ambermoon_french_1.20_extracted.lha) [tar.gz](https://github.com/Pyrdacor/Ambermoon/raw/master/Disks/French/ambermoon_french_1.20_extracted.tar.gz)       | 23-11-2025   |
-| 1.20    | French   | ADF Disk Images | [zip](https://github.com/Pyrdacor/Ambermoon/raw/master/Disks/French/ambermoon_french_1.20_adf.zip) [lha](https://github.com/Pyrdacor/Ambermoon/raw/master/Disks/French/ambermoon_french_1.20_adf.lha) [tar.gz](https://github.com/Pyrdacor/Ambermoon/raw/master/Disks/French/ambermoon_french_1.20_adf.tar.gz)                         | 23-11-2025   |
-| 1.20    | Czech    | Extracted Files | [zip](https://github.com/Pyrdacor/Ambermoon/raw/master/Disks/Czech/ambermoon_czech_1.20_extracted.zip) [lha](https://github.com/Pyrdacor/Ambermoon/raw/master/Disks/Czech/ambermoon_czech_1.20_extracted.lha) [tar.gz](https://github.com/Pyrdacor/Ambermoon/raw/master/Disks/Czech/ambermoon_czech_1.20_extracted.tar.gz)             | 23-11-2025   |
-| 1.20    | Czech    | ADF Disk Images | [zip](https://github.com/Pyrdacor/Ambermoon/raw/master/Disks/Czech/ambermoon_czech_1.20_adf.zip) [lha](https://github.com/Pyrdacor/Ambermoon/raw/master/Disks/Czech/ambermoon_czech_1.20_adf.lha) [tar.gz](https://github.com/Pyrdacor/Ambermoon/raw/master/Disks/Czech/ambermoon_czech_1.20_adf.tar.gz)                               | 23-11-2025   |
-| 1.20    | Polish   | Extracted Files | [zip](https://github.com/Pyrdacor/Ambermoon/raw/master/Disks/Polish/ambermoon_polish_1.20_extracted.zip) [lha](https://github.com/Pyrdacor/Ambermoon/raw/master/Disks/Polish/ambermoon_polish_1.20_extracted.lha) [tar.gz](https://github.com/Pyrdacor/Ambermoon/raw/master/Disks/Polish/ambermoon_polish_1.20_extracted.tar.gz)       | 23-11-2025   |
-| 1.20    | Polish   | ADF Disk Images | [zip](https://github.com/Pyrdacor/Ambermoon/raw/master/Disks/Polish/ambermoon_polish_1.20_adf.zip) [lha](https://github.com/Pyrdacor/Ambermoon/raw/master/Disks/Polish/ambermoon_polish_1.20_adf.lha) [tar.gz](https://github.com/Pyrdacor/Ambermoon/raw/master/Disks/Polish/ambermoon_polish_1.20_adf.tar.gz)                         | 23-11-2025   |
+| Version | Language | Type            | Download                                                                                                                                                                                                                                                                                                                                           | Release date |
+| ------- | -------- | --------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------ |
+| 1.21    | English  | Extracted Files | [zip](https://github.com/Pyrdacor/Ambermoon/releases/download/game-v1.21/ambermoon_english_1.21_extracted.zip) [lha](https://github.com/Pyrdacor/Ambermoon/releases/download/game-v1.21/ambermoon_english_1.21_extracted.lha) [tar.gz](https://github.com/Pyrdacor/Ambermoon/releases/download/game-v1.21/ambermoon_english_1.21_extracted.tar.gz) | 08-10-2026   |
+| 1.21    | English  | ADF Disk Images | [zip](https://github.com/Pyrdacor/Ambermoon/releases/download/game-v1.21/ambermoon_english_1.21_adf.zip) [lha](https://github.com/Pyrdacor/Ambermoon/releases/download/game-v1.21/ambermoon_english_1.21_adf.lha) [tar.gz](https://github.com/Pyrdacor/Ambermoon/releases/download/game-v1.21/ambermoon_english_1.21_adf.tar.gz)                   | 08-10-2026   |
+| 1.21    | German   | Extracted Files | [zip](https://github.com/Pyrdacor/Ambermoon/releases/download/game-v1.21/ambermoon_german_1.21_extracted.zip) [lha](https://github.com/Pyrdacor/Ambermoon/releases/download/game-v1.21/ambermoon_german_1.21_extracted.lha) [tar.gz](https://github.com/Pyrdacor/Ambermoon/releases/download/game-v1.21/ambermoon_german_1.21_extracted.tar.gz)    | 08-10-2026   |
+| 1.21    | German   | ADF Disk Images | [zip](https://github.com/Pyrdacor/Ambermoon/releases/download/game-v1.21/ambermoon_german_1.21_adf.zip) [lha](https://github.com/Pyrdacor/Ambermoon/releases/download/game-v1.21/ambermoon_german_1.21_adf.lha) [tar.gz](https://github.com/Pyrdacor/Ambermoon/releases/download/game-v1.21/ambermoon_german_1.21_adf.tar.gz)                      | 08-10-2026   |
+| 1.21    | French   | Extracted Files | [zip](https://github.com/Pyrdacor/Ambermoon/releases/download/game-v1.21/ambermoon_french_1.21_extracted.zip) [lha](https://github.com/Pyrdacor/Ambermoon/releases/download/game-v1.21/ambermoon_french_1.21_extracted.lha) [tar.gz](https://github.com/Pyrdacor/Ambermoon/releases/download/game-v1.21/ambermoon_french_1.21_extracted.tar.gz)    | 08-10-2026   |
+| 1.21    | French   | ADF Disk Images | [zip](https://github.com/Pyrdacor/Ambermoon/releases/download/game-v1.21/ambermoon_french_1.21_adf.zip) [lha](https://github.com/Pyrdacor/Ambermoon/releases/download/game-v1.21/ambermoon_french_1.21_adf.lha) [tar.gz](https://github.com/Pyrdacor/Ambermoon/releases/download/game-v1.21/ambermoon_french_1.21_adf.tar.gz)                      | 08-10-2026   |
+| 1.21    | Czech    | Extracted Files | [zip](https://github.com/Pyrdacor/Ambermoon/releases/download/game-v1.21/ambermoon_czech_1.21_extracted.zip) [lha](https://github.com/Pyrdacor/Ambermoon/releases/download/game-v1.21/ambermoon_czech_1.21_extracted.lha) [tar.gz](https://github.com/Pyrdacor/Ambermoon/releases/download/game-v1.21/ambermoon_czech_1.21_extracted.tar.gz)       | 08-10-2026   |
+| 1.21    | Czech    | ADF Disk Images | [zip](https://github.com/Pyrdacor/Ambermoon/releases/download/game-v1.21/ambermoon_czech_1.21_adf.zip) [lha](https://github.com/Pyrdacor/Ambermoon/releases/download/game-v1.21/ambermoon_czech_1.21_adf.lha) [tar.gz](https://github.com/Pyrdacor/Ambermoon/releases/download/game-v1.21/ambermoon_czech_1.21_adf.tar.gz)                         | 08-10-2026   |
+| 1.21    | Polish   | Extracted Files | [zip](https://github.com/Pyrdacor/Ambermoon/releases/download/game-v1.21/ambermoon_polish_1.21_extracted.zip) [lha](https://github.com/Pyrdacor/Ambermoon/releases/download/game-v1.21/ambermoon_polish_1.21_extracted.lha) [tar.gz](https://github.com/Pyrdacor/Ambermoon/releases/download/game-v1.21/ambermoon_polish_1.21_extracted.tar.gz)    | 08-10-2026   |
+| 1.21    | Polish   | ADF Disk Images | [zip](https://github.com/Pyrdacor/Ambermoon/releases/download/game-v1.21/ambermoon_polish_1.21_adf.zip) [lha](https://github.com/Pyrdacor/Ambermoon/releases/download/game-v1.21/ambermoon_polish_1.21_adf.lha) [tar.gz](https://github.com/Pyrdacor/Ambermoon/releases/download/game-v1.21/ambermoon_polish_1.21_adf.tar.gz)                      | 08-10-2026   |
 
 ### WHDLoad
 
@@ -45,6 +35,16 @@ Thanks to Wepl we now have a working WHDLoad slave for Ambermoon 1.16 and above.
 | 1.19    | German   | [link](https://github.com/Pyrdacor/Ambermoon/raw/master/Disks/German/Ambermoon-1_19-German-WHDLoad.lha)   | 23-12-2023   |
 | 1.19    | French   | [link](https://github.com/Pyrdacor/Ambermoon/raw/master/Disks/French/Ambermoon-1_19-French-WHDLoad.lha)   | 23-12-2023   |
 
+**Note:** The downloads also contain the save folders so if you just overwrite your own folders you might lose your savegames. So either back them up or don't copy folders Save.01 to Save.10 over.
+
+**Note:** Some fixes will only work for new games as they are bound to the savegame. This includes all non-text party member fixes, chest fixes and merchant fixes.
+
+**Note:** From english 1.10 and german 1.09 onwards, the versions will also work with 68000 CPUs (A500 etc).
+
+**Note:** From english 1.14 and german 1.13 onwards, the two main executables have been merged and all ingame texts, item data and button graphics have been moved to external data files. Moreover the language-dependent dictionary files "Dictionary.english" and "Dictionary.german" now are called "Dict.amb" in both languages. The file "Monster_char_data.amb" is now called "Monster_char.amb". The installer won't work from 1.14 to 1.16 but was fixed in 1.17. However booting directly from the floppies to play won't work from 1.14 to 1.18 but was fixed in 1.19! Since 1.19, french, polish and czech releases are also provided.
+
+**Note:** The complete source code for the Amiga is now available [here](https://github.com/Pyrdacor/Ambermoon/blob/master/AmbermoonSource). It was based on Jurie Horneman's source release and my own disassembled sources. It contains everything which the main executable AM2_CPU contained and also the parts which were originally in AM2_BLIT. It can be compiled with vasm to the AM2_CPU and will be the base for future bugfixes or extensions.
+
 ### Changelog
 
 Over all the years Alex Holland has carefully tracked all bug reports and fixes in an [excel sheet](https://docs.google.com/spreadsheets/d/1as5W8gibm-MTb9VEqpkfgtwWviqjQx96A3NmcvzX98A). Kudos to him!
@@ -54,22 +54,23 @@ Beside that all releases contain a readme.txt with a summary of all the changes 
 
 ## Tool releases
 
-| Version | Release date | Windows 64bit                                                                                        | Linux 64bit                                                                                           | Windows 32bit                                                                                             |
-| ------- | ------------ | ---------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------- |
-| 1.17    | 14-06-2023   | [Download](https://github.com/Pyrdacor/Ambermoon/releases/download/v1.17/AmbermoonTools-Windows.zip) | [Download](https://github.com/Pyrdacor/Ambermoon/releases/download/v1.17/AmbermoonTools-Linux.tar.gz) | [Download](https://github.com/Pyrdacor/Ambermoon/releases/download/v1.17/AmbermoonTools-Windows32Bit.zip) |
+| Version | Release date | Windows 64bit | Linux 64bit | Amiga | Windows 32bit |
+| ------- | ------------ | ------------- | ----------- | ----- | ------------- |
+| 1.18    | 08-10-2026   | [Download](https://github.com/Pyrdacor/Ambermoon/releases/download/tools-v1.18/AmbermoonTools-1.18-Windows.zip) | [Download](https://github.com/Pyrdacor/Ambermoon/releases/download/tools-v1.18/AmbermoonTools-1.18-Linux.tar.gz) | [Download](https://github.com/Pyrdacor/Ambermoon/releases/download/tools-v1.18/AmbermoonTools-1.18-Amiga.lha) | - |
+| 1.17    | 14-06-2023   | [Download](https://github.com/Pyrdacor/Ambermoon/releases/download/v1.17/AmbermoonTools-Windows.zip) | [Download](https://github.com/Pyrdacor/Ambermoon/releases/download/v1.17/AmbermoonTools-Linux.tar.gz) | - | [Download](https://github.com/Pyrdacor/Ambermoon/releases/download/v1.17/AmbermoonTools-Windows32Bit.zip) |
 
-This zip file contains:
+Since 1.18 the tools are native programs (written in CShift, see [Tools](Tools/README.md)), also for the Amiga (68000 and up). The archives contain:
 
 -   A tool to pack files into Ambermoon game data files or extract them (AmbermoonPack)
--   A tool to change monster values (AmbermoonMonsterEditor)
--   A tool to export and import texts from/into Ambermoon game data files (AmbermoonTextImport)
--   A tool to export and import all texts from/into Ambermoon game data files (AmbermoonTextManager) **use this now**
+-   A tool to export and import all texts from/into Ambermoon game data files (AmbermoonTextManager)
 -   A tool to extract ADF disk files (AmbermoonDiskExtract)
 -   A tool to view and edit map/NPC/partychar events (AmbermoonEventEditor)
--   A tool to vied and edit labyrinth data (AmbermoonLabdataEditor)
+-   A tool to view and edit labyrinth data (AmbermoonLabdataEditor)
 -   A tool to view, add and edit items (AmbermoonItemEditor)
 -   A tool to inspect 3D maps in a console window (Ambermoon3DMapViewer)
 -   A tool to create Ambermoon graphic files from PNGs and palettes (AmbermoonImageConverter)
+
+The 1.17 archives also contain AmbermoonMonsterEditor and AmbermoonTextImport.
 
 **Note:** Some tools are in beta state so use with care, save often and always backup your files!
 
