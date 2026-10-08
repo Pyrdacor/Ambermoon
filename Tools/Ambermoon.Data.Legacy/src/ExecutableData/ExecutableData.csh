@@ -85,6 +85,17 @@ Error<ExecutableData> _Create(List<Hunk> hunks, Optional<DataReader> textAmb, Op
         SkyGradients = new Graphic[9],
         DaytimePaletteReplacements = new Graphic[6]
     };
+    if (_Fill(ref data, hunks, textAmb, objectsAmb, buttonGraphics) is error e)
+        return error(e.Message);
+    return data;
+}
+
+// The body of _Create. It fills the data by reference and returns a small Error<void>: with the big
+// Error<ExecutableData> at each of its many returns, the stack frame was larger than 32 KB, which the m68k backend
+// (the Amiga builds of the tools) cannot address.
+Error<void> _Fill(ref ExecutableData data, List<Hunk> hunks, Optional<DataReader> textAmb, Optional<DataReader> objectsAmb,
+                  Optional<DataReader> buttonGraphics)
+{
     string invalid = "[Data] Invalid executable file.";
 
     int firstCode = -1;
@@ -97,7 +108,7 @@ Error<ExecutableData> _Create(List<Hunk> hunks, Optional<DataReader> textAmb, Op
     if (firstCode < 0 && textAmb is null)
     {
         data.DataInfoString = "Unknown data version";
-        return data;
+        return;
     }
 
     var codeReader = firstCode < 0 ? DataReader.FromData(new uint8[0]) : DataReader.FromData(hunks[firstCode].Data);
@@ -310,7 +321,7 @@ Error<ExecutableData> _Create(List<Hunk> hunks, Optional<DataReader> textAmb, Op
     }
 
     data.ItemManager = ItemManager.Create(items);
-    return data;
+    return;
 }
 
 
