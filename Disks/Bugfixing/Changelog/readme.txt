@@ -1,5 +1,49 @@
-Ambermoon German 1.20 by Pyrdacor (23-11-2025)
+Ambermoon German 1.21 by Pyrdacor (08-10-2026)
 ==============================================
+
+Changes in 1.21
+===============
+
+- Fixed a crash (Guru 8000 0003) on Amigas with a plain 68000 CPU like the
+  A500 or A600, e.g. when leaving grandfather's house. Some packed game files
+  have an odd size, which the 68000 could not handle when unpacking them.
+- Fixed a crash (Guru 8100 0005) when quitting the game or cancelling a
+  disk error requester. At the start, the game wrote 2 bytes behind the button
+  graphics, which damaged the memory list of the system.
+- Leaving a conversation without taking the offered items (e.g. Tolimar's
+  reward for the golden horseshoes) and talking to the person again no longer
+  messes up the screen or crashes the game.
+- The jump spell can no longer be used to jump over locked doors, places and
+  riddlemouths (e.g. into the hangar in the temple of the brotherhood).
+- The enchanter now uses the price per charge of each item instead of a fixed
+  price.
+- Alkem now gives a reward for returning his ring.
+- Amber in the mine of Dor Kiredon and in Ferrin's storage cellar: after taking
+  the first amber, the other spots are no longer empty.
+- Fixed walkable tiles:
+  - Curtains and windows in the trainer house in Spannenberg
+  - More wall decorations in several tilesets
+  - Beds and logs in the corridor map
+- The hard disk installer no longer complains about a missing liesmich.txt.
+- The program "Ambermoon" (the loader) was fixed:
+  - No more crash when quitting the game after starting it from the Workbench
+  - On OS 3.0+ the sprite resolution was set with a wrong pointer, which could
+    cause sprite errors during and after the game
+  - After an error message, the next disk requester of the system could
+    crash the computer
+  - Libraries, screen and window are checked now, and some memory leaks in
+    error cases are gone
+- For the nerds:
+  - The game program (AM2_CPU) is now built from source code: the original
+    source code of Jurie Horneman, extended with the missing parts (kernel,
+    3D renderer, music player) and all later fixes. See AmbermoonSource on
+    github.
+  - Random object animations in 3D maps used the value 4 instead of the map
+    width (bug of the original code).
+  - The memory manager could write an 11th memory block behind its table of
+    10 entries (when the CHIP memory was fragmented).
+  - The unused event 24 ("remove party member") works now. It was broken in
+    the original and is not used by any map yet.
 
 Changes in 1.20
 ===============

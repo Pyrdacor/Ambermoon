@@ -1,5 +1,54 @@
-Ambermoon German 1.20 by Pyrdacor (23-11-2025)
+Ambermoon German 1.21 by Pyrdacor (08-10-2026)
 ==============================================
+
+Änderungen in 1.21
+==================
+
+- Ein Absturz (Guru 8000 0003) auf Amigas mit einfachem 68000 wie dem A500
+  oder A600 wurde behoben, z.B. beim Verlassen von Großvaters Haus. Einige
+  gepackte Spieldateien haben eine ungerade Größe, mit der der 68000 beim
+  Entpacken nicht zurechtkam.
+- Ein Absturz (Guru 8100 0005) beim Beenden des Spiels oder beim Abbrechen
+  einer Disk-Fehlermeldung wurde behoben. Beim Start hat das Spiel 2 Bytes
+  hinter die Button-Grafiken geschrieben und so die Speicherliste des Systems
+  beschädigt.
+- Wenn man ein Gespräch verlässt, ohne die angebotenen Gegenstände zu nehmen
+  (z.B. Tolimars Belohnung für die goldenen Hufeisen), und die Person erneut
+  anspricht, gibt es keinen Grafikmüll oder Absturz mehr.
+- Mit dem Sprung-Zauber kann man nicht mehr über verschlossene Türen, Orte
+  und Rätselmünder springen (z.B. in den Hangar im Tempel der Bruderschaft).
+- Der Verzauberer nimmt nun den Preis pro Ladung des jeweiligen Gegenstands
+  statt eines festen Preises.
+- Alkem gibt nun eine Belohnung, wenn man ihm seinen Ring zurückbringt.
+- Bernstein in der Mine von Dor Kiredon und in Ferrins Vorratskeller: Nachdem
+  man den ersten Bernstein genommen hat, sind die anderen Stellen nicht mehr
+  leer.
+- Begehbare Tiles wurden behoben:
+  - Vorhänge und Fenster im Trainerhaus in Spannenberg
+  - Weitere Wanddekorationen in mehreren Tilesets
+  - Betten und Baumstämme in der Gang-Karte
+- Der Festplatten-Installer beschwert sich nicht mehr über eine fehlende
+  liesmich.txt.
+- Das Programm "Ambermoon" (der Loader) wurde korrigiert:
+  - Kein Absturz mehr beim Beenden, wenn das Spiel von der Workbench gestartet
+    wurde
+  - Unter OS 3.0+ wurde die Sprite-Auflösung mit einem falschen Zeiger
+    gesetzt, was zu Sprite-Fehlern während und nach dem Spiel führen konnte
+  - Nach einer Fehlermeldung konnte der nächste Disk-Requester des Systems
+    den Rechner abstürzen lassen
+  - Libraries, Screen und Fenster werden nun geprüft, und einige Speicherlecks
+    in Fehlerfällen sind behoben
+- Für die Nerds:
+  - Das Spielprogramm (AM2_CPU) wird nun aus Quellcode gebaut: dem originalen
+    Quellcode von Jurie Horneman, ergänzt um die fehlenden Teile (Kernel,
+    3D-Renderer, Musik-Player) und alle späteren Fixes. Siehe
+    AmbermoonSource auf github.
+  - Zufällige Objekt-Animationen in 3D-Karten nutzten den Wert 4 statt der
+    Kartenbreite (Fehler im Original-Code).
+  - Die Speicherverwaltung konnte einen 11. Speicherblock hinter ihre Tabelle
+    mit 10 Einträgen schreiben (wenn der CHIP-Speicher zerstückelt war).
+  - Das ungenutzte Event 24 ("Partymitglied entfernen") funktioniert nun. Es
+    war im Original kaputt und wird noch von keiner Karte benutzt.
 
 Änderungen in 1.20
 ==================
