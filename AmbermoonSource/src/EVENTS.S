@@ -3209,6 +3209,8 @@ Remove_member:
 	move.b	-1(a0,d7.w),d6
 	Get	d6,a0
 	lea.l	Char_inventory(a0),a0
+	subq.l	#8,sp			; FIX: Temporary object packet
+	move.l	sp,a1
 ; ---------- Dump body items ----------------------
 	moveq.l	#0,d0			; Get body chest number
 	move.b	Event_b2(a5),d0
@@ -3221,16 +3223,20 @@ Remove_member:
 	moveq.l	#9-1,d1
 .Loop2:	tst.w	Object_index(a0)		; Anything there ?
 	beq.s	.Next2
-	move.b	d4,d0			; Yes! Put in chest
+	Copy_packet a0,a1			; FIX: Remove the item from the
+	move.b	d6,d0			;  character first (Auto_move_to_INV
+	jsr	Remove_item		;  destroys the source packet, so
+	exg	a0,a1			;  Remove_item used Object_index 0)
+	move.b	d4,d0			; Put in chest
 	jsr	Auto_move_to_INV
-	move.b	d6,d0
-	jsr	Remove_item
+	exg	a0,a1
 .Next2:	addq.w	#1,d2			; Next body item
 	addq.w	#Object_packet_size,a0
-	dbra	d7,.Loop2
+	dbra	d1,.Loop2			; FIX: Was dbra d7 (the member number)
 	move.l	a0,-(sp)
 	Get	d4,a0			; Save chest
 	move.w	d5,d0
+	moveq.l	#Chest_data_file,d1		; FIX: d1 was not set
 	jsr	Save_subfile
 	move.b	d4,d0			; Free memory
 	jsr	Free_pointer
@@ -3244,26 +3250,32 @@ Remove_member:
 	moveq.l	#Chest_data_file,d1		; Load chest data
 	jsr	Load_subfile
 	move.b	d0,d4
-	moveq.l	#1,d2			; Dump backpack items
+	moveq.l	#9+1,d2			; Dump backpack items
+					; FIX: Was 1 (backpack slots are 10...33)
 	moveq.l	#Items_per_char-1,d1
 .Loop3:	tst.w	Object_index(a0)		; Anything there ?
 	beq.s	.Next3
-	move.b	d4,d0			; Yes! Put in chest
-	jsr	Auto_move_to_INV
+	Copy_packet a0,a1			; FIX: See above
 	move.b	d6,d0
 	moveq.l	#0,d3
 	move.b	Quantity(a0),d3
 	jsr	Remove_item
+	exg	a0,a1
+	move.b	d4,d0			; Put in chest
+	jsr	Auto_move_to_INV
+	exg	a0,a1
 .Next3:	addq.w	#1,d2			; Next backpack item
 	addq.w	#Object_packet_size,a0
-	dbra	d7,.Loop3
+	dbra	d1,.Loop3			; FIX: Was dbra d7 (the member number)
 	Get	d4,a0			; Save chest
 	move.w	d5,d0
+	moveq.l	#Chest_data_file,d1		; FIX: d1 was not set
 	jsr	Save_subfile
 	move.b	d4,d0			; Free memory
 	jsr	Free_pointer
 	jsr	Free_memory	
 	Free	d6
+	addq.l	#8,sp			; FIX: Remove temporary packet
 ; ---------- Remove party member ------------------
 	jsr	Remove_party_member		; Goodbye !
 .Exit:	rts
