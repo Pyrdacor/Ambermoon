@@ -99,7 +99,7 @@ jobs:
               Copy-Item -Destination releases
           Get-ChildItem releases | Format-Table Name, Length
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v5
         with:
           name: ambermoon-${{ steps.version.outputs.version }}
           path: releases/*
@@ -111,14 +111,16 @@ jobs:
           VERSION: ${{ steps.version.outputs.version }}
         run: |
           $tag = "game-v$env:VERSION"
-          # a new run replaces the draft of the same version (a published release is left alone)
-          $existing = gh release view $tag --json isDraft 2>$null | ConvertFrom-Json
-          if ($existing -and -not $existing.isDraft) {
+          # the releases with this tag (a draft has no tag yet: it is found by the tag it will get)
+          $releases = gh api "repos/${{ github.repository }}/releases?per_page=100" | ConvertFrom-Json |
+              Where-Object { $_.tag_name -eq $tag }
+          if ($releases | Where-Object { -not $_.draft }) {
             Write-Host "::warning::The release $tag is published already: the archives are only artifacts of this run"
             exit 0
           }
-          if ($existing) {
-            gh release delete $tag --yes --cleanup-tag
+          # a new run replaces the draft of the same version
+          foreach ($draft in $releases) {
+            gh api -X DELETE "repos/${{ github.repository }}/releases/$($draft.id)" | Out-Null
           }
           gh release create $tag (Get-ChildItem releases).FullName --draft --target "${{ github.sha }}" `
             --title "Ambermoon $env:VERSION" `
