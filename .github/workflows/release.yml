@@ -1,0 +1,125 @@
+# Builds the releases of Ambermoon in all languages with AmbermoonReleaseCreator (Tools/).
+#
+# Trigger: a push to a branch named release/vX.XX (e.g. release/v1.21 -> version 1.21), or by hand (Actions -> release
+# -> Run workflow) with a version.
+#
+# The tools are built with the latest release of CShift (Tools/build.ps1). German comes first: it is made of the previous
+# German release in Disks/German and the files in Disks/Bugfixing/German, and it is the base of the other languages
+# (Disks/Bugfixing/<language>, Translations/<language>). The archives (ADF images and the extracted files as zip, tar.gz
+# and LHA) are the artifacts of the run, and they are attached to a draft release "Ambermoon X.XX" (tag game-vX.XX),
+# which is published by hand. SOURCE_DATE_EPOCH is the time of the commit: the same commit gives the same release.
+
+name: release
+
+on:
+  push:
+    branches:
+      - "release/v*"
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "The version of the release (X.XX)"
+        required: true
+
+permissions:
+  contents: write # the draft release
+
+# A newer push to the same branch replaces a run that is still running.
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  release:
+    name: Releases of all languages
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Determine version
+        id: version
+        shell: pwsh
+        run: |
+          $version = "${{ github.event.inputs.version }}"
+          if (-not $version) {
+            if ("${{ github.ref_name }}" -notmatch '^release/v([1-9]\.[0-9]{2})$') {
+              Write-Error "'${{ github.ref_name }}' is not a release branch. Expected release/vX.XX, e.g. release/v1.21"
+              exit 1
+            }
+            $version = $Matches[1]
+          }
+          if ($version -notmatch '^[1-9]\.[0-9]{2}$') {
+            Write-Error "The version '$version' does not have the form X.XX"
+            exit 1
+          }
+          "version=$version" >> $env:GITHUB_OUTPUT
+          Write-Host "Version: $version"
+
+      - name: Build the tools
+        shell: pwsh
+        run: ./Tools/build.ps1
+
+      - name: Create the releases
+        shell: pwsh
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          $env:AMBERMOON_TOOLS = Join-Path $PWD "Tools\bin"
+          $env:SOURCE_DATE_EPOCH = git log -1 --format=%ct
+          # the languages with texts in Disks/Bugfixing, German first
+          $languages = @("German") + (Get-ChildItem Disks/Bugfixing -Directory |
+              Where-Object { $_.Name -ne "German" -and (Test-Path (Join-Path $_.FullName "AllTexts")) } |
+              ForEach-Object { $_.Name } | Sort-Object)
+          $failed = @()
+          foreach ($language in $languages) {
+            Write-Host "::group::$language $env:VERSION"
+            $log = "release-$language.log"
+            & Tools/bin/AmbermoonReleaseCreator.exe $language $env:VERSION 2>&1 | ForEach-Object { "$_" } | Tee-Object -FilePath $log
+            $code = $LASTEXITCODE
+            Write-Host "::endgroup::"
+            # a tool that fails does not stop the release creator (as in the original): its message fails the release
+            if ($code -ne 0 -or (Select-String -Path $log -Pattern "failed with exit code" -Quiet)) {
+              Write-Host "::error::The release of $language failed (see the log of the step)"
+              $failed += $language
+            }
+          }
+          if ($failed.Count -gt 0) {
+            Write-Error "failed: $($failed -join ', ')"
+            exit 1
+          }
+
+      - name: Collect the archives
+        shell: pwsh
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          New-Item -ItemType Directory -Force releases | Out-Null
+          Get-ChildItem Disks -Recurse -File -Filter "ambermoon_*_$($env:VERSION)_*" |
+              Where-Object { $_.Extension -in ".zip", ".gz", ".lha" -and $_.LastWriteTime -gt (Get-Date).AddHours(-6) } |
+              Copy-Item -Destination releases
+          Get-ChildItem releases | Format-Table Name, Length
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ambermoon-${{ steps.version.outputs.version }}
+          path: releases/*
+
+      - name: Draft release
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          $tag = "game-v$env:VERSION"
+          # a new run replaces the draft of the same version (a published release is left alone)
+          $existing = gh release view $tag --json isDraft 2>$null | ConvertFrom-Json
+          if ($existing -and -not $existing.isDraft) {
+            Write-Host "::warning::The release $tag is published already: the archives are only artifacts of this run"
+            exit 0
+          }
+          if ($existing) {
+            gh release delete $tag --yes --cleanup-tag
+          }
+          gh release create $tag (Get-ChildItem releases).FullName --draft --target "${{ github.sha }}" `
+            --title "Ambermoon $env:VERSION" `
+            --notes "The releases of Ambermoon $env:VERSION in all languages: ADF disk images and the extracted files, as zip, tar.gz and LHA archives. Made by AmbermoonReleaseCreator (Tools/) from ${{ github.sha }}."

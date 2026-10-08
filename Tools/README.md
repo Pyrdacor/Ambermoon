@@ -35,6 +35,18 @@ A single tool: `cshiftc build AmbermoonPack` (the program is then `AmbermoonPack
 the original tools (`tests/expected.txt`); `tests/reference/` has the scripts that compared the ports with the
 originals on the data of the game.
 
+## Releases of the game (GitHub Actions)
+
+A push to a branch named `release/vX.XX` (e.g. `release/v1.21`) builds the releases of version X.XX in all languages
+([.github/workflows/release.yml](../.github/workflows/release.yml)), on Windows like the original release creator:
+the tools are built with the latest release of CShift, then AmbermoonReleaseCreator makes the German release (of the
+previous German release in `Disks/German` and the files in `Disks/Bugfixing/German`) and with it the releases of the
+other languages that have texts in `Disks/Bugfixing` (Czech, English, French, Polish). The archives are the artifacts
+of the run and are attached to a draft release *Ambermoon X.XX* (tag `game-vX.XX`; the tags `vX.XX` belong to the
+releases of the tools), which is published by hand; they are not committed. The workflow can also be started by hand
+(*Actions* → *release* → *Run workflow*) with a version, once it is on the default branch. The times in the releases
+are the time of the commit (`SOURCE_DATE_EPOCH`), so the same commit gives the same release.
+
 ## Use it
 
 Most tools have a help: run them with `--help`. The command lines are those of the originals (see *Usage* below).
