@@ -1,0 +1,6 @@
+{
+	"name": "AmbermoonBitmaps",
+	"type": "library",
+	"sources": ["src"],
+	"dependencies": ["../Ambermoon.Common", "../Ambermoon.Data.Common"]
+}

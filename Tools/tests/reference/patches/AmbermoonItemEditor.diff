@@ -1,0 +1,71 @@
+diff -ru -x obj -x out -x bin -x '*.csproj' AmbermoonItemEditor/Executable.cs AmbermoonItemEditor/Executable.cs
+--- AmbermoonItemEditor/Executable.cs	2026-10-06 17:50:39.490633918 +0000
++++ AmbermoonItemEditor/Executable.cs	2026-10-07 07:45:00.322552375 +0000
+@@ -29,7 +29,7 @@
+             // There is an issue with the deploder and AM2_BLIT where the second code
+             // hunk is treated as a data hunk instead. Fix this here automatically.
+             if (hunks[5].Type == HunkType.Data)
+-                hunks[5] = new Hunk(HunkType.Code, hunks[5].MemoryFlags, ((Hunk)hunks[5]).Data, hunks[5].Size / 4);
++                hunks[5] = new Hunk(HunkType.Code, hunks[5].MemoryFlags, ((Hunk)hunks[5]).Data); // PATCH: Size is in dwords already
+ 
+             var itemManager = new ExecutableData(hunks).ItemManager;
+             var items = new List<Item>(itemManager.Items);
+@@ -120,6 +120,7 @@
+             var executableWriter = new DataWriter();
+             Write(executableWriter, hunks);
+             executableWriter.CopyTo(stream);
++            lastItemAmount = items.Count; // PATCH: the data hunk has the items now
+         }
+     }
+ }
+diff -ru -x obj -x out -x bin -x '*.csproj' AmbermoonItemEditor/ItemManager.cs AmbermoonItemEditor/ItemManager.cs
+--- AmbermoonItemEditor/ItemManager.cs	2026-10-06 17:50:39.490633918 +0000
++++ AmbermoonItemEditor/ItemManager.cs	2026-10-07 07:43:08.299792465 +0000
+@@ -65,7 +65,7 @@
+                 return new List<Item>();
+ 
+             partialName = partialName.ToLower();
+-            return items.Where(item => item.Name.ToLower().Contains(partialName)).ToList();
++            return items.Where(item => (item.Name ?? "").ToLower().Contains(partialName)).ToList(); // PATCH: items without a name
+         }
+ 
+         public abstract void Save(System.IO.Stream stream);
+diff -ru -x obj -x out -x bin -x '*.csproj' AmbermoonItemEditor/Program.cs AmbermoonItemEditor/Program.cs
+--- AmbermoonItemEditor/Program.cs	2026-10-06 17:50:39.490633918 +0000
++++ AmbermoonItemEditor/Program.cs	2026-10-07 04:31:55.893620294 +0000
+@@ -409,9 +409,11 @@
+  
+                 foreach (var value in ItemDescription.ValueDescriptions)
+                 {
++                    int valueStart = dataIndex; // PATCH: write where the value was read
+                     if (value.Required)
+                     {
+                         int? currentValue = adding ? (int?)null : Read(value);
++                        dataIndex = valueStart;
+                         string currentValueSuffix = currentValue == null ? "" : $" ({ currentValue})";
+                         int? input;
+ 
+@@ -443,6 +445,7 @@
+                     else
+                     {
+                         int? currentValue = adding ? value.DefaultValue : Read(value);
++                        dataIndex = valueStart;
+                         string currentValueSuffix = $" ({ currentValue})";
+                         int? input;
+ 
+@@ -456,13 +459,13 @@
+                             input = ReadInt(value.ShowAsHex) ?? currentValue;
+                         }
+ 
+-                        if (input < 0 || input > 0xffff || !value.Check((ushort)input))
++                        if ((value.Type == ValueType.SByte ? input < -128 : input < 0) || input > 0xffff || !value.Check(unchecked((ushort)input.Value))) // PATCH: negative signed bytes
+                         {
+                             Console.WriteLine($"Invalid value given. Using default: {value.DefaultValueText}");
+                             input = value.DefaultValue;
+                         }
+ 
+-                        Write(value, (ushort)input);
++                        Write(value, unchecked((ushort)input.Value));
+                     }
+                 }
+ 

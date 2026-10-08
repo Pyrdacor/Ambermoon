@@ -1,0 +1,7 @@
+{
+	"name": "HexValueChanger",
+	"sources": ["src"],
+	"output": "bin/HexValueChanger",
+	"optimize": 2,
+	"dependencies": ["../Ambermoon.Common"]
+}

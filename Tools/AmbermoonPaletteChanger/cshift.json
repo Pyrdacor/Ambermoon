@@ -1,0 +1,7 @@
+{
+	"name": "AmbermoonPaletteChanger",
+	"sources": ["src"],
+	"output": "bin/AmbermoonPaletteChanger",
+	"optimize": 2,
+	"dependencies": ["../Ambermoon.Common", "../Ambermoon.Data.Common", "../AmbermoonBitmaps"]
+}

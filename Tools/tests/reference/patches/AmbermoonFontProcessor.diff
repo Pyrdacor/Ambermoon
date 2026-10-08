@@ -1,0 +1,35 @@
+--- AmbermoonFontProcessor/Program.cs	2026-10-07 20:40:49.516617800 +0200
++++ AmbermoonFontProcessor/Program.cs	2026-10-07 20:40:49.905314800 +0200
+@@ -173,7 +173,7 @@
+ RenderGlyphs(ExtractGlyphDataFromBitmap(RenderGlyphs(largeGlyphData, true, 22), true, 22), true, 22)
+     .Save(@"D:\Projects\AmbermoonInternalTools\AmbermoonExtroPatcher\LargeGlyphsAgain.png", ImageFormat.Png);*/
+ 
+-//GlyphTool.Main(args);
++GlyphTool.Main(args);
+ 
+ // This function creates the font file for Ambermoon Extro texts.
+ // TODO: Currently it uses a fixed glyph mapping for Czech. This needs to be changed.
+@@ -388,6 +388,7 @@
+         {
+             Console.Write("Enter index of first free glyph slot: ");
+             string? input = Console.ReadLine();
++            if (input == null) return;
+             if (!int.TryParse(input, out freeIndex) || freeIndex < 0)
+             {
+                 Console.WriteLine("Invalid index.");
+@@ -418,6 +419,7 @@
+             switch (command)
+             {
+                 case "exit":
++                    Environment.Exit(0);
+                     return;
+ 
+                 case "copy":
+@@ -473,6 +475,7 @@
+         {
+             Console.Write("> ");
+             string? line = Console.ReadLine();
++            if (line == null) return;
+             if (string.IsNullOrWhiteSpace(line)) continue;
+ 
+             ProcessCommand(line);

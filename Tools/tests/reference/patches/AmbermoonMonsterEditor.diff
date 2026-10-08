@@ -1,0 +1,62 @@
+diff -ru -x obj -x out -x bin -x '*.csproj' AmbermoonMonsterEditor/Program.cs AmbermoonMonsterEditor/Program.cs
+--- AmbermoonMonsterEditor/Program.cs	2026-10-06 17:50:39.504684294 +0000
++++ AmbermoonMonsterEditor/Program.cs	2026-10-07 04:23:35.166514571 +0000
+@@ -40,6 +40,7 @@
+         }
+ 
+         static string DataPath = AppContext.BaseDirectory;
++        static string MonsterFileName = "Monster_char_data.amb";
+         static GameData gameData = null;
+         static GraphicProvider graphicProvider = null;
+         static GameData GameData
+@@ -48,11 +49,7 @@
+             {
+                 if (gameData == null)
+                 {
+-                    gameData = LoadGameData();
+-
+-                    var hunks = AmigaExecutable.Read(gameData.Files["AM2_CPU"].Files[1]);
+-                    graphicProvider = new GraphicProvider(gameData,
+-                        new Ambermoon.Data.Legacy.ExecutableData.ExecutableData(hunks), null);
++                    gameData = LoadGameData(); // PATCH: no GraphicProvider (unused)
+                 }
+ 
+                 return gameData;
+@@ -122,7 +119,7 @@
+ 
+             try
+             {
+-                return gameData == null ? null : gameData.Files["Monster_char_data.amb"].Files;
++                if (gameData == null) return null; if (gameData.Files.ContainsKey("Monster_char_data.amb")) return gameData.Files["Monster_char_data.amb"].Files; MonsterFileName = "Monster_char.amb"; return gameData.Files["Monster_char.amb"].Files;
+             }
+             catch
+             {
+@@ -143,7 +140,7 @@
+                 if (files == null)
+                     return null;
+ 
+-                return files.Select(f => new { i = f.Key, m = Monster.Load((uint)f.Key, monsterReader, f.Value) }).ToDictionary(x => x.i, x => x.m);
++                return files.Where(f => f.Value.Size != 0).Select(f => new { i = f.Key, m = Monster.Load((uint)f.Key, monsterReader, f.Value) }).ToDictionary(x => x.i, x => x.m);
+             }
+             catch
+             {
+@@ -165,7 +162,7 @@
+                 if (files == null)
+                     return null;
+ 
+-                return files.Select(f => new { i = f.Key, m = Monster.Load((uint)f.Key, monsterReader, f.Value) }).ToDictionary(x => x.i, x => x.m);
++                return files.Where(f => f.Value.Size != 0).Select(f => new { i = f.Key, m = Monster.Load((uint)f.Key, monsterReader, f.Value) }).ToDictionary(x => x.i, x => x.m);
+             }
+             catch
+             {
+@@ -492,8 +489,8 @@
+             var dataWriter = new DataWriter();
+             FileWriter.WriteContainer(dataWriter, files, FileType.AMBR);
+ 
+-            string monsterDataFile = Path.Combine(DataPath, "Monster_char_data.amb");
+-            string backupFile = Path.Combine(DataPath, "Monster_char_data.amb.backup");
++            string monsterDataFile = Path.Combine(DataPath, MonsterFileName);
++            string backupFile = Path.Combine(DataPath, MonsterFileName + ".backup");
+ 
+             if (!File.Exists(monsterDataFile))
+             {

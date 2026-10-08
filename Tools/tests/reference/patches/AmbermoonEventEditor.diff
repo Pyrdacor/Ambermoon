@@ -1,0 +1,208 @@
+diff -ru -x obj -x out -x bin -x '*.csproj' AmbermoonEventEditor/FlowChart.cs AmbermoonEventEditor/FlowChart.cs
+--- AmbermoonEventEditor/FlowChart.cs	2026-10-06 17:50:39.476069783 +0000
++++ AmbermoonEventEditor/FlowChart.cs	2026-10-06 18:55:09.905203855 +0000
+@@ -99,7 +99,7 @@
+ 
+                 Event EventFromIndex(uint index)
+                 {
+-                    return index == 0xffff ? null : events[(int)index];
++                    return index == 0xffff || index >= events.Count ? null : events[(int)index];
+                 }
+ 
+                 if (IsBranchEvent(@event))
+@@ -223,7 +223,10 @@
+             var branchRefSpans = BranchReferenceSources.Select(r => new Range(r.Key, r.Value)).ToList();
+ 
+             if (maxLabelSize < 10)
+-                throw new Exception("Space is not large enough to show the graph.");
++            {
++                printLine("Space is not large enough to show the graph.");
++                return;
++            }
+ 
+             void WriteLine(string text, int index, int backRefIndex = -1, int branchRefIndex = -1,
+                 RefDrawType backRefDrawType = RefDrawType.None, RefDrawType branchRefDrawType = RefDrawType.None)
+@@ -302,6 +305,8 @@
+                     int refIndex = branchRefSpans.IndexOf(branchRefSpan);
+                     var sourceNode = BranchRefForward[refIndex] ? branchRefSpan.GetLowIndexNode() : branchRefSpan.GetHighIndexNode();
+                     int otherBranchRefIndex = BranchReferenceSources.IndexOf(sourceNode);
++                    if (otherBranchRefIndex < 0)
++                        continue;
+ 
+                     if (otherBranchRefIndex < branchRef.Length)
+                     {
+diff -ru -x obj -x out -x bin -x '*.csproj' AmbermoonEventEditor/Program.cs AmbermoonEventEditor/Program.cs
+--- AmbermoonEventEditor/Program.cs	2026-10-06 17:50:39.476069783 +0000
++++ AmbermoonEventEditor/Program.cs	2026-10-06 18:57:35.638113408 +0000
+@@ -129,6 +129,7 @@
+                 DrawLine();
+                 Console.Write("Enter command: ");
+                 string command = Console.ReadLine();
++                if (command == null) System.Environment.Exit(0);
+                 DrawLine();
+ 
+                 ProcessCommand(command, eventList, events, map, out bool save, out string saveFileName, eventChainIndex =>
+@@ -418,7 +419,9 @@
+ 
+         static int? ReadInt(bool hex = false)
+         {
+-            string input = Console.ReadLine().ToLower();
++            string line = Console.ReadLine();
++            if (line == null) System.Environment.Exit(0);
++            string input = line.ToLower();
+ 
+             if (hex)
+             {
+@@ -525,7 +528,7 @@
+ 
+             if (listIndex != -1)
+             {
+-                bool canMoveSuccessorToBegin = true;
++                bool canMoveSuccessorToBegin = @event.Next != null;
+ 
+                 if (@event.Next != null)
+                 {
+@@ -563,7 +566,7 @@
+                         eventList.Remove(@event);
+                         var eventsToRemove = new List<Event>();
+                         var eventToRemove = @event;
+-                        while (eventToRemove != null)
++                        while (eventToRemove != null && !eventsToRemove.Contains(eventToRemove))
+                         {
+                             eventsToRemove.Add(eventToRemove);
+                             eventToRemove = eventToRemove.Next;
+@@ -572,7 +575,8 @@
+                         {
+                             for (int i = eventsToRemove.Count - 1; i >= 0; --i)
+                             {
+-                                RemoveEvent(eventList, events, events.IndexOf(eventsToRemove[i]), true);
++                                if (events.IndexOf(eventsToRemove[i]) >= 0)
++                                    RemoveEvent(eventList, events, events.IndexOf(eventsToRemove[i]), true);
+                             }
+                         }
+                         removeEventChainHandler?.Invoke(listIndex);
+@@ -824,7 +828,7 @@
+             // Key: Branch root event, Value: Alternative branch event 
+             Queue<KeyValuePair<IBranchEvent, Event>> branchStarts = [];
+ 
+-            if (copyBranches && @event is IBranchEvent directBranchEvent && directBranchEvent.AlternativeBranchEventIndex != 0xffff)
++            if (copyBranches && @event is IBranchEvent directBranchEvent && directBranchEvent.AlternativeBranchEventIndex != 0xffff && directBranchEvent.AlternativeBranchEventIndex < events.Count)
+                 branchStarts.Enqueue(KeyValuePair.Create(clone as IBranchEvent, events[(int)directBranchEvent.AlternativeBranchEventIndex]));
+ 
+             @event = @event.Next;
+@@ -859,7 +863,7 @@
+                 var parent = clone;
+                 clone = Clone(@event);
+ 
+-                if (copyBranches && @event is IBranchEvent branchEvent && branchEvent.AlternativeBranchEventIndex != 0xffff)
++                if (copyBranches && @event is IBranchEvent branchEvent && branchEvent.AlternativeBranchEventIndex != 0xffff && branchEvent.AlternativeBranchEventIndex < events.Count)
+                     branchStarts.Enqueue(KeyValuePair.Create(clone as IBranchEvent, events[(int)branchEvent.AlternativeBranchEventIndex]));
+                 
+                 @event = @event.Next;
+@@ -886,7 +890,7 @@
+                 uint branchIndex = (uint)events.Count;
+                 events.Add(clone);
+ 
+-                if (branchStart is IBranchEvent directBranchEvent && directBranchEvent.AlternativeBranchEventIndex != 0xffff)
++                if (branchStart is IBranchEvent directBranchEvent && directBranchEvent.AlternativeBranchEventIndex != 0xffff && directBranchEvent.AlternativeBranchEventIndex < events.Count)
+                     branchStarts.Enqueue(KeyValuePair.Create(clone as IBranchEvent, events[(int)directBranchEvent.AlternativeBranchEventIndex]));
+ 
+                 while (ev != null)
+@@ -902,7 +906,7 @@
+                     var parent = clone;
+                     clone = Clone(ev);
+ 
+-                    if (ev is IBranchEvent branchEvent && branchEvent.AlternativeBranchEventIndex != 0xffff)
++                    if (ev is IBranchEvent branchEvent && branchEvent.AlternativeBranchEventIndex != 0xffff && branchEvent.AlternativeBranchEventIndex < events.Count)
+                         branchStarts.Enqueue(KeyValuePair.Create(clone as IBranchEvent, events[(int)branchEvent.AlternativeBranchEventIndex]));
+ 
+                     ev = ev.Next;
+@@ -959,7 +963,8 @@
+                 var tempEventList = new List<Event>();
+                 var tempEvents = new List<Event>();
+                 AddEvent(tempEventList, tempEvents, map, index, true);
+-                ReplaceEvent(eventList, events, @event, tempEvents[0]);
++                if (tempEvents.Count != 0)
++                    ReplaceEvent(eventList, events, @event, tempEvents[0]);
+                 return;
+             }
+             else
+@@ -980,6 +985,12 @@
+                     valueDescription.Write(eventData, ref dataIndex, value);
+                 }
+ 
++                if (!EventDescriptions.Events.ContainsKey(@event.Type))
++                {
++                    Console.WriteLine($"Events of type {@event.Type} can not be edited.");
++                    Console.WriteLine();
++                    return;
++                }
+                 var eventDescription = EventDescriptions.Events[@event.Type];
+                 var type = @event.GetType();
+ 
+@@ -1197,7 +1208,7 @@
+             Console.Write("Which event to connect to: ");
+             var targetIndex = ReadInt(true);
+ 
+-            if (targetIndex == null)
++            if (targetIndex == null || targetIndex < 0 || targetIndex >= events.Count)
+             {
+                 Console.WriteLine("Invalid event index");
+                 Console.WriteLine();
+@@ -1688,7 +1699,7 @@
+             var chainEvents = new List<Event>();
+             var @event = eventList[index];
+ 
+-            while (@event != null)
++            while (@event != null && !chainEvents.Contains(@event))
+             {
+                 chainEvents.Add(@event);
+                 @event = @event.Next;
+@@ -1716,17 +1727,17 @@
+ 
+                     idMapping.Add((uint)eventIndex, (uint)idMapping.Count);
+ 
+-                    if (ev is ConditionEvent conditionEvent && conditionEvent.ContinueIfFalseWithMapEventIndex != 0xffff)
++                    if (ev is ConditionEvent conditionEvent && conditionEvent.ContinueIfFalseWithMapEventIndex != 0xffff && conditionEvent.ContinueIfFalseWithMapEventIndex < events.Count)
+                         branches.Enqueue(events[(int)conditionEvent.ContinueIfFalseWithMapEventIndex]);
+-                    else if (ev is Dice100RollEvent diceEvent && diceEvent.ContinueIfFalseWithMapEventIndex != 0xffff)
++                    else if (ev is Dice100RollEvent diceEvent && diceEvent.ContinueIfFalseWithMapEventIndex != 0xffff && diceEvent.ContinueIfFalseWithMapEventIndex < events.Count)
+                         branches.Enqueue(events[(int)diceEvent.ContinueIfFalseWithMapEventIndex]);
+-                    else if (ev is DoorEvent doorEvent && doorEvent.UnlockFailedEventIndex != 0xffff)
++                    else if (ev is DoorEvent doorEvent && doorEvent.UnlockFailedEventIndex != 0xffff && doorEvent.UnlockFailedEventIndex < events.Count)
+                         branches.Enqueue(events[(int)doorEvent.UnlockFailedEventIndex]);
+-                    else if (ev is ChestEvent chestEvent && chestEvent.UnlockFailedEventIndex != 0xffff)
++                    else if (ev is ChestEvent chestEvent && chestEvent.UnlockFailedEventIndex != 0xffff && chestEvent.UnlockFailedEventIndex < events.Count)
+                         branches.Enqueue(events[(int)chestEvent.UnlockFailedEventIndex]);
+-                    else if (ev is DecisionEvent decisionEvent && decisionEvent.NoEventIndex != 0xffff)
++                    else if (ev is DecisionEvent decisionEvent && decisionEvent.NoEventIndex != 0xffff && decisionEvent.NoEventIndex < events.Count)
+                         branches.Enqueue(events[(int)decisionEvent.NoEventIndex]);
+-                    else if (ev is PartyMemberConditionEvent partyMemberConditionEvent && partyMemberConditionEvent.ContinueIfFalseWithMapEventIndex != 0xffff)
++                    else if (ev is PartyMemberConditionEvent partyMemberConditionEvent && partyMemberConditionEvent.ContinueIfFalseWithMapEventIndex != 0xffff && partyMemberConditionEvent.ContinueIfFalseWithMapEventIndex < events.Count)
+                         branches.Enqueue(events[(int)partyMemberConditionEvent.ContinueIfFalseWithMapEventIndex]);
+ 
+ 					return ev.Next;
+@@ -1757,17 +1768,17 @@
+             foreach (var ev in events)
+             {
+                 if (ev is ConditionEvent conditionEvent && conditionEvent.ContinueIfFalseWithMapEventIndex != 0xffff)
+-                    conditionEvent.ContinueIfFalseWithMapEventIndex = idMapping[conditionEvent.ContinueIfFalseWithMapEventIndex];
++                    { if (idMapping.TryGetValue(conditionEvent.ContinueIfFalseWithMapEventIndex, out var mappedconditionEvent)) conditionEvent.ContinueIfFalseWithMapEventIndex = mappedconditionEvent; }
+                 else if (ev is Dice100RollEvent diceEvent && diceEvent.ContinueIfFalseWithMapEventIndex != 0xffff)
+-                    diceEvent.ContinueIfFalseWithMapEventIndex = idMapping[diceEvent.ContinueIfFalseWithMapEventIndex];
++                    { if (idMapping.TryGetValue(diceEvent.ContinueIfFalseWithMapEventIndex, out var mappeddiceEvent)) diceEvent.ContinueIfFalseWithMapEventIndex = mappeddiceEvent; }
+                 else if (ev is DecisionEvent decisionEvent && decisionEvent.NoEventIndex != 0xffff)
+-                    decisionEvent.NoEventIndex = idMapping[decisionEvent.NoEventIndex];
++                    { if (idMapping.TryGetValue(decisionEvent.NoEventIndex, out var mappeddecisionEvent)) decisionEvent.NoEventIndex = mappeddecisionEvent; }
+                 else if (ev is DoorEvent doorEvent && doorEvent.UnlockFailedEventIndex != 0xffff)
+-                    doorEvent.UnlockFailedEventIndex = idMapping[doorEvent.UnlockFailedEventIndex];
++                    { if (idMapping.TryGetValue(doorEvent.UnlockFailedEventIndex, out var mappeddoorEvent)) doorEvent.UnlockFailedEventIndex = mappeddoorEvent; }
+                 else if (ev is ChestEvent chestEvent && chestEvent.UnlockFailedEventIndex != 0xffff)
+-                    chestEvent.UnlockFailedEventIndex = idMapping[chestEvent.UnlockFailedEventIndex];
++                    { if (idMapping.TryGetValue(chestEvent.UnlockFailedEventIndex, out var mappedchestEvent)) chestEvent.UnlockFailedEventIndex = mappedchestEvent; }
+                 else if (ev is PartyMemberConditionEvent partyMemberConditionEvent && partyMemberConditionEvent.ContinueIfFalseWithMapEventIndex != 0xffff)
+-					partyMemberConditionEvent.ContinueIfFalseWithMapEventIndex = idMapping[partyMemberConditionEvent.ContinueIfFalseWithMapEventIndex];
++					{ if (idMapping.TryGetValue(partyMemberConditionEvent.ContinueIfFalseWithMapEventIndex, out var mappedpartyMemberConditionEvent)) partyMemberConditionEvent.ContinueIfFalseWithMapEventIndex = mappedpartyMemberConditionEvent; }
+ 
+ 			}
+ 

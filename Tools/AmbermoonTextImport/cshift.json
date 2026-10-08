@@ -1,0 +1,7 @@
+{
+	"name": "AmbermoonTextImport",
+	"sources": ["src"],
+	"output": "bin/AmbermoonTextImport",
+	"optimize": 2,
+	"dependencies": ["../Ambermoon.Common", "../Ambermoon.Data.Common", "../Ambermoon.Data.Legacy"]
+}

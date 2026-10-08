@@ -1,0 +1,10 @@
+# The cases of the text packer tests: a name, the packer (intro or extro) and the arguments, run in a copy of texts/
+# (@DIR@ is the path of the copy; '_' is a space).
+intro       intro   @DIR@
+intro-cwd   intro
+intro-help  intro   --help
+extro       extro   @DIR@
+extro-cwd   extro
+extro-click extro   @DIR@ <KLIK>
+extro-names extro   @DIR@ <KLIK> JAN_NOVÁK X_Y Z
+extro-help  extro   /?

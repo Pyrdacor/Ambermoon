@@ -1,0 +1,7 @@
+{
+	"name": "AmbermoonPack",
+	"sources": ["src"],
+	"output": "bin/AmbermoonPack",
+	"optimize": 2,
+	"dependencies": ["../Ambermoon.Common", "../Ambermoon.Data.Legacy"]
+}

@@ -1,0 +1,33 @@
+# The cases of the AmbermoonPack test: a name and the arguments (run in a folder with files/, textfiles/ and items/;
+# 'out' is the file that is written). Comments start with #.
+amnp-c0      AMNP files out -c0 -v
+amnp-c1      AMNP files out -c1 -v
+amnp-c2      AMNP files out -c2 -v
+amnp-c3      AMNP files out -c3 -v
+amnp-c4      AMNP files out -c4 -v
+amnp-text-c4 AMNP textfiles out -c4 -v
+amnp-text-c5 AMNP textfiles out -c5 -v
+ampc-c3-d4   AMPC files out -c3 -d4 -v
+ampc-c1      AMPC files out -c1
+amnc-d1      AMNC files out -d1
+amnc         AMNC files out
+ambr-d2      AMBR files out -d2
+ambr-d3      AMBR files out -d3
+ambr-d4      AMBR files out -d4
+amnp-d4-c2   AMNP files out -d4 -c2
+lob          LOB files/001 out -v
+lob-c2       LOB files/002 out -c2 -v
+lob-c1-odd   LOB files/005 out -c1
+vol1         VOL1 files/002 out
+vol1-c3      VOL1 files/003 out -c3
+jh           JH files/001 out 0x1234
+jh-decimal   JH files/003 out 4660
+jh-lob       JH+LOB files/002 out 0xd2e7
+jh-lob-odd   JH+LOB files/005 out 0xd2e7
+pkitem       PKITEM items out
+bad-type     FOO files out
+bad-option   AMNP files out -c9
+bad-source   AMNP nothing out
+bad-key      JH files/001 out 0xzz
+too-many     AMNP files out 1234
+no-args

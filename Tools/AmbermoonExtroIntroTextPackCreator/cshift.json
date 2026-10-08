@@ -1,0 +1,7 @@
+{
+	"name": "AmbermoonExtroIntroTextPackCreator",
+	"sources": ["src"],
+	"output": "bin/AmbermoonExtroIntroTextPackCreator",
+	"optimize": 2,
+	"dependencies": ["../Ambermoon.Common", "../Ambermoon.Data.Legacy", "../AmbermoonTextPacks"]
+}

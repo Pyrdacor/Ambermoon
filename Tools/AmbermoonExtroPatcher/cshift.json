@@ -1,0 +1,7 @@
+{
+	"name": "AmbermoonExtroPatcher",
+	"sources": ["src"],
+	"output": "bin/AmbermoonExtroPatcher",
+	"optimize": 2,
+	"dependencies": ["../Ambermoon.Common", "../Ambermoon.Data.Common", "../Ambermoon.Data.Legacy", "../Ambermoon.Data.Text.Patching"]
+}

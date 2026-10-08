@@ -1,0 +1,7 @@
+{
+	"name": "AmbermoonLabdataEditor",
+	"sources": ["src"],
+	"output": "bin/AmbermoonLabdataEditor",
+	"optimize": 2,
+	"dependencies": ["../Ambermoon.Common", "../Ambermoon.Data.Common", "../Ambermoon.Data.Legacy"]
+}

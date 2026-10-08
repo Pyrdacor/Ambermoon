@@ -1,0 +1,7 @@
+{
+	"name": "AmbermoonDiskExtract",
+	"sources": ["src"],
+	"output": "bin/AmbermoonDiskExtract",
+	"optimize": 2,
+	"dependencies": ["../Ambermoon.Common", "../Ambermoon.Data.Common", "../Ambermoon.Data.Legacy"]
+}

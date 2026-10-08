@@ -1,0 +1,7 @@
+{
+	"name": "AmbermoonExtroTextPacker",
+	"sources": ["src"],
+	"output": "bin/AmbermoonExtroTextPacker",
+	"optimize": 2,
+	"dependencies": ["../Ambermoon.Common", "../Ambermoon.Data.Legacy", "../AmbermoonTextPacks"]
+}

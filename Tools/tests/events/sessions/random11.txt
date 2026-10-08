@@ -1,0 +1,86 @@
+connect 4
+c
+events
+3
+61
+21
+0
+
+connect 2a
+1c
+3
+0
+221
+
+3
+3
+copychain 28
+$27
+2
+0
+1
+ffff
+ffff
+1e
+
+19
+231
+2
+graph
+ffff
+7
+0x0
+1
+1
+copy
+copychain 1b
+0
+3
+edit
+22
+12
+45
+ffff
+0
+13
+chain 2
+1
+1a
+ffff
+
+0
+27
+d
+161
+16
+11
+edit b
+1
+1a
+edit 2
+ffff
+3
+0
+2
+16222
+55657
+33
+28545
+0x22
+7809
+
+
+
+
+
+
+
+
+
+
+
+
+save
+1
+@OUT@
+exit
