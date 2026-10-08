@@ -34,6 +34,11 @@ jobs:
     name: Releases of all languages
     runs-on: windows-latest
     steps:
+      # the files of the Amiga keep their bytes: Windows runners check out text files with CRLF otherwise, and AmigaDOS
+      # cannot run the scripts of the boot disk with them ("Can't open df0:raminstall")
+      - name: No CRLF conversion
+        run: git config --global core.autocrlf false
+
       - uses: actions/checkout@v5
 
       - name: Determine version
