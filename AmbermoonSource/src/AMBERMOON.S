@@ -36,6 +36,9 @@
 ; ---------- Modules (in link order) --------------
 	opt	o1-,o2-,o4-,o5-,o11-		; reconstructed code : explicit encodings
 	include	KERNEL/START.S
+	IFD	DEBUG
+	include	KERNEL/DEBUG_AE.S	; Debug build only
+	ENDC
 	opt	o2+,o4+,o5+,o11+		; original code : optimizations of the original assembler
 	include	MAIN.S
 	include	DISPLAY.S

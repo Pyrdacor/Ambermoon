@@ -46,6 +46,7 @@ in the 68020 code of the CPU renderer). They are expected.
 | `src/MAP/3D_RENDER.S` | **Reconstructed** 3D renderer: walls, objects, floor & ceiling (CPU version). |
 | `src/MAP/3D_BLIT.S`, `3D_BLIT2.S` | **Reconstructed** blitter versions of the 3D renderer (merged from AM2_BLIT in 1.21). |
 | `src/MUSIC/SONIC_ARRANGER.S` | **Reconstructed** Sonic Arranger replay routine (original names of the replayer). |
+| `src/KERNEL/DEBUG_AE.S` | Debug build only (symbol `DEBUG`, see `Disks/Bugfixing/Executables/compile_debug.sh`): shows the location of a 68000 address error. |
 | `src/LOADER/Ambermoon.s` | Loader `Ambermoon` (disassembly with names and bugfixes, separate executable). Build in `src/LOADER` with `vasmm68k_mot -m68030 -Fhunkexe -o Ambermoon -nosym -kick1hunks -keepempty -no-opt Ambermoon.s`. |
 | `src/FAIRY.S`, `src/DIAGNOST.S` | Original files. `FAIRY.S` is not part of AM2. `DIAGNOST.S` is only partly assembled (cheat code is switched off). |
 | `CHANGES.md` | List of all changes compared to the original source (generated from the comments). |

@@ -63,6 +63,9 @@ Start_program:
 	jmp	Exit_to_loader
 .Skip:
 	jsr	Init_system
+	IFD	DEBUG
+	jsr	Install_AE_handler	; Debug build only
+	ENDC
 	jsr	Init_blitter
 Restart_game:
 	lea.l	Return_value,sp
