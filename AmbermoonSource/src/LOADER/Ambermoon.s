@@ -11,6 +11,8 @@
 ; - FUN_OpenLibraries, FUN_CreateWindow: Results of OpenLibrary, OpenScreen and
 ;   OpenWindow were not checked.
 ; - FUN_LoadFile, FUN_LoadKeymap: Memory leaks in the error cases.
+; - FUN_ReplyWorkbenchMessage: The current directory (wa_Lock) and the task
+;   name were not restored when started from Workbench (Guru on exit).
 
 ; #######################
 ; # HUNK00 - CODE       #
@@ -164,7 +166,8 @@ LAB_0021f19c:
 	bra.w LAB_Exit
 LAB_0021f1de:
 	movea.l DAT_Task,A0
-	move.l #s_RUNNING,($000a,A0)
+	move.l ($000a,A0),DAT_OldTaskName ; FIX: Remember the old name (restored before exit)
+	move.l #s_RUNNING,($000a,A0) ; ln_Name
 	move.l A6,-(SP)
 	movea.l $4,A6
 	jsr (-$008a,A6) ; exec.Permit
@@ -804,18 +807,40 @@ FUN_GetWorkbenchMessage:
 	tst.l DAT_DOSLibrary ; FIX: dos.library may not be open
 	beq.b LAB_0021fa78
 	movea.l D0,A0
-	move.l (A0),D1
+	move.l (A0),D1 ; wa_Lock
 	move.l A6,-(SP)
 	movea.l DAT_DOSLibrary,A6
 	jsr (-$007e,A6) ; dos.CurrentDir
 	movea.l (SP)+,A6
+	move.l D0,DAT_OldCurrentDir ; FIX: Remember the old current directory
+	st DAT_CurrentDirChanged
 LAB_0021fa78:
 	movem.l (SP)+,D0/D1/A0/A1/A5
 	rts
+; FIX: When started from Workbench, the current directory was changed to the
+;      lock of the icon (wa_Lock) and never changed back. On exit, DOS unlocks
+;      the current directory of the process (OS 2.0+), so the lock of the
+;      Workbench was unlocked twice -> Guru when quitting the loader.
+;      Now the old current directory and the old task name are restored.
 FUN_ReplyWorkbenchMessage:
 	movem.l A1/A0/D1/D0,-(SP)
 	tst.l DAT_WorkbenchMessage
 	beq.b LAB_0021fab2
+	tst.b DAT_CurrentDirChanged ; FIX: Restore the old current directory
+	beq.b LAB_CurrentDirRestored
+	move.l DAT_OldCurrentDir,D1
+	move.l A6,-(SP)
+	movea.l DAT_DOSLibrary,A6
+	jsr (-$007e,A6) ; dos.CurrentDir
+	movea.l (SP)+,A6
+	sf DAT_CurrentDirChanged
+LAB_CurrentDirRestored:
+	move.l DAT_OldTaskName,D0 ; FIX: Restore the old task name ("RUNNING" is
+	beq.b LAB_TaskNameRestored ;      in this program which is unloaded)
+	movea.l DAT_Task,A0
+	move.l D0,($000a,A0)
+	clr.l DAT_OldTaskName
+LAB_TaskNameRestored:
 	move.l A6,-(SP)
 	movea.l $4,A6
 	jsr (-$0084,A6) ; exec.Forbid
@@ -2740,6 +2765,15 @@ DAT_ScrollOffset:
 DAT_HandlerProcess:
 	; Process * (FIX: new, see FUN_CloseWindow)
 	dx.l 1
+DAT_OldCurrentDir:
+	; BPTR (FIX: new, see FUN_ReplyWorkbenchMessage)
+	dx.l 1
+DAT_OldTaskName:
+	; char * (FIX: new, see FUN_ReplyWorkbenchMessage)
+	dx.l 1
+DAT_CurrentDirChanged:
+	; (FIX: new, see FUN_ReplyWorkbenchMessage)
+	dx.b 1
 ;   }
 
 ; #######################
