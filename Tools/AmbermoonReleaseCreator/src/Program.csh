@@ -316,6 +316,8 @@ struct Creator
         AddAllFilesIn(ref a, "BootDisk", "", true);
         foreach (var name in ["Ambermoon", "Ambermoon.info", "Ambermoon_install", "Ambermoon_install.info", "readme.txt"])
             a.Add(AdfEntry { Path = name, Target = "" });
+        if (Language == "German")
+            a.Add(AdfEntry { Path = "liesmich.txt", Target = "" }); // the german hard disk installer copies it as well (#137)
         AddAllFilesIn(ref a, AmberPath("Save.00"), "Initial", false);
         AddAmberfiles(ref a, ["AM2_CPU", "Button_graphics", "Objects.amb", "Text.amb"]);
         if (!CreateADF(adfTempPath, 'A', a))
@@ -494,23 +496,24 @@ struct Creator
         return true;
     }
 
-    // File.ReadAllLines and WriteAllLines of .NET with a new first line
+    // Replaces the first line of a text file. The file is handled as bytes: the rest of it keeps its encoding and its
+    // line endings. (The original read and wrote the file as UTF-8 text with File.ReadAllLines/WriteAllLines, which
+    // turned the ISO-8859-1 umlauts of liesmich.txt into replacement characters.)
     bool SetFirstLine(string path, string line)
     {
-        if (ReadAllTextNet(path) is not string text)
+        var read = File.ReadAllBytes(path);
+        if (read is not uint8[] data)
             return Failed("Could not find file '" + path + "'.");
-        var lines = SplitLinesNet(text);
-        if (lines.Count() == 0)
+        if (data.Length == 0)
             return Failed("The file '" + path + "' is empty.");
-        lines[0] = line;
-        string newLine = Process.IsWindows() ? "\r\n" : "\n";
-        var sb = StringBuilder.Create();
-        foreach (var l in lines)
-        {
-            sb.Append(l);
-            sb.Append(newLine);
-        }
-        if (File.WriteAllText(path, sb.ToString()) is error e)
+        int end = 0;
+        while (end < data.Length && data[end] != 13 && data[end] != 10)
+            end += 1;
+        var result = List<uint8>.Create();
+        result.AddRange(line.AsBytes().ToArray());
+        for (var i = end; i < data.Length; i += 1)
+            result.Add(data[i]);
+        if (File.WriteAllBytes(path, result.ToArray()) is error e)
             return Failed(e.Message);
         return true;
     }

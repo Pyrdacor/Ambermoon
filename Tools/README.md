@@ -342,7 +342,10 @@ when it removes old matches. Packing is 60 to 300 times faster:
   texts are missing (only German, French, Czech and Polish have them) and files that do not fit on a disk give an error
   message (the original ends with an exception, or writes an empty ADF image for a full disk); the temporary folder is
   always deleted. The zip files are deflated by System.Compression (not zlib-ng): the same entries and header fields,
-  other compressed bytes; the gzip data likewise.
+  other compressed bytes; the gzip data likewise. The first line of `readme.txt` and `liesmich.txt` (version and date)
+  is replaced byte-wise: the rest of the file keeps its encoding and line endings (the original reads and writes them as
+  UTF-8 text with CRLF, which turns the ISO-8859-1 umlauts of `liesmich.txt` into replacement characters). The German
+  disk A contains `liesmich.txt` as well, as the German hard disk installer copies it (#137, also in the original).
 * AmbermoonAdvancedReleaseCreator: without arguments it shows the usage (the original's check of the number of
   arguments is never true: it ends with an exception); a relative folder works (the LHA writer of the original ends with
   an exception for it). The names in the tar.gz files are relative to the current folder also when the path is written
