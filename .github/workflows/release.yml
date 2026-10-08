@@ -62,6 +62,8 @@ jobs:
 
       - name: Build the tools
         shell: pwsh
+        env:
+          GITHUB_TOKEN: ${{ github.token }} # the GitHub API limits requests without a token (403)
         run: ./Tools/build.ps1
 
       - name: Create the releases

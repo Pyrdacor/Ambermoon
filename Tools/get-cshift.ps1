@@ -16,7 +16,14 @@ if (-not [Environment]::Is64BitOperatingSystem) {
 # Windows PowerShell 5.1 does not use TLS 1.2 by default
 [Net.ServicePointManager]::SecurityProtocol = [Net.ServicePointManager]::SecurityProtocol -bor [Net.SecurityProtocolType]::Tls12
 
-$release = Invoke-RestMethod -Uri "https://api.github.com/repos/$repo/releases/latest" -UseBasicParsing
+# with a token (GITHUB_TOKEN or GH_TOKEN, e.g. in GitHub Actions) the API has a much higher rate limit: without one,
+# it allows 60 requests per hour and IP, which the shared runners of GitHub Actions use up easily (error 403)
+$headers = @{}
+$token = if ($env:GITHUB_TOKEN) { $env:GITHUB_TOKEN } else { $env:GH_TOKEN }
+if ($token) {
+    $headers["Authorization"] = "Bearer $token"
+}
+$release = Invoke-RestMethod -Uri "https://api.github.com/repos/$repo/releases/latest" -Headers $headers -UseBasicParsing
 $tag = $release.tag_name
 if (-not $tag) {
     throw "the latest release of CShift cannot be found"
