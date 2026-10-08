@@ -1,0 +1,7 @@
+# Shell and Python scripts keep LF line endings (bash fails on CRLF in Windows checkouts).
+*.sh text eol=lf
+*.py text eol=lf
+# The data of the tests: their results are compared byte for byte.
+tests/** -text
+tests/**/*.sh text eol=lf
+tests/**/*.py text eol=lf
