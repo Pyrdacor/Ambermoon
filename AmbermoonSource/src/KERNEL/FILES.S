@@ -1551,9 +1551,15 @@ Decompress_chunk:
 	move.l	4(a1),d2
 	addq.l	#8,d2
 	add.l	d0,d2
-	move.l	Decompress_target(pc),a0
-	add.l	Decompress_offset(pc),a0
-	add.l	d1,a0
+	addq.l	#1,d2		; FIX: Round up to an even size. The data is
+	andi.b	#$fe,d2		; moved with move.l, so if the packed or the
+	move.l	Decompress_target(pc),a0	; unpacked size was odd, the
+	add.l	Decompress_offset(pc),a0	; pointers were odd and the 68000
+	add.l	d1,a0		; crashed with an address error (Guru
+	move.l	a0,d3		; 8000 0003, Github issue #134). One more
+	addq.l	#1,d3		; byte is read behind the chunk, and the
+	andi.b	#$fe,d3		; target end is moved up by at most one byte
+	move.l	d3,a0		; (the buffer has the compression space).
 	add.l	d2,a1
 .Loop:
 	move.l	-(a1),-(a0)
