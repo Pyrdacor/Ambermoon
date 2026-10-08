@@ -17,6 +17,13 @@ Dialogue_ModInit:
 	sf	Joined			; Clear
 	sf	Left
 	sf	Abort_dialogue
+	sf	Dialogue_items		; FIX: Not cleared before. When a dialogue was
+					; left with items in the slots ({Exit}, "Yes"),
+					; the flag stayed set. In the next dialogue the
+					; slots are empty, so Dialogue_DisUpd "hid" the
+					; items and popped the new dialogue module and
+					; a wrong scroll bar -> graphics mess / crash.
+					; (Github issue #74)
 	jsr	Clear_new_words_array
 	jsr	Clear_sold_slots
 	tst.b	NPC_or_member		; Dialogue with party member ?
