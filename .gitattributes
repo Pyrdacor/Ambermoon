@@ -1,0 +1,2 @@
+# The files of the game (the boot disk scripts, texts, ...) are used on the Amiga as they are: no CRLF conversion.
+Disks/** -text
