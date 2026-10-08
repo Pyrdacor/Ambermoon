@@ -17,11 +17,23 @@ case "$(uname -s)" in
     *) echo "error: there is no release of CShift for $(uname -s) (Linux and Windows only)" >&2; exit 1 ;;
 esac
 
+# with a token (GITHUB_TOKEN or GH_TOKEN, e.g. in GitHub Actions) the API has a much higher rate limit: without one,
+# it allows 60 requests per hour and IP, which the shared runners of GitHub Actions use up easily (error 403)
+TOKEN="${GITHUB_TOKEN:-${GH_TOKEN:-}}"
+
 fetch() { # <url> <output file or ->
     if command -v curl > /dev/null 2>&1; then
-        curl -fsSL "$1" -o "$2"
+        if [ -n "$TOKEN" ] && [[ "$1" == https://api.github.com/* ]]; then
+            curl -fsSL -H "Authorization: Bearer $TOKEN" "$1" -o "$2"
+        else
+            curl -fsSL "$1" -o "$2"
+        fi
     elif command -v wget > /dev/null 2>&1; then
-        wget -q "$1" -O "$2"
+        if [ -n "$TOKEN" ] && [[ "$1" == https://api.github.com/* ]]; then
+            wget -q --header "Authorization: Bearer $TOKEN" "$1" -O "$2"
+        else
+            wget -q "$1" -O "$2"
+        fi
     else
         echo "error: curl or wget is needed" >&2
         return 1

@@ -1,0 +1,105 @@
+# Builds the tool release: Ambermoon3DMapViewer, AmbermoonDiskExtract, AmbermoonEventEditor, AmbermoonImageConverter,
+# AmbermoonItemEditor, AmbermoonLabdataEditor, AmbermoonPack and AmbermoonTextManager (Tools/, CShift), each platform
+# in one archive: Windows (zip), Linux (tar.gz) and the Amiga (lha). See Tools/package-tools.sh.
+#
+# Trigger: a pushed tag tools-vX.XX (e.g. tools-v1.18): the archives are attached to the release
+# "Ambermoon Tools X.XX" of the tag. By hand (Actions -> tools -> Run workflow) with a version: only the artifacts of
+# the run, no release.
+
+name: tools
+
+on:
+  push:
+    tags:
+      - "tools-v*"
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "The version of the tools (X.XX)"
+        required: true
+
+permissions:
+  contents: write # the release
+  actions: read # the artifacts of the run
+
+jobs:
+  version:
+    name: Version
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+    steps:
+      - id: version
+        run: |
+          version="${{ github.event.inputs.version }}"
+          if [ -z "$version" ]; then
+            if [[ ! "${{ github.ref_name }}" =~ ^tools-v([0-9]+\.[0-9]{2})$ ]]; then
+              echo "::error::'${{ github.ref_name }}' is not a tool release tag. Expected tools-vX.XX, e.g. tools-v1.18"
+              exit 1
+            fi
+            version="${BASH_REMATCH[1]}"
+          fi
+          if [[ ! "$version" =~ ^[0-9]+\.[0-9]{2}$ ]]; then
+            echo "::error::The version '$version' does not have the form X.XX"
+            exit 1
+          fi
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+          echo "Version: $version"
+
+  windows:
+    name: Windows
+    needs: version
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v5
+      - name: Build and pack
+        shell: bash
+        env:
+          GITHUB_TOKEN: ${{ github.token }} # the GitHub API limits requests without a token (403)
+        run: bash Tools/package-tools.sh "${{ needs.version.outputs.version }}" windows release
+      - uses: actions/upload-artifact@v6
+        with:
+          name: tools-windows
+          path: release/*
+
+  linux-amiga:
+    name: Linux and Amiga
+    needs: version
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - name: Install lha
+        run: sudo apt-get update && sudo apt-get install -y jlha-utils
+      - name: Build and pack
+        env:
+          GITHUB_TOKEN: ${{ github.token }} # the GitHub API limits requests without a token (403)
+        run: |
+          bash Tools/package-tools.sh "${{ needs.version.outputs.version }}" linux release
+          bash Tools/package-tools.sh "${{ needs.version.outputs.version }}" amiga release
+      - uses: actions/upload-artifact@v6
+        with:
+          name: tools-linux-amiga
+          path: release/*
+
+  release:
+    name: Release
+    needs: [version, windows, linux-amiga]
+    if: startsWith(github.ref, 'refs/tags/tools-v')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download the archives
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh run download "${{ github.run_id }}" --repo "${{ github.repository }}" --dir artifacts
+          mkdir -p release
+          find artifacts -type f -exec mv {} release/ \;
+      - name: Create the release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VERSION: ${{ needs.version.outputs.version }}
+        run: |
+          ls -l release
+          notes="The Ambermoon tools $VERSION: Ambermoon3DMapViewer, AmbermoonDiskExtract, AmbermoonEventEditor, AmbermoonImageConverter, AmbermoonItemEditor, AmbermoonLabdataEditor, AmbermoonPack and AmbermoonTextManager for Windows (zip), Linux (tar.gz) and the Amiga (lha). Built from ${{ github.sha }}."
+          gh release create "${{ github.ref_name }}" release/* --repo "${{ github.repository }}" --verify-tag \
+            --title "Ambermoon Tools $VERSION" --notes "$notes" --latest=false
