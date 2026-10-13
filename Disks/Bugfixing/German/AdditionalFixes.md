@@ -1,5 +1,6 @@
 ## Unreleased
 
+- Four goto points of Dor Grestin (both exits, the nest and the food store) shared their 'known' bits with goto points in Spannenberg and the Rogue's wine cellar, so they were shown on the map before they were found (#99).
 - Removed the random encounters with Gizzeks near the town walls of Dor Kiredon again (added in 1.18). The palette of the town's combat background doesn't suit them, so they had wrong colors. The encounters with the insects happen there again like in the original (fixes #145).
 - Fixed collision of two beds and a log in the corridor map (267), you could walk onto them (fixes #146).
 - Random animations of 3D objects now use the real map width for their position hash (fixes #127).
