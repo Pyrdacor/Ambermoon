@@ -48,12 +48,12 @@ unpack jh-lob 58eea01c3617046502779c6961f1a497 f0c0d0115ff01d54298b8a705e04d554
 pack jh-lob-odd 2da589e8151b88cc5dab51d9da2a00f2 -
 pack pkitem db773afb00a8fd6ccd84b13151de7831 bc390d44cbfc9387e1b61fbbc12521e7
 unpack pkitem 58eea01c3617046502779c6961f1a497 c3a5e9e3eddaaceceabad669e6062735
-pack bad-type 3e72f9cc3c6a37cdd587765d5a34ddb1 -
-pack bad-option 9a0194c728c14cacfd044fd810c862b2 -
-pack bad-source b9ca526782a8ce5cc34e4603c65bff29 -
+pack bad-type d6b258967a34d626ad1ddef95404b333 -
+pack bad-option ecb9010cf3cb912ab3e22c7cca894887 -
+pack bad-source f78063242e5f56cdcb3fc16b97e1770e -
 pack bad-key 1fa02d0b121274398875890daf266c5b -
-pack too-many 9a0194c728c14cacfd044fd810c862b2 -
-pack no-args 9a0194c728c14cacfd044fd810c862b2 -
+pack too-many ecb9010cf3cb912ab3e22c7cca894887 -
+pack no-args ecb9010cf3cb912ab3e22c7cca894887 -
 events view.txt:map/300 1f675d951d95b924557ef78e7363b072 - ce3131a7234a8cbfa722d02ce61e59fb
 events view.txt:npc dcff4eb1f4083133860715b2f676362a - a0785074b98320987dd63c9ab5aca285
 events random1.txt:map/300 060a4823794670ab686de3faa0dc8be8 9f50207ed34a83eb47980dda80074e0b ce3131a7234a8cbfa722d02ce61e59fb

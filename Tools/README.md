@@ -101,6 +101,8 @@ The command lines are the ones of the originals:
 ```
 AmbermoonPack UNPACK 2Map_data.amb maps              # the files of a container as maps/001, maps/002, ...
 AmbermoonPack AMPC maps 2Map_data.amb -c3 -v         # packs them again (best of three LOB compressions)
+AmbermoonPack UNPACK 2Map_data.amb maps -x           # with hexadecimal names: maps/001, ..., maps/00F, maps/010, ...
+AmbermoonPack AMPC maps 2Map_data.amb -x             # packs files with hexadecimal names again
 AmbermoonPack REPACK Monster_char.amb out.amb -c2    # a container in another compression
 AmbermoonPack JH+LOB Dict Dict.amb 0xd2e7           # JH-encrypted LOB with the key 0xd2e7
 

@@ -16,14 +16,23 @@ const int ErrorExecution = 6;
 const int ErrorInvalidSourceFile = 7;
 const int ErrorInvalidFileIndices = 8;
 
+// -x: the names of the files of a directory are hexadecimal numbers
+bool HexFileNumbers = false;
+
+// the name of the file with the number (3 digits at least, hexadecimal with -x)
+string FileNumberName(int number)
+{
+    return HexFileNumbers ? number.ToString("X").PadLeft(3, '0') : number.ToString("D3");
+}
+
 void Usage()
 {
     Console.WriteLine();
     Console.WriteLine("Usage: AmbermoonPack <type> <source> <dest> [key] [options]");
     Console.WriteLine("       AmbermoonPack REPACK <source> <dest> [options]");
-    Console.WriteLine("       AmbermoonPack UNPACK <source> <dest>");
-    Console.WriteLine("       AmbermoonPack UNITEM <source> <dest>");
-    Console.WriteLine("       AmbermoonPack PKITEM <source> <dest>");
+    Console.WriteLine("       AmbermoonPack UNPACK <source> <dest> [-x]");
+    Console.WriteLine("       AmbermoonPack UNITEM <source> <dest> [-x]");
+    Console.WriteLine("       AmbermoonPack PKITEM <source> <dest> [-x]");
     Console.WriteLine();
     Console.WriteLine("The first version packs a directory of single files into a container.");
     Console.WriteLine("UNPACK unpacks a container to a directory of single files.");
@@ -56,6 +65,8 @@ void Usage()
     Console.WriteLine("      N=5: Use best of 0 and 4");
     Console.WriteLine("      Note that for AMNP, the raw data is used if the best compression is worse.");
     Console.WriteLine(" -v: Verbose. Prints compression info for each subfile to the console.");
+    Console.WriteLine(" -x: Hexadecimal file numbers (001 ... 00F, 010 ...) for the files of a directory,");
+    Console.WriteLine("     when packing and when unpacking.");
     Console.WriteLine();
     Console.WriteLine("Examples:");
     Console.WriteLine();
@@ -67,7 +78,8 @@ void Usage()
     Console.WriteLine("Note:");
     Console.WriteLine(" If the files have names like 001, 002, etc this is used as the");
     Console.WriteLine(" file number inside the resulting container. Otherwise they are");
-    Console.WriteLine(" sorted alphabetically and numbered 1 to n.");
+    Console.WriteLine(" sorted alphabetically and numbered 1 to n. With -x the names are");
+    Console.WriteLine(" hexadecimal numbers.");
     Console.WriteLine();
     Console.WriteLine("Error codes:");
     Console.WriteLine(" 0: No error");
@@ -82,11 +94,12 @@ void Usage()
     Console.WriteLine();
 }
 
-// the options (-dN, -cN, -v) and the other arguments
+// the options (-dN, -cN, -v, -x) and the other arguments
 struct Options
 {
     bool Valid;
     bool Verbose;
+    bool HexFileNumbers;
     LobType LobType;
     FileDictionaryCompression FileDictionaryCompression;
     string[] Args;
@@ -106,6 +119,8 @@ Options ParseOptions(string[] args)
             compressOptions.Add(arg);
         if (arg == "-v")
             options.Verbose = true;
+        if (arg == "-x")
+            options.HexFileNumbers = true;
         if (arg.Length == 0 || arg[0] != '-')
             rest.Add(arg);
     }
@@ -195,6 +210,7 @@ int Main(string[] arguments)
     }
 
     string[] args = options.Args;
+    HexFileNumbers = options.HexFileNumbers;
 
     if (args.Length != 3 && args.Length != 4)
     {
@@ -460,7 +476,7 @@ void Unpack(string[] args)
     foreach (var number in file.Numbers())
     {
         var subfile = file.Files[number];
-        if (File.WriteAllBytes(Path.Combine(outDir, number.ToString("D3")), subfile.ReadToEnd()) is error)
+        if (File.WriteAllBytes(Path.Combine(outDir, FileNumberName(number)), subfile.ReadToEnd()) is error)
         {
             Console.WriteLine("Failed to write output files");
             Exit(ErrorWritingToDestination);
@@ -526,7 +542,7 @@ void UnpackItems(string[] args)
 
     for (var i = 0; i < itemCount; i += 1)
     {
-        if (reader.Remaining() < 60 || File.WriteAllBytes(Path.Combine(args[2], (i + 1).ToString("D3")), reader.ReadBytes(60)) is error)
+        if (reader.Remaining() < 60 || File.WriteAllBytes(Path.Combine(args[2], FileNumberName(i + 1)), reader.ReadBytes(60)) is error)
         {
             Console.WriteLine("Failed to write output files");
             Exit(ErrorWritingToDestination);
@@ -629,7 +645,7 @@ Error<Dictionary<uint32, uint8[]>> GetContainerDataFromFiles(string[] files)
         string stem = Path.GetStem(file);
         if (_IsNumber(stem))
         {
-            int64 number = stem.Length <= 10 && stem.ParseInt64() is int64 n ? n : -1;
+            int64 number = _ParseNumber(stem);
             if (number < 0 || number > 4294967295)
                 return error("Value was either too large or too small for a UInt32.");
             index = (uint32)number;
@@ -646,9 +662,32 @@ Error<Dictionary<uint32, uint8[]>> GetContainerDataFromFiles(string[] files)
     return result;
 }
 
+// a file number: decimal digits, or hexadecimal digits with -x
 bool _IsNumber(StringSlice name)
 {
-    return name.Length > 0 && _AllDigits(name);
+    if (name.Length == 0)
+        return false;
+    if (!HexFileNumbers)
+        return _AllDigits(name);
+    foreach (var c in name)
+    {
+        if (!Char.IsHexDigit(c))
+            return false;
+    }
+    return true;
+}
+
+// the value of a file number (see _IsNumber), -1 if it is too long
+int64 _ParseNumber(StringSlice name)
+{
+    if (!HexFileNumbers)
+        return name.Length <= 10 && name.ParseInt64() is int64 n ? n : -1;
+    if (name.Length > 8)
+        return -1;
+    int64 value = 0;
+    foreach (var c in name)
+        value = value * 16 + (int64)Char.HexValue(c);
+    return value;
 }
 
 Error<uint8[]> _ReadAllBytes(string path)
