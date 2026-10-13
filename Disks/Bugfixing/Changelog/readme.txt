@@ -13,8 +13,6 @@ Changes in 1.21
 - Leaving a conversation without taking the offered items (e.g. Tolimar's
   reward for the golden horseshoes) and talking to the person again no longer
   messes up the screen or crashes the game.
-- Calling and dismissing the giant eagle no longer leaks the memory of its
-  graphics.
 - The jump spell can no longer be used to jump over locked doors, places and
   riddlemouths (e.g. into the hangar in the temple of the brotherhood).
 - The enchanter now uses the price per charge of each item instead of a fixed
