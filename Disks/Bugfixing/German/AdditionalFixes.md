@@ -1,5 +1,6 @@
 ## Unreleased
 
+- Removed the random encounters with Gizzeks near the town walls of Dor Kiredon again (added in 1.18). The palette of the town's combat background doesn't suit them, so they had wrong colors. The encounters with the insects happen there again like in the original (fixes #145).
 - Fixed collision of two beds and a log in the corridor map (267), you could walk onto them (fixes #146).
 - Random animations of 3D objects now use the real map width for their position hash (fixes #127).
 - The enchanter now uses the item specific price per charge if the item has one (fixes #125).

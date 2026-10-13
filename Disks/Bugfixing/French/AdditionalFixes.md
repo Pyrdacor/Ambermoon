@@ -1,5 +1,6 @@
 ## Unreleased
 
+- Removed the random encounters with Gizzeks near the town walls of Dor Kiredon again (added in 1.18). The palette of the town's combat background doesn't suit them, so they had wrong colors. The encounters with the insects happen there again like in the original (fixes #145).
 - Added the missing text in Luminor's tower 5 which is shown when pressing the button while the fire demons are still alive.
 - Fixed collision of two beds and a log in the corridor map (267), you could walk onto them (fixes #146).
 - Fixed walkable curtains in the wall of the trainer house in Spannenberg (fixes #123).

@@ -1,5 +1,6 @@
 ## Unreleased
 
+- Removed the random encounters with Gizzeks near the town walls of Dor Kiredon again (added in 1.18). The palette of the town's combat background doesn't suit them, so they had wrong colors. The encounters with the insects happen there again like in the original (fixes #145).
 - Fixed collision of two beds and a log in the corridor map (267), you could walk onto them (fixes #146).
 - Fixed walkable curtains in the wall of the trainer house in Spannenberg (fixes #123).
 - The pieces of amber in the mine of Dor Kiredon (level 1 and 2) and in Ferrin's storage cellar are no longer empty after the first one was taken. This was broken since german 1.08 / english 1.09 (fixes #103).
