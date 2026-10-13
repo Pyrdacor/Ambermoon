@@ -1,5 +1,6 @@
 ## Unreleased
 
+- The border of the airship maps used a wall which their labdata doesn't have. It is now the usual invisible border (255), so the automap and the magic map no longer show garbage there (#99).
 - Four goto points of Dor Grestin (both exits, the nest and the food store) shared their 'known' bits with goto points in Spannenberg and the Rogue's wine cellar, so they were shown on the map before they were found (#99).
 - Removed the random encounters with Gizzeks near the town walls of Dor Kiredon again (added in 1.18). The palette of the town's combat background doesn't suit them, so they had wrong colors. The encounters with the insects happen there again like in the original (fixes #145).
 - Added the missing text in Luminor's tower 5 which is shown when pressing the button while the fire demons are still alive.
