@@ -1,5 +1,25 @@
-Ambermoon German 1.21 by Pyrdacor (08-10-2026)
+Ambermoon German 1.22 by Pyrdacor (13-10-2026)
 ==============================================
+
+Änderungen in 1.22
+==================
+
+- Wenn man in die Nähe der Ränder der Weltkarte von Lyramion fliegt (z.B. mit
+  dem Riesenadler), bricht das Spiel nicht mehr mit "file couldn't be loaded"
+  ab. In 1.20 und 1.21 fehlten einige Kartentext-Dateien.
+- Falsche Wanddekorationen in 3D-Städten wurden behoben. Beim Betreten einer
+  Stadt wie Illien oder Newlake konnten manche Wände die Fenster, Säulen oder
+  Rätselmünder anderer Wände zeigen. Das war ein Fehler im Original-Spiel.
+- Die Automap und die magische Karte zeigen im Luftschiff keinen Grafikmüll
+  mehr.
+- Einige Orte in Dor Grestin wurden auf der Karte angezeigt, bevor man sie
+  gefunden hatte.
+- Der Jugendtrank und der Jugendzauber machen Charaktere, die jünger als 18
+  sind, nicht mehr älter.
+- Tote Charaktere können außerhalb von Kämpfen keine Gegenstände mehr
+  benutzen.
+- Die Zufallskämpfe mit Gizzeks an der Stadtmauer von Dor Kiredon wurden
+  wieder entfernt. Sie hatten falsche Farben.
 
 Änderungen in 1.21
 ==================

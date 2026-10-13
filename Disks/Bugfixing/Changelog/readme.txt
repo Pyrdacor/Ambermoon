@@ -1,5 +1,24 @@
-Ambermoon German 1.21 by Pyrdacor (08-10-2026)
+Ambermoon German 1.22 by Pyrdacor (13-10-2026)
 ==============================================
+
+Changes in 1.22
+===============
+
+- Flying near the borders of the world map of Lyramion (e.g. with the giant
+  eagle) no longer stops the game with "file couldn't be loaded". Some map
+  text files were missing in 1.20 and 1.21.
+- Wrong wall decorations in 3D towns are fixed. When entering a town like
+  Illien or Newlake, some walls could show the windows, pillars or riddle
+  mouths of other walls. This was a bug of the original game.
+- The automap and the magic map no longer show garbage in the airship.
+- Some places of Dor Grestin were shown on the map before you found them.
+- The youth potion and the youth spell no longer make characters older who
+  are younger than 18.
+- Dead characters can no longer use items outside of combat.
+- The random encounters with Gizzeks at the town walls of Dor Kiredon were
+  removed again. They had wrong colors.
+- English: New text for the riddle mouth in grandfather's cellar. It no
+  longer asks you to answer a clue that never follows.
 
 Changes in 1.21
 ===============
