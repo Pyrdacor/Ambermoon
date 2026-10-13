@@ -1510,6 +1510,8 @@ Youth:
 	swap	d0
 	addq.w	#1,d0
 	move.w	AAge(a0),d1		; Subtract from age
+	cmp.w	#Minimum_age,d1		; FIX: Already young enough ?
+	ble.s	.Ok			;  Yes -> Keep age (was set to 18) (#23)
 	sub.w	d0,d1
 	cmp.w	#Minimum_age,d1		; Too young ?
 	bpl.s	.Ok
