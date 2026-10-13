@@ -266,9 +266,9 @@ Show_eagle_flying_away:
 	addq.w	#4,d0			; Fly away
 	subq.w	#1,d1
 	dbra	d7,.Loop
-	jsr	Remove_HDOB		; Exit
-	jsr	Update_screen
-	move.b	HDOB_gfx_handle(a0),d0
+	move.b	HDOB_gfx_handle(a0),d0	; FIX: Was read after Remove_HDOB,
+	jsr	Remove_HDOB		;  which clears the handle, so the
+	jsr	Update_screen		;  fake handle was never destroyed.
 	jsr	Destroy_fake_handle
 	Pop	CA
 .Exit:	movem.l	(sp)+,d0/d1/d7/a0
