@@ -293,7 +293,9 @@ void WriteGameDataFile(string containerFile, Error<Optional<uint8[]>> result)
     }
 }
 
-Error<uint8[]> WriteContainerData(Dictionary<uint32, uint8[]> files, FileType fileType)
+// `minimumFileCount`: the number of files of the container in the game data, so that the empty files at its end are
+// kept (the game loads them, e.g. the texts of the maps 234-256 in 1Map_texts.amb)
+Error<uint8[]> WriteContainerData(Dictionary<uint32, uint8[]> files, FileType fileType, int minimumFileCount)
 {
     // (the original: "The first file must have index 1 and not 0.", and Max() of no files)
     if (files.ContainsKey(0))
@@ -302,7 +304,7 @@ Error<uint8[]> WriteContainerData(Dictionary<uint32, uint8[]> files, FileType fi
         return error("Sequence contains no elements");
 
     var writer = new DataWriter();
-    try FileWriter.WriteContainer(ref writer, files, fileType, null,
+    try FileWriter.WriteContainer(ref writer, files, fileType, (Optional<int>)minimumFileCount,
                                   NewCompression ? LobType.TakeBest : LobType.Ambermoon,
                                   NewCompression ? FileDictionaryCompression.UseBest : FileDictionaryCompression.None, null);
     return writer.ToArray();
@@ -485,7 +487,7 @@ Error<Optional<uint8[]>> PatchedCharacters(string filename, Dictionary<uint32, s
     }
 
     bool party = ToLowerNet(Path.GetFileName(filename)).StartsWith("party");
-    var containerData = try WriteContainerData(files, party ? FileType.AMBR : FileType.AMPC);
+    var containerData = try WriteContainerData(files, party ? FileType.AMBR : FileType.AMPC, container.Files.Count());
     return (Optional<uint8[]>)containerData;
 }
 
@@ -615,7 +617,7 @@ Error<Optional<uint8[]>> PatchedGotoPoints(string filename, Dictionary<uint32, s
         files[key] = writer.ToArray();
     }
 
-    var containerData = try WriteContainerData(files, FileType.AMPC);
+    var containerData = try WriteContainerData(files, FileType.AMPC, container.Files.Count());
     return (Optional<uint8[]>)containerData;
 }
 
@@ -631,7 +633,7 @@ Error<Optional<uint8[]>> PatchedTextContainer(string file, Dictionary<uint32, st
         return (Optional<uint8[]>)new uint8[0];
 
     var gameData = ImportGameData();
-    if (!gameData.Files.ContainsKey(file))
+    if (gameData.Files.TryGet(file) is not FileContainer container)
         return (Optional<uint8[]>)null;
 
     var containerFiles = Dictionary<uint32, uint8[]>.Create();
@@ -653,7 +655,7 @@ Error<Optional<uint8[]>> PatchedTextContainer(string file, Dictionary<uint32, st
         containerFiles[key] = writer.ToArray();
     }
 
-    var containerData = try WriteContainerData(containerFiles, FileType.AMNP);
+    var containerData = try WriteContainerData(containerFiles, FileType.AMNP, container.Files.Count());
     return (Optional<uint8[]>)containerData;
 }
 
