@@ -1852,9 +1852,9 @@ Show_eagle_flying_in:
 	addq.w	#4,d0			; Fly away
 	addq.w	#1,d1
 	dbra	d7,.Loop
-	jsr	Remove_HDOB		; Exit
-	move.b	HDOB_gfx_handle(a0),d0
-	jsr	Destroy_fake_handle
+	move.b	HDOB_gfx_handle(a0),d0	; FIX: Was read after Remove_HDOB,
+	jsr	Remove_HDOB		;  which clears the handle, so the
+	jsr	Destroy_fake_handle		;  fake handle was never destroyed.
 	Pop	CA
 .Exit:	movem.l	(sp)+,d0/d1/d7/a0
 	rts
