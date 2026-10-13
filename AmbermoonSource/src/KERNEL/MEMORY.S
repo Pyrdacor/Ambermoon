@@ -152,7 +152,10 @@ Duplicate_or_load_block:
 	jsr	Update_file_mem_prio
 	jsr	Claim_block
 .Exit:
-	movem.l	(sp)+,d1/d2/a0-a2
+	tst.b	d0			; FIX: The block is unique. Invalidate it
+	beq.s	.Done			;  so that no other load can find and
+	jsr	Invalidate_memory		;  share it (it is changed, e.g. by the
+.Done:	movem.l	(sp)+,d1/d2/a0-a2	;  wall overlays, #66).
 	rts
 
 ;*****************************************************************************
