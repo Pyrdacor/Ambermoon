@@ -1576,7 +1576,11 @@ Update_weight:
 Inv2_CIL_evaluate:
 	Get	Inventory_handle,a1
 ; ---------- Check if we are in combat ------------
-	tst.b	Battling			; Well ?
+	move.w	Body_conditions(a1),d0	; FIX: Dead characters could use
+	andi.w	#Dead_mask,d0		;  items outside of combat (#68)
+	beq.s	.Not_dead
+	bset	#7,2(a0)			; Disable	{Use item}
+.Not_dead:	tst.b	Battling			; Well ?
 	beq.s	.No_combat
 	bset	#7,6(a0)			; Disable	{Drop item}
 	bset	#7,14(a0)			; Disable	{Transfer	gold}
