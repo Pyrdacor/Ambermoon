@@ -91,6 +91,8 @@ Automap_ModInit:
 	cmp.w	#First_wall,d2		; Wall or object ?
 	bmi	.Object
 	subi.w	#First_wall,d2		; Wall !
+	cmp.w	Nr_of_walls,d2		; FIX: Legal ? The airship maps use
+	bpl.s	.Done			;  a wall the labdata doesn't have (#99)
 	lea.l	Wall_data_offsets,a3	; Get wall data address
 	lsl.w	#2,d2
 	move.l	0(a3,d2.w),a3

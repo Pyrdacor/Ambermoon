@@ -307,6 +307,8 @@ Insert_3D_in_minimap:
 	cmp.w	#First_wall,d2		; Wall ?
 	bmi.s	.Next_X
 	subi.w	#First_wall,d2		; Display
+	cmp.w	Nr_of_walls,d2		; FIX: Legal ? (#99)
+	bpl.s	.Next_X
 	lsl.w	#2,d2
 	move.l	0(a2,d2.w),d2
 	move.b	Wall_minimap_colour(a1,d2.l),d2
