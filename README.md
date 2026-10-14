@@ -52,6 +52,8 @@ There you can see the progress of bugfixes.
 
 Beside that all releases contain a readme.txt with a summary of all the changes since the original versions.
 
+Hexaae created a modded Floors.amb which replaces the grass texture in cities with some cobblestones. See https://github.com/Hexaae/Ambermoon-ground-texture-fix.
+
 ## Tool releases
 
 | Version | Release date | Windows 64bit | Linux 64bit | Amiga | Windows 32bit |
