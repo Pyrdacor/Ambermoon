@@ -621,9 +621,18 @@ Offset | Type | Description
 0x01 | ubyte | Character index
 0x02 | ubyte | Chest index for equipment
 0x03 | ubyte | Chest index for inventory items
-0x04 | ubyte[6] | Unused
+0x04 | ubyte | **Ambermoon Advanced** only: Chest flags (0 in the original)
+0x05 | ubyte[5] | Unused
 
 This event is not used in the original but there is actually code for this event.
+
+### Chest flags (Ambermoon Advanced only)
+
+- Bit0: The equipment chest is an extended chest
+- Bit1: The inventory chest is an extended chest
+- Bit2-7: Unused
+
+The chest indices are 0-based like in the chest event (the program adds 1 to get the chest file). As the event has only a byte for each chest index, an extended chest (index above 256) is addressed with the corresponding flag, which adds 256 to the chest index. This works like the extended chest flag of the [chest event](#chest-event-0x03--3).
 
 First the party members in slot 2 to 6 are checked for a match with the character index. The character index is basically the sub-file index of Party_char.amb. So you can specify something like `remove Sabine from party` by specifying the character index for Sabine. If the given character is not inside the party, nothing happens but the result is set to false so a following condition might branch depending on the outcome.
 
@@ -631,7 +640,9 @@ Before the character is removed from the party, all equipped items are stored in
 
 **Bug:** There is a code bug in the original, where the amount of items is stored in register D1 instead of D7. This way the event wouldn't work as expected or might even crash the application dependent on the previous value in D7.
 
-**Ambermoon Advanced:** I repaired the event code for the extension so in theory it can be used with this codebase. It is untested though and not really used by Ambermoon Advanced as well.
+**Ambermoon Advanced:** I repaired the event code for the extension. In Episode 4 the event is used for the first time: Bore leaves the party in Dor Kiredon and his items are stored in two extended chests in the mine.
+
+**Note:** When the character is removed, the program clears the character bit at the character's "person save bit position", so the character appears on its home map again (like after leaving the party in a conversation). If this is not wanted, a following event has to set the character bit again.
 
 
 ## Delay event (0x19 / 25) (Ambermoon Advanced only)
