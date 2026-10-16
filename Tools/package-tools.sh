@@ -21,7 +21,7 @@ OUT="$(cd "$OUT" && pwd)"
 
 # the tools of the release
 TOOLS=(Ambermoon3DMapViewer AmbermoonDiskExtract AmbermoonEventEditor AmbermoonImageConverter AmbermoonItemEditor
-       AmbermoonLabdataEditor AmbermoonPack AmbermoonTextManager)
+       AmbermoonLabdataEditor AmbermoonMapEditor2D AmbermoonPack AmbermoonTextManager)
 
 case "$PLATFORM" in
     windows) EXE=".exe"; TARGET=(); ARCHIVE="AmbermoonTools-$VERSION-Windows.zip" ;;

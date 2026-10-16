@@ -71,6 +71,7 @@ Since 1.18 the tools are native programs (written in CShift, see [Tools](Tools/R
 -   A tool to view and edit labyrinth data (AmbermoonLabdataEditor)
 -   A tool to view, add and edit items (AmbermoonItemEditor)
 -   A tool to inspect 3D maps in a console window (Ambermoon3DMapViewer)
+-   An editor for the 2D maps with a window (AmbermoonMapEditor2D, since the tools 1.20)
 -   A tool to create Ambermoon graphic files from PNGs and palettes (AmbermoonImageConverter)
 
 The 1.17 archives also contain AmbermoonMonsterEditor and AmbermoonTextImport.

@@ -1,5 +1,5 @@
 # Builds the tool release: Ambermoon3DMapViewer, AmbermoonDiskExtract, AmbermoonEventEditor, AmbermoonImageConverter,
-# AmbermoonItemEditor, AmbermoonLabdataEditor, AmbermoonPack and AmbermoonTextManager (Tools/, CShift), each platform
+# AmbermoonItemEditor, AmbermoonLabdataEditor, AmbermoonMapEditor2D, AmbermoonPack and AmbermoonTextManager (Tools/, CShift), each platform
 # in one archive: Windows (zip), Linux (tar.gz) and the Amiga (lha). See Tools/package-tools.sh.
 #
 # Trigger: a pushed tag tools-vX.XX (e.g. tools-v1.18): the archives are attached to the release
@@ -100,6 +100,6 @@ jobs:
           VERSION: ${{ needs.version.outputs.version }}
         run: |
           ls -l release
-          notes="The Ambermoon tools $VERSION: Ambermoon3DMapViewer, AmbermoonDiskExtract, AmbermoonEventEditor, AmbermoonImageConverter, AmbermoonItemEditor, AmbermoonLabdataEditor, AmbermoonPack and AmbermoonTextManager for Windows (zip), Linux (tar.gz) and the Amiga (lha). Built from ${{ github.sha }}."
+          notes="The Ambermoon tools $VERSION: Ambermoon3DMapViewer, AmbermoonDiskExtract, AmbermoonEventEditor, AmbermoonImageConverter, AmbermoonItemEditor, AmbermoonLabdataEditor, AmbermoonMapEditor2D, AmbermoonPack and AmbermoonTextManager for Windows (zip), Linux (tar.gz) and the Amiga (lha). Built from ${{ github.sha }}."
           gh release create "${{ github.ref_name }}" release/* --repo "${{ github.repository }}" --verify-tag \
             --title "Ambermoon Tools $VERSION" --notes "$notes" --latest=false
