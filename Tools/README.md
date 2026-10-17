@@ -140,6 +140,7 @@ AmbermoonFontProcessor SmallGlyphs.png [commands.txt]   # copy <index> | save [p
 AmbermoonReleaseCreator Czech 1.20                  # in the Ambermoon repository: Disks/Czech/ambermoon_czech_1.20_*
 AmbermoonAdvancedReleaseCreator D:\rel 1.20         # D:\rel\<lang>\ambermoon_advanced_<lang>_1.20_extracted.zip, ...
 AmbermoonMapEditor2D Amberfiles 258                  # the map editor (a window) with map 258 of the game data
+AmbermoonImageEditor item.png                        # the paint program (a window); other files ask for their format
 ```
 
 AmbermoonReleaseCreator runs the tools AmbermoonTextManager, AmbermoonFontCreator, AmbermoonIntroPatcher and

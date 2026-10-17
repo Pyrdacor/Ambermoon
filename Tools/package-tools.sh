@@ -20,8 +20,8 @@ mkdir -p "$OUT"
 OUT="$(cd "$OUT" && pwd)"
 
 # the tools of the release
-TOOLS=(Ambermoon3DMapViewer AmbermoonDiskExtract AmbermoonEventEditor AmbermoonImageConverter AmbermoonItemEditor
-       AmbermoonLabdataEditor AmbermoonMapEditor2D AmbermoonPack AmbermoonTextManager)
+TOOLS=(Ambermoon3DMapViewer AmbermoonDiskExtract AmbermoonEventEditor AmbermoonImageConverter AmbermoonImageEditor
+       AmbermoonItemEditor AmbermoonLabdataEditor AmbermoonMapEditor2D AmbermoonPack AmbermoonTextManager)
 
 case "$PLATFORM" in
     windows) EXE=".exe"; TARGET=(); ARCHIVE="AmbermoonTools-$VERSION-Windows.zip" ;;
