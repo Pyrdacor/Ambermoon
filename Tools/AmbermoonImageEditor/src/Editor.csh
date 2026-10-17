@@ -30,7 +30,6 @@ struct Editor
     string FilePath;           // "" for a new picture
     FileKind Kind;
     AmigaFormat Format;        // how the Amiga graphic is stored (also the defaults of the dialogs)
-    int PaletteOffset;         // where the colors are in a palette file of 32 colors
     Image View;                // the picture as it is shown (transparent pixels as a checkerboard)
     bool ViewChanged;
 
@@ -46,7 +45,7 @@ struct Editor
     bool FillEverywhere;
     uint32 Primary;            // a palette index, or ARGB for pictures with more than 256 colors
     uint32 Secondary;
-    int Zoom;                  // 1, 2, 4 or 8
+    int Zoom;                  // 1, 2 or 4
     bool Drawing;
     bool DrawingSecondary;
     int LastX;
@@ -119,7 +118,6 @@ struct Editor
         ChangeCounter = 0;
         SavedAtChange = 0;
         Drawing = false;
-        PaletteOffset = 0;
         _ResetColors();
         View = Image.Create(picture.Width, picture.Height);
         ViewChanged = true;
@@ -163,8 +161,8 @@ struct Editor
         }
         RawData = data;
         DialogPath = path;
-        DialogFormat = Format;
-        DialogFormat.Frames = 1;
+        // the defaults: no preset, 5 bits per pixel, 1 frame (the size of the last graphic)
+        DialogFormat = AmigaFormat.Create(Format.Width, Format.Height, 5);
         ShowRaw = true;
         return;
     }
@@ -174,21 +172,10 @@ struct Editor
     Error<void> OpenRaw(AmigaFormat format)
     {
         var indices = try DecodePlanar(RawData, format);
-        var palette = List<uint32>.Create();
-        var colors = DefaultPalette();
-        int count = 1 << format.Bpp;
-        // the colors where the graphics of this depth are in the palettes of the game (4 bits: from 16 on, 3: from 24 on)
-        int offset = format.Bpp == 4 ? 16 : format.Bpp == 3 ? 24 : 0;
-        for (var i = 0; i < count; i += 1)
-            palette.Add(colors[(offset + i) % colors.Length]);
-        if (format.Bpp == 1)
-        {
-            palette[0] = 0xff000000u;
-            palette[1] = 0xffffffffu;
-        }
+        // the palette of a new graphic of this depth (its size is 1 << bpp)
+        var palette = Picture.CreateAmiga(1, 1, format.Bpp).Palette;
         _SetPicture(Picture.FromIndices(format.Width * Math.Max(1, format.Frames), format.Height, indices, palette), DialogPath, FileKind.Amiga);
         Format = format;
-        PaletteOffset = offset;
         RawData = new uint8[0];
         return;
     }
@@ -232,14 +219,13 @@ struct Editor
         Format.Bpp = bpp;
         if (!Format.SlicesAllowed())
             Format.Slices = false;
-        PaletteOffset = 0;
         _ResetColors();
         ViewChanged = true;
     }
 
     // ---- palette files ----
 
-    /// Takes the colors of a palette file (from the palette offset on).
+    /// Takes the colors of a palette file (as many as the palette of the picture has, at most 32).
     /// @error the file cannot be read, or the picture has no palette.
     Error<void> LoadPalette(string path)
     {
@@ -249,19 +235,19 @@ struct Editor
             return error($"Could not read '{path}'.");
         var colors = try ReadPaletteFile(data);
         BeginChange();
-        for (var i = 0; i < Picture.Palette.Count() && PaletteOffset + i < colors.Length; i += 1)
-            Picture.Palette[i] = colors[PaletteOffset + i];
+        for (var i = 0; i < Picture.Palette.Count() && i < colors.Length; i += 1)
+            Picture.Palette[i] = colors[i];
         ViewChanged = true;
         return;
     }
 
-    /// Saves the colors as a palette file (from the palette offset on).
+    /// Saves the colors as a palette file (always 32 colors: the first 32 of the palette, black for missing ones).
     /// @error the file cannot be written, or the picture has no palette.
     Error<void> SavePalette(string path)
     {
         if (!Picture.Indexed)
             return error("The picture has more than 256 colors and no palette.");
-        if (File.WriteAllBytes(path, WritePaletteFile(Picture.Palette, PaletteOffset)) is error)
+        if (File.WriteAllBytes(path, WritePaletteFile(Picture.Palette)) is error)
             return error($"Could not write '{path}'.");
         return;
     }

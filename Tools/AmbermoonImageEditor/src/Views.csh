@@ -23,7 +23,7 @@ string ToolHelp(Tool tool)
         case Tool.Pencil: return "Pixels; dragging draws lines. Left: primary color, right: secondary color (D)";
         case Tool.Brush: return "A square brush of 2x2 to 16x16 pixels (B)";
         case Tool.Fill: return "Fills the area of the color, or the color everywhere (F)";
-        case Tool.Eraser: return "Makes pixels transparent (E)";
+        case Tool.Eraser: return "Makes pixels transparent; dragging erases a line (E)";
         default: return "Takes the color of a pixel. Left: primary, right: secondary (I)";
     }
 }
@@ -67,7 +67,6 @@ void DrawMenu(Ui ui, ref Editor editor)
             if (ui.MenuItem("Zoom 1x", "1")) editor.Zoom = 1;
             if (ui.MenuItem("Zoom 2x", "2")) editor.Zoom = 2;
             if (ui.MenuItem("Zoom 4x", "4")) editor.Zoom = 4;
-            if (ui.MenuItem("Zoom 8x", "8")) editor.Zoom = 8;
             if (ui.MenuItem(editor.ShowGrid ? "Hide the grid" : "Show the grid", "G"))
                 editor.ShowGrid = !editor.ShowGrid;
         }
@@ -103,14 +102,12 @@ void DrawToolbar(Ui ui, ref Editor editor)
                 editor.Tool = tool;
             ui.Tooltip(ToolHelp(tool));
         }
-        if (editor.Tool == Tool.Brush || editor.Tool == Tool.Eraser)
+        if (editor.Tool == Tool.Brush)
         {
-            int min = editor.Tool == Tool.Brush ? 2 : 1;
-            editor.BrushSize = Math.Max(min, editor.BrushSize);
             ui.Label($"Size {editor.BrushSize}x{editor.BrushSize}");
             using (ui.Column(140))
             {
-                ui.Slider("brushsize", ref editor.BrushSize, min, 16);
+                ui.Slider("brushsize", ref editor.BrushSize, 2, 16);
             }
         }
         if (editor.Tool == Tool.Fill)
@@ -121,7 +118,6 @@ void DrawToolbar(Ui ui, ref Editor editor)
         ui.Radio("1x", ref editor.Zoom, 1);
         ui.Radio("2x", ref editor.Zoom, 2);
         ui.Radio("4x", ref editor.Zoom, 4);
-        ui.Radio("8x", ref editor.Zoom, 8);
     }
 }
 
@@ -150,7 +146,7 @@ void DrawCanvas(Ui ui, ref Editor editor, int height)
             ui.SetCursor(Cursor.Crosshair);
         }
         if (ui.Hovered() && input.Ctrl && input.Wheel != 0)
-            editor.Zoom = input.Wheel > 0 ? Math.Min(8, editor.Zoom * 2) : Math.Max(1, editor.Zoom / 2);
+            editor.Zoom = input.Wheel > 0 ? Math.Min(4, editor.Zoom * 2) : Math.Max(1, editor.Zoom / 2);
         _UseTool(ref editor, input, held, rightHeld);
 
         var canvas = ui.Canvas();
@@ -185,7 +181,7 @@ void DrawCanvas(Ui ui, ref Editor editor, int height)
         // the pixels the tool would change
         if (editor.HoverX >= 0)
         {
-            int size = editor.Tool == Tool.Brush || editor.Tool == Tool.Eraser ? editor.BrushSize : 1;
+            int size = editor.Tool == Tool.Brush ? editor.BrushSize : 1;
             int start = -(size - 1) / 2;
             int x0 = Math.Max(0, editor.HoverX + start);
             int y0 = Math.Max(0, editor.HoverY + start);
@@ -266,7 +262,7 @@ void _UseTool(ref Editor editor, UiInput input, bool held, bool rightHeld)
 
 int _ToolSize(ref Editor editor)
 {
-    return editor.Tool == Tool.Pencil ? 1 : editor.BrushSize;
+    return editor.Tool == Tool.Brush ? editor.BrushSize : 1;
 }
 
 // the value a drawing tool sets; false if the eraser finds no transparent color
@@ -341,25 +337,6 @@ void DrawSideBar(Ui ui, ref Editor editor)
                 _DrawColorEditor(ui, ref editor);
                 if (picture.TransparentZero)
                     ui.Note("Color 0 is transparent.");
-                var offsets = PaletteOffsets(_Bpp(ref editor));
-                if (picture.Palette.Count() <= PaletteFileColors && offsets.Count() > 1)
-                {
-                    var names = List<string>.Create();
-                    int selected = 0;
-                    for (var i = 0; i < offsets.Count(); i += 1)
-                    {
-                        names.Add(offsets[i].ToString());
-                        if (offsets[i] == editor.PaletteOffset)
-                            selected = i;
-                    }
-                    using (ui.Row())
-                    {
-                        ui.Label("Palette offset");
-                        if (ui.ComboBox("paloffset", ref selected, names))
-                            editor.PaletteOffset = offsets[selected];
-                    }
-                    ui.Tooltip("Where the colors are in a palette file of 32 colors (Ambermoon: 4 BPP from 16, 3 BPP from 24)");
-                }
             }
         }
 

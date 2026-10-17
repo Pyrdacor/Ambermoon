@@ -242,25 +242,15 @@ Error<uint32[]> ReadPaletteFile(uint8[] data)
     return palette;
 }
 
-/// A palette file of the game: the colors from `offset` on, black for the rest.
-uint8[] WritePaletteFile(List<uint32> colors, int offset)
+/// A palette file of the game: 32 colors (the first 32, black for missing ones).
+uint8[] WritePaletteFile(List<uint32> colors)
 {
     var data = new uint8[2 * PaletteFileColors];
-    for (var i = 0; i < colors.Count() && offset + i < PaletteFileColors; i += 1)
+    for (var i = 0; i < colors.Count() && i < PaletteFileColors; i += 1)
     {
         int color = ToAmigaColor(colors[i]);
-        data[2 * (offset + i)] = (uint8)(color >> 8);
-        data[2 * (offset + i) + 1] = (uint8)(color & 0xff);
+        data[2 * i] = (uint8)(color >> 8);
+        data[2 * i + 1] = (uint8)(color & 0xff);
     }
     return data;
-}
-
-/// The palette offsets a graphic of some bits per pixel can have in the 32 colors of a palette of the game.
-List<int> PaletteOffsets(int bpp)
-{
-    var offsets = List<int>.Create();
-    int count = 1 << bpp;
-    for (var offset = 0; offset + count <= PaletteFileColors; offset += Math.Max(8, count))
-        offsets.Add(offset);
-    return offsets;
 }

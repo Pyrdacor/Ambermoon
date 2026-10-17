@@ -36,7 +36,7 @@ void HandleKeys(Ui ui, ref Editor editor)
         editor.DoUndo();
     if (input.Pressed(Key.Y, ctrl))
         editor.DoRedo();
-    // the tools and the zoom only without modifiers
+    // the tools and the zoom (1x, 2x, 4x) only without modifiers
     var none = KeyModifiers.None;
     if (input.Pressed(Key.D, none)) editor.Tool = Tool.Pencil;
     if (input.Pressed(Key.B, none)) editor.Tool = Tool.Brush;
@@ -47,7 +47,6 @@ void HandleKeys(Ui ui, ref Editor editor)
     if (input.Pressed(Key.D1, none)) editor.Zoom = 1;
     if (input.Pressed(Key.D2, none)) editor.Zoom = 2;
     if (input.Pressed(Key.D4, none)) editor.Zoom = 4;
-    if (input.Pressed(Key.D8, none)) editor.Zoom = 8;
 }
 
 bool AnyDialog(ref Editor editor)

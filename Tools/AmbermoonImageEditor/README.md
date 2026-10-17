@@ -9,14 +9,12 @@ for it yet.
 AmbermoonImageEditor [file]
 ```
 
-It is a new program in place of `AmbermoonTools/AmbermoonImageEditor` (WinForms), not a port of it.
-
 ## Files
 
 - **Open** (Ctrl+O): a PNG or BMP file is opened at once. Any other file is read as an Amiga graphic, and a dialog asks
   for its format:
-  - **Format**: a preset of the game, or "None" to choose freely. A preset fixes what it knows: it shows those values
-    and they cannot be changed.
+  - **Format**: a preset of the game, or "None" (the default) to choose freely. A preset fixes what it knows: it shows
+    those values and they cannot be changed.
   - **Width** and **height** (of one frame).
   - **Bits per pixel**: 1, 3, 4 or 5 (default 5).
   - **Frames** (default 1): graphics of the same size one after the other in the file; they are shown side by side,
@@ -57,11 +55,11 @@ The left mouse button paints with the left color and the right button with the r
 | Pencil (D) | pixels; dragging draws a line of pixels |
 | Brush (B) | a square of 2x2 to 16x16 pixels (the size in the toolbar) |
 | Fill (F) | fills the area of the color (connected horizontally and vertically), or with "Replace the color everywhere" every pixel of that color |
-| Eraser (E) | makes pixels transparent (color 0 of an Amiga graphic), 1x1 to 16x16 |
+| Eraser (E) | makes pixels transparent (color 0 of an Amiga graphic); dragging erases a line of pixels |
 | Picker (I) | takes the color of a pixel |
 
 Other controls:
-- Zoom 1x, 2x, 4x or 8x: the keys 1, 2, 4, 8, the toolbar, or Ctrl and the wheel.
+- Zoom 1x, 2x or 4x: the keys 1, 2, 4, the toolbar, or Ctrl and the wheel.
 - G shows a grid from 4x zoom on.
 - Undo (Ctrl+Z) and redo (Ctrl+Y) cover 64 steps.
 - Closing the window asks about unsaved changes.
@@ -87,13 +85,8 @@ no palette ("Too many colors"), and the colors are ARGB.
 Pictures that have few enough colors keep them exactly.
 
 **Palette > Load palette / Save palette**: a palette file of the game has 32 colors of 16 bits (X4R4G4B4, big endian:
-64 bytes), like the files of `Palettes.amb`. The **palette offset** is where the colors of the picture are in those 32:
-- 4 bits per pixel use 16 colors from 0 or 16;
-- 3 bits use 8 colors from 0, 8, 16 or 24.
-
-The graphics of the game with 4 bits use colors 16 to 31, those with 3 bits 24 to 31. An Amiga graphic of 4 or 3 bits
-is opened with that offset and with those colors of palette 1. When a palette is saved, the colors outside the picture
-are black.
+64 bytes), like the files of `Palettes.amb`. Loading takes as many colors as the palette of the picture has (at most
+32). Saving always writes 32 colors: those of the picture, black for the rest.
 
 ## Testing without a window
 
