@@ -67,6 +67,7 @@ void DrawMenu(Ui ui, ref Editor editor)
             if (ui.MenuItem("Zoom 1x", "1")) editor.Zoom = 1;
             if (ui.MenuItem("Zoom 2x", "2")) editor.Zoom = 2;
             if (ui.MenuItem("Zoom 4x", "4")) editor.Zoom = 4;
+            if (ui.MenuItem("Zoom 8x", "8")) editor.Zoom = 8;
             if (ui.MenuItem(editor.ShowGrid ? "Hide the grid" : "Show the grid", "G"))
                 editor.ShowGrid = !editor.ShowGrid;
         }
@@ -118,6 +119,7 @@ void DrawToolbar(Ui ui, ref Editor editor)
         ui.Radio("1x", ref editor.Zoom, 1);
         ui.Radio("2x", ref editor.Zoom, 2);
         ui.Radio("4x", ref editor.Zoom, 4);
+        ui.Radio("8x", ref editor.Zoom, 8);
     }
 }
 
@@ -146,7 +148,7 @@ void DrawCanvas(Ui ui, ref Editor editor, int height)
             ui.SetCursor(Cursor.Crosshair);
         }
         if (ui.Hovered() && input.Ctrl && input.Wheel != 0)
-            editor.Zoom = input.Wheel > 0 ? Math.Min(4, editor.Zoom * 2) : Math.Max(1, editor.Zoom / 2);
+            editor.Zoom = input.Wheel > 0 ? Math.Min(8, editor.Zoom * 2) : Math.Max(1, editor.Zoom / 2);
         _UseTool(ref editor, input, held, rightHeld);
 
         var canvas = ui.Canvas();
@@ -337,6 +339,8 @@ void DrawSideBar(Ui ui, ref Editor editor)
                 _DrawColorEditor(ui, ref editor);
                 if (picture.TransparentZero)
                     ui.Note("Color 0 is transparent.");
+                PaletteOffsetField(ui, "paloffset", editor.PaletteBpp(), ref editor.PaletteOffset);
+                ui.Tooltip("Where the colors are in a palette file of 32 colors (for loading and saving palettes)");
             }
         }
 

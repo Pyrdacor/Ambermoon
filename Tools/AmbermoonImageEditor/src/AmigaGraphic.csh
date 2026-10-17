@@ -242,15 +242,45 @@ Error<uint32[]> ReadPaletteFile(uint8[] data)
     return palette;
 }
 
-/// A palette file of the game: 32 colors (the first 32, black for missing ones).
-uint8[] WritePaletteFile(List<uint32> colors)
+/// A palette file of the game: 32 colors, those of the picture from `offset` on, black for the others.
+uint8[] WritePaletteFile(List<uint32> colors, int offset)
 {
     var data = new uint8[2 * PaletteFileColors];
-    for (var i = 0; i < colors.Count() && i < PaletteFileColors; i += 1)
+    for (var i = 0; i < colors.Count() && offset + i < PaletteFileColors; i += 1)
     {
         int color = ToAmigaColor(colors[i]);
-        data[2 * i] = (uint8)(color >> 8);
-        data[2 * i + 1] = (uint8)(color & 0xff);
+        data[2 * (offset + i)] = (uint8)(color >> 8);
+        data[2 * (offset + i) + 1] = (uint8)(color & 0xff);
     }
     return data;
+}
+
+/// The palette offsets an Amiga graphic can have in the 32 colors of a palette file: 0 or 16 for 4 bits per pixel,
+/// 0, 16 or 24 for 3 bits, only 0 for the others.
+List<int> PaletteOffsets(int bpp)
+{
+    var offsets = List<int>.Create();
+    offsets.Add(0);
+    if (bpp == 4 || bpp == 3)
+        offsets.Add(16);
+    if (bpp == 3)
+        offsets.Add(24);
+    return offsets;
+}
+
+/// The colors of a new Amiga graphic: 1 << bpp colors of the default palette from `offset` on (black and white for
+/// 1 bit).
+List<uint32> AmigaPalette(int bpp, int offset)
+{
+    var palette = List<uint32>.Create();
+    var colors = DefaultPalette();
+    int count = 1 << bpp;
+    for (var i = 0; i < count; i += 1)
+        palette.Add(offset + i < colors.Length ? colors[offset + i] : 0xff000000u);
+    if (bpp == 1)
+    {
+        palette[0] = 0xff000000u;
+        palette[1] = 0xffffffffu;
+    }
+    return palette;
 }

@@ -20,8 +20,12 @@ AmbermoonImageEditor [file]
   - **Frames** (default 1): graphics of the same size one after the other in the file; they are shown side by side,
     with a line between them.
   - **1 byte per row** (8 pixel slices): for 4 bits per pixel, and for 1 bit with a width up to 8.
+  - **Palette offset** (default 0): which colors of the default palette the graphic uses: 0 or 16 for 4 bits per
+    pixel, 0, 16 or 24 for 3 bits; fixed to 0 otherwise.
 
-  The dialog says how many bytes the format needs and how many the file has.
+  The dialog says how many bytes the format needs and how many the file has, and shows a preview of the graphic in
+  that format, so wrong values are seen at once. If the file is too short for the format, it shows why instead of the
+  preview (and the graphic cannot be opened).
 - **New** (Ctrl+N): width, height and bits per pixel. A new picture is always an Amiga graphic; it has 1 << bpp colors
   (palette 1 of the game; black and white for 1 bit).
 - **Save** (Ctrl+S) writes the file in the format it was opened or last saved in. **Save as** (Ctrl+Shift+S) chooses
@@ -59,7 +63,7 @@ The left mouse button paints with the left color and the right button with the r
 | Picker (I) | takes the color of a pixel |
 
 Other controls:
-- Zoom 1x, 2x or 4x: the keys 1, 2, 4, the toolbar, or Ctrl and the wheel.
+- Zoom 1x, 2x, 4x or 8x: the keys 1, 2, 4, 8, the toolbar, or Ctrl and the wheel.
 - G shows a grid from 4x zoom on.
 - Undo (Ctrl+Z) and redo (Ctrl+Y) cover 64 steps.
 - Closing the window asks about unsaved changes.
@@ -85,8 +89,10 @@ no palette ("Too many colors"), and the colors are ARGB.
 Pictures that have few enough colors keep them exactly.
 
 **Palette > Load palette / Save palette**: a palette file of the game has 32 colors of 16 bits (X4R4G4B4, big endian:
-64 bytes), like the files of `Palettes.amb`. Loading takes as many colors as the palette of the picture has (at most
-32). Saving always writes 32 colors: those of the picture, black for the rest.
+64 bytes), like the files of `Palettes.amb`. The **palette offset** (in the side bar; default 0) is where the colors
+of the picture are in those 32: 0 or 16 for an Amiga graphic of 4 bits per pixel, 0, 16 or 24 for 3 bits, else 0.
+Loading takes the colors from the offset on (as many as the picture has); saving always writes 32 colors, those of the
+picture from the offset on and black for the others.
 
 ## Testing without a window
 

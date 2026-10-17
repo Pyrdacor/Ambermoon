@@ -2,6 +2,7 @@
 // files, unsaved changes and messages.
 
 using System;
+using System.Image;
 using System.Ui;
 
 void ShowError(ref Editor editor, string text)
@@ -171,6 +172,75 @@ void FormatFields(Ui ui, ref AmigaFormat format, bool fixedSize, int totalWidth,
         format.Slices = false;
 }
 
+/// The palette offset: 0, or 0 / 16 for 4 bits per pixel, 0 / 16 / 24 for 3 bits; fixed to 0 for the others.
+void PaletteOffsetField(Ui ui, string id, int bpp, ref int offset)
+{
+    var offsets = PaletteOffsets(bpp);
+    if (!offsets.Contains(offset))
+        offset = 0;
+    using (ui.Row())
+    {
+        ui.Label("Palette offset");
+        if (offsets.Count() == 1)
+        {
+            ui.Label("0");
+            return;
+        }
+        var names = List<string>.Create();
+        int selected = 0;
+        for (var i = 0; i < offsets.Count(); i += 1)
+        {
+            names.Add(offsets[i].ToString());
+            if (offsets[i] == offset)
+                selected = i;
+        }
+        using (ui.Column(90))
+        {
+            if (ui.ComboBox(id, ref selected, names))
+                offset = offsets[selected];
+        }
+    }
+}
+
+const int PreviewWidth = 360;
+const int PreviewHeight = 180;
+const int PreviewPixels = 4000000;
+
+// the preview of the format dialog (made again when the format changes), or why there is none
+void _RawPreview(Ui ui, ref Editor editor)
+{
+    var format = editor.DialogFormat;
+    string key = $"{format.Width},{format.Height},{format.Bpp},{format.Frames},{format.Slices},{editor.DialogOffset}";
+    if (key != editor.PreviewKey)
+    {
+        editor.PreviewKey = key;
+        editor.PreviewError = "";
+        if ((int64)format.Width * format.Height * Math.Max(1, format.Frames) > PreviewPixels)
+            editor.PreviewError = "Too big for a preview.";
+        else if (RawPicture(editor.RawData, format, editor.DialogOffset) is Picture picture)
+            editor.Preview = picture.ToCheckedImage();
+        else if (RawPicture(editor.RawData, format, editor.DialogOffset) is error e)
+            editor.PreviewError = e.Message;
+    }
+    if (editor.PreviewError.Length > 0)
+    {
+        // the reason in the place of the preview
+        using (ui.Panel("No preview"))
+        {
+            ui.Text(editor.PreviewError);
+        }
+        return;
+    }
+    // the whole picture, as large as fits (at most 4 times)
+    var image = editor.Preview;
+    double scale = Math.Min(4.0, Math.Min((double)PreviewWidth / (double)image.Width, (double)PreviewHeight / (double)image.Height));
+    int w = Math.Max(1, (int)((double)image.Width * scale));
+    int h = Math.Max(1, (int)((double)image.Height * scale));
+    var area = ui.Area(PreviewWidth, h);
+    ui.FillRect(area, Color.FromRgb(20, 20, 20));
+    ui.DrawImage(image, Rect.Create(0, 0, image.Width, image.Height), Rect.Create(area.X, area.Y, (int)((double)w * ui.Scale()), area.Height));
+}
+
 /// The format of a file without a PNG or BMP header.
 void RawFormatDialog(Ui ui, ref Editor editor)
 {
@@ -178,6 +248,8 @@ void RawFormatDialog(Ui ui, ref Editor editor)
     {
         ui.Text($"'{Path.GetFileName(editor.DialogPath)}' is no PNG or BMP file. As an Amiga graphic, it needs:");
         FormatFields(ui, ref editor.DialogFormat, false, 0, 0);
+        PaletteOffsetField(ui, "rawoffset", editor.DialogFormat.Bpp, ref editor.DialogOffset);
+        ui.Tooltip("Which colors of the palette the graphic uses (Ambermoon: 4 BPP often from 16, 3 BPP from 24)");
         var format = editor.DialogFormat;
         int size = editor.RawData.Length;
         int needed = format.DataSize();
@@ -190,11 +262,12 @@ void RawFormatDialog(Ui ui, ref Editor editor)
         }
         else
             ui.Note($"This is the size of the file: {size} bytes.");
+        _RawPreview(ui, ref editor);
         using (ui.Row())
         {
-            if (ui.Button("Open") && needed <= size)
+            if (ui.Button("Open") && needed <= size && editor.PreviewError.Length == 0)
             {
-                if (editor.OpenRaw(format) is error e)
+                if (editor.OpenRaw(format, editor.DialogOffset) is error e)
                     ShowError(ref editor, e.Message);
                 editor.ShowRaw = false;
             }

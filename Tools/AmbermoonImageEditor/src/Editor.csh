@@ -30,6 +30,7 @@ struct Editor
     string FilePath;           // "" for a new picture
     FileKind Kind;
     AmigaFormat Format;        // how the Amiga graphic is stored (also the defaults of the dialogs)
+    int PaletteOffset;         // where the colors are in a palette file of 32 colors (0; 4 BPP: 0 or 16; 3 BPP: 0, 16 or 24)
     Image View;                // the picture as it is shown (transparent pixels as a checkerboard)
     bool ViewChanged;
 
@@ -45,7 +46,7 @@ struct Editor
     bool FillEverywhere;
     uint32 Primary;            // a palette index, or ARGB for pictures with more than 256 colors
     uint32 Secondary;
-    int Zoom;                  // 1, 2 or 4
+    int Zoom;                  // 1, 2, 4 or 8
     bool Drawing;
     bool DrawingSecondary;
     int LastX;
@@ -70,6 +71,10 @@ struct Editor
     string DialogPath;
     uint8[] RawData;           // the file that is read as an Amiga graphic
     AmigaFormat DialogFormat;
+    int DialogOffset;          // the palette offset of the format dialog
+    string PreviewKey;         // the format the preview of the format dialog was made for
+    Image Preview;
+    string PreviewError;
     int DialogKind;            // the format of the save dialog (FileKind)
     int DialogBpp;
     int PendingAction;         // after the unsaved changes dialog: 1 open, 2 new, 3 quit
@@ -95,6 +100,9 @@ struct Editor
             DialogPath = "",
             RawData = new uint8[0],
             DialogFormat = AmigaFormat.Create(16, 16, 5),
+            PreviewKey = "",
+            Preview = Image.Create(1, 1),
+            PreviewError = "",
             DialogBpp = 5,
             Status = ""
         };
@@ -118,6 +126,7 @@ struct Editor
         ChangeCounter = 0;
         SavedAtChange = 0;
         Drawing = false;
+        PaletteOffset = 0;
         _ResetColors();
         View = Image.Create(picture.Width, picture.Height);
         ViewChanged = true;
@@ -163,19 +172,20 @@ struct Editor
         DialogPath = path;
         // the defaults: no preset, 5 bits per pixel, 1 frame (the size of the last graphic)
         DialogFormat = AmigaFormat.Create(Format.Width, Format.Height, 5);
+        DialogOffset = 0;
+        PreviewKey = "";
         ShowRaw = true;
         return;
     }
 
     /// Reads the file of the format dialog as an Amiga graphic.
     /// @error the file is too short for the format.
-    Error<void> OpenRaw(AmigaFormat format)
+    Error<void> OpenRaw(AmigaFormat format, int paletteOffset)
     {
-        var indices = try DecodePlanar(RawData, format);
-        // the palette of a new graphic of this depth (its size is 1 << bpp)
-        var palette = Picture.CreateAmiga(1, 1, format.Bpp).Palette;
-        _SetPicture(Picture.FromIndices(format.Width * Math.Max(1, format.Frames), format.Height, indices, palette), DialogPath, FileKind.Amiga);
+        var picture = try RawPicture(RawData, format, paletteOffset);
+        _SetPicture(picture, DialogPath, FileKind.Amiga);
         Format = format;
+        PaletteOffset = PaletteOffsets(format.Bpp).Contains(paletteOffset) ? paletteOffset : 0;
         RawData = new uint8[0];
         return;
     }
@@ -219,13 +229,14 @@ struct Editor
         Format.Bpp = bpp;
         if (!Format.SlicesAllowed())
             Format.Slices = false;
+        PaletteOffset = 0;
         _ResetColors();
         ViewChanged = true;
     }
 
     // ---- palette files ----
 
-    /// Takes the colors of a palette file (as many as the palette of the picture has, at most 32).
+    /// Takes the colors of a palette file from the palette offset on (as many as the palette of the picture has).
     /// @error the file cannot be read, or the picture has no palette.
     Error<void> LoadPalette(string path)
     {
@@ -235,19 +246,20 @@ struct Editor
             return error($"Could not read '{path}'.");
         var colors = try ReadPaletteFile(data);
         BeginChange();
-        for (var i = 0; i < Picture.Palette.Count() && i < colors.Length; i += 1)
-            Picture.Palette[i] = colors[i];
+        for (var i = 0; i < Picture.Palette.Count() && PaletteOffset + i < colors.Length; i += 1)
+            Picture.Palette[i] = colors[PaletteOffset + i];
         ViewChanged = true;
         return;
     }
 
-    /// Saves the colors as a palette file (always 32 colors: the first 32 of the palette, black for missing ones).
+    /// Saves the colors as a palette file: always 32 colors, those of the picture from the palette offset on, black for
+    /// the others.
     /// @error the file cannot be written, or the picture has no palette.
     Error<void> SavePalette(string path)
     {
         if (!Picture.Indexed)
             return error("The picture has more than 256 colors and no palette.");
-        if (File.WriteAllBytes(path, WritePaletteFile(Picture.Palette)) is error)
+        if (File.WriteAllBytes(path, WritePaletteFile(Picture.Palette, PaletteOffset)) is error)
             return error($"Could not write '{path}'.");
         return;
     }
@@ -304,25 +316,20 @@ struct Editor
         if (!ViewChanged)
             return View;
         Picture.RenderInto(View);
-        for (var y = 0; y < View.Height; y += 1)
-        {
-            for (var x = 0; x < View.Width; x += 1)
-            {
-                int i = x + y * View.Width;
-                uint32 color = View.Pixels[i];
-                uint32 alpha = color >> 24;
-                if (alpha == 255)
-                    continue;
-                uint32 back = (((x >> 2) + (y >> 2)) & 1) == 0 ? (uint32)0x9c : (uint32)0x6c;
-                uint32 r = (((color >> 16) & 0xff) * alpha + back * (255 - alpha)) / 255;
-                uint32 g = (((color >> 8) & 0xff) * alpha + back * (255 - alpha)) / 255;
-                uint32 b = ((color & 0xff) * alpha + back * (255 - alpha)) / 255;
-                View.Pixels[i] = 0xff000000u | (r << 16) | (g << 8) | b;
-            }
-        }
+        CheckerBehind(View);
         View.Changed();
         ViewChanged = false;
         return View;
+    }
+
+    /// The bits per pixel the palette offset depends on: those of an Amiga graphic (by the size of its palette), 0 for
+    /// other pictures.
+    int PaletteBpp()
+    {
+        if (!Picture.Indexed || !Picture.TransparentZero)
+            return 0;
+        int count = Picture.Palette.Count();
+        return count == 8 ? 3 : count == 16 ? 4 : count == 2 ? 1 : count == 32 ? 5 : 0;
     }
 
     /// The color a tool paints with (primary or secondary), as the picture stores it.
@@ -336,4 +343,12 @@ struct Editor
     {
         return Picture.Indexed ? Picture.IndexColor((int)value) : value;
     }
+}
+
+/// An Amiga graphic of a file in a format, with the colors of the default palette from the palette offset on.
+/// @error the file is too short for the format.
+Error<Picture> RawPicture(uint8[] data, AmigaFormat format, int paletteOffset)
+{
+    var indices = try DecodePlanar(data, format);
+    return Picture.FromIndices(format.Width * Math.Max(1, format.Frames), format.Height, indices, AmigaPalette(format.Bpp, paletteOffset));
 }

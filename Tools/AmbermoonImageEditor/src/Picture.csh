@@ -23,13 +23,7 @@ struct Picture
     /// A new Amiga graphic: all pixels color 0, the default palette cut to 1 << bpp colors.
     static Picture CreateAmiga(int width, int height, int bpp)
     {
-        var palette = List<uint32>.Create();
-        var colors = DefaultPalette();
-        int count = 1 << bpp;
-        for (var i = 0; i < count; i += 1)
-            palette.Add(i < colors.Length ? colors[i] : 0xff000000u);
-        if (bpp == 1)
-            palette[1] = 0xffffffffu;
+        var palette = AmigaPalette(bpp, 0);
         return Picture
         {
             Width = width,
@@ -264,6 +258,15 @@ struct Picture
         return image;
     }
 
+    /// The picture as it is shown: transparent pixels over a checkerboard.
+    Image ToCheckedImage()
+    {
+        var image = Image.Create(Width, Height);
+        RenderInto(image);
+        CheckerBehind(image);
+        return image;
+    }
+
     /// Draws the picture into an image of its size.
     void RenderInto(Image image)
     {
@@ -300,6 +303,27 @@ struct Picture
                 return bpp;
         }
         return 0;
+    }
+}
+
+/// Puts a checkerboard behind the transparent pixels of an image (blending the half transparent ones).
+void CheckerBehind(Image image)
+{
+    for (var y = 0; y < image.Height; y += 1)
+    {
+        for (var x = 0; x < image.Width; x += 1)
+        {
+            int i = x + y * image.Width;
+            uint32 color = image.Pixels[i];
+            uint32 alpha = color >> 24;
+            if (alpha == 255)
+                continue;
+            uint32 back = (((x >> 2) + (y >> 2)) & 1) == 0 ? (uint32)0x9c : (uint32)0x6c;
+            uint32 r = (((color >> 16) & 0xff) * alpha + back * (255 - alpha)) / 255;
+            uint32 g = (((color >> 8) & 0xff) * alpha + back * (255 - alpha)) / 255;
+            uint32 b = ((color & 0xff) * alpha + back * (255 - alpha)) / 255;
+            image.Pixels[i] = 0xff000000u | (r << 16) | (g << 8) | b;
+        }
     }
 }
 
