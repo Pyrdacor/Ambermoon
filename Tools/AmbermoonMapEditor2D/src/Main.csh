@@ -56,39 +56,38 @@ void Save(ref Editor editor)
 void HandleKeys(Ui ui, ref Editor editor)
 {
     var input = ui.Input();
-    if (input.Ctrl)
-    {
-        if (input.Pressed(Key.O))
-            RunAction(ref editor, 1, false);
-        if (input.Pressed(Key.N))
-            RunAction(ref editor, 2, false);
-        if (input.Pressed(Key.S))
-        {
-            if (input.Shift)
-                editor.ShowSaveFile = editor.MapLoaded;
-            else
-                Save(ref editor);
-        }
-        if (input.Pressed(Key.Z) && editor.MapLoaded)
-            editor.DoUndo();
-        if (input.Pressed(Key.Y) && editor.MapLoaded)
-            editor.DoRedo();
-        if (input.Pressed(Key.Plus))
-            editor.Zoom = Math.Min(4, editor.Zoom + 1);
-        if (input.Pressed(Key.Minus))
-            editor.Zoom = Math.Max(1, editor.Zoom - 1);
-        if (input.Pressed(Key.Q))
-            RunAction(ref editor, 3, false);
+    // the shortcuts: the modifiers held at the key press count (a quick Ctrl+S within one frame is not lost)
+    var ctrl = KeyModifiers.Ctrl;
+    var ctrlShift = KeyModifiers.Ctrl | KeyModifiers.Shift;
+    if (input.Pressed(Key.O, ctrl))
+        RunAction(ref editor, 1, false);
+    if (input.Pressed(Key.N, ctrl))
+        RunAction(ref editor, 2, false);
+    if (input.Pressed(Key.S, ctrl))
+        Save(ref editor);
+    if (input.Pressed(Key.S, ctrlShift))
+        editor.ShowSaveFile = editor.MapLoaded;
+    if (input.Pressed(Key.Z, ctrl) && editor.MapLoaded)
+        editor.DoUndo();
+    if (input.Pressed(Key.Y, ctrl) && editor.MapLoaded)
+        editor.DoRedo();
+    // + is Shift with another key on many keyboards
+    if (input.Pressed(Key.Plus, ctrl) || input.Pressed(Key.Plus, ctrlShift))
+        editor.Zoom = Math.Min(4, editor.Zoom + 1);
+    if (input.Pressed(Key.Minus, ctrl))
+        editor.Zoom = Math.Max(1, editor.Zoom - 1);
+    if (input.Pressed(Key.Q, ctrl))
+        RunAction(ref editor, 3, false);
+    if (!editor.MapLoaded)
         return;
-    }
-    if (!editor.MapLoaded || input.Alt)
-        return;
-    if (input.Pressed(Key.B)) editor.Tool = Tool.Brush;
-    if (input.Pressed(Key.F)) editor.Tool = Tool.Fill;
-    if (input.Pressed(Key.E)) editor.Tool = Tool.Eraser;
-    if (input.Pressed(Key.P)) editor.Tool = Tool.ColorPicker;
-    if (input.Pressed(Key.G)) editor.ShowGrid = !editor.ShowGrid;
-    if (input.Pressed(Key.Tab)) editor.Layer = Editor.Other(editor.Layer);
+    // the keys of the tools only without modifiers
+    var none = KeyModifiers.None;
+    if (input.Pressed(Key.B, none)) editor.Tool = Tool.Brush;
+    if (input.Pressed(Key.F, none)) editor.Tool = Tool.Fill;
+    if (input.Pressed(Key.E, none)) editor.Tool = Tool.Eraser;
+    if (input.Pressed(Key.P, none)) editor.Tool = Tool.ColorPicker;
+    if (input.Pressed(Key.G, none)) editor.ShowGrid = !editor.ShowGrid;
+    if (input.Pressed(Key.Tab, none)) editor.Layer = Editor.Other(editor.Layer);
 }
 
 void DrawMenu(Ui ui, ref Editor editor)

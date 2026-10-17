@@ -2,8 +2,10 @@
 
 An editor for the 2D maps of Ambermoon (indoor maps, towns, dungeons and the world maps): a port of
 `AmbermoonTools/AmbermoonMapEditor2D` (WinForms), with the character editor of `AmbermoonMapCharEditor` that it
-embedded, to CShift with `System.Ui` (CShift 0.35 or later). It runs on Windows and Linux (X11). It is built for the
-Amiga too (AmigaOS 3.0 and later), but `System.Ui` does not draw images there yet, so the map and the tiles stay empty.
+embedded, to CShift with `System.Ui` (CShift 0.36 or later). It is made for Windows and Linux (X11). It is built for
+the Amiga too (AmigaOS 3.0 and later), but not made for it yet: the window is laid out for 1280 x 800, the images
+take a lot of memory (an image of each tile set and palette in 32 bits), the colors are those of the Workbench screen
+and a frame full of tiles takes about a second on an A1200.
 
 ```
 AmbermoonMapEditor2D [game data folder [map index]]
