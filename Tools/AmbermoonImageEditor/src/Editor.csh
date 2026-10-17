@@ -42,7 +42,8 @@ struct Editor
 
     // ---- tools ----
     Tool Tool;
-    int BrushSize;
+    int BrushSize;             // 2 to 16
+    int EraserSize;            // 1 to 16
     bool FillEverywhere;
     uint32 Primary;            // a palette index, or ARGB for pictures with more than 256 colors
     uint32 Secondary;
@@ -70,8 +71,9 @@ struct Editor
     string Message;
     string DialogPath;
     uint8[] RawData;           // the file that is read as an Amiga graphic
-    AmigaFormat DialogFormat;
-    int DialogOffset;          // the palette offset of the format dialog
+    AmigaFormat DialogFormat;  // the format of the save and new dialogs
+    AmigaFormat RawFormat;     // the format of the open dialog: 16 x 16, 5 BPP, 1 frame at first, then the last one
+    int RawOffset;             // its palette offset
     string PreviewKey;         // the format the preview of the format dialog was made for
     Image Preview;
     string PreviewError;
@@ -92,6 +94,7 @@ struct Editor
             Undo = List<Picture>.Create(),
             Redo = List<Picture>.Create(),
             BrushSize = 2,
+            EraserSize = 1,
             Primary = 1,
             Zoom = 4,
             HoverX = -1,
@@ -100,6 +103,7 @@ struct Editor
             DialogPath = "",
             RawData = new uint8[0],
             DialogFormat = AmigaFormat.Create(16, 16, 5),
+            RawFormat = AmigaFormat.Create(16, 16, 5),
             PreviewKey = "",
             Preview = Image.Create(1, 1),
             PreviewError = "",
@@ -170,9 +174,7 @@ struct Editor
         }
         RawData = data;
         DialogPath = path;
-        // the defaults: no preset, 5 bits per pixel, 1 frame (the size of the last graphic)
-        DialogFormat = AmigaFormat.Create(Format.Width, Format.Height, 5);
-        DialogOffset = 0;
+        // the dialog keeps the values it was last used with
         PreviewKey = "";
         ShowRaw = true;
         return;

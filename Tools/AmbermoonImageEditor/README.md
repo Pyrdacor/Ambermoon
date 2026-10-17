@@ -12,8 +12,9 @@ AmbermoonImageEditor [file]
 ## Files
 
 - **Open** (Ctrl+O): a PNG or BMP file is opened at once. Any other file is read as an Amiga graphic, and a dialog asks
-  for its format:
-  - **Format**: a preset of the game, or "None" (the default) to choose freely. A preset fixes what it knows: it shows
+  for its format. After the start of the program it has 16 x 16 pixels, 5 bits per pixel, 1 frame and no preset;
+  after that it keeps the values it was last used with.
+  - **Format**: a preset of the game, or "None" to choose freely. A preset fixes what it knows: it shows
     those values and they cannot be changed.
   - **Width** and **height** (of one frame).
   - **Bits per pixel**: 1, 3, 4 or 5 (default 5).
@@ -59,7 +60,7 @@ The left mouse button paints with the left color and the right button with the r
 | Pencil (D) | pixels; dragging draws a line of pixels |
 | Brush (B) | a square of 2x2 to 16x16 pixels (the size in the toolbar) |
 | Fill (F) | fills the area of the color (connected horizontally and vertically), or with "Replace the color everywhere" every pixel of that color |
-| Eraser (E) | makes pixels transparent (color 0 of an Amiga graphic); dragging erases a line of pixels |
+| Eraser (E) | makes pixels transparent (color 0 of an Amiga graphic), 1x1 to 16x16 (the size in the toolbar); dragging erases a line |
 | Picker (I) | takes the color of a pixel |
 
 Other controls:

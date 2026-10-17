@@ -209,17 +209,17 @@ const int PreviewPixels = 4000000;
 // the preview of the format dialog (made again when the format changes), or why there is none
 void _RawPreview(Ui ui, ref Editor editor)
 {
-    var format = editor.DialogFormat;
-    string key = $"{format.Width},{format.Height},{format.Bpp},{format.Frames},{format.Slices},{editor.DialogOffset}";
+    var format = editor.RawFormat;
+    string key = $"{format.Width},{format.Height},{format.Bpp},{format.Frames},{format.Slices},{editor.RawOffset}";
     if (key != editor.PreviewKey)
     {
         editor.PreviewKey = key;
         editor.PreviewError = "";
         if ((int64)format.Width * format.Height * Math.Max(1, format.Frames) > PreviewPixels)
             editor.PreviewError = "Too big for a preview.";
-        else if (RawPicture(editor.RawData, format, editor.DialogOffset) is Picture picture)
+        else if (RawPicture(editor.RawData, format, editor.RawOffset) is Picture picture)
             editor.Preview = picture.ToCheckedImage();
-        else if (RawPicture(editor.RawData, format, editor.DialogOffset) is error e)
+        else if (RawPicture(editor.RawData, format, editor.RawOffset) is error e)
             editor.PreviewError = e.Message;
     }
     if (editor.PreviewError.Length > 0)
@@ -247,10 +247,10 @@ void RawFormatDialog(Ui ui, ref Editor editor)
     using (ui.Modal("rawformat", "The format of the graphic"))
     {
         ui.Text($"'{Path.GetFileName(editor.DialogPath)}' is no PNG or BMP file. As an Amiga graphic, it needs:");
-        FormatFields(ui, ref editor.DialogFormat, false, 0, 0);
-        PaletteOffsetField(ui, "rawoffset", editor.DialogFormat.Bpp, ref editor.DialogOffset);
+        FormatFields(ui, ref editor.RawFormat, false, 0, 0);
+        PaletteOffsetField(ui, "rawoffset", editor.RawFormat.Bpp, ref editor.RawOffset);
         ui.Tooltip("Which colors of the palette the graphic uses (Ambermoon: 4 BPP often from 16, 3 BPP from 24)");
-        var format = editor.DialogFormat;
+        var format = editor.RawFormat;
         int size = editor.RawData.Length;
         int needed = format.DataSize();
         if (needed > size)
@@ -267,7 +267,7 @@ void RawFormatDialog(Ui ui, ref Editor editor)
         {
             if (ui.Button("Open") && needed <= size && editor.PreviewError.Length == 0)
             {
-                if (editor.OpenRaw(format, editor.DialogOffset) is error e)
+                if (editor.OpenRaw(format, editor.RawOffset) is error e)
                     ShowError(ref editor, e.Message);
                 editor.ShowRaw = false;
             }

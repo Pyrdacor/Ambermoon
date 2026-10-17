@@ -23,7 +23,7 @@ string ToolHelp(Tool tool)
         case Tool.Pencil: return "Pixels; dragging draws lines. Left: primary color, right: secondary color (D)";
         case Tool.Brush: return "A square brush of 2x2 to 16x16 pixels (B)";
         case Tool.Fill: return "Fills the area of the color, or the color everywhere (F)";
-        case Tool.Eraser: return "Makes pixels transparent; dragging erases a line (E)";
+        case Tool.Eraser: return "Makes pixels transparent, 1x1 to 16x16; dragging erases a line (E)";
         default: return "Takes the color of a pixel. Left: primary, right: secondary (I)";
     }
 }
@@ -111,6 +111,14 @@ void DrawToolbar(Ui ui, ref Editor editor)
                 ui.Slider("brushsize", ref editor.BrushSize, 2, 16);
             }
         }
+        if (editor.Tool == Tool.Eraser)
+        {
+            ui.Label($"Size {editor.EraserSize}x{editor.EraserSize}");
+            using (ui.Column(140))
+            {
+                ui.Slider("erasersize", ref editor.EraserSize, 1, 16);
+            }
+        }
         if (editor.Tool == Tool.Fill)
         {
             ui.Checkbox("Replace the color everywhere", ref editor.FillEverywhere);
@@ -183,7 +191,7 @@ void DrawCanvas(Ui ui, ref Editor editor, int height)
         // the pixels the tool would change
         if (editor.HoverX >= 0)
         {
-            int size = editor.Tool == Tool.Brush ? editor.BrushSize : 1;
+            int size = _ToolSize(ref editor);
             int start = -(size - 1) / 2;
             int x0 = Math.Max(0, editor.HoverX + start);
             int y0 = Math.Max(0, editor.HoverY + start);
@@ -264,7 +272,9 @@ void _UseTool(ref Editor editor, UiInput input, bool held, bool rightHeld)
 
 int _ToolSize(ref Editor editor)
 {
-    return editor.Tool == Tool.Brush ? editor.BrushSize : 1;
+    if (editor.Tool == Tool.Brush)
+        return editor.BrushSize;
+    return editor.Tool == Tool.Eraser ? editor.EraserSize : 1;
 }
 
 // the value a drawing tool sets; false if the eraser finds no transparent color
