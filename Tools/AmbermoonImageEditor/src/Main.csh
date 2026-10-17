@@ -53,7 +53,8 @@ void HandleKeys(Ui ui, ref Editor editor)
 bool AnyDialog(ref Editor editor)
 {
     return editor.ShowOpen || editor.ShowRaw || editor.ShowSave || editor.ShowNew || editor.ShowNormalize ||
-           editor.ShowUnsaved || editor.ShowMessage || editor.ShowPaletteLoad || editor.ShowPaletteSave;
+           editor.ShowUnsaved || editor.ShowMessage || editor.ShowPaletteLoad || editor.ShowPaletteSave ||
+           editor.ShowContainer || editor.ShowPaletteChoice;
 }
 
 /// One frame of the window.
@@ -96,6 +97,10 @@ void Draw(Ui ui, ref Editor editor, int windowHeight)
     }
 
     if (editor.ShowOpen) OpenDialog(ui, ref editor);
+    // the palette choice before the container choice: when the container choice opens it, it starts with the next
+    // frame (one Enter chooses once)
+    if (editor.ShowPaletteChoice) PaletteChoiceDialog(ui, ref editor);
+    if (editor.ShowContainer) ContainerDialog(ui, ref editor);
     if (editor.ShowRaw) RawFormatDialog(ui, ref editor);
     if (editor.ShowSave) SaveDialog(ui, ref editor);
     if (editor.ShowNew) NewDialog(ui, ref editor);

@@ -3,5 +3,5 @@
 	"sources": ["src"],
 	"output": "bin/AmbermoonImageEditor",
 	"optimize": 2,
-	"dependencies": []
+	"dependencies": ["../Ambermoon.Common", "../Ambermoon.Data.Common", "../Ambermoon.Data.Legacy"]
 }

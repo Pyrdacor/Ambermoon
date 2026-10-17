@@ -453,7 +453,7 @@ void PaletteFileDialogs(Ui ui, ref Editor editor)
 {
     if (editor.ShowPaletteLoad)
     {
-        var result = ui.FileDialog("palload", "Load a palette (32 colors of 16 bits, like Palettes.amb)", ref editor.DialogPath);
+        var result = ui.FileDialog("palload", "Load a palette (32 colors of 16 bits, or a palette of Palettes.amb)", ref editor.DialogPath);
         if (result != UiDialogResult.None)
             editor.ShowPaletteLoad = false;
         if (result == UiDialogResult.Ok && editor.LoadPalette(editor.DialogPath) is error e)
@@ -470,6 +470,109 @@ void PaletteFileDialogs(Ui ui, ref Editor editor)
                 ShowError(ref editor, e.Message);
             else
                 editor.Status = $"Saved the palette to {editor.DialogPath}";
+        }
+    }
+}
+
+// ---- files of containers and palettes of Palettes.amb ----
+
+// Up, Down, Home and End move the choice of a list
+void _ListKeys(Ui ui, ref int selection, int count)
+{
+    var input = ui.Input();
+    if (input.Pressed(Key.Down)) selection = Math.Min(count - 1, selection + 1);
+    if (input.Pressed(Key.Up)) selection = Math.Max(0, selection - 1);
+    if (input.Pressed(Key.Home)) selection = 0;
+    if (input.Pressed(Key.End)) selection = count - 1;
+}
+
+void ContainerDialog(Ui ui, ref Editor editor)
+{
+    var file = editor.SourceFile;
+    bool monsters = editor.Choice == ChoicePurpose.Monster;
+    using (ui.Modal("container", monsters ? "Open a monster" : "Open a file of the container"))
+    {
+        ui.Text($"'{Path.GetFileName(file.Path)}' has {file.Numbers.Length} files. {(monsters ? "The monster is opened with its graphic of Monster_gfx.amb." : "Which one?")}");
+        var labels = ContainerLabels(file);
+        _ListKeys(ui, ref editor.ChoiceSelection, labels.Count());
+        using (ui.Scroll("containerfiles", 320))
+        {
+            for (var i = 0; i < labels.Count(); i += 1)
+            {
+                using (ui.Id(i))
+                {
+                    if (ui.ListItem(labels[i], editor.ChoiceSelection == i))
+                        editor.ChoiceSelection = i;
+                }
+            }
+        }
+        using (ui.Row())
+        {
+            if (ui.Button("Open") || ui.Input().Pressed(Key.Enter))
+            {
+                editor.ShowContainer = false;
+                if (editor.ChoiceSelection >= 0 && editor.ChoiceSelection < file.Numbers.Length &&
+                    ChooseContainerFile(ref editor, file.Numbers[editor.ChoiceSelection]) is error e)
+                    ShowError(ref editor, e.Message);
+            }
+            if (ui.Button("Cancel") || ui.Input().Pressed(Key.Escape))
+                editor.ShowContainer = false;
+        }
+    }
+}
+
+void PaletteChoiceDialog(Ui ui, ref Editor editor)
+{
+    bool monster = editor.Choice == ChoicePurpose.MonsterPalette;
+    using (ui.Modal("palettechoice", monster ? $"The palette of {editor.Monster.Name}" : "Choose a palette"))
+    {
+        if (monster)
+            ui.Text($"{editor.Monster.FrameWidth} x {editor.Monster.FrameHeight} pixels per frame, shown as {editor.Monster.MappedWidth} x {editor.Monster.MappedHeight}, 5 BPP, with the palette mapping of the monster. Which palette?");
+        _ListKeys(ui, ref editor.ChoiceSelection, editor.PaletteChoices.Count());
+        using (ui.Scroll("palettes", 320))
+        {
+            for (var i = 0; i < editor.PaletteChoices.Count(); i += 1)
+            {
+                using (ui.Id(i))
+                {
+                    using (ui.Row())
+                    {
+                        using (ui.Column(110))
+                        {
+                            if (ui.ListItem($"Palette {i + 1}", editor.ChoiceSelection == i))
+                                editor.ChoiceSelection = i;
+                        }
+                        // the 32 colors
+                        var strip = ui.Area(PaletteFileColors * 10, 18);
+                        if (ui.Clicked())
+                            editor.ChoiceSelection = i;
+                        var colors = editor.PaletteChoices[i];
+                        int w = strip.Width / PaletteFileColors;
+                        for (var c = 0; c < colors.Length && c < PaletteFileColors; c += 1)
+                            ui.FillRect(Rect.Create(strip.X + c * w, strip.Y, w, strip.Height), Color.FromArgb(colors[c]));
+                    }
+                }
+            }
+        }
+        using (ui.Row())
+        {
+            if (ui.Button("OK") || ui.Input().Pressed(Key.Enter))
+            {
+                editor.ShowPaletteChoice = false;
+                if (editor.ChoiceSelection >= 0 && editor.ChoiceSelection < editor.PaletteChoices.Count())
+                {
+                    var palette = editor.PaletteChoices[editor.ChoiceSelection];
+                    if (monster)
+                    {
+                        if (editor.OpenMonster(palette) is error e)
+                            ShowError(ref editor, e.Message);
+                    }
+                    else
+                        editor.ApplyPalette(palette);
+                }
+            }
+            if (ui.Button("Cancel") || ui.Input().Pressed(Key.Escape))
+                editor.ShowPaletteChoice = false;
         }
     }
 }

@@ -2,6 +2,7 @@
 
 using System;
 using System.Image;
+using Ambermoon.Data.Legacy.Serialization;
 
 enum Tool : int32
 {
@@ -68,6 +69,13 @@ struct Editor
     bool ShowPaletteLoad;
     bool ShowPaletteSave;
     bool ShowBrowse;
+    bool ShowContainer;        // the choice of a file of a container
+    bool ShowPaletteChoice;    // the choice of a palette of Palettes.amb
+    ChoicePurpose Choice;
+    int ChoiceSelection;
+    GameFile SourceFile;       // the container a graphic is chosen from
+    List<uint32[]> PaletteChoices;
+    MonsterGraphic Monster;    // the monster whose palette is chosen
     string Message;
     string DialogPath;
     uint8[] RawData;           // the file that is read as an Amiga graphic
@@ -105,6 +113,9 @@ struct Editor
             DialogFormat = AmigaFormat.Create(16, 16, 5),
             RawFormat = AmigaFormat.Create(16, 16, 5),
             PreviewKey = "",
+            SourceFile = GameFile { Path = "", Files = Dictionary<int, uint8[]>.Create(), Numbers = new int[0] },
+            PaletteChoices = List<uint32[]>.Create(),
+            Monster = MonsterGraphic { Name = "", Data = new uint8[0], Mapping = new uint8[32] },
             Preview = Image.Create(1, 1),
             PreviewError = "",
             DialogBpp = 5,
@@ -172,11 +183,42 @@ struct Editor
             _SetPicture(Picture.FromImage(image), path, png ? FileKind.Png : FileKind.Bmp);
             return;
         }
-        RawData = data;
-        DialogPath = path;
-        // the dialog keeps the values it was last used with
-        PreviewKey = "";
-        ShowRaw = true;
+        // a container of the game: first the choice of its file (a monster of Monster_char.amb: then its palette)
+        if (IsContainer(data))
+        {
+            SourceFile = try ReadGameFile(path, data);
+            if (SourceFile.Numbers.Length == 0)
+                return error($"'{path}' is an empty container.");
+            Choice = IsMonsterFile(path) ? ChoicePurpose.Monster : ChoicePurpose.Graphic;
+            ChoiceSelection = 0;
+            ShowContainer = true;
+            return;
+        }
+        // an encrypted or compressed single file (e.g. Object_icons): its decoded data
+        if (IsEncoded(data))
+        {
+            var file = try ReadGameFile(path, data);
+            if (file.Numbers.Length == 0)
+                return error($"'{path}' is empty.");
+            PrepareRawDialog(ref this, path, path, file.Files[file.Numbers[0]]);
+            return;
+        }
+        // any other file: the format dialog (with the preset of the name of the file, else the last values)
+        PrepareRawDialog(ref this, path, path, data);
+        return;
+    }
+
+    /// The picture of the monster with the chosen palette.
+    /// @error the graphic does not fit its size.
+    Error<void> OpenMonster(uint32[] palette)
+    {
+        var picture = try MonsterPicture(Monster, palette);
+        _SetPicture(picture, $"{SourceFile.Path} #{Monster.Name}", FileKind.Amiga);
+        Format = AmigaFormat.Create(Monster.MappedWidth, Monster.MappedHeight, 5);
+        Format.Frames = Math.Max(1, picture.Width / Math.Max(1, Monster.MappedWidth));
+        Format.Preset = 10;
+        // the picture has no file of its own: saving asks where
+        FilePath = "";
         return;
     }
 
@@ -244,14 +286,27 @@ struct Editor
     {
         if (!Picture.Indexed)
             return error("The picture has more than 256 colors and no palette.");
-        if (File.ReadAllBytes(path) is not uint8[] data)
-            return error($"Could not read '{path}'.");
-        var colors = try ReadPaletteFile(data);
+        var palettes = try ReadPalettes(path);
+        if (palettes.Count() == 1)
+        {
+            ApplyPalette(palettes[0]);
+            return;
+        }
+        // a container like Palettes.amb: the palette is chosen
+        PaletteChoices = palettes;
+        Choice = ChoicePurpose.PaletteLoad;
+        ChoiceSelection = 0;
+        ShowPaletteChoice = true;
+        return;
+    }
+
+    /// Takes the colors of a palette of 32 colors from the palette offset on.
+    void ApplyPalette(uint32[] colors)
+    {
         BeginChange();
         for (var i = 0; i < Picture.Palette.Count() && PaletteOffset + i < colors.Length; i += 1)
             Picture.Palette[i] = colors[PaletteOffset + i];
         ViewChanged = true;
-        return;
     }
 
     /// Saves the colors as a palette file: always 32 colors, those of the picture from the palette offset on, black for
