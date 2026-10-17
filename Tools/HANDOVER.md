@@ -53,7 +53,8 @@ Also fixed on the way: a bug of the compiler (temporaries of a conversion in a b
 ## Left to do
 
 AmbermoonMapEditor2D (a tool with a user interface) was ported later with `System.Ui` of CShift 0.36, with the
-character editor of AmbermoonMapCharEditor in its side bar; see its README.md. The remaining command line projects of `AmbermoonTools` (the others have a user interface and are not ported:
+character editor of AmbermoonMapCharEditor in its side bar; see its README.md. AmbermoonImageEditor is a new paint
+program for the graphics of the game in place of the old AmbermoonImageEditor (see its README.md). The remaining command line projects of `AmbermoonTools` (the others have a user interface and are not ported:
 Ambermoon3DMapEditor, AmbermoonButtonGraphicsDesigner, AmbermoonCharEditor, AmbermoonEditor, AmbermoonImageEditor,
 AmbermoonMapCharEditor, AmbermoonMapEditor2D, AmbermoonMapEditor3D, AmbermoonUIEventEditor):
 

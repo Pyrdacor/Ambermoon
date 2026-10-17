@@ -1,0 +1,7 @@
+{
+	"name": "AmbermoonImageEditor",
+	"sources": ["src"],
+	"output": "bin/AmbermoonImageEditor",
+	"optimize": 2,
+	"dependencies": []
+}

@@ -24,7 +24,7 @@ BUILD_ONLY=(AmbermoonListExtractor AmbermoonLabdataEditor AmbermoonLabdataExtrac
             Ambermoon3DMapViewer AmbermoonMonsterEditor AmbermoonItemEditor AmbermoonNameExtract
             AmbermoonTextImport AmbermoonTextManager AmbermoonIntroPatcher AmbermoonExtroPatcher
             AmbermoonPaletteChanger AmbermoonImageConverter AmbermoonFontCreator AmbermoonFontProcessor
-            AmbermoonReleaseCreator AmbermoonAdvancedReleaseCreator AmbermoonMapEditor2D)
+            AmbermoonReleaseCreator AmbermoonAdvancedReleaseCreator AmbermoonMapEditor2D AmbermoonImageEditor)
 declare -A COMMAND
 
 RECORD=0

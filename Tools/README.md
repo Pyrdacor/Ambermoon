@@ -8,8 +8,9 @@ tools (see *How the port was checked* below), the bugs of the originals are fixe
 and many of them are much faster.
 
 Of the tools with a user interface, AmbermoonMapEditor2D is ported together with the character editor it embeds
-(AmbermoonMapCharEditor), with `System.Ui` of CShift 0.36, see [its README](AmbermoonMapEditor2D/README.md). The others
-(Ambermoon3DMapEditor, AmbermoonButtonGraphicsDesigner, AmbermoonCharEditor, AmbermoonEditor, AmbermoonImageEditor,
+(AmbermoonMapCharEditor), with `System.Ui` of CShift 0.36, see [its README](AmbermoonMapEditor2D/README.md).
+AmbermoonImageEditor is a new paint program in its place (not a port of the old one, [its README](AmbermoonImageEditor/README.md)).
+The others (Ambermoon3DMapEditor, AmbermoonButtonGraphicsDesigner, AmbermoonCharEditor, AmbermoonEditor,
 AmbermoonMapEditor3D, AmbermoonUIEventEditor) are not part of it, nor are AmbermoonPatcher (the original does not
 compile) and AmbermoonMonsterBattleImageGenerator.
 
@@ -90,6 +91,7 @@ Most tools have a help: run them with `--help`. The command lines are those of t
 | `Ambermoon.Release/` | library: zip files (reading, and writing like .NET's `ZipFile`), tar.gz files like SharpZipLib, the archives of a release | `Package` of the release creators |
 | `AmbermoonReleaseCreator/` | makes a release of a language (texts, intro, extro, fonts and boot disk patched): the ADF images and the archives | `AmbermoonTools/AmbermoonReleaseCreator` |
 | `AmbermoonMapEditor2D/` | edits the 2D maps of the game in a window (tiles, events, characters, map properties, tilesets) | `AmbermoonTools/AmbermoonMapEditor2D`, `AmbermoonMapCharEditor` |
+| `AmbermoonImageEditor/` | a paint program in a window for PNG, BMP and the palette graphics of the Amiga (1, 3, 4, 5 bit planes, textures, frames) with the palette files of the game | new (in place of `AmbermoonTools/AmbermoonImageEditor`) |
 | `AmbermoonAdvancedReleaseCreator/` | makes the archives of prepared folders of Ambermoon Advanced | `AmbermoonTools/AmbermoonAdvancedReleaseCreator` |
 | `tests/` | tests with expected results of the original tools; `tests/reference/`: building the originals and comparing them with the ports | |
 
