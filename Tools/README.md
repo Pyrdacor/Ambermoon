@@ -7,11 +7,11 @@ Pyrdacor's suite of command line tools for the data files of Ambermoon, written 
 tools (see *How the port was checked* below), the bugs of the originals are fixed (see *Different from the original*),
 and many of them are much faster.
 
-Of the tools with a user interface, AmbermoonMapEditor2D is ported (with `System.Ui` of CShift 0.34, see
-[its README](AmbermoonMapEditor2D/README.md)). The others (Ambermoon3DMapEditor, AmbermoonButtonGraphicsDesigner,
-AmbermoonCharEditor, AmbermoonEditor, AmbermoonImageEditor, AmbermoonMapCharEditor, AmbermoonMapEditor3D,
-AmbermoonUIEventEditor) are not part of it, nor are AmbermoonPatcher (the original does not compile) and
-AmbermoonMonsterBattleImageGenerator.
+Of the tools with a user interface, AmbermoonMapEditor2D is ported together with the character editor it embeds
+(AmbermoonMapCharEditor), with `System.Ui` of CShift 0.35, see [its README](AmbermoonMapEditor2D/README.md). The others
+(Ambermoon3DMapEditor, AmbermoonButtonGraphicsDesigner, AmbermoonCharEditor, AmbermoonEditor, AmbermoonImageEditor,
+AmbermoonMapEditor3D, AmbermoonUIEventEditor) are not part of it, nor are AmbermoonPatcher (the original does not
+compile) and AmbermoonMonsterBattleImageGenerator.
 
 ## Build it
 
@@ -89,7 +89,7 @@ Most tools have a help: run them with `--help`. The command lines are those of t
 | `Amiga.FileFormats/` | library: ADF disk images (OFS/FFS, bootable) and LHA archives (LH5 to LH7) as the packages Amiga.FileFormats.ADF and .LHA write them | `Amiga.FileFormats.ADF`, `Amiga.FileFormats.LHA` (the writing parts) |
 | `Ambermoon.Release/` | library: zip files (reading, and writing like .NET's `ZipFile`), tar.gz files like SharpZipLib, the archives of a release | `Package` of the release creators |
 | `AmbermoonReleaseCreator/` | makes a release of a language (texts, intro, extro, fonts and boot disk patched): the ADF images and the archives | `AmbermoonTools/AmbermoonReleaseCreator` |
-| `AmbermoonMapEditor2D/` | edits the 2D maps of the game in a window (tiles, events, map properties, tilesets) | `AmbermoonTools/AmbermoonMapEditor2D` |
+| `AmbermoonMapEditor2D/` | edits the 2D maps of the game in a window (tiles, events, characters, map properties, tilesets) | `AmbermoonTools/AmbermoonMapEditor2D`, `AmbermoonMapCharEditor` |
 | `AmbermoonAdvancedReleaseCreator/` | makes the archives of prepared folders of Ambermoon Advanced | `AmbermoonTools/AmbermoonAdvancedReleaseCreator` |
 | `tests/` | tests with expected results of the original tools; `tests/reference/`: building the originals and comparing them with the ports | |
 

@@ -38,7 +38,7 @@ string ToolHelp(Tool tool)
         case Tool.ColorPicker: return "Left: take the tile of the layer, right: of the other layer (P)";
         case Tool.EventChanger: return "Left: choose the event of the tile, right: remove it";
         case Tool.EventRepeater: return "Left: give the tile the last chosen event, right: remove it";
-        case Tool.PositionPicker: return "Click: the position of the selected character";
+        case Tool.PositionPicker: return "Click: the position of the selected character (on a path: at the time of day)";
         default: return "";
     }
 }
@@ -163,7 +163,7 @@ void DrawSideBar(Ui ui, ref Editor editor)
 
         DrawMapProperties(ui, ref editor);
         DrawEventList(ui, ref editor);
-        DrawCharacterList(ui, ref editor);
+        DrawCharacterPanel(ui, ref editor);
     }
 }
 
@@ -292,44 +292,6 @@ void DrawEventList(Ui ui, ref Editor editor)
                     ui.Tooltip("Click: paint this event with the event repeater");
                 }
             }
-        }
-    }
-}
-
-string CharacterText(CharacterReference reference)
-{
-    string type = reference.Type == CharacterType.Monster ? "Monster group" : reference.Type == CharacterType.NPC ? "NPC" :
-                  reference.Type == CharacterType.PartyMember ? "Party member" : "Map object";
-    string position = reference.Positions.Count() > 0 ? $"{reference.Positions[0].X}, {reference.Positions[0].Y}" : "-";
-    return $"{type} {reference.Index}, graphic {reference.GraphicIndex}, at {position}";
-}
-
-void DrawCharacterList(Ui ui, ref Editor editor)
-{
-    using (ui.Panel("Monsters and NPCs"))
-    {
-        bool any = false;
-        for (var i = 0; i < editor.Map.CharacterReferences.Length; i += 1)
-        {
-            if (editor.Map.CharacterReferences[i] is not CharacterReference reference)
-                continue;
-            any = true;
-            using (ui.Id(i))
-            {
-                if (ui.ListItem($"{i + 1}: {CharacterText(reference)}", editor.SelectedCharacter == i))
-                    editor.SelectedCharacter = i;
-            }
-        }
-        if (!any)
-            ui.Note("none");
-        if (editor.SelectedCharacter >= 0)
-        {
-            if (ui.Button("Place on map"))
-            {
-                editor.Tool = Tool.PositionPicker;
-                editor.ShowCharacters = true;
-            }
-            ui.Tooltip("The next click on the map sets the (first) position of the character");
         }
     }
 }
@@ -543,15 +505,96 @@ void EventSelectDialog(Ui ui, ref Editor editor)
     }
 }
 
-bool TileFlag(Ui ui, ref TilesetTile tile, string label, TileFlags flag)
+bool TileFlag(Ui ui, ref TileFlags flags, string label, TileFlags flag)
 {
-    bool value = (tile.Flags & flag) != TileFlags.None;
+    bool value = (flags & flag) != TileFlags.None;
     if (ui.Checkbox(label, ref value))
     {
-        tile.Flags = value ? tile.Flags | flag : tile.Flags & ~flag;
+        flags = value ? flags | flag : flags & ~flag;
         return true;
     }
     return false;
+}
+
+/// The flags of a tile (or of a character): movement, drawing, sitting and the combat background.
+void TileFlagsEditor(Ui ui, ref TileFlags flags)
+{
+    using (ui.Columns(3))
+    {
+        TileFlag(ui, ref flags, "Block all movement", TileFlags.BlockAllMovement);
+        TileFlag(ui, ref flags, "Alternate animation", TileFlags.WaveAnimation);
+        TileFlag(ui, ref flags, "Random animation start", TileFlags.RandomAnimationStart);
+        TileFlag(ui, ref flags, "Use back tile flags", TileFlags.UseBackgroundTileFlags);
+        TileFlag(ui, ref flags, "Block sight", TileFlags.BlockSight);
+        TileFlag(ui, ref flags, "Floor", TileFlags.Floor);
+        TileFlag(ui, ref flags, "Hide player", TileFlags.PlayerInvisible);
+        TileFlag(ui, ref flags, "Auto poison", TileFlags.AutoPoison);
+    }
+    ui.Note("Allow movement:");
+    using (ui.Columns(4))
+    {
+        TileFlag(ui, ref flags, "Walk", TileFlags.AllowMovementWalk);
+        TileFlag(ui, ref flags, "Horse", TileFlags.AllowMovementHorse);
+        TileFlag(ui, ref flags, "Raft", TileFlags.AllowMovementRaft);
+        TileFlag(ui, ref flags, "Ship", TileFlags.AllowMovementShip);
+        TileFlag(ui, ref flags, "Magical disc", TileFlags.AllowMovementMagicalDisc);
+        TileFlag(ui, ref flags, "Eagle", TileFlags.AllowMovementEagle);
+        TileFlag(ui, ref flags, "Fly", TileFlags.AllowMovementFly);
+        TileFlag(ui, ref flags, "Swim", TileFlags.AllowMovementSwim);
+        TileFlag(ui, ref flags, "Witch broom", TileFlags.AllowMovementWitchBroom);
+        TileFlag(ui, ref flags, "Sand lizard", TileFlags.AllowMovementSandLizard);
+        TileFlag(ui, ref flags, "Sand ship", TileFlags.AllowMovementSandShip);
+        TileFlag(ui, ref flags, "Wasp", TileFlags.AllowMovementWasp);
+    }
+
+    // how the tile is drawn: normal, behind or in front of the characters
+    var drawModes = List<string>.Create();
+    drawModes.Add("Normal");
+    drawModes.Add("Background");
+    drawModes.Add("Foreground");
+    bool background = (flags & TileFlags.Background) != TileFlags.None;
+    bool front = (flags & TileFlags.BringToFront) != TileFlags.None;
+    int drawMode = background ? (front ? 2 : 1) : 0;
+    using (ui.Row())
+    {
+        ui.Label("Draw mode");
+        if (ui.ComboBox("tdraw", ref drawMode, drawModes))
+        {
+            flags = flags & ~(TileFlags.Background | TileFlags.BringToFront);
+            if (drawMode >= 1)
+                flags = flags | TileFlags.Background;
+            if (drawMode == 2)
+                flags = flags | TileFlags.BringToFront;
+        }
+    }
+
+    // sitting and sleeping: bits 23-25
+    var sitModes = List<string>.Create();
+    sitModes.Add("Normal");
+    sitModes.Add("Sit, look up");
+    sitModes.Add("Sit, look right");
+    sitModes.Add("Sit, look down");
+    sitModes.Add("Sit, look left");
+    sitModes.Add("Sleep");
+    int sit = (int)(((uint32)flags >> 23) & 7);
+    if (sit > 5)
+        sit = 0;
+    using (ui.Row())
+    {
+        ui.Label("Sit/sleep");
+        if (ui.ComboBox("tsit", ref sit, sitModes))
+            flags = (TileFlags)(((uint32)flags & ~((uint32)7 << 23)) | ((uint32)sit << 23));
+    }
+    int combat = (int)((uint32)flags >> 28);
+    using (ui.Row())
+    {
+        ui.Label("Combat background");
+        using (ui.Column(70))
+        {
+            if (ui.IntBox("tcombat", ref combat, 0, 15))
+                flags = (TileFlags)(((uint32)flags & 0x0fffffff) | ((uint32)combat << 28));
+        }
+    }
 }
 
 void EditTileDialog(Ui ui, ref Editor editor)
@@ -600,82 +643,7 @@ void EditTileDialog(Ui ui, ref Editor editor)
             }
         }
 
-        using (ui.Columns(3))
-        {
-            TileFlag(ui, ref tile, "Block all movement", TileFlags.BlockAllMovement);
-            TileFlag(ui, ref tile, "Alternate animation", TileFlags.WaveAnimation);
-            TileFlag(ui, ref tile, "Random animation start", TileFlags.RandomAnimationStart);
-            TileFlag(ui, ref tile, "Use back tile flags", TileFlags.UseBackgroundTileFlags);
-            TileFlag(ui, ref tile, "Block sight", TileFlags.BlockSight);
-            TileFlag(ui, ref tile, "Floor", TileFlags.Floor);
-            TileFlag(ui, ref tile, "Hide player", TileFlags.PlayerInvisible);
-            TileFlag(ui, ref tile, "Auto poison", TileFlags.AutoPoison);
-        }
-        ui.Note("Allow movement:");
-        using (ui.Columns(4))
-        {
-            TileFlag(ui, ref tile, "Walk", TileFlags.AllowMovementWalk);
-            TileFlag(ui, ref tile, "Horse", TileFlags.AllowMovementHorse);
-            TileFlag(ui, ref tile, "Raft", TileFlags.AllowMovementRaft);
-            TileFlag(ui, ref tile, "Ship", TileFlags.AllowMovementShip);
-            TileFlag(ui, ref tile, "Magical disc", TileFlags.AllowMovementMagicalDisc);
-            TileFlag(ui, ref tile, "Eagle", TileFlags.AllowMovementEagle);
-            TileFlag(ui, ref tile, "Fly", TileFlags.AllowMovementFly);
-            TileFlag(ui, ref tile, "Swim", TileFlags.AllowMovementSwim);
-            TileFlag(ui, ref tile, "Witch broom", TileFlags.AllowMovementWitchBroom);
-            TileFlag(ui, ref tile, "Sand lizard", TileFlags.AllowMovementSandLizard);
-            TileFlag(ui, ref tile, "Sand ship", TileFlags.AllowMovementSandShip);
-            TileFlag(ui, ref tile, "Wasp", TileFlags.AllowMovementWasp);
-        }
-
-        // how the tile is drawn: normal, behind or in front of the characters
-        var drawModes = List<string>.Create();
-        drawModes.Add("Normal");
-        drawModes.Add("Background");
-        drawModes.Add("Foreground");
-        bool background = (tile.Flags & TileFlags.Background) != TileFlags.None;
-        bool front = (tile.Flags & TileFlags.BringToFront) != TileFlags.None;
-        int drawMode = background ? (front ? 2 : 1) : 0;
-        using (ui.Row())
-        {
-            ui.Label("Draw mode");
-            if (ui.ComboBox("tdraw", ref drawMode, drawModes))
-            {
-                tile.Flags = tile.Flags & ~(TileFlags.Background | TileFlags.BringToFront);
-                if (drawMode >= 1)
-                    tile.Flags = tile.Flags | TileFlags.Background;
-                if (drawMode == 2)
-                    tile.Flags = tile.Flags | TileFlags.BringToFront;
-            }
-        }
-
-        // sitting and sleeping: bits 23-25
-        var sitModes = List<string>.Create();
-        sitModes.Add("Normal");
-        sitModes.Add("Sit, look up");
-        sitModes.Add("Sit, look right");
-        sitModes.Add("Sit, look down");
-        sitModes.Add("Sit, look left");
-        sitModes.Add("Sleep");
-        int sit = (int)(((uint32)tile.Flags >> 23) & 7);
-        if (sit > 5)
-            sit = 0;
-        using (ui.Row())
-        {
-            ui.Label("Sit/sleep");
-            if (ui.ComboBox("tsit", ref sit, sitModes))
-                tile.Flags = (TileFlags)(((uint32)tile.Flags & ~((uint32)7 << 23)) | ((uint32)sit << 23));
-        }
-        int combat = (int)((uint32)tile.Flags >> 28);
-        using (ui.Row())
-        {
-            ui.Label("Combat background");
-            using (ui.Column(70))
-            {
-                if (ui.IntBox("tcombat", ref combat, 0, 15))
-                    tile.Flags = (TileFlags)(((uint32)tile.Flags & 0x0fffffff) | ((uint32)combat << 28));
-            }
-        }
+        TileFlagsEditor(ui, ref tile.Flags);
 
         using (ui.Row())
         {

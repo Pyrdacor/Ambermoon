@@ -154,18 +154,8 @@ void _UseTool(Ui ui, ref Editor editor, UiInput input, bool held, bool rightHeld
             }
             break;
         case Tool.PositionPicker:
-            if (clicked && x >= 0 && editor.SelectedCharacter >= 0 &&
-                editor.Map.CharacterReferences[editor.SelectedCharacter] is CharacterReference reference)
-            {
-                editor.BeginChange();
-                if (reference.Positions.Count() == 0)
-                    reference.Positions.Add(Position { X = x + 1, Y = y + 1 });
-                else
-                    reference.Positions[0] = Position { X = x + 1, Y = y + 1 };
-                editor.Map.CharacterReferences[editor.SelectedCharacter] = reference;
-                editor.CharactersChanged = true;
-                editor.Tool = Tool.Brush;
-            }
+            if (clicked && x >= 0)
+                PlaceCharacter(ref editor, x, y);
             break;
         default:
             break;
@@ -231,19 +221,29 @@ void _RenderMap(Ui ui, ref Editor editor, Rect area)
         }
     }
 
-    // the characters at their (first) position
+    // the characters where they are at the time of day, and the path of the selected one
     if (editor.ShowCharacters)
     {
+        if (editor.SelectedCharacter >= 0 && map.CharacterReferences[editor.SelectedCharacter] is CharacterReference selected)
+            _DrawPath(canvas, area, map, selected);
+        var npcAtlas = editor.Graphics.NPCAtlas(map.NPCGfxIndex, map.PaletteIndex);
+        int npcGraphics = editor.Graphics.NPCGraphicCount(map.NPCGfxIndex);
         for (var i = 0; i < map.CharacterReferences.Length; i += 1)
         {
             if (map.CharacterReferences[i] is not CharacterReference reference)
                 continue;
-            if (reference.Positions.Count() == 0)
+            int at = PositionIndex(reference, editor.PathStep);
+            if (at >= reference.Positions.Count())
                 continue;
-            var position = reference.Positions[0];
+            var position = reference.Positions[at];
             if (position.X < 1 || position.Y < 1 || position.X > map.Width || position.Y > map.Height)
                 continue;
             var cell = CellRect(area, map.Width, map.Height, position.X - 1, position.Y - 1);
+            // the graphic: a tile of the tileset, or an NPC graphic (16x32, standing on the tile)
+            if (HasFlag(reference, CharacterReferenceFlags.UseTileset))
+                DrawTile(canvas, atlas, tileset, reference.GraphicIndex, frame, cell);
+            else if ((int)reference.GraphicIndex < npcGraphics)
+                canvas.DrawImage(npcAtlas, NPCGraphicRect((int)reference.GraphicIndex), Rect.Create(cell.X, cell.Y - cell.Height, cell.Width, 2 * cell.Height));
             var color = reference.Type == CharacterType.Monster ? Color.FromRgb(230, 40, 40)
                       : reference.Type == CharacterType.NPC ? Color.FromRgb(60, 140, 255) : Color.FromRgb(240, 200, 40);
             canvas.StrokeRect(cell, i == editor.SelectedCharacter ? 3 : 2, color);
@@ -261,6 +261,36 @@ void _RenderMap(Ui ui, ref Editor editor, Rect area)
         var marker = Rect.Create(first.X, first.Y, last.Right() - first.X, last.Bottom() - first.Y);
         canvas.FillRect(marker, Color.FromArgb(0x50, 0x40, 0xff, 0x40));
         canvas.StrokeRect(marker, 2, Color.FromRgb(255, 230, 0));
+    }
+}
+
+// the path of a character over the day: a line from position to position (positions 0, 0 are left out)
+void _DrawPath(Canvas canvas, Rect area, Map map, CharacterReference reference)
+{
+    int count = Math.Min(PositionCount(reference), reference.Positions.Count());
+    if (count < 2)
+        return;
+    var color = Color.FromArgb(0xc0, 0xff, 0xff, 0xff);
+    bool hasLast = false;
+    var last = Rect.Create(0, 0, 0, 0);
+    for (var i = 0; i < count; i += 1)
+    {
+        var position = reference.Positions[i];
+        if (position.X < 1 || position.Y < 1 || position.X > map.Width || position.Y > map.Height)
+        {
+            hasLast = false;
+            continue;
+        }
+        var cell = CellRect(area, map.Width, map.Height, position.X - 1, position.Y - 1);
+        int size = Math.Max(2, cell.Width / 6);
+        canvas.FillRect(Rect.Create(cell.X + (cell.Width - size) / 2, cell.Y + (cell.Height - size) / 2, size, size), color);
+        if (hasLast && (last.X != cell.X || last.Y != cell.Y))
+        {
+            canvas.Line((double)(last.X + last.Width / 2), (double)(last.Y + last.Height / 2),
+                        (double)(cell.X + cell.Width / 2), (double)(cell.Y + cell.Height / 2), 2.0, color);
+        }
+        last = cell;
+        hasLast = true;
     }
 }
 

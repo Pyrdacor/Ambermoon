@@ -58,6 +58,7 @@ struct Editor
     List<uint32> MapIndices;
     List<string> MapNames;
     List<string> SongNames;
+    CharacterNames Names;
 
     // ---- the map ----
     bool MapLoaded;
@@ -96,6 +97,8 @@ struct Editor
     int HoverTile;             // the tile of the tileset under the mouse (0: none)
     double Time;
     int SelectedCharacter;
+    int PathStep;              // the time of day for the positions of the characters (5 minutes each)
+    bool PlaceFollowing;       // placing a character on a path sets the following times too
     bool Painting;             // a stroke of the brush is going on (one undo step)
 
     // ---- dialogs ----
@@ -104,6 +107,7 @@ struct Editor
     bool ShowNewMap;
     bool ShowSaveFile;
     bool ShowEditTile;
+    bool ShowCharacterFlags;
     bool ShowEventSelect;
     bool ShowResize;
     bool ShowUnsaved;
@@ -134,6 +138,7 @@ struct Editor
             MapIndices = List<uint32>.Create(),
             MapNames = List<string>.Create(),
             SongNames = List<string>.Create(),
+            Names = CharacterNames { Party = NameList.Create(), NPCs = NameList.Create(), MonsterGroups = NameList.Create() },
             ChangedTilesets = List<uint32>.Create(),
             Undo = List<Snapshot>.Create(),
             Redo = List<Snapshot>.Create(),
@@ -147,6 +152,7 @@ struct Editor
             HoverX = -1,
             HoverY = -1,
             SelectedCharacter = -1,
+            PlaceFollowing = true,
             FilePath = "",
             Message = "",
             Status = "",
@@ -178,6 +184,7 @@ struct Editor
         GameDataPath = path;
         GameDataLoaded = true;
         Graphics = TileGraphics.Create(gameData);
+        Names = CharacterNames.Load(gameData);
         MapLoaded = false;
         _ListMaps();
         _ListSongs();

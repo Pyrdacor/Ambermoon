@@ -1,8 +1,9 @@
 # AmbermoonMapEditor2D
 
 An editor for the 2D maps of Ambermoon (indoor maps, towns, dungeons and the world maps): a port of
-`AmbermoonTools/AmbermoonMapEditor2D` (WinForms) to CShift with `System.Ui` (CShift 0.34 or later). It runs on
-Windows, Linux (X11) and the Amiga (AmigaOS 3.0 and later).
+`AmbermoonTools/AmbermoonMapEditor2D` (WinForms), with the character editor of `AmbermoonMapCharEditor` that it
+embedded, to CShift with `System.Ui` (CShift 0.35 or later). It runs on Windows and Linux (X11). It is built for the
+Amiga too (AmigaOS 3.0 and later), but `System.Ui` does not draw images there yet, so the map and the tiles stay empty.
 
 ```
 AmbermoonMapEditor2D [game data folder [map index]]
@@ -14,7 +15,8 @@ The last folder is remembered (`.AmbermoonMapEditor2D.cfg` in the home folder, `
 ## The window
 
 - **Map** menu: open game data, open a map (a list of all 2D maps), a new map (index, indoor/world map/dungeon,
-  world, size), save (into the game data), save the map data to a file of its own, quit.
+  world, size), save (into the game data), save the map data to a file of its own, quit. Quitting, closing the window
+  and opening another map ask first when there are unsaved changes.
 - **Toolbar**: the tools (below). **Map view**: the map, zoom 1-4 (Ctrl+wheel, Ctrl++ / Ctrl+-, the slider).
   **Status line**: the tool, the layer, the selected tile and the tile under the mouse (position, index, back and front
   tile, event).
@@ -24,7 +26,29 @@ The last folder is remembered (`.AmbermoonMapEditor2D.cfg` in the home folder, `
 - **Side bar**: the layer to paint on (Tab switches), what is shown (back and front layer, grid, events, characters,
   animation, unused tiles, tiles that block walking, horses, rafts, ships, the disc or the eagle), the properties of
   the map (size, type, world, tileset, palette, music, NPC graphics, flags), its events (a click chooses an event for
-  the event repeater), its monsters and NPCs (with "Place on map" for their position).
+  the event repeater) and its characters (below).
+
+## Characters
+
+The side bar lists the characters of the map (up to 32: party members, NPCs, monster groups and map objects) with
+their names from the game data. **Add** makes a new NPC (the next click on the map places it), **Remove** removes the
+selected one (the ones after it move up: the game stops at the first empty one), **Place on map** sets its position
+with clicks on the map. For the selected character:
+
+- the type and who it is: the party member, the NPC, the map text (an NPC with a short text), the monster group (named
+  after its monsters, the boss first) or the event of a map object;
+- random movement (monsters and map objects: chase the party), the graphic of the tileset instead of an NPC graphic,
+  the short text of NPCs, the travel type it moves with;
+- the graphic (with a preview: the NPC graphics of the map's NPC graphics file, or a tile of the tileset), the combat
+  background of monsters, and its tile flags (how it is drawn, which travel types can pass it);
+- its position. Monsters and characters with random movement have one; the others have a path with a position for
+  every 5 minutes of the day (0, 0: not on the map at that time). **Time of day** chooses the time: the map shows all
+  characters where they are then, and the path of the selected one as a line. A click with "Place on map" sets the
+  position at that time and, if wanted, at all later times, so a path is made by placing the character at the times
+  it moves.
+
+The characters are drawn with their graphics (NPC graphics are 16x32 and stand on their tile) and a frame: red for
+monsters, blue for NPCs, yellow for the others.
 
 ## Tools
 
@@ -39,7 +63,7 @@ The last folder is remembered (`.AmbermoonMapEditor2D.cfg` in the home folder, `
 | Event repeater | gives the tile the last chosen event | removes the event |
 
 Undo (Ctrl+Z) and redo (Ctrl+Y) cover all changes of the map (128 steps): tiles, events, size, properties and
-positions of characters.
+characters.
 
 ## Saving
 
@@ -54,12 +78,12 @@ the texts of every map it enters. The data of a map that was not changed is writ
 - Tileset changes are saved to `Icon_data.amb` (the original only exported them to a file).
 - All changes can be undone, not only the painting; resizing changes the tiles of the map (the original changed only
   the initial tiles, see its source).
-- The tool for character positions only sets the first position. The original embedded the character editor of
-  AmbermoonMapCharEditor; it is not ported.
+- The character editor is in the side bar instead of a window of its own, positions are set on the map (the original
+  had a table of the 288 positions), and the flags of Ambermoon Advanced (stationary, move only when the player is
+  seen) are not offered: the game of this repository does not know them (characters that have them keep them).
 - No music is played (the original played the song of the map) and the tiles are drawn with the system font of
   `System.Ui`.
 - There are no custom mouse pointers (a cross over the map).
-- Closing the window does not ask about unsaved changes (Quit in the menu and Ctrl+Q do).
 
 ## Testing without a window
 

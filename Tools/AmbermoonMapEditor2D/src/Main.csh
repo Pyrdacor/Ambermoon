@@ -228,6 +228,7 @@ void Draw(Ui ui, ref Editor editor, int windowHeight, ref TilesetTile copied, re
     if (editor.ShowResize) ResizeDialog(ui, ref editor);
     if (editor.ShowEventSelect) EventSelectDialog(ui, ref editor);
     if (editor.ShowEditTile) EditTileDialog(ui, ref editor);
+    if (editor.ShowCharacterFlags) CharacterFlagsDialog(ui, ref editor);
     if (editor.ShowSaveFile) SaveFileDialog(ui, ref editor);
     if (editor.ShowUnsaved) UnsavedDialog(ui, ref editor);
     if (editor.ShowMessage) MessageDialog(ui, ref editor);
@@ -284,7 +285,7 @@ int Screenshot(string[] args)
 bool AnyDialog(ref Editor editor)
 {
     return editor.ShowOpenGameData || editor.ShowOpenMap || editor.ShowNewMap || editor.ShowResize || editor.ShowEventSelect ||
-           editor.ShowEditTile || editor.ShowSaveFile || editor.ShowUnsaved || editor.ShowMessage;
+           editor.ShowEditTile || editor.ShowCharacterFlags || editor.ShowSaveFile || editor.ShowUnsaved || editor.ShowMessage;
 }
 
 int Main(string[] args)
@@ -318,19 +319,19 @@ int Main(string[] args)
     var copied = TilesetTile { };
     bool hasCopy = false;
     string title = "";
+    // closing the window asks about unsaved changes like Quit
+    window.ConfirmClose(true);
     while (!editor.Quit && window.Update())
     {
         ui.Begin(window);
         editor.Time = ui.Input().Time;
+        if (ui.Input().CloseRequested && !editor.ShowUnsaved)
+            RunAction(ref editor, 3, false);
         Draw(ui, ref editor, (int)((double)window.Height() / window.Scale()), ref copied, ref hasCopy);
-        window.Show(ui);
-        // animated tiles: the window waits for input after a frame of the ui, but not after an image, so the frame
-        // is shown again as an image and the loop slowed down to the speed of the animation
+        // animated tiles: the next frame when the animation goes on
         if (editor.Animate && editor.MapLoaded && !AnyDialog(ref editor))
-        {
-            window.Show(ui.Frame());
-            Thread.Sleep(40);
-        }
+            ui.RequestFrame((int)(FrameSeconds * 1000.0));
+        window.Show(ui);
         string newTitle = Title(ref editor);
         if (newTitle != title)
         {
