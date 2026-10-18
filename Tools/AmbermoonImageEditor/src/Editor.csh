@@ -48,7 +48,7 @@ struct Editor
     bool FillEverywhere;
     uint32 Primary;            // a palette index, or ARGB for pictures with more than 256 colors
     uint32 Secondary;
-    int Zoom;                  // 1, 2, 4 or 8
+    int Zoom;                  // 1, 2, 4, 8, 16 or 32
     bool Drawing;
     bool DrawingSecondary;
     int LastX;

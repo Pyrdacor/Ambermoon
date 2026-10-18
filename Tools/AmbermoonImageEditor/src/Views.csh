@@ -68,6 +68,8 @@ void DrawMenu(Ui ui, ref Editor editor)
             if (ui.MenuItem("Zoom 2x", "2")) editor.Zoom = 2;
             if (ui.MenuItem("Zoom 4x", "4")) editor.Zoom = 4;
             if (ui.MenuItem("Zoom 8x", "8")) editor.Zoom = 8;
+            if (ui.MenuItem("Zoom 16x")) editor.Zoom = 16;
+            if (ui.MenuItem("Zoom 32x")) editor.Zoom = 32;
             if (ui.MenuItem(editor.ShowGrid ? "Hide the grid" : "Show the grid", "G"))
                 editor.ShowGrid = !editor.ShowGrid;
         }
@@ -128,6 +130,8 @@ void DrawToolbar(Ui ui, ref Editor editor)
         ui.Radio("2x", ref editor.Zoom, 2);
         ui.Radio("4x", ref editor.Zoom, 4);
         ui.Radio("8x", ref editor.Zoom, 8);
+        ui.Radio("16x", ref editor.Zoom, 16);
+        ui.Radio("32x", ref editor.Zoom, 32);
     }
 }
 
@@ -158,7 +162,7 @@ void DrawCanvas(Ui ui, ref Editor editor, int height)
             ui.SetCursor(Cursor.Crosshair);
         }
         if (ui.Hovered() && input.Ctrl && input.Wheel != 0)
-            editor.Zoom = input.Wheel > 0 ? Math.Min(8, editor.Zoom * 2) : Math.Max(1, editor.Zoom / 2);
+            editor.Zoom = input.Wheel > 0 ? Math.Min(32, editor.Zoom * 2) : Math.Max(1, editor.Zoom / 2);
         _UseTool(ref editor, input, held, rightHeld, clicked, rightClicked);
 
         var canvas = ui.Canvas();

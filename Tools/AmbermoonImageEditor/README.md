@@ -85,7 +85,7 @@ The left mouse button paints with the left color and the right button with the r
 | Picker (I) | takes the color of a pixel |
 
 Other controls:
-- Zoom 1x, 2x, 4x or 8x: the keys 1, 2, 4, 8, the toolbar, or Ctrl and the wheel.
+- Zoom 1x, 2x, 4x, 8x, 16x or 32x: the toolbar, the menu Image, Ctrl and the wheel, or the keys 1, 2, 4 and 8.
 - G shows a grid from 4x zoom on.
 - Undo (Ctrl+Z) and redo (Ctrl+Y) cover 64 steps.
 - Closing the window asks about unsaved changes.
