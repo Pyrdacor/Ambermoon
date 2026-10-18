@@ -287,6 +287,13 @@ bool AnyDialog(ref Editor editor)
            editor.ShowEditTile || editor.ShowCharacterFlags || editor.ShowSaveFile || editor.ShowUnsaved || editor.ShowMessage;
 }
 
+/// Whether the frame had input that can change what is shown: then the next frame comes at once, so that the result
+/// of a click or key is drawn without waiting for the next input.
+bool HadInput(UiInput input)
+{
+    return input.MousePressed || input.MouseReleased || input.RightPressed || input.RightReleased || input.Keys.Count() > 0;
+}
+
 int Main(string[] args)
 {
     if (args.Length >= 4 && args[0] == "--screenshot")
@@ -330,6 +337,8 @@ int Main(string[] args)
         // animated tiles: the next frame when the animation goes on
         if (editor.Animate && editor.MapLoaded && !AnyDialog(ref editor))
             ui.RequestFrame((int)(FrameSeconds * 1000.0));
+        if (HadInput(ui.Input()))
+            ui.RequestFrame(0);
         window.Show(ui);
         string newTitle = Title(ref editor);
         if (newTitle != title)

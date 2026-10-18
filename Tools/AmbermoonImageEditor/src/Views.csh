@@ -142,9 +142,11 @@ void DrawCanvas(Ui ui, ref Editor editor, int height)
         var input = ui.Input();
         bool held = ui.Held();
         bool rightHeld = ui.RightHeld();
+        bool clicked = ui.Clicked();
+        bool rightClicked = ui.RightClicked();
         editor.HoverX = -1;
         editor.HoverY = -1;
-        if (ui.Hovered() || held || rightHeld)
+        if (ui.Hovered() || held || rightHeld || clicked || rightClicked)
         {
             int px = (int)((int64)(input.MouseX - area.X) * picture.Width / Math.Max(1, area.Width));
             int py = (int)((int64)(input.MouseY - area.Y) * picture.Height / Math.Max(1, area.Height));
@@ -157,7 +159,7 @@ void DrawCanvas(Ui ui, ref Editor editor, int height)
         }
         if (ui.Hovered() && input.Ctrl && input.Wheel != 0)
             editor.Zoom = input.Wheel > 0 ? Math.Min(8, editor.Zoom * 2) : Math.Max(1, editor.Zoom / 2);
-        _UseTool(ref editor, input, held, rightHeld);
+        _UseTool(ref editor, input, held, rightHeld, clicked, rightClicked);
 
         var canvas = ui.Canvas();
         canvas.DrawImage(editor.CurrentView(), Rect.Create(0, 0, picture.Width, picture.Height), area);
@@ -204,12 +206,16 @@ void DrawCanvas(Ui ui, ref Editor editor, int height)
     }
 }
 
-void _UseTool(ref Editor editor, UiInput input, bool held, bool rightHeld)
+void _UseTool(ref Editor editor, UiInput input, bool held, bool rightHeld, bool clicked, bool rightClicked)
 {
     int x = editor.HoverX;
     int y = editor.HoverY;
-    bool pressed = (input.MousePressed && held) || (input.RightPressed && rightHeld);
-    bool secondary = rightHeld && !held;
+    // a press, also one that is released in the same frame (a quick click while frames are slow: in the browser, on
+    // the Amiga)
+    bool left = input.MousePressed && (held || clicked);
+    bool right = input.RightPressed && (rightHeld || rightClicked);
+    bool pressed = left || right;
+    bool secondary = right && !left;
     switch (editor.Tool)
     {
         case Tool.Pencil:

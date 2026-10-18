@@ -154,6 +154,13 @@ int Screenshot(string[] args)
     return 0;
 }
 
+/// Whether the frame had input that can change what is shown: then the next frame comes at once, so that the result
+/// of a click or key is drawn without waiting for the next input.
+bool HadInput(UiInput input)
+{
+    return input.MousePressed || input.MouseReleased || input.RightPressed || input.RightReleased || input.Keys.Count() > 0;
+}
+
 int Main(string[] args)
 {
     if (args.Length >= 2 && args[0] == "--screenshot")
@@ -178,6 +185,8 @@ int Main(string[] args)
         if (ui.Input().CloseRequested && !editor.ShowUnsaved)
             RunAction(ref editor, 3, false);
         Draw(ui, ref editor, (int)((double)window.Height() / window.Scale()));
+        if (HadInput(ui.Input()))
+            ui.RequestFrame(0);
         window.Show(ui);
         string newTitle = Title(ref editor);
         if (newTitle != title)

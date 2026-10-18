@@ -83,7 +83,7 @@ void DrawMapView(Ui ui, ref Editor editor, int height)
         // the tile under the mouse
         editor.HoverX = -1;
         editor.HoverY = -1;
-        if (hovered || held || rightHeld)
+        if (hovered || held || rightHeld || clicked || rightClicked)
         {
             int tx = (int)((int64)(input.MouseX - area.X) * map.Width / Math.Max(1, area.Width));
             int ty = (int)((int64)(input.MouseY - area.Y) * map.Height / Math.Max(1, area.Height));
@@ -109,7 +109,10 @@ void _UseTool(Ui ui, ref Editor editor, UiInput input, bool held, bool rightHeld
 {
     int x = editor.HoverX;
     int y = editor.HoverY;
-    bool pressed = (input.MousePressed && held) || (input.RightPressed && rightHeld);
+    // a press, also one that is released in the same frame (a quick click while frames are slow)
+    bool left = input.MousePressed && (held || clicked);
+    bool right = input.RightPressed && (rightHeld || rightClicked);
+    bool pressed = left || right;
     switch (editor.Tool)
     {
         case Tool.Brush:
@@ -122,8 +125,9 @@ void _UseTool(Ui ui, ref Editor editor, UiInput input, bool held, bool rightHeld
             {
                 editor.BeginChange();
                 editor.Painting = true;
+                editor.Paint(x, y, right && !left);
             }
-            if (editor.Painting && (held || rightHeld) && x >= 0)
+            else if (editor.Painting && (held || rightHeld) && x >= 0)
                 editor.Paint(x, y, rightHeld && !held);
             if (!held && !rightHeld)
                 editor.Painting = false;
