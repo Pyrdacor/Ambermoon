@@ -276,3 +276,6 @@ Based on the Meynaf patch.
 - Added floor texture to S'Angrila
 - Fixed wrong direction when teleporting from Luminor's tower 4 to 3
 - Changed Gryban start Exp from 114250 (previous fixed value) to 113400 (like in german fix) as this is exactly the exp needed for level 35.
+- Monsters can now cross the green slime in the old cave. Before, only the party could walk over it, so monsters got stuck at the slime (labdata 2, objects 15-17).
+- Fixed missing or superfluous quotation marks in 22 texts (signs, NPC dialogues, the dwarf diary, a party member text).
+- Fixed the typos ESTABLISED, INTESTED, WORDLY and POSSES, "TO SPEAK TO YOU YOU NOTICE" (Sansri), "NORTH NORTH WEST" and the healer telling you not to enter the madman's "cellar" instead of his cell.

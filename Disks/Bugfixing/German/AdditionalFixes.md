@@ -348,3 +348,6 @@ as shown above. Here the summary:
 
 Note that the event chain indices are 1-based inside the tile data. This is the case because 0 would mean
 no event on the tile at all. So 9 means event chain 8 (0-based).
+
+- Monster können jetzt über den grünen Schleim in der alten Höhle laufen. Vorher konnte nur die Gruppe darüber gehen, Monster blieben davor stehen (Labdata 2, Objekte 15-17).
+- Im Text eines Gruppenmitglieds (Party_texts.amb 8, Text 8) stand die Erzählung "VERBITTERT WENDET ER SICH VON EUCH AB." noch in den Anführungszeichen.

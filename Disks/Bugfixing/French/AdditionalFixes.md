@@ -54,3 +54,4 @@
 ## Version 1.17
 
 First release based on english 1.17.
+- Monsters can now cross the green slime in the old cave (labdata 2, objects 15-17), before only the party could walk over it.
