@@ -72,7 +72,10 @@ void DrawMapView(Ui ui, ref Editor editor, int height)
     int tileSize = TileSize * editor.Zoom;
     using (ui.ScrollArea("map", 0, height))
     {
-        var area = ui.Area("mapview", map.Width * tileSize, map.Height * tileSize);
+        // in a row: in a column the Ui would cut the area to the width of the column (and squeeze the map)
+        Rect area;
+        using (ui.Row())
+            area = ui.Area("mapview", map.Width * tileSize, map.Height * tileSize);
         var input = ui.Input();
         bool hovered = ui.Hovered();
         bool held = ui.Held();

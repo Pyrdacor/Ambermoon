@@ -199,7 +199,10 @@ void DrawCanvas(Ui ui, ref Editor editor, int height)
     int width = single ? fw : picture.Width;
     using (ui.ScrollArea("canvas", 0, height))
     {
-        var area = ui.Area("picture", width * zoom, picture.Height * zoom);
+        // in a row: in a column the Ui would cut the area to the width of the column (and squeeze the picture)
+        Rect area;
+        using (ui.Row())
+            area = ui.Area("picture", width * zoom, picture.Height * zoom);
         var input = ui.Input();
         bool held = ui.Held();
         bool rightHeld = ui.RightHeld();
