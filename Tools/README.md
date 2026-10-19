@@ -8,7 +8,7 @@ tools (see *How the port was checked* below), the bugs of the originals are fixe
 and many of them are much faster.
 
 Of the tools with a user interface, AmbermoonMapEditor2D is ported together with the character editor it embeds
-(AmbermoonMapCharEditor), with `System.Ui` of CShift 0.36, see [its README](AmbermoonMapEditor2D/README.md).
+(AmbermoonMapCharEditor), with `System.Ui` of CShift 0.37, see [its README](AmbermoonMapEditor2D/README.md).
 AmbermoonImageEditor is a new paint program in its place (not a port of the old one, [its README](AmbermoonImageEditor/README.md)).
 The others (Ambermoon3DMapEditor, AmbermoonButtonGraphicsDesigner, AmbermoonCharEditor, AmbermoonEditor,
 AmbermoonMapEditor3D, AmbermoonUIEventEditor) are not part of it, nor are AmbermoonPatcher (the original does not

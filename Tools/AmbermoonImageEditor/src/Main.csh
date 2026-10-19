@@ -177,10 +177,10 @@ int Main(string[] args)
     var ui = Ui.Create();
     ui.SetTheme(Theme.Dark());
     string title = "";
-    // closing the window asks about unsaved changes like Quit
-    window.ConfirmClose(true);
     while (!editor.Quit && window.Update())
     {
+        // closing the window asks when there are unsaved changes (like Quit; in the browser the browser asks)
+        window.ConfirmClose(editor.Dirty());
         ui.Begin(window);
         if (ui.Input().CloseRequested && !editor.ShowUnsaved)
             RunAction(ref editor, 3, false);

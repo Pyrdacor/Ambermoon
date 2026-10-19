@@ -325,10 +325,10 @@ int Main(string[] args)
     var copied = TilesetTile { };
     bool hasCopy = false;
     string title = "";
-    // closing the window asks about unsaved changes like Quit
-    window.ConfirmClose(true);
     while (!editor.Quit && window.Update())
     {
+        // closing the window asks when there are unsaved changes (like Quit; in the browser the browser asks)
+        window.ConfirmClose(editor.Dirty());
         ui.Begin(window);
         editor.Time = ui.Input().Time;
         if (ui.Input().CloseRequested && !editor.ShowUnsaved)

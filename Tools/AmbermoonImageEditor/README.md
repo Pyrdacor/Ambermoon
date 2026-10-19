@@ -1,9 +1,9 @@
 # AmbermoonImageEditor
 
-A paint program for the graphics of Ambermoon, in CShift with `System.Ui` (CShift 0.36 or later). It opens PNG and
+A paint program for the graphics of Ambermoon, in CShift with `System.Ui` (CShift 0.37 or later). It opens PNG and
 BMP files and the palette graphics of the Amiga (bit planes with 1, 3, 4 or 5 bits per pixel), and it reads and writes
-the palette files of the game. It is made for Windows and Linux (X11); it is built for the Amiga too, but not made
-for it yet.
+the palette files of the game. It is made for Windows and Linux (X11) and runs in the browser too (see below); it is
+built for the Amiga too, but not made for it yet.
 
 ```
 AmbermoonImageEditor [file]
@@ -50,7 +50,8 @@ AmbermoonImageEditor [file]
   The picture has no file of its own; Save asks where to save it.
 - **New** (Ctrl+N): width, height and bits per pixel. A new picture is always an Amiga graphic; it has 1 << bpp colors
   (palette 1 of the game; black and white for 1 bit).
-- **Save** (Ctrl+S) writes the file in the format it was opened or last saved in. **Save as** (Ctrl+Shift+S) chooses
+- **Save** (Ctrl+S) writes the file in the format it was opened or last saved in (a new picture, a file of a container
+  or a monster asks where, like Save as). **Save as** (Ctrl+Shift+S) chooses
   PNG, BMP or Amiga graphic. Its default is the format the picture was opened in. For an Amiga graphic it has the same
   fields as the open dialog. The size comes from the picture: the frames divide its width. The dialog says what is
   wrong if the picture does not fit, e.g. colors above what the bits per pixel can store.
@@ -88,7 +89,7 @@ Other controls:
 - Zoom 1x, 2x, 4x, 8x, 16x or 32x: the toolbar, the menu Image, Ctrl and the wheel, or the keys 1, 2, 4 and 8.
 - G shows a grid from 4x zoom on.
 - Undo (Ctrl+Z) and redo (Ctrl+Y) cover 64 steps.
-- Closing the window asks about unsaved changes.
+- Closing the window asks about unsaved changes (in the browser the browser asks before the tab is closed).
 
 ## Colors and palettes
 
@@ -116,6 +117,17 @@ their colors to choose one. The **palette offset** (in the side bar; default 0) 
 of the picture are in those 32: 0 or 16 for an Amiga graphic of 4 bits per pixel, 0, 16 or 24 for 3 bits, else 0.
 Loading takes the colors from the offset on (as many as the picture has); saving always writes 32 colors, those of the
 picture from the offset on and black for the others.
+
+## In the browser
+
+`cshiftc publish Tools/AmbermoonImageEditor` makes one HTML page with the whole program (open it in a browser, also on
+a phone: touch works like the mouse). The browser lets the program see only the files the user chooses:
+- **Open** shows "Choose files...": the browser's file chooser, where several files can be chosen at once. The files a
+  container needs must be chosen together with it: `Monster_char.amb` with `Monster_gfx.amb` and `Palettes.amb`. The
+  picture is the chosen file that is not only such a neighbour.
+- **Save as** asks only for a name, and the file is downloaded. Ctrl+S of a file that was opened in the browser does the
+  same (the opened file is only a copy in the page).
+- **Save palette** downloads the palette.
 
 ## Testing without a window
 

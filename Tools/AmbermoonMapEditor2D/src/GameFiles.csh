@@ -87,6 +87,16 @@ struct RawContainer
     }
 }
 
+/// In the browser (CShift 0.37) the files the user opened are only in the memory of the page
+/// (/home/web_user/files/...): a file of the game that was changed there is offered as a download as well.
+void OfferDownload(string path, uint8[] data)
+{
+    if (!path.StartsWith("/home/web_user/files/"))
+        return;
+    Directory.Create("/home/web_user/downloads");
+    File.WriteAllBytes(Path.Combine("/home/web_user/downloads", Path.GetFileName(path)), data);
+}
+
 /// Replaces a subfile of a container file on disk.
 /// @error the file cannot be read or written, or is no container.
 Error<void> ReplaceSubfile(string path, int number, uint8[] data)
@@ -95,8 +105,10 @@ Error<void> ReplaceSubfile(string path, int number, uint8[] data)
         return error($"Could not read '{path}'.");
     var container = try RawContainer.Read(bytes);
     try container.Replace(number, data);
-    if (File.WriteAllBytes(path, container.ToArray()) is error)
+    var bytes2 = container.ToArray();
+    if (File.WriteAllBytes(path, bytes2) is error)
         return error($"Could not write '{path}'.");
+    OfferDownload(path, bytes2);
     return;
 }
 
@@ -110,8 +122,10 @@ Error<void> EnsureSubfileCount(string path, int count)
     if (container.Subfiles.Count() >= count)
         return;
     container.EnsureCount(count);
-    if (File.WriteAllBytes(path, container.ToArray()) is error)
+    var bytes2 = container.ToArray();
+    if (File.WriteAllBytes(path, bytes2) is error)
         return error($"Could not write '{path}'.");
+    OfferDownload(path, bytes2);
     return;
 }
 

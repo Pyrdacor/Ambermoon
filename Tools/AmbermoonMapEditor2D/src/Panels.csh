@@ -330,7 +330,8 @@ void OpenGameDataDialog(Ui ui, ref Editor editor)
             if (ui.Button("Open") || ui.Submitted("gamedatapath"))
             {
                 string path = editor.FilePath.Trim().ToString();
-                if (File.Exists(path))
+                // a file of the game data stands for its folder (File.Exists is also true for a folder in the browser)
+                if (!Directory.Exists(path) && File.Exists(path))
                     path = Path.GetDirectory(path);
                 if (editor.LoadGameData(path) is error e)
                     ShowError(ref editor, e.Message);
@@ -347,11 +348,11 @@ void OpenGameDataDialog(Ui ui, ref Editor editor)
     }
     if (editor.ShowOpenFile)
     {
-        var result = ui.FileDialog("gamedatafile", "Choose a file of the game data (e.g. Icon_data.amb)", ref editor.FilePath);
+        // the folder of the game data (in the browser the browser's chooser of a folder: its files are copied into the
+        // page)
+        var result = ui.FileDialog("gamedatafile", "Choose the folder of the game data", ref editor.FilePath, FileDialogMode.Folder);
         if (result != UiDialogResult.None)
             editor.ShowOpenFile = false;
-        if (result == UiDialogResult.Ok)
-            editor.FilePath = Path.GetDirectory(editor.FilePath);
     }
 }
 
@@ -722,7 +723,7 @@ void RunAction(ref Editor editor, int action, bool confirmed)
 
 void SaveFileDialog(Ui ui, ref Editor editor)
 {
-    var result = ui.FileDialog("savefile", "Save the map data to a file", ref editor.FilePath);
+    var result = ui.FileDialog("savefile", "Save the map data to a file", ref editor.FilePath, FileDialogMode.Save);
     if (result == UiDialogResult.Ok)
     {
         if (editor.SaveToFile(editor.FilePath) is error e)

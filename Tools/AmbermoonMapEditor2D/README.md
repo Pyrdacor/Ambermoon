@@ -2,7 +2,8 @@
 
 An editor for the 2D maps of Ambermoon (indoor maps, towns, dungeons and the world maps): a port of
 `AmbermoonTools/AmbermoonMapEditor2D` (WinForms), with the character editor of `AmbermoonMapCharEditor` that it
-embedded, to CShift with `System.Ui` (CShift 0.36 or later). It is made for Windows and Linux (X11). It is built for
+embedded, to CShift with `System.Ui` (CShift 0.37 or later). It is made for Windows and Linux (X11) and runs in the
+browser too (see below). It is built for
 the Amiga too (AmigaOS 3.0 and later), but not made for it yet: the window is laid out for 1280 x 800, the images
 take a lot of memory (an image of each tile set and palette in 32 bits), the colors are those of the Workbench screen
 and a frame full of tiles takes about a second on an A1200.
@@ -86,6 +87,14 @@ the texts of every map it enters. The data of a map that was not changed is writ
 - No music is played (the original played the song of the map) and the tiles are drawn with the system font of
   `System.Ui`.
 - There are no custom mouse pointers (a cross over the map).
+
+## In the browser
+
+`cshiftc publish Tools/AmbermoonMapEditor2D` makes one HTML page with the whole program. "Browse..." in the dialog of the
+game data opens the browser's chooser of a folder (not on phones): its files are copied into the page. Saving writes
+the copies, and every file of the game data that changed (the map data, the map texts, `Icon_data.amb`) is downloaded
+as well; copy the downloads back into the folder of the game data. "Save to a file" asks only for a name and downloads
+the map data. Before the tab is closed with unsaved changes, the browser asks.
 
 ## Testing without a window
 

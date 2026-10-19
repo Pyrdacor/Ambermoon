@@ -86,11 +86,25 @@ void UnsavedDialog(Ui ui, ref Editor editor)
 
 void OpenDialog(Ui ui, ref Editor editor)
 {
-    var result = ui.FileDialog("openfile", "Open a picture (PNG, BMP or an Amiga graphic)", ref editor.DialogPath);
+    // several files can be chosen: in the browser the files a container needs come along (Monster_char.amb with
+    // Monster_gfx.amb and Palettes.amb); the picture is the one that is not only such a neighbour
+    var result = ui.FileDialog("openfile", "Open a picture (PNG, BMP or an Amiga graphic)", ref editor.DialogPath, FileDialogMode.OpenMany);
     if (result == UiDialogResult.None)
         return;
     editor.ShowOpen = false;
-    if (result == UiDialogResult.Ok && editor.Open(editor.DialogPath) is error e)
+    if (result != UiDialogResult.Ok)
+        return;
+    string path = editor.DialogPath;
+    foreach (var chosen in ui.FileDialogPaths("openfile"))
+    {
+        string name = Path.GetFileName(chosen).ToLower();
+        if (name != "monster_gfx.amb" && name != "palettes.amb")
+        {
+            path = chosen;
+            break;
+        }
+    }
+    if (editor.Open(path) is error e)
         ShowError(ref editor, e.Message);
 }
 
@@ -285,7 +299,9 @@ void SaveOrAsk(ref Editor editor)
 {
     if (!editor.Loaded)
         return;
-    if (editor.FilePath.Length == 0)
+    // a new picture, a file of a container ("2Wall3D.amb #10"), or one that was opened in the browser (its file is in
+    // the memory of the page): save as
+    if (editor.FilePath.Length == 0 || editor.FilePath.Contains(" #") || editor.FilePath.StartsWith(BrowserFiles))
     {
         OpenSaveDialog(ref editor);
         return;
@@ -296,11 +312,15 @@ void SaveOrAsk(ref Editor editor)
         editor.Status = $"Saved {editor.FilePath}";
 }
 
+/// Where the browser puts the files the user opens (CShift 0.37): they are only in the memory of the page.
+const string BrowserFiles = "/home/web_user/files/";
+
 void OpenSaveDialog(ref Editor editor)
 {
     editor.DialogKind = (int)editor.Kind;
     editor.DialogFormat = editor.Format;
-    editor.DialogPath = editor.FilePath.Length > 0 ? editor.FilePath : "picture";
+    string name = editor.FilePath.Length > 0 && !editor.FilePath.Contains(" #") ? editor.FilePath : Path.Combine(_Folder(editor.FilePath), "picture");
+    editor.DialogPath = _WithExtension(name, editor.Kind);
     editor.ShowSave = true;
 }
 
@@ -308,13 +328,6 @@ void SaveDialog(Ui ui, ref Editor editor)
 {
     using (ui.Modal("save", "Save the picture"))
     {
-        using (ui.Row())
-        {
-            ui.Label("File");
-            ui.TextBox("savepath", ref editor.DialogPath);
-            if (ui.Button("Browse..."))
-                editor.ShowBrowse = true;
-        }
         var kinds = List<string>.Create();
         kinds.Add("PNG");
         kinds.Add("BMP");
@@ -348,22 +361,9 @@ void SaveDialog(Ui ui, ref Editor editor)
         }
         using (ui.Row())
         {
-            if (ui.Button("Save") && problem.Length == 0)
-            {
-                if (editor.SaveAs(editor.DialogPath, (FileKind)editor.DialogKind, editor.DialogFormat) is error e)
-                    ShowError(ref editor, e.Message);
-                else
-                {
-                    editor.ShowSave = false;
-                    editor.Status = $"Saved {editor.DialogPath}";
-                    if (editor.PendingAction != 0 && !editor.ShowUnsaved)
-                    {
-                        int action = editor.PendingAction;
-                        editor.PendingAction = 0;
-                        RunAction(ref editor, action, true);
-                    }
-                }
-            }
+            // the file is chosen with the file dialog for saving (in the browser: a name, and the file is downloaded)
+            if (ui.Button("Save...") && problem.Length == 0)
+                editor.ShowBrowse = true;
             if (ui.Button("Cancel") || ui.Input().Pressed(Key.Escape))
             {
                 editor.ShowSave = false;
@@ -373,9 +373,25 @@ void SaveDialog(Ui ui, ref Editor editor)
     }
     if (editor.ShowBrowse)
     {
-        var result = ui.FileDialog("savebrowse", "Save as", ref editor.DialogPath);
+        var result = ui.FileDialog("savebrowse", "Save as", ref editor.DialogPath, FileDialogMode.Save);
         if (result != UiDialogResult.None)
             editor.ShowBrowse = false;
+        if (result == UiDialogResult.Ok)
+        {
+            if (editor.SaveAs(editor.DialogPath, (FileKind)editor.DialogKind, editor.DialogFormat) is error e)
+                ShowError(ref editor, e.Message);
+            else
+            {
+                editor.ShowSave = false;
+                editor.Status = $"Saved {editor.DialogPath}";
+                if (editor.PendingAction != 0 && !editor.ShowUnsaved)
+                {
+                    int action = editor.PendingAction;
+                    editor.PendingAction = 0;
+                    RunAction(ref editor, action, true);
+                }
+            }
+        }
     }
 }
 
@@ -461,7 +477,7 @@ void PaletteFileDialogs(Ui ui, ref Editor editor)
     }
     if (editor.ShowPaletteSave)
     {
-        var result = ui.FileDialog("palsave", "Save the palette (32 colors of 16 bits)", ref editor.DialogPath);
+        var result = ui.FileDialog("palsave", "Save the palette (32 colors of 16 bits)", ref editor.DialogPath, FileDialogMode.Save);
         if (result != UiDialogResult.None)
             editor.ShowPaletteSave = false;
         if (result == UiDialogResult.Ok)
