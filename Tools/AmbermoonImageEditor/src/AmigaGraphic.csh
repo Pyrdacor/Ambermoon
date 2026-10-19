@@ -200,8 +200,27 @@ int _PlaneByte(AmigaFormat format, int bytesPerRow, int x, int y, int plane)
 
 const int PaletteFileColors = 32;
 
-/// Palette 1 of Ambermoon (Palettes.amb), the colors of a new graphic.
+/// The palette of the user interface of Ambermoon (the first palette in AM2_CPU): the items, the portraits and the
+/// graphics of the user interface use it. It is also the palette of a new graphic.
+uint32[] UiPalette()
+{
+    uint16[] colors = [0x000, 0xedc, 0xffe, 0xbbc, 0x89a, 0x578, 0x256, 0x034, 0xfc9, 0xea7, 0xc85, 0xa63, 0x842, 0x521,
+                       0xb80, 0xda0, 0xfc0, 0xf90, 0xc60, 0x812, 0xc43, 0xe63, 0xaa4, 0x573, 0x254, 0x509, 0x222, 0x443,
+                       0x665, 0x887, 0xaa9, 0xccb];
+    var palette = new uint32[colors.Length];
+    for (var i = 0; i < colors.Length; i += 1)
+        palette[i] = FromAmigaColor((int)colors[i]);
+    return palette;
+}
+
+/// The colors of a new graphic and of a graphic that is opened: the palette of the user interface.
 uint32[] DefaultPalette()
+{
+    return UiPalette();
+}
+
+/// Palette 1 of Ambermoon (Palettes.amb).
+uint32[] FirstMapPalette()
 {
     uint16[] colors = [0x000, 0xeed, 0x9b5, 0x8a4, 0x793, 0x683, 0x573, 0x462, 0x351, 0x241, 0x131, 0x020, 0x224, 0x346,
                        0x368, 0x499, 0xcb0, 0xb75, 0x983, 0x762, 0x541, 0x320, 0xc40, 0xd80, 0x533, 0x854, 0x222, 0x443,

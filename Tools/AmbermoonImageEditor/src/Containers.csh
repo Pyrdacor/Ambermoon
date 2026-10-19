@@ -4,6 +4,7 @@
 // from Monster_gfx.amb (its size, palette mapping and scaling from the monster data).
 
 using System;
+using System.Image;
 using Ambermoon;
 using Ambermoon.Data;
 using Ambermoon.Data.Legacy.Serialization;
@@ -152,8 +153,19 @@ Error<void> ChooseContainerFile(ref Editor editor, int number)
         return error($"The container has no file {number}.");
     if (editor.Choice == ChoicePurpose.Monster)
     {
-        editor.Monster = try ReadMonsterGraphic(file.Path, number, data);
-        editor.PaletteChoices = try ReadPalettes(Path.Combine(_FolderOf(file.Path), "Palettes.amb"));
+        // the graphics and the palettes: next to Monster_char.amb, or chosen by the user when they are not there
+        string graphicsPath = _Neighbour(editor.MonsterGfxPath, file.Path, "Monster_gfx.amb");
+        string palettesPath = _Neighbour(editor.PalettesPath, file.Path, "Palettes.amb");
+        if (graphicsPath.Length == 0 || palettesPath.Length == 0)
+        {
+            editor.LocateName = graphicsPath.Length == 0 ? "Monster_gfx.amb" : "Palettes.amb";
+            editor.LocateNumber = number;
+            editor.DialogPath = Path.Combine(_FolderOf(file.Path), editor.LocateName);
+            editor.ShowLocate = true;
+            return;
+        }
+        editor.Monster = try ReadMonsterGraphic(graphicsPath, number, data);
+        editor.PaletteChoices = try ReadPalettes(palettesPath);
         editor.Choice = ChoicePurpose.MonsterPalette;
         editor.ChoiceSelection = 0;
         editor.ShowPaletteChoice = true;
@@ -163,19 +175,36 @@ Error<void> ChooseContainerFile(ref Editor editor, int number)
     return;
 }
 
+// a file that a container needs: the one the user chose, else the file of that name next to the container (the case of
+// the name does not matter); "" if there is none
+string _Neighbour(string chosen, string container, string name)
+{
+    if (chosen.Length > 0 && File.Exists(chosen))
+        return chosen;
+    string folder = _FolderOf(container);
+    string exact = Path.Combine(folder, name);
+    if (File.Exists(exact))
+        return exact;
+    foreach (var entry in Directory.GetEntries(folder))
+    {
+        if (entry.ToLower() == name.ToLower())
+            return Path.Combine(folder, entry);
+    }
+    return "";
+}
+
 string _FolderOf(string path)
 {
     string folder = Path.GetDirectory(path);
     return folder.Length == 0 ? "." : folder;
 }
 
-/// A monster of Monster_char.amb with its graphic of Monster_gfx.amb (in the same folder).
+/// A monster of Monster_char.amb with its graphic of Monster_gfx.amb.
 /// @error the monster data is damaged, or Monster_gfx.amb or the graphic is missing.
-Error<MonsterGraphic> ReadMonsterGraphic(string path, int number, uint8[] data)
+Error<MonsterGraphic> ReadMonsterGraphic(string graphicsPath, int number, uint8[] data)
 {
     var reader = DataReader.FromData(data);
     var monster = try MonsterReader.ReadMonster((uint32)number, ref reader, null);
-    string graphicsPath = Path.Combine(_FolderOf(path), "Monster_gfx.amb");
     if (File.ReadAllBytes(graphicsPath) is not uint8[] graphicsData)
         return error($"Could not read '{graphicsPath}' (the graphics of the monsters).");
     var graphics = try ReadGameFile(graphicsPath, graphicsData);
@@ -238,6 +267,19 @@ Error<List<uint32[]>> ReadPalettes(string path)
     if (File.ReadAllBytes(path) is not uint8[] data)
         return error($"Could not read '{path}'.");
     var palettes = List<uint32[]>.Create();
+    bool png = data.Length >= 8 && data[0] == 0x89 && data[1] == 0x50 && data[2] == 0x4e && data[3] == 0x47;
+    bool bmp = data.Length >= 14 && data[0] == 0x42 && data[1] == 0x4d;
+    if (png || bmp)
+    {
+        // a picture: each pixel is a color (row by row), the first 32, black for the rest
+        if (Image.Decode(data) is not Image image)
+            return error($"'{Path.GetFileName(path)}' is no valid {(png ? "PNG" : "BMP")} file.");
+        var colors = new uint32[PaletteFileColors];
+        for (var i = 0; i < PaletteFileColors; i += 1)
+            colors[i] = i < image.Pixels.Length ? image.Pixels[i] | 0xff000000u : 0xff000000u;
+        palettes.Add(colors);
+        return palettes;
+    }
     if (data.Length == 2 * PaletteFileColors && !IsContainer(data) && !IsEncoded(data))
     {
         palettes.Add(try ReadPaletteFile(data));

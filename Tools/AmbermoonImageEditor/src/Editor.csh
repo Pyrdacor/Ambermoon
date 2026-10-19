@@ -114,6 +114,11 @@ struct Editor
     GameFile SourceFile;       // the container a graphic is chosen from
     List<uint32[]> PaletteChoices;
     MonsterGraphic Monster;    // the monster whose palette is chosen
+    string MonsterGfxPath;     // Monster_gfx.amb and Palettes.amb, when the user chose them (not next to Monster_char.amb)
+    string PalettesPath;
+    bool ShowLocate;           // asks for a file a container needs
+    string LocateName;
+    int LocateNumber;
     string Message;
     string DialogPath;
     uint8[] RawData;           // the file that is read as an Amiga graphic
@@ -153,6 +158,9 @@ struct Editor
             PreviewKey = "",
             SourceFile = GameFile { Path = "", Files = Dictionary<int, uint8[]>.Create(), Numbers = new int[0] },
             PaletteChoices = List<uint32[]>.Create(),
+            MonsterGfxPath = "",
+            PalettesPath = "",
+            LocateName = "",
             Monster = MonsterGraphic { Name = "", Data = new uint8[0], Mapping = new uint8[32] },
             Preview = Image.Create(1, 1),
             FloatView = Image.Create(1, 1),

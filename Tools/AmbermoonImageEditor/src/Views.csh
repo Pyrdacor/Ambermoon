@@ -110,6 +110,8 @@ void DrawMenu(Ui ui, ref Editor editor)
         }
         using (ui.Menu("Palette"))
         {
+            if (editor.Picture.Indexed && ui.MenuItem("UI palette"))
+                editor.ApplyPalette(UiPalette());
             if (ui.MenuItem("Load palette..."))
             {
                 editor.DialogPath = Path.Combine(_Folder(editor.FilePath), "palette");

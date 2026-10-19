@@ -41,15 +41,15 @@ AmbermoonImageEditor [file]
   | `Portraits.amb`, `Pics_80x80.amb`, `Monster_gfx.amb` | portrait, picture 80x80, monster |
 
 - **Monsters**: `Monster_char.amb` lists the monsters by name. The chosen monster is opened with its graphic of
-  `Monster_gfx.amb` (in the same folder), and a dialog asks for the palette (from `Palettes.amb` in the same folder). The
-  monster data gives the rest:
+  `Monster_gfx.amb`, and a dialog asks for the palette (from `Palettes.amb`). Both are taken from the folder of
+  `Monster_char.amb`; when one is not there, the editor asks for it. The monster data gives the rest:
   - 5 bits per pixel, and the width and height of a frame; the number of frames comes from the size of the graphic;
   - every color goes through the palette mapping of the monster;
   - each frame is scaled to the size the monster is shown with.
 
   The picture has no file of its own; Save asks where to save it.
 - **New** (Ctrl+N): width, height and bits per pixel. A new picture is always an Amiga graphic; it has 1 << bpp colors
-  (palette 1 of the game; black and white for 1 bit).
+  (of the UI palette; black and white for 1 bit).
 - **Save** (Ctrl+S) writes the file in the format it was opened or last saved in (a new picture, a file of a container
   or a monster asks where, like Save as). **Save as** (Ctrl+Shift+S) chooses
   PNG, BMP or Amiga graphic. Its default is the format the picture was opened in. For an Amiga graphic it has the same
@@ -148,9 +148,15 @@ no palette ("Too many colors"), and the colors are ARGB.
 
 Pictures that have few enough colors keep them exactly.
 
+**The UI palette** is the palette of the user interface of the game (the first one in `AM2_CPU`): the items, the
+portraits and the graphics of the user interface use it. It is built into the editor: it is the palette of a new
+graphic and of an Amiga graphic that is opened (also in the preview of the format dialog), and **Palette > UI palette**
+gives it to the picture.
+
 **Palette > Load palette / Save palette**: a palette file of the game has 32 colors of 16 bits (X4R4G4B4, big endian:
 64 bytes). `Palettes.amb` (or another container of palettes) can be loaded too: a dialog shows its palettes with
-their colors to choose one. The **palette offset** (in the side bar; default 0) is where the colors
+their colors to choose one. A PNG or BMP is a palette too: each pixel is a color (row by row), the first 32 of them
+(black for the rest if there are fewer). The **palette offset** (in the side bar; default 0) is where the colors
 of the picture are in those 32: 0 or 16 for an Amiga graphic of 4 bits per pixel, 0, 16 or 24 for 3 bits, else 0.
 Loading takes the colors from the offset on (as many as the picture has); saving always writes 32 colors, those of the
 picture from the offset on and black for the others.
@@ -165,6 +171,9 @@ a phone: touch works like the mouse). The browser lets the program see only the 
 - **Save as** asks only for a name, and the file is downloaded. Ctrl+S of a file that was opened in the browser does the
   same (the opened file is only a copy in the page).
 - **Save palette** downloads the palette.
+- If the files a monster needs were not chosen together with `Monster_char.amb`, the editor asks for them one after the
+  other.
+- On the pages of GitHub Pages (`publish-web.sh`), File > Quit goes back to the start page.
 
 ## Testing without a window
 

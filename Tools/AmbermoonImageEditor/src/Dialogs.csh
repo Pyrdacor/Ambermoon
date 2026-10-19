@@ -471,7 +471,7 @@ void PaletteFileDialogs(Ui ui, ref Editor editor)
 {
     if (editor.ShowPaletteLoad)
     {
-        var result = ui.FileDialog("palload", "Load a palette (32 colors of 16 bits, or a palette of Palettes.amb)", ref editor.DialogPath);
+        var result = ui.FileDialog("palload", "Load a palette (32 colors of 16 bits, a palette of Palettes.amb, or a PNG/BMP: each pixel a color)", ref editor.DialogPath);
         if (result != UiDialogResult.None)
             editor.ShowPaletteLoad = false;
         if (result == UiDialogResult.Ok && editor.LoadPalette(editor.DialogPath) is error e)
@@ -624,4 +624,24 @@ void ResizeDialog(Ui ui, ref Editor editor)
                 editor.ShowResize = false;
         }
     }
+}
+
+/// Asks for a file a container needs when it is not next to it (Monster_gfx.amb and Palettes.amb for the monsters of
+/// Monster_char.amb; in the browser only the files the user chose are there).
+void LocateDialog(Ui ui, ref Editor editor)
+{
+    string container = Path.GetFileName(editor.SourceFile.Path);
+    var result = ui.FileDialog("locate", $"Choose {editor.LocateName} (it is not next to {container})", ref editor.DialogPath);
+    if (result == UiDialogResult.None)
+        return;
+    editor.ShowLocate = false;
+    if (result != UiDialogResult.Ok)
+        return;
+    if (editor.LocateName == "Monster_gfx.amb")
+        editor.MonsterGfxPath = editor.DialogPath;
+    else
+        editor.PalettesPath = editor.DialogPath;
+    // go on with the monster (it may ask for the other file next)
+    if (ChooseContainerFile(ref editor, editor.LocateNumber) is error e)
+        ShowError(ref editor, e.Message);
 }
