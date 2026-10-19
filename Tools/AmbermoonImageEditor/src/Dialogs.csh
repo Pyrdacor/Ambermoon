@@ -317,8 +317,10 @@ const string BrowserFiles = "/home/web_user/files/";
 
 void OpenSaveDialog(ref Editor editor)
 {
+    CommitFloat(ref editor);
     editor.DialogKind = (int)editor.Kind;
     editor.DialogFormat = editor.Format;
+    editor.DialogFormat.Frames = editor.Picture.Frames;
     string name = editor.FilePath.Length > 0 && !editor.FilePath.Contains(" #") ? editor.FilePath : Path.Combine(_Folder(editor.FilePath), "picture");
     editor.DialogPath = _WithExtension(name, editor.Kind);
     editor.ShowSave = true;
@@ -589,6 +591,37 @@ void PaletteChoiceDialog(Ui ui, ref Editor editor)
             }
             if (ui.Button("Cancel") || ui.Input().Pressed(Key.Escape))
                 editor.ShowPaletteChoice = false;
+        }
+    }
+}
+
+/// The size of the frames: their pixels scaled, or the canvas cut or extended.
+void ResizeDialog(Ui ui, ref Editor editor)
+{
+    var picture = editor.Picture;
+    using (ui.Modal("resize", picture.Frames > 1 ? "Resize the frames" : "Resize the picture"))
+    {
+        ui.Text($"Now {picture.FrameWidth()} x {picture.Height} pixels{(picture.Frames > 1 ? $" per frame ({picture.Frames} frames)" : "")}.");
+        using (ui.Row())
+        {
+            ui.Label("Width");
+            using (ui.Column(90)) { ui.IntBox("rwidth", ref editor.ResizeWidth, 1, 4096); }
+            ui.Label("Height");
+            using (ui.Column(90)) { ui.IntBox("rheight", ref editor.ResizeHeight, 1, 4096); }
+        }
+        ui.Radio("Scale the pixels", ref editor.ResizeMode, 0);
+        ui.Radio("Change the canvas (cut off or add transparent pixels)", ref editor.ResizeMode, 1);
+        if (editor.ResizeMode == 1)
+            ui.Checkbox("Keep the picture in the middle (else at the top left)", ref editor.ResizeCenter);
+        using (ui.Row())
+        {
+            if (ui.Button("Resize"))
+            {
+                ResizeFrames(ref editor, editor.ResizeWidth, editor.ResizeHeight, editor.ResizeMode == 0, editor.ResizeCenter);
+                editor.ShowResize = false;
+            }
+            if (ui.Button("Cancel") || ui.Input().Pressed(Key.Escape))
+                editor.ShowResize = false;
         }
     }
 }

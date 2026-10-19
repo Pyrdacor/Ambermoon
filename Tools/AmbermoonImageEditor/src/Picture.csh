@@ -19,6 +19,11 @@ struct Picture
     uint32[] Pixels;
     /// Color 0 is transparent (Amiga graphics).
     bool TransparentZero;
+    /// The frames: graphics of the same size side by side (Width is a multiple of their number).
+    int Frames;
+    /// The columns the drawing tools may change (ClipLeft to ClipRight - 1; the current frame when only it is shown).
+    int ClipLeft;
+    int ClipRight;
 
     /// A new Amiga graphic: all pixels color 0, the default palette cut to 1 << bpp colors.
     static Picture CreateAmiga(int width, int height, int bpp)
@@ -32,7 +37,9 @@ struct Picture
             Indices = new uint8[width * height],
             Palette = palette,
             Pixels = new uint32[0],
-            TransparentZero = true
+            TransparentZero = true,
+            Frames = 1,
+            ClipRight = int.MaxValue
         };
     }
 
@@ -47,7 +54,9 @@ struct Picture
             Indices = indices,
             Palette = palette,
             Pixels = new uint32[0],
-            TransparentZero = true
+            TransparentZero = true,
+            Frames = 1,
+            ClipRight = int.MaxValue
         };
     }
 
@@ -84,7 +93,9 @@ struct Picture
             Indices = indexed ? indices : new uint8[0],
             Palette = indexed ? palette : List<uint32>.Create(),
             Pixels = indexed ? new uint32[0] : image.Pixels.Clone(),
-            TransparentZero = false
+            TransparentZero = false,
+            Frames = 1,
+            ClipRight = int.MaxValue
         };
         if (!indexed)
         {
@@ -117,6 +128,18 @@ struct Picture
         return x >= 0 && y >= 0 && x < Width && y < Height;
     }
 
+    /// Whether the drawing tools may change a pixel (inside the picture and the clip).
+    bool Editable(int x, int y)
+    {
+        return Contains(x, y) && x >= ClipLeft && x < ClipRight;
+    }
+
+    /// The width of a frame.
+    int FrameWidth()
+    {
+        return Frames > 0 && Width % Frames == 0 ? Width / Frames : Width;
+    }
+
     // ---- colors ----
 
     /// The color of a palette index as it is shown (color 0 transparent if wanted).
@@ -138,7 +161,7 @@ struct Picture
 
     void Set(int x, int y, uint32 value)
     {
-        if (!Contains(x, y))
+        if (!Editable(x, y))
             return;
         int i = x + y * Width;
         if (Indexed)
@@ -209,7 +232,7 @@ struct Picture
     /// Fills the area of the color at the pixel (connected horizontally and vertically).
     void Fill(int x, int y, uint32 value)
     {
-        if (!Contains(x, y))
+        if (!Editable(x, y))
             return;
         uint32 old = Get(x, y);
         if (old == value)
@@ -222,7 +245,7 @@ struct Picture
             stack.RemoveAt(stack.Count() - 1);
             int px = i % Width;
             int py = i / Width;
-            if (Get(px, py) != old)
+            if (!Editable(px, py) || Get(px, py) != old)
                 continue;
             Set(px, py, value);
             if (px > 0) stack.Add(i - 1);
@@ -235,7 +258,7 @@ struct Picture
     /// Replaces the color of the pixel everywhere.
     void Replace(int x, int y, uint32 value)
     {
-        if (!Contains(x, y))
+        if (!Editable(x, y))
             return;
         uint32 old = Get(x, y);
         for (var py = 0; py < Height; py += 1)
@@ -246,6 +269,133 @@ struct Picture
                     Set(px, py, value);
             }
         }
+    }
+
+    // ---- parts of the picture ----
+
+    /// A picture of the same kind (palette, transparency) and the given size, all pixels `value`.
+    Picture Blank(int width, int height, uint32 value)
+    {
+        var copy = this;
+        copy.Width = width;
+        copy.Height = height;
+        copy.Frames = 1;
+        copy.ClipLeft = 0;
+        copy.ClipRight = int.MaxValue;
+        var palette = List<uint32>.Create();
+        foreach (var color in Palette)
+            palette.Add(color);
+        copy.Palette = palette;
+        copy.Indices = new uint8[Indexed ? width * height : 0];
+        copy.Pixels = new uint32[Indexed ? 0 : width * height];
+        if (value != 0)
+        {
+            for (var i = 0; i < width * height; i += 1)
+            {
+                if (Indexed)
+                    copy.Indices[i] = (uint8)value;
+                else
+                    copy.Pixels[i] = value;
+            }
+        }
+        return copy;
+    }
+
+    /// A part of the picture (clipped to it; outside pixels stay `outside`).
+    Picture Extract(int x, int y, int width, int height, uint32 outside)
+    {
+        var part = Blank(width, height, outside);
+        for (var py = 0; py < height; py += 1)
+        {
+            for (var px = 0; px < width; px += 1)
+            {
+                if (Contains(x + px, y + py))
+                    part.SetRaw(px, py, Get(x + px, y + py));
+            }
+        }
+        return part;
+    }
+
+    /// Writes the pixels of a picture of the same kind at a position (clipped; with `skip`, pixels of the value `skipped`
+    /// are left out: a transparent paste).
+    void Stamp(Picture source, int x, int y, bool skip, uint32 skipped)
+    {
+        for (var py = 0; py < source.Height; py += 1)
+        {
+            for (var px = 0; px < source.Width; px += 1)
+            {
+                uint32 value = source.Get(px, py);
+                if (skip && value == skipped)
+                    continue;
+                if (Contains(x + px, y + py))
+                    SetRaw(x + px, y + py, value);
+            }
+        }
+    }
+
+    /// Sets the pixels of a rectangle (clipped to the picture).
+    void FillRect(int x, int y, int width, int height, uint32 value)
+    {
+        for (var py = y; py < y + height; py += 1)
+        {
+            for (var px = x; px < x + width; px += 1)
+            {
+                if (Contains(px, py))
+                    SetRaw(px, py, value);
+            }
+        }
+    }
+
+    /// The picture mirrored: left and right (horizontal) or top and bottom.
+    Picture Flipped(bool horizontal)
+    {
+        var result = Blank(Width, Height, 0);
+        for (var y = 0; y < Height; y += 1)
+        {
+            for (var x = 0; x < Width; x += 1)
+                result.SetRaw(horizontal ? Width - 1 - x : x, horizontal ? y : Height - 1 - y, Get(x, y));
+        }
+        return result;
+    }
+
+    /// The picture turned by 90 degrees (clockwise or counterclockwise): width and height change places.
+    Picture Rotated(bool clockwise)
+    {
+        var result = Blank(Height, Width, 0);
+        for (var y = 0; y < Height; y += 1)
+        {
+            for (var x = 0; x < Width; x += 1)
+            {
+                if (clockwise)
+                    result.SetRaw(Height - 1 - y, x, Get(x, y));
+                else
+                    result.SetRaw(y, Width - 1 - x, Get(x, y));
+            }
+        }
+        return result;
+    }
+
+    /// The picture scaled to another size (each pixel takes the nearest one).
+    Picture Scaled(int width, int height)
+    {
+        var result = Blank(width, height, 0);
+        for (var y = 0; y < height; y += 1)
+        {
+            int sy = y * Height / height;
+            for (var x = 0; x < width; x += 1)
+                result.SetRaw(x, y, Get(x * Width / width, sy));
+        }
+        return result;
+    }
+
+    /// Sets a pixel without the clip of the tools.
+    void SetRaw(int x, int y, uint32 value)
+    {
+        int i = x + y * Width;
+        if (Indexed)
+            Indices[i] = (uint8)value;
+        else
+            Pixels[i] = value;
     }
 
     // ---- showing and saving ----

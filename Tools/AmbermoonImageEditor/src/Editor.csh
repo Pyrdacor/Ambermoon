@@ -10,7 +10,8 @@ enum Tool : int32
     Brush,
     Fill,
     Eraser,
-    Picker
+    Picker,
+    Select
 }
 
 /// What a picture was read from and is saved as.
@@ -58,6 +59,38 @@ struct Editor
     bool ShowGrid;
     bool ColorEditing;         // a slider of a color is dragged (one undo step)
 
+    // ---- selection and clipboard ----
+    bool HasSelection;
+    int SelX;
+    int SelY;
+    int SelW;
+    int SelH;
+    bool Selecting;            // the rectangle is being drawn with the mouse
+    int SelStartX;
+    int SelStartY;
+    bool Floating;             // a pasted or lifted part above the picture
+    Picture FloatPic;
+    int FloatX;
+    int FloatY;
+    bool FloatOwnsChange;      // lifted: its undo step began then (a paste begins it when it is placed)
+    bool FloatChanged;         // its image must be made again
+    Image FloatView;
+    bool Moving;               // the floating part is dragged
+    int MoveOffsetX;
+    int MoveOffsetY;
+    bool PasteTransparent;     // transparent pixels of a floating part are left out when it is placed
+    Picture Clipboard;
+    bool HasClipboard;
+
+    // ---- frames and animation ----
+    int CurrentFrame;
+    bool SingleFrame;          // only the current frame is shown and edited
+    bool Playing;
+    double PlayStart;
+    double Time;
+    int FrameMs;
+    bool PingPong;
+
     // ---- dialogs ----
     bool ShowOpen;
     bool ShowRaw;
@@ -69,6 +102,11 @@ struct Editor
     bool ShowPaletteLoad;
     bool ShowPaletteSave;
     bool ShowBrowse;
+    bool ShowResize;
+    int ResizeWidth;
+    int ResizeHeight;
+    int ResizeMode;            // 0: scale the pixels, 1: change the canvas
+    bool ResizeCenter;
     bool ShowContainer;        // the choice of a file of a container
     bool ShowPaletteChoice;    // the choice of a palette of Palettes.amb
     ChoicePurpose Choice;
@@ -117,6 +155,10 @@ struct Editor
             PaletteChoices = List<uint32[]>.Create(),
             Monster = MonsterGraphic { Name = "", Data = new uint8[0], Mapping = new uint8[32] },
             Preview = Image.Create(1, 1),
+            FloatView = Image.Create(1, 1),
+            FloatPic = Picture.CreateAmiga(1, 1, 1),
+            Clipboard = Picture.CreateAmiga(1, 1, 1),
+            FrameMs = 150,
             PreviewError = "",
             DialogBpp = 5,
             Status = ""
@@ -142,6 +184,12 @@ struct Editor
         SavedAtChange = 0;
         Drawing = false;
         PaletteOffset = 0;
+        HasSelection = false;
+        Floating = false;
+        Selecting = false;
+        Moving = false;
+        CurrentFrame = 0;
+        Playing = false;
         _ResetColors();
         View = Image.Create(picture.Width, picture.Height);
         ViewChanged = true;
@@ -213,9 +261,10 @@ struct Editor
     Error<void> OpenMonster(uint32[] palette)
     {
         var picture = try MonsterPicture(Monster, palette);
+        picture.Frames = Math.Max(1, picture.Width / Math.Max(1, Monster.MappedWidth));
         _SetPicture(picture, $"{SourceFile.Path} #{Monster.Name}", FileKind.Amiga);
         Format = AmigaFormat.Create(Monster.MappedWidth, Monster.MappedHeight, 5);
-        Format.Frames = Math.Max(1, picture.Width / Math.Max(1, Monster.MappedWidth));
+        Format.Frames = picture.Frames;
         Format.Preset = 10;
         // the picture has no file of its own: saving asks where
         FilePath = "";
@@ -227,6 +276,7 @@ struct Editor
     Error<void> OpenRaw(AmigaFormat format, int paletteOffset)
     {
         var picture = try RawPicture(RawData, format, paletteOffset);
+        picture.Frames = Math.Max(1, format.Frames);
         _SetPicture(picture, DialogPath, FileKind.Amiga);
         Format = format;
         PaletteOffset = PaletteOffsets(format.Bpp).Contains(paletteOffset) ? paletteOffset : 0;
@@ -246,6 +296,9 @@ struct Editor
             if (File.WriteAllBytes(path, data) is error)
                 return error($"Could not write '{path}'.");
             Format = format;
+            // the frames of the file are those of the picture from now on
+            Picture.Frames = Math.Max(1, format.Frames);
+            CurrentFrame = Math.Min(CurrentFrame, Picture.Frames - 1);
         }
         else
         {
@@ -268,8 +321,11 @@ struct Editor
     /// Reduces the colors to an Amiga graphic of `bpp` bits per pixel.
     void NormalizeColors(int bpp)
     {
+        Deselect(ref this);
         BeginChange();
+        int frames = Picture.Frames;
         Picture = Normalize(Picture, bpp);
+        Picture.Frames = frames;
         Format.Bpp = bpp;
         if (!Format.SlicesAllowed())
             Format.Slices = false;
@@ -336,6 +392,8 @@ struct Editor
 
     void DoUndo()
     {
+        Floating = false;
+        HasSelection = false;
         if (Undo.Count() == 0)
             return;
         Redo.Add(Picture.Clone());
@@ -347,6 +405,8 @@ struct Editor
 
     void DoRedo()
     {
+        Floating = false;
+        HasSelection = false;
         if (Redo.Count() == 0)
             return;
         Undo.Add(Picture.Clone());
@@ -360,8 +420,17 @@ struct Editor
     {
         if (View.Width != Picture.Width || View.Height != Picture.Height)
             View = Image.Create(Picture.Width, Picture.Height);
+        CurrentFrame = Math.Max(0, Math.Min(CurrentFrame, Picture.Frames - 1));
         if (Picture.Indexed && ((int)Primary >= Picture.Palette.Count() || (int)Secondary >= Picture.Palette.Count()))
             _ResetColors();
+        ViewChanged = true;
+    }
+
+    /// After the size or the frames of the picture changed: a new view, the current frame inside.
+    void AfterResize()
+    {
+        View = Image.Create(Picture.Width, Picture.Height);
+        CurrentFrame = Math.Max(0, Math.Min(CurrentFrame, Picture.Frames - 1));
         ViewChanged = true;
     }
 

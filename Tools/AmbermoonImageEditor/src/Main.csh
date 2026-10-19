@@ -36,8 +36,38 @@ void HandleKeys(Ui ui, ref Editor editor)
         editor.DoUndo();
     if (input.Pressed(Key.Y, ctrl))
         editor.DoRedo();
-    // the tools and the zoom only without modifiers
+    if (input.Pressed(Key.C, ctrl))
+        Copy(ref editor);
+    if (input.Pressed(Key.X, ctrl))
+        Cut(ref editor);
+    if (input.Pressed(Key.V, ctrl))
+        Paste(ref editor);
+    if (input.Pressed(Key.A, ctrl))
+        SelectAll(ref editor);
+    // the tools, the zoom, the frames and the selection only without modifiers
     var none = KeyModifiers.None;
+    if (input.Pressed(Key.Delete, none))
+        DeleteSelection(ref editor);
+    if (input.Pressed(Key.Escape, none))
+        Deselect(ref editor);
+    if (input.Pressed(Key.Enter, none))
+        CommitFloat(ref editor);
+    if (input.Pressed(Key.S, none)) editor.Tool = Tool.Select;
+    if (input.Pressed(Key.H, none)) _Transform(ref editor, Transform.FlipHorizontal);
+    if (input.Pressed(Key.V, none)) _Transform(ref editor, Transform.FlipVertical);
+    if (input.Pressed(Key.R, none)) _Transform(ref editor, Transform.RotateClockwise);
+    if (input.Pressed(Key.R, KeyModifiers.Shift)) _Transform(ref editor, Transform.RotateCounterclockwise);
+    int frames = editor.Picture.Frames;
+    if (input.Pressed(Key.Comma, none) && frames > 1)
+    {
+        Deselect(ref editor);
+        editor.CurrentFrame = (editor.CurrentFrame + frames - 1) % frames;
+    }
+    if (input.Pressed(Key.Period, none) && frames > 1)
+    {
+        Deselect(ref editor);
+        editor.CurrentFrame = (editor.CurrentFrame + 1) % frames;
+    }
     if (input.Pressed(Key.D, none)) editor.Tool = Tool.Pencil;
     if (input.Pressed(Key.B, none)) editor.Tool = Tool.Brush;
     if (input.Pressed(Key.F, none)) editor.Tool = Tool.Fill;
@@ -54,12 +84,13 @@ bool AnyDialog(ref Editor editor)
 {
     return editor.ShowOpen || editor.ShowRaw || editor.ShowSave || editor.ShowNew || editor.ShowNormalize ||
            editor.ShowUnsaved || editor.ShowMessage || editor.ShowPaletteLoad || editor.ShowPaletteSave ||
-           editor.ShowContainer || editor.ShowPaletteChoice;
+           editor.ShowContainer || editor.ShowPaletteChoice || editor.ShowResize;
 }
 
 /// One frame of the window.
 void Draw(Ui ui, ref Editor editor, int windowHeight)
 {
+    editor.Time = ui.Input().Time;
     if (!AnyDialog(ref editor))
         HandleKeys(ui, ref editor);
     DrawMenu(ui, ref editor);
@@ -89,7 +120,7 @@ void Draw(Ui ui, ref Editor editor, int windowHeight)
                 if (editor.HoverX >= 0)
                     editor.Status = "";
             }
-            using (ui.Column(260))
+            using (ui.Column(290))
             {
                 DrawSideBar(ui, ref editor);
             }
@@ -105,6 +136,7 @@ void Draw(Ui ui, ref Editor editor, int windowHeight)
     if (editor.ShowSave) SaveDialog(ui, ref editor);
     if (editor.ShowNew) NewDialog(ui, ref editor);
     if (editor.ShowNormalize) NormalizeDialog(ui, ref editor);
+    if (editor.ShowResize) ResizeDialog(ui, ref editor);
     PaletteFileDialogs(ui, ref editor);
     if (editor.ShowUnsaved) UnsavedDialog(ui, ref editor);
     if (editor.ShowMessage) MessageDialog(ui, ref editor);
@@ -187,6 +219,9 @@ int Main(string[] args)
         Draw(ui, ref editor, (int)((double)window.Height() / window.Scale()));
         if (HadInput(ui.Input()))
             ui.RequestFrame(0);
+        // the animation preview goes on by itself
+        if (editor.Loaded && editor.Playing && editor.Picture.Frames > 1)
+            ui.RequestFrame(Math.Max(10, editor.FrameMs / 2));
         window.Show(ui);
         string newTitle = Title(ref editor);
         if (newTitle != title)

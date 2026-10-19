@@ -12,7 +12,8 @@ string ToolName(Tool tool)
         case Tool.Brush: return "Brush";
         case Tool.Fill: return "Fill";
         case Tool.Eraser: return "Eraser";
-        default: return "Picker";
+        case Tool.Picker: return "Picker";
+        default: return "Select";
     }
 }
 
@@ -24,7 +25,8 @@ string ToolHelp(Tool tool)
         case Tool.Brush: return "A square brush of 2x2 to 16x16 pixels (B)";
         case Tool.Fill: return "Fills the area of the color, or the color everywhere (F)";
         case Tool.Eraser: return "Makes pixels transparent, 1x1 to 16x16; dragging erases a line (E)";
-        default: return "Takes the color of a pixel. Left: primary, right: secondary (I)";
+        case Tool.Picker: return "Takes the color of a pixel. Left: primary, right: secondary (I)";
+        default: return "A rectangle; dragging inside it moves the pixels. Ctrl+C/X/V, Del, Ctrl+A, Esc (S)";
     }
 }
 
@@ -56,6 +58,20 @@ void DrawMenu(Ui ui, ref Editor editor)
                 editor.DoUndo();
             if (ui.MenuItem("Redo", "Ctrl+Y"))
                 editor.DoRedo();
+            ui.Separator();
+            if (ui.MenuItem("Cut", "Ctrl+X"))
+                Cut(ref editor);
+            if (ui.MenuItem("Copy", "Ctrl+C"))
+                Copy(ref editor);
+            if (editor.HasClipboard && ui.MenuItem("Paste", "Ctrl+V"))
+                Paste(ref editor);
+            if (ui.MenuItem("Delete", "Del"))
+                DeleteSelection(ref editor);
+            ui.Separator();
+            if (ui.MenuItem("Select all", "Ctrl+A"))
+                SelectAll(ref editor);
+            if (editor.HasSelection && ui.MenuItem("Select nothing", "Esc"))
+                Deselect(ref editor);
         }
         using (ui.Menu("Image"))
         {
@@ -64,6 +80,25 @@ void DrawMenu(Ui ui, ref Editor editor)
                 editor.DialogBpp = editor.Picture.NeededBpp() > 0 ? editor.Picture.NeededBpp() : 5;
                 editor.ShowNormalize = true;
             }
+            ui.Separator();
+            // the selection, or else each frame
+            if (ui.MenuItem("Mirror left/right", "H"))
+                _Transform(ref editor, Transform.FlipHorizontal);
+            if (ui.MenuItem("Mirror top/bottom", "V"))
+                _Transform(ref editor, Transform.FlipVertical);
+            if (ui.MenuItem("Rotate right", "R"))
+                _Transform(ref editor, Transform.RotateClockwise);
+            if (ui.MenuItem("Rotate left", "Shift+R"))
+                _Transform(ref editor, Transform.RotateCounterclockwise);
+            if (editor.HasSelection && ui.MenuItem("Crop to the selection"))
+                CropToSelection(ref editor);
+            if (ui.MenuItem("Resize..."))
+            {
+                editor.ResizeWidth = editor.Picture.FrameWidth();
+                editor.ResizeHeight = editor.Picture.Height;
+                editor.ShowResize = true;
+            }
+            ui.Separator();
             if (ui.MenuItem("Zoom 1x", "1")) editor.Zoom = 1;
             if (ui.MenuItem("Zoom 2x", "2")) editor.Zoom = 2;
             if (ui.MenuItem("Zoom 4x", "4")) editor.Zoom = 4;
@@ -89,6 +124,12 @@ void DrawMenu(Ui ui, ref Editor editor)
     }
 }
 
+void _Transform(ref Editor editor, Transform transform)
+{
+    if (TransformPicture(ref editor, transform) is error e)
+        ShowError(ref editor, e.Message);
+}
+
 string _Folder(string path)
 {
     return path.Length == 0 ? "" : Path.GetDirectory(path);
@@ -98,12 +139,18 @@ void DrawToolbar(Ui ui, ref Editor editor)
 {
     using (ui.Row())
     {
-        foreach (var tool in [Tool.Pencil, Tool.Brush, Tool.Fill, Tool.Eraser, Tool.Picker])
+        foreach (var tool in [Tool.Pencil, Tool.Brush, Tool.Fill, Tool.Eraser, Tool.Picker, Tool.Select])
         {
             string label = editor.Tool == tool ? $"[{ToolName(tool)}]" : ToolName(tool);
             if (ui.Button(label + "##tool" + ((int)tool).ToString()))
                 editor.Tool = tool;
             ui.Tooltip(ToolHelp(tool));
+        }
+        if (editor.Tool == Tool.Select)
+        {
+            if (ui.Checkbox("Transparent", ref editor.PasteTransparent))
+                editor.FloatChanged = true;
+            ui.Tooltip("Transparent pixels of a pasted or moved part leave the picture below as it is");
         }
         if (editor.Tool == Tool.Brush)
         {
@@ -135,14 +182,22 @@ void DrawToolbar(Ui ui, ref Editor editor)
     }
 }
 
-/// The picture: the tools with the mouse, frames and grid.
+/// The picture (or only its current frame): the tools with the mouse, frames, grid, the selection and a floating part.
 void DrawCanvas(Ui ui, ref Editor editor, int height)
 {
+    // other tools than Select place a floating part and forget the selection
+    if (editor.Tool != Tool.Select && (editor.Floating || editor.HasSelection))
+        Deselect(ref editor);
     var picture = editor.Picture;
     int zoom = editor.Zoom;
+    int fw = picture.FrameWidth();
+    bool single = editor.SingleFrame && picture.Frames > 1;
+    // the columns that are shown
+    int left = single ? editor.CurrentFrame * fw : 0;
+    int width = single ? fw : picture.Width;
     using (ui.ScrollArea("canvas", 0, height))
     {
-        var area = ui.Area("picture", picture.Width * zoom, picture.Height * zoom);
+        var area = ui.Area("picture", width * zoom, picture.Height * zoom);
         var input = ui.Input();
         bool held = ui.Held();
         bool rightHeld = ui.RightHeld();
@@ -150,30 +205,40 @@ void DrawCanvas(Ui ui, ref Editor editor, int height)
         bool rightClicked = ui.RightClicked();
         editor.HoverX = -1;
         editor.HoverY = -1;
+        // the pixel under the mouse (also outside of the picture while a rectangle or a part is dragged)
+        int mx = left + _Floor((int64)(input.MouseX - area.X) * width, Math.Max(1, area.Width));
+        int my = _Floor((int64)(input.MouseY - area.Y) * picture.Height, Math.Max(1, area.Height));
         if (ui.Hovered() || held || rightHeld || clicked || rightClicked)
         {
-            int px = (int)((int64)(input.MouseX - area.X) * picture.Width / Math.Max(1, area.Width));
-            int py = (int)((int64)(input.MouseY - area.Y) * picture.Height / Math.Max(1, area.Height));
-            if (input.MouseX >= area.X && input.MouseY >= area.Y && picture.Contains(px, py))
+            if (mx >= left && mx < left + width && my >= 0 && my < picture.Height)
             {
-                editor.HoverX = px;
-                editor.HoverY = py;
+                editor.HoverX = mx;
+                editor.HoverY = my;
             }
             ui.SetCursor(Cursor.Crosshair);
         }
         if (ui.Hovered() && input.Ctrl && input.Wheel != 0)
             editor.Zoom = input.Wheel > 0 ? Math.Min(32, editor.Zoom * 2) : Math.Max(1, editor.Zoom / 2);
-        _UseTool(ref editor, input, held, rightHeld, clicked, rightClicked);
+        // the tools only change the frame that is shown
+        editor.Picture.ClipLeft = left;
+        editor.Picture.ClipRight = left + width;
+        if (editor.Tool == Tool.Select)
+            _UseSelect(ref editor, input, held, clicked, mx, my, left, width);
+        else
+            _UseTool(ref editor, input, held, rightHeld, clicked, rightClicked);
+        editor.Picture.ClipLeft = 0;
+        editor.Picture.ClipRight = int.MaxValue;
+        picture = editor.Picture;
 
         var canvas = ui.Canvas();
-        canvas.DrawImage(editor.CurrentView(), Rect.Create(0, 0, picture.Width, picture.Height), area);
+        canvas.DrawImage(editor.CurrentView(), Rect.Create(left, 0, width, picture.Height), area);
         var clip = canvas.Clip.Intersect(area);
         if (editor.ShowGrid && zoom >= 4)
         {
             var gridColor = Color.FromArgb(0x50, 0, 0, 0);
-            for (var x = 1; x < picture.Width; x += 1)
+            for (var x = 1; x < width; x += 1)
             {
-                int sx = area.X + x * area.Width / picture.Width;
+                int sx = area.X + x * area.Width / width;
                 if (sx >= clip.X && sx < clip.Right())
                     canvas.FillRect(Rect.Create(sx, clip.Y, 1, clip.Height), gridColor);
             }
@@ -185,28 +250,135 @@ void DrawCanvas(Ui ui, ref Editor editor, int height)
             }
         }
         // the borders of the frames
-        int frames = editor.Kind == FileKind.Amiga ? Math.Max(1, editor.Format.Frames) : 1;
-        if (frames > 1 && editor.Format.Width * frames == picture.Width)
+        if (!single && picture.Frames > 1)
         {
-            for (var f = 1; f < frames; f += 1)
+            for (var f = 1; f < picture.Frames; f += 1)
             {
-                int sx = area.X + f * editor.Format.Width * area.Width / picture.Width;
+                int sx = area.X + f * fw * area.Width / width;
                 canvas.FillRect(Rect.Create(sx, area.Y, 1, area.Height), Color.FromRgb(255, 80, 200));
             }
         }
+        // the floating part and the rectangle of the selection
+        if (editor.Floating)
+        {
+            var image = _FloatImage(ref editor);
+            var target = _ScreenRect(area, left, width, picture.Height, editor.FloatX, editor.FloatY, editor.FloatPic.Width, editor.FloatPic.Height);
+            canvas.DrawImage(image, Rect.Create(0, 0, image.Width, image.Height), target);
+        }
+        if (editor.HasSelection || editor.Floating)
+        {
+            var r = editor.Floating
+                ? _ScreenRect(area, left, width, picture.Height, editor.FloatX, editor.FloatY, editor.FloatPic.Width, editor.FloatPic.Height)
+                : _ScreenRect(area, left, width, picture.Height, editor.SelX, editor.SelY, editor.SelW, editor.SelH);
+            canvas.StrokeRect(Rect.Create(r.X - 1, r.Y - 1, r.Width + 2, r.Height + 2), 1, Color.Black());
+            canvas.StrokeRect(r, 1, Color.White());
+        }
         // the pixels the tool would change
-        if (editor.HoverX >= 0)
+        if (editor.HoverX >= 0 && editor.Tool != Tool.Select)
         {
             int size = _ToolSize(ref editor);
             int start = -(size - 1) / 2;
-            int x0 = Math.Max(0, editor.HoverX + start);
+            int x0 = Math.Max(left, editor.HoverX + start);
             int y0 = Math.Max(0, editor.HoverY + start);
-            int x1 = Math.Min(picture.Width, editor.HoverX + start + size);
+            int x1 = Math.Min(left + width, editor.HoverX + start + size);
             int y1 = Math.Min(picture.Height, editor.HoverY + start + size);
-            var marker = Rect.Create(area.X + x0 * area.Width / picture.Width, area.Y + y0 * area.Height / picture.Height,
-                                     (x1 - x0) * area.Width / picture.Width, (y1 - y0) * area.Height / picture.Height);
+            var marker = _ScreenRect(area, left, width, picture.Height, x0, y0, x1 - x0, y1 - y0);
             canvas.StrokeRect(marker, 1, Color.FromRgb(255, 230, 0));
         }
+    }
+}
+
+// floor division (negative values round down: the mouse left of or above the picture)
+int _Floor(int64 a, int b)
+{
+    int64 q = a / b;
+    if (a % b != 0 && (a < 0) != (b < 0))
+        q -= 1;
+    return (int)q;
+}
+
+// a rectangle of pixels of the picture on the screen
+Rect _ScreenRect(Rect area, int left, int width, int height, int x, int y, int w, int h)
+{
+    int x0 = area.X + (int)((int64)(x - left) * area.Width / width);
+    int y0 = area.Y + (int)((int64)y * area.Height / height);
+    int x1 = area.X + (int)((int64)(x + w - left) * area.Width / width);
+    int y1 = area.Y + (int)((int64)(y + h) * area.Height / height);
+    return Rect.Create(x0, y0, x1 - x0, y1 - y0);
+}
+
+// the image of the floating part (transparent pixels as a checkerboard, or left out for a transparent paste)
+Image _FloatImage(ref Editor editor)
+{
+    if (!editor.FloatChanged && editor.FloatView.Width == editor.FloatPic.Width && editor.FloatView.Height == editor.FloatPic.Height)
+        return editor.FloatView;
+    editor.FloatView = Image.Create(editor.FloatPic.Width, editor.FloatPic.Height);
+    editor.FloatPic.RenderInto(editor.FloatView);
+    if (!editor.PasteTransparent)
+        CheckerBehind(editor.FloatView);
+    editor.FloatView.Changed();
+    editor.FloatChanged = false;
+    return editor.FloatView;
+}
+
+// the Select tool: a press in the floating part (or the selection) drags it, elsewhere starts a new rectangle
+void _UseSelect(ref Editor editor, UiInput input, bool held, bool clicked, int mx, int my, int left, int width)
+{
+    bool pressed = input.MousePressed && (held || clicked);
+    var picture = editor.Picture;
+    if (pressed && editor.HoverX >= 0)
+    {
+        bool inFloat = editor.Floating && mx >= editor.FloatX && my >= editor.FloatY &&
+                       mx < editor.FloatX + editor.FloatPic.Width && my < editor.FloatY + editor.FloatPic.Height;
+        bool inSelection = !editor.Floating && editor.HasSelection && mx >= editor.SelX && my >= editor.SelY &&
+                           mx < editor.SelX + editor.SelW && my < editor.SelY + editor.SelH;
+        if (inSelection)
+        {
+            LiftSelection(ref editor);
+            inFloat = true;
+        }
+        if (inFloat)
+        {
+            editor.Moving = true;
+            editor.MoveOffsetX = mx - editor.FloatX;
+            editor.MoveOffsetY = my - editor.FloatY;
+        }
+        else
+        {
+            Deselect(ref editor);
+            editor.Selecting = true;
+            editor.SelStartX = mx;
+            editor.SelStartY = my;
+            editor.HasSelection = true;
+            editor.SelX = mx;
+            editor.SelY = my;
+            editor.SelW = 1;
+            editor.SelH = 1;
+        }
+    }
+    else if (held && editor.Moving)
+    {
+        editor.FloatX = mx - editor.MoveOffsetX;
+        editor.FloatY = my - editor.MoveOffsetY;
+        editor.SelX = editor.FloatX;
+        editor.SelY = editor.FloatY;
+    }
+    else if (held && editor.Selecting)
+    {
+        // the rectangle from where it began to the pixel under the mouse, inside of what is shown
+        int x0 = Math.Max(left, Math.Min(editor.SelStartX, mx));
+        int y0 = Math.Max(0, Math.Min(editor.SelStartY, my));
+        int x1 = Math.Min(left + width - 1, Math.Max(editor.SelStartX, mx));
+        int y1 = Math.Min(picture.Height - 1, Math.Max(editor.SelStartY, my));
+        editor.SelX = x0;
+        editor.SelY = y0;
+        editor.SelW = Math.Max(1, x1 - x0 + 1);
+        editor.SelH = Math.Max(1, y1 - y0 + 1);
+    }
+    if (!held)
+    {
+        editor.Moving = false;
+        editor.Selecting = false;
     }
 }
 
@@ -276,6 +448,8 @@ void _UseTool(ref Editor editor, UiInput input, bool held, bool rightHeld, bool 
                 else
                     editor.Primary = editor.Picture.Get(x, y);
             }
+            break;
+        default:
             break;
     }
 }
@@ -364,6 +538,8 @@ void DrawSideBar(Ui ui, ref Editor editor)
             }
         }
 
+        DrawFramesPanel(ui, ref editor);
+
         using (ui.Panel("Picture"))
         {
             ui.Label($"{picture.Width} x {picture.Height} pixels");
@@ -371,8 +547,6 @@ void DrawSideBar(Ui ui, ref Editor editor)
             {
                 var format = editor.Format;
                 ui.Label($"Amiga graphic, {_Bpp(ref editor)} BPP{(format.Slices ? ", 8 pixel slices" : "")}");
-                if (format.Frames > 1)
-                    ui.Label($"{format.Frames} frames of {format.Width} x {format.Height}");
             }
             else
                 ui.Label(editor.Kind == FileKind.Png ? "PNG" : "BMP");
@@ -477,8 +651,10 @@ string StatusText(ref Editor editor)
         uint32 value = editor.Picture.Get(editor.HoverX, editor.HoverY);
         text += $" | {editor.HoverX}, {editor.HoverY}";
         text += editor.Picture.Indexed ? $" | color {value}" : $" | #{value:X8}";
-        if (editor.Kind == FileKind.Amiga && editor.Format.Frames > 1 && editor.Format.Width > 0)
-            text += $" | frame {editor.HoverX / editor.Format.Width + 1}";
+        if (editor.Picture.Frames > 1)
+            text += $" | frame {editor.HoverX / editor.Picture.FrameWidth() + 1}";
     }
+    if (editor.HasSelection || editor.Floating)
+        text += $" | selection {(editor.Floating ? editor.FloatX : editor.SelX)}, {(editor.Floating ? editor.FloatY : editor.SelY)} {(editor.Floating ? editor.FloatPic.Width : editor.SelW)} x {(editor.Floating ? editor.FloatPic.Height : editor.SelH)}";
     return text;
 }

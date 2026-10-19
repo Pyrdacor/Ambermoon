@@ -84,12 +84,49 @@ The left mouse button paints with the left color and the right button with the r
 | Fill (F) | fills the area of the color (connected horizontally and vertically), or with "Replace the color everywhere" every pixel of that color |
 | Eraser (E) | makes pixels transparent (color 0 of an Amiga graphic), 1x1 to 16x16 (the size in the toolbar); dragging erases a line |
 | Picker (I) | takes the color of a pixel |
+| Select (S) | draws a rectangle; dragging inside it moves its pixels (their place becomes transparent) |
 
 Other controls:
 - Zoom 1x, 2x, 4x, 8x, 16x or 32x: the toolbar, the menu Image, Ctrl and the wheel, or the keys 1, 2, 4 and 8.
 - G shows a grid from 4x zoom on.
 - Undo (Ctrl+Z) and redo (Ctrl+Y) cover 64 steps.
 - Closing the window asks about unsaved changes (in the browser the browser asks before the tab is closed).
+
+## Editing
+
+The menu Edit and the keys work with the selection of the Select tool:
+- **Cut** (Ctrl+X), **Copy** (Ctrl+C): the selected pixels, or the current frame without a selection, go to the
+  clipboard of the editor (it stays when another picture is opened).
+- **Paste** (Ctrl+V): the clipboard floats above the picture at the selection (or at the top left) and is moved with
+  the mouse. Enter, a click outside of it, another tool or Esc places it. Its colors are those of the picture:
+  - the same palette keeps its color numbers;
+  - other colors get the nearest color of the palette;
+  - transparent pixels stay transparent.
+- **Transparent** (in the toolbar with the Select tool): transparent pixels of a pasted or moved part leave the
+  picture below as it is.
+- **Delete** (Del) makes the selection transparent. **Select all** (Ctrl+A) selects the picture, or the frame that
+  is shown. **Esc** places a floating part and selects nothing.
+
+The menu Image changes the selection, or else each frame:
+- **Mirror** left/right (H) and top/bottom (V).
+- **Rotate** right (R) and left (Shift+R). Frames must be square for this; a selection can be any size.
+- **Crop to the selection**.
+- **Resize...**: the size of each frame, either with the pixels scaled, or with the canvas cut off or extended (new
+  pixels transparent, the picture at the top left or in the middle).
+
+Each of these is one undo step.
+
+## Frames
+
+Any picture can be divided into frames of the same width: the panel Frames chooses how many (the numbers that divide
+the width). An Amiga graphic is opened and saved with its frames, and the save dialog starts with them.
+- **<** and **>** (the keys , and .) choose the current frame.
+- **Show only this frame**: only the current frame is shown and edited, and the tools cannot paint into the
+  neighbouring frames.
+- **Add** inserts an empty frame after the current one, **Copy** a copy of it, **Remove** removes it, and **Move <**
+  and **>** move it.
+- **Animation**: the frames one after the other in a preview. **Play** and **Pause**, the time of each frame (20 to
+  1000 ms), and **Back and forth** (the frames forwards and then backwards, like the wave animation of the game).
 
 ## Colors and palettes
 
