@@ -78,6 +78,9 @@ Since 1.18 the tools are native programs (written in CShift, see [Tools](Tools/R
 
 The 1.17 archives also contain AmbermoonMonsterEditor and AmbermoonTextImport.
 
+The map editor and the image editor also run in the browser, without installing anything:
+**https://pyrdacor.github.io/Ambermoon/** (the files you open stay on your computer, saved files are downloaded).
+
 **Note:** Some tools are in beta state so use with care, save often and always backup your files!
 
 More info can be found here: https://github.com/Pyrdacor/Ambermoon/blob/master/AmbermoonTools/README.md

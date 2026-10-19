@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ambermoon Tools</title>
+<style>
+  :root {
+    --bg: #f6f5f2;
+    --card: #ffffff;
+    --text: #1f1d1a;
+    --muted: #5d5850;
+    --border: #dedad2;
+    --accent: #8a5a12;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #1b1a18;
+      --card: #252321;
+      --text: #ece8e1;
+      --muted: #a8a196;
+      --border: #3a3733;
+      --accent: #e0b25c;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font: 16px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif;
+  }
+  main { max-width: 860px; margin: 0 auto; padding: 32px 16px 48px; }
+  h1 { font-size: 1.8rem; margin: 0 0 4px; }
+  .lead { color: var(--muted); margin: 0 0 28px; }
+  .tools { display: grid; gap: 16px; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); }
+  .tool {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+  }
+  .tool h2 { font-size: 1.2rem; margin: 0 0 8px; }
+  .tool p { margin: 0 0 12px; color: var(--muted); }
+  .tool ul { margin: 0 0 16px; padding-left: 20px; color: var(--muted); font-size: 0.95rem; }
+  .open {
+    margin-top: auto;
+    align-self: flex-start;
+    background: var(--accent);
+    color: var(--bg);
+    text-decoration: none;
+    font-weight: 600;
+    padding: 8px 16px;
+    border-radius: 6px;
+  }
+  .open:hover { filter: brightness(1.1); }
+  .notes { margin-top: 32px; color: var(--muted); font-size: 0.95rem; }
+  .notes a { color: var(--accent); }
+  .notes li { margin-bottom: 6px; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Ambermoon Tools</h1>
+  <p class="lead">Editors for the game data of the Amiga game Ambermoon, running in your browser. Nothing is uploaded:
+  the files you open stay on your computer, and what you save is downloaded.</p>
+
+  <div class="tools">
+    <section class="tool">
+      <h2>Map Editor 2D</h2>
+      <p>Edits the 2D maps: towns, indoor maps, dungeons and the world maps.</p>
+      <ul>
+        <li>Tiles, events, map properties and tilesets</li>
+        <li>Monsters and NPCs with their paths over the day</li>
+        <li>Open the folder of the game data (Amberfiles) on a computer</li>
+      </ul>
+      <a class="open" href="AmbermoonMapEditor2D.html">Open the map editor</a>
+    </section>
+    <section class="tool">
+      <h2>Image Editor</h2>
+      <p>A paint program for PNG, BMP and the graphics of the game.</p>
+      <ul>
+        <li>Bit planes with 1, 3, 4 or 5 bits per pixel, textures, frames</li>
+        <li>Containers (.amb), monsters, palettes of Palettes.amb</li>
+        <li>Selection, mirror, rotate, resize, animation preview</li>
+      </ul>
+      <a class="open" href="AmbermoonImageEditor.html">Open the image editor</a>
+    </section>
+  </div>
+
+  <ul class="notes">
+    <li>The map editor needs a folder of the game data; browsers on phones cannot choose folders.</li>
+    <li>When the map editor saves, every changed file of the game data is downloaded: copy them back into the folder
+      of the game data.</li>
+    <li>For the monsters of Monster_char.amb, choose Monster_gfx.amb and Palettes.amb together with it.</li>
+    <li>The tools are also available as programs for Windows, Linux and the Amiga:
+      <a href="https://github.com/Pyrdacor/Ambermoon#tool-releases">tool releases</a> ·
+      <a href="https://github.com/Pyrdacor/Ambermoon/tree/master/Tools">source</a></li>
+  </ul>
+</main>
+</body>
+</html>

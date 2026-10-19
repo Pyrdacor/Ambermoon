@@ -1,0 +1,51 @@
+# Publishes the tools with a window in the browser on GitHub Pages: AmbermoonMapEditor2D and AmbermoonImageEditor
+# (each one HTML file made by `cshiftc publish`) and a start page. See Tools/publish-web.sh.
+#
+# Trigger: a push to master that changes Tools/ (or this workflow), or by hand (Actions -> web -> Run workflow).
+# Once: Settings -> Pages -> Build and deployment -> Source: "GitHub Actions".
+
+name: web
+
+on:
+  push:
+    branches:
+      - master
+    paths:
+      - "Tools/**"
+      - ".github/workflows/web.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write # the deployment
+  id-token: write # the deployment
+
+# one deployment at a time; a newer push replaces a waiting one, a running one finishes
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - name: Publish the pages
+        env:
+          GITHUB_TOKEN: ${{ github.token }} # the GitHub API limits requests without a token (403)
+        run: bash Tools/publish-web.sh site
+      - uses: actions/upload-pages-artifact@v4
+        with:
+          path: site
+
+  deploy:
+    name: Deploy
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

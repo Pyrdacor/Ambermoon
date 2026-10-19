@@ -14,6 +14,10 @@ The others (Ambermoon3DMapEditor, AmbermoonButtonGraphicsDesigner, AmbermoonChar
 AmbermoonMapEditor3D, AmbermoonUIEventEditor) are not part of it, nor are AmbermoonPatcher (the original does not
 compile) and AmbermoonMonsterBattleImageGenerator.
 
+Both tools with a window also run in the browser: `publish-web.sh` makes a web page of each (`cshiftc publish`) and the
+start page `web/index.html`, and the workflow `web` (.github/workflows/web.yml) publishes them on GitHub Pages
+(https://pyrdacor.github.io/Ambermoon/) with every change of `Tools/` on master.
+
 ## Build it
 
 The build scripts download the latest release of the CShift compiler (it brings its own clang and linker) and build
