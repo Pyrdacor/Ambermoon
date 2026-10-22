@@ -75,40 +75,51 @@ struct Lob
     /// Decompresses `decodedSize` bytes from the reader's position on.
     static Error<DataReader> Decompress(ref DataReader reader, uint32 decodedSize)
     {
-        int size = (int)decodedSize;
-        var decoded = new uint8[size];
-        int decodeIndex = 0;
-
-        while (decodeIndex < size)
+        // (the bytes are read with an index of their own and checked once per header and per match, not with a call per
+        // byte: on a 68000 that is several times faster)
+        var decoded = new uint8[(int)decodedSize];
+        if (reader.Overrun())
+            return error(_OutOfBounds);
+        var data = reader.Bytes();
+        int at = reader.Position;
+        int to = 0;
+        while (to < decoded.Length)
         {
-            int header = reader.ReadByte();
-            for (var i = 0; i < 8; i += 1)
+            if (at < 0 || at >= data.Length)
+                return error(_OutOfBounds);
+            int header = data[at];
+            at += 1;
+            // the bits of the header from the highest on: 0 a match, 1 a literal byte
+            for (var bit = 0x80; bit != 0 && to < decoded.Length; bit >>= 1)
             {
-                if ((header & 0x80) == 0) // a match
+                if ((header & bit) == 0) // a match
                 {
-                    int first = reader.ReadByte();
-                    int matchLength = (first & 0x0f) + 3;
-                    int matchOffset = ((first << 4) & 0xff00) | reader.ReadByte();
-                    int matchIndex = decodeIndex - matchOffset;
-                    if (matchIndex < 0 || decodeIndex + matchLength > size)
+                    if (at + 1 >= data.Length)
                         return error(_OutOfBounds);
-                    for (var n = 0; n < matchLength; n += 1)
-                        decoded[decodeIndex + n] = decoded[matchIndex + n];
-                    decodeIndex += matchLength;
+                    int first = data[at];
+                    int from = to - (((first << 4) & 0xff00) | data[at + 1]);
+                    int stop = to + (first & 0x0f) + 3;
+                    at += 2;
+                    if (from < 0 || stop > decoded.Length)
+                        return error(_OutOfBounds);
+                    while (to < stop)
+                    {
+                        decoded[to] = decoded[from];
+                        to += 1;
+                        from += 1;
+                    }
                 }
                 else // a literal byte
                 {
-                    decoded[decodeIndex] = reader.ReadByte();
-                    decodeIndex += 1;
+                    if (at >= data.Length)
+                        return error(_OutOfBounds);
+                    decoded[to] = data[at];
+                    at += 1;
+                    to += 1;
                 }
-                if (decodeIndex == size)
-                    break;
-                header <<= 1;
             }
-            if (reader.Overrun())
-                return error(_OutOfBounds);
         }
-
+        reader.Position = at;
         return DataReader.FromData(decoded);
     }
 }

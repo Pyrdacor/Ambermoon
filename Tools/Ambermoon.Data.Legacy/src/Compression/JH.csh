@@ -9,28 +9,20 @@ struct JH
     /// En- or decrypts `data` in place from `offset` on (a last single byte is handled as the upper byte of a word).
     static void Crypt(uint8[] data, uint16 key, int offset)
     {
-        int length = data.Length;
-        int numWords = (length - offset + 1) >> 1;
+        // two bytes per key, then the last byte alone if the length from the offset is odd
+        int last = data.Length - 1;
         int d0 = key;
         int index = offset;
-        for (var i = 0; i < numWords; i += 1)
+        while (index < last)
         {
-            if (index == length - 1)
-            {
-                data[index] = (uint8)(data[index] ^ (d0 >> 8));
-            }
-            else
-            {
-                data[index] = (uint8)(data[index] ^ (d0 >> 8));
-                data[index + 1] = (uint8)(data[index + 1] ^ d0);
-            }
-            int d1 = d0;
-            d0 = ((d0 << 4) + d1 + 87) & 0xffff;
+            data[index] = (uint8)(data[index] ^ (d0 >> 8));
+            data[index + 1] = (uint8)(data[index + 1] ^ d0);
+            d0 = ((d0 << 4) + d0 + 87) & 0xffff;
             index += 2;
         }
+        if (index == last)
+            data[index] = (uint8)(data[index] ^ (d0 >> 8));
     }
-
-    /// En- or decrypts `data` in place.
     static void Crypt(uint8[] data, uint16 key)
     {
         Crypt(data, key, 0);

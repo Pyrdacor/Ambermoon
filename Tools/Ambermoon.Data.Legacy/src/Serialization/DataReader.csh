@@ -62,6 +62,15 @@ struct DataReader
         return _data[index];
     }
 
+    /// All bytes, without a copy: for decoders that read a lot with an index of their own (and set Position when they
+    /// are done) instead of a call per byte.
+    ReadOnlySlice<uint8> Bytes()
+    {
+        if (_data == null)
+            return new uint8[0];
+        return _data;
+    }
+
     /// Moves the position to the next multiple of 2.
     void AlignToWord()
     {
