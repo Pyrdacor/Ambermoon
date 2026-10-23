@@ -356,3 +356,4 @@ no event on the tile at all. So 9 means event chain 8 (0-based).
 - Im Text des Bewohners von S'Angrila (Map 442, Text 2) fehlte "bin" in "UND ICH BIN DER LETZTE MEINER FAMILIE".
 - Im Palast von S'Arin (Map 446) blieb die Musik nach einem Ereignis aus (Musik 0 statt Map-Musik wiederherstellen, Event 27).
 - Im Stadthaus (Map 273) landete man beim Betreten in der Tür. Der Teleport aus Map 263 (Event 72) führt jetzt auf (10,4) statt (10,3).
+- Im Haus des Trainers (Map 268) konnte man auf die obere Wand (Reihe 2) laufen. Die Wandkacheln 0x3b1-0x3b3 von Tileset 4 übernehmen jetzt die blockierenden Flags des Hintergrunds.
