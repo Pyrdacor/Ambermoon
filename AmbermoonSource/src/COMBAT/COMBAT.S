@@ -712,6 +712,10 @@ Do_combat_round:
 ; ***** Check for end of battle *****
 	tst.w	Remaining_members		; All players gone ?
 	bne.s	.Ok
+	; FIX: asleep, panicked or mad members are still on the battlefield.
+	; They can wake up or calm down, so this is no game over.
+	jsr	Any_member_in_battle
+	bne.s	.Ok
 	tst.w	Fled_members		; Any fled ?
 	bne.s	.Chicken
 	move.b	#Combat_lost,Combat_result	; No -> Lost...
@@ -736,6 +740,11 @@ Do_combat_round:
 	move.w	Body_conditions(a0),d0
 	Free	Active_handle
 	andi.w	#Active_mask,d0
+	beq.s	.Skip
+	; FIX: if nobody can lead (all asleep, panicked or mad) keep the leader.
+	; Select_new_active_member would end the game. The player starts the next
+	; rounds with OK until someone wakes up or calms down.
+	jsr	Any_active_member
 	beq.s	.Skip
 	jsr	Select_new_active_member	; No -> Select new leader
 ; ---------- Advance monsters ---------------------
@@ -764,6 +773,57 @@ Do_combat_round:
 .Leave:	sf	Fighting			; Stop !
 	st	Random_animating
 	jmp	Update_screen
+
+;*****************************************************************************
+; [ Any party member still on the battlefield ? ]
+;  OUT : ne - Yes
+;        eq - No
+; All registers are restored
+; NOTE :
+;  - Incapable members (dead, petrified, fled) were removed from the matrix.
+;*****************************************************************************
+Any_member_in_battle:
+	movem.l	d0/d7/a0/a1,-(sp)
+	lea.l	Combat_matrix,a1		; Search matrix
+	moveq.l	#30-1,d7
+.Loop:	move.l	(a1)+,d0			; Anything there ?
+	beq.s	.Next
+	move.l	d0,a0
+	moveq.l	#0,d0
+	cmp.b	#1,Part_type(a0)		; Party member ?
+	bne.s	.Next
+	moveq.l	#-1,d0			; Yes
+	bra.s	.Exit
+.Next:	dbra	d7,.Loop
+.Exit:	tst.l	d0
+	movem.l	(sp)+,d0/d7/a0/a1		; (doesn't change the flags)
+	rts
+
+;*****************************************************************************
+; [ Any party member who could be the leader ? ]
+;  OUT : ne - Yes
+;        eq - No
+; All registers are restored
+;*****************************************************************************
+Any_active_member:
+	movem.l	d0/d1/d7/a0/a1,-(sp)
+	moveq.l	#0,d1
+	lea.l	Party_handles,a0		; Check party
+	moveq.l	#6-1,d7
+.Loop:	tst.b	(a0)			; Anyone there ?
+	beq.s	.Next
+	Get	(a0),a1			; Could be active ?
+	move.w	Body_conditions(a1),d0
+	Free	(a0)
+	andi.w	#Active_mask,d0
+	bne.s	.Next
+	moveq.l	#-1,d1			; Yes
+	bra.s	.Exit
+.Next:	addq.l	#1,a0			; Next member
+	dbra	d7,.Loop
+.Exit:	tst.l	d1
+	movem.l	(sp)+,d0/d1/d7/a0/a1		; (doesn't change the flags)
+	rts
 
 ;*****************************************************************************
 ; [ Update participant control status ]

@@ -105,7 +105,11 @@ Automap_ModInit:
 	subq.w	#1,d2			; Get automapper icon
 	mulu.w	#Objectgroup3D_data_size,d2
 	move.w	Lab_data+2+Object_automapper_icon(a5,d2.w),d2
-.Do1:	jsr	Insert_automap_icon		; Insert
+.Do1:	btst	d2,d4			; FIX: Hidden (trap, trapdoor,
+	beq.s	.Do1b			;  spinner) ? Events already did this.
+	btst	#Show_traps_function,Automap_function	; Yes -> Show ?
+	beq.s	.Done
+.Do1b:	jsr	Insert_automap_icon		; Insert
 .Done:	moveq.l	#0,d3			; Get event byte
 	move.b	1(a2),d3
 	beq.s	.Next_X			; Empty ?

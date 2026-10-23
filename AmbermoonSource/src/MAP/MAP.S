@@ -416,6 +416,16 @@ Game_after_move:
 	btst	d0,d1
 	beq	.No_clair
 	jsr	Get_coordinates_in_front	; Get
+	cmp.w	Clairv_last_X,d0		; FIX: Report each square only once
+	bne.s	.New_spot			;  (this also runs on every idle
+	cmp.w	Clairv_last_Y,d1		;  time step, so the message was
+	bne.s	.New_spot			;  repeated all the time)
+	move.w	Map_nr,d2
+	cmp.w	Clairv_last_map,d2
+	beq	.No_clair
+.New_spot:	move.w	d0,Clairv_last_X		; Store
+	move.w	d1,Clairv_last_Y
+	move.w	Map_nr,Clairv_last_map
 	jsr	Find_event		; Find event
 	bmi	.No_clair			; Any there ?
 	jsr	Check_event_save_status	; Already saved ?
