@@ -72,6 +72,53 @@ struct Lob
         return w.Out.ToArray();
     }
 
+    // The headers whose 8 elements surely fit (the header and at most 16 more bytes of input, at most 8 matches of 18
+    // bytes of output), decoded through pointers without a check per element, as the original 68000 code does; only a
+    // match before the start of the output is an error (false). 'position' is the input and output index, before and
+    // after.
+    static unsafe bool _DecompressFast(ReadOnlySlice<uint8> data, uint8[] decoded, int[] position)
+    {
+        uint8* input = data.Ptr();
+        uint8* src = input + position[0];
+        uint8* srcEnd = input + (data.Length - 17);
+        uint8* start = &decoded[0];
+        uint8* dst = start + position[1];
+        uint8* dstEnd = start + (decoded.Length - 8 * 18);
+        while (src <= srcEnd && dst <= dstEnd)
+        {
+            int header = *src;
+            src += 1;
+            for (var n = 0; n < 8; n += 1)
+            {
+                if ((header & 0x80) != 0) // a literal byte
+                {
+                    *dst = *src;
+                    dst += 1;
+                    src += 1;
+                }
+                else // a match
+                {
+                    int first = *src;
+                    uint8* from = dst - (((first << 4) & 0xff00) | src[1]);
+                    if (from < start)
+                        return false;
+                    src += 2;
+                    int length = (first & 0x0f) + 3;
+                    for (var k = 0; k < length; k += 1)
+                    {
+                        *dst = *from;
+                        dst += 1;
+                        from += 1;
+                    }
+                }
+                header <<= 1;
+            }
+        }
+        position[0] = (int)(src - input);
+        position[1] = (int)(dst - start);
+        return true;
+    }
+
     /// Decompresses `decodedSize` bytes from the reader's position on.
     static Error<DataReader> Decompress(ref DataReader reader, uint32 decodedSize)
     {
@@ -83,6 +130,15 @@ struct Lob
         var data = reader.Bytes();
         int at = reader.Position;
         int to = 0;
+        // as long as a header and its 8 elements surely fit: through pointers, without a check per element
+        if (decoded.Length >= 8 * 18 && at >= 0 && data.Length - at >= 17)
+        {
+            int[] position = [at, 0];
+            if (!_DecompressFast(data, decoded, position))
+                return error(_OutOfBounds);
+            at = position[0];
+            to = position[1];
+        }
         while (to < decoded.Length)
         {
             if (at < 0 || at >= data.Length)
