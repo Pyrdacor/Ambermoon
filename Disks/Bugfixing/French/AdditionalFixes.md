@@ -55,3 +55,4 @@
 
 First release based on english 1.17.
 - Monsters can now cross the green slime in the old cave (labdata 2, objects 15-17), before only the party could walk over it.
+- In the palace of S'Arin (map 446) the music stayed off after an event (music 0 instead of restoring the map music, event 27).

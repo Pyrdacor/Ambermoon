@@ -354,3 +354,4 @@ no event on the tile at all. So 9 means event chain 8 (0-based).
 - Der Name von Kapitän Torle (NPC 11) war "KAPITAIN TORLE" geschrieben.
 - Tippfehler im Text der antiken Anlage 4 (Map 369, Text 2): "GEHEMNISVOLLEN" statt "GEHEIMNISVOLLEN".
 - Im Text des Bewohners von S'Angrila (Map 442, Text 2) fehlte "bin" in "UND ICH BIN DER LETZTE MEINER FAMILIE".
+- Im Palast von S'Arin (Map 446) blieb die Musik nach einem Ereignis aus (Musik 0 statt Map-Musik wiederherstellen, Event 27).
