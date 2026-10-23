@@ -351,3 +351,6 @@ no event on the tile at all. So 9 means event chain 8 (0-based).
 
 - Monster können jetzt über den grünen Schleim in der alten Höhle laufen. Vorher konnte nur die Gruppe darüber gehen, Monster blieben davor stehen (Labdata 2, Objekte 15-17).
 - Im Text eines Gruppenmitglieds (Party_texts.amb 8, Text 8) stand die Erzählung "VERBITTERT WENDET ER SICH VON EUCH AB." noch in den Anführungszeichen.
+- Der Name von Kapitän Torle (NPC 11) war "KAPITAIN TORLE" geschrieben.
+- Tippfehler im Text der antiken Anlage 4 (Map 369, Text 2): "GEHEMNISVOLLEN" statt "GEHEIMNISVOLLEN".
+- Im Text des Bewohners von S'Angrila (Map 442, Text 2) fehlte "bin" in "UND ICH BIN DER LETZTE MEINER FAMILIE".
