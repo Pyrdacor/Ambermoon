@@ -56,3 +56,4 @@
 First release based on english 1.17.
 - Monsters can now cross the green slime in the old cave (labdata 2, objects 15-17), before only the party could walk over it.
 - In the palace of S'Arin (map 446) the music stayed off after an event (music 0 instead of restoring the map music, event 27).
+- When entering the town house (map 273) you landed in the door. The teleport from map 263 (event 72) now leads to (10,4) instead of (10,3).
