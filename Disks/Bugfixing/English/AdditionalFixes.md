@@ -279,3 +279,4 @@ Based on the Meynaf patch.
 - Monsters can now cross the green slime in the old cave. Before, only the party could walk over it, so monsters got stuck at the slime (labdata 2, objects 15-17).
 - Fixed missing or superfluous quotation marks in 22 texts (signs, NPC dialogues, the dwarf diary, a party member text).
 - Fixed the typos ESTABLISED, INTESTED, WORDLY and POSSES, "TO SPEAK TO YOU YOU NOTICE" (Sansri), "NORTH NORTH WEST" and the healer telling you not to enter the madman's "cellar" instead of his cell.
+- In the palace of S'Arin (map 446) the music stayed off after an event (music 0 instead of restoring the map music, event 27).
