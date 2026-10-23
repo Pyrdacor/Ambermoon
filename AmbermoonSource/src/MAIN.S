@@ -2455,6 +2455,9 @@ Clairvoyant:	ds.b 1
 Time_lock:	ds.b 1				; Used to lock time-update
 New_step:	ds.b 1				; Signals a new step
 	even
+Clairv_last_X:	ds.w 1				; Last square checked by clairvoyance
+Clairv_last_Y:	ds.w 1
+Clairv_last_map:	ds.w 1
 
 Ghost1_string_length:	ds.w 1		; Ghost string data
 Ghost2_string_length:	ds.w 1
