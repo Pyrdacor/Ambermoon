@@ -104,7 +104,7 @@ struct FileReader
         int fileCount = reader.ReadWord();
         int type = fileCount >> 14;
         fileCount &= 0x3ff;
-        var data = reader.ToArray();
+        var data = reader.Bytes(); // the files are read where they are (no copies)
 
         if (type == 0 || type == 2)
         {
@@ -125,7 +125,7 @@ struct FileReader
                 {
                     if (fileSize < 0 || offset + fileSize > data.Length)
                         return error(_BadRange);
-                    var subfile = DataReader.Create(data, offset, fileSize);
+                    var subfile = DataReader.FromSlice(data[offset..offset + fileSize]);
                     container.Files[i] = try _DecodeFile(ref subfile, fileType, i);
                 }
                 offset += fileSize;
@@ -169,7 +169,7 @@ struct FileReader
                     int start = offset + fileOffsets[i];
                     if (start + size > data.Length)
                         return error(_BadRange);
-                    var subfile = DataReader.Create(data, start, size);
+                    var subfile = DataReader.FromSlice(data[start..start + size]);
                     container.Files[i] = try _DecodeFile(ref subfile, fileType, i);
                 }
                 else
