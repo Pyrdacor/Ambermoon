@@ -44,6 +44,10 @@ Talking to grandfather (right mouse button on him): the greeting, the word selec
 
 ![Dialogue](docs/dialogue.png) ![Word selector](docs/words.png) ![Answer](docs/answer.png)
 
+Giving gold to grandfather (he is not interested):
+
+![Give gold](docs/givegold.png)
+
 Map 264 "Zum hinkenden Gauner" at 14:00 (`./build.sh --map 264 --pos 11,13,2 --time 14:00`):
 
 ![Tavern](docs/tavern.png)
@@ -173,7 +177,9 @@ the text window, long ones open the dialogue screen with the portrait (all 102 p
 palette that is computed in advance by the converter) and the info of the person. The dialogue events of the
 person (greeting, asked words, farewell) are processed with their texts, queries (party members, items,
 words, conditions, gold, food) and modifications of the bit arrays, and new words are added to the known
-words. Showing and giving items, gold and food, joining and leaving the party are not done yet.
+words. Items can be shown and given (the item moves from its slot to the portrait), gold and food can be
+given with the number input window of the original. Joining is refused because the party of the proof of
+concept is always full, and dialogues with party members (and so leaving the party) are not done yet.
 
 `src/POC/PERSONS.S` contains the persons and the time from `PERSONS.S`, `TIME.S` and `MAP/MAP.S`: persons
 on a path (one position per 5 minutes of the day) and randomly moving persons, sitting and sleeping
@@ -195,7 +201,7 @@ Hatari (STE, 8 MHz):
 * The other events (places, riddle mouths, trapdoors, ...), monsters (movement, combat), light
   spells, transports and travel modes other than on foot, and 3D maps.
 * In the inventory: most spells of usable items, gold and food, and moving only a part of a stack.
-* In dialogues: showing and giving items, gold and food, joining and leaving the party.
+* Dialogues with party members, joining and leaving the party.
 * The module system, the memory manager and loading from the original containers (the data is converted in
   advance).
 * Sound and music.
