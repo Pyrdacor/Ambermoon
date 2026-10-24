@@ -372,10 +372,10 @@ def main():
     for p in portraits:
         for v in p:
             weights[v] += 1
-    for c in (2, 4, 16, 19, 20, 21, 22):   # text colours (White, Lighter_blue, Yellow, reds, Light_green)
-        weights[c] += 2000
-    for c in (6,):                         # LP bar (7, 6) must differ from the SP bar (24, 23)
-        weights[c] += 4000
+    # Only the colours which the status block uses get extra weight, the other slots are left to the portraits
+    # (the skin tones need them). White is fixed anyway, Lighter_blue (names) is close to a UI grey.
+    weights[16] += 500                     # Yellow (name of the active member)
+    weights[6] += 4000                     # LP bar (7, 6) must differ from the SP bar (24, 23)
     ui16, ui_lut = make_palette(main_pal, weights, fixed=WHITE)
     write('UIPAL.BIN', palette_file(ui16, ui_lut))
     write('PORTR.BIN', b''.join(st_graphic([ui_lut[v] for v in p], 32, 34) for p in portraits))
