@@ -371,10 +371,15 @@ def main():
         portraits.append(planar(data.read(f'Portraits.amb/{ch[0x0a]:03}'), 32, 34, 5))
         names += ch[0x112:0x112 + 15].split(b'\0')[0][:15].ljust(16, b'\0')
         chars += ch[:512].ljust(512, b'\0')
+    # The palettes are chosen once for all portraits of Portraits.amb (not only for the current party), so they
+    # need not be recalculated when the party changes. The weights are scaled to 6 portraits.
+    all_portraits = [planar(data.read(n), 32, 34, 5) for n in sorted(data.names)
+                     if n.startswith('Portraits.amb/') and n[-1] != '/']
+    portrait_weight = 6 / len(all_portraits)
     weights = [0] * 32
-    for p in portraits:
+    for p in all_portraits:
         for v in p:
-            weights[v] += 1
+            weights[v] += portrait_weight
     # Only the colours which the status block uses get extra weight, the other slots are left to the portraits
     # (the skin tones need them). White is fixed anyway, Lighter_blue (names) is close to a UI grey.
     weights[16] += 500                     # Yellow (name of the active member)
@@ -397,9 +402,9 @@ def main():
     for ic in obj_icons:
         for v in ic:
             weights[v] += 1
-    for p in portraits:
+    for p in all_portraits:
         for v in p:
-            weights[v] += 1
+            weights[v] += portrait_weight
     weights[16] += 2000                    # text colour (Yellow)
     inv16, inv_lut = make_palette(main_pal, weights, fixed=WHITE)
     write('INVPAL.BIN', palette_file(inv16, inv_lut))
@@ -414,7 +419,10 @@ def main():
     raw = source_data('KERNEL/CHIP_DATA.S', 'Status_icons')   # 22 status icons (16x16, 5 bit, from icon 1)
     stat_icons = [planar(raw, 16, 16, 5, i * 160) for i in range(22)]
     weights = [0] * 32
-    for g in portraits + stat_icons:
+    for p in all_portraits:
+        for v in p:
+            weights[v] += portrait_weight
+    for g in stat_icons:
         for v in g:
             weights[v] += 1
     for c in (4, 16, 22):
