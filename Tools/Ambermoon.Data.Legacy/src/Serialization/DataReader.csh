@@ -71,6 +71,13 @@ struct DataReader
         return _data;
     }
 
+    /// The bytes from the position to the end, without a copy (none behind the end).
+    ReadOnlySlice<uint8> RemainingBytes()
+    {
+        var all = Bytes();
+        return Position >= all.Length ? all[0..0] : all[Position..];
+    }
+
     /// Moves the position to the next multiple of 2.
     void AlignToWord()
     {
