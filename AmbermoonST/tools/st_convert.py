@@ -49,7 +49,10 @@
 #   STATICON.BIN  status icons 1...22 (Status_icons of KERNEL/CHIP_DATA.S, 16x16) in the character palette
 #   INVGFX.BIN  Swordshield (2 x 16x9), Chequered (32x11), Pick_Mptr (hotspot X, Y (words), 16x16)
 #   TEXTS.BIN   64 UI texts, 16 race names, 16 class names, 300 messages, 16 short attribute names, 16 short
-#               skill names, 16 language names, 16 condition names (zero-terminated)
+#               skill names, 16 language names, 16 condition names, 32 item type names, 16 attribute names,
+#               16 skill names, 8 spell class names, 210 spell names (zero-terminated)
+#   SPELLS.BIN  Spell_data of KERNEL/DATA.S (5 bytes per spell), OT<i>.BIN the texts of the text scrolls
+#   STATICUI.BIN  the status icons in the UI palette (for the status block)
 import argparse, math, os, re, struct, sys, zipfile
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -445,7 +448,8 @@ def main():
     texts = b''
     for folder, count in (('UITexts', 64), ('RaceNames', 16), ('ClassNames', 16), ('Messages', 300),
                           ('AttributeShortNames', 16), ('SkillShortNames', 16), ('LanguageNames', 16),
-                          ('ConditionNames', 16)):
+                          ('ConditionNames', 16), ('ItemTypeNames', 32), ('AttributeNames', 16),
+                          ('SkillNames', 16), ('SpellClassNames', 8), ('SpellNames', 7 * 30)):
         for i in range(count):
             fn = os.path.join(ALLTEXTS, 'Text.amb', folder, f'{i:03}.txt')
             t = ''
@@ -454,6 +458,9 @@ def main():
                     t = f.read().rstrip('\0\r\n')
             texts += t.encode('cp850') + b'\0'
     write('TEXTS.BIN', texts)
+    write('SPELLS.BIN', source_data('KERNEL/DATA.S', 'Spell_data')[:7 * 30 * 5])   # 5 bytes per spell
+    for i in range(1, 6):                  # texts of the text scrolls (like the map texts)
+        write(f'OT{i}.BIN', data.read(f'Object_texts.amb/{i:03}'), quiet=True)
     print('Inventory palette:', ' '.join(f'${st_word(c, 4):03x}' for c in inv16))
 
     status = b''
@@ -471,6 +478,9 @@ def main():
         else:
             status += st_graphic([8 + v for v in planar(raw, w, h, 3)], w, h)
     write('UIGFX.BIN', status)
+    raw = source_data('KERNEL/CHIP_DATA.S', 'Status_icons')   # status icons for the status block
+    write('STATICUI.BIN', b''.join(st_graphic([ui_lut[v] for v in planar(raw, 16, 16, 5, i * 160)], 16, 16)
+                                   for i in range(22)))
     winicons = source_data('KERNEL/CHIP_DATA.S', 'Window_icons')   # 9 parts 16x16, 3 bit, colour 0 transparent
     write('WINICONS.BIN', b''.join(st_graphic([v and 8 + v for v in planar(winicons, 16, 16, 3, i * 96)], 16, 16)
                                    for i in range(9)))

@@ -1632,7 +1632,13 @@ File_list:
 	dc.l	Status_icons,22*16*8
 	dc.b	"DATA\STATICON.BIN",0
 	even
-	dc.l	Texts,16*1024
+	dc.l	Status_icons_UI,22*16*8
+	dc.b	"DATA\STATICUI.BIN",0
+	even
+	dc.l	Spell_data,7*30*5
+	dc.b	"DATA\SPELLS.BIN",0
+	even
+	dc.l	Texts,20*1024
 	dc.b	"DATA\TEXTS.BIN",0
 	even
 	dc.l	0

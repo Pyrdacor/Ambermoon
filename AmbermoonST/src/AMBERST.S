@@ -24,3 +24,4 @@
 	include	"POC/EVENTS.S"
 	include	"POC/LIGHT.S"
 	include	"POC/INVENTORY.S"
+	include	"POC/ITEMS.S"

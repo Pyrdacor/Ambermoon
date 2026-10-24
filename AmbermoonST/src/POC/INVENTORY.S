@@ -219,7 +219,7 @@ Inventory_input:
 .Left:	btst	#Left_pressed,d6		; Left button ?
 	beq	.Exit
 	tst.b	Moving_flag		; Moving an item ?
-	bne.s	.Moving
+	bne	.Moving
 ; ---------- Not moving ---------------------------
 	cmp.w	#Obj_member,d1		; Portrait ?
 	bne.s	.No_member
@@ -249,7 +249,21 @@ Inventory_input:
 	sub.w	Inventory_mode,d0
 	jsr	Show_inventory_mode
 	bra	.Exit
-.No_switch:	cmp.w	#3,d0			; Exit ?
+.No_switch:	cmp.w	#2,Inventory_mode		; Item functions (Inventory 2)
+	bne.s	.No_items
+	cmp.w	#2,d0			; Use item ?
+	bne.s	.No_use
+	jsr	Use_item
+	bra	.Exit
+.No_use:	cmp.w	#4,d0			; Drop item ?
+	bne.s	.No_drop
+	jsr	Drop_item
+	bra	.Exit
+.No_drop:	cmp.w	#7,d0			; View item ?
+	bne.s	.No_items
+	jsr	View_item
+	bra	.Exit
+.No_items:	cmp.w	#3,d0			; Exit ?
 	bne	.Exit
 	jsr	Press_exit_icon
 	st	Inventory_exit
@@ -1416,6 +1430,7 @@ Stop_moving:
 	lea.l	Mouse_pointer,a0
 	jsr	Change_Mptr
 	jsr	Erase_PA
+	jsr	Hide_status_icons
 	move.l	(sp)+,a0
 	rts
 
@@ -1483,6 +1498,7 @@ Init_moving_item:
 	addq.l	#8,a2
 	dbra	d7,.Copy
 .Done:	move.l	#Drag_buffer,Drag_graphic
+	jsr	Show_transfer_victims
 	movem.l	(sp)+,d0-d7/a0-a3
 	rts
 
@@ -1710,40 +1726,11 @@ Backpack_item_moved:
 Member_moved:
 	movem.l	d0-d7/a0-a3,-(sp)
 	move.w	d0,d7
+	lea.l	Inter_packet,a2
+	jsr	Check_transfer		; Possible ?
+	bne.s	.Exit
 	jsr	Get_char_data
 	move.l	a1,a3
-	lea.l	Inter_packet,a2
-	move.w	Object_index(a2),d0
-	jsr	Get_item_data
-; ---------- Check the extra weight ---------------
-	moveq.l	#0,d1			; Get weight of items
-	move.b	Quantity(a2),d1
-	move.w	Weight(a1),d2
-	mulu.w	d1,d2
-	move.w	AStrength(a3),d3
-	add.w	AStrength+Magic(a3),d3
-	mulu.w	#1000,d3
-	addi.l	#999,d3
-	sub.l	Weight_normal(a3),d3
-	cmp.l	d2,d3			; Not too heavy ?
-	bmi.s	.Exit
-; ---------- Scan for free slots in backpack ------
-	lea.l	Char_inventory+Backpack_slots(a3),a0
-	moveq.l	#Items_per_char-1,d4
-.Loop:	move.w	Object_index(a0),d3		; Free slot ?
-	beq.s	.Do
-	cmp.w	Object_index(a2),d3		; No -> Same object ?
-	bne.s	.Next
-	btst	#Multiple,Item_bits_STATIC(a1)	; Yes -> Multiple item ?
-	beq.s	.Next
-	moveq.l	#0,d3			; Yes -> Fits ?
-	move.b	Quantity(a0),d3
-	add.w	d1,d3
-	cmp.w	#100,d3
-	bmi.s	.Do
-.Next:	addq.w	#Object_packet_size,a0
-	dbra	d4,.Loop
-	bra.s	.Exit
 ; ---------- Move it ------------------------------
 .Do:	move.l	a3,a1
 	move.l	a2,a0
@@ -2452,9 +2439,9 @@ Disabled	EQU	$8000
 Inv1_CIL:	dc.w Backpack_cicon,0,Exit_cicon
 	dc.w 0,0,0
 	dc.w 0,0,0
-Inv2_CIL:	dc.w Stats_cicon,Use_item_cicon+Disabled,Exit_cicon
-	dc.w Drop_item_cicon+Disabled,Drop_gold_cicon+Disabled,Drop_food_cicon+Disabled
-	dc.w View_item_cicon+Disabled,Transfer_gold_cicon+Disabled,Transfer_food_cicon+Disabled
+Inv2_CIL:	dc.w Stats_cicon,Use_item_cicon,Exit_cicon
+	dc.w Drop_item_cicon,Drop_gold_cicon+Disabled,Drop_food_cicon+Disabled
+	dc.w View_item_cicon,Transfer_gold_cicon+Disabled,Transfer_food_cicon+Disabled
 
 ; Objects under the mouse
 	rsreset
@@ -2550,5 +2537,5 @@ Chequered:	ds.b 11*2*8
 Pick_pointer:	ds.b 4+16*8
 Object_icons:	ds.b 188*16*8
 Object_data:	ds.b 2+402*Item_data_size
-Texts:	ds.b 16*1024
+Texts:	ds.b 20*1024
 	even
