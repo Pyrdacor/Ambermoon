@@ -13,7 +13,7 @@
 	SECTION	Program,code
 
 Submap_size	EQU	50			; Width & height of a world submap
-World_slot_size	EQU	16*1024
+World_slot_size	EQU	11*1024			; (largest world map : 10964 bytes)
 
 ;*****************************************************************************
 ; [ Load a map ]
@@ -681,7 +681,7 @@ World_data:	dc.w	16,16,1			; Lyramion
 	dc.w	4,4,513				; Morag
 
 	SECTION	Fast_BSS,bss
-Max_map_texts	EQU	32*1024
+Max_map_texts	EQU	8*1024			; (largest text file : 3738 bytes)
 Number_buffer:	ds.b 8
 Map_nr:	ds.w 1
 Map_texts_nr:	ds.w 1

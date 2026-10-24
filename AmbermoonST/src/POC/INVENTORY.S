@@ -37,6 +37,7 @@ SBD_thingy_height:	rs.w 1
 SBD_max_row:	rs.w 1			; Number of rows - visible rows
 SBD_units:	rs.w 1			; Slots per row
 SBD_half:	rs.w 1			; Half page (rows)
+SBD_update:	rs.l 1			; Routine which shows the slots
 Info_X	EQU	208			; Small member info
 Info_Y	EQU	49
 ; Text numbers in TEXTS.BIN
@@ -1236,7 +1237,8 @@ Set_scroll_row:
 	mulu.w	SBD_row_height(a0),d0
 	sf	d1
 	jsr	Draw_scroll_bar
-	jsr	Update_objects
+	move.l	SBD_update(a0),a0		; Show the slots
+	jsr	(a0)
 	movem.l	(sp)+,d0/d1/a0
 	rts
 
@@ -2174,7 +2176,7 @@ Print_prompt:
 	divu.w	#Char_width+1,d0
 	move.w	d0,Text_width
 	jsr	Process_text
-	move.w	#White,Ink_colour
+	move.w	PA_Ink(a3),Ink_colour
 	move.w	#Default_shadow,Shadow_colour
 	lea.l	Text_lines,a4
 	move.w	Text_height,d7
@@ -2480,7 +2482,7 @@ Inv_RL:	R_palette 0,UI_palette
 	even
 
 ; Print area of the inventory (.PA of Inv2_Mod in MODULES.S)
-Inv_PA:	dc.w 21,181,50,70
+Inv_PA:	dc.w 21,181,50,70,White
 
 ; Raster list of the character screen (Inv_RL with its own palette)
 Char_RL:	R_palette 0,UI_palette
@@ -2548,6 +2550,7 @@ Condition_icon_table:
 ; slots, 4 rows visible)
 Backpack_bar:	dc.l Backpack_pos_list
 	dc.w 175,76,112,112/8,112-4*(112/8),4,3,2
+	dc.l Update_objects
 
 ; Scroll bar thingy colours (HULL/CONTROLS.S)
 Unselected_thingy_colours:

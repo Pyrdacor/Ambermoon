@@ -57,6 +57,9 @@
 #   LAYOUT3.BIN layout 3 (door & chest screen), P80_<n>.BIN the 80x80 pictures (Pics_80x80.amb) of doors and
 #               chests in the inventory palette
 #   CHESTS.BIN  the data of all chests of the initial savegame (Chest_data.amb, 148 bytes each, from chest 0)
+#   LAYOUT8.BIN layout 8 (dialogue), PT<n>.BIN portrait n in the inventory palette, DICT.BIN the dictionary
+#   NPC<n>.BIN, NPCT<n>.BIN  data & texts of person n (NPC_char.amb, NPC_texts.amb, unchanged)
+#   PC<n>.BIN, PCT<n>.BIN    data & texts of party member n (Party_char.amb, Party_texts.amb, unchanged)
 import argparse, math, os, re, struct, sys, zipfile
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -439,6 +442,22 @@ def main():
         chests += raw[o:o + size].ljust(148, b'\0')[:148]
         o += size
     write('CHESTS.BIN', chests)
+
+    # dialogue screen (layout 8) : the portraits of all persons in the inventory palette (loaded when needed),
+    # the dictionary and the character data & texts of the persons
+    layout = planar(data.read('Layouts.amb/008'), 320, 163, 3)
+    write('LAYOUT8.BIN', st_graphic([8 + v for v in layout], 320, 163))
+    for n in sorted(data.names):
+        if n.startswith('Portraits.amb/') and n[-1] != '/':
+            write(f'PT{int(n[-3:])}.BIN', st_graphic([inv_lut[v] for v in planar(data.read(n), 32, 34, 5)], 32, 34),
+                  quiet=True)
+    write('DICT.BIN', data.read('Dictionary.german/001'))
+    for folder, prefix in (('NPC_char.amb', 'NPC'), ('NPC_texts.amb', 'NPCT'), ('Party_char.amb', 'PC'),
+                           ('Party_texts.amb', 'PCT')):
+        for n in sorted(data.names):
+            if n.startswith(folder + '/') and n[-1] != '/':
+                write(f'{prefix}{int(n[-3:])}.BIN', data.read(n), quiet=True)
+    print('Portraits (PT*.BIN), person data & texts (NPC*.BIN, NPCT*.BIN, PC*.BIN, PCT*.BIN)')
 
     # character screen : no items there, so its palette is chosen for the portraits, the status icons and the
     # text colours (Light_green : headlines, Yellow & Lighter_blue : condition names)

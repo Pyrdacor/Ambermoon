@@ -250,10 +250,20 @@ Select_member:
 ;   - From [ Req_ModInit ] (HULL/CONTROLS.S).
 ;*****************************************************************************
 Ask_yes_no:
-	movem.l	d1-d7/a0-a6,-(sp)
-	addi.w	#Messages,d0		; Process text
+	move.l	a0,-(sp)
+	addi.w	#Messages,d0		; Get text
 	jsr	Get_text
-	move.w	#(14-2)*16/(Char_width+1),Text_width
+	jsr	Ask_yes_no_text
+	move.l	(sp)+,a0
+	rts
+
+; [ Yes / No requester with a text ]
+;   IN : a0 - Pointer to text (.l)
+;  OUT : d0 - 1 = Yes, 0 = No (.w)
+; Changed registers : d0
+Ask_yes_no_text:
+	movem.l	d1-d7/a0-a6,-(sp)
+	move.w	#(14-2)*16/(Char_width+1),Text_width	; Process text
 	jsr	Process_text
 	move.w	Text_height,d5		; Calculate window height
 	cmp.w	#6*2,d5

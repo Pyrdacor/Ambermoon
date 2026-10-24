@@ -465,7 +465,9 @@ Touch_map:
 	bne.s	.Exit
 	cmp.b	#Touched_QM_type,Event_b1(a5)	; For touch ?
 	bne.s	.Exit
-.Do:	jsr	Handle_event_chain
+.Do:	st	Hand_flag			; Handle event
+	jsr	Handle_event_chain
+	sf	Hand_flag
 	st	Pending_events		; (the position may have changed)
 .Exit:	movem.l	(sp)+,d0-d2/a5
 	rts
@@ -1858,9 +1860,9 @@ Load_error_text:
 	even
 
 	SECTION	Fast_BSS,bss
-Max_icons	EQU	1600
-Max_NPC_graphics	EQU	64*1024
-Max_map_size	EQU	12+320+100*100*4+16384
+Max_icons	EQU	1552			; (largest tileset : 1545 icons)
+Max_NPC_graphics	EQU	16*1024			; (largest file : 14886 bytes)
+Max_map_size	EQU	20*1024			; (largest map : 16124 bytes)
 UI_graphics_size	EQU	3*36*8+8+34*2*8+2*17*2*8
 
 UI_palette:	ds.b 64

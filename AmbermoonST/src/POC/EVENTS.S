@@ -16,6 +16,8 @@ Save_events	EQU	$0504
 Save_CD	EQU	$2504
 Save_chests	EQU	$35a4
 Save_doors	EQU	$35c4
+Save_words	EQU	$3504
+Save_goto_points	EQU	$3584
 
 ;*****************************************************************************
 ; [ Handle events at player's current location ]
@@ -217,8 +219,8 @@ Event_ptrs:
 	dc.l Map_exit,Door,Item_found,Show_pictxt,Not_implemented	; 1 - 5
 	dc.l Not_implemented,Not_implemented,Not_implemented,Not_implemented,Change_icon	; 6 - 10
 	dc.l Not_implemented,Not_implemented,Query,Modify,Not_implemented	; 11 - 15
-	dc.l No_event,Not_implemented,Not_implemented,Not_implemented,No_event	; 16 - 20
-	dc.l No_event,Not_implemented,Not_implemented,Not_implemented	; 21 - 24
+	dc.l No_event,Dia_text,Dia_give,Requester,No_event	; 16 - 20
+	dc.l No_event,Not_implemented,No_event,No_event	; 21 - 24
 
 ;*****************************************************************************
 ; [ After a map change or a jump ]
@@ -402,7 +404,11 @@ Show_picture_text:
 ; Get the map texts of the event map (world submaps have their own texts)
 ;  OUT : a0 - Pointer to the map texts (.l)
 Get_event_texts:
-	movem.l	d0-d2/a1,-(sp)
+	tst.b	Map_or_dialogue		; Dialogue ?
+	beq.s	.Map
+	lea.l	Dialogue_texts,a0		; Yes -> its texts
+	rts
+.Map:	movem.l	d0-d2/a1,-(sp)
 	move.w	Current_event_map_nr,d0
 	cmp.w	Map_texts_nr,d0		; Loaded ?
 	beq.s	.Ok
@@ -485,10 +491,11 @@ Query:
 .Exit:	rts
 
 .Ptrs:	dc.l .Quest,.Event,.Door,.Chest		;  0 -  3
-	dc.l .CD,0,0,0				;  4 -  7
-	dc.l 0,.Success,0,.Light			;  8 - 11
-	dc.l .Direction				; 12
-.Max	EQU	13
+	dc.l .CD,.Party,.Item_carried,0		;  4 -  7
+	dc.l .WD,.Success,0,.Light			;  8 - 11
+	dc.l .Direction,.Condition,.Touched,0		; 12 - 15
+	dc.l 0,0,.Gold,.Food			; 16 - 19
+.Max	EQU	20
 
 .Quest:	moveq.l	#Quest_bit_array,d1
 	bra.s	.Do
@@ -499,6 +506,8 @@ Query:
 .Chest:	moveq.l	#Chest_bit_array,d1
 	bra.s	.Do
 .CD:	moveq.l	#CD_bit_array,d1
+	bra.s	.Do
+.WD:	moveq.l	#WD_bit_array,d1
 .Do:	move.w	Event_w6(a5),d0		; Get bit number
 	moveq.l	#3,d2			; Get bit
 	jsr	Access_bit_array
@@ -516,6 +525,56 @@ Query:
 	seq	Query_result
 	rts
 
+.Party:	move.w	Event_w6(a5),d0		; Character in the party ?
+	lea.l	Member_nrs,a0
+	moveq.l	#6-1,d7
+.Loop1:	cmp.w	(a0)+,d0
+	beq.s	.Yes1
+	dbra	d7,.Loop1
+	rts
+.Yes1:	st	Query_result
+	rts
+
+.Item_carried:					; x items of type y carried ?
+	move.w	Event_w6(a5),d0		; Get item number
+	moveq.l	#0,d1			; Get required quantity
+	move.b	Event_b3(a5),d1
+	lea.l	Party_chars+Char_inventory,a1
+	moveq.l	#6-1,d7
+.Loop2:	move.l	a1,a0
+	moveq.l	#Items_per_char+9-1,d6
+.Loop3:	cmp.w	Object_index(a0),d0		; Is this the one ?
+	bne.s	.Next3
+	moveq.l	#0,d2
+	move.b	Quantity(a0),d2
+	sub.w	d2,d1
+	ble.s	.Yes1			; Enough ?
+.Next3:	addq.w	#Object_packet_size,a0
+	dbra	d6,.Loop3
+	lea.l	512(a1),a1
+	dbra	d7,.Loop2
+	rts
+
+.Condition:	move.l	Dialogue_data_ptr,a0	; Condition of the person ?
+	move.w	Body_conditions(a0),d0
+	move.w	Event_w6(a5),d1
+	btst	d1,d0
+	sne	Query_result
+	rts
+
+.Touched:	move.b	Hand_flag,Query_result	; Touched ?
+	rts
+
+.Gold:	move.w	Party_chars+(Active_member-1)*512+Gold_coins,d0
+	cmp.w	Event_w6(a5),d0		; Enough gold ?
+	spl	Query_result
+	rts
+
+.Food:	move.w	Party_chars+(Active_member-1)*512+Food_rations,d0
+	cmp.w	Event_w6(a5),d0		; Enough food ?
+	spl	Query_result
+	rts
+
 ;*****************************************************************************
 ; [ Modify event ]
 ; NOTE :
@@ -525,6 +584,8 @@ Modify:
 	lea.l	Current_event_data,a5
 	moveq.l	#0,d0			; Get modify type
 	move.b	Event_b1(a5),d0
+	cmp.w	#8,d0			; Known words ?
+	beq.s	.WD
 	cmp.w	#5,d0			; Bit array ?
 	bpl.s	.Exit
 	move.b	.Arrays(pc,d0.w),d1
@@ -535,6 +596,16 @@ Modify:
 	bne.s	.Exit
 	jsr	Get_CD_value
 .Exit:	rts
+
+.WD:	move.w	Event_w6(a5),d0		; Get word
+	tst.b	Map_or_dialogue		; Map or dialogue ?
+	beq.s	.Map
+	moveq.l	#New_words_bit_array,d1	; Dialogue -> new word
+	moveq.l	#1,d2
+	jsr	Access_bit_array
+.Map:	moveq.l	#WD_bit_array,d1		; Modify bit
+	move.b	Event_b2(a5),d2
+	jmp	Access_bit_array
 
 .Arrays:	dc.b Quest_bit_array,Event_bit_array,Door_bit_array,Chest_bit_array
 	dc.b CD_bit_array
@@ -553,7 +624,7 @@ Modify:
 ;*****************************************************************************
 Access_bit_array:
 	movem.l	d0/d1/a0,-(sp)
-	cmp.w	#5,d1			; Legal array type ?
+	cmp.w	#Max_bit_array,d1		; Legal array type ?
 	bpl	.Exit
 	lea.l	.Bit_array_table(pc),a0	; Get bit array info
 	lsl.w	#3,d1
@@ -590,6 +661,9 @@ Access_bit_array:
 	dc.l	256,Savegame+Save_doors
 	dc.l	32*1024,Savegame+Save_CD
 	dc.l	64*1024,Savegame+Save_events
+	dc.l	1024,Savegame+Save_words
+	dc.l	1024,New_words
+	dc.l	256,Savegame+Save_goto_points
 
 ;*****************************************************************************
 ; [ Text window ]
@@ -935,7 +1009,10 @@ Success:	ds.b 1
 Break_event:	ds.b 1
 First_event:	ds.b 1
 Query_result:	ds.b 1
+Map_or_dialogue:	ds.b 1
+Hand_flag:	ds.b 1
 Text_lines:	ds.b Max_lines*(Line_stride)
+New_words:	ds.b 128			; New words (bit array)
 	even
 Window_background:	ds.b 18*9*16*8
 Event_palette:	ds.b 64

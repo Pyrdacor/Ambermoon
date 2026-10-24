@@ -219,9 +219,18 @@ Close_lay3:
 ; NOTE :
 ;   - Like [ Do_text ] (HULL/CONTROLS.S) with the print area of layout 3.
 Lay3_text:
-	movem.l	d0-d7/a0-a4,-(sp)
+	move.l	a0,-(sp)
 	jsr	Get_event_texts
 	jsr	Find_large_text
+	jsr	Show_PA_text
+	move.l	(sp)+,a0
+	rts
+
+; [ Print a text in the print area and wait ]
+;   IN : a0 - Pointer to text (.l)
+; All registers are restored
+Show_PA_text:
+	movem.l	d0-d7/a0-a4,-(sp)
 	move.l	Print_area_ptr,a3
 	move.w	PA_X2(a3),d0		; Width
 	sub.w	PA_X1(a3),d0
@@ -239,7 +248,7 @@ Lay3_text:
 	move.w	Text_height,d6		; Lines left
 	beq.s	.Exit
 .Page:	jsr	Erase_PA
-	move.w	#White,Ink_colour
+	move.w	PA_Ink(a3),Ink_colour
 	move.w	#Default_shadow,Shadow_colour
 	move.w	PA_X1(a3),d0
 	move.w	PA_Y1(a3),d1
@@ -1049,12 +1058,13 @@ Lay3_RL:	R_palette 0,UI_palette
 	even
 
 ; Print area of layout 3 (Lay3_PA in MODULES.S)
-Lay3_PA:	dc.w 113,300,46,97
+Lay3_PA:	dc.w 113,300,46,97,White
 
 ; Scroll bar of layout 3 (Lay3_scroll_bar in DISPLAY.S : 4 rows of 6 slots,
 ; 2 rows visible)
 Lay3_bar:	dc.l Lay3_object_pos_list
 	dc.w 154,139,53,53/4,53-2*(53/4),2,6,1
+	dc.l Update_objects
 
 ; Positions of the object slots of layout 3 (ACTIONS.S)
 Lay3_object_pos_list:
