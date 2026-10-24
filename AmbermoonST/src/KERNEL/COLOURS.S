@@ -217,10 +217,12 @@ Raster_VBL:
 	lea.l	Palette_regs,a1
 .Loop:	move.w	(a0),d0			; Line 0 ?
 	bne.s	.Arm
-	move.w	2(a0),d0			; Execute event
+	move.w	2(a0),d1			; Execute event
 	bmi.s	.Full
-	add.w	d0,d0
-	move.w	6(a0),0(a1,d0.w)
+	add.w	d1,d1
+	move.w	6(a0),d0
+	jsr	Fade_colour
+	move.w	d0,0(a1,d1.w)
 	addq.l	#8,a0
 	bra.s	.Loop
 .Full:	move.l	4(a0),a2
@@ -247,7 +249,16 @@ Timer_B_interrupt:
 .Loop:	move.w	2(a0),d0
 	bmi.s	.Full
 	add.w	d0,d0			; One colour
+	tst.w	Fade_level
+	bne.s	.Fade1
 	move.w	6(a0),0(a1,d0.w)
+	bra.s	.Next
+.Fade1:	move.l	d1,-(sp)
+	move.w	d0,d1
+	move.w	6(a0),d0
+	jsr	Fade_colour
+	move.w	d0,0(a1,d1.w)
+	move.l	(sp)+,d1
 	bra.s	.Next
 .Full:	move.l	4(a0),a2			; Complete palette
 	tst.w	Fade_level
@@ -320,6 +331,39 @@ Fade_palette_regs:
 	dbra	d3,.Loop
 	movem.l	(sp)+,a0/a1/d0-d3
 	movem.l	Fade_buffer,d0-d7
+.Exit:	rts
+
+;*****************************************************************************
+; [ Fade one colour towards black ]
+;   IN : d0 - STE colour (.w)
+;  OUT : d0 - faded colour (.w)
+; All other registers are restored
+; NOTE :
+;   - Like [ Fade_palette_regs ], for the colours of the ranges.
+;*****************************************************************************
+Fade_colour:
+	tst.w	Fade_level
+	beq.s	.Exit
+	movem.l	d1-d3/a1/a2,-(sp)
+	move.w	Fade_level,d3		; Table offset
+	lsl.w	#4,d3
+	lea.l	STE_to_linear,a1
+	lea.l	Fade_scale,a2
+	moveq.l	#0,d1
+	rol.w	#4,d0			; Skip the unused top nibble
+	moveq.l	#3-1,d2
+.Loop:	rol.w	#4,d1
+	rol.w	#4,d0
+	move.w	d0,-(sp)
+	andi.w	#$f,d0
+	move.b	0(a1,d0.w),d0		; 0...15
+	add.w	d3,d0			; Scale & convert
+	move.b	0(a2,d0.w),d0
+	or.b	d0,d1
+	move.w	(sp)+,d0
+	dbra	d2,.Loop
+	move.w	d1,d0
+	movem.l	(sp)+,d1-d3/a1/a2
 .Exit:	rts
 
 ; Amiga nibble (0...15) -> STE nibble (bit 3 is the lowest bit)

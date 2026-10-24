@@ -23,3 +23,4 @@
 	include	"POC/MAPLOAD.S"
 	include	"POC/EVENTS.S"
 	include	"POC/LIGHT.S"
+	include	"POC/INVENTORY.S"

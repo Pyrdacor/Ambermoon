@@ -334,11 +334,13 @@ Show_picture_text:
 	lea.l	ShowPicTxt_RL,a0		; Install palette
 	jsr	Set_raster_list
 ; ---------- Show layout & picture ----------------
+	lea.l	ShowPicTxt_files,a0		; Load layout
+	jsr	Load_files
 	moveq.l	#0,d0			; Show layout
 	moveq.l	#Middle_Y+1,d1
 	moveq.l	#20,d6
 	move.w	#199-Middle_Y,d7
-	lea.l	Layout7,a0
+	lea.l	Extra_layout,a0
 	jsr	Put_unmasked_block
 	moveq.l	#Window_colour,d4		; Clear text area
 	move.w	#16,d0
@@ -812,6 +814,8 @@ Process_text:
 	beq	.Insert_name
 	cmp.l	#'LEAD',d1
 	beq	.Insert_name
+	cmp.l	#'INVN',d1
+	beq	.Insert_inv_name
 	bra	.Loop
 .Char:	cmp.b	#' ',d0			; Space ?
 	bne.s	.Not_space
@@ -831,6 +835,16 @@ Process_text:
 .Done:	move.w	d6,Text_height
 	movem.l	(sp)+,d0-d7/a0-a3
 	rts
+
+; Insert the name of the inventory member
+.Insert_inv_name:
+	movem.l	a4,-(sp)
+	move.w	Inventory_member,d0
+	subq.w	#1,d0
+	lsl.w	#4,d0
+	lea.l	Names,a4
+	add.w	d0,a4
+	bra.s	.Copy
 
 ; Insert the name of the active member (the hero in the proof of concept)
 .Insert_name:
@@ -891,6 +905,13 @@ ShowPicTxt_RL:
 	R_palette Middle_Y+1,Event_palette
 	R_end
 	even
+
+; Files loaded for the picture screen
+ShowPicTxt_files:
+	dc.l	Extra_layout,320*163/2
+	dc.b	"DATA\LAYOUT7.BIN",0
+	even
+	dc.l	0
 
 	SECTION	Fast_BSS,bss
 Max_line_length	EQU	48			; (buffer)

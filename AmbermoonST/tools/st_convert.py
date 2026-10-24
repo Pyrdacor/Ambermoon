@@ -41,6 +41,12 @@
 #   NAMES.BIN   6 names (16 bytes each)
 #   CHARS.BIN   character data of the 6 party members (Party_char.amb, first 512 bytes each)
 #   FONT.BIN    Glyph_mapping (224 bytes) + Glyph_data (5 bytes per glyph), unchanged
+#   INVPAL.BIN  palette of the inventory screen below the status block (like UIPAL.BIN)
+#   OBJICONS.BIN  item graphics (Object_icons, 16x16 each), PORTRI.BIN the portraits in the inventory palette
+#   OBJECTS.BIN item data (Objects.amb, unchanged : number of items (word) + 60 bytes per item)
+#   LAYOUT2.BIN layout 2 (inventory), 320x163
+#   INVGFX.BIN  Swordshield (2 x 16x9), Chequered (32x11), Pick_Mptr (hotspot X, Y (words), 16x16)
+#   TEXTS.BIN   64 UI texts, 16 race names, 16 class names, 300 messages (zero-terminated)
 import argparse, math, os, re, struct, sys, zipfile
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -52,6 +58,8 @@ from st_map_preview import planar, amiga_rgb, kmeans, snap, st_word, to_lab, dis
 SRC = os.path.join(ROOT, 'AmbermoonSource', 'src')
 PARTY = (1, 8, 9, 10, 11, 12)               # Party_char.amb: hero, Egil, Selena, Nelvin, Sabine, Valdyn
 AMBERFILES = os.path.join(ROOT, 'Disks', 'Bugfixing', 'German', 'Amberfiles')
+ALLTEXTS = os.path.join(ROOT, 'Disks', 'Bugfixing', 'German', 'AllTexts')
+WHITE = (2,)                                # Amiga colour White : ST colour 1 in the UI & inventory palettes
 
 
 class Data:
@@ -167,18 +175,20 @@ def st_graphic(pix, w, h):
     return bytes(out)
 
 
-def make_palette(palette, weights, ui_first=24):
+def make_palette(palette, weights, ui_first=24, fixed=()):
     """16 colour palette with the slot layout described above. palette: 32 rgb, weights: 32 values.
     ui_first: first UI colour which gets a fixed slot (8 + colour - 24). In the map area colour 24 is not needed
     by the UI (value 0 of the layout and the buttons is drawn black), so slot 8 is another free slot there.
+    fixed: colours which get the slots 1, 2, ... (e.g. white for the dragged items, see WHITE_SLOT).
     Returns (16 rgb, lookup table of 32 slots)."""
     ui = palette[ui_first:32]
-    points = palette[1:ui_first]
-    w = [math.sqrt(x) for x in weights[1:ui_first]]
-    # k-means with the UI colours fixed
-    result = kmeans(points, w, ui, 15, 4)
-    free = result[len(ui):]
-    pal16 = [snap(palette[0], 4)] + free + [snap(c, 4) for c in ui]
+    fix = [snap(palette[c], 4) for c in fixed]
+    points = [palette[i] for i in range(1, ui_first) if i not in fixed]
+    w = [math.sqrt(weights[i]) for i in range(1, ui_first) if i not in fixed]
+    # k-means with the fixed and the UI colours fixed
+    result = kmeans(points, w, fix + ui, 15, 4)
+    free = result[len(fix) + len(ui):]
+    pal16 = [snap(palette[0], 4)] + fix + free + [snap(c, 4) for c in ui]
     labs = [to_lab(c) for c in pal16]
     lut = []
     for i in range(32):
@@ -186,6 +196,8 @@ def make_palette(palette, weights, ui_first=24):
             lut.append(0)
         elif i >= ui_first:
             lut.append(8 + i - 24)
+        elif i in fixed:
+            lut.append(1 + fixed.index(i))
         else:            # never slot 0: it is transparent
             li = to_lab(palette[i])
             lut.append(min(range(1, 16), key=lambda j: dist(li, labs[j])))
@@ -364,12 +376,56 @@ def main():
         weights[c] += 2000
     for c in (6,):                         # LP bar (7, 6) must differ from the SP bar (24, 23)
         weights[c] += 4000
-    ui16, ui_lut = make_palette(main_pal, weights)
+    ui16, ui_lut = make_palette(main_pal, weights, fixed=WHITE)
     write('UIPAL.BIN', palette_file(ui16, ui_lut))
     write('PORTR.BIN', b''.join(st_graphic([ui_lut[v] for v in p], 32, 34) for p in portraits))
     write('NAMES.BIN', names)
     write('CHARS.BIN', chars)
     print('UI colours of the bars: LP', ui_lut[7], ui_lut[6], ' SP', ui_lut[24], ui_lut[23])
+
+    # ---------- inventory : area below the status block ----------
+    # The Amiga version uses Main_pal there too (Inv_RL in MODULES.S). Here the palette is chosen for the items
+    # and the portraits (the portrait of the inventory member is shown there). The items are not drawn in the
+    # status block area : a dragged item is shown as a white silhouette (like Amberstar), and white has the same
+    # slot in both palettes.
+    raw = data.read('Object_icons/001')
+    obj_icons = [planar(raw, 16, 16, 5, i * 160) for i in range(len(raw) // 160)]
+    weights = [0] * 32
+    for ic in obj_icons:
+        for v in ic:
+            weights[v] += 1
+    for p in portraits:
+        for v in p:
+            weights[v] += 1
+    weights[16] += 2000                    # text colour (Yellow)
+    inv16, inv_lut = make_palette(main_pal, weights, fixed=WHITE)
+    write('INVPAL.BIN', palette_file(inv16, inv_lut))
+    write('OBJICONS.BIN', b''.join(st_graphic([inv_lut[v] for v in ic], 16, 16) for ic in obj_icons))
+    write('PORTRI.BIN', b''.join(st_graphic([inv_lut[v] for v in p], 32, 34) for p in portraits))
+    write('OBJECTS.BIN', decode_file(open(os.path.join(AMBERFILES, 'Objects.amb'), 'rb').read()))
+    layout2 = planar(data.read('Layouts.amb/002'), 320, 163, 3)
+    write('LAYOUT2.BIN', st_graphic([8 + v for v in layout2], 320, 163))   # (colour 24 is the background)
+    inv_gfx = b''
+    raw = source_data('KERNEL/CHIP_DATA.S', 'Swordshield')
+    for i in range(2):                     # sword & shield (16x9, 3 bit, base colour 24, colour 0 transparent)
+        inv_gfx += st_graphic([v and 8 + v for v in planar(raw, 16, 9, 3, i * 54)], 16, 9)
+    raw = source_data('KERNEL/CHIP_DATA.S', 'Chequered')   # disabled control icon (32x11, 1 bit)
+    inv_gfx += st_graphic([inv_lut[28] if v else 0 for v in planar(raw, 32, 11, 1)], 32, 11)
+    raw = source_data('KERNEL/DATA.S', 'Pick_Mptr')         # mouse pointer while moving an item
+    inv_gfx += struct.pack('>HH', 1, 1) + st_graphic([v and 8 + v for v in planar(raw, 16, 16, 3)], 16, 16)
+    write('INVGFX.BIN', inv_gfx)
+    # texts : 64 UI texts, 16 race names, 16 class names, 300 messages (zero-terminated, cp850 like the game texts)
+    texts = b''
+    for folder, count in (('UITexts', 64), ('RaceNames', 16), ('ClassNames', 16), ('Messages', 300)):
+        for i in range(count):
+            fn = os.path.join(ALLTEXTS, 'Text.amb', folder, f'{i:03}.txt')
+            t = ''
+            if os.path.exists(fn):
+                with open(fn, encoding='utf-8-sig') as f:
+                    t = f.read().rstrip('\0\r\n')
+            texts += t.encode('cp850') + b'\0'
+    write('TEXTS.BIN', texts)
+    print('Inventory palette:', ' '.join(f'${st_word(c, 4):03x}' for c in inv16))
 
     status = b''
     for label, w, h in (('Status_L', 16, 36), ('Status_M', 16, 36), ('Status_R', 16, 36),
@@ -410,7 +466,7 @@ def main():
     write('START.BIN', struct.pack('>6H', map_nr, x, y, d, hour, minute))
     names = b''
     for i in range(3):
-        with open(os.path.join(ROOT, 'Disks', 'Bugfixing', 'German', 'AllTexts', 'Text.amb', 'WorldNames',
+        with open(os.path.join(ALLTEXTS, 'Text.amb', 'WorldNames',
                                f'{i:03}.txt'), encoding='utf-8-sig') as f:
             names += f.read().strip().encode('cp850')[:31].ljust(32, b'\0')
     write('WORLDS.BIN', names)

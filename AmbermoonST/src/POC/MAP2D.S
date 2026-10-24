@@ -90,6 +90,7 @@ Copy_screen_to_both:
 	move.w	#ST_screen_size/4-1,d7
 .Loop:	move.l	(a0)+,(a1)+
 	dbra	d7,.Loop
+	jsr	Forget_mouse_pointer
 .Exit:	movem.l	(sp)+,d0-d7/a0-a6
 	rts
 
@@ -468,11 +469,36 @@ Handle_input:
 	cmp.w	#$01,d0			; ESC ?
 	beq.s	.Quit
 	cmp.w	#$61,d0			; UNDO ?
-	bne.s	.Keys
+	beq.s	.Quit
+	cmp.w	#$3b,d0			; F1...F6 : inventory
+	bmi.s	.Keys
+	cmp.w	#$40+1,d0
+	bpl.s	.Keys
+	subi.w	#$3b-1,d0
+	move.w	d0,d7
+	jsr	Inventory_screen
+	bra	.Exit
 .Quit:	st	Quit_flag
 	bra	.Exit
+; ---------- Inventory ----------------------------
+.Mouse:	jsr	Read_mouse_clicks		; Right button on a portrait ?
+	btst	#Right_pressed,d0
+	beq.s	.Move_input
+	cmp.w	#Middle_Y+1,Mouse_Y
+	bpl.s	.Move_input
+	move.w	Mouse_X,d7
+	subi.w	#16,d7
+	bmi.s	.Move_input
+	ext.l	d7
+	divu.w	#48,d7
+	cmp.w	#6,d7
+	bpl.s	.Move_input
+	addq.w	#1,d7
+	jsr	Inventory_screen
+	bra	.Exit
 ; ---------- Movement -----------------------------
-.Mouse:	moveq.l	#-1,d7			; No direction
+.Move_input:
+	moveq.l	#-1,d7			; No direction
 	lea.l	Direction_keys,a0		; Keys held down ?
 .Loop:	move.w	(a0)+,d0
 	bmi.s	.No_key
@@ -1582,8 +1608,23 @@ File_list:
 	dc.l	Window_icons,9*16*8
 	dc.b	"DATA\WINICONS.BIN",0
 	even
-	dc.l	Layout7,320*163/2
-	dc.b	"DATA\LAYOUT7.BIN",0
+	dc.l	Inv_palette,64
+	dc.b	"DATA\INVPAL.BIN",0
+	even
+	dc.l	Inv_portraits,6*34*2*8
+	dc.b	"DATA\PORTRI.BIN",0
+	even
+	dc.l	Inv_graphics,2*9*8+11*2*8+4+16*8
+	dc.b	"DATA\INVGFX.BIN",0
+	even
+	dc.l	Object_icons,188*16*8
+	dc.b	"DATA\OBJICONS.BIN",0
+	even
+	dc.l	Object_data,2+402*Item_data_size
+	dc.b	"DATA\OBJECTS.BIN",0
+	even
+	dc.l	Texts,16*1024
+	dc.b	"DATA\TEXTS.BIN",0
 	even
 	dc.l	0
 
@@ -1594,7 +1635,7 @@ Load_error_text:
 	even
 
 	SECTION	Fast_BSS,bss
-Max_icons	EQU	2048
+Max_icons	EQU	1600
 Max_NPC_graphics	EQU	64*1024
 Max_map_size	EQU	12+320+100*100*4+16384
 UI_graphics_size	EQU	3*36*8+8+34*2*8+2*17*2*8
@@ -1656,7 +1697,7 @@ Underlay_buffer:	ds.b Mapbuf_size
 Overlay_buffer:	ds.w Mapbuf_size
 Font_data:	ds.b 1024
 Layout:	ds.b 320*163/2
-Layout7:	ds.b 320*163/2
+Extra_layout:	ds.b 320*163/2		; Layout 2 or 7 (loaded when needed)
 Control_icons:	ds.b 78*13*2*8
 Portraits:	ds.b 6*34*2*8
 Party_chars:	ds.b 6*512

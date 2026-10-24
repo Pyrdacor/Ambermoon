@@ -8,8 +8,9 @@ This folder contains a proof of concept of an Atari ST port of Ambermoon, based 
 changes (e.g. out of the house onto the world map Lyramion and back), text popups (shown in a text window or
 with their picture),
 tile changes and conditions/actions on the bits of the savegame. All 2D city maps and the 2D world maps
-can be reached. Outdoors there is a light circle around the party which depends on the time of day. There
-is no music.
+can be reached. Outdoors there is a light circle around the party which depends on the time of day. The
+inventory of the party members can be opened, and items can be moved between the backpack, the body and the
+other party members. There is no music.
 
 ![Start](docs/start.png) ![After walking](docs/moved.png)
 
@@ -21,6 +22,11 @@ after it, and the world map in front of the house:
 The world map at night (22:30, the start of the game) and at dusk (19:00):
 
 ![Night](docs/night.png) ![Dusk](docs/dusk.png)
+
+The inventory of Selena (right mouse button on her portrait or F3) while her arrows are moved: they are shown as a
+white silhouette, so they can be dragged onto the portraits, which have their own palette:
+
+![Inventory](docs/inventory.png)
 
 Map 264 "Zum hinkenden Gauner" at 14:00 (`./build.sh --map 264 --pos 11,13,2 --time 14:00`):
 
@@ -43,6 +49,11 @@ Map 264 "Zum hinkenden Gauner" at 14:00 (`./build.sh --map 264 --pos 11,13,2 --t
 Controls: cursor keys or numeric keypad (also diagonally), or hold the left mouse button in the map window
 or on a control icon. `ESC` or `UNDO` quits.
 
+Inventory: right mouse button on a portrait or `F1` ... `F6`. The left mouse button on an item takes it (the
+whole stack); then the left mouse button on a backpack slot, on the body or on a portrait puts it there, the
+right mouse button or `ESC` puts it back. The name of the item under the mouse is shown above the mouse. The
+exit icon or `ESC` closes the inventory.
+
 ## Target machine
 
 STE with 1 MB. It also runs on a plain ST, but the colours are then rounded to 3 bits per channel (see
@@ -64,6 +75,12 @@ lists in `MODULES.S`): the status block (lines 0–36) uses the UI palette, the 
 
 For the status block, the colours of the LP bar (Amiga colours 7 and 6, blue) get their own ST colour, so
 that they stay different from the SP bar (24 and 23, green).
+
+The Amiga version uses one palette for the status block, the items and the portraits, because items can be
+dragged onto the portraits. Here the inventory screen has its own palette below the status block, chosen for
+the items and the portraits (the portrait of the inventory member is shown there too), and a moved item is
+shown as a white silhouette like in Amberstar. White (Amiga colour 2) is ST colour 1 in both palettes, so the
+silhouette looks the same over the portraits.
 
 `tools/st_convert.py` converts all graphics in advance into the ST format (per line and 16 pixels 4 plane
 words) with the final ST colours, and writes for each palette a lookup table Amiga colour → ST colour,
@@ -116,6 +133,13 @@ Amiga version erases the area outside the circle every frame; here the map posit
 the circle changes (inside, edge, outside), positions outside are drawn black once and only the edge
 positions are redrawn and erased line by line every frame.
 
+`src/POC/INVENTORY.S` contains the Inventory 2 screen of `INVENTOR.S` and `DISPLAY.S`: the small member info,
+the body items (with the cross over the other hand for double-handed weapons), the backpack with the scroll
+bar, the weight, and moving items with the checks of the original (body place, class, sex, hands, fingers,
+cursed items, stacks of up to 99) and its boni (damage, protection, LP/SP maximum, attributes, skills). The
+text above the mouse and the moved item are drawn with the mouse pointer (`KERNEL/MOUSE.S`), like the HDOBs
+of the Amiga version. The prompts ("Wohin damit?", ...) are the original messages.
+
 `src/POC/PERSONS.S` contains the persons and the time from `PERSONS.S`, `TIME.S` and `MAP/MAP.S`: persons
 on a path (one position per 5 minutes of the day) and randomly moving persons, sitting and sleeping
 persons, collisions with persons, and the time of day, which advances by one step (5 minutes) every 4
@@ -135,6 +159,8 @@ Hatari (STE, 8 MHz):
 
 * Talking to persons, the other events (doors, chests, places, ...), monsters (movement, combat), light
   spells, transports and travel modes other than on foot, and 3D maps.
+* In the inventory: the character screen (Inventory 1), using, dropping and viewing items, gold and food, and
+  moving only a part of a stack.
 * The module system, the memory manager and loading from the original containers (the data is converted in
   advance).
 * Sound and music.
