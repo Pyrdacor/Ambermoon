@@ -22,3 +22,4 @@
 	include	"POC/PERSONS.S"
 	include	"POC/MAPLOAD.S"
 	include	"POC/EVENTS.S"
+	include	"POC/LIGHT.S"

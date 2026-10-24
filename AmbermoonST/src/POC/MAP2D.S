@@ -869,6 +869,7 @@ Display_2D_map:
 	add.w	Mapbuf_X,d0
 	move.w	d0,Party_cell
 	jsr	Mark_sprite_cells
+	jsr	Prepare_light
 	lea.l	Underlay_buffer,a1
 	lea.l	Overlay_buffer,a2
 	lea.l	Redraw_flags,a3
@@ -890,7 +891,27 @@ Display_2D_map:
 	moveq.l	#0,d3			; Party or person here ?
 	lea.l	Sprite_cells,a0
 	move.b	0(a0,d4.w),d3
-	tst.w	d3			; Sprites : always redraw
+	lea.l	Cell_light,a0		; Light
+	cmp.b	#1,0(a0,d4.w)
+	bmi.s	.Lit			; Inside the light ?
+	beq.s	.Edge			; On the edge ?
+	tst.b	d3			; Dark : sprite here ?
+	bne.s	.Dark_sprite
+	cmp.w	#2,4(a4)			; Already black ?
+	beq	.Skip
+	jsr	Clear_icon		; No -> erase
+	move.l	#-1,(a4)
+	move.w	#2,4(a4)
+	bra	.Skip
+.Dark_sprite:
+	tst.b	Stygian			; Complete darkness ?
+	beq.s	.Edge
+	jsr	Clear_icon		; Yes -> only the sprite
+	move.l	#-1,(a4)
+	move.w	#1,4(a4)
+	bra	.Skip
+.Edge:	moveq.l	#1,d3			; Always redraw
+.Lit:	tst.w	d3			; Sprites : always redraw
 	bne.s	.Redraw
 	cmp.l	(a4),d2			; Same icons ?
 	bne.s	.Redraw
@@ -960,6 +981,7 @@ Display_2D_map:
 	dbra	d7,.Loop5
 ; ---------- Display sky overlays -----------------
 	jsr	Display_2D_sky
+	jsr	Display_2D_night		; Light circle
 	jsr	Pop_CA
 	subq.b	#1,Anim_count		; Time for an update ?
 	bne.s	.Exit

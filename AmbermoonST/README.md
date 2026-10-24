@@ -7,13 +7,18 @@ This folder contains a proof of concept of an Atari ST port of Ambermoon, based 
 (NPCs) are shown and move on their paths or randomly while the time of day passes. Map events work for map
 changes (e.g. out of the house onto the world map Lyramion and back), text popups (shown in a text window),
 tile changes and conditions/actions on the bits of the savegame. All 2D city maps and the 2D world maps
-can be reached. There is no music.
+can be reached. Outdoors there is a light circle around the party which depends on the time of day. There
+is no music.
 
 ![Start](docs/start.png) ![After walking](docs/moved.png)
 
 The text popup at the start of the game, and the world map in front of the house:
 
 ![Text window](docs/textwindow.png) ![World map](docs/world.png)
+
+The world map at night (22:30, the start of the game) and at dusk (19:00):
+
+![Night](docs/night.png) ![Dusk](docs/dusk.png)
 
 Map 264 "Zum hinkenden Gauner" at 14:00 (`./build.sh --map 264 --pos 11,13,2 --time 14:00`):
 
@@ -102,6 +107,12 @@ the game is done with GEMDOS; only the TOS system timer (Timer C) is switched on
 icon, query and modify of the bit arrays of the savegame) and the text window (`Open_window`,
 `TxtW_DisInit`, text processing with word wrap and `~SELF~`).
 
+`src/POC/LIGHT.S` contains the light from `MAP/2D_MAP.S` and `TIME.S`: always light (indoor), changing with
+the time of day (outdoor, radius of the light circle per hour) or dark (only the party is visible). The
+Amiga version erases the area outside the circle every frame; here the map positions are classified when
+the circle changes (inside, edge, outside), positions outside are drawn black once and only the edge
+positions are redrawn and erased line by line every frame.
+
 `src/POC/PERSONS.S` contains the persons and the time from `PERSONS.S`, `TIME.S` and `MAP/MAP.S`: persons
 on a path (one position per 5 minutes of the day) and randomly moving persons, sitting and sleeping
 persons, collisions with persons, and the time of day, which advances by one step (5 minutes) every 4
@@ -120,8 +131,8 @@ Hatari (STE, 8 MHz):
 ## Not done yet
 
 * Talking to persons, the other events (doors, chests, places, ...), pictures of text popups,
-  monsters (movement, combat), darkness/light circle (also at night on the world map), transports and
-  travel graphics, and 3D maps.
+  monsters (movement, combat), light spells, transports and travel modes other than on foot, and 3D
+  maps.
 * The module system, the memory manager and loading from the original containers (the data is converted in
   advance).
 * Sound and music.

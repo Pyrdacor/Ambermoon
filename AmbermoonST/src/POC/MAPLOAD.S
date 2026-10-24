@@ -113,6 +113,7 @@ Load_map:
 	move.w	#C2_animbias,Anim_bias
 .Done:	jsr	Get_CD_value
 	jsr	Make_map_name
+	jsr	Update_light_status
 	movem.l	(sp)+,d0-d7/a0-a2
 	rts
 
