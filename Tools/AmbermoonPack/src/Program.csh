@@ -476,7 +476,7 @@ void Unpack(string[] args)
     foreach (var number in file.Numbers())
     {
         var subfile = file.Files[number];
-        if (File.WriteAllBytes(Path.Combine(outDir, FileNumberName(number)), subfile.ReadToEnd()) is error)
+        if (File.WriteAllBytes(Path.Combine(outDir, FileNumberName(number)), subfile.RemainingBytes()) is error)
         {
             Console.WriteLine("Failed to write output files");
             Exit(ErrorWritingToDestination);
@@ -500,7 +500,8 @@ FileContainer LoadForUnpack(string path)
         Console.WriteLine("Error loading file: " + readError.Message);
         Exit(ErrorInvalidSourceFile);
     }
-    var file = FileReader.ReadFile("", DataReader.Create(loaded is uint8[] bytes ? bytes : new uint8[0]));
+    // (the loaded bytes are the reader's own: no copy)
+    var file = FileReader.ReadFile("", DataReader.FromData(loaded is uint8[] bytes ? bytes : new uint8[0]));
     if (file is FileContainer container)
         return container;
     if (file is error e)
