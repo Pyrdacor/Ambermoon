@@ -31,6 +31,7 @@
 #               frames of 16x32)
 #   PORTR.BIN   6 portraits (32x34) of the party used by the proof of concept
 #   NAMES.BIN   6 names (16 bytes each)
+#   CHARS.BIN   character data of the 6 party members (Party_char.amb, first 512 bytes each)
 #   FONT.BIN    Glyph_mapping (224 bytes) + Glyph_data (5 bytes per glyph), unchanged
 #   ICONS.BIN   all icon graphics of the tileset of the map (16x16 each)
 #   ICONDAT.BIN icon data of the tileset (unchanged)
@@ -261,20 +262,26 @@ def main():
     main_pal = [amiga_rgb(c) for c in source_words('KERNEL/DATA.S', 'Main_pal', 32)]
     portraits = []
     names = b''
+    chars = b''
     for c in PARTY:
         ch = data.read(f'Party_char.amb/{c:03}')
         portraits.append(planar(data.read(f'Portraits.amb/{ch[0x0a]:03}'), 32, 34, 5))
         names += ch[0x112:0x112 + 15].split(b'\0')[0][:15].ljust(16, b'\0')
+        chars += ch[:512].ljust(512, b'\0')
     weights = [0] * 32
     for p in portraits:
         for v in p:
             weights[v] += 1
     for c in (2, 4, 16, 19, 20, 21, 22):   # text colours (White, Lighter_blue, Yellow, reds, Light_green)
         weights[c] += 2000
+    for c in (6,):                         # LP bar (7, 6) must differ from the SP bar (24, 23)
+        weights[c] += 4000
     ui16, ui_lut = make_palette(main_pal, weights)
     write('UIPAL.BIN', palette_file(ui16, ui_lut))
     write('PORTR.BIN', b''.join(st_graphic([ui_lut[v] for v in p], 32, 34) for p in portraits))
     write('NAMES.BIN', names)
+    write('CHARS.BIN', chars)
+    print('UI colours of the bars: LP', ui_lut[7], ui_lut[6], ' SP', ui_lut[24], ui_lut[23])
 
     status = b''
     for label, w, h in (('Status_L', 16, 36), ('Status_M', 16, 36), ('Status_R', 16, 36),

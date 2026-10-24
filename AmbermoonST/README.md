@@ -47,6 +47,9 @@ lists in `MODULES.S`): the status block (lines 0–36) uses the UI palette, the 
 | 1–7 | 7 colours chosen per area (weighted k-means over the map tiles, portraits, party graphics) |
 | 8–15 | the Amiga colours 24–31 (UI colours: layouts and all 3 bit graphics with base colour 24) |
 
+For the status block, the colours of the LP bar (Amiga colours 7 and 6, blue) get their own ST colour, so
+that they stay different from the SP bar (24 and 23, green).
+
 `tools/st_convert.py` converts all graphics in advance into the ST format (per line and 16 pixels 4 plane
 words) with the final ST colours, and writes for each palette a lookup table Amiga colour → ST colour,
 which the kernel uses for boxes and text colours.
@@ -104,4 +107,4 @@ Hatari (STE, 8 MHz):
 * The module system, the memory manager and loading from the original containers (the data is converted in
   advance).
 * Sound and music.
-* Status icons and bars of the party members.
+* Status icons of the party members.

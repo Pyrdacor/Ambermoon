@@ -154,6 +154,7 @@ Display_status_block:
 	jsr	Put_unmasked_block
 	moveq.l	#1,d7			; Display portraits
 .Loop2:	jsr	Display_portrait
+	jsr	Update_member_bars
 	addq.w	#1,d7
 	cmp.w	#6+1,d7
 	bmi.s	.Loop2
@@ -210,6 +211,89 @@ Display_portrait:
 	lea.l	Temp_name,a0
 	jsr	Print_centered_string
 	movem.l	(sp)+,d0-d7/a0
+	rts
+
+;*****************************************************************************
+; [ Draw the LP & SP bars of a member ]
+;   IN : d7 - Member number [1...6] (.w)
+; All registers are restored
+; NOTE :
+;   - From [ Update_member_status ] (DISPLAY.S), only the bars.
+;*****************************************************************************
+Update_member_bars:
+	movem.l	d0-d7/a0/a2,-(sp)
+	lea.l	Party_chars,a2		; Get character data
+	move.w	d7,d0
+	subq.w	#1,d0
+	mulu.w	#512,d0
+	add.l	d0,a2
+	move.w	d7,d5			; Calculate X-coordinate
+	subq.w	#1,d5
+	mulu.w	#48,d5
+	addi.w	#16,d5
+	move.w	Life_points+Maximum(a2),d0	; Get maximum LP
+	add.w	Life_points+Magic(a2),d0
+	move.w	Life_points(a2),d7		; Get normal LP
+	cmp.w	d0,d7			; More as maximum ?
+	bmi.s	.Less1
+	moveq.l	#16,d7			; Full bar
+	bra.s	.Do1
+.Less1:	ext.l	d7			; Calculate height of bar
+	lsl.l	#4,d7
+	tst.w	d0
+	beq.s	.Zero1
+	divu.w	d0,d7
+	bne.s	.Do1
+.Zero1:	moveq.l	#1,d7
+.Do1:	tst.b	Spell_class_counter(a2)	; ANY magic ?
+	bne.s	.Magic
+	moveq.l	#0,d6			; No!
+	bra.s	.Do2
+.Magic:	move.w	Power_points+Maximum(a2),d0	; Get maximum PP
+	add.w	Power_points+Magic(a2),d0
+	move.w	Power_points(a2),d6		; Get normal PP
+	cmp.w	d0,d6			; More as maximum ?
+	bmi.s	.Less2
+	moveq.l	#16,d6			; Full bar
+	bra.s	.Do2
+.Less2:	ext.l	d6			; Calculate height of bar
+	lsl.l	#4,d6
+	tst.w	d0
+	beq.s	.Zero2
+	divu.w	d0,d6
+	bne.s	.Do2
+.Zero2:	moveq.l	#1,d6
+.Do2:	move.w	d5,d0			; Draw LP bar
+	addi.w	#34,d0
+	move.w	d0,d2
+	moveq.l	#34,d3
+	move.w	d3,d1
+	sub.w	d7,d1
+	addq.w	#1,d1
+	moveq.l	#7,d4
+	jsr	Draw_box
+	addq.w	#1,d0
+	move.w	d5,d2
+	addi.w	#37,d2
+	moveq.l	#6,d4
+	jsr	Draw_box
+	tst.w	d6			; Any PP ?
+	beq.s	.Exit
+	move.w	d5,d0			; Draw PP bar
+	addi.w	#34+8,d0
+	move.w	d0,d2
+	moveq.l	#34,d3
+	move.w	d3,d1
+	sub.w	d6,d1
+	addq.w	#1,d1
+	moveq.l	#24,d4
+	jsr	Draw_box
+	addq.w	#1,d0
+	move.w	d5,d2
+	addi.w	#37+8,d2
+	moveq.l	#23,d4
+	jsr	Draw_box
+.Exit:	movem.l	(sp)+,d0-d7/a0/a2
 	rts
 
 ;*****************************************************************************
@@ -1449,6 +1533,9 @@ File_list:
 	dc.l	Names,6*16
 	dc.b	"DATA\NAMES.BIN",0
 	even
+	dc.l	Party_chars,6*512
+	dc.b	"DATA\CHARS.BIN",0
+	even
 	dc.l	Font_data,1024
 	dc.b	"DATA\FONT.BIN",0
 	even
@@ -1541,6 +1628,7 @@ Font_data:	ds.b 1024
 Layout:	ds.b 320*163/2
 Control_icons:	ds.b 78*13*2*8
 Portraits:	ds.b 6*34*2*8
+Party_chars:	ds.b 6*512
 Party_graphics:	ds.b 17*32*8
 Icon_data_buffer:	ds.b 2+Max_icons*8
 Map_data_buffer:	ds.b Max_map_size
