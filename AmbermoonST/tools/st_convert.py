@@ -21,6 +21,8 @@
 #   P<t>.BIN    the same for the map area of the maps with tileset t
 #   I<t>.BIN    icon graphics of tileset t (16x16 each), D<t>.BIN its icon data (unchanged)
 #   G<w>_<t>.BIN  party graphics of world w (17 frames of 16x32) for tileset t
+#   T0_<t>.BIN  travel graphics "on foot" for tileset t (4 directions : width in truncs, height, X & Y offset
+#               (words), graphic)
 #   N<n>_<t>.BIN  NPC graphics file n for tileset t (number of frames (byte), 0 (byte), frames of 16x32)
 #   M<nnn>.BIN  data of 2D map nnn, X<nnn>.BIN its map texts (both unchanged)
 #   SAVE.BIN    the initial savegame (Party_data.sav: event bits, map characters, ...)
@@ -185,6 +187,32 @@ def make_palette(palette, weights):
     return pal16, lut
 
 
+def sprite_lut(palette, pal16):
+    """Lookup table for sprites (party and NPC graphics) into an existing 16 colour palette. The colours are
+    matched with more weight on the hue and less on the lightness than in Lab, so that e.g. yellow hair becomes
+    yellowish brown instead of green when the palette has no yellow (the tiles of the world maps use most of the
+    colours)."""
+    labs = [to_lab(c) for c in pal16]
+
+    def hue_dist(l1, l2):
+        dl = l1[0] - l2[0]
+        c1, c2 = math.hypot(l1[1], l1[2]), math.hypot(l2[1], l2[2])
+        dc = c1 - c2
+        dh2 = max((l1[1] - l2[1]) ** 2 + (l1[2] - l2[2]) ** 2 - dc * dc, 0)
+        return math.sqrt((0.5 * dl) ** 2 + dc * dc + 4 * dh2)
+
+    lut = []
+    for i in range(32):
+        if i == 0:
+            lut.append(0)
+        elif i >= 24:
+            lut.append(8 + i - 24)
+        else:
+            li = to_lab(palette[i])
+            lut.append(min(range(1, 16), key=lambda j: hue_dist(li, labs[j])))
+    return lut
+
+
 def palette_file(pal16, lut):
     return b''.join(struct.pack('>H', st_word(c, 4)) for c in pal16) + bytes(lut)
 
@@ -266,14 +294,25 @@ def main():
             for v in frame:
                 weights[v] += 16       # small but important
         map16, map_lut = make_palette(map_pal, weights)
+        spr_lut = sprite_lut(map_pal, map16)
         write(f'P{tileset}.BIN', palette_file(map16, map_lut))
         write(f'I{tileset}.BIN', b''.join(st_graphic([map_lut[v] for v in t], 16, 16) for t in tiles))
         write(f'D{tileset}.BIN', idata)
         for w in worlds:
-            write(f'G{w}_{tileset}.BIN', b''.join(st_graphic([map_lut[v] for v in f], 16, 32) for f in party[w]))
+            write(f'G{w}_{tileset}.BIN', b''.join(st_graphic([spr_lut[v] for v in f], 16, 32) for f in party[w]))
+        # travel graphics "on foot" (used instead of the party graphics on the world maps): per direction
+        # width (truncs), height, X & Y offset (words) and the graphic
+        raw = data.read('Travel_gfx.amb/001')
+        out = b''
+        o = 0
+        for _ in range(4):
+            w, h, xo, yo = struct.unpack('>4h', raw[o:o + 8])
+            out += raw[o:o + 8] + st_graphic([map_lut[v] for v in planar(raw, w * 16, h, 5, o + 8)], w * 16, h)
+            o += 8 + w * h * 10
+        write(f'T0_{tileset}.BIN', out)
         for n in npcs_used:
             write(f'N{n}_{tileset}.BIN', b''.join(
-                bytes([len(g), 0]) + b''.join(st_graphic([map_lut[v] for v in f], 16, 32) for f in g)
+                bytes([len(g), 0]) + b''.join(st_graphic([spr_lut[v] for v in f], 16, 32) for f in g)
                 for g in npc_files[n]) + b'\0\0')
         print(f'Tileset {tileset}: palette {pal_index}', ' '.join(f'${st_word(c, 4):03x}' for c in map16))
 

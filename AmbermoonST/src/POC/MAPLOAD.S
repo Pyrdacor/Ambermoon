@@ -56,6 +56,14 @@ Load_map:
 	moveq.l	#64,d1
 	moveq.l	#'P',d2
 	jsr	Load_numbered_file
+	movem.l	d0-d3/a1,-(sp)		; Travel graphics "on foot"
+	move.w	d0,d1
+	moveq.l	#0,d0
+	moveq.l	#'T',d2
+	move.l	#Max_travel_graphics,d3
+	lea.l	Travel_graphics,a1
+	jsr	Load_sprite_file
+	movem.l	(sp)+,d0-d3/a1
 .Same_ts:
 ; ---------- Party & NPC graphics -----------------
 	lea.l	Map_data_buffer,a0
@@ -689,5 +697,7 @@ World_map:	ds.b 1
 Submap_changed:	ds.b 1
 Needed_submaps:	ds.w 9
 World_slot_nrs:	ds.w 9
+Max_travel_graphics	EQU	1024
+Travel_graphics:	ds.b Max_travel_graphics
 Map_texts:	ds.b Max_map_texts
 World_slots:	ds.b 9*World_slot_size

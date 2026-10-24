@@ -1257,18 +1257,38 @@ Get_hashable_number:
 ; [ Display party ]
 ; All registers are restored
 ; NOTE :
-;   - From MAP/2D_MAP.S (on foot).
+;   - From MAP/2D_MAP.S (on foot : the travel graphics on world maps).
 ;*****************************************************************************
 Display_2D_party:
 	movem.l	d0/d1/d5-d7/a0,-(sp)
-	lea.l	Party_graphics,a0		; Seek graphics
-	moveq.l	#0,d0			; World map : always standing
-	tst.b	World_map			;  (the Amiga version uses the
-	bne.s	.Stand			;   travel graphics there)
+	tst.b	World_map			; Show travel modes in this
+	beq	.No_trans			;  map ?
+	lea.l	Travel_graphics,a0		; Seek graphics
+	move.w	View_direction,d7
+	bra.s	.Entry
+.Loop:	move.w	(a0)+,d0			; Skip frame
+	mulu.w	(a0)+,d0
+	lsl.l	#3,d0			; (8 bytes per trunc)
+	lea.l	4(a0,d0.l),a0
+.Entry:	dbra	d7,.Loop
+	move.w	(a0)+,d6			; Get dimensions
+	move.w	(a0)+,d7
+	move.w	Mapbuf_X,d0		; Get coordinates
+	lsl.w	#4,d0
+	addi.w	#Map2D_X-16,d0
+	move.w	Mapbuf_Y,d1
+	lsl.w	#4,d1
+	addi.w	#Map2D_Y-16,d1
+	add.w	(a0)+,d0
+	add.w	(a0)+,d1
+	moveq.l	#5,d5			; Display transport
+	jsr	Put_masked_block
+	bra	.Exit
+.No_trans:	lea.l	Party_graphics,a0		; Seek graphics
 	move.w	Map_Xcoord,d0		; Get sit/sleep status
 	move.w	Map_Ycoord,d1
 	jsr	Get_sit_sleep_status
-.Stand:	tst.w	d0			; Just standing ?
+	tst.w	d0			; Just standing ?
 	bne.s	.No
 	move.w	View_direction,d0		; Yes -> Choose direction
 	mulu.w	#Party_frames,d0
@@ -1287,7 +1307,7 @@ Display_2D_party:
 	moveq.l	#1,d6
 	moveq.l	#32,d7
 	jsr	Put_masked_block
-	movem.l	(sp)+,d0/d1/d5-d7/a0
+.Exit:	movem.l	(sp)+,d0/d1/d5-d7/a0
 	rts
 
 ;*****************************************************************************
