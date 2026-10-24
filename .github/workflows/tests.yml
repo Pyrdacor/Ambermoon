@@ -1,0 +1,56 @@
+# Tests of the Ambermoon tools (Tools/, CShift) for every pull request and every push to master that changes them:
+# Tools/tests/run.sh builds the tools with the latest release of CShift (Tools/get-cshift.sh) and compares their
+# results with the ones of the original tools (Tools/tests/expected.txt), on Linux and Windows, and on Linux also as
+# AmigaOS programs (the 68000 code generator) under vamos (amitools).
+
+name: tests
+
+on:
+  pull_request:
+    paths:
+      - "Tools/**"
+      - ".github/workflows/tests.yml"
+  push:
+    branches:
+      - master
+    paths:
+      - "Tools/**"
+      - ".github/workflows/tests.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  linux-amiga:
+    name: Linux and Amiga
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - name: Get CShift
+        env:
+          GITHUB_TOKEN: ${{ github.token }} # the GitHub API limits requests without a token (403)
+        run: echo "CSHIFTC=$(bash Tools/get-cshift.sh | tail -n 1)" >> "$GITHUB_ENV"
+      - name: Tool tests
+        run: bash Tools/tests/run.sh "$CSHIFTC"
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.11" # (machine68k 0.3 is built from its source there; 0.4 does not work with vamos)
+      - name: Install vamos
+        run: pip install amitools "machine68k<0.4"
+      - name: Tool tests on the Amiga (vamos)
+        run: bash Tools/tests/run.sh --amiga "$CSHIFTC"
+
+  windows:
+    name: Windows
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v5
+      - name: Get CShift
+        shell: bash
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: echo "CSHIFTC=$(bash Tools/get-cshift.sh | tail -n 1)" >> "$GITHUB_ENV"
+      - name: Tool tests
+        shell: bash
+        run: bash Tools/tests/run.sh "$CSHIFTC"
