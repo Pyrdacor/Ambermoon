@@ -11,16 +11,23 @@ using Ambermoon.Data.Legacy;
 ///
 /// A reader is a value: a copy has a position of its own (pass a reader as `ref` to read on with it). Reading past the
 /// end does not stop the program: it gives zeros and sets [DataReader.Overrun], which the readers of the formats check
-/// to report damaged data as an error.
+/// to report damaged data as an error. A reader reads an array or a part of one (a file in a container) without a copy.
 struct DataReader
 {
-    uint8[] _data;
+    ReadOnlySlice<uint8> _data;
+    uint8[] _array; // the array that _data is all of (null for a part of one)
     /// Where the next value is read.
     int Position;
     bool _overrun;
 
     /// A reader of `data` itself (no copy).
     static DataReader FromData(uint8[] data)
+    {
+        return DataReader { _data = data, _array = data };
+    }
+
+    /// A reader of the bytes of `data` (no copy: a part of an array, such as a file in a container).
+    static DataReader FromSlice(ReadOnlySlice<uint8> data)
     {
         return DataReader { _data = data };
     }
@@ -40,7 +47,7 @@ struct DataReader
     /// The number of bytes.
     int Size()
     {
-        return _data == null ? 0 : _data.Length;
+        return _data.Length;
     }
 
     /// The number of bytes from the position to the end (0 if the position is behind the end).
@@ -66,8 +73,6 @@ struct DataReader
     /// are done) instead of a call per byte.
     ReadOnlySlice<uint8> Bytes()
     {
-        if (_data == null)
-            return new uint8[0];
         return _data;
     }
 
@@ -152,11 +157,17 @@ struct DataReader
     /// Reads `amount` bytes (a new array).
     uint8[] ReadBytes(int amount)
     {
-        var bytes = new uint8[amount];
         int available = Remaining();
+        if (amount <= available && amount > 0)
+        {
+            var whole = _data[Position..Position + amount].ToArray();
+            Position += amount;
+            return whole;
+        }
+        var bytes = new uint8[amount];
         int n = amount < available ? amount : available;
-        if (n > 0)
-            Array.Copy(_data, Position, bytes, 0, n);
+        for (var i = 0; i < n; i += 1)
+            bytes[i] = _data[Position + i];
         if (n < amount)
             _overrun = true;
         Position += amount;
@@ -166,9 +177,12 @@ struct DataReader
     /// The bytes from the position to the end (a new array); the position is the end afterwards.
     uint8[] ReadToEnd()
     {
-        var bytes = new uint8[Remaining()];
-        if (bytes.Length > 0)
-            Array.Copy(_data, Position, bytes, 0, bytes.Length);
+        if (Remaining() == 0)
+        {
+            Position = Size();
+            return new uint8[0];
+        }
+        var bytes = _data[Position..].ToArray();
         Position = Size();
         return bytes;
     }
@@ -243,10 +257,12 @@ struct DataReader
         return FindByteSequence(AmbermoonEncoding.GetBytes(text), offset);
     }
 
-    /// The bytes of the reader (not a copy).
+    /// The bytes of the reader: the array it reads (not a copy), or a copy of the part of an array that it reads.
     uint8[] ToArray()
     {
-        return _data == null ? new uint8[0] : _data;
+        if (_array != null)
+            return _array;
+        return _data.Length == 0 ? new uint8[0] : _data.ToArray();
     }
 
     uint8 _At(int index)
