@@ -93,19 +93,35 @@ Change_Mptr:
 ;*****************************************************************************
 Draw_mouse_pointer:
 	movem.l	d0-d7/a0-a3,-(sp)
+	tst.b	Drag_fixed		; Moving item ?
+	bne.s	.Select
 	tst.b	Mouse_off_flag
 	bne	.Exit
 	move.l	Current_Mptr,d0
 	beq	.Exit
 	move.l	d0,a3
-	lea.l	Pointer_save1,a2		; Select save area
+.Select:	lea.l	Pointer_save1,a2		; Select save area
 	move.l	Work_screen,d0
-	tst.l	(a2)
+	cmp.l	(a2),d0			; Screen 1 ?
 	beq.s	.Set
-	cmp.l	(a2),d0
-	beq.s	.Found
+	lea.l	Pointer_save2,a2
+	cmp.l	(a2),d0			; Screen 2 ?
+	beq.s	.Set
+	move.l	On_screen,d1		; New screen : replace the area
+	lea.l	Pointer_save1,a2		;  that does not belong to the
+	cmp.l	(a2),d1			;  shown screen
+	bne.s	.Set
 	lea.l	Pointer_save2,a2
 .Set:	move.l	d0,(a2)
+	tst.b	Drag_fixed		; Moving item ?
+	beq.s	.Found
+	movem.w	Drag_pos,d0/d1		; Yes -> only the item
+	move.w	d0,d2
+	addi.w	#16,d2
+	move.w	d1,d3
+	addi.w	#16,d3
+	movem.w	d0-d3,Overlay_rect
+	bra	.No_text
 ; ---------- Mouse pointer ------------------------
 .Found:	move.w	Mouse_X,d0		; Get position
 	sub.w	(a3),d0
@@ -198,6 +214,15 @@ Draw_mouse_pointer:
 ; ---------- Draw ---------------------------------
 .Draw:	lea.l	Default_CA,a0
 	jsr	Push_CA
+	tst.b	Drag_fixed		; Moving item ?
+	beq.s	.Normal
+	move.l	Drag_graphic,a0		; Yes
+	movem.w	Drag_pos,d0/d1
+	moveq.l	#1,d6
+	moveq.l	#16,d7
+	jsr	Put_masked_block
+	bra.s	.Done
+.Normal:
 	move.l	Ghost_text,d0		; Text
 	beq.s	.No_text2
 	move.l	d0,a0
@@ -222,7 +247,7 @@ Draw_mouse_pointer:
 	moveq.l	#1,d6
 	moveq.l	#16,d7
 	jsr	Put_masked_block
-	jsr	Pop_CA
+.Done:	jsr	Pop_CA
 .Exit:	movem.l	(sp)+,d0-d7/a0-a3
 	rts
 
@@ -298,9 +323,11 @@ Erase_mouse_pointer:
 	SECTION	Fast_BSS,bss
 Mouse_X:	ds.w 1
 Mouse_Y:	ds.w 1
+Drag_pos:	ds.w 2			; Position of the moved item
 Mouse_buttons:	ds.b 1
 Mouse_clicks:	ds.b 1
 Mouse_off_flag:	ds.b 1
+Drag_fixed:	ds.b 1			; Item moved by the program
 	even
 Current_Mptr:	ds.l 1
 Drag_graphic:	ds.l 1			; Dragged item (16x24) / 0

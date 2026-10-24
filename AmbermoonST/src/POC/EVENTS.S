@@ -220,7 +220,7 @@ Event_ptrs:
 	dc.l Not_implemented,Not_implemented,Not_implemented,Not_implemented,Change_icon	; 6 - 10
 	dc.l Not_implemented,Not_implemented,Query,Modify,Not_implemented	; 11 - 15
 	dc.l No_event,Dia_text,Dia_give,Requester,No_event	; 16 - 20
-	dc.l No_event,Not_implemented,No_event,No_event	; 21 - 24
+	dc.l No_event,Not_implemented,Dia_execute,No_event	; 21 - 24
 
 ;*****************************************************************************
 ; [ After a map change or a jump ]

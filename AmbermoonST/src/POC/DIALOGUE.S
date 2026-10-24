@@ -50,11 +50,11 @@ Talk_2D:
 .Capito:	jsr	Dialogue_screen
 	bra.s	.Exit
 ; ---------- Short dialogue -----------------------
-.Short:	move.w	Map_nr,Current_event_map_nr	; Map text
+.Short:	moveq.l	#0,d0			; Get text number
+	move.b	NPC_char_nr(a0),d0
+	move.w	Map_nr,Current_event_map_nr	; Map text
 	sf	Map_or_dialogue
 	jsr	Get_event_texts
-	moveq.l	#0,d0
-	move.b	NPC_char_nr(a0),d0
 	jsr	Find_large_text
 	jsr	Text_window
 .Exit:	movem.l	(sp)+,d0-d7/a0-a6
@@ -239,13 +239,26 @@ Dialogue_screen:
 	andi.w	#$00ff,d0
 	cmp.w	#Obj_icon,d1		; Control icon ?
 	bne.s	.Loop
-	cmp.w	#1,d0			; Talk ?
-	bne.s	.No_talk
-	jsr	DIA_Ask_word
-	bra.s	.Loop
-.No_talk:	cmp.w	#3,d0			; Exit ?
-	bne.s	.Loop
-	jsr	Press_exit_icon
+	subq.w	#1,d0			; Disabled ?
+	bmi.s	.Loop
+	move.w	d0,d1
+	add.w	d1,d1
+	lea.l	Dialogue_CIL_work,a0
+	move.w	0(a0,d1.w),d2
+	beq.s	.Loop
+	bmi.s	.Loop
+	cmp.w	#3-1,d0			; Exit ?
+	beq.s	.Exit
+	add.w	d1,d1			; Execute
+	move.l	.Ptrs(pc,d1.w),a0
+	jsr	(a0)
+	jsr	Dialogue_CIL_evaluate	; Update
+	jsr	Copy_screen_to_both
+	bra	.Loop
+.Ptrs:	dc.l DIA_Ask_word,0,0
+	dc.l DIA_Show_item,0,DIA_Join_party
+	dc.l DIA_Give_item,DIA_Give_gold,DIA_Give_food
+.Exit:	jsr	Press_exit_icon
 .Leave:	moveq.l	#Exit_DIAC,d0		; The end
 	moveq.l	#0,d1
 	jsr	DIA_event_handler
@@ -276,6 +289,280 @@ DIA_Ask_word:
 .Exit:	movem.l	(sp)+,d0/d1
 	rts
 
+; [ Show the control icons that are possible ]
+; All registers are restored
+; NOTE :
+;   - From [ Dialogue_CIL_evaluate ] (DIALOGUE.S). Leaving the party is not
+;     possible, because the proof of concept has no dialogues with party
+;     members.
+Dialogue_CIL_evaluate:
+	movem.l	d0/d7/a0-a2,-(sp)
+	lea.l	Dialogue_CIL,a0		; Copy
+	lea.l	Dialogue_CIL_work,a1
+	moveq.l	#9-1,d7
+.Loop:	move.w	(a0)+,(a1)+
+	dbra	d7,.Loop
+	lea.l	Dialogue_CIL_work,a0
+	moveq.l	#Active_member,d7
+	jsr	Get_char_data
+	lea.l	Char_inventory+Backpack_slots(a1),a2	; Any items ?
+	moveq.l	#Items_per_char-1,d7
+.Loop2:	tst.w	Object_index(a2)
+	bne.s	.Items
+	lea.l	Object_packet_size(a2),a2
+	dbra	d7,.Loop2
+	bset	#7,3*2(a0)		; No -> disable {Show item}
+	bset	#7,6*2(a0)		;  and {Give item}
+.Items:	tst.w	Gold_coins(a1)		; Any gold ?
+	bne.s	.Gold
+	bset	#7,7*2(a0)
+.Gold:	tst.w	Food_rations(a1)		; Any food ?
+	bne.s	.Food
+	bset	#7,8*2(a0)
+.Food:	jsr	Display_CIL
+	movem.l	(sp)+,d0/d7/a0-a2
+	rts
+
+; [ Show an item / give an item ]
+; NOTE :
+;   - From [ DIA_Show_item ] and [ DIA_Give_item ] : the backpack of the
+;     active member is shown in the object slots, the selected item moves
+;     to the portrait.
+DIA_Show_item:
+	movem.l	d0-d3/d7/a0-a2,-(sp)
+	move.w	#108,d0			; Select item
+	jsr	DIA_Select_item
+	bmi.s	.Exit
+	move.w	d0,d1			; Try
+	moveq.l	#Show_item_DIAC,d0
+	jsr	DIA_event_handler
+	bpl.s	.Done			; Anything ?
+	move.w	#114,d0			; "Nothing special"
+	jsr	Do_prompt
+.Done:	jsr	Move_item_back_to_slot
+	jsr	Hide_Lay3_objects
+	jsr	Copy_screen_to_both
+.Exit:	movem.l	(sp)+,d0-d3/d7/a0-a2
+	rts
+
+DIA_Give_item:
+	movem.l	d0-d3/d7/a0-a2,-(sp)
+	move.w	#109,d0			; Select item
+	jsr	DIA_Select_item
+	bmi.s	.Exit
+	move.w	d0,d1			; Try
+	sf	Item_accepted
+	moveq.l	#Give_item_DIAC,d0
+	jsr	DIA_event_handler
+	bpl.s	.Done			; Anything ?
+	move.w	#114,d0			; "Nothing special"
+	jsr	Do_prompt
+.Done:	tst.b	Item_accepted		; Taken ?
+	bne.s	.Taken
+	jsr	Move_item_back_to_slot	; No -> move back
+.Taken:	jsr	Hide_Lay3_objects
+	jsr	Build_dialogue_screen	; (gold, food & weight)
+	jsr	Copy_screen_to_both
+.Exit:	movem.l	(sp)+,d0-d3/d7/a0-a2
+	rts
+
+; [ Select an item of the active member and move it to the portrait ]
+;   IN : d0 - Prompt (message number) (.w)
+;  OUT : d0 - Backpack slot {0...23} (.w)
+;        mi - Nothing selected
+; Changed registers : d0
+DIA_Select_item:
+	movem.l	d1-d7/a0-a2,-(sp)
+	moveq.l	#Active_member,d7		; Show backpack
+	jsr	Get_char_data
+	lea.l	Char_inventory+Backpack_slots(a1),a1
+	move.l	a1,Slot_base
+	move.l	#Lay3_bar,SB_ptr
+	move.w	d0,d2
+	moveq.l	#0,d0
+	jsr	Set_scroll_row
+	move.w	d2,d0
+	moveq.l	#0,d1
+	jsr	Select_item
+	subi.w	#9+1,d0			; Anything ?
+	bmi.s	.Exit
+	move.w	d0,d2
+	jsr	Move_item_to_portrait
+	move.w	d2,d0
+.Exit:	movem.l	(sp)+,d1-d7/a0-a2
+	tst.w	d0
+	rts
+
+; [ Move an item to the portrait ]
+;   IN : d0 - Backpack slot {0...23} (.w)
+; All registers are restored
+; NOTE :
+;   - From [ Move_item_to_portrait ] (DIALOGUE.S). The item is drawn like
+;     the mouse pointer ([ Drag_fixed ]).
+Move_item_to_portrait:
+	movem.l	d0-d4/a0-a2,-(sp)
+	move.w	d0,d2			; Save slot
+	move.w	d0,d1			; Get graphic
+	mulu.w	#Object_packet_size,d1
+	move.l	Slot_base,a2
+	move.w	Object_index(a2,d1.w),d0
+	jsr	Get_item_data
+	jsr	Get_item_graphic
+	move.l	a0,Drag_graphic
+	move.w	d2,d0			; Get slot coordinates
+	sub.w	Scroll_bar_result,d0
+	lsl.w	#2,d0
+	lea.l	Lay3_object_pos_list,a0
+	movem.w	0(a0,d0.w),d0/d1
+	movem.w	d0/d1,Slot_XY
+	move.w	d0,d2			; Erase slot
+	move.w	d1,d3
+	addi.w	#16-1,d2
+	addi.w	#24-1,d3
+	moveq.l	#27,d4
+	jsr	Draw_box
+	jsr	Copy_screen_to_both
+	movem.w	d0/d1,Drag_pos		; Move to the portrait
+	st	Drag_fixed
+	move.w	#Dialogue_X+8,d0
+	move.w	#Dialogue_Y+30,d1
+	moveq.l	#8,d2
+	jsr	Move_item
+	movem.l	(sp)+,d0-d4/a0-a2
+	rts
+
+; [ Move the item back to its slot ]
+; All registers are restored
+Move_item_back_to_slot:
+	movem.l	d0-d2,-(sp)
+	movem.w	Slot_XY,d0/d1
+	moveq.l	#10,d2			; (quickly !)
+	jsr	Move_item
+	sf	Drag_fixed
+	clr.l	Drag_graphic
+	moveq.l	#0,d0			; Show slots
+	jsr	Set_scroll_row
+	jsr	Copy_screen_to_both
+	movem.l	(sp)+,d0-d2
+	rts
+
+; [ Move the item to a position ]
+;   IN : d0/d1 - Target coordinates (.w)
+;        d2 - Speed (pixels per frame) (.w)
+; All registers are restored
+; NOTE :
+;   - Like [ Move_HDOB ] (KERNEL/HDOBS.S).
+Move_item:
+	movem.l	d0-d7,-(sp)
+	movem.w	Drag_pos,d4/d5		; Get distance
+	move.w	d0,d6
+	sub.w	d4,d6
+	move.w	d1,d7
+	sub.w	d5,d7
+	move.w	d6,d3			; Number of steps
+	bpl.s	.Abs1
+	neg.w	d3
+.Abs1:	move.w	d7,d0
+	bpl.s	.Abs2
+	neg.w	d0
+.Abs2:	cmp.w	d0,d3
+	bpl.s	.Max
+	move.w	d0,d3
+.Max:	ext.l	d3
+	divu.w	d2,d3
+	tst.w	d3
+	beq.s	.Last
+	moveq.l	#1,d2			; Do
+.Loop:	move.w	d6,d0
+	muls.w	d2,d0
+	divs.w	d3,d0
+	add.w	d4,d0
+	move.w	d7,d1
+	muls.w	d2,d1
+	divs.w	d3,d1
+	add.w	d5,d1
+	movem.w	d0/d1,Drag_pos
+	jsr	Switch_screens
+	addq.w	#1,d2
+	cmp.w	d3,d2
+	ble.s	.Loop
+.Last:	add.w	d6,d4			; Exactly there
+	add.w	d7,d5
+	movem.w	d4/d5,Drag_pos
+	jsr	Switch_screens
+	jsr	Switch_screens
+	movem.l	(sp)+,d0-d7
+	rts
+
+; [ The item disappears at the portrait ]
+; All registers are restored
+Dissolve_item_at_portrait:
+	move.l	d7,-(sp)
+	moveq.l	#25-1,d7			; (wait a moment)
+.Loop:	jsr	Switch_screens
+	dbra	d7,.Loop
+	sf	Drag_fixed
+	clr.l	Drag_graphic
+	jsr	Switch_screens
+	jsr	Switch_screens
+	move.l	(sp)+,d7
+	rts
+
+; [ Join the party ]
+; NOTE :
+;   - From [ DIA_Join_party ] : the party of the proof of concept always
+;     has six members.
+DIA_Join_party:
+	move.l	d0,-(sp)
+	move.w	#121,d0			; "The party is full"
+	jsr	Do_prompt
+	move.l	(sp)+,d0
+	rts
+
+; [ Give gold / food ]
+; NOTE :
+;   - From [ DIA_Give_gold ] and [ DIA_Give_food ].
+DIA_Give_gold:
+	movem.l	d0-d2/d7/a1,-(sp)
+	moveq.l	#Gold_coins,d2
+	move.w	#110,d0
+	moveq.l	#Give_gold_DIAC,d7
+	bra.s	DIA_Give_goldfood
+DIA_Give_food:
+	movem.l	d0-d2/d7/a1,-(sp)
+	moveq.l	#Food_rations,d2
+	move.w	#111,d0
+	moveq.l	#Give_food_DIAC,d7
+DIA_Give_goldfood:
+	move.l	d7,-(sp)
+	moveq.l	#Active_member,d7		; How much ?
+	jsr	Get_char_data
+	move.l	(sp)+,d7
+	moveq.l	#0,d1
+	move.w	0(a1,d2.w),d1
+	move.w	d2,-(sp)
+	moveq.l	#1,d2			; (gold or food)
+	cmp.w	#Give_gold_DIAC,d7
+	beq.s	.Gold
+	moveq.l	#2,d2
+.Gold:	jsr	Input_number
+	move.w	(sp)+,d2
+	move.l	d0,d1			; Any ?
+	beq.s	.Exit
+	sf	Not_enough		; Try
+	move.w	d7,d0
+	jsr	DIA_event_handler
+	bpl.s	.Exit			; Anything ?
+	tst.b	Not_enough		; Not enough ?
+	bne.s	.Exit
+	move.w	#112,d0			; "Hah !"
+	cmp.w	#Gold_coins,d2
+	beq.s	.Prompt
+	move.w	#113,d0
+.Prompt:	jsr	Do_prompt
+.Exit:	movem.l	(sp)+,d0-d2/d7/a1
+	rts
+
 ; [ Build the dialogue screen ]
 ; All registers are restored
 ; NOTE :
@@ -289,8 +576,7 @@ Build_dialogue_screen:
 	lea.l	Extra_layout,a0
 	jsr	Put_unmasked_block
 	jsr	Erase_PA
-	lea.l	Dialogue_CIL,a0		; Show control icons
-	jsr	Display_CIL
+	jsr	Dialogue_CIL_evaluate	; Show control icons
 	jsr	Hide_Lay3_objects		; Hide
 	move.w	#Dialogue_X,d0		; Display portrait
 	move.w	#Dialogue_Y,d1
@@ -409,6 +695,8 @@ DIA_event_handler:
 ; All registers are restored
 Find_DIA_event:
 	movem.l	d0-d2/d6/d7/a0-a2,-(sp)
+	move.w	d0,Current_DIAC		; Store input
+	move.w	d1,Current_DIAC_value
 	moveq.l	#-1,d7			; Default is no event
 	move.l	Dialogue_data_ptr,a0	; Get dialogue data
 	move.w	#NPC_dialogue,d2		; (NPC or party member)
@@ -432,16 +720,9 @@ Find_DIA_event:
 	bne.s	.Next
 	cmp.b	Event_b1(a2),d0		; Correct action type ?
 	bne.s	.Next
-	cmp.w	#Ask_word_DIAC,d0		; (the value is only checked
-	bne.s	.Ok			;  for words)
-	move.b	Event_w6(a2),d2		; (not aligned)
-	lsl.w	#8,d2
-	move.b	Event_w6+1(a2),d2
-	cmp.w	#-1,d2			; Does it matter ?
-	beq.s	.Ok
-	cmp.w	d1,d2			; Correct value ?
+	jsr	Dia_action		; Correct value ?
 	bne.s	.Next
-.Ok:	move.w	-2(a0),Current_event_entry_nr	; Yes -> Set event info
+	move.w	-2(a0),Current_event_entry_nr	; Yes -> Set event info
 	clr.w	Current_event_map_nr
 	move.w	Current_event_block,d0	; Copy event data
 	jsr	Copy_event_data
@@ -451,6 +732,95 @@ Find_DIA_event:
 .Exit:	tst.w	d7			; Any luck ?
 	movem.l	(sp)+,d0-d2/d6/d7/a0-a2
 	rts
+
+; [ Check the value of a dialogue action ]
+;   IN : d0 - Dialogue action (.w)
+;        d1 - Value (.w)
+;        a2 - Pointer to event data (.l)
+;  OUT : eq - Correct, ne - Wrong
+; All registers are restored
+; NOTE :
+;   - From [ Dia_action ] (EVENTS.S).
+Dia_action:
+	movem.l	d0-d3/d7/a0/a1,-(sp)
+	moveq.l	#0,d7			; Default is OK
+	move.b	Event_w6(a2),d2		; Get value (not aligned)
+	lsl.w	#8,d2
+	move.b	Event_w6+1(a2),d2
+	cmp.w	#-1,d2			; Does it matter ?
+	beq.s	.Exit
+	cmp.w	#Ask_word_DIAC,d0		; Word ?
+	bne.s	.No_word
+	cmp.w	d1,d2			; Correct value ?
+	sne	d7
+	bra.s	.Exit
+.No_word:	cmp.w	#Show_item_DIAC,d0		; Item ?
+	beq.s	.Item
+	cmp.w	#Give_item_DIAC,d0
+	bne.s	.No_item
+.Item:	move.w	d7,d3
+	moveq.l	#Active_member,d7		; Get object index
+	jsr	Get_char_data
+	move.w	d3,d7
+	lea.l	Char_inventory+Backpack_slots(a1),a1
+	move.w	d1,d3
+	mulu.w	#Object_packet_size,d3
+	cmp.w	Object_index(a1,d3.w),d2	; Correct item ?
+	sne	d7
+	bra.s	.Exit
+.No_item:	move.w	#102,d3			; Gold ?
+	cmp.w	#Give_gold_DIAC,d0
+	beq.s	.Amount
+	move.w	#227,d3			; Food ?
+	cmp.w	#Give_food_DIAC,d0
+	bne.s	.Exit
+.Amount:	cmp.w	d2,d1			; Enough ?
+	bmi.s	.Not
+	move.w	d2,Current_DIAC_value	; Yes
+	bra.s	.Exit
+.Not:	move.w	d3,d0			; "Give me more !"
+	jsr	Do_prompt
+	st	Not_enough
+	st	d7
+.Exit:	tst.b	d7
+	movem.l	(sp)+,d0-d3/d7/a0/a1
+	rts
+
+; [ Dialogue execute event ]
+; NOTE :
+;   - From [ Dia_execute ] (EVENTS.S) : joining and leaving the party are
+;     not possible in the proof of concept.
+Dia_execute:
+	move.w	Current_DIAC_value,d1	; Get parameters
+	moveq.l	#Active_member,d7
+	jsr	Get_char_data
+	move.l	a1,a0
+	move.w	Current_DIAC,d0
+	cmp.w	#Give_item_DIAC,d0		; Item ?
+	bne.s	.No_item
+	jsr	Dissolve_item_at_portrait	; Poof !
+	st	Item_accepted
+	move.w	d1,d2			; Remove item
+	addi.w	#9+1,d2
+	moveq.l	#1,d3
+	jmp	Remove_item
+.No_item:	moveq.l	#Gold_coins,d2		; Gold ?
+	move.w	#Gold_weight,d3
+	cmp.w	#Give_gold_DIAC,d0
+	beq.s	.Remove
+	moveq.l	#Food_rations,d2		; Food ?
+	move.w	#Food_weight,d3
+	cmp.w	#Give_food_DIAC,d0
+	bne.s	.Exit
+.Remove:	cmp.w	0(a0,d2.w),d1		; Enough ?
+	bls.s	.Ok
+	move.w	0(a0,d2.w),d1		; No -> clip
+.Ok:	sub.w	d1,0(a0,d2.w)		; Remove
+	mulu.w	d3,d1
+	sub.l	d1,Weight_normal(a0)
+	jsr	Build_dialogue_screen	; Show
+	jsr	Copy_screen_to_both
+.Exit:	rts
 
 ; [ Handle a chain of dialogue events ]
 ; All registers are restored
@@ -862,11 +1232,11 @@ Dialogue_RL:
 Dialogue_PA:	dc.w 16+1,191-1,43+1,122-1,31
 
 ; Control icon list of the dialogue screen (Dialogue_CIL in DIALOGUE.S) :
-; only talking and leaving are possible in the proof of concept
+; leaving the party is not possible in the proof of concept
 Dialogue_CIL:
 	dc.w Talk_cicon,0,Exit_cicon
-	dc.w View_item_cicon+Disabled,Leave_party_cicon+Disabled,Join_party_cicon+Disabled
-	dc.w Give_item_cicon+Disabled,Give_gold_cicon+Disabled,Give_food_cicon+Disabled
+	dc.w View_item_cicon,Leave_party_cicon+Disabled,Join_party_cicon
+	dc.w Give_item_cicon,Give_gold_cicon,Give_food_cicon
 
 ; Scroll bar of the word selector (WSelW_scroll_bar in WORD_SEL.S : one word
 ; per row, 16 rows visible, the other values are set when it is opened)
@@ -892,6 +1262,13 @@ Nr_of_known_words:	ds.w 1
 Abort_dialogue:	ds.b 1
 Word_buffer_flag:	ds.b 1
 Dia_packet:	ds.b Object_packet_size
+	even
+Current_DIAC:	ds.w 1
+Current_DIAC_value:	ds.w 1
+Slot_XY:	ds.w 2
+Dialogue_CIL_work:	ds.w 9
+Item_accepted:	ds.b 1
+Not_enough:	ds.b 1
 	even
 Word_buffer1:	ds.b 32
 Word_buffer2:	ds.b 32
