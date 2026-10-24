@@ -13,6 +13,10 @@
 ; white silhouette like in Amberstar (white has the same ST colour in both
 ; palettes).
 ;
+; The Stats icon switches to the Inventory 1 screen (character screen :
+; attributes, skills, languages and conditions), which has its own palette
+; for the portrait and the status icons, the backpack icon switches back.
+;
 ; Right mouse button on a portrait or F1...F6 opens the inventory of a member.
 ; Left mouse button on an item takes it (the whole stack) ; then left mouse
 ; button on a slot, the body or a portrait puts it there, right mouse button
@@ -51,6 +55,16 @@ Inventory_headline	EQU	48
 Race_names	EQU	64
 Class_names	EQU	80
 Messages	EQU	96
+Skills_txt	EQU	5
+Attrs_txt	EQU	6
+Language_txt	EQU	7
+Conditions_txt	EQU	8
+Skill_txt	EQU	14
+Attr_txt	EQU	15
+Short_attr_names	EQU	396
+Short_skill_names	EQU	412
+Language_names	EQU	428
+Condition_names	EQU	444
 
 ;*****************************************************************************
 ; [ Inventory screen ]
@@ -65,34 +79,14 @@ Inventory_screen:
 	sf	Moving_flag
 	clr.l	Ghost_text
 	clr.l	Drag_graphic
-	moveq.l	#1,d0			; Fade out
-	jsr	Fade_screen
-	lea.l	Inventory_files,a0		; Load layout
-	jsr	Load_files
-	lea.l	Inv_RL,a0			; Install palettes
-	jsr	Set_raster_list
 	jsr	Reset_party_weight
-; ---------- Show layout --------------------------
-	moveq.l	#0,d0
-	moveq.l	#Middle_Y+1,d1
-	moveq.l	#20,d6
-	move.w	#199-Middle_Y,d7
-	lea.l	Extra_layout,a0
-	jsr	Put_unmasked_block
-	move.w	#31,Ink_colour		; Print headline
-	move.w	#Default_shadow,Shadow_colour
-	moveq.l	#Inventory_headline,d0
-	jsr	Get_text
-	moveq.l	#19,d0
-	moveq.l	#40,d1
-	move.w	#165,d2
-	jsr	Print_centered_string
-	jsr	Display_Inv2_member_info
-	lea.l	Inv2_CIL,a0		; Show icons
-	jsr	Display_CIL
-	jsr	Copy_screen_to_both
-	moveq.l	#0,d0			; Fade in
-	jsr	Fade_screen
+	moveq.l	#2,d0			; Inventory 2 possible ?
+	jsr	Get_inventory_char
+	move.w	Body_conditions(a1),d1
+	andi.w	#Inv2_mask,d1
+	beq.s	.Inv2
+	moveq.l	#1,d0			; No -> Inventory 1
+.Inv2:	jsr	Show_inventory_mode
 	jsr	Clear_keyboard
 	jsr	Read_mouse_clicks
 	sf	Inventory_exit
@@ -118,6 +112,61 @@ Inventory_screen:
 	jsr	Clear_keyboard
 	jsr	Read_mouse_clicks
 	movem.l	(sp)+,d0-d7/a0-a6
+	rts
+
+;*****************************************************************************
+; [ Show Inventory 1 or 2 ]
+;   IN : d0 - 1 = Inventory 1 (character screen), 2 = Inventory 2 (.w)
+; All registers are restored
+; NOTE :
+;   - From [ Inv1_DisInit ] and [ Inv2_DisInit ]. The whole screen is faded
+;     (the Amiga version fades only the bottom).
+;*****************************************************************************
+Show_inventory_mode:
+	movem.l	d0-d7/a0-a2,-(sp)
+	move.w	d0,Inventory_mode
+	clr.l	Ghost_text
+	moveq.l	#1,d0			; Fade out
+	jsr	Fade_screen
+	lea.l	Inventory_files,a0		; Inventory 2
+	lea.l	Inv_RL,a1
+	lea.l	Inv_portraits,a2
+	cmp.w	#1,Inventory_mode
+	bne.s	.Go
+	lea.l	Character_files,a0		; Inventory 1
+	lea.l	Char_RL,a1
+	lea.l	Char_portraits,a2
+.Go:	move.l	a2,Small_portraits
+	jsr	Load_files		; Load layout
+	move.l	a1,a0			; Install palettes
+	jsr	Set_raster_list
+	moveq.l	#0,d0			; Show layout
+	moveq.l	#Middle_Y+1,d1
+	moveq.l	#20,d6
+	move.w	#199-Middle_Y,d7
+	lea.l	Extra_layout,a0
+	jsr	Put_unmasked_block
+	cmp.w	#1,Inventory_mode
+	beq.s	.Inv1
+	move.w	#31,Ink_colour		; Print headline
+	move.w	#Default_shadow,Shadow_colour
+	moveq.l	#Inventory_headline,d0
+	jsr	Get_text
+	moveq.l	#19,d0
+	moveq.l	#40,d1
+	move.w	#165,d2
+	jsr	Print_centered_string
+	jsr	Display_Inv2_member_info
+	lea.l	Inv2_CIL,a0
+	bra.s	.Icons
+.Inv1:	jsr	Display_Inv1_member_info
+	lea.l	Inv1_CIL,a0
+.Icons:	jsr	Display_CIL		; Show icons
+	jsr	Copy_screen_to_both
+	moveq.l	#0,d0			; Fade in
+	jsr	Fade_screen
+	jsr	Read_mouse_clicks
+	movem.l	(sp)+,d0-d7/a0-a2
 	rts
 
 ;*****************************************************************************
@@ -194,7 +243,13 @@ Inventory_input:
 	bra	.Exit
 .No_bar:	cmp.w	#Obj_icon,d1		; Control icon ?
 	bne	.Exit
-	cmp.w	#3,d0			; Exit ?
+	cmp.w	#1,d0			; Stats / backpack ?
+	bne.s	.No_switch
+	moveq.l	#3,d0			; Switch screen
+	sub.w	Inventory_mode,d0
+	jsr	Show_inventory_mode
+	bra	.Exit
+.No_switch:	cmp.w	#3,d0			; Exit ?
 	bne	.Exit
 	jsr	Press_exit_icon
 	st	Inventory_exit
@@ -245,7 +300,9 @@ Find_inventory_object:
 	ori.w	#Obj_member<<8,d0
 	bra	.Exit
 ; ---------- Body slots ---------------------------
-.No_status:	lea.l	Body_pos_list,a0
+.No_status:	cmp.w	#1,Inventory_mode		; Inventory 1 ?
+	beq	.No_bar
+	lea.l	Body_pos_list,a0
 	moveq.l	#1,d0
 	moveq.l	#Body_slot_size,d4
 .Loop1:	jsr	.Inside
@@ -339,7 +396,13 @@ Find_inventory_object:
 Update_ghost:
 	movem.l	d0-d2/a0-a2,-(sp)
 	sub.l	a2,a2			; No name
-	tst.b	Moving_flag		; Moving an item ?
+	move.w	#White,Ghost_ink
+	cmp.w	#1,Inventory_mode		; Inventory 1 ?
+	bne.s	.Inv2
+	jsr	Condition_touched
+	move.l	a0,a2
+	bra.s	.Done
+.Inv2:	tst.b	Moving_flag		; Moving an item ?
 	bne.s	.Done
 	jsr	Find_inventory_object
 	move.w	d0,d1
@@ -376,7 +439,11 @@ Switch_inventory_member:
 	beq.s	.Exit
 	jsr	Save_scroll_bar_position
 	move.w	d7,Inventory_member
-	jsr	Display_Inv2_member_info
+	cmp.w	#1,Inventory_mode		; Inventory 1 ?
+	bne.s	.Inv2
+	jsr	Display_Inv1_member_info
+	bra.s	.No
+.Inv2:	jsr	Display_Inv2_member_info
 	tst.b	Moving_flag		; Moving ?
 	beq.s	.No
 	moveq.l	#55,d0			; Show prompt again
@@ -428,7 +495,7 @@ Display_small_member_info:
 	moveq.l	#Window_colour,d4
 	jsr	Draw_box
 ; ---------- Display portrait ---------------------
-	lea.l	Inv_portraits,a0
+	move.l	Small_portraits,a0
 	move.w	Inventory_member,d7
 	subq.w	#1,d7
 	mulu.w	#34*2*8,d7
@@ -522,6 +589,220 @@ Display_small_member_info:
 	jsr	Put_text_line
 	jsr	Update_small_member_info	; Do the rest
 	movem.l	(sp)+,d0-d7/a0-a2
+	rts
+
+;*****************************************************************************
+; [ Display Inventory 1 member info ]
+; All registers are restored
+; NOTE :
+;   - From INVENTOR.S.
+;*****************************************************************************
+Display_Inv1_member_info:
+	movem.l	d0-d7/a0-a4,-(sp)
+	jsr	Display_small_member_info	; Small info
+	jsr	Get_inventory_char
+	move.w	#16,d0			; Clear area
+	move.w	#49,d1
+	move.w	#191,d2
+	move.w	#193,d3
+	moveq.l	#Window_colour,d4
+	jsr	Draw_box
+	move.w	#Default_shadow,Shadow_colour
+;----------- Print character skills ---------------
+	move.w	#Light_green,Ink_colour
+	moveq.l	#Skills_txt,d0		; Print "SKILLS"
+	jsr	Get_text
+	move.w	#16+6,d0
+	move.w	#50+65,d1
+	move.w	#12*6,d2
+	jsr	Print_centered_string
+	move.w	#White,Ink_colour
+	move.w	#Short_skill_names,d0	; Print skills
+	jsr	Get_text
+	move.l	a0,a3
+	lea.l	Skills(a1),a4
+	move.w	#16+6,d3
+	move.w	#50+72,d4
+	moveq.l	#Max_skills-1,d5
+	moveq.l	#"0",d6
+	moveq.l	#2,d7
+.Loop1:	move.w	d3,d0			; Print skill name
+	move.w	d4,d1
+	move.l	a3,a0
+	jsr	Put_text_line
+	moveq.l	#Skill_txt,d0
+	jsr	Copy_text
+	move.w	(a4),d0			; Convert normal skill
+	add.w	Magic(a4),d0
+	move.l	a2,a0
+	jsr	DecR_convert
+	move.b	#"%",(a0)
+	move.w	Maximum(a4),d0		; Convert maximum skill
+	lea.l	4(a2),a0
+	jsr	DecR_convert
+	move.b	#"%",(a0)
+	move.w	d3,d0			; Print skill
+	addi.w	#5*(Char_width+1),d0
+	move.w	d4,d1
+	move.l	a2,a0
+	jsr	Put_text_line
+	addq.w	#Char_height+1,d4		; Next skill
+.Skip1:	tst.b	(a3)+
+	bne.s	.Skip1
+	addq.w	#Skill_data_size,a4
+	dbra	d5,.Loop1
+;----------- Print character attributes -----------
+	move.w	#Light_green,Ink_colour
+	moveq.l	#Attrs_txt,d0		; Print "ATTRIBUTES"
+	jsr	Get_text
+	move.w	#16+6,d0
+	move.w	#50,d1
+	move.w	#12*6,d2
+	jsr	Print_centered_string
+	move.w	#White,Ink_colour
+	move.w	#Short_attr_names,d0	; Print attributes
+	jsr	Get_text
+	move.l	a0,a3
+	lea.l	Attributes(a1),a4
+	move.w	#50+7,d4
+	moveq.l	#Max_attrs-1,d5
+	moveq.l	#3,d7
+.Loop2:	move.w	d3,d0			; Print attribute name
+	move.w	d4,d1
+	move.l	a3,a0
+	jsr	Put_text_line
+	moveq.l	#Attr_txt,d0
+	jsr	Copy_text
+	move.w	(a4),d0			; Convert normal attribute
+	add.w	Magic(a4),d0
+	move.l	a2,a0
+	jsr	DecR_convert
+	move.b	#"/",(a0)
+	move.w	Maximum(a4),d0		; Convert maximum attribute
+	lea.l	4(a2),a0
+	jsr	DecR_convert
+	move.w	d3,d0			; Print attribute
+	addi.w	#5*(Char_width+1),d0
+	move.w	d4,d1
+	move.l	a2,a0
+	jsr	Put_text_line
+	addq.w	#Char_height+2,d4		; Next attribute
+.Skip2:	tst.b	(a3)+
+	bne.s	.Skip2
+	addq.w	#Attr_data_size,a4
+	dbra	d5,.Loop2
+; ---------- Print known languages ----------------
+	move.w	#Light_green,Ink_colour
+	moveq.l	#Language_txt,d0		; Print "LANGUAGES"
+	jsr	Get_text
+	move.w	#16+15*6,d0
+	move.w	#50,d1
+	move.w	#12*6,d2
+	jsr	Print_centered_string
+	move.w	#White,Ink_colour
+	move.w	#Language_names,d0	; Print languages
+	jsr	Get_text
+	move.w	#16+15*6,d0
+	move.w	#50+7,d1
+	move.b	Learned_languages(a1),d6
+	moveq.l	#0,d7
+.Loop3:	btst	d7,d6			; Language known ?
+	beq.s	.Next3
+	move.l	a0,-(sp)
+	jsr	Put_text_line
+	move.l	(sp)+,a0
+.Next3:	addq.w	#Char_height+2,d1		; Next language
+.Skip3:	tst.b	(a0)+
+	bne.s	.Skip3
+	addq.w	#1,d7
+	cmpi.w	#Max_languages,d7
+	bmi.s	.Loop3
+; ---------- Display conditions -------------------
+	move.w	#Light_green,Ink_colour
+	moveq.l	#Conditions_txt,d0		; Print "CONDITIONS"
+	jsr	Get_text
+	moveq.l	#96,d0
+	move.w	#50+65,d1
+	moveq.l	#80,d2
+	jsr	Print_centered_string
+	lea.l	Condition_list,a3		; (for the names)
+	move.w	Body_conditions(a1),d6	; Dead or alive ?
+	move.w	d6,d0
+	andi.w	#Dead_mask,d0
+	beq.s	.Alive
+	moveq.l	#96,d0			; Display cross icon
+	moveq.l	#124,d1
+	move.w	d0,(a3)+
+	move.w	d1,(a3)+
+	move.w	#Dead,(a3)+
+	lea.l	Status_icons+(Dead_icon-1)*16*8,a0
+	jsr	Put_masked_icon
+	bra.s	.Done
+.Alive:	lea.l	Bodymind_pos,a2
+	lea.l	Condition_icon_table,a4
+.Again:	moveq.l	#0,d7			; Get condition number
+	move.b	(a4),d7
+	cmp.b	#-1,d7			; Last one ?
+	beq.s	.Done
+	btst	d7,d6			; Got it ?
+	beq.s	.Next
+	moveq.l	#96,d0			; Get coordinates
+	moveq.l	#124,d1
+	add.w	(a2)+,d0
+	add.w	(a2)+,d1
+	move.w	d0,(a3)+
+	move.w	d1,(a3)+
+	move.w	d7,(a3)+
+	moveq.l	#0,d4			; Get icon address
+	move.b	1(a4),d4
+	subq.w	#1,d4
+	lsl.w	#7,d4			; (16 x 8 bytes)
+	lea.l	Status_icons,a0
+	add.w	d4,a0
+	jsr	Put_masked_icon		; Display icon
+.Next:	addq.l	#2,a4			; Next body condition
+	bra.s	.Again
+.Done:	move.w	#-1,(a3)			; End of list
+	movem.l	(sp)+,d0-d7/a0-a4
+	rts
+
+;*****************************************************************************
+; [ Find the condition under the mouse ]
+;  OUT : a0 - Pointer to name / 0 = none (.l)
+; Changed registers : a0
+; NOTE :
+;   - From [ Condition_touched ] : the name of a condition which makes
+;     the member inactive is shown in light blue, the others in yellow.
+;*****************************************************************************
+Condition_touched:
+	movem.l	d0-d3/a1,-(sp)
+	sub.l	a0,a0
+	move.w	Mouse_X,d2
+	move.w	Mouse_Y,d3
+	lea.l	Condition_list,a1
+.Loop:	move.w	(a1)+,d0			; End of list ?
+	bmi.s	.Exit
+	move.w	(a1)+,d1
+	addq.l	#2,a1
+	cmp.w	d0,d2			; Mouse inside ?
+	bmi.s	.Loop
+	addi.w	#16,d0
+	cmp.w	d0,d2
+	bpl.s	.Loop
+	cmp.w	d1,d3
+	bmi.s	.Loop
+	addi.w	#16,d1
+	cmp.w	d1,d3
+	bpl.s	.Loop
+	move.w	-2(a1),d0			; Yes -> get name
+	move.w	#Yellow,Ghost_ink
+	move.w	#Active_mask,d1
+	btst	d0,d1
+	beq.s	.Ink
+	move.w	#Lighter_blue,Ghost_ink
+.Ink:	addi.w	#Condition_names,d0
+	jsr	Get_text
+.Exit:	movem.l	(sp)+,d0-d3/a1
 	rts
 
 ;*****************************************************************************
@@ -2157,10 +2438,21 @@ Inv_RL:	R_palette 0,UI_palette
 	R_end
 	even
 
-; Control icon list of the inventory (Inv2_CIL in INVENTOR.S) : only Exit
-; is possible in the proof of concept
+; Raster list of the character screen (Inv_RL with its own palette)
+Char_RL:	R_palette 0,UI_palette
+	R_range 1,25,35,Portrait_range
+	R_palette Middle_Y+1,Char_palette
+	R_range Info_Y,25,35,Portrait_range
+	R_end
+	even
+
+; Control icon lists (Inv1_CIL and Inv2_CIL in INVENTOR.S) : the item
+; functions are not possible in the proof of concept
 Disabled	EQU	$8000
-Inv2_CIL:	dc.w Stats_cicon+Disabled,Use_item_cicon+Disabled,Exit_cicon
+Inv1_CIL:	dc.w Backpack_cicon,0,Exit_cicon
+	dc.w 0,0,0
+	dc.w 0,0,0
+Inv2_CIL:	dc.w Stats_cicon,Use_item_cicon+Disabled,Exit_cicon
 	dc.w Drop_item_cicon+Disabled,Drop_gold_cicon+Disabled,Drop_food_cicon+Disabled
 	dc.w View_item_cicon+Disabled,Transfer_gold_cicon+Disabled,Transfer_food_cicon+Disabled
 
@@ -2184,6 +2476,30 @@ Backpack_pos_list:
 	dc.w 109,134,131,134,153,134
 	dc.w 109,163,131,163,153,163
 
+; Positions of the condition icons relative to 96,124 (INVENTOR.S)
+Bodymind_pos:
+	dc.w 0,0,32,0,64,0
+	dc.w 16,16,48,16
+	dc.w 0,32,32,32,64,32
+	dc.w 16,48,48,48
+
+; Conditions and their status icons (INVENTOR.S)
+Condition_icon_table:
+	dc.b Lamed,Lamed_icon
+	dc.b Poisoned,Poisoned_icon
+	dc.b Petrified,Petrified_icon
+	dc.b Diseased,Diseased_icon
+	dc.b Aging,Aging_icon
+	dc.b Irritated,Irritated_icon
+	dc.b Mad,Mad_icon
+	dc.b Asleep,Asleep_icon
+	dc.b Panicked,Panicked_icon
+	dc.b Blind,Blind_icon
+	dc.b Stoned,Stoned_icon
+	dc.b Exhausted,Exhausted_icon
+	dc.b -1,-1
+	even
+
 ; Scroll bar thingy colours (HULL/CONTROLS.S)
 Unselected_thingy_colours:
 	dc.w 28,27,30,29,31
@@ -2196,9 +2512,17 @@ Inventory_files:
 	dc.b	"DATA\LAYOUT2.BIN",0
 	even
 	dc.l	0
+Character_files:
+	dc.l	Extra_layout,320*163/2
+	dc.b	"DATA\LAYOUT6.BIN",0
+	even
+	dc.l	0
 
 	SECTION	Fast_BSS,bss
 Inventory_member:	ds.w 1
+Inventory_mode:	ds.w 1			; 1 = Inventory 1, 2 = Inventory 2
+Small_portraits:	ds.l 1
+Condition_list:	ds.w 3*12+1		; X, Y, condition / -1
 Inventory_scroll_positions:	ds.w 6
 Scroll_row:	ds.w 1
 Scroll_bar_result:	ds.w 1
@@ -2217,6 +2541,9 @@ Inv_text_buffer:	ds.b 64
 Drag_buffer:	ds.b 24*8			; Moved item (16x24)
 Inv_palette:	ds.b 64
 Inv_portraits:	ds.b 6*34*2*8
+Char_palette:	ds.b 64
+Char_portraits:	ds.b 6*34*2*8
+Status_icons:	ds.b 22*16*8
 Inv_graphics:					; INVGFX.BIN
 Swordshield:	ds.b 2*9*8
 Chequered:	ds.b 11*2*8

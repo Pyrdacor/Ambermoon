@@ -28,6 +28,10 @@ white silhouette, so they can be dragged onto the portraits, which have their ow
 
 ![Inventory](docs/inventory.png)
 
+The character screen of Sabine (Stats icon in the inventory):
+
+![Character screen](docs/character.png)
+
 Map 264 "Zum hinkenden Gauner" at 14:00 (`./build.sh --map 264 --pos 11,13,2 --time 14:00`):
 
 ![Tavern](docs/tavern.png)
@@ -52,7 +56,8 @@ or on a control icon. `ESC` or `UNDO` quits.
 Inventory: right mouse button on a portrait or `F1` ... `F6`. The left mouse button on an item takes it (the
 whole stack); then the left mouse button on a backpack slot, on the body or on a portrait puts it there, the
 right mouse button or `ESC` puts it back. The name of the item under the mouse is shown above the mouse. The
-exit icon or `ESC` closes the inventory.
+Stats icon shows the character screen, the backpack icon goes back. The exit icon or `ESC` closes the
+inventory.
 
 ## Target machine
 
@@ -80,7 +85,8 @@ The Amiga version uses one palette for the status block, the items and the portr
 dragged onto the portraits. Here the inventory screen has its own palette below the status block, chosen for
 the items and the portraits (the portrait of the inventory member is shown there too), and a moved item is
 shown as a white silhouette like in Amberstar. White (Amiga colour 2) is ST colour 1 in both palettes, so the
-silhouette looks the same over the portraits.
+silhouette looks the same over the portraits. The character screen shows no items, so it has another palette
+there, for the portrait, the status icons and the text colours (the headlines are light green).
 
 `tools/st_convert.py` converts all graphics in advance into the ST format (per line and 16 pixels 4 plane
 words) with the final ST colours, and writes for each palette a lookup table Amiga colour → ST colour,
@@ -138,7 +144,9 @@ the body items (with the cross over the other hand for double-handed weapons), t
 bar, the weight, and moving items with the checks of the original (body place, class, sex, hands, fingers,
 cursed items, stacks of up to 99) and its boni (damage, protection, LP/SP maximum, attributes, skills). The
 text above the mouse and the moved item are drawn with the mouse pointer (`KERNEL/MOUSE.S`), like the HDOBs
-of the Amiga version. The prompts ("Wohin damit?", ...) are the original messages.
+of the Amiga version. The prompts ("Wohin damit?", ...) are the original messages. The Inventory 1 screen
+(character screen) shows the attributes, skills, languages and conditions (status icons, with their names
+above the mouse).
 
 `src/POC/PERSONS.S` contains the persons and the time from `PERSONS.S`, `TIME.S` and `MAP/MAP.S`: persons
 on a path (one position per 5 minutes of the day) and randomly moving persons, sitting and sleeping
@@ -159,8 +167,7 @@ Hatari (STE, 8 MHz):
 
 * Talking to persons, the other events (doors, chests, places, ...), monsters (movement, combat), light
   spells, transports and travel modes other than on foot, and 3D maps.
-* In the inventory: the character screen (Inventory 1), using, dropping and viewing items, gold and food, and
-  moving only a part of a stack.
+* In the inventory: using, dropping and viewing items, gold and food, and moving only a part of a stack.
 * The module system, the memory manager and loading from the original containers (the data is converted in
   advance).
 * Sound and music.

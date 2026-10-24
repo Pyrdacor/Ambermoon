@@ -1623,6 +1623,15 @@ File_list:
 	dc.l	Object_data,2+402*Item_data_size
 	dc.b	"DATA\OBJECTS.BIN",0
 	even
+	dc.l	Char_palette,64
+	dc.b	"DATA\CHARPAL.BIN",0
+	even
+	dc.l	Char_portraits,6*34*2*8
+	dc.b	"DATA\PORTRC.BIN",0
+	even
+	dc.l	Status_icons,22*16*8
+	dc.b	"DATA\STATICON.BIN",0
+	even
 	dc.l	Texts,16*1024
 	dc.b	"DATA\TEXTS.BIN",0
 	even

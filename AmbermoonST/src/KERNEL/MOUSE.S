@@ -203,7 +203,7 @@ Draw_mouse_pointer:
 	move.l	d0,a0
 	move.w	Ink_colour,-(sp)
 	move.w	Shadow_colour,-(sp)
-	move.w	#White,Ink_colour
+	move.w	Ghost_ink,Ink_colour
 	move.w	#Default_shadow,Shadow_colour
 	movem.w	Ghost_XY,d0/d1
 	jsr	Put_text_line
@@ -305,6 +305,7 @@ Mouse_off_flag:	ds.b 1
 Current_Mptr:	ds.l 1
 Drag_graphic:	ds.l 1			; Dragged item (16x24) / 0
 Ghost_text:	ds.l 1			; Text above the mouse / 0
+Ghost_ink:	ds.w 1			; Its colour
 Pointer_XY:	ds.w 2
 Ghost_XY:	ds.w 2
 Overlay_rect:	ds.w 4

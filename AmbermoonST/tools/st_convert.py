@@ -44,9 +44,12 @@
 #   INVPAL.BIN  palette of the inventory screen below the status block (like UIPAL.BIN)
 #   OBJICONS.BIN  item graphics (Object_icons, 16x16 each), PORTRI.BIN the portraits in the inventory palette
 #   OBJECTS.BIN item data (Objects.amb, unchanged : number of items (word) + 60 bytes per item)
-#   LAYOUT2.BIN layout 2 (inventory), 320x163
+#   LAYOUT2.BIN layout 2 (inventory), LAYOUT6.BIN layout 6 (character screen), 320x163
+#   CHARPAL.BIN palette of the character screen below the status block, PORTRC.BIN the portraits in it
+#   STATICON.BIN  status icons 1...22 (Status_icons of KERNEL/CHIP_DATA.S, 16x16) in the character palette
 #   INVGFX.BIN  Swordshield (2 x 16x9), Chequered (32x11), Pick_Mptr (hotspot X, Y (words), 16x16)
-#   TEXTS.BIN   64 UI texts, 16 race names, 16 class names, 300 messages (zero-terminated)
+#   TEXTS.BIN   64 UI texts, 16 race names, 16 class names, 300 messages, 16 short attribute names, 16 short
+#               skill names, 16 language names, 16 condition names (zero-terminated)
 import argparse, math, os, re, struct, sys, zipfile
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -403,8 +406,24 @@ def main():
     write('OBJICONS.BIN', b''.join(st_graphic([inv_lut[v] for v in ic], 16, 16) for ic in obj_icons))
     write('PORTRI.BIN', b''.join(st_graphic([inv_lut[v] for v in p], 32, 34) for p in portraits))
     write('OBJECTS.BIN', decode_file(open(os.path.join(AMBERFILES, 'Objects.amb'), 'rb').read()))
-    layout2 = planar(data.read('Layouts.amb/002'), 320, 163, 3)
-    write('LAYOUT2.BIN', st_graphic([8 + v for v in layout2], 320, 163))   # (colour 24 is the background)
+    for n in (2, 6):                       # inventory & character screen (colour 24 is the background)
+        layout = planar(data.read(f'Layouts.amb/{n:03}'), 320, 163, 3)
+        write(f'LAYOUT{n}.BIN', st_graphic([8 + v for v in layout], 320, 163))
+    # character screen : no items there, so its palette is chosen for the portraits, the status icons and the
+    # text colours (Light_green : headlines, Yellow & Lighter_blue : condition names)
+    raw = source_data('KERNEL/CHIP_DATA.S', 'Status_icons')   # 22 status icons (16x16, 5 bit, from icon 1)
+    stat_icons = [planar(raw, 16, 16, 5, i * 160) for i in range(22)]
+    weights = [0] * 32
+    for g in portraits + stat_icons:
+        for v in g:
+            weights[v] += 1
+    for c in (4, 16, 22):
+        weights[c] += 2000
+    chr16, chr_lut = make_palette(main_pal, weights, fixed=WHITE)
+    write('CHARPAL.BIN', palette_file(chr16, chr_lut))
+    write('PORTRC.BIN', b''.join(st_graphic([chr_lut[v] for v in p], 32, 34) for p in portraits))
+    write('STATICON.BIN', b''.join(st_graphic([chr_lut[v] for v in g], 16, 16) for g in stat_icons))
+    print('Character screen palette:', ' '.join(f'${st_word(c, 4):03x}' for c in chr16))
     inv_gfx = b''
     raw = source_data('KERNEL/CHIP_DATA.S', 'Swordshield')
     for i in range(2):                     # sword & shield (16x9, 3 bit, base colour 24, colour 0 transparent)
@@ -416,7 +435,9 @@ def main():
     write('INVGFX.BIN', inv_gfx)
     # texts : 64 UI texts, 16 race names, 16 class names, 300 messages (zero-terminated, cp850 like the game texts)
     texts = b''
-    for folder, count in (('UITexts', 64), ('RaceNames', 16), ('ClassNames', 16), ('Messages', 300)):
+    for folder, count in (('UITexts', 64), ('RaceNames', 16), ('ClassNames', 16), ('Messages', 300),
+                          ('AttributeShortNames', 16), ('SkillShortNames', 16), ('LanguageNames', 16),
+                          ('ConditionNames', 16)):
         for i in range(count):
             fn = os.path.join(ALLTEXTS, 'Text.amb', folder, f'{i:03}.txt')
             t = ''
