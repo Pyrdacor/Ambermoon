@@ -10,6 +10,8 @@
 #   slot 0        : colour 0 (black, transparent for masked graphics)
 #   slots 1..7    : 7 colours chosen by a weighted k-means for the graphics of the area (map tiles, portraits)
 #   slots 8..15   : colours 24..31 (the UI colours: layouts, status block and all 3 bit graphics use them)
+#                   In the map area slot 8 (colour 24) is another free colour, because value 0 of the layout and
+#                   the buttons is drawn black there.
 # So 3 bit graphics with base colour 24 look the same in both areas, and every Amiga colour of an area is
 # translated with a lookup table of 32 bytes (written to the palette files, used by the kernel for Draw_box
 # and the text colours).
@@ -164,22 +166,24 @@ def st_graphic(pix, w, h):
     return bytes(out)
 
 
-def make_palette(palette, weights):
+def make_palette(palette, weights, ui_first=24):
     """16 colour palette with the slot layout described above. palette: 32 rgb, weights: 32 values.
+    ui_first: first UI colour which gets a fixed slot (8 + colour - 24). In the map area colour 24 is not needed
+    by the UI (value 0 of the layout and the buttons is drawn black), so slot 8 is another free slot there.
     Returns (16 rgb, lookup table of 32 slots)."""
-    ui = palette[24:32]
-    points = palette[1:24]
-    w = [math.sqrt(x) for x in weights[1:24]]
-    # k-means with the UI colours fixed: result = 8 UI colours + 7 free colours
+    ui = palette[ui_first:32]
+    points = palette[1:ui_first]
+    w = [math.sqrt(x) for x in weights[1:ui_first]]
+    # k-means with the UI colours fixed
     result = kmeans(points, w, ui, 15, 4)
-    free = result[8:]
+    free = result[len(ui):]
     pal16 = [snap(palette[0], 4)] + free + [snap(c, 4) for c in ui]
     labs = [to_lab(c) for c in pal16]
     lut = []
     for i in range(32):
         if i == 0:
             lut.append(0)
-        elif i >= 24:
+        elif i >= ui_first:
             lut.append(8 + i - 24)
         else:            # never slot 0: it is transparent
             li = to_lab(palette[i])
@@ -205,7 +209,7 @@ def sprite_lut(palette, pal16):
     for i in range(32):
         if i == 0:
             lut.append(0)
-        elif i >= 24:
+        elif i >= 25:
             lut.append(8 + i - 24)
         else:
             li = to_lab(palette[i])
@@ -293,7 +297,7 @@ def main():
         for frame in sprites:
             for v in frame:
                 weights[v] += 16       # small but important
-        map16, map_lut = make_palette(map_pal, weights)
+        map16, map_lut = make_palette(map_pal, weights, 25)
         spr_lut = sprite_lut(map_pal, map16)
         write(f'P{tileset}.BIN', palette_file(map16, map_lut))
         write(f'I{tileset}.BIN', b''.join(st_graphic([map_lut[v] for v in t], 16, 16) for t in tiles))
