@@ -5,16 +5,18 @@ This folder contains a proof of concept of an Atari ST port of Ambermoon, based 
 2D map layout with the map name and the control icons, and the 2D maps. It starts like the game in map 258
 "Großvaters Haus". The party can walk around, the map scrolls, the tiles are animated, and the persons
 (NPCs) are shown and move on their paths or randomly while the time of day passes. Map events work for map
-changes (e.g. out of the house onto the world map Lyramion and back), text popups (shown in a text window),
+changes (e.g. out of the house onto the world map Lyramion and back), text popups (shown in a text window or
+with their picture),
 tile changes and conditions/actions on the bits of the savegame. All 2D city maps and the 2D world maps
 can be reached. Outdoors there is a light circle around the party which depends on the time of day. There
 is no music.
 
 ![Start](docs/start.png) ![After walking](docs/moved.png)
 
-The text popup at the start of the game, and the world map in front of the house:
+The picture text at the start of the game (the picture has its own 16 colour palette), the text popup
+after it, and the world map in front of the house:
 
-![Text window](docs/textwindow.png) ![World map](docs/world.png)
+![Picture text](docs/picture.png) ![Text window](docs/textwindow.png) ![World map](docs/world.png)
 
 The world map at night (22:30, the start of the game) and at dusk (19:00):
 
@@ -104,8 +106,9 @@ change) and handles the 2D world maps: like the quad-maps of `MAP/2D_WILD.S`, bu
 the game is done with GEMDOS; only the TOS system timer (Timer C) is switched on for that.
 
 `src/POC/EVENTS.S` contains the map events from `EVENTS.S` (event chains, map exit, text popup, change
-icon, query and modify of the bit arrays of the savegame) and the text window (`Open_window`,
-`TxtW_DisInit`, text processing with word wrap and `~SELF~`).
+icon, query and modify of the bit arrays of the savegame), the text window (`Open_window`,
+`TxtW_DisInit`, text processing with word wrap and `~SELF~`) and the picture text screen (`Show_pictxt`: the
+event picture with its own palette from line 37, the text paged 7 lines at a time below it).
 
 `src/POC/LIGHT.S` contains the light from `MAP/2D_MAP.S` and `TIME.S`: always light (indoor), changing with
 the time of day (outdoor, radius of the light circle per hour) or dark (only the party is visible). The
@@ -130,9 +133,8 @@ Hatari (STE, 8 MHz):
 
 ## Not done yet
 
-* Talking to persons, the other events (doors, chests, places, ...), pictures of text popups,
-  monsters (movement, combat), light spells, transports and travel modes other than on foot, and 3D
-  maps.
+* Talking to persons, the other events (doors, chests, places, ...), monsters (movement, combat), light
+  spells, transports and travel modes other than on foot, and 3D maps.
 * The module system, the memory manager and loading from the original containers (the data is converted in
   advance).
 * Sound and music.

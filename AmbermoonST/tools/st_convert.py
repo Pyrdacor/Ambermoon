@@ -30,7 +30,8 @@
 #   SAVE.BIN    the initial savegame (Party_data.sav: event bits, map characters, ...)
 #   START.BIN   start map, X, Y, view direction, hour, minute (words)
 #   WORLDS.BIN  the names of the 3 worlds (32 bytes each)
-#   LAYOUT.BIN  layout 1 (2D map), 320x163
+#   LAYOUT.BIN  layout 1 (2D map), 320x163, LAYOUT7.BIN layout 7 (show picture + text)
+#   E<i>.BIN    event picture i (320x92), Q<i>.BIN its palette (like P<t>.BIN)
 #   UIGFX.BIN   UI graphics of KERNEL/CHIP_DATA.S: Status_L, Status_M, Status_R (16x36 each),
 #               Status_TB (32x1), Empty_portrait (32x34), Button_up, Button_down (32x17 each)
 #   WINICONS.BIN  the 9 parts of a window border (Window_icons of KERNEL/CHIP_DATA.S, 16x16 each)
@@ -319,6 +320,26 @@ def main():
                 bytes([len(g), 0]) + b''.join(st_graphic([spr_lut[v] for v in f], 16, 32) for f in g)
                 for g in npc_files[n]) + b'\0\0')
         print(f'Tileset {tileset}: palette {pal_index}', ' '.join(f'${st_word(c, 4):03x}' for c in map16))
+
+    # event pictures (Show picture + text event) with their own palettes (Event_pix_palette_table of
+    # KERNEL/DATA.S; the table has only 8 entries, the 9th picture uses the palette of the others)
+    pal_table = list(source_data('KERNEL/DATA.S', 'Event_pix_palette_table')) + [0x21]
+    for i in range(9):
+        name = f'Event_pix.amb/{i + 1:03}'
+        if name not in data.names:
+            continue
+        pd = data.read(f'Palettes.amb/{pal_table[i]:03}')
+        epal = [amiga_rgb(struct.unpack('>H', pd[k * 2:k * 2 + 2])[0] & 0xfff) for k in range(32)]
+        pic = planar(data.read(name), 320, 92, 5)
+        weights = [0] * 32
+        for v in pic:
+            weights[v] += 1
+        e16, elut = make_palette(epal, weights, 25)
+        write(f'Q{i}.BIN', palette_file(e16, elut), quiet=True)
+        write(f'E{i}.BIN', st_graphic([elut[v] for v in pic], 320, 92), quiet=True)
+    print('Event pictures (E*.BIN) and their palettes (Q*.BIN)')
+    layout7 = planar(data.read('Layouts.amb/007'), 320, 163, 3)
+    write('LAYOUT7.BIN', st_graphic([v and 8 + v for v in layout7], 320, 163))
 
     layout = planar(data.read('Layouts.amb/001'), 320, 163, 3)
     # Value 0 is colour 24 of the map palette, which is red in palette 7 (the background around the frames).

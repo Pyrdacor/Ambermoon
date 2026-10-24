@@ -146,6 +146,7 @@ Amiga_to_STE_colour:
 	movem.l	d1/d2/a0,-(sp)
 	lea.l	STE_nibbles,a0
 	moveq.l	#0,d1
+	rol.w	#4,d0			; Skip the unused top nibble
 	moveq.l	#3-1,d2
 .Loop:	rol.w	#4,d1
 	rol.w	#4,d0
@@ -287,28 +288,31 @@ Timer_B_interrupt:
 ;  OUT : d0-d7 - faded colours (.l)
 ; All other registers are restored
 ; NOTE :
-;   - [ Fade_level ] is 0 (full colours) ... 15 (black).
+;   - [ Fade_level ] is 0 (full colours) ... 15 (black). The colours are
+;     scaled, unlike the Amiga version, which counts every component down.
 ;*****************************************************************************
 Fade_palette_regs:
 	tst.w	Fade_level
 	beq.s	.Exit
 	movem.l	d0-d7,Fade_buffer
 	movem.l	a0/a1/d0-d3,-(sp)
+	move.w	Fade_level,d0		; Table offset
+	lsl.w	#4,d0
+	move.w	d0,Fade_offset
 	lea.l	Fade_buffer,a0
 	lea.l	STE_to_linear,a1
 	moveq.l	#16-1,d3
 .Loop:	move.w	(a0),d0
 	moveq.l	#0,d1
+	rol.w	#4,d0			; Skip the unused top nibble
 	moveq.l	#3-1,d2
 .Loop2:	rol.w	#4,d1
 	rol.w	#4,d0
 	move.w	d0,-(sp)
 	andi.w	#$f,d0
 	move.b	0(a1,d0.w),d0		; 0...15
-	sub.w	Fade_level,d0
-	bpl.s	.Ok
-	moveq.l	#0,d0
-.Ok:	move.b	STE_nibbles(pc,d0.w),d0
+	add.w	Fade_offset,d0		; Scale & convert
+	move.b	Fade_scale(pc,d0.w),d0
 	or.b	d0,d1
 	move.w	(sp)+,d0
 	dbra	d2,.Loop2
@@ -321,6 +325,25 @@ Fade_palette_regs:
 ; Amiga nibble (0...15) -> STE nibble (bit 3 is the lowest bit)
 STE_nibbles:
 	dc.b	$0,$8,$1,$9,$2,$a,$3,$b,$4,$c,$5,$d,$6,$e,$7,$f
+; Fade level (0...15) x linear value (0...15) -> STE nibble of value * (15 - level) / 15
+; (all colour components are scaled, so the colours keep their hue while fading)
+Fade_scale:
+	dc.b	$0,$8,$1,$9,$2,$a,$3,$b,$4,$c,$5,$d,$6,$e,$7,$f
+	dc.b	$0,$8,$1,$9,$2,$a,$3,$b,$b,$4,$c,$5,$d,$6,$e,$7
+	dc.b	$0,$8,$1,$9,$9,$2,$a,$3,$b,$4,$c,$5,$5,$d,$6,$e
+	dc.b	$0,$8,$1,$1,$9,$2,$a,$3,$3,$b,$4,$c,$5,$5,$d,$6
+	dc.b	$0,$8,$8,$1,$9,$2,$2,$a,$3,$b,$b,$4,$c,$5,$5,$d
+	dc.b	$0,$8,$8,$1,$9,$9,$2,$a,$a,$3,$b,$b,$4,$c,$c,$5
+	dc.b	$0,$8,$8,$1,$1,$9,$2,$2,$a,$a,$3,$b,$b,$4,$4,$c
+	dc.b	$0,$8,$8,$1,$1,$9,$9,$2,$2,$a,$a,$3,$3,$b,$b,$4
+	dc.b	$0,$0,$8,$8,$1,$1,$9,$9,$2,$2,$a,$a,$3,$3,$b,$b
+	dc.b	$0,$0,$8,$8,$1,$1,$1,$9,$9,$2,$2,$2,$a,$a,$3,$3
+	dc.b	$0,$0,$8,$8,$8,$1,$1,$1,$9,$9,$9,$2,$2,$2,$a,$a
+	dc.b	$0,$0,$8,$8,$8,$8,$1,$1,$1,$1,$9,$9,$9,$9,$2,$2
+	dc.b	$0,$0,$0,$8,$8,$8,$8,$8,$1,$1,$1,$1,$1,$9,$9,$9
+	dc.b	$0,$0,$0,$0,$8,$8,$8,$8,$8,$8,$8,$8,$1,$1,$1,$1
+	dc.b	$0,$0,$0,$0,$0,$0,$0,$0,$8,$8,$8,$8,$8,$8,$8,$8
+	dc.b	$0,$0,$0,$0,$0,$0,$0,$0,$0,$0,$0,$0,$0,$0,$0,$0
 ; STE nibble -> linear value (0...15)
 STE_to_linear:
 	dc.b	0,2,4,6,8,10,12,14,1,3,5,7,9,11,13,15
@@ -358,6 +381,7 @@ Next_raster:	ds.l 1
 Raster_event_ptr:	ds.l 1
 Current_RL_ptr:	ds.l 1
 Fade_level:	ds.w 1
+Fade_offset:	ds.w 1
 Fade_buffer:	ds.w 16
 Raster_events1:	ds.b 8*256
 Raster_events2:	ds.b 8*256

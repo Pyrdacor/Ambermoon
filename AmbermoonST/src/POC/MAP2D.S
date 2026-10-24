@@ -1582,6 +1582,9 @@ File_list:
 	dc.l	Window_icons,9*16*8
 	dc.b	"DATA\WINICONS.BIN",0
 	even
+	dc.l	Layout7,320*163/2
+	dc.b	"DATA\LAYOUT7.BIN",0
+	even
 	dc.l	0
 
 Position_text:
@@ -1653,6 +1656,7 @@ Underlay_buffer:	ds.b Mapbuf_size
 Overlay_buffer:	ds.w Mapbuf_size
 Font_data:	ds.b 1024
 Layout:	ds.b 320*163/2
+Layout7:	ds.b 320*163/2
 Control_icons:	ds.b 78*13*2*8
 Portraits:	ds.b 6*34*2*8
 Party_chars:	ds.b 6*512

@@ -4,7 +4,9 @@
 ; HULL/WORDS.S of the original source. Implemented events : map exit /
 ; teleport (1), text popup (4, without picture), change icon (10), query
 ; (13) and modify (14) of the bit arrays of the savegame. Other events end
-; the event chain.
+; the event chain. A text popup with a picture is shown like the module
+; ShowPicTxt_Mod (EVENTS.S, MODULES.S) : layout 7 with the picture and the
+; text below, with the palette of the picture.
 
 	SECTION	Program,code
 
@@ -276,7 +278,7 @@ Do_MX:	moveq.l	#0,d0			; Get new coordinates
 ;*****************************************************************************
 ; [ Show picture + text event ]
 ; NOTE :
-;   - From EVENTS.S. The picture is not shown yet, only the text.
+;   - From EVENTS.S.
 ;*****************************************************************************
 Show_pictxt:
 	lea.l	Current_event_data,a5
@@ -286,7 +288,17 @@ Show_pictxt:
 	bne.s	.Go_on
 	st	Break_event		; No -> abort chain
 	bra.s	.Exit
-.Go_on:	moveq.l	#0,d0			; Get text number
+.Go_on:	cmp.b	#-1,Event_b1(a5)		; Any picture ?
+	beq.s	.No_pic
+	moveq.l	#0,d0			; Get text number
+	move.b	Event_b5(a5),d0
+	jsr	Get_event_texts
+	jsr	Find_large_text
+	moveq.l	#0,d0			; Get picture number
+	move.b	Event_b1(a5),d0
+	jsr	Show_picture_text
+	bra.s	.Exit
+.No_pic:	moveq.l	#0,d0			; Get text number
 	move.b	Event_b5(a5),d0
 	cmp.b	#-1,d0			; Any ?
 	beq.s	.Exit
@@ -294,6 +306,96 @@ Show_pictxt:
 	jsr	Find_large_text
 	jsr	Text_window
 .Exit:	rts
+
+;*****************************************************************************
+; [ Show a picture and a text ]
+;   IN : d0 - Picture number {0...} (.w)
+;        a0 - Pointer to text (.l)
+; All registers are restored
+; NOTE :
+;   - From [ ShowPicTxt_ModInit ] (EVENTS.S) and [ Init_ShowPicTxt_layout ]
+;     (DISPLAY.S).
+;*****************************************************************************
+Show_picture_text:
+	movem.l	d0-d7/a0-a6,-(sp)
+	move.l	a0,-(sp)
+	move.w	d0,-(sp)
+	moveq.l	#1,d0			; Fade out
+	jsr	Fade_screen
+	move.w	(sp)+,d0			; Load picture & palette
+	lea.l	Event_picture,a1
+	move.l	#20*ShowPicTxt_height*8,d1
+	moveq.l	#'E',d2
+	jsr	Load_numbered_file
+	lea.l	Event_palette,a1
+	moveq.l	#64,d1
+	moveq.l	#'Q',d2
+	jsr	Load_numbered_file
+	lea.l	ShowPicTxt_RL,a0		; Install palette
+	jsr	Set_raster_list
+; ---------- Show layout & picture ----------------
+	moveq.l	#0,d0			; Show layout
+	moveq.l	#Middle_Y+1,d1
+	moveq.l	#20,d6
+	move.w	#199-Middle_Y,d7
+	lea.l	Layout7,a0
+	jsr	Put_unmasked_block
+	moveq.l	#Window_colour,d4		; Clear text area
+	move.w	#16,d0
+	move.w	#138,d1
+	move.w	#303,d2
+	move.w	#192,d3
+	jsr	Draw_box
+	moveq.l	#0,d0			; Display picture
+	move.w	#ShowPicTxt_Y,d1
+	moveq.l	#20,d6
+	moveq.l	#ShowPicTxt_height,d7
+	lea.l	Event_picture,a0
+	jsr	Put_unmasked_block
+	jsr	Copy_screen_to_both
+	moveq.l	#0,d0			; Fade in
+	jsr	Fade_screen
+; ---------- Do text ------------------------------
+	move.l	(sp)+,a0
+	move.w	#(302-18+1)/(Char_width+1),Text_width
+	jsr	Process_text
+	lea.l	Text_lines,a4		; First line
+	move.w	Text_height,d6		; Lines left
+.Page:	move.w	d6,d5			; Lines of this page
+	cmp.w	#ShowPicTxt_lines,d5
+	bls.s	.Ok
+	moveq.l	#ShowPicTxt_lines,d5
+.Ok:	moveq.l	#Window_colour,d4		; Clear text area
+	move.w	#16,d0
+	move.w	#138,d1
+	move.w	#303,d2
+	move.w	#192,d3
+	jsr	Draw_box
+	move.w	#Default_ink,Ink_colour	; Print the lines
+	move.w	#Default_shadow,Shadow_colour
+	move.w	#18,d0
+	move.w	#139+1,d1
+	move.w	d5,d7
+	subq.w	#1,d7
+.Line:	move.l	a4,a0
+	jsr	Put_text_line
+	lea.l	Line_stride(a4),a4
+	addi.w	#Char_height+2,d1
+	dbra	d7,.Line
+	jsr	Copy_screen_to_both		; Show
+	jsr	Wait_for_click
+	sub.w	d5,d6			; Next page
+	bne	.Page
+; ---------- Back to the map ----------------------
+	moveq.l	#1,d0			; Fade out
+	jsr	Fade_screen
+	lea.l	Map_RL,a0
+	jsr	Set_raster_list
+	jsr	Draw_map_screen
+	moveq.l	#0,d0			; Fade in
+	jsr	Fade_screen
+	movem.l	(sp)+,d0-d7/a0-a6
+	rts
 
 ; Get the map texts of the event map (world submaps have their own texts)
 ;  OUT : a0 - Pointer to the map texts (.l)
@@ -498,6 +600,7 @@ Access_bit_array:
 ;*****************************************************************************
 Text_window:
 	movem.l	d0-d7/a0-a6,-(sp)
+	move.w	#Max_text_window_line,Text_width
 	jsr	Process_text
 	lea.l	Text_lines,a4		; First line
 	move.w	Text_height,d6		; Lines left
@@ -717,7 +820,7 @@ Process_text:
 	move.l	a2,a3			; Remember position
 .Not_space:	move.b	d0,(a2)+			; Store
 	addq.w	#1,d7
-	cmp.w	#Max_line_length,d7		; Line full ?
+	cmp.w	Text_width,d7		; Line full ?
 	bls	.Loop
 	jsr	.Wrap
 	bra	.Loop
@@ -737,7 +840,7 @@ Process_text:
 	beq.s	.Copied
 	move.b	d0,(a2)+
 	addq.w	#1,d7
-	cmp.w	#Max_line_length,d7
+	cmp.w	Text_width,d7
 	bls.s	.Copy
 	jsr	.Wrap
 	bra.s	.Copy
@@ -780,8 +883,19 @@ Process_text:
 	addq.w	#1,d7
 	rts
 
+	SECTION	Fast_DATA,data
+; Raster list of the picture screen (ShowPicTxt_RL in MODULES.S)
+ShowPicTxt_RL:
+	R_palette 0,UI_palette
+	R_range 1,25,35,Portrait_range
+	R_palette Middle_Y+1,Event_palette
+	R_end
+	even
+
 	SECTION	Fast_BSS,bss
-Max_line_length	EQU	42
+Max_line_length	EQU	48			; (buffer)
+Max_text_window_line	EQU	42
+ShowPicTxt_lines	EQU	7
 Line_stride	EQU	Max_line_length+2
 Max_lines	EQU	64
 Current_event_data:	ds.b Event_data_size
@@ -794,6 +908,7 @@ Current_event_map_nr:	ds.w 1
 Current_event_X:	ds.w 1
 Current_event_Y:	ds.w 1
 Text_height:	ds.w 1
+Text_width:	ds.w 1
 Window_data:	ds.w 4
 Success:	ds.b 1
 Break_event:	ds.b 1
@@ -802,3 +917,5 @@ Query_result:	ds.b 1
 Text_lines:	ds.b Max_lines*(Line_stride)
 	even
 Window_background:	ds.b 18*9*16*8
+Event_palette:	ds.b 64
+Event_picture:	ds.b 20*ShowPicTxt_height*8
