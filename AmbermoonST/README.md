@@ -10,7 +10,10 @@ with their picture),
 tile changes and conditions/actions on the bits of the savegame. All 2D city maps and the 2D world maps
 can be reached. Outdoors there is a light circle around the party which depends on the time of day. The
 inventory of the party members can be opened, and items can be moved between the backpack, the body and the
-other party members. There is no music.
+other party members; items can be used (a subset of the spells), viewed and dropped. Doors and chests open
+their own screen (pick the lock, use a key or lockpick, find and disarm traps, take the items, gold and food),
+and persons can be talked to (the hand and mouth actions of the second control icon list or the right mouse
+button on the map). There is no music.
 
 ![Start](docs/start.png) ![After walking](docs/moved.png)
 
@@ -31,6 +34,15 @@ white silhouette, so they can be dragged onto the portraits, which have their ow
 The character screen of Sabine (Stats icon in the inventory):
 
 ![Character screen](docs/character.png)
+
+A locked door in the cell block and the chest in grandfather's house (Hand icon on the second control icon list,
+right mouse button on the control icons):
+
+![Door](docs/door.png) ![Chest](docs/chest.png)
+
+Talking to grandfather (right mouse button on him): the greeting, the word selector (Talk icon) and his answer:
+
+![Dialogue](docs/dialogue.png) ![Word selector](docs/words.png) ![Answer](docs/answer.png)
 
 Map 264 "Zum hinkenden Gauner" at 14:00 (`./build.sh --map 264 --pos 11,13,2 --time 14:00`):
 
@@ -148,6 +160,21 @@ of the Amiga version. The prompts ("Wohin damit?", ...) are the original message
 (character screen) shows the attributes, skills, languages and conditions (status icons, with their names
 above the mouse).
 
+`src/POC/ITEMS.S` contains using, viewing and dropping items (`INVENTOR.S`, `MAGIC.S`), the accept/refuse
+status icons on the portraits while an item is moved and the yes/no requester. Only a few spells can be
+used from items in the proof of concept; the others give the original message that it is not possible here.
+
+`src/POC/CHEST.S` contains the door and chest events (`EVENTS.S`, `LAYOUT3.S`): the 80x80 picture with the
+inventory palette, the texts, opening the lock (pick lock, key, lockpick, traps), and taking items, gold and
+food. The contents of the chests come from the savegame (`Save.00`) and are written back when they change.
+
+`src/POC/DIALOGUE.S` contains talking to persons (`DIALOGUE.S`, `WORD_SEL.S`): short dialogues are shown in
+the text window, long ones open the dialogue screen with the portrait (all 102 portraits share one static
+palette that is computed in advance by the converter) and the info of the person. The dialogue events of the
+person (greeting, asked words, farewell) are processed with their texts, queries (party members, items,
+words, conditions, gold, food) and modifications of the bit arrays, and new words are added to the known
+words. Showing and giving items, gold and food, joining and leaving the party are not done yet.
+
 `src/POC/PERSONS.S` contains the persons and the time from `PERSONS.S`, `TIME.S` and `MAP/MAP.S`: persons
 on a path (one position per 5 minutes of the day) and randomly moving persons, sitting and sleeping
 persons, collisions with persons, and the time of day, which advances by one step (5 minutes) every 4
@@ -165,9 +192,10 @@ Hatari (STE, 8 MHz):
 
 ## Not done yet
 
-* Talking to persons, the other events (doors, chests, places, ...), monsters (movement, combat), light
+* The other events (places, riddle mouths, trapdoors, ...), monsters (movement, combat), light
   spells, transports and travel modes other than on foot, and 3D maps.
-* In the inventory: using, dropping and viewing items, gold and food, and moving only a part of a stack.
+* In the inventory: most spells of usable items, gold and food, and moving only a part of a stack.
+* In dialogues: showing and giving items, gold and food, joining and leaving the party.
 * The module system, the memory manager and loading from the original containers (the data is converted in
   advance).
 * Sound and music.
