@@ -272,7 +272,10 @@ def main():
             raw += source_data('KERNEL/CHIP_DATA.S', 'GFX_char_value_bar_frames')
         if len(raw) < w * h * 3 // 8:
             raise SystemExit(f'{label}: only {len(raw)} bytes')
-        status += st_graphic([8 + v for v in planar(raw, w, h, 3)], w, h)
+        if label.startswith('Button'):   # map area: value 0 (colour 24, red in palette 7) is drawn black
+            status += st_graphic([v and 8 + v for v in planar(raw, w, h, 3)], w, h)
+        else:
+            status += st_graphic([8 + v for v in planar(raw, w, h, 3)], w, h)
     write('UIGFX.BIN', status)
 
     buttons = decode_file(open(os.path.join(AMBERFILES, 'Button_graphics'), 'rb').read())
