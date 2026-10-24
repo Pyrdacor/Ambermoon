@@ -239,7 +239,9 @@ def main():
     write('PARTY.BIN', b''.join(st_graphic([map_lut[v] for v in f], 16, 32) for f in party))
 
     layout = planar(data.read('Layouts.amb/001'), 320, 163, 3)
-    write('LAYOUT.BIN', st_graphic([8 + v for v in layout], 320, 163))
+    # Value 0 is colour 24 of the map palette, which is red in palette 7 (the background around the frames).
+    # It is drawn black (ST colour 0) instead.
+    write('LAYOUT.BIN', st_graphic([v and 8 + v for v in layout], 320, 163))
 
     # ---------- status block area ----------
     main_pal = [amiga_rgb(c) for c in source_words('KERNEL/DATA.S', 'Main_pal', 32)]
