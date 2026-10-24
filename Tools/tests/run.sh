@@ -4,6 +4,12 @@
 #
 #   Tools/tests/run.sh [path/to/cshiftc]           builds the tools and compares (default compiler: $CSHIFTC, the
 #                                                   newest one in Tools/.cshift (get-cshift.sh), cshiftc on the PATH)
+#   Tools/tests/run.sh --amiga [path/to/cshiftc]   the same with the tools built for AmigaOS (m68k-amigaos, the
+#                                                   68000 code generator) and run under vamos (amitools); absolute
+#                                                   paths in the arguments become root:..., and the console output
+#                                                   is compared as on the PC. Left out there: arguments that are
+#                                                   not ASCII (vamos passes UTF-8, AmigaOS programs read Latin-1)
+#                                                   and an argument that is only * (vamos drops all arguments then)
 #   Tools/tests/run.sh --record <Tool>=<command> ...
 #                                                   writes the results of the original tools into expected.txt (only
 #                                                   those of the tools given), e.g.
@@ -28,6 +34,12 @@ BUILD_ONLY=(AmbermoonListExtractor AmbermoonLabdataEditor AmbermoonLabdataExtrac
 declare -A COMMAND
 
 RECORD=0
+AMIGA=0
+if [ "${1:-}" = "--amiga" ]; then
+    AMIGA=1
+    shift
+    if ! command -v vamos > /dev/null 2>&1; then echo "vamos not found (pip install amitools)"; exit 2; fi
+fi
 if [ "${1:-}" = "--record" ]; then
     RECORD=1
     shift
@@ -49,6 +61,23 @@ else
     if [ -z "$COMPILER" ]; then echo "cshiftc not found (get-cshift.sh downloads it)"; exit 2; fi
     CC_ARGS=()
     if [ -n "${CSHIFT_CC:-}" ]; then CC_ARGS=(--cc "$CSHIFT_CC"); fi
+    if [ $AMIGA -eq 1 ]; then
+        CC_ARGS=(--target m68k-amigaos)
+        # a tool under vamos, with absolute paths as root:... (the volume of the PC's root directory)
+        cat > "$TMP/amiga" <<'AMIGA'
+#!/usr/bin/env bash
+exe="$1"
+shift
+args=()
+for a in "$@"; do
+    # (a path of this machine: its file or its folder exists; not an option like /?)
+    case "$a" in /?*) if [ -e "$a" ] || { [ "$(dirname "$a")" != / ] && [ -d "$(dirname "$a")" ]; }; then a="root:${a#/}"; fi ;; esac
+    args+=("$a")
+done
+exec vamos -m 8192 -q -- "$exe" "${args[@]}"
+AMIGA
+        chmod +x "$TMP/amiga"
+    fi
     for tool in "${TOOLS[@]}" "${BUILD_ONLY[@]}"; do
         if ! "$COMPILER" build "$ROOT/$tool" "${CC_ARGS[@]}" -o "$TMP/$tool" > "$TMP/build.log" 2>&1; then
             echo "FAIL  Ambermoon: building $tool failed:"
@@ -56,6 +85,7 @@ else
             exit 1
         fi
         COMMAND[$tool]="$TMP/$tool"
+        [ $AMIGA -eq 1 ] && COMMAND[$tool]="$TMP/amiga $TMP/$tool"
     done
 fi
 
@@ -114,6 +144,10 @@ test_hex() {
     local HEX="$1" session args n=0 work
     while read -r session args; do
         n=$((n + 1))
+        if [ $AMIGA -eq 1 ] && [[ " $args " == *" * "* ]]; then
+            echo "skip  Ambermoon hex $n:$session (an argument that is only *, under vamos)"
+            continue
+        fi
         work="$TMP/h_$n"
         mkdir -p "$work"
         cp -r "$DIR/hex/files" "$work/files"
@@ -130,6 +164,11 @@ test_texts() {
         [ "$packer" = "$kind" ] || continue
         # Windows passes the arguments of a program in the ANSI code page, not as UTF-8 (see Todo.md): the cases with
         # other characters than ASCII in their arguments are left out there
+        # (and vamos passes them as UTF-8, where AmigaOS programs read Latin-1)
+        if [ $AMIGA -eq 1 ] && LC_ALL=C grep -q '[^ -~]' <<< "$args"; then
+            echo "skip  Ambermoon $kind $name (arguments that are not ASCII, under vamos)"
+            continue
+        fi
         case "$(uname -s)" in
             MINGW*|MSYS*|CYGWIN*)
                 if LC_ALL=C grep -q '[^ -~]' <<< "$args"; then
@@ -142,7 +181,7 @@ test_texts() {
         local argv=()
         for a in $args; do a="${a//_/ }"; argv+=("${a//@DIR@/$work}"); done
         (cd "$work" && $PACKER "${argv[@]}" > "$TMP/t_$name.out" 2>&1 < /dev/null; echo "exit $?" >> "$TMP/t_$name.out")
-        sed -i "s#$work#WORK#g" "$TMP/t_$name.out"
+        sed -i "s#root:${work#/}#WORK#g; s#$work#WORK#g" "$TMP/t_$name.out"
         output="$work/Intro_texts.amb"
         [ "$kind" = extro ] && output="$work/Extro_texts.amb"
         echo "$kind $name $(hash_text "$TMP/t_$name.out") $(hash_file "$output")" >> "$RESULTS"
@@ -168,7 +207,7 @@ test_diskextract() {
         args="${args//@OUT@/$work/out}"
         # shellcheck disable=SC2086
         (cd "$work" && $EXTRACT $args > stdout 2>&1 < /dev/null; echo "exit $?" >> stdout)
-        sed -i "s#$DIR/adf#ADF#g; s#$work#WORK#g" "$work/stdout"
+        sed -i "s#root:${DIR#/}/adf#ADF#g; s#root:${work#/}#WORK#g; s#$DIR/adf#ADF#g; s#$work#WORK#g" "$work/stdout"
         echo "adf $name $(hash_text "$work/stdout") $(hash_dir "$work/out")" >> "$RESULTS"
     done < <(cases "$DIR/adf/cases.txt")
 }
