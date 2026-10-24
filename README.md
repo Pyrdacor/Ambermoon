@@ -86,8 +86,6 @@ The map editor and the image editor also run in the browser, without installing 
 
 More info can be found here: https://github.com/Pyrdacor/Ambermoon/blob/master/AmbermoonTools/README.md
 
-[![Build status](https://ci.appveyor.com/api/projects/status/dn5n21r8m11an48i/branch/master?svg=true)](https://ci.appveyor.com/project/Pyrdacor/ambermoon/branch/master)
-
 ## Content
 
 | Section                | Description                                     |
