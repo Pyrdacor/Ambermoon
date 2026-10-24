@@ -3,9 +3,14 @@
 This folder contains a proof of concept of an Atari ST port of Ambermoon, based on the source code in
 `AmbermoonSource`. It shows the 2D map screen: the status block with the portraits, the 2D map layout with
 the map name and the control icons, and a 2D map (by default map 258 "Großvaters Haus", where the game
-starts). The party can walk around, the map scrolls and the tiles are animated. There is no music.
+starts). The party can walk around, the map scrolls, the tiles are animated, and the persons (NPCs) are
+shown and move on their paths or randomly while the time of day passes. There is no music.
 
 ![Start](docs/start.png) ![After walking](docs/moved.png)
+
+Map 264 "Zum hinkenden Gauner" at 14:00 (`./build.sh --map 264 --pos 11,13,2 --time 14:00`):
+
+![Tavern](docs/tavern.png)
 
 ## Building and running
 
@@ -15,7 +20,8 @@ starts). The party can walk around, the map scrolls and the tiles are animated. 
 ```
 
 * `build.sh` needs Python 3 with Pillow and `vasmm68k_mot` (set `VASM` to its path if it is not in `PATH`).
-  `./build.sh --map 264 --pos 10,10,2` converts another 2D map (start position x, y, view direction).
+  `./build.sh --map 264 --pos 11,13,2 --time 14:00` converts another 2D map (start position x, y, view
+  direction, time of day). Which map characters are present is taken from the initial savegame.
 * `build/hd` can be used as GEMDOS drive in Hatari or copied to a real ST (`AMBERST.PRG` and `DATA\`).
 * `run_hatari.sh` uses Hatari's default TOS; set `TOS` to use another image, e.g. EmuTOS.
 
@@ -73,8 +79,13 @@ line) is set by one Timer B interrupt per line.
 
 `src/POC/MAP2D.S` contains the routines of `MAP/2D_MAP.S`, `MAP/2D_CITY.S`, `MAP/MAP.S`, `DISPLAY.S` and
 `HULL/CONTROLS.S` that are needed for the 2D map screen (display, tile animation, movement with collision
-check, scrolling, status block, layout, control icons), without the module system, events, NPCs and the
-memory manager.
+check, scrolling, status block, layout, control icons), without the module system, events and the memory
+manager.
+
+`src/POC/PERSONS.S` contains the persons and the time from `PERSONS.S`, `TIME.S` and `MAP/MAP.S`: persons
+on a path (one position per 5 minutes of the day) and randomly moving persons, sitting and sleeping
+persons, collisions with persons, and the time of day, which advances by one step (5 minutes) every 4
+moves or every 10 seconds. Monsters are shown, but stay where they are.
 
 The Amiga version redraws the whole map window every frame with the blitter. On the ST this took 5 frames,
 so a tile cache was added: for each screen buffer and map position the graphics drawn last time are
@@ -88,7 +99,8 @@ Hatari (STE, 8 MHz):
 
 ## Not done yet
 
-* NPCs, events, darkness/light circle, transports, the 2D world maps and 3D maps.
+* Talking to persons, events, monsters (movement, combat), darkness/light circle, transports, the 2D
+  world maps and 3D maps.
 * The module system, the memory manager and loading from the original containers (the data is converted in
   advance).
 * Sound and music.

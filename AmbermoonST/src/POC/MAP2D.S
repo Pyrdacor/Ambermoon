@@ -7,7 +7,8 @@
 ;
 ; The display code follows the original 2D map code (MAP/2D_MAP.S,
 ; MAP/2D_CITY.S, MAP/MAP.S, DISPLAY.S, HULL/CONTROLS.S) closely, but without
-; the module system, events, NPCs and the memory manager.
+; the module system, events and the memory manager. The persons (NPCs) are
+; in POC/PERSONS.S.
 
 	SECTION	Program,code
 
@@ -48,6 +49,10 @@ Program_main:
 	move.w	#160,Mouse_X
 	move.w	#100,Mouse_Y
 	jsr	Init_map
+	jsr	Calculate_map_data_offsets
+	jsr	Init_persons_2D
+	jsr	Init_time
+	move.l	#Realtime,VblQ_ptr_ST
 	jsr	Invalidate_tile_caches
 ; ---------- Draw the static parts ----------------
 	jsr	Display_status_block
@@ -65,6 +70,7 @@ Program_main:
 	tst.b	Quit_flag
 	bne.s	.Exit
 	jsr	Display_2D_map
+	jsr	Handle_realtime_steps
 	jsr	Display_position
 	jsr	Switch_screens
 	bra.s	.Loop
@@ -104,6 +110,16 @@ Init_map:
 	move.w	(a0)+,Map_Xcoord
 	move.w	(a0)+,Map_Ycoord
 	move.w	(a0)+,View_direction
+	move.w	(a0)+,Hour
+	move.w	(a0)+,Minute
+	move.b	3(a0),d0			; CD bits (as in Get_CD_value)
+	lsl.w	#8,d0
+	move.b	2(a0),d0
+	swap	d0
+	move.b	1(a0),d0
+	lsl.w	#8,d0
+	move.b	(a0),d0
+	move.l	d0,CD_value
 	move.w	#1,Party_frame
 	move.b	#C2_animspeed,Anim_speed	; Animation parameters (2D city)
 	move.b	#C2_animspeed,Anim_count
@@ -534,6 +550,7 @@ Try_2D_move:
 	move.w	d1,Map_Ycoord
 	st	Moved			; Yay!
 	jsr	Animate_party
+	jsr	Time_after_move
 	move.w	VBL_counter,Last_move	; Reset clock
 .Exit:	movem.l	(sp)+,d0-d3/d7
 	rts
@@ -579,10 +596,12 @@ Movement_check_2D:
 ;  OUT : d0 - Location status (.l)
 ; Changed registers : d0
 ; NOTE :
-;   - From MAP/MAP.S (2D city map, no NPCs).
+;   - From MAP/MAP.S (2D city map).
 ;*****************************************************************************
 Get_location_status:
-	movem.l	d1/a0/a1,-(sp)
+	movem.l	d1-d7/a0/a1,-(sp)
+	move.w	d0,d4			; Save coordinates
+	move.w	d1,d5
 	lea.l	Map_data_buffer+Map_data,a1	; Get map pointer
 	subq.w	#1,d1
 	mulu.w	Width_of_map,d1
@@ -598,13 +617,63 @@ Get_location_status:
 	move.l	-8(a0,d0.w),d0
 .No_under:	moveq.l	#0,d1			; Get overlay icon number
 	move.w	2(a1),d1
-	beq.s	.Exit			; Is there an overlay ?
+	beq.s	.No_over			; Is there an overlay ?
 	lsl.w	#3,d1			; Get overlay icon status
 	move.l	-8(a0,d1.l),d1
+; ---------- Check NPC's --------------------------
+.No_over:	moveq.l	#0,d2			; No NPC icon status
+	lea.l	VNPC_data,a0
+	move.l	CD_value,d6
+	moveq.l	#0,d7
+.Loop:	tst.b	NPC_char_nr(a0)		; Anyone there ?
+	beq.s	.Next
+	btst	d7,d6			; Deleted ?
+	bne.s	.Next
+	cmp.w	Current_NPC,d7		; Is self ?
+	beq.s	.Next
+	cmp.w	VMap_X(a0),d4		; Right coordinates ?
+	bne.s	.Next
+	cmp.w	VMap_Y(a0),d5
+	bne.s	.Next
+	move.b	NPC_icon_status(a0),d2	; Get icon status (unaligned)
+	lsl.w	#8,d2
+	move.b	NPC_icon_status+1(a0),d2
+	swap	d2
+	move.b	NPC_icon_status+2(a0),d2
+	lsl.w	#8,d2
+	move.b	NPC_icon_status+3(a0),d2
+	bra.s	.End
+.Next:	lea.l	VNPC_data_size(a0),a0	; Next NPC
+	addq.w	#1,d7
+	cmpi.w	#Max_chars,d7
+	bmi.s	.Loop
+; ---------- Merge location status ----------------
+.End:	tst.l	d2			; Any NPC ?
+	beq.s	.No
+	btst	#Underlay_priority_bit,d2	; Overlay priority ?
+	bne.s	.No
+	move.l	d2,d0			; Yes -> Use NPC status
+	bra.s	.Exit
+.No:	tst.l	d1			; Any overlay ?
+	beq.s	.Exit
 	btst	#Underlay_priority_bit,d1	; Underlay priority ?
 	bne.s	.Exit
 	move.l	d1,d0			; No -> Use overlay status
-.Exit:	movem.l	(sp)+,d1/a0/a1
+.Exit:	movem.l	(sp)+,d1-d7/a0/a1
+	rts
+
+;*****************************************************************************
+; [ Get sit/sleep status of a location ]
+;   IN : d0 - Map X-coordinate (.w)
+;        d1 - Map Y-coordinate (.w)
+;  OUT : d0 - Standing / Sitting_north ... / Sleeping (.w)
+; Changed registers : d0
+;*****************************************************************************
+Get_sit_sleep_status:
+	jsr	Get_location_status
+	andi.l	#Sit_sleep_mask,d0		; Get sit/sleep status
+	rol.l	#8,d0
+	rol.l	#1,d0
 	rts
 
 ;*****************************************************************************
@@ -675,6 +744,7 @@ Recalc_mapbuf_coords:
 ;*****************************************************************************
 Fill_map_buffers:
 	movem.l	d0/d1/d6/d7/a1-a3,-(sp)
+	jsr	Clear_persons_buffer
 	jsr	Recalc_mapbuf_coords	; Set map buffer coordinates
 	lea.l	Map_data_buffer+Map_data,a1	; Calculate map address
 	move.w	Map_Ycoord,d0
@@ -700,6 +770,7 @@ Fill_map_buffers:
 	dbra	d6,.Loop2
 	adda.w	d1,a1
 	dbra	d7,.Loop1
+	jsr	NPC_manager_2D		; Handle persons
 	movem.l	(sp)+,d0/d1/d6/d7/a1-a3
 	rts
 
@@ -724,6 +795,7 @@ Display_2D_map:
 	mulu.w	#Mapbuf_width,d0
 	add.w	Mapbuf_X,d0
 	move.w	d0,Party_cell
+	jsr	Mark_sprite_cells
 	lea.l	Underlay_buffer,a1
 	lea.l	Overlay_buffer,a2
 	lea.l	Redraw_flags,a3
@@ -742,21 +814,14 @@ Display_2D_map:
 	move.b	(a1)+,d2
 	swap	d2
 	move.w	(a2)+,d2
-	moveq.l	#0,d3			; Party here ?
-	move.w	Party_cell,d3
-	cmp.w	d3,d4
-	beq.s	.Party
-	subi.w	#Mapbuf_width,d3		; (the party is 32 pixels high)
-	cmp.w	d3,d4
-	beq.s	.Party
-	moveq.l	#0,d3
-	bra.s	.No_party
-.Party:	moveq.l	#1,d3
-.No_party:	tst.w	d3			; Party : always redraw
+	moveq.l	#0,d3			; Party or person here ?
+	lea.l	Sprite_cells,a0
+	move.b	0(a0,d4.w),d3
+	tst.w	d3			; Sprites : always redraw
 	bne.s	.Redraw
 	cmp.l	(a4),d2			; Same icons ?
 	bne.s	.Redraw
-	tst.w	4(a4)			; Party was here ?
+	tst.w	4(a4)			; Sprite was here ?
 	bne.s	.Redraw
 	btst	#0,7(a4)			; Animated ?
 	beq	.Skip
@@ -797,8 +862,30 @@ Display_2D_map:
 	subi.w	#Mapbuf_width,d5
 	add.w	Width_of_map,d5
 	dbra	d7,.Loop1
-; ---------- Display party & sky overlays ---------
-	jsr	Display_2D_party
+; ---------- Display persons & party -------------
+	lea.l	Icon_graphics,a0
+	lea.l	Persons_buffer,a1
+	jsr	Get_hashable_number
+	moveq.l	#0,d4			; Map buffer position
+	move.w	#Map2D_Y,d1
+	moveq.l	#Mapbuf_height,d7		; +1 !
+.Loop5:	move.w	#Map2D_X,d0		; Do one row
+	moveq.l	#Mapbuf_width-1,d6
+.Loop6:	move.b	(a1)+,d2			; Get person number
+	beq.s	.No_NPC
+	jsr	Display_2D_person		; Display person
+.No_NPC:	cmp.w	Party_cell,d4		; Party time ?
+	bne.s	.Next6
+	jsr	Display_2D_party		; Yeah!
+.Next6:	addi.w	#16,d0			; Next X
+	addq.w	#1,d4
+	addq.w	#1,d5
+	dbra	d6,.Loop6
+	addi.w	#16,d1			; Next Y
+	subi.w	#Mapbuf_width,d5
+	add.w	Width_of_map,d5
+	dbra	d7,.Loop5
+; ---------- Display sky overlays -----------------
 	jsr	Display_2D_sky
 	jsr	Pop_CA
 	subq.b	#1,Anim_count		; Time for an update ?
@@ -806,6 +893,155 @@ Display_2D_map:
 	jsr	Update_animation		; Update animation
 	move.b	Anim_speed,Anim_count	; Reset counter
 .Exit:	movem.l	(sp)+,d0-d7/a0-a6
+	rts
+
+;*****************************************************************************
+; [ Mark the map buffer positions which are covered by party and persons ]
+; All registers are restored
+; NOTE :
+;   - The sprites are 32 pixels high, so the position above is marked too.
+;*****************************************************************************
+Mark_sprite_cells:
+	movem.l	d0/d7/a0/a1,-(sp)
+	lea.l	Sprite_cells,a0		; Clear
+	moveq.l	#Mapbuf_size-1,d7
+.Clear:	clr.b	(a0)+
+	dbra	d7,.Clear
+	lea.l	Sprite_cells,a0
+	move.w	Party_cell,d0		; Party
+	jsr	.Mark
+	lea.l	Persons_buffer,a1		; Persons
+	moveq.l	#0,d0
+.Loop:	tst.b	(a1)+
+	beq.s	.Next
+	jsr	.Mark
+.Next:	addq.w	#1,d0
+	cmp.w	#Mapbuf_width*(Mapbuf_height+1),d0
+	bmi.s	.Loop
+	movem.l	(sp)+,d0/d7/a0/a1
+	rts
+
+; Mark position d0 and the one above
+.Mark:	move.w	d0,d7
+	cmp.w	#Mapbuf_size,d7
+	bpl.s	.Above
+	st	0(a0,d7.w)
+.Above:	subi.w	#Mapbuf_width,d7
+	bmi.s	.Done
+	cmp.w	#Mapbuf_size,d7
+	bpl.s	.Done
+	st	0(a0,d7.w)
+.Done:	rts
+
+;*****************************************************************************
+; [ Display 2D person ]
+;   IN : d0 - X-coordinate (.w)
+;        d1 - Y-coordinate (.w)
+;        d2 - NPC index + 1 (.b)
+;        d5 - Hashable number (.w)
+;        a0 - Pointer to icon graphics (.l)
+;        a5 - Pointer to icon info (.l)
+; All registers are restored
+; NOTE :
+;   - From MAP/2D_MAP.S. The map clip area must be installed.
+;*****************************************************************************
+Display_2D_person:
+	movem.l	d0-d7/a0-a2,-(sp)
+	lea.l	VNPC_data,a1		; Get NPC data
+	andi.w	#$00ff,d2
+	subq.w	#1,d2
+	move.w	d2,Current_NPC		; Set
+	mulu.w	#VNPC_data_size,d2
+	add.w	d2,a1
+	move.b	NPC_icon_nr(a1),d2		; Get icon number (unaligned)
+	lsl.w	#8,d2
+	move.b	NPC_icon_nr+1(a1),d2
+	move.b	NPC_icon_status(a1),d4	; Get icon status bits
+	lsl.w	#8,d4
+	move.b	NPC_icon_status+1(a1),d4
+	swap	d4
+	move.b	NPC_icon_status+2(a1),d4
+	lsl.w	#8,d4
+	move.b	NPC_icon_status+3(a1),d4
+	btst	#3,NPC_status_bits(a1)	; NPC or map graphics ?
+	beq.s	.NPC
+; ---------- Map graphics -------------------------
+	cmp.w	#Map2D_Y+Mapbuf_height*16,d1	; Out of window ?
+	bpl	.Exit
+	btst	#Underlay_bit,d4		; Under- or overlay ?
+	bne.s	.Over
+	jsr	Display_2D_underlay		; Show underlay
+	bra	.Exit
+.Over:	jsr	Display_2D_overlay		; Show overlay
+	bra	.Exit
+; ---------- NPC graphics -------------------------
+.NPC:	move.w	d0,d6			; Save coordinates
+	move.w	d1,d7
+	move.w	VMap_X(a1),d0		; Get sit/sleep status
+	move.w	VMap_Y(a1),d1
+	jsr	Get_location_status
+	btst	#Party_invisible_bit,d0	; Invisible ?
+	bne	.Exit
+	andi.l	#Sit_sleep_mask,d0
+	rol.l	#8,d0
+	rol.l	#1,d0
+	tst.w	d0			; Just standing ?
+	bne	.No
+; ---------- Just standing ------------------------
+	move.w	d6,d0			; Restore coordinates
+	move.w	d7,d1
+	lea.l	NPC_graphics,a0		; Seek graphics
+	bra.s	.Entry
+.Loop:	moveq.l	#0,d7			; Get number of frames
+	move.b	(a0),d7
+	addq.l	#2,a0
+	mulu.w	#32*8,d7			; Skip graphics
+	add.l	d7,a0
+.Entry:	dbra	d2,.Loop
+	moveq.l	#0,d3			; Default frame
+	moveq.l	#0,d2			; Get number of frames
+	move.b	(a0),d2
+	addq.l	#2,a0
+	cmp.w	#1,d2			; Any animation ?
+	bls.s	.No_anim
+	lea.l	Circle_anim-4,a2		; Circle or wave ?
+	btst	#Circle_wave_bit,d4
+	beq.s	.Circle
+	lea.l	Wave_anim-4,a2		; Wave
+.Circle:	lsl.w	#2,d2			; Add number of frames
+	adda.w	d2,a2
+	btst	#Random_anim_bit,d4		; Random animation ?
+	beq.s	.No_random
+	moveq.l	#0,d2			; Random hash
+	move.b	1(a2),d2
+	add.w	d2,d5
+	andi.w	#$000f,d5
+	move.w	2(a2),d2			; Test
+	btst	d5,d2
+	beq.s	.No_anim
+.No_random:	add.b	(a2),d3			; Get current frame
+.No_anim:	mulu.w	#32*8,d3			; Calculate frame address
+	adda.l	d3,a0
+	subi.w	#16,d1			; Display NPC
+	moveq.l	#5,d5
+	moveq.l	#1,d6
+	moveq.l	#32,d7
+	jsr	Put_masked_block
+	bra.s	.Exit
+; ---------- Sitting or sleeping ------------------
+.No:	lea.l	Party_graphics,a0		; Seek graphics
+	addi.w	#4*Party_frames-1,d0
+	mulu.w	#32*8,d0
+	add.l	d0,a0
+	move.w	d6,d0			; Restore coordinates
+	move.w	d7,d1
+	subi.w	#16,d1
+	moveq.l	#5,d5			; Display party
+	moveq.l	#1,d6
+	moveq.l	#32,d7
+	jsr	Put_masked_block
+.Exit:	move.w	#-1,Current_NPC		; Clear
+	movem.l	(sp)+,d0-d7/a0-a2
 	rts
 
 ;*****************************************************************************
@@ -948,15 +1184,22 @@ Get_hashable_number:
 ; [ Display party ]
 ; All registers are restored
 ; NOTE :
-;   - From MAP/2D_MAP.S (on foot, standing).
+;   - From MAP/2D_MAP.S (on foot).
 ;*****************************************************************************
 Display_2D_party:
 	movem.l	d0/d1/d5-d7/a0,-(sp)
 	lea.l	Party_graphics,a0		; Seek graphics
-	move.w	View_direction,d0		; Choose direction
+	move.w	Map_Xcoord,d0		; Get sit/sleep status
+	move.w	Map_Ycoord,d1
+	jsr	Get_sit_sleep_status
+	tst.w	d0			; Just standing ?
+	bne.s	.No
+	move.w	View_direction,d0		; Yes -> Choose direction
 	mulu.w	#Party_frames,d0
 	add.w	Party_frame,d0		; Animate
-	mulu.w	#32*8,d0
+	bra.s	.Do
+.No:	addi.w	#4*Party_frames-1,d0	; No -> Choose special frame
+.Do:	mulu.w	#32*8,d0
 	add.l	d0,a0
 	move.w	Mapbuf_X,d0		; Get coordinates
 	lsl.w	#4,d0
@@ -1224,8 +1467,11 @@ File_list:
 	dc.l	Map_name,64
 	dc.b	"DATA\MAPNAME.BIN",0
 	even
-	dc.l	Start_position,6
+	dc.l	Start_position,14
 	dc.b	"DATA\START.BIN",0
+	even
+	dc.l	NPC_graphics,Max_NPC_graphics
+	dc.b	"DATA\NPCGFX.BIN",0
 	even
 	dc.l	0
 
@@ -1237,6 +1483,7 @@ Load_error_text:
 
 	SECTION	Fast_BSS,bss
 Max_icons	EQU	2048
+Max_NPC_graphics	EQU	64*1024
 Max_map_size	EQU	12+320+100*100*4+16384
 UI_graphics_size	EQU	3*36*8+8+34*2*8+2*17*2*8
 
@@ -1254,7 +1501,8 @@ Names:	ds.b 6*16
 Temp_name:	ds.b 6
 Map_name:	ds.b 64
 	even
-Start_position:	ds.w 3
+Start_position:	ds.w 5			; X, Y, direction, hour, minute
+	ds.b	4			; CD bits
 Quit_flag:	ds.b 1
 Moved:	ds.b 1
 Party_animate_state:	ds.b 1
@@ -1279,6 +1527,8 @@ Mapbuf_X:	ds.w 1
 Mapbuf_Y:	ds.w 1
 Party_cell:	ds.w 1
 Cell_flags:	ds.w 1
+Sprite_cells:	ds.b Mapbuf_size
+	even
 Tile_cache_owner:	ds.l 1
 Tile_cache1:	ds.l 4*Mapbuf_size
 Tile_cache2:	ds.l 4*Mapbuf_size
@@ -1295,3 +1545,4 @@ Party_graphics:	ds.b 17*32*8
 Icon_data_buffer:	ds.b 2+Max_icons*8
 Map_data_buffer:	ds.b Max_map_size
 Icon_graphics:	ds.b Max_icons*16*8
+NPC_graphics:	ds.b Max_NPC_graphics

@@ -19,3 +19,4 @@
 	include	"KERNEL/FILES.S"
 	include	"KERNEL/VARIOUS.S"
 	include	"POC/MAP2D.S"
+	include	"POC/PERSONS.S"

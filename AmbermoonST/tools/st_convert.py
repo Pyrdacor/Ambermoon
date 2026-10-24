@@ -25,7 +25,10 @@
 #   BUTTONS.BIN control icons of Button_graphics (78 x 32x13, colour 0 transparent)
 #   MPTR.BIN    default mouse pointer (Default_Mptr of KERNEL/DATA.S): hotspot X, Y (words), 16x16
 #   MAPNAME.BIN map name (0-terminated)
-#   START.BIN   start position X, Y, view direction (words)
+#   START.BIN   start position X, Y, view direction, hour, minute (words), CD bits of the map (4 bytes, as in
+#               the savegame: which map characters are not present)
+#   NPCGFX.BIN  NPC graphics of the map (NPC_gfx.amb, same structure: number of frames (byte), 0 (byte),
+#               frames of 16x32)
 #   PORTR.BIN   6 portraits (32x34) of the party used by the proof of concept
 #   NAMES.BIN   6 names (16 bytes each)
 #   FONT.BIN    Glyph_mapping (224 bytes) + Glyph_data (5 bytes per glyph), unchanged
@@ -190,6 +193,7 @@ def main():
     ap.add_argument('out')
     ap.add_argument('--map', type=int, default=258)
     ap.add_argument('--pos', default='2,15,1', help='start position x,y,direction (default: start of the game)')
+    ap.add_argument('--time', default='22:30', help='time of day (default: start of the game)')
     ap.add_argument('--data', default=os.path.join(ROOT, 'ExtractedGameFiles.zip'))
     args = ap.parse_args()
     os.makedirs(args.out, exist_ok=True)
@@ -213,6 +217,13 @@ def main():
     icons = [struct.unpack('>IHBB', idata[2 + i * 8:10 + i * 8]) for i in range(struct.unpack('>H', idata[:2])[0])]
     party_gfx = data.read(f'Party_gfx.amb/{world + 1:03}')
     party = [planar(party_gfx, 16, 32, 5, i * 320) for i in range(len(party_gfx) // 320)]
+    npc_raw = data.read(f'NPC_gfx.amb/{m[7]:03}') if m[7] else b''
+    npcs = []                                # list of lists of frames
+    i = 0
+    while i + 2 <= len(npc_raw) and npc_raw[i]:
+        n = npc_raw[i]
+        npcs.append([planar(npc_raw, 16, 32, 5, i + 2 + k * 320) for k in range(n)])
+        i += 2 + n * 320
 
     # weights: pixels of all maps with this tileset and palette (all animation frames) + party graphics
     weights = [0] * 32
@@ -228,7 +239,7 @@ def main():
                         if g - 1 + k < len(tiles):
                             for v in tiles[g - 1 + k]:
                                 weights[v] += 1
-    for frame in party:
+    for frame in party + [f for g in npcs for f in g]:
         for v in frame:
             weights[v] += 16       # small but important
     map16, map_lut = make_palette(map_pal, weights)
@@ -237,6 +248,8 @@ def main():
     write('ICONDAT.BIN', idata)
     write('MAP.BIN', m)
     write('PARTY.BIN', b''.join(st_graphic([map_lut[v] for v in f], 16, 32) for f in party))
+    write('NPCGFX.BIN', b''.join(bytes([len(g), 0]) + b''.join(st_graphic([map_lut[v] for v in f], 16, 32)
+                                                               for f in g) for g in npcs) + b'\0\0')
 
     layout = planar(data.read('Layouts.amb/001'), 320, 163, 3)
     # Value 0 is colour 24 of the map palette, which is red in palette 7 (the background around the frames).
@@ -291,7 +304,10 @@ def main():
         size = struct.unpack('>H', texts[2:4])[0]
         name = texts[2 + 2 * count:2 + 2 * count + size].split(b'\0')[0].strip()
     write('MAPNAME.BIN', name + b'\0')
-    write('START.BIN', struct.pack('>3H', *map(int, args.pos.split(','))))
+    hour, minute = map(int, args.time.split(':'))
+    save = open(os.path.join(AMBERFILES, 'Save.00', 'Party_data.sav'), 'rb').read()
+    cd = save[0x2504 + (args.map - 1) * 4:0x2504 + args.map * 4]
+    write('START.BIN', struct.pack('>5H', *map(int, args.pos.split(',')), hour, minute) + cd)
 
     font = source_data('KERNEL/TEXTS.S', 'Glyph_mapping')
     glyphs = source_data('KERNEL/TEXTS.S', 'Glyph_data')
