@@ -26,16 +26,17 @@
 
 Body_slot_size	EQU	16
 Backpack_slot_height	EQU	24
-Backpack_bar_X	EQU	175
-Backpack_bar_Y	EQU	76
-Backpack_bar_height	EQU	112
-Backpack_row_height	EQU	Backpack_bar_height/8	; 8 rows of 3 slots
-Backpack_thingy_height	EQU	Backpack_bar_height-4*Backpack_row_height
-Max_scroll_row	EQU	4
-Inv_PA_X1	EQU	21			; Print area (prompts)
-Inv_PA_X2	EQU	181
-Inv_PA_Y1	EQU	50
-Inv_PA_Y2	EQU	70
+; Scroll bar descriptors (the data of the scroll bars of HULL/CONTROLS.S)
+	rsreset
+SBD_pos_list:	rs.l 1			; Positions of the 12 slots
+SBD_X:	rs.w 1
+SBD_Y:	rs.w 1
+SBD_height:	rs.w 1
+SBD_row_height:	rs.w 1
+SBD_thingy_height:	rs.w 1
+SBD_max_row:	rs.w 1			; Number of rows - visible rows
+SBD_units:	rs.w 1			; Slots per row
+SBD_half:	rs.w 1			; Half page (rows)
 Info_X	EQU	208			; Small member info
 Info_Y	EQU	49
 ; Text numbers in TEXTS.BIN
@@ -125,6 +126,7 @@ Inventory_screen:
 Show_inventory_mode:
 	movem.l	d0-d7/a0-a2,-(sp)
 	move.w	d0,Inventory_mode
+	move.l	#Inv_PA,Print_area_ptr
 	clr.l	Ghost_text
 	moveq.l	#1,d0			; Fade out
 	jsr	Fade_screen
@@ -316,6 +318,8 @@ Find_inventory_object:
 ; ---------- Body slots ---------------------------
 .No_status:	cmp.w	#1,Inventory_mode		; Inventory 1 ?
 	beq	.No_bar
+	cmp.w	#3,Inventory_mode		; Layout 3 (no body) ?
+	beq.s	.Slots
 	lea.l	Body_pos_list,a0
 	moveq.l	#1,d0
 	moveq.l	#Body_slot_size,d4
@@ -325,15 +329,18 @@ Find_inventory_object:
 	cmp.w	#9+1,d0
 	bmi.s	.Loop1
 ; ---------- Backpack slots -----------------------
-	lea.l	Backpack_pos_list,a0
+.Slots:	move.l	SB_ptr,a0
+	move.l	SBD_pos_list(a0),a0
 	moveq.l	#1,d0
 	moveq.l	#Backpack_slot_height,d4
 .Loop2:	jsr	.Inside
-	beq.s	.Backpack
+	beq	.Backpack
 	addq.w	#1,d0
 	cmp.w	#12+1,d0
 	bmi.s	.Loop2
 ; ---------- Body area (number 0) -----------------
+	cmp.w	#3,Inventory_mode
+	beq.s	.No_body
 	moveq.l	#0,d0
 	cmp.w	#20,d2
 	bmi.s	.No_body
@@ -344,13 +351,18 @@ Find_inventory_object:
 	cmp.w	#176+16,d3
 	bmi	.Body
 ; ---------- Scroll bar ---------------------------
-.No_body:	cmp.w	#Backpack_bar_X,d2
+.No_body:	move.l	SB_ptr,a0
+	move.w	SBD_X(a0),d1
+	cmp.w	d1,d2
 	bmi.s	.No_bar
-	cmp.w	#Backpack_bar_X+6,d2
+	addq.w	#6,d1
+	cmp.w	d1,d2
 	bpl.s	.No_bar
-	cmp.w	#Backpack_bar_Y,d3
+	move.w	SBD_Y(a0),d1
+	cmp.w	d1,d3
 	bmi.s	.No_bar
-	cmp.w	#Backpack_bar_Y+Backpack_bar_height,d3
+	add.w	SBD_height(a0),d1
+	cmp.w	d1,d3
 	bpl.s	.No_bar
 	move.w	#Obj_scroll_bar<<8,d0
 	bra.s	.Exit
@@ -431,7 +443,7 @@ Update_ghost:
 	bra.s	.Slot
 .Body:	tst.w	d0			; Body slot ?
 	beq.s	.Done
-.Slot:	jsr	Get_packet
+.Slot:	jsr	Get_slot_packet
 	move.w	Object_index(a0),d0		; Anything there ?
 	beq.s	.Done
 	jsr	Get_item_data
@@ -471,7 +483,11 @@ Switch_inventory_member:
 ; All registers are restored
 ;*****************************************************************************
 Display_Inv2_member_info:
-	movem.l	d0/d1/a0,-(sp)
+	movem.l	d0/d1/a0/a1,-(sp)
+	jsr	Get_inventory_char		; Backpack slots
+	lea.l	Char_inventory+Backpack_slots(a1),a1
+	move.l	a1,Slot_base
+	move.l	#Backpack_bar,SB_ptr
 	jsr	Erase_PA
 	jsr	Display_small_member_info
 	jsr	Display_body_objects
@@ -481,7 +497,7 @@ Display_Inv2_member_info:
 	move.w	-2(a0,d0.w),d0
 	jsr	Set_scroll_row
 	jsr	Update_weight
-	movem.l	(sp)+,d0/d1/a0
+	movem.l	(sp)+,d0/d1/a0/a1
 	rts
 
 ; Store the scroll bar position of the current member
@@ -1098,22 +1114,26 @@ Update_objects:
 	rts
 
 ;*****************************************************************************
-; [ Display a backpack object ]
+; [ Display an object of the backpack or a chest ]
 ;   IN : d0 - Slot number {1...12} (.w)
 ; All registers are restored
 ; NOTE :
-;   - From DISPLAY.S. [ Scroll_bar_result ] is added to the slot number.
+;   - From DISPLAY.S. [ Scroll_bar_result ] is added to the slot number, the
+;     packets are at [ Slot_base ], the positions in the scroll bar
+;     descriptor [ SB_ptr ].
 ;*****************************************************************************
 Display_object:
 	movem.l	d0-d7/a0-a3,-(sp)
-	lea.l	Backpack_pos_list-4,a3	; Find coordinates
+	move.l	SB_ptr,a3			; Find coordinates
+	move.l	SBD_pos_list(a3),a3
+	subq.w	#1,d0
 	move.w	d0,d1
 	lsl.w	#2,d1
 	add.w	d1,a3
-	addi.w	#9,d0			; Get packet
-	add.w	Scroll_bar_result,d0
-	jsr	Get_packet
-	move.l	a0,a2
+	add.w	Scroll_bar_result,d0	; Get packet
+	mulu.w	#Object_packet_size,d0
+	move.l	Slot_base,a2
+	add.l	d0,a2
 	move.w	(a3),d0			; Erase area
 	move.w	2(a3),d1
 	move.w	d0,d2
@@ -1195,29 +1215,29 @@ Press_exit_icon:
 ;*****************************************************************************
 ; [ Scroll bar ]
 ; NOTE :
-;   - From HULL/CONTROLS.S, for the scroll bar of the backpack (8 rows of
-;     3 slots, 4 rows visible).
+;   - From HULL/CONTROLS.S, for the scroll bar descriptor [ SB_ptr ].
 ;*****************************************************************************
 ; [ Set the scroll bar row ]
-;   IN : d0 - Row {0...4} (.w)
+;   IN : d0 - Row (.w)
 ; All registers are restored
 Set_scroll_row:
-	movem.l	d0/d1,-(sp)
+	movem.l	d0/d1/a0,-(sp)
+	move.l	SB_ptr,a0
 	tst.w	d0
 	bpl.s	.Ok1
 	moveq.l	#0,d0
-.Ok1:	cmp.w	#Max_scroll_row,d0
+.Ok1:	cmp.w	SBD_max_row(a0),d0
 	ble.s	.Ok2
-	moveq.l	#Max_scroll_row,d0
+	move.w	SBD_max_row(a0),d0
 .Ok2:	move.w	d0,Scroll_row
 	move.w	d0,d1
-	mulu.w	#3,d1
+	mulu.w	SBD_units(a0),d1
 	move.w	d1,Scroll_bar_result
-	mulu.w	#Backpack_row_height,d0
+	mulu.w	SBD_row_height(a0),d0
 	sf	d1
 	jsr	Draw_scroll_bar
 	jsr	Update_objects
-	movem.l	(sp)+,d0/d1
+	movem.l	(sp)+,d0/d1/a0
 	rts
 
 ; [ Draw scroll bar ]
@@ -1225,17 +1245,21 @@ Set_scroll_row:
 ;        d1 - Thingy selected (.b)
 ; All registers are restored
 Draw_scroll_bar:
-	movem.l	d0-d6/a1,-(sp)
+	movem.l	d0-d6/a0/a1,-(sp)
+	move.l	SB_ptr,a0
 	lea.l	Unselected_thingy_colours,a1
 	tst.b	d1
 	beq.s	.Do
 	lea.l	Selected_thingy_colours,a1
 .Do:	move.w	d0,d6
 ; ---------- Draw scroll bar ----------------------
-	move.w	#Backpack_bar_X,d0		; First box
-	move.w	#Backpack_bar_Y,d1
-	move.w	#Backpack_bar_X+6-1,d2
-	move.w	#Backpack_bar_Y+Backpack_bar_height-1,d3
+	move.w	SBD_X(a0),d0		; First box
+	move.w	SBD_Y(a0),d1
+	move.w	d0,d2
+	addq.w	#6-1,d2
+	move.w	d1,d3
+	add.w	SBD_height(a0),d3
+	subq.w	#1,d3
 	moveq.l	#26,d4
 	jsr	Draw_box
 	addq.w	#1,d0			; Second box
@@ -1243,13 +1267,14 @@ Draw_scroll_bar:
 	moveq.l	#27,d4
 	jsr	Draw_box
 ; ---------- Draw thingy --------------------------
-	move.w	#Backpack_bar_X,d0		; First box
-	move.w	#Backpack_bar_Y,d1
+	move.w	SBD_X(a0),d0		; First box
+	move.w	SBD_Y(a0),d1
 	add.w	d6,d1
 	move.w	d0,d2
 	addq.w	#6-1,d2
 	move.w	d1,d3
-	addi.w	#Backpack_thingy_height-1,d3
+	add.w	SBD_thingy_height(a0),d3
+	subq.w	#1,d3
 	move.w	(a1)+,d4
 	jsr	Draw_box
 	addq.w	#1,d0			; Second box
@@ -1272,55 +1297,63 @@ Draw_scroll_bar:
 	move.w	d1,d3
 	move.w	(a1)+,d4
 	jsr	Draw_box
-	addi.w	#Backpack_thingy_height,d1	; Shadow
-	cmp.w	#Backpack_bar_Y+Backpack_bar_height-1,d1	; Thingy at the bottom ?
+	add.w	SBD_thingy_height(a0),d1	; Shadow
+	move.w	SBD_Y(a0),d3		; Thingy at the bottom ?
+	add.w	SBD_height(a0),d3
+	subq.w	#1,d3
+	cmp.w	d3,d1
 	bgt.s	.Exit
 	move.w	d0,d2			; Draw shadow under thingy
 	addq.w	#6-1,d2
 	move.w	d1,d3
 	moveq.l	#26,d4
 	jsr	Draw_box
-.Exit:	movem.l	(sp)+,d0-d6/a1
+.Exit:	movem.l	(sp)+,d0-d6/a0/a1
 	rts
 
 ; [ Scroll bar pressed ]
 ; All registers are restored
 Scroll_bar_pressed:
-	movem.l	d0-d3,-(sp)
+	movem.l	d0-d4/a0,-(sp)
+	move.l	SB_ptr,a0
 	move.w	Scroll_row,d2		; Get thingy position
-	mulu.w	#Backpack_row_height,d2
-	addi.w	#Backpack_bar_Y,d2
+	mulu.w	SBD_row_height(a0),d2
+	add.w	SBD_Y(a0),d2
 	move.w	Mouse_Y,d0
 	cmp.w	d2,d0			; Above thingy ?
 	bpl.s	.Not_above
 	move.w	Scroll_row,d0		; Half page up
-	subq.w	#2,d0
+	sub.w	SBD_half(a0),d0
 	bra.s	.Set
-.Not_above:	addi.w	#Backpack_thingy_height,d2	; Below thingy ?
+.Not_above:	add.w	SBD_thingy_height(a0),d2	; Below thingy ?
 	cmp.w	d2,d0
 	bmi.s	.In
 	move.w	Scroll_row,d0		; Half page down
-	addq.w	#2,d0
+	add.w	SBD_half(a0),d0
 .Set:	jsr	Set_scroll_row
 	jsr	Copy_screen_to_both
 	bra	.Exit
 ; ---------- Drag scroll thingy -------------------
 .In:	clr.l	Ghost_text
-	subi.w	#Backpack_thingy_height,d2	; Grab offset
+	sub.w	SBD_thingy_height(a0),d2	; Grab offset
 	sub.w	d2,d0
 	move.w	d0,d3
+	move.w	SBD_max_row(a0),d4		; Maximum offset
+	mulu.w	SBD_row_height(a0),d4
 .Again:	move.w	Mouse_Y,d0		; Get position
 	sub.w	d3,d0
-	subi.w	#Backpack_bar_Y,d0
+	sub.w	SBD_Y(a0),d0
 	bpl.s	.Ok1
 	moveq.l	#0,d0
-.Ok1:	cmp.w	#Max_scroll_row*Backpack_row_height,d0
+.Ok1:	cmp.w	d4,d0
 	ble.s	.Ok2
-	move.w	#Max_scroll_row*Backpack_row_height,d0
+	move.w	d4,d0
 .Ok2:	move.w	d0,d2
-	addi.w	#Backpack_row_height/2,d0	; Get row
+	move.w	SBD_row_height(a0),d1	; Get row
+	lsr.w	#1,d1
+	add.w	d1,d0
 	ext.l	d0
-	divu.w	#Backpack_row_height,d0
+	divu.w	SBD_row_height(a0),d0
 	cmp.w	Scroll_row,d0		; Update needed ?
 	beq.s	.No
 	jsr	Set_scroll_row
@@ -1335,7 +1368,7 @@ Scroll_bar_pressed:
 	jsr	Set_scroll_row
 	jsr	Copy_screen_to_both
 	jsr	Read_mouse_clicks
-.Exit:	movem.l	(sp)+,d0-d3
+.Exit:	movem.l	(sp)+,d0-d4/a0
 	rts
 
 ;*****************************************************************************
@@ -2128,29 +2161,36 @@ Reset_party_weight:
 ;   IN : d0 - Message number (.w)
 ; All registers are restored
 Print_prompt:
-	movem.l	d0-d7/a0/a4,-(sp)
+	movem.l	d0-d7/a0/a3/a4,-(sp)
 	jsr	Erase_PA
 	addi.w	#Messages,d0
 	jsr	Get_text
-	move.w	#(Inv_PA_X2-Inv_PA_X1+1)/(Char_width+1),Text_width
+	move.l	Print_area_ptr,a3
+	move.w	PA_X2(a3),d2		; Width
+	sub.w	PA_X1(a3),d2
+	addq.w	#1,d2
+	move.w	d2,d0
+	ext.l	d0
+	divu.w	#Char_width+1,d0
+	move.w	d0,Text_width
 	jsr	Process_text
 	move.w	#White,Ink_colour
 	move.w	#Default_shadow,Shadow_colour
 	lea.l	Text_lines,a4
 	move.w	Text_height,d7
-	cmp.w	#3,d7			; (3 lines fit)
+	cmp.w	#3,d7			; (3 lines)
 	bls.s	.Ok
 	moveq.l	#3,d7
-.Ok:	move.w	#Inv_PA_X1,d0
-	move.w	#Inv_PA_Y1+1,d1
+.Ok:	move.w	PA_X1(a3),d0
+	move.w	PA_Y1(a3),d1
+	addq.w	#1,d1
 	bra.s	.Next
 .Line:	move.l	a4,a0
-	move.w	#Inv_PA_X2-Inv_PA_X1+1,d2
 	jsr	Print_centered_string
 	lea.l	Line_stride(a4),a4
 	addi.w	#Char_height+2,d1
 .Next:	dbra	d7,.Line
-	movem.l	(sp)+,d0-d7/a0/a4
+	movem.l	(sp)+,d0-d7/a0/a3/a4
 	rts
 
 ; [ Print a prompt and wait for the user ]
@@ -2175,14 +2215,13 @@ Do_prompt:
 ; [ Erase the print area ]
 ; All registers are restored
 Erase_PA:
-	movem.l	d0-d4,-(sp)
-	move.w	#Inv_PA_X1,d0
-	move.w	#Inv_PA_Y1,d1
-	move.w	#Inv_PA_X2,d2
-	move.w	#Inv_PA_Y2,d3
+	movem.l	d0-d4/a0,-(sp)
+	move.l	Print_area_ptr,a0
+	movem.w	(a0),d0/d2		; (X1, X2)
+	movem.w	PA_Y1(a0),d1/d3		; (Y1, Y2)
 	moveq.l	#Window_colour,d4
 	jsr	Draw_box
-	movem.l	(sp)+,d0-d4
+	movem.l	(sp)+,d0-d4/a0
 	rts
 
 ;*****************************************************************************
@@ -2261,6 +2300,21 @@ Get_packet:
 	mulu.w	#Object_packet_size,d0
 	add.l	d0,a0
 	movem.l	(sp)+,d0/a1
+	rts
+
+; [ Get the packet of a slot ]
+;   IN : d0 - Slot number : body {1...9} or slot under the scroll bar + 9 (.w)
+;  OUT : a0 - Pointer to object packet (.l)
+; Changed registers : a0
+Get_slot_packet:
+	cmp.w	#9+1,d0			; Body ?
+	bmi	Get_packet
+	move.l	d0,-(sp)			; No -> [ Slot_base ]
+	subi.w	#9+1,d0
+	mulu.w	#Object_packet_size,d0
+	move.l	Slot_base,a0
+	add.l	d0,a0
+	move.l	(sp)+,d0
 	rts
 
 ; [ Get item data ]
@@ -2425,6 +2479,9 @@ Inv_RL:	R_palette 0,UI_palette
 	R_end
 	even
 
+; Print area of the inventory (.PA of Inv2_Mod in MODULES.S)
+Inv_PA:	dc.w 21,181,50,70
+
 ; Raster list of the character screen (Inv_RL with its own palette)
 Char_RL:	R_palette 0,UI_palette
 	R_range 1,25,35,Portrait_range
@@ -2487,6 +2544,11 @@ Condition_icon_table:
 	dc.b -1,-1
 	even
 
+; Scroll bar of the backpack (Inv2_scroll_bar in INVENTOR.S : 8 rows of 3
+; slots, 4 rows visible)
+Backpack_bar:	dc.l Backpack_pos_list
+	dc.w 175,76,112,112/8,112-4*(112/8),4,3,2
+
 ; Scroll bar thingy colours (HULL/CONTROLS.S)
 Unselected_thingy_colours:
 	dc.w 28,27,30,29,31
@@ -2512,6 +2574,9 @@ Small_portraits:	ds.l 1
 Condition_list:	ds.w 3*12+1		; X, Y, condition / -1
 Inventory_scroll_positions:	ds.w 6
 Scroll_row:	ds.w 1
+SB_ptr:	ds.l 1			; Scroll bar descriptor
+Print_area_ptr:	ds.l 1			; Print area (X1, X2, Y1, Y2)
+Slot_base:	ds.l 1			; Packets of the slots under the scroll bar
 Scroll_bar_result:	ds.w 1
 Source_slot:	ds.w 1
 Target_slot:	ds.w 1

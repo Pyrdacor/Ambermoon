@@ -214,7 +214,7 @@ No_event:					; (events without effect here, e.g. music)
 
 ; Event routines (Event_ptrs in EVENTS.S)
 Event_ptrs:
-	dc.l Map_exit,Not_implemented,Not_implemented,Show_pictxt,Not_implemented	; 1 - 5
+	dc.l Map_exit,Door,Item_found,Show_pictxt,Not_implemented	; 1 - 5
 	dc.l Not_implemented,Not_implemented,Not_implemented,Not_implemented,Change_icon	; 6 - 10
 	dc.l Not_implemented,Not_implemented,Query,Modify,Not_implemented	; 11 - 15
 	dc.l No_event,Not_implemented,Not_implemented,Not_implemented,No_event	; 16 - 20

@@ -25,3 +25,5 @@
 	include	"POC/LIGHT.S"
 	include	"POC/INVENTORY.S"
 	include	"POC/ITEMS.S"
+	include	"POC/CHEST.S"
+	include	"POC/DIALOGUE.S"

@@ -361,16 +361,113 @@ Print_centered_string:
 ;     (M2_CIL in MAP/2D_MAP.S).
 ;*****************************************************************************
 Display_control_icons:
-	movem.l	d0-d3/a2/a3,-(sp)
-	lea.l	M2_CIL,a2
-	lea.l	Icon_pos,a3
-	moveq.l	#9-1,d2
-.Loop:	move.w	(a3)+,d0			; Get coordinates
-	move.w	(a3)+,d1
-	move.w	(a2)+,d3			; Display button
-	jsr	Display_up_button
-	dbra	d2,.Loop
-	movem.l	(sp)+,d0-d3/a2/a3
+	move.l	a0,-(sp)
+	lea.l	M2_CIL,a0			; Movement or actions ?
+	tst.b	Second_CIL_flag
+	beq.s	.First
+	lea.l	Second_CIL,a0
+.First:	jsr	Display_CIL
+	move.l	(sp)+,a0
+	rts
+
+;*****************************************************************************
+; [ Switch between the two control icon lists of the map ]
+; All registers are restored
+; NOTE :
+;   - Like [ Switch_map_CIL ] (MAP/MAP.S).
+;*****************************************************************************
+Switch_map_CIL:
+	not.b	Second_CIL_flag
+	jsr	Display_control_icons
+	jmp	Copy_screen_to_both
+
+;*****************************************************************************
+; [ Select a map position next to the party ]
+;   IN : a0 - Pointer to mouse pointer (.l)
+;  OUT : d0/d1 - Map coordinates (.w)
+;        mi - Aborted (right mouse button or ESC)
+; Changed registers : d0,d1
+; NOTE :
+;   - Like the Hand and Mouth modules (ACTIONS.S, MODULES.S) : the position
+;     must be next to the party (or the tile above, for persons).
+;*****************************************************************************
+Select_map_target:
+	movem.l	d2-d7/a0-a6,-(sp)
+	jsr	Change_Mptr
+	jsr	Read_mouse_clicks
+.Loop:	jsr	Display_2D_map
+	jsr	Handle_realtime_steps
+	jsr	Switch_screens
+	jsr	Read_key			; ESC ?
+	cmp.w	#$01,d0
+	beq.s	.Abort
+	jsr	Read_mouse_clicks
+	btst	#Right_pressed,d0
+	bne.s	.Abort
+	btst	#Left_pressed,d0
+	beq.s	.Loop
+	move.w	Mouse_X,d0		; Inside the map window ?
+	subi.w	#Map2D_X,d0
+	bmi.s	.Loop
+	cmp.w	#Mapbuf_width*16,d0
+	bpl.s	.Loop
+	move.w	Mouse_Y,d1
+	subi.w	#Map2D_Y,d1
+	bmi.s	.Loop
+	cmp.w	#Mapbuf_height*16,d1
+	bpl.s	.Loop
+	lsr.w	#4,d0			; Relative to the party
+	lsr.w	#4,d1
+	sub.w	Mapbuf_X,d0
+	sub.w	Mapbuf_Y,d1
+	move.w	d0,d2			; Next to the party ?
+	addq.w	#1,d2
+	cmp.w	#2,d2
+	bhi.s	.Loop
+	move.w	d1,d2
+	addq.w	#2,d2
+	cmp.w	#3,d2
+	bhi.s	.Loop
+	add.w	Map_Xcoord,d0		; Map coordinates
+	add.w	Map_Ycoord,d1
+	moveq.l	#0,d2
+	bra.s	.Exit
+.Abort:	moveq.l	#-1,d2
+.Exit:	lea.l	Mouse_pointer,a0
+	jsr	Change_Mptr
+	tst.w	d2
+	movem.l	(sp)+,d2-d7/a0-a6
+	rts
+
+;*****************************************************************************
+; [ Touch a map position (Hand action) ]
+;   IN : d0/d1 - Map coordinates (.w)
+; All registers are restored
+; NOTE :
+;   - From [ Touch ] (ACTIONS.S) : doors, chests and riddle mouths, and
+;     queries for touching.
+;*****************************************************************************
+Touch_map:
+	movem.l	d0-d2/a5,-(sp)
+	move.w	Map_Xcoord,Old_Xcoord	; (the party stays here)
+	move.w	Map_Ycoord,Old_Ycoord
+	jsr	Find_event		; Find event
+	bmi.s	.Exit
+	jsr	Check_event_save_status	; Already saved ?
+	bne.s	.Exit
+	lea.l	Current_event_data,a5	; No -> Examine event
+	moveq.l	#0,d0			; Get event type
+	move.b	(a5),d0
+	move.l	#Handable_event_mask,d1	; Touchable ?
+	btst	d0,d1
+	bne.s	.Do
+	cmp.b	#Query_type,d0		; Query ?
+	bne.s	.Exit
+	cmp.b	#Touched_QM_type,Event_b1(a5)	; For touch ?
+	bne.s	.Exit
+.Do:	jsr	Handle_event_chain
+	st	Pending_events		; (the position may have changed)
+.Exit:	movem.l	(sp)+,d0-d2/a5
 	rts
 
 ;*****************************************************************************
@@ -482,19 +579,57 @@ Handle_input:
 	bra	.Exit
 ; ---------- Inventory ----------------------------
 .Mouse:	jsr	Read_mouse_clicks		; Right button on a portrait ?
-	btst	#Right_pressed,d0
-	beq.s	.Move_input
+	move.w	d0,d6
+	btst	#Right_pressed,d6
+	beq	.No_right
 	cmp.w	#Middle_Y+1,Mouse_Y
-	bpl.s	.Move_input
+	bpl.s	.Right_map
 	move.w	Mouse_X,d7
 	subi.w	#16,d7
-	bmi.s	.Move_input
+	bmi	.Move_input
 	ext.l	d7
 	divu.w	#48,d7
 	cmp.w	#6,d7
-	bpl.s	.Move_input
+	bpl	.Move_input
 	addq.w	#1,d7
 	jsr	Inventory_screen
+	bra	.Exit
+; ---------- Right button on the icons : switch ---
+.Right_map:	cmp.w	#208,Mouse_X		; Control icons ?
+	bmi.s	.Action
+	cmp.w	#143,Mouse_Y
+	bmi.s	.Move_input
+	jsr	Switch_map_CIL
+	bra	.Exit
+; ---------- Right button in the map : talk -------
+.Action:	lea.l	Mouth_pointer,a0		; (Mouse_action_on)
+	jsr	Select_map_target
+	bmi	.Exit
+	jsr	Talk_2D
+	bra	.Exit
+; ---------- Second control icons -----------------
+.No_right:	tst.b	Second_CIL_flag		; Action icons ?
+	beq.s	.Move_input
+	btst	#Left_pressed,d6
+	beq.s	.Move_input
+	jsr	Control_icon_number
+	cmp.w	#2,d0			; Hand ?
+	bne.s	.No_hand
+	moveq.l	#2,d0
+	jsr	Press_icon
+	lea.l	Hand_pointer,a0
+	jsr	Select_map_target
+	bmi	.Exit
+	jsr	Touch_map
+	bra	.Exit
+.No_hand:	cmp.w	#3,d0			; Talk ?
+	bne.s	.Move_input
+	moveq.l	#3,d0
+	jsr	Press_icon
+	lea.l	Mouth_pointer,a0
+	jsr	Select_map_target
+	bmi	.Exit
+	jsr	Talk_2D
 	bra	.Exit
 ; ---------- Movement -----------------------------
 .Move_input:
@@ -517,6 +652,63 @@ Handle_input:
 	rts
 
 ;*****************************************************************************
+; [ Get the number of the control icon under the mouse ]
+;  OUT : d0 - Icon number {1...9} / 0 = none (.w)
+; Changed registers : d0
+;*****************************************************************************
+Control_icon_number:
+	movem.l	d1,-(sp)
+	moveq.l	#0,d0
+	move.w	Mouse_X,d1
+	subi.w	#208,d1
+	bmi.s	.Exit
+	ext.l	d1
+	divu.w	#32,d1
+	cmp.w	#3,d1
+	bpl.s	.Exit
+	move.w	d1,d0
+	move.w	Mouse_Y,d1
+	subi.w	#143,d1
+	bmi.s	.None
+	ext.l	d1
+	divu.w	#17,d1
+	cmp.w	#3,d1
+	bpl.s	.None
+	mulu.w	#3,d1
+	add.w	d1,d0
+	addq.w	#1,d0
+	bra.s	.Exit
+.None:	moveq.l	#0,d0
+.Exit:	movem.l	(sp)+,d1
+	rts
+
+; [ Show a control icon pressed until the mouse button is released ]
+;   IN : d0 - Icon number {1...9} (.w)
+; All registers are restored
+Press_icon:
+	movem.l	d0-d3/a0,-(sp)
+	move.w	d0,d2
+	lea.l	M2_CIL-2,a0		; Get icon
+	tst.b	Second_CIL_flag
+	beq.s	.First
+	lea.l	Second_CIL-2,a0
+.First:	add.w	d2,d2
+	move.w	0(a0,d2.w),d3
+	add.w	d2,d2			; Get position
+	lea.l	Icon_pos-4,a0
+	move.w	0(a0,d2.w),d0
+	move.w	2(a0,d2.w),d1
+	jsr	Display_down_button
+	jsr	Copy_screen_to_both
+.Wait:	jsr	Switch_screens
+	btst	#Left_pressed,Mouse_buttons
+	bne.s	.Wait
+	jsr	Display_up_button
+	jsr	Copy_screen_to_both
+	movem.l	(sp)+,d0-d3/a0
+	rts
+
+;*****************************************************************************
 ; [ Get the movement direction from the mouse position ]
 ;  OUT : d7 - Direction {0...7} / -1 = none (.w)
 ; Changed registers : d7
@@ -531,6 +723,8 @@ Mouse_direction_2D:
 	move.w	Mouse_Y,d1
 	cmp.w	#208,d0			; Control icons ?
 	bmi.s	.Map
+	tst.b	Second_CIL_flag		; (not the action icons)
+	bne	.Exit
 	cmp.w	#143,d1
 	bmi.s	.Exit
 	subi.w	#208,d0
@@ -641,7 +835,9 @@ Try_2D_move:
 	add.w	d3,d1
 	jsr	Movement_check_2D
 	bne.s	.Exit			; Possible ?
-	move.w	d0,Map_Xcoord		; Yes -> store new coordinates
+	move.w	Map_Xcoord,Old_Xcoord	; Yes -> remember old coordinates
+	move.w	Map_Ycoord,Old_Ycoord
+	move.w	d0,Map_Xcoord		;  & store new coordinates
 	move.w	d1,Map_Ycoord
 	st	Moved			; Yay!
 	jsr	World_evaluate		; World map : next submap ?
@@ -1555,6 +1751,12 @@ M2_CIL:	dc.w Upleft_2D_cicon,Up_2D_cicon,Upright_2D_cicon
 	dc.w Left_2D_cicon,Hourglass_cicon,Right_2D_cicon
 	dc.w Downleft_2D_cicon,Down_2D_cicon,Downright_2D_cicon
 
+; Second control icon list of the 2D map (Second_CIL in ACTIONS.S) : only
+; Hand and Talk are possible in the proof of concept
+Second_CIL:	dc.w Look_cicon+Disabled,Hand_cicon,Talk_cicon
+	dc.w Change_trans_cicon+Disabled,Use_magic_cicon+Disabled,Camp_cicon+Disabled
+	dc.w Automapper_cicon+Disabled,Combat_pos_cicon+Disabled,Disk_cicon+Disabled
+
 ; Positions of the control icons (HULL/CONTROLS.S)
 Icon_pos:	dc.w 208,143,240,143,272,143
 	dc.w 208,160,240,160,272,160
@@ -1583,6 +1785,9 @@ File_list:
 	even
 	dc.l	Mouse_pointer,4+16*8
 	dc.b	"DATA\MPTR.BIN",0
+	even
+	dc.l	Hand_pointer,2*(4+16*8)
+	dc.b	"DATA\MPTRS2.BIN",0
 	even
 	dc.l	Portraits,6*34*2*8
 	dc.b	"DATA\PORTR.BIN",0
@@ -1638,6 +1843,9 @@ File_list:
 	dc.l	Spell_data,7*30*5
 	dc.b	"DATA\SPELLS.BIN",0
 	even
+	dc.l	Chests,256*(Items_per_chest*Object_packet_size+4)
+	dc.b	"DATA\CHESTS.BIN",0
+	even
 	dc.l	Texts,20*1024
 	dc.b	"DATA\TEXTS.BIN",0
 	even
@@ -1665,6 +1873,10 @@ Empty_portrait:	ds.b 34*2*8
 Button_up:	ds.b 17*2*8
 Button_down:	ds.b 17*2*8
 Mouse_pointer:	ds.b 4+16*8
+Hand_pointer:	ds.b 4+16*8
+Mouth_pointer:	ds.b 4+16*8
+Second_CIL_flag:	ds.b 1
+	even
 Names:	ds.b 6*16
 Temp_name:	ds.b 6
 Map_name:	ds.b 64

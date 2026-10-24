@@ -37,6 +37,7 @@
 #   WINICONS.BIN  the 9 parts of a window border (Window_icons of KERNEL/CHIP_DATA.S, 16x16 each)
 #   BUTTONS.BIN control icons of Button_graphics (78 x 32x13, colour 0 transparent)
 #   MPTR.BIN    default mouse pointer (Default_Mptr of KERNEL/DATA.S): hotspot X, Y (words), 16x16
+#   MPTRS2.BIN  the mouse pointers Hand_Mptr and Mouth_Mptr (like MPTR.BIN)
 #   PORTR.BIN   6 portraits (32x34) of the party used by the proof of concept
 #   NAMES.BIN   6 names (16 bytes each)
 #   CHARS.BIN   character data of the 6 party members (Party_char.amb, first 512 bytes each)
@@ -53,6 +54,9 @@
 #               16 skill names, 8 spell class names, 210 spell names (zero-terminated)
 #   SPELLS.BIN  Spell_data of KERNEL/DATA.S (5 bytes per spell), OT<i>.BIN the texts of the text scrolls
 #   STATICUI.BIN  the status icons in the UI palette (for the status block)
+#   LAYOUT3.BIN layout 3 (door & chest screen), P80_<n>.BIN the 80x80 pictures (Pics_80x80.amb) of doors and
+#               chests in the inventory palette
+#   CHESTS.BIN  the data of all chests of the initial savegame (Chest_data.amb, 148 bytes each, from chest 0)
 import argparse, math, os, re, struct, sys, zipfile
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -66,6 +70,7 @@ PARTY = (1, 8, 9, 10, 11, 12)               # Party_char.amb: hero, Egil, Selena
 AMBERFILES = os.path.join(ROOT, 'Disks', 'Bugfixing', 'German', 'Amberfiles')
 ALLTEXTS = os.path.join(ROOT, 'Disks', 'Bugfixing', 'German', 'AllTexts')
 WHITE = (2,)                                # Amiga colour White : ST colour 1 in the UI & inventory palettes
+PICS80 = (1, 2, 3, 11, 15)                  # 80x80 pictures : closed chest, door, empty chest, opened chest, pile
 
 
 class Data:
@@ -417,6 +422,24 @@ def main():
     for n in (2, 6):                       # inventory & character screen (colour 24 is the background)
         layout = planar(data.read(f'Layouts.amb/{n:03}'), 320, 163, 3)
         write(f'LAYOUT{n}.BIN', st_graphic([8 + v for v in layout], 320, 163))
+    # door & chest screen (layout 3) : the 80x80 pictures of doors and chests in the inventory palette (the
+    # items look the same there, and the pictures nearly as good as with an own palette)
+    for n in PICS80:
+        write(f'P80_{n}.BIN', st_graphic([inv_lut[v] for v in planar(data.read(f'Pics_80x80.amb/{n:03}'), 80, 80, 5)],
+                                         80, 80), quiet=True)
+    layout = planar(data.read('Layouts.amb/003'), 320, 163, 3)
+    write('LAYOUT3.BIN', st_graphic([8 + v for v in layout], 320, 163))
+    # the chests of the initial savegame (Save.00/Chest_data.amb : AMBR container with 256 chests)
+    raw = open(os.path.join(AMBERFILES, 'Save.00', 'Chest_data.amb'), 'rb').read()
+    count = struct.unpack('>H', raw[4:6])[0]
+    sizes = struct.unpack(f'>{count}I', raw[6:6 + 4 * count])
+    o = 6 + 4 * count
+    chests = b''
+    for size in sizes:
+        chests += raw[o:o + size].ljust(148, b'\0')[:148]
+        o += size
+    write('CHESTS.BIN', chests)
+
     # character screen : no items there, so its palette is chosen for the portraits, the status icons and the
     # text colours (Light_green : headlines, Yellow & Lighter_blue : condition names)
     raw = source_data('KERNEL/CHIP_DATA.S', 'Status_icons')   # 22 status icons (16x16, 5 bit, from icon 1)
@@ -490,6 +513,11 @@ def main():
                                   for i in range(len(buttons) // 156)))
     mptr = source_data('KERNEL/DATA.S', 'Default_Mptr')   # the hotspot words are dc.w, not part of it
     write('MPTR.BIN', struct.pack('>HH', 1, 1) + st_graphic([v and 8 + v for v in planar(mptr, 16, 16, 3)], 16, 16))
+    ptrs = b''
+    for label in ('Hand_Mptr', 'Mouth_Mptr'):  # mouse pointers of the 2D actions (hotspot 7, 7)
+        raw = source_data('KERNEL/DATA.S', label)
+        ptrs += struct.pack('>HH', 7, 7) + st_graphic([v and 8 + v for v in planar(raw, 16, 16, 3)], 16, 16)
+    write('MPTRS2.BIN', ptrs)
 
     save = open(os.path.join(AMBERFILES, 'Save.00', 'Party_data.sav'), 'rb').read()
     write('SAVE.BIN', save)

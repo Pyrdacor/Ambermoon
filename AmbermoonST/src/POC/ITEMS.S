@@ -194,7 +194,7 @@ Select_item:
 	tst.w	d0
 	beq.s	.Loop
 .Check:	move.w	d0,d2			; Anything there ?
-	jsr	Get_packet
+	jsr	Get_slot_packet
 	tst.w	Object_index(a0)
 	beq.s	.Loop
 	move.w	d2,d4			; Yes
@@ -420,7 +420,7 @@ View_item:
 	jsr	Select_item
 	tst.w	d0			; Anything selected ?
 	beq	.Exit
-	jsr	Get_packet
+	jsr	Get_slot_packet
 	lea.l	Inter_packet,a1		; Copy packet
 	Copy_packet a0,a1
 .Again:	jsr	Item_view_window_1
