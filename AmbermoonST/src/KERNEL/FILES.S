@@ -1,7 +1,9 @@
 ; Loading files (Atari ST)
 ; Replaces the file handling of KERNEL/FILES.S of the Amiga version.
-; For the proof of concept all files are loaded at the start with GEMDOS,
-; while TOS is still active.
+; Files are loaded with GEMDOS. While the system is taken over, the TOS
+; system timer (Timer C, needed by the disk drivers for time-outs) is
+; switched on during loading. The VBL, raster and keyboard interrupts stay
+; active.
 
 	SECTION	Program,code
 
@@ -16,6 +18,11 @@
 Load_file:
 	movem.l	d1-d3/a0-a2,-(sp)
 	move.l	d0,d3
+	tst.b	System_active		; Switch on Timer C
+	beq.s	.Go
+	bset	#5,MFP_IERB
+	bset	#5,MFP_IMRB
+.Go:
 	clr.w	-(sp)			; Fopen(name, read only)
 	move.l	a0,-(sp)
 	move.w	#Fopen,-(sp)
@@ -36,7 +43,11 @@ Load_file:
 	trap	#GEMDOS
 	addq.l	#4,sp
 	move.l	d3,d0
-.Exit:	movem.l	(sp)+,d1-d3/a0-a2
+.Exit:	tst.b	System_active		; Switch off Timer C
+	beq.s	.Done
+	bclr	#5,MFP_IERB
+	bclr	#5,MFP_IMRB
+.Done:	movem.l	(sp)+,d1-d3/a0-a2
 	rts
 
 ;*****************************************************************************

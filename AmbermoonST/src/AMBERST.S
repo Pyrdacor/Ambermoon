@@ -20,3 +20,5 @@
 	include	"KERNEL/VARIOUS.S"
 	include	"POC/MAP2D.S"
 	include	"POC/PERSONS.S"
+	include	"POC/MAPLOAD.S"
+	include	"POC/EVENTS.S"

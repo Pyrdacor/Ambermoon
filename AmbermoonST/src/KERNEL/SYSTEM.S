@@ -65,6 +65,7 @@ Init_system:
 	move.b	#$40,MFP_IERB		; Only ACIA (no Timer C)
 	move.b	#$40,MFP_IMRB
 	bset	#3,MFP_VR			; Software end of interrupt
+	st	System_active
 	move.w	(sp)+,sr
 	jsr	My_vsync
 	movem.l	(sp)+,d0-d7/a0-a6
@@ -78,6 +79,7 @@ Restore_system:
 	movem.l	d0-d7/a0-a6,-(sp)
 	move.w	sr,-(sp)
 	move.w	#$2700,sr
+	sf	System_active
 	clr.b	MFP_TBCR
 	move.l	Old_VBL,Vec_VBL.w
 	move.l	Old_ACIA,Vec_ACIA.w
@@ -264,6 +266,7 @@ Old_IMRB:	ds.b 1
 Old_TBCR:	ds.b 1
 Old_VR:	ds.b 1
 Screen_flag:	ds.b 1
+System_active:	ds.b 1
 	even
 VBL_counter:	ds.w 1
 VblQ_ptr_ST:	ds.l 1			; Frame hook (called in the VBL)

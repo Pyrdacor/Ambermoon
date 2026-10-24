@@ -49,24 +49,23 @@ Program_main:
 	move.w	#160,Mouse_X
 	move.w	#100,Mouse_Y
 	jsr	Init_map
-	jsr	Calculate_map_data_offsets
-	jsr	Init_persons_2D
 	jsr	Init_time
 	move.l	#Realtime,VblQ_ptr_ST
-	jsr	Invalidate_tile_caches
 ; ---------- Draw the static parts ----------------
 	jsr	Display_status_block
-	jsr	Show_map_layout
-	jsr	Print_headline
-	jsr	Display_control_icons
-	jsr	Display_2D_map
-	jsr	Copy_screen_to_both
+	jsr	Draw_map_screen
 	moveq.l	#0,d0			; Fade in
 	jsr	Fade_screen
 	jsr	Clear_keyboard
 	jsr	Read_mouse_clicks
+	st	Pending_events		; Handle first step
 ; ---------- Main loop ----------------------------
-.Loop:	jsr	Handle_input
+.Loop:	tst.b	Pending_events		; Events after a move ?
+	beq.s	.No_events
+	sf	Pending_events
+	jsr	Event_handler
+	bra.s	.Loop
+.No_events:	jsr	Handle_input
 	tst.b	Quit_flag
 	bne.s	.Exit
 	jsr	Display_2D_map
@@ -100,30 +99,16 @@ Copy_screen_to_both:
 ;*****************************************************************************
 Init_map:
 	movem.l	d0/a0,-(sp)
-	lea.l	Map_data_buffer,a0
-	moveq.l	#0,d0
-	move.b	4(a0),d0			; Width & height
-	move.w	d0,Width_of_map
-	move.b	5(a0),d0
-	move.w	d0,Height_of_map
 	lea.l	Start_position,a0
+	move.w	(a0)+,d0			; Map
 	move.w	(a0)+,Map_Xcoord
 	move.w	(a0)+,Map_Ycoord
 	move.w	(a0)+,View_direction
 	move.w	(a0)+,Hour
 	move.w	(a0)+,Minute
-	move.b	3(a0),d0			; CD bits (as in Get_CD_value)
-	lsl.w	#8,d0
-	move.b	2(a0),d0
-	swap	d0
-	move.b	1(a0),d0
-	lsl.w	#8,d0
-	move.b	(a0),d0
-	move.l	d0,CD_value
 	move.w	#1,Party_frame
-	move.b	#C2_animspeed,Anim_speed	; Animation parameters (2D city)
-	move.b	#C2_animspeed,Anim_count
-	move.w	#C2_animbias,Anim_bias
+	move.w	#-1,Current_tileset
+	jsr	Load_map
 	movem.l	(sp)+,d0/a0
 	rts
 
@@ -633,8 +618,10 @@ Try_2D_move:
 	move.w	d0,Map_Xcoord		; Yes -> store new coordinates
 	move.w	d1,Map_Ycoord
 	st	Moved			; Yay!
+	jsr	World_evaluate		; World map : next submap ?
 	jsr	Animate_party
 	jsr	Time_after_move
+	st	Pending_events		; Handle events
 	move.w	VBL_counter,Last_move	; Reset clock
 .Exit:	movem.l	(sp)+,d0-d3/d7
 	rts
@@ -656,6 +643,8 @@ Try_2D_move:
 Movement_check_2D:
 	movem.l	d0-d2,-(sp)
 	moveq.l	#-1,d2			; Zero flag off
+	tst.b	World_map			; 2D city map ?
+	bne.s	.World
 	cmp.w	#1,d0			; X too low ?
 	blt.s	.Exit
 	cmp.w	Width_of_map,d0		; X too high ?
@@ -664,7 +653,7 @@ Movement_check_2D:
 	blt.s	.Exit
 	cmp.w	Height_of_map,d1		; Y too high ?
 	bgt.s	.Exit
-	jsr	Get_location_status		; Get location status
+.World:	jsr	Get_location_status		; Get location status
 	btst.l	#Way_blocked_bit,d0		; Way blocked ?
 	bne.s	.Exit
 	btst.l	#Blocked_foot_bit,d0	; Way possible on foot ?
@@ -686,13 +675,11 @@ Get_location_status:
 	movem.l	d1-d7/a0/a1,-(sp)
 	move.w	d0,d4			; Save coordinates
 	move.w	d1,d5
-	lea.l	Map_data_buffer+Map_data,a1	; Get map pointer
-	subq.w	#1,d1
-	mulu.w	Width_of_map,d1
-	subq.w	#1,d0
-	add.w	d0,d1
-	lsl.l	#2,d1
-	add.l	d1,a1
+	jsr	Get_map_tile		; Get map pointer
+	bne.s	.Inside
+	move.l	#1<<Way_blocked_bit,d0	; Outside : blocked
+	bra	.Exit
+.Inside:	move.l	a0,a1
 	lea.l	Icon_data_buffer+2,a0	; Get icon data
 	moveq.l	#0,d0			; Get underlay icon number
 	move.b	(a1),d0
@@ -795,6 +782,8 @@ Recalc_mapbuf_coords:
 	movem.l	d0/d1,-(sp)
 	move.w	#Mapbuf_centreX,Mapbuf_X	; Reset map buffer coordinates
 	move.w	#Mapbuf_centreY,Mapbuf_Y
+	tst.b	World_map			; World map : always centred
+	bne	.Go_on2
 	move.w	Map_Xcoord,d0		; Load party coordinates
 	move.w	Map_Ycoord,d1
 	cmpi.w	#Mapbuf_centreX+1,d0	; Left boundary check
@@ -827,35 +816,35 @@ Recalc_mapbuf_coords:
 ;   - From [ C2_DisUpd ] (MAP/2D_CITY.S).
 ;*****************************************************************************
 Fill_map_buffers:
-	movem.l	d0/d1/d6/d7/a1-a3,-(sp)
+	movem.l	d0-d7/a0-a3,-(sp)
 	jsr	Clear_persons_buffer
 	jsr	Recalc_mapbuf_coords	; Set map buffer coordinates
-	lea.l	Map_data_buffer+Map_data,a1	; Calculate map address
-	move.w	Map_Ycoord,d0
-	subq.w	#1,d0
-	sub.w	Mapbuf_Y,d0
-	move.w	Width_of_map,d1
-	mulu.w	d1,d0
-	add.w	Map_Xcoord,d0
-	subq.w	#1,d0
-	sub.w	Mapbuf_X,d0
-	lsl.l	#2,d0
-	adda.l	d0,a1
-	subi.w	#Mapbuf_width,d1		; Calculate offset
-	lsl.w	#2,d1
-	lea.l	Underlay_buffer,a2		; Copy maps to buffer
+	lea.l	Underlay_buffer,a2		; Copy map part to buffers
 	lea.l	Overlay_buffer,a3
+	move.w	Map_Ycoord,d5		; First map position
+	sub.w	Mapbuf_Y,d5
 	moveq.l	#Mapbuf_height-1,d7
-.Loop1:	moveq.l	#Mapbuf_width-1,d6
-.Loop2:	move.b	(a1)+,(a2)+		; Copy underlay
-	addq.l	#1,a1			; Skip event
-	move.b	(a1)+,(a3)+		; Copy overlay
-	move.b	(a1)+,(a3)+
+.Loop1:	move.w	Map_Xcoord,d4
+	sub.w	Mapbuf_X,d4
+	moveq.l	#Mapbuf_width-1,d6
+.Loop2:	move.w	d4,d0
+	move.w	d5,d1
+	jsr	Get_map_tile
+	beq.s	.Outside
+	move.b	(a0),(a2)+		; Copy underlay
+	move.b	2(a0),(a3)+		; Copy overlay
+	move.b	3(a0),(a3)+
+	bra.s	.Next2
+.Outside:	clr.b	(a2)+			; Outside the map
+	clr.w	(a3)+
+.Next2:	addq.w	#1,d4
 	dbra	d6,.Loop2
-	adda.w	d1,a1
+	addq.w	#1,d5
 	dbra	d7,.Loop1
+	tst.b	World_map			; Persons ?
+	bne.s	.Exit
 	jsr	NPC_manager_2D		; Handle persons
-	movem.l	(sp)+,d0/d1/d6/d7/a1-a3
+.Exit:	movem.l	(sp)+,d0-d7/a0-a3
 	rts
 
 ;*****************************************************************************
@@ -1273,10 +1262,13 @@ Get_hashable_number:
 Display_2D_party:
 	movem.l	d0/d1/d5-d7/a0,-(sp)
 	lea.l	Party_graphics,a0		; Seek graphics
+	moveq.l	#0,d0			; World map : always standing
+	tst.b	World_map			;  (the Amiga version uses the
+	bne.s	.Stand			;   travel graphics there)
 	move.w	Map_Xcoord,d0		; Get sit/sleep status
 	move.w	Map_Ycoord,d1
 	jsr	Get_sit_sleep_status
-	tst.w	d0			; Just standing ?
+.Stand:	tst.w	d0			; Just standing ?
 	bne.s	.No
 	move.w	View_direction,d0		; Yes -> Choose direction
 	mulu.w	#Party_frames,d0
@@ -1512,9 +1504,6 @@ File_list:
 	dc.l	UI_palette,64
 	dc.b	"DATA\UIPAL.BIN",0
 	even
-	dc.l	Map_palette,64
-	dc.b	"DATA\MAPPAL.BIN",0
-	even
 	dc.l	Layout,320*163/2
 	dc.b	"DATA\LAYOUT.BIN",0
 	even
@@ -1539,26 +1528,17 @@ File_list:
 	dc.l	Font_data,1024
 	dc.b	"DATA\FONT.BIN",0
 	even
-	dc.l	Icon_graphics,Max_icons*16*8
-	dc.b	"DATA\ICONS.BIN",0
-	even
-	dc.l	Icon_data_buffer,2+Max_icons*8
-	dc.b	"DATA\ICONDAT.BIN",0
-	even
-	dc.l	Map_data_buffer,Max_map_size
-	dc.b	"DATA\MAP.BIN",0
-	even
-	dc.l	Party_graphics,17*32*8
-	dc.b	"DATA\PARTY.BIN",0
-	even
-	dc.l	Map_name,64
-	dc.b	"DATA\MAPNAME.BIN",0
-	even
-	dc.l	Start_position,14
+	dc.l	Start_position,12
 	dc.b	"DATA\START.BIN",0
 	even
-	dc.l	NPC_graphics,Max_NPC_graphics
-	dc.b	"DATA\NPCGFX.BIN",0
+	dc.l	Savegame,Savegame_size
+	dc.b	"DATA\SAVE.BIN",0
+	even
+	dc.l	World_names,3*32
+	dc.b	"DATA\WORLDS.BIN",0
+	even
+	dc.l	Window_icons,9*16*8
+	dc.b	"DATA\WINICONS.BIN",0
 	even
 	dc.l	0
 
@@ -1588,8 +1568,13 @@ Names:	ds.b 6*16
 Temp_name:	ds.b 6
 Map_name:	ds.b 64
 	even
-Start_position:	ds.w 5			; X, Y, direction, hour, minute
-	ds.b	4			; CD bits
+Start_position:	ds.w 6			; Map, X, Y, direction, hour, minute
+Savegame_size	EQU	16*1024
+Savegame:	ds.b Savegame_size
+World_names:	ds.b 3*32
+Window_icons:	ds.b 9*16*8
+Pending_events:	ds.b 1
+	even
 Quit_flag:	ds.b 1
 Moved:	ds.b 1
 Party_animate_state:	ds.b 1

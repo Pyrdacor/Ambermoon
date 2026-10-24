@@ -1,12 +1,19 @@
 # Ambermoon for the Atari ST – proof of concept
 
 This folder contains a proof of concept of an Atari ST port of Ambermoon, based on the source code in
-`AmbermoonSource`. It shows the 2D map screen: the status block with the portraits, the 2D map layout with
-the map name and the control icons, and a 2D map (by default map 258 "Großvaters Haus", where the game
-starts). The party can walk around, the map scrolls, the tiles are animated, and the persons (NPCs) are
-shown and move on their paths or randomly while the time of day passes. There is no music.
+`AmbermoonSource`. It shows the 2D map screen: the status block with the portraits and the LP/SP bars, the
+2D map layout with the map name and the control icons, and the 2D maps. It starts like the game in map 258
+"Großvaters Haus". The party can walk around, the map scrolls, the tiles are animated, and the persons
+(NPCs) are shown and move on their paths or randomly while the time of day passes. Map events work for map
+changes (e.g. out of the house onto the world map Lyramion and back), text popups (shown in a text window),
+tile changes and conditions/actions on the bits of the savegame. All 2D city maps and the 2D world maps
+can be reached. There is no music.
 
 ![Start](docs/start.png) ![After walking](docs/moved.png)
+
+The text popup at the start of the game, and the world map in front of the house:
+
+![Text window](docs/textwindow.png) ![World map](docs/world.png)
 
 Map 264 "Zum hinkenden Gauner" at 14:00 (`./build.sh --map 264 --pos 11,13,2 --time 14:00`):
 
@@ -20,9 +27,10 @@ Map 264 "Zum hinkenden Gauner" at 14:00 (`./build.sh --map 264 --pos 11,13,2 --t
 ```
 
 * `build.sh` needs Python 3 with Pillow and `vasmm68k_mot` (set `VASM` to its path if it is not in `PATH`).
-  `./build.sh --map 264 --pos 11,13,2 --time 14:00` converts another 2D map (start position x, y, view
-  direction, time of day). Which map characters are present is taken from the initial savegame.
-* `build/hd` can be used as GEMDOS drive in Hatari or copied to a real ST (`AMBERST.PRG` and `DATA\`).
+  By default the game starts like the initial savegame; `./build.sh --map 264 --pos 11,13,2 --time 14:00`
+  starts in another 2D map (start position x, y, view direction, time of day).
+* `build/hd` can be used as GEMDOS drive in Hatari or copied to a real ST with a hard disk
+  (`AMBERST.PRG` and `DATA\`, about 6 MB). The maps and graphics are loaded while playing.
 * `run_hatari.sh` uses Hatari's default TOS; set `TOS` to use another image, e.g. EmuTOS.
 
 Controls: cursor keys or numeric keypad (also diagonally), or hold the left mouse button in the map window
@@ -85,6 +93,15 @@ line) is set by one Timer B interrupt per line.
 check, scrolling, status block, layout, control icons), without the module system, events and the memory
 manager.
 
+`src/POC/MAPLOAD.S` loads the maps (the graphics of a tileset, the NPC and party graphics only when they
+change) and handles the 2D world maps: like the quad-maps of `MAP/2D_WILD.S`, but with the 3x3 submaps of
+50x50 around the party in memory, so every position of the map window can be read directly. Loading during
+the game is done with GEMDOS; only the TOS system timer (Timer C) is switched on for that.
+
+`src/POC/EVENTS.S` contains the map events from `EVENTS.S` (event chains, map exit, text popup, change
+icon, query and modify of the bit arrays of the savegame) and the text window (`Open_window`,
+`TxtW_DisInit`, text processing with word wrap and `~SELF~`).
+
 `src/POC/PERSONS.S` contains the persons and the time from `PERSONS.S`, `TIME.S` and `MAP/MAP.S`: persons
 on a path (one position per 5 minutes of the day) and randomly moving persons, sitting and sleeping
 persons, collisions with persons, and the time of day, which advances by one step (5 minutes) every 4
@@ -102,8 +119,9 @@ Hatari (STE, 8 MHz):
 
 ## Not done yet
 
-* Talking to persons, events, monsters (movement, combat), darkness/light circle, transports, the 2D
-  world maps and 3D maps.
+* Talking to persons, the other events (doors, chests, places, ...), pictures of text popups,
+  monsters (movement, combat), darkness/light circle (also at night on the world map), transports and
+  travel graphics, and 3D maps.
 * The module system, the memory manager and loading from the original containers (the data is converted in
   advance).
 * Sound and music.
