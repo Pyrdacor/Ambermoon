@@ -40,6 +40,7 @@ import argparse, math, os, re, struct, sys, zipfile
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.abspath(os.path.join(HERE, '..', '..'))
+sys.dont_write_bytecode = True            # no __pycache__ in Tools/AtariST
 sys.path.insert(0, os.path.join(ROOT, 'Tools', 'AtariST'))
 from st_map_preview import planar, amiga_rgb, kmeans, snap, st_word, to_lab, dist  # noqa: E402
 
