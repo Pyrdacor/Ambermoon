@@ -98,11 +98,13 @@ struct Lob
                 }
                 else // a match
                 {
+                    // (both bytes read before the check: src is not read again when it fails, and the reads walk)
                     int first = *src;
-                    uint8* from = dst - (((first << 4) & 0xff00) | src[1]);
+                    int second = src[1];
+                    src += 2;
+                    uint8* from = dst - (((first << 4) & 0xff00) | second);
                     if (from < start)
                         return false;
-                    src += 2;
                     int length = (first & 0x0f) + 3;
                     for (var k = 0; k < length; k += 1)
                     {
