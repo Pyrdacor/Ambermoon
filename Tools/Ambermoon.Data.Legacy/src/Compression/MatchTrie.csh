@@ -18,10 +18,10 @@ struct TrieMatch
 /// (`maxMatchOffset`) are removed after each [MatchTrie.Add].
 ///
 /// This is the trie of Ambermoon.Data.Legacy with the same results (the compressed data must be the same byte for
-/// byte), but stored in arrays instead of objects: the children of all nodes are one hash table from (parent, key) to
-/// the child, and the nodes of the added offsets are a sorted array instead of a SortedDictionary. Like in the
-/// original, removing a node removes whatever child its parent has under its key, and nodes that were cut off stay
-/// where they are.
+/// byte), but stored in arrays instead of objects: the children of the root are a table by byte, those of the other
+/// nodes one hash table from (parent, key) to the child, and the nodes of the added offsets are a sorted array instead
+/// of a SortedDictionary. Like in the original, removing a node removes whatever child its parent has under its key,
+/// and nodes that were cut off stay where they are.
 struct MatchTrie
 {
     // the nodes; 0 is the root (a branch node)
@@ -33,12 +33,16 @@ struct MatchTrie
     int[] _leafLength;  // leaves: its length (can become -1 when a leaf is split, as in the original)
     int _nodeCount;
 
-    // the children: open addressing, the key is parent * 256 + byte
-    int64[] _slotKeys;  // _Empty, _Deleted or a key
+    // the children of the root by byte (every walk starts there), 0 if there is none (the root is no child)
+    int[] _rootChildren;
+
+    // the other children: open addressing by (parent, byte), in 32 bits (the 68000 multiplies only 16 by 16 bits); a
+    // slot holds parent + 1, so that a new (zeroed) array is empty
+    int[] _slotParents; // 0 empty, -1 deleted, else the parent + 1
+    uint8[] _slotBytes;
     int[] _slotNodes;
     int _slotsUsed;     // filled or deleted
     int _slotsLive;
-    int _slotShift;     // 64 - log2(number of slots)
 
     // the node that each added offset ended in, sorted by offset; the entries before _matchFirst are removed
     int[] _matchOffsets;
@@ -66,11 +70,10 @@ struct MatchTrie
         trie._leafOffset = new int[1024];
         trie._leafLength = new int[1024];
         trie._NewNode(-1, 0, 0, false); // the root
-        trie._slotKeys = new int64[1024];
-        trie._slotNodes = new int[1024];
-        trie._slotShift = 64 - 10;
-        for (var i = 0; i < 1024; i += 1)
-            trie._slotKeys[i] = -1;
+        trie._rootChildren = new int[256];
+        trie._slotParents = new int[8192];
+        trie._slotBytes = new uint8[8192];
+        trie._slotNodes = new int[8192];
         trie._matchOffsets = new int[256];
         trie._matchNodes = new int[256];
         return trie;
@@ -83,19 +86,25 @@ struct MatchTrie
     }
 
     /// Adds the sequence of `length` bytes at `offset` (at most the longest match length of the compression; less at
-    /// the end of the data) and removes the sequences that are too far behind it now.
-    void Add(uint8[] sequence, int offset, int length)
+    /// the end of the data) and removes the sequences that are too far behind it now. Returns what
+    /// [MatchTrie.GetLongestMatch] with the same arguments would have returned before (both walk the same way).
+    TrieMatch Add(uint8[] sequence, int offset, int length)
     {
         int node = 0;
-        for (var i = 0; i < length; i += 1)
+        int matchOffset = -1;
+        int i = 0;
+        int leafLength = 0; // the bytes that match the rest of the leaf that the walk ended in
+        while (i < length)
         {
             int child = _GetChild(node, sequence[offset + i]);
             if (child >= 0)
             {
                 // found a child, go on in the trie
+                matchOffset = _lastMatchOffset[child];
                 if (!_isLeaf[child])
                     _lastMatchOffset[child] = offset;
                 node = child;
+                i += 1;
                 continue;
             }
 
@@ -104,6 +113,7 @@ struct MatchTrie
                 // split the leaf
                 int leaf = node;
                 int matchLength = _LeafMatchLength(leaf, sequence, offset + i, length - i);
+                leafLength = matchLength;
                 if (matchLength == length - i)
                 {
                     // the whole rest matches: only the last match offset changes
@@ -152,6 +162,7 @@ struct MatchTrie
         }
 
         _AddMatchNode(offset, node);
+        var match = TrieMatch { Offset = matchOffset, Length = i + leafLength };
 
         // remove the nodes that are too far away (matches are searched before adding, hence the + 1)
         int firstOffset = offset - _maxMatchOffset + 1;
@@ -160,6 +171,7 @@ struct MatchTrie
             _Remove(_matchNodes[_matchFirst], firstOffset);
             _matchFirst += 1;
         }
+        return match;
     }
 
     /// The longest earlier sequence that matches the bytes at `searchOffset`, at most `maxLength` bytes.
@@ -287,25 +299,32 @@ struct MatchTrie
 
     // ---- the children ----
 
-    int _Slot(int64 key)
+    // where the search for (parent, byte) starts: no multiplication; the byte spread over the higher bits, so that the
+    // children of one node and the nodes after it do not crowd the same slots (also written out where it is used)
+    int _Slot(int parent, uint8 key, int mask)
     {
-        return (int)(unchecked((uint64)key * 11400714819323198485) >> _slotShift);
+        return unchecked(parent ^ (key << 11) ^ (key << 3) ^ (parent >> 9)) & mask;
     }
 
     // the child of a branch node with this key, -1 if there is none (leaves have no children)
     int _GetChild(int node, uint8 key)
     {
+        if (node == 0)
+        {
+            int rootChild = _rootChildren[key];
+            return rootChild != 0 ? rootChild : -1;
+        }
         if (_isLeaf[node])
             return -1;
-        int64 slotKey = (int64)node * 256 + key;
-        int mask = _slotKeys.Length - 1;
-        int i = _Slot(slotKey);
+        int mask = _slotParents.Length - 1;
+        int i = unchecked(node ^ (key << 11) ^ (key << 3) ^ (node >> 9)) & mask;
+        int stored = node + 1;
         while (true)
         {
-            int64 k = _slotKeys[i];
-            if (k == slotKey)
+            int p = _slotParents[i];
+            if (p == stored && _slotBytes[i] == key)
                 return _slotNodes[i];
-            if (k == -1)
+            if (p == 0)
                 return -1;
             i = (i + 1) & mask;
         }
@@ -315,21 +334,26 @@ struct MatchTrie
     // sets the child of 'parent' with this key (replaces the one that is there)
     void _SetChild(int parent, uint8 key, int child)
     {
-        int64 slotKey = (int64)parent * 256 + key;
-        int mask = _slotKeys.Length - 1;
-        int i = _Slot(slotKey);
+        if (parent == 0)
+        {
+            _rootChildren[key] = child;
+            return;
+        }
+        int mask = _slotParents.Length - 1;
+        int i = unchecked(parent ^ (key << 11) ^ (key << 3) ^ (parent >> 9)) & mask;
+        int stored = parent + 1;
         int deleted = -1;
         while (true)
         {
-            int64 k = _slotKeys[i];
-            if (k == slotKey)
+            int p = _slotParents[i];
+            if (p == stored && _slotBytes[i] == key)
             {
                 _slotNodes[i] = child;
                 return;
             }
-            if (k == -1)
+            if (p == 0)
                 break;
-            if (k == -2 && deleted < 0)
+            if (p == -1 && deleted < 0)
                 deleted = i;
             i = (i + 1) & mask;
         }
@@ -337,29 +361,35 @@ struct MatchTrie
             i = deleted;
         else
             _slotsUsed += 1;
-        _slotKeys[i] = slotKey;
+        _slotParents[i] = stored;
+        _slotBytes[i] = key;
         _slotNodes[i] = child;
         _slotsLive += 1;
-        if (_slotsUsed * 2 > _slotKeys.Length)
+        if (_slotsUsed * 2 > _slotParents.Length)
             _Rehash();
     }
 
     // removes the child of 'parent' with this key (whichever node it is)
     void _RemoveChild(int parent, uint8 key)
     {
-        int64 slotKey = (int64)parent * 256 + key;
-        int mask = _slotKeys.Length - 1;
-        int i = _Slot(slotKey);
+        if (parent == 0)
+        {
+            _rootChildren[key] = 0;
+            return;
+        }
+        int mask = _slotParents.Length - 1;
+        int i = unchecked(parent ^ (key << 11) ^ (key << 3) ^ (parent >> 9)) & mask;
+        int stored = parent + 1;
         while (true)
         {
-            int64 k = _slotKeys[i];
-            if (k == slotKey)
+            int p = _slotParents[i];
+            if (p == stored && _slotBytes[i] == key)
             {
-                _slotKeys[i] = -2;
+                _slotParents[i] = -1;
                 _slotsLive -= 1;
                 return;
             }
-            if (k == -1)
+            if (p == 0)
                 return;
             i = (i + 1) & mask;
         }
@@ -367,29 +397,26 @@ struct MatchTrie
 
     void _Rehash()
     {
-        int size = _slotKeys.Length;
+        int size = _slotParents.Length;
         while (_slotsLive * 4 > size)
             size *= 2;
-        int bits = 0;
-        while ((1 << bits) < size)
-            bits += 1;
-        var oldKeys = _slotKeys;
+        var oldParents = _slotParents;
+        var oldBytes = _slotBytes;
         var oldNodes = _slotNodes;
-        _slotKeys = new int64[size];
+        _slotParents = new int[size];
+        _slotBytes = new uint8[size];
         _slotNodes = new int[size];
-        _slotShift = 64 - bits;
-        for (var i = 0; i < size; i += 1)
-            _slotKeys[i] = -1;
         int mask = size - 1;
-        for (var j = 0; j < oldKeys.Length; j += 1)
+        for (var j = 0; j < oldParents.Length; j += 1)
         {
-            int64 k = oldKeys[j];
-            if (k < 0)
+            int p = oldParents[j];
+            if (p <= 0)
                 continue;
-            int i = _Slot(k);
-            while (_slotKeys[i] != -1)
+            int i = _Slot(p - 1, oldBytes[j], mask);
+            while (_slotParents[i] != 0)
                 i = (i + 1) & mask;
-            _slotKeys[i] = k;
+            _slotParents[i] = p;
+            _slotBytes[i] = oldBytes[j];
             _slotNodes[i] = oldNodes[j];
         }
         _slotsUsed = _slotsLive;
