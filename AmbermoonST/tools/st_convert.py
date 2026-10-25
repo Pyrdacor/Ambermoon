@@ -34,6 +34,11 @@
 #   E<i>.BIN    event picture i (320x92), Q<i>.BIN its palette (like P<t>.BIN)
 #   UIGFX.BIN   UI graphics of KERNEL/CHIP_DATA.S: Status_L, Status_M, Status_R (16x36 each),
 #               Status_TB (32x1), Empty_portrait (32x34), Button_up, Button_down (32x17 each)
+#   LAYOUT4.BIN layout 4 (combat), CBGTAB.BIN the combat backgrounds of the 2D maps (Combat_bg_2D_table),
+#               CB<i>_<p>.BIN background i with palette p (16 ST colours, lookup table for the monster graphics,
+#               320x95), MG<n>.BIN monster graphics n (5 bit, per 16 pixels 5 plane words), MC<n>.BIN monster n (Monster_char_data),
+#               MGROUPS.BIN the monster groups 1...128 (36 bytes each), COMBFX.BIN combat effects (blood, scratches,
+#               slash, explosion, 5 bit like MG), TACTIC.BIN Fighting_FXGFX (32x36) and the tactical icons (16x14)
 #   PLACES.BIN  the place data (Place_data/001), MERCHANT.BIN the items of the 32 merchants (144 bytes each)
 #   ANKH.BIN    Ankh_symbol (32x29) of KERNEL/CHIP_DATA.S in the UI palette (healer)
 #   STATGFX.BIN Damage_star (32x26) and Death_mask (32x34) of KERNEL/CHIP_DATA.S in the UI palette
@@ -454,6 +459,100 @@ def main():
         name = f'Merchant_data.amb/{n:03}'
         merchants += (data.read(name) if name in data.names else b'').ljust(144, b'\0')[:144]
     write('MERCHANT.BIN', merchants)
+
+    # combat : layout 4, the combat backgrounds of the 2D maps (each with its palette : 16 ST colours computed
+    # from the background and the colours of all monsters, the image and a lookup table for the monster graphics,
+    # which are converted when they are loaded), the monster graphics, characters and groups, the combat
+    # effects (5 bit, also converted when loaded) and the tactical icons in the inventory palette
+    layout = planar(data.read('Layouts.amb/004'), 320, 163, 3)
+    write('LAYOUT4.BIN', st_graphic([8 + v for v in layout], 320, 163))
+    bg_table = source_data('KERNEL/DATA.S', 'Combat_bg_2D_table')
+    write('CBGTAB.BIN', bg_table)
+    monsters = {}
+    for name in sorted(data.names):
+        if name.startswith('Monster_char_data.amb/') and name[-1] != '/':
+            n = int(name[-3:])
+            monsters[n] = data.read(name)
+            write(f'MC{n}.BIN', monsters[n], quiet=True)
+    def word_interleave(raw, w):
+        """5 bit graphic with interleaved lines -> per line and per 16 pixels 5 plane words (converted at
+        runtime into the ST format)."""
+        rb = w // 8
+        out = bytearray()
+        for y in range(len(raw) // (rb * 5)):
+            base = y * rb * 5
+            for g in range(0, rb, 2):
+                for p in range(5):
+                    out += raw[base + p * rb + g:base + p * rb + g + 2]
+        return bytes(out)
+
+    mon_hist = [0] * 32
+    gfx_done = set()
+    for n, mc in monsters.items():
+        g = mc[12]
+        w, h = struct.unpack('>HH', mc[802:806])
+        recol = mc[768:800]
+        raw = data.read(f'Monster_gfx.amb/{g:03}')
+        if g not in gfx_done:
+            write(f'MG{g}.BIN', word_interleave(raw, w), quiet=True)
+            gfx_done.add(g)
+        frames = len(raw) // (w // 16 * 10 * h)
+        for v in planar(raw, w, h * frames, 5):
+            if v:
+                mon_hist[recol[v]] += 1
+    groups = b''
+    for n in range(1, 129):
+        name = f'Monster_groups.amb/{n:03}'
+        groups += (data.read(name) if name in data.names else b'').ljust(36, b'\0')[:36]
+    write('MGROUPS.BIN', groups)
+    combos = sorted(set((bg_table[i], bg_table[i + j]) for i in range(0, len(bg_table), 4) for j in (1, 2, 3)))
+    for img, pal in combos:
+        pd = data.read(f'Palettes.amb/{pal:03}')
+        cpal = [amiga_rgb(struct.unpack('>H', pd[i * 2:i * 2 + 2])[0] & 0xfff) for i in range(32)]
+        pix = planar(data.read(f'Combat_background.amb/{img:03}')[-320 * 95 * 5 // 8:], 320, 95, 5)  # (16 : 4 more bytes)
+        hist = [0] * 32
+        for v in pix:
+            hist[v] += 1
+        tot_bg, tot_mon = sum(hist), max(1, sum(mon_hist))
+        weights = [hist[i] + mon_hist[i] * tot_bg / tot_mon for i in range(32)]
+        pal16, lut = make_palette(cpal, weights, ui_first=32)
+        labs = [to_lab(c) for c in pal16]
+        bg_lut = [min(range(16), key=lambda j: dist(to_lab(cpal[i]), labs[j])) for i in range(32)]
+        write(f'CB{img}_{pal}.BIN', palette_file(pal16, lut) +
+              st_graphic([bg_lut[v] for v in pix], 320, 95), quiet=True)
+    # combat effects (offsets of the battle FX graphics in GAME_OFF.S, all 5 bit)
+    fx_sizes, active = [], False
+    for line in open(os.path.join(SRC, 'GAME_OFF.S'), encoding='latin-1'):
+        if line.startswith('Fireball_fro_FXGFX:'):
+            active = True
+        if active:
+            m = re.match(r'([A-Za-z_]+_FXGFX):', line)
+            if m:
+                fx_sizes.append([m.group(1), 0])
+            m = re.match(r'\s+rsgfx\s+(\d+),(\d+),(\d+)', line)
+            if m:
+                w, h, f = map(int, m.groups())
+                fx_sizes[-1][1] = w // 16 * 10 * h * f
+            if line.startswith('Tactical_GFX:'):
+                break
+    fx_sizes[-1][1] = 2 * 6 * 36                       # Fighting_FXGFX (3 bit, 32x36)
+    fx_off, o = {}, 0
+    for name, size in fx_sizes:
+        fx_off[name] = o
+        o += size
+    cg = data.read('Combat_graphics/001')
+    fx = b''
+    for name, w, size in (('Blood_FXGFX', 32, 32 // 16 * 10 * 32 * 4), ('Scratches_FXGFX', 32, 32 // 16 * 10 * 32 * 4),
+                          ('Slash_FXGFX', 16, 43 * 10 * 3), ('Explosion_FXGFX', 48, 3 * 59 * 10 * 14)):
+        fx += word_interleave(cg[fx_off[name]:fx_off[name] + size], w)
+    write('COMBFX.BIN', fx)
+    fight = planar(cg[fx_off['Fighting_FXGFX']:], 32, 36, 3)
+    tact = cg[o:]
+    icons = len(tact) // 140
+    write('TACTIC.BIN', st_graphic([v and 12 + v for v in fight], 32, 36) +
+          b''.join(st_graphic([inv_lut[v] for v in planar(tact, 16, 14, 5, i * 140)], 16, 14) for i in range(icons)))
+    print(f'Combat: {len(combos)} backgrounds (CB*.BIN), {len(monsters)} monsters (MC*.BIN), '
+          f'{len(gfx_done)} monster graphics (MG*.BIN), {icons} tactical icons')
 
     # dialogue screen (layout 8) : the portraits of all persons in the inventory palette (loaded when needed),
     # the dictionary and the character data & texts of the persons

@@ -69,6 +69,7 @@ Program_main:
 	tst.b	Quit_flag
 	bne.s	.Exit
 	jsr	Display_2D_map
+	jsr	Combat_check
 	jsr	Handle_realtime_steps
 	jsr	Display_position
 	jsr	Update_status
@@ -1873,6 +1874,12 @@ File_list:
 	even
 	dc.l	Texts,20*1024
 	dc.b	"DATA\TEXTS.BIN",0
+	even
+	dc.l	Combat_bg_table,16*4
+	dc.b	"DATA\CBGTAB.BIN",0
+	even
+	dc.l	Monster_groups,128*Max_monsters*2
+	dc.b	"DATA\MGROUPS.BIN",0
 	even
 	dc.l	0
 

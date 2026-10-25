@@ -105,13 +105,13 @@ Prepare_light:
 	lea.l	Cell_light,a0
 	tst.w	d4			; No circle ?
 	bne.s	.Spans
-	moveq.l	#Mapbuf_size-1,d0		; Everything is inside
+	move.w	#Mapbuf_size-1,d0		; Everything is inside
 .Clear:	clr.b	(a0)+
 	dbra	d0,.Clear
 	bra	.Exit
 ; ---------- Half widths of the circle ------------
 .Spans:	lea.l	Circle_span,a1		; -1 = no circle on this line
-	moveq.l	#Mapbuf_height*16-1,d0
+	move.w	#Mapbuf_height*16-1,d0
 .Clr:	move.w	#-1,(a1)+
 	dbra	d0,.Clr
 	lea.l	Circle_span,a1

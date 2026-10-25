@@ -21,6 +21,8 @@ Damage_frames	EQU	2*Damage_interval		; (50 frames per second)
 ;*****************************************************************************
 Update_status:
 	movem.l	d0/d7/a0/a1,-(sp)
+	tst.b	Battling			; (combat icons)
+	bne.s	.No_switch
 	move.w	VBL_counter,d0		; Is it time ?
 	sub.w	AutoIcon_time,d0
 	cmp.w	#AutoIcon_interval,d0

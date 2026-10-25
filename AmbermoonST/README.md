@@ -15,7 +15,9 @@ their own screen (pick the lock, use a key or lockpick, find and disarm traps, t
 and persons can be talked to (the hand and mouth actions of the second control icon list or the right mouse
 button on the map). Traps, chance and data change events work, with the damage bursts, condition icons and
 deaths in the status block. Places can be entered: trainers, healers, sages, inns (renting a room and resting in
-the camp), merchants and libraries, blacksmiths. There is no music.
+the camp), merchants and libraries, blacksmiths. Monsters on the map hunt the party, and encounters lead to the
+combat screen (moving, advancing, close- and long-range attacks, parading, fleeing, the monster logic of the
+original, loot and experience). There is no music.
 
 ![Start](docs/start.png) ![After walking](docs/moved.png)
 
@@ -59,6 +61,16 @@ Resting in the camp after renting a room (map 266), and a trap that kills (chang
 masks and the cross icons:
 
 ![Camp](docs/camp.png) ![Death](docs/death.png)
+
+Combat on Kire's moon at night (encounter at 29,4 of map 300, `./build.sh --map 300 --pos 29,5,0`): the monsters
+are zoomed like the COMOBs of the original, Thalion is hit (the scratches), and after a won battle the loot is
+divided on the screen of the trash pile:
+
+![Combat](docs/combat.png) ![Loot](docs/loot.png)
+
+A hunting monster reaches the party (map 275) and the combat in the cave:
+
+![Attack](docs/attack.png) ![Combat in the cave](docs/combat2.png)
 
 Map 264 "Zum hinkenden Gauner" at 14:00 (`./build.sh --map 264 --pos 11,13,2 --time 14:00`):
 
@@ -208,7 +220,26 @@ the 2D maps) and the transport merchants are not done.
 `src/POC/PERSONS.S` contains the persons and the time from `PERSONS.S`, `TIME.S` and `MAP/MAP.S`: persons
 on a path (one position per 5 minutes of the day) and randomly moving persons, sitting and sleeping
 persons, collisions with persons, and the time of day, which advances by one step (5 minutes) every 4
-moves or every 10 seconds. Monsters are shown, but stay where they are.
+moves or every 10 seconds. Monsters which see the party (line of sight) hunt it; when one reaches the party,
+the combat requester of `COMBAT.S` appears.
+
+`src/POC/COMBAT.S` and `src/POC/COMBAT2.S` contain the combat (`COMBAT/COMBAT.S`, `COMBAT/MONSTER_.S`,
+`COMBAT/TACTIC.S`, `COMBAT/COMOBS.S`, `COMBAT/APRES.S`): the Encounter event and the combat requester, the
+combat screen with the tactic window and the original control icons, the combat rounds sorted by speed
+(moving, advancing, close- and long-range attacks with critical hits, parading, breaking weapons and armour,
+fleeing), the monster logic (danger, courage, offensive and defensive actions, targets), the monster
+animations, and after the battle the experience, level ups and the loot (on the opened chest screen with the
+trash pile). Magic, the flying projectiles, the inventory and the options during combat are not done.
+
+The combat data (background, monster graphics, effects) is loaded into the memory of the map graphics, which
+are loaded again after the battle. Each combat background has its own 16 colour palette, computed by the
+converter from the background and the colours of all monsters; the monster graphics (5 bit) are converted to
+4 bit with the lookup table of that palette when they are loaded. The original draws the COMOBs with the
+blitter into a zoom screen and updates only the changed areas. Here the combat window is rebuilt every
+frame: the background is copied, and the COMOBs are projected like in `COMOBS.S` and drawn from far to near
+with a software zoom (a line of the source is unpacked to one byte per pixel, the scaled line is packed into
+the planes 8 pixels at a time). This takes several frames when big monsters are near, so the animations are
+slower than on the Amiga.
 
 The Amiga version redraws the whole map window every frame with the blitter. On the ST this took 5 frames,
 so a tile cache was added: for each screen buffer and map position the graphics drawn last time are
@@ -222,9 +253,9 @@ Hatari (STE, 8 MHz):
 
 ## Not done yet
 
-* Monsters (movement, combat, encounters), light spells, transports and travel modes other than on foot, the
-  transport merchants, casting and learning spells (camp), level ups, a new leader when the active member
-  dies, and 3D maps (riddle mouths, spinners, ...).
+* Magic in combat, light spells, transports and travel modes other than on foot, the transport merchants,
+  casting and learning spells (camp), a new leader when the active member dies, game over (the proof of
+  concept ends), and 3D maps (riddle mouths, spinners, ...).
 * In the inventory: most spells of usable items, gold and food, and moving only a part of a stack.
 * Dialogues with party members, joining and leaving the party.
 * The module system, the memory manager and loading from the original containers (the data is converted in

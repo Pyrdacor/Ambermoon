@@ -218,7 +218,7 @@ No_event:					; (events without effect here, e.g. music)
 Event_ptrs:
 	dc.l Map_exit,Door,Item_found,Show_pictxt,Not_implemented	; 1 - 5
 	dc.l Event_trap,Not_implemented,Not_implemented,Datachange,Change_icon	; 6 - 10
-	dc.l Not_implemented,Places,Query,Modify,Chance	; 11 - 15
+	dc.l Encounter,Places,Query,Modify,Chance	; 11 - 15
 	dc.l No_event,Dia_text,Dia_give,Requester,No_event	; 16 - 20
 	dc.l No_event,Not_implemented,Dia_execute,No_event	; 21 - 24
 

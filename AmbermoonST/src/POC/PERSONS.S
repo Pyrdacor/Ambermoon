@@ -1,8 +1,9 @@
 ; Proof of concept : persons (NPCs) and time on 2D maps (Atari ST)
 ;
 ; Taken from PERSONS.S, TIME.S, MAP/MAP.S and MAIN.S of the original source,
-; without monsters (they stay where they are), combat, events and the memory
-; manager (the map data is in Map_data_buffer).
+; without the memory manager (the map data is in Map_data_buffer). Monsters
+; which see the party hunt it; when a monster reaches the party, a combat is
+; requested (see COMBAT.S).
 
 	SECTION	Program,code
 
@@ -92,8 +93,11 @@ Init_persons_2D:
 ;*****************************************************************************
 NPC_manager_2D:
 	movem.l	d0/d1/d6/d7/a1/a2,-(sp)
+	tst.w	Monster_move_delay		; Waiting ?
+	beq.s	.Zero
+	subq.w	#1,Monster_move_delay	; Yes
 ; ---------- Update NPC positions -----------------
-	lea.l	VNPC_data,a1
+.Zero:	lea.l	VNPC_data,a1
 	move.l	CD_value,d6
 	moveq.l	#0,d7
 .Loop1:	tst.b	NPC_char_nr(a1)		; Anyone there ?
@@ -104,8 +108,13 @@ NPC_manager_2D:
 	move.b	d0,d1
 	andi.b	#$03,d1
 	cmp.b	#2,d1			; Monster or person ?
-	beq.s	.Next1			; (monsters are not handled)
-	btst	#2,d0			; Path or random ?
+	bne.s	.Person
+	btst	#2,d0			; Hunt or stay ?
+	beq.s	.Stay
+	jsr	Hunting_monster_2D		; Handle hunting monster
+.Stay:	jsr	Battle_check
+	bra.s	.Next1
+.Person:	btst	#2,d0			; Path or random ?
 	beq.s	.Path
 	jsr	Random_person_2D		; Handle random person
 	bra.s	.Next1
@@ -373,6 +382,257 @@ Move_in_direction:
 	ext.w	d2
 	add.w	d2,d1
 	movem.l	(sp)+,d2/a0
+	rts
+
+;*****************************************************************************
+; [ Check for combat with a monster ]
+;   IN : d7 - NPC index {0...31} (.w)
+;        a1 - Pointer to NPC data (.l)
+; All registers are restored
+; NOTE :
+;   - From PERSONS.S (always on foot).
+;*****************************************************************************
+Battle_check:
+	movem.l	d0/d1,-(sp)
+	move.w	VMap_X(a1),d0		; Get coordinates
+	move.w	VMap_Y(a1),d1
+	cmp.w	Map_Xcoord,d0		; X the same ?
+	bne.s	.Exit
+	cmp.w	Map_Ycoord,d1		; Y the same ?
+	bne.s	.Exit
+	tst.w	Monster_move_delay		; Waiting ?
+	bne.s	.Exit
+	moveq.l	#0,d0			; Get monstergroup number
+	move.b	NPC_char_nr(a1),d0
+	move.w	d0,Monstergroup_nr		; Set info
+	move.w	d7,Combat_char_index
+	st	Combat_req		; Activate requester
+.Exit:	movem.l	(sp)+,d0/d1
+	rts
+
+;*****************************************************************************
+; [ Hunting monster movement routine (2D map) ]
+;   IN : a1 - Pointer to NPC data (.l)
+; All registers are restored
+; NOTE :
+;   - From PERSONS.S.
+;*****************************************************************************
+Hunting_monster_2D:
+	movem.l	d0-d6,-(sp)
+	move.w	VMap_X(a1),d0		; Get position
+	move.w	VMap_Y(a1),d1
+	jsr	Check_line_of_sight		; Check line of sight
+	beq	.Visible
+	tst.w	Monster_move_delay		; Waiting ?
+	bne	.Exit
+	tst.b	New_step			; Update position ?
+	beq	.Exit
+	btst	#0,VFlags(a1)		; Moving at random ?
+	bne.s	.Not_random
+	jsr	Random_person_2D
+	bra	.Exit
+.Not_random:
+	move.w	VDir(a1),d2		; Get direction
+	jsr	Move_in_direction
+	jsr	Monster_movement_check
+	beq	.Move
+	bclr	#0,VFlags(a1)		; Random movement
+	clr.w	VPathlen(a1)		; Force new path
+	jsr	Random_person_2D
+	bra	.Exit
+.Visible:	tst.w	Monster_move_delay		; Waiting ?
+	bne	.Exit
+	ori.b	#3,VFlags(a1)		; Set bit 0 & 1
+	tst.b	New_step			; Update position ?
+	bne.s	.Ok
+	tst.b	New_move
+	beq	.Exit
+.Ok:	move.w	d0,d2			; Duplicate coordinates
+	move.w	d1,d3
+	sub.w	Map_Xcoord,d2		; Calculate dX & dY
+	sub.w	Map_Ycoord,d3
+	move.w	d2,d4
+	bpl.s	.Pos1
+	neg.w	d4
+.Pos1:	move.w	d3,d5
+	bpl.s	.Pos2
+	neg.w	d5
+.Pos2:	ext.l	d2			; Mega SGN function
+	beq.s	.Zero1
+	swap.w	d2
+	bmi.s	.Zero1
+	moveq.l	#1,d2
+.Zero1:	ext.l	d3			; Mega SGN function
+	beq.s	.Zero2
+	swap.w	d3
+	bmi.s	.Zero2
+	moveq.l	#1,d3
+.Zero2:	sub.w	d5,d4			; dX - dY
+	ext.l	d4			; Mega SGN function
+	beq.s	.Zero3
+	swap.w	d4
+	bmi.s	.Zero3
+	moveq.l	#1,d4
+.Zero3:	neg.w	d2			; Invert
+	neg.w	d3
+	addq.w	#1,d2			; Calculate index
+	addq.w	#1,d3
+	addq.w	#1,d4
+	add.w	d3,d2
+	add.w	d3,d3
+	add.w	d3,d2
+	move.w	d4,d3
+	lsl.w	#3,d3
+	add.w	d3,d2
+	add.w	d4,d2
+	add.w	d2,d2			; Get direction priorities
+	add.w	d2,d2
+	move.l	.Dir_table(pc,d2.w),d2
+	bmi	.Move
+	move.w	d0,d4			; Copy coordinates
+	move.w	d1,d5
+	rol.l	#8,d2			; Get 1st direction
+	tst.b	d2
+	bmi.s	.No_move2
+	jsr	Move_in_direction		; Try move
+	jsr	Monster_movement_check
+	beq.s	.Move
+	move.w	d4,d0			; Restore coordinates
+	move.w	d5,d1
+	rol.l	#8,d2			; Get 2nd direction
+	tst.b	d2
+	bmi.s	.No_move2
+	jsr	Move_in_direction		; Try move
+	jsr	Monster_movement_check
+	beq.s	.Move
+	move.w	d4,d0			; Restore coordinates
+	move.w	d5,d1
+	rol.l	#8,d2			; Get 3rd direction
+	tst.b	d2
+	bmi.s	.No_move2
+	jsr	Move_in_direction		; Try move
+	jsr	Monster_movement_check
+	beq.s	.Move
+.No_move2:	bra.s	.Exit
+.Move:	move.w	d0,VMap_X(a1)		; Store new coordinates
+	move.w	d1,VMap_Y(a1)
+	andi.w	#$00ff,d2			; Store direction
+	move.w	d2,VDir(a1)
+.Exit:	movem.l	(sp)+,d0-d6
+	rts
+
+.Dir_table:
+	dc.l $00030100,$00030100,$00010300	; dX < dY
+	dc.l $03000200,-1,$01000200
+	dc.l $02030100,$02010300,$02010300
+	dc.l $0003ff00,-1,$0001ff00		; dX = dY
+	dc.l -1,-1,-1
+	dc.l $0203ff00,-1,$0201ff00
+	dc.l $03000200,$00030100,$01000200	; dX > dY
+	dc.l $03000200,-1,$01000200
+	dc.l $03020000,$02030100,$01020000
+
+; [ Movement check for monsters ]
+;   IN : d0/d1 - Coordinates (.w)
+;        a1 - Pointer to NPC data (.l)
+;  OUT : eq - Possible, ne - Not possible
+; All registers are restored
+; NOTE :
+;   - Like [ NPC_movement_check_2D ], but monsters may go to the party.
+Monster_movement_check:
+	cmp.w	Map_Xcoord,d0
+	bne	NPC_movement_check_2D
+	cmp.w	Map_Ycoord,d1
+	bne	NPC_movement_check_2D
+	rts
+
+;*****************************************************************************
+; [ Check if the party is in a monster's line of sight ]
+;   IN : a1 - Pointer to NPC data (.l)
+;  OUT : eq - In line of sight, ne - NOT in line of sight
+; All registers are restored
+; NOTE :
+;   - From PERSONS.S.
+;*****************************************************************************
+Check_line_of_sight:
+	movem.l	d0-d7,-(sp)
+	move.w	VMap_X(a1),d0		; Get monster's absolute
+	move.w	VMap_Y(a1),d1		;  coordinates
+	move.w	d0,d4			; Calculate monster's
+	move.w	d1,d5			;  relative coordinates
+	sub.w	Map_Xcoord,d4
+	sub.w	Map_Ycoord,d5
+	tst.w	d4			; Same location ?
+	bne.s	.Notzero
+	tst.w	d5
+	beq	.Seen
+.Notzero:	move.w	d4,d2			; Mega SGN function
+	ext.l	d2
+	beq.s	.Zero1
+	swap.w	d2
+	bmi.s	.Zero1
+	moveq.l	#1,d2
+.Zero1:	move.w	d5,d3			; Mega SGN function
+	ext.l	d3
+	beq.s	.Zero2
+	swap.w	d3
+	bmi.s	.Zero2
+	moveq.l	#1,d3
+.Zero2:	neg.w	d2			; Reverse
+	neg.w	d3
+	tst.w	d4			; Calculate dX
+	bpl.s	.No_abs1
+	neg.w	d4
+.No_abs1:	tst.w	d5			; Calculate dY
+	bpl.s	.No_abs2
+	neg.w	d5
+.No_abs2:	cmp.w	d5,d4			; dY > dX ?
+	bmi.s	.dYdX
+; ---------- dY =< dX -----------------------------
+	move.w	d4,d6			; Initialize Bresenham
+	lsr.w	#1,d6			;  variable
+	move.w	d4,d7			; dX = counter
+	subq.w	#1,d7			; One less
+	bmi	.Not2			; Exit if zero
+	bra.s	.Entry1
+.Again1:	move.l	d0,-(sp)			; Vision blocked ?
+	jsr	Get_location_status
+	btst	#Vision_blocked_bit,d0
+	bne.s	.Not
+	move.l	(sp)+,d0
+.Entry1:	add.w	d5,d6			; Trace line
+	cmp.w	d4,d6
+	bmi.s	.Skip1
+	sub.w	d4,d6
+	add.w	d3,d1			; Update Y
+.Skip1:	add.w	d2,d0			; Update X
+	dbra	d7,.Again1		; Next
+	bra.s	.Seen
+; ---------- dY > dX ------------------------------
+.dYdX:	move.w	d5,d6			; Initialize Bresenham
+	lsr.w	#1,d6			;  variable
+	move.w	d5,d7			; dY = counter
+	subq.w	#1,d7			; One less
+	bmi.s	.Not2			; Exit if zero
+	bra.s	.Entry2
+.Again2:	move.l	d0,-(sp)			; Vision blocked ?
+	jsr	Get_location_status
+	btst	#Vision_blocked_bit,d0
+	bne.s	.Not
+	move.l	(sp)+,d0
+.Entry2:	add.w	d4,d6			; Trace line
+	cmp.w	d5,d6
+	bmi.s	.Skip2
+	sub.w	d5,d6
+	add.w	d2,d0			; Update X
+.Skip2:	add.w	d3,d1			; Update Y
+	dbra	d7,.Again2		; Next
+.Seen:	moveq.l	#0,d0			; Peek a boo !
+	bra.s	.Exit
+.Not:	move.l	(sp)+,d0			; Stack correction
+.Not2:	moveq.l	#-1,d0			; Where are you ?
+.Exit:	tst.b	d0			; Get zero flag
+	movem.l	(sp)+,d0-d7
 	rts
 
 ;*****************************************************************************
