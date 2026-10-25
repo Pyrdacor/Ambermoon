@@ -27,6 +27,10 @@ Save_goto_points	EQU	$3584
 ;*****************************************************************************
 Event_handler:
 	movem.l	d0/d1,-(sp)
+	move.w	Travel_mode,d0		; Events possible ?
+	move.w	#Event_mask,d1
+	btst	d0,d1
+	beq.s	.Exit
 	move.w	Map_Xcoord,d0		; Get player's coordinates
 	move.w	Map_Ycoord,d1
 	jsr	Find_event		; Find event

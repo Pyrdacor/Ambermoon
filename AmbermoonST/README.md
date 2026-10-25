@@ -16,7 +16,8 @@ and persons can be talked to (the hand and mouth actions of the second control i
 button on the map), also the party members (mouth on the party), who can leave the party and join it again. Traps, chance and data change events work, with the damage bursts, condition icons and
 deaths in the status block. Places can be entered: trainers, healers, sages, inns (renting a room and resting in
 the camp), merchants and libraries, blacksmiths. The party can camp (Camp icon), rest and learn spells from
-spell scrolls. Monsters on the map hunt the party, and encounters lead to the
+spell scrolls. On the world maps the parked horses, rafts and ships can be used (Change travel mode icon), the
+transport merchants sell them, and the party swims in the water. Monsters on the map hunt the party, and encounters lead to the
 combat screen (moving, advancing, close- and long-range attacks, parading, fleeing, the monster logic of the
 original, loot and experience). There is no music.
 
@@ -82,6 +83,11 @@ Learning a spell from a scroll in the camp (Read scroll icon; here Thalion got t
 data, and the attempt fails):
 
 ![Scroll](docs/scroll.png) ![Failed](docs/scroll2.png)
+
+The raft of the savegame at the pier of map 171 (`./build.sh --map 171 --pos 21,42,0 --time 12:00`): the party
+gets on (Change travel mode icon) and sails; left in the water, it has to swim (damage):
+
+![Raft](docs/raft.png) ![Swimming](docs/swim.png)
 
 Map 264 "Zum hinkenden Gauner" at 14:00 (`./build.sh --map 264 --pos 11,13,2 --time 14:00`):
 
@@ -237,7 +243,14 @@ rest, one food ration per member, 50% of the LP and SP) and learns spells from s
 known spells, spell learning points, the Read scrolls skill; the scroll simply disappears instead of the
 dissolve or explosion animation). Casting spells and aging while resting are not done. Bought
 items are taken from the slots like the items of a chest. The enchanter and the food merchant (not used in
-the 2D maps) and the transport merchants are not done.
+the 2D maps) are not done.
+
+`src/POC/TRANSPORT.S` contains the transports and travel modes (`ACTIONS.S`, `MAIN.S`, `MAP/MAP.S`,
+`MAP/2D_MAP.S`, `PLACES.S`): the parked transports of the savegame (`Trans_data`) are drawn on the world maps,
+the Change travel mode icon gets on and off, the travel mode decides the graphics of the party (all 11 modes
+are converted), the tiles which can be entered, the speed (`Travel_speed`) and whether monsters attack and events
+happen; on foot the party swims in the water (members with a low swimming skill lose LP). The transport
+merchants sell horses, rafts and ships, which are put at the place given in the place data.
 
 `src/POC/PERSONS.S` contains the persons and the time from `PERSONS.S`, `TIME.S` and `MAP/MAP.S`: persons
 on a path (one position per 5 minutes of the day) and randomly moving persons, sitting and sleeping
@@ -275,7 +288,7 @@ Hatari (STE, 8 MHz):
 
 ## Not done yet
 
-* Magic in combat, light spells, transports and travel modes other than on foot, the transport merchants,
+* Magic in combat, light spells, the travel modes which are given by magic (magic disc, giant eagle, ...),
   casting spells, a new leader when the active member dies, game over (the proof of
   concept ends), and 3D maps (riddle mouths, spinners, ...).
 * In the inventory: most spells of usable items, gold and food, and moving only a part of a stack.

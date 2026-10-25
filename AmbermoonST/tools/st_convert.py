@@ -23,8 +23,8 @@
 #   P<t>.BIN    the same for the map area of the maps with tileset t
 #   I<t>.BIN    icon graphics of tileset t (16x16 each), D<t>.BIN its icon data (unchanged)
 #   G<w>_<t>.BIN  party graphics of world w (17 frames of 16x32) for tileset t
-#   T0_<t>.BIN  travel graphics "on foot" for tileset t (4 directions : width in truncs, height, X & Y offset
-#               (words), graphic)
+#   T<m>_<t>.BIN  travel graphics of travel mode m for tileset t (4 directions : width in truncs, height, X & Y offset
+#               (words), graphic), STA<t>.BIN the stationary transports (horse, raft, ship, sand crawler, sand skimmer)
 #   N<n>_<t>.BIN  NPC graphics file n for tileset t (number of frames (byte), 0 (byte), frames of 16x32)
 #   M<nnn>.BIN  data of 2D map nnn, X<nnn>.BIN its map texts (both unchanged)
 #   SAVE.BIN    the initial savegame (Party_data.sav: event bits, map characters, ...)
@@ -343,14 +343,23 @@ def main():
             write(f'G{w}_{tileset}.BIN', b''.join(st_graphic([spr_lut[v] for v in f], 16, 32) for f in party[w]))
         # travel graphics "on foot" (used instead of the party graphics on the world maps): per direction
         # width (truncs), height, X & Y offset (words) and the graphic
-        raw = data.read('Travel_gfx.amb/001')
+        for mode in range(11):                      # all travel modes (Travel_gfx.amb 1...11)
+            raw = data.read(f'Travel_gfx.amb/{mode + 1:03}')
+            out = b''
+            o = 0
+            for _ in range(4):
+                w, h, xo, yo = struct.unpack('>4h', raw[o:o + 8])
+                out += raw[o:o + 8] + st_graphic([map_lut[v] for v in planar(raw, w * 16, h, 5, o + 8)], w * 16, h)
+                o += 8 + w * h * 10
+            write(f'T{mode}_{tileset}.BIN', out, quiet=mode > 0)
+        # stationary transports (horse, raft, ship, sand crawler, sand skimmer : Stationary_dimensions)
+        raw = data.read('Stationary/001')
         out = b''
         o = 0
-        for _ in range(4):
-            w, h, xo, yo = struct.unpack('>4h', raw[o:o + 8])
-            out += raw[o:o + 8] + st_graphic([map_lut[v] for v in planar(raw, w * 16, h, 5, o + 8)], w * 16, h)
-            o += 8 + w * h * 10
-        write(f'T0_{tileset}.BIN', out)
+        for w, h in ((32, 22), (32, 11), (48, 34), (48, 21), (48, 39)):
+            out += st_graphic([map_lut[v] for v in planar(raw, w, h, 5, o)], w, h)
+            o += w // 8 * 5 * h
+        write(f'STA{tileset}.BIN', out, quiet=True)
         for n in npcs_used:
             write(f'N{n}_{tileset}.BIN', b''.join(
                 bytes([len(g), 0]) + b''.join(st_graphic([spr_lut[v] for v in f], 16, 32) for f in g)

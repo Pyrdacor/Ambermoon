@@ -395,6 +395,10 @@ Move_in_direction:
 ;*****************************************************************************
 Battle_check:
 	movem.l	d0/d1,-(sp)
+	move.w	Travel_mode,d0		; Vulnerable ?
+	move.w	#Combat_mask,d1
+	btst	d0,d1
+	beq.s	.Exit
 	move.w	VMap_X(a1),d0		; Get coordinates
 	move.w	VMap_Y(a1),d1
 	cmp.w	Map_Xcoord,d0		; X the same ?
@@ -740,6 +744,9 @@ Time_after_move:
 	dbra	d0,.Count
 	jsr	Update_time		; 1 step per {x} moves
 	moveq.l	#Moves_per_step,d0
+	tst.b	World_map			; (world map : travel speed)
+	beq.s	.Count
+	move.w	Time_warp,d0
 .Count:	move.w	d0,Move_count		; Store counter
 	move.l	(sp)+,d0
 	rts

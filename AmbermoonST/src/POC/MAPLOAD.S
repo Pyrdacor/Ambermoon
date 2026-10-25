@@ -56,14 +56,8 @@ Load_map:
 	moveq.l	#64,d1
 	moveq.l	#'P',d2
 	jsr	Load_numbered_file
-	movem.l	d0-d3/a1,-(sp)		; Travel graphics "on foot"
-	move.w	d0,d1
-	moveq.l	#0,d0
-	moveq.l	#'T',d2
-	move.l	#Max_travel_graphics,d3
-	lea.l	Travel_graphics,a1
-	jsr	Load_sprite_file
-	movem.l	(sp)+,d0-d3/a1
+	jsr	Load_travel_graphics	; Travel graphics
+	jsr	Load_stationary_graphics	; Stationary transports
 .Same_ts:
 ; ---------- Party & NPC graphics -----------------
 	lea.l	Map_data_buffer,a0
@@ -111,7 +105,9 @@ Load_map:
 	move.b	#C2_animspeed,Anim_speed	; Animation parameters (2D city)
 	move.b	#C2_animspeed,Anim_count
 	move.w	#C2_animbias,Anim_bias
-.Done:	jsr	Get_CD_value
+.Done:	move.w	Travel_mode,d0		; (speed of the travel mode)
+	jsr	Set_new_travel_mode
+	jsr	Get_CD_value
 	jsr	Make_map_name
 	jsr	Update_light_status
 	movem.l	(sp)+,d0-d7/a0-a2
@@ -698,7 +694,7 @@ World_map:	ds.b 1
 Submap_changed:	ds.b 1
 Needed_submaps:	ds.w 9
 World_slot_nrs:	ds.w 9
-Max_travel_graphics	EQU	1024
+Max_travel_graphics	EQU	6*1024
 Travel_graphics:	ds.b Max_travel_graphics
 Map_texts:	ds.b Max_map_texts
 World_slots:	ds.b 9*World_slot_size

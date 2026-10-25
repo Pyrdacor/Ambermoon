@@ -72,7 +72,11 @@ Program_main:
 	jsr	Combat_check
 	jsr	Handle_realtime_steps
 	jsr	Display_position
-	jsr	Update_status
+	tst.w	Icons_redraw		; Control icons changed ?
+	beq.s	.No_icons
+	subq.w	#1,Icons_redraw
+	jsr	Display_control_icons
+.No_icons:	jsr	Update_status
 	jsr	Switch_screens
 	bra.s	.Loop
 .Exit:	moveq.l	#1,d0			; Fade out
@@ -381,13 +385,26 @@ Print_centered_string:
 ;     (M2_CIL in MAP/2D_MAP.S).
 ;*****************************************************************************
 Display_control_icons:
-	move.l	a0,-(sp)
+	movem.l	d0/d7/a0/a1,-(sp)
 	lea.l	M2_CIL,a0			; Movement or actions ?
 	tst.b	Second_CIL_flag
 	beq.s	.First
-	lea.l	Second_CIL,a0
+	lea.l	Second_CIL,a1		; Evaluate actions
+	lea.l	Second_CIL_work,a0
+	moveq.l	#9-1,d7
+.Copy:	move.w	(a1)+,(a0)+
+	dbra	d7,.Copy
+	lea.l	Second_CIL_work,a0
+	jsr	Travel_mode_possible	; Change travel mode ?
+	bne.s	.Trans
+	bset	#7,3*2(a0)
+.Trans:	move.w	Travel_mode,d0		; Camp ?
+	move.w	#Camp_mask,d7
+	btst	d0,d7
+	bne.s	.First
+	bset	#7,5*2(a0)
 .First:	jsr	Display_CIL
-	move.l	(sp)+,a0
+	movem.l	(sp)+,d0/d7/a0/a1
 	rts
 
 ;*****************************************************************************
@@ -631,9 +648,9 @@ Handle_input:
 	bra	.Exit
 ; ---------- Second control icons -----------------
 .No_right:	tst.b	Second_CIL_flag		; Action icons ?
-	beq.s	.Move_input
+	beq	.Move_input
 	btst	#Left_pressed,d6
-	beq.s	.Move_input
+	beq	.Move_input
 	jsr	Control_icon_number
 	cmp.w	#2,d0			; Hand ?
 	bne.s	.No_hand
@@ -644,8 +661,18 @@ Handle_input:
 	bmi	.Exit
 	jsr	Touch_map
 	bra	.Exit
-.No_hand:	cmp.w	#6,d0			; Camp ?
+.No_hand:	cmp.w	#4,d0			; Change travel mode ?
+	bne.s	.No_trans
+	btst	#7,Second_CIL_work+3*2
+	bne	.Exit
+	moveq.l	#4,d0
+	jsr	Press_icon
+	jsr	Change_travel_mode
+	bra	.Exit
+.No_trans:	cmp.w	#6,d0			; Camp ?
 	bne.s	.No_camp
+	btst	#7,Second_CIL_work+5*2
+	bne	.Exit
 	moveq.l	#6,d0
 	jsr	Press_icon
 	jsr	Camp
@@ -814,7 +841,9 @@ Make_2D_move:
 	movem.l	d2/d3/d6/d7,-(sp)
 	move.w	VBL_counter,d2		; Is it time ?
 	sub.w	Last_move,d2
-	cmp.w	#M2_movement_speed,d2
+	move.w	#M2_movement_speed,d3	; (faster with transports)
+	sub.w	Time_warp,d3
+	cmp.w	d3,d2
 	bmi.s	.Exit
 	sf	Moved
 	move.w	Map_Xcoord,d2		; Get party coordinates
@@ -848,15 +877,17 @@ Make_2D_move:
 ;   - From MAP/2D_MAP.S.
 ;*****************************************************************************
 Try_2D_move:
-	movem.l	d0-d3/d7,-(sp)
-	move.b	.View(pc,d7.w),d0		; Set view direction
+	movem.l	d0-d3/d7/a0,-(sp)
+	lea.l	.View(pc),a0		; Set view direction
+	move.b	0(a0,d7.w),d0
 	ext.w	d0
 	move.w	d0,View_direction
 	move.w	d2,d0			; Get party coordinates
 	move.w	d3,d1
 	add.w	d7,d7			; Get coordinate offsets
-	move.b	.Offsets(pc,d7.w),d2
-	move.b	.Offsets+1(pc,d7.w),d3
+	lea.l	.Offsets(pc),a0
+	move.b	0(a0,d7.w),d2
+	move.b	1(a0,d7.w),d3
 	ext.w	d2
 	ext.w	d3
 	add.w	d2,d0			; Move
@@ -869,11 +900,15 @@ Try_2D_move:
 	move.w	d1,Map_Ycoord
 	st	Moved			; Yay!
 	jsr	World_evaluate		; World map : next submap ?
-	jsr	Animate_party
+	jsr	Check_swimming		; Swimming ?
+	tst.b	Second_CIL_flag		; (icons may change)
+	beq.s	.No_icons
+	move.w	#2,Icons_redraw
+.No_icons:	jsr	Animate_party
 	jsr	Time_after_move
 	st	Pending_events		; Handle events
 	move.w	VBL_counter,Last_move	; Reset clock
-.Exit:	movem.l	(sp)+,d0-d3/d7
+.Exit:	movem.l	(sp)+,d0-d3/d7/a0
 	rts
 
 .View:	dc.b 0,0,1,2,2,2,3,0
@@ -904,10 +939,18 @@ Movement_check_2D:
 	cmp.w	Height_of_map,d1		; Y too high ?
 	bgt.s	.Exit
 .World:	jsr	Get_location_status		; Get location status
+	moveq.l	#0,d1			; Get travel mode
+	tst.b	World_map			; (only on world maps)
+	beq.s	.Skip
+	move.w	Travel_mode,d1
+	cmp.w	#Swimming,d1		; Swimming ?
+	bne.s	.Skip
+	moveq.l	#On_foot,d1		; Yes -> Equals on foot
+.Skip:	add.w	#Blocked_foot_bit,d1
 	btst.l	#Way_blocked_bit,d0		; Way blocked ?
 	bne.s	.Exit
-	btst.l	#Blocked_foot_bit,d0	; Way possible on foot ?
-	seq	d2
+	btst.l	d1,d0			; Way possible for current
+	seq	d2			;  travel mode ?
 .Exit:	tst.b	d2			; Get zero flag
 	movem.l	(sp)+,d0-d2
 	rts
@@ -1207,6 +1250,7 @@ Display_2D_map:
 	add.w	Width_of_map,d5
 	dbra	d7,.Loop1
 ; ---------- Display persons & party -------------
+	jsr	Display_2D_transports
 	lea.l	Icon_graphics,a0
 	lea.l	Persons_buffer,a1
 	jsr	Get_hashable_number
@@ -1253,6 +1297,7 @@ Mark_sprite_cells:
 .Clear:	clr.b	(a0)+
 	dbra	d7,.Clear
 	lea.l	Sprite_cells,a0
+	jsr	Mark_transport_cells	; Transports
 	move.w	Party_cell,d0		; Party
 	jsr	.Mark
 	lea.l	Persons_buffer,a1		; Persons
@@ -1780,9 +1825,9 @@ M2_CIL:	dc.w Upleft_2D_cicon,Up_2D_cicon,Upright_2D_cicon
 	dc.w Downleft_2D_cicon,Down_2D_cicon,Downright_2D_cicon
 
 ; Second control icon list of the 2D map (Second_CIL in ACTIONS.S) : only
-; Hand, Talk and Camp are possible in the proof of concept
+; Hand, Talk, Change travel mode and Camp are possible in the proof of concept
 Second_CIL:	dc.w Look_cicon+Disabled,Hand_cicon,Talk_cicon
-	dc.w Change_trans_cicon+Disabled,Use_magic_cicon+Disabled,Camp_cicon
+	dc.w Change_trans_cicon,Use_magic_cicon+Disabled,Camp_cicon
 	dc.w Automapper_cicon+Disabled,Combat_pos_cicon+Disabled,Disk_cicon+Disabled
 
 ; Positions of the control icons (HULL/CONTROLS.S)
@@ -1922,6 +1967,8 @@ Mouse_pointer:	ds.b 4+16*8
 Hand_pointer:	ds.b 4+16*8
 Mouth_pointer:	ds.b 4+16*8
 Second_CIL_flag:	ds.b 1
+	even
+Second_CIL_work:	ds.w 9
 	even
 Names:	ds.b 6*16
 Temp_name:	ds.b 6

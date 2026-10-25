@@ -78,9 +78,9 @@ Places:
 	dc.l MerchOBJC_place_init
 	dc.l 0				; (food merchant)
 	dc.l MerchOBJC_place_init
-	dc.l 0				; (transport merchants)
-	dc.l 0
-	dc.l 0
+	dc.l MerchTRANS_place_init		; Transport merchants
+	dc.l MerchTRANS_place_init
+	dc.l MerchTRANS_place_init
 	dc.l Blacksmith_place_init
 
 ; [ Go back to the previous position on the map ]
