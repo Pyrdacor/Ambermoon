@@ -138,6 +138,11 @@ lists in `MODULES.S`): the status block (lines 0–36) uses the UI palette, the 
 For the status block, the colours of the LP bar (Amiga colours 7 and 6, blue) get their own ST colour, so
 that they stay different from the SP bar (24 and 23, green).
 
+In the palettes of the status block, the inventory and the character screen (`UIPAL`, `INVPAL`, `CHARPAL`),
+ST colour 8 is a dark grey ($333) instead of Amiga colour 24 (a dark green, $254): that is the background of
+the layouts (value 0), so the screens with layouts look grey. The graphics which use colour 24 themselves (the
+SP bar, portraits, items) get one of the chosen colours for it (it takes part in the k-means there).
+
 The Amiga version uses one palette for the status block, the items and the portraits, because items can be
 dragged onto the portraits. Here the inventory screen has its own palette below the status block, chosen for
 the items and the portraits (the portrait of the inventory member is shown there too), and a moved item is

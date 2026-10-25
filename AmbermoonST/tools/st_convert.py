@@ -199,16 +199,26 @@ def st_graphic(pix, w, h):
     return bytes(out)
 
 
-def make_palette(palette, weights, ui_first=24, fixed=()):
+# Layout background (ST slot 8, value 0 of the layouts) in the UI palettes : a dark grey instead of colour 24 of
+# Main_pal ($254, a dark green). The graphics which use colour 24 themselves (SP bar, portraits, items) get the
+# nearest other slot (colour 24 is one of the colours of the k-means there).
+LAYOUT_GREY = (51, 51, 51)
+
+
+def make_palette(palette, weights, ui_first=24, fixed=(), grey=False):
     """16 colour palette with the slot layout described above. palette: 32 rgb, weights: 32 values.
     ui_first: first UI colour which gets a fixed slot (8 + colour - 24). In the map area colour 24 is not needed
     by the UI (value 0 of the layout and the buttons is drawn black), so slot 8 is another free slot there.
     fixed: colours which get the slots 1, 2, ... (e.g. white for the dragged items, see WHITE_SLOT).
+    grey: slot 8 is LAYOUT_GREY (see there).
     Returns (16 rgb, lookup table of 32 slots)."""
     ui = palette[ui_first:32]
+    if grey:
+        ui = [LAYOUT_GREY] + ui[1:]
     fix = [snap(palette[c], 4) for c in fixed]
-    points = [palette[i] for i in range(1, ui_first) if i not in fixed]
-    w = [math.sqrt(weights[i]) for i in range(1, ui_first) if i not in fixed]
+    own = [i for i in range(1, ui_first) if i not in fixed] + ([24] if grey else [])
+    points = [palette[i] for i in own]
+    w = [math.sqrt(weights[i]) for i in own]
     # k-means with the fixed and the UI colours fixed
     result = kmeans(points, w, fix + ui, 15, 4)
     free = result[len(fix) + len(ui):]
@@ -218,6 +228,9 @@ def make_palette(palette, weights, ui_first=24, fixed=()):
     for i in range(32):
         if i == 0:
             lut.append(0)
+        elif i == 24 and grey:
+            li = to_lab(palette[i])
+            lut.append(min((j for j in range(1, 16) if j != 8), key=lambda j: dist(li, labs[j])))
         elif i >= ui_first:
             lut.append(8 + i - 24)
         elif i in fixed:
@@ -414,7 +427,8 @@ def main():
     # (the skin tones need them). White is fixed anyway, Lighter_blue (names) is close to a UI grey.
     weights[16] += 500                     # Yellow (name of the active member)
     weights[6] += 4000                     # LP bar (7, 6) must differ from the SP bar (24, 23)
-    ui16, ui_lut = make_palette(main_pal, weights, fixed=WHITE)
+    weights[24] += 4000                    # (colour 24 needs an own slot, slot 8 is the layout grey)
+    ui16, ui_lut = make_palette(main_pal, weights, fixed=WHITE, grey=True)
     write('UIPAL.BIN', palette_file(ui16, ui_lut))
     write('PORTR.BIN', b''.join(st_graphic([ui_lut[v] for v in p], 32, 34) for p in portraits))
     write('NAMES.BIN', names)
@@ -436,7 +450,7 @@ def main():
         for v in p:
             weights[v] += portrait_weight
     weights[16] += 2000                    # text colour (Yellow)
-    inv16, inv_lut = make_palette(main_pal, weights, fixed=WHITE)
+    inv16, inv_lut = make_palette(main_pal, weights, fixed=WHITE, grey=True)
     write('INVPAL.BIN', palette_file(inv16, inv_lut))
     write('OBJICONS.BIN', b''.join(st_graphic([inv_lut[v] for v in ic], 16, 16) for ic in obj_icons))
     write('PORTRI.BIN', b''.join(st_graphic([inv_lut[v] for v in p], 32, 34) for p in portraits))
@@ -593,7 +607,7 @@ def main():
             weights[v] += 1
     for c in (4, 16, 22):
         weights[c] += 2000
-    chr16, chr_lut = make_palette(main_pal, weights, fixed=WHITE)
+    chr16, chr_lut = make_palette(main_pal, weights, fixed=WHITE, grey=True)
     write('CHARPAL.BIN', palette_file(chr16, chr_lut))
     write('PORTRC.BIN', b''.join(st_graphic([chr_lut[v] for v in p], 32, 34) for p in portraits))
     # the portraits of all party characters (joining) in the UI palette (PUI<n>.BIN) and in the character
