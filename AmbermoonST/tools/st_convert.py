@@ -199,26 +199,16 @@ def st_graphic(pix, w, h):
     return bytes(out)
 
 
-# Layout background (ST slot 8, value 0 of the layouts) in the UI palettes : a dark grey instead of colour 24 of
-# Main_pal ($254, a dark green). The graphics which use colour 24 themselves (SP bar, portraits, items) get the
-# nearest other slot (colour 24 is one of the colours of the k-means there).
-LAYOUT_GREY = (51, 51, 51)
-
-
-def make_palette(palette, weights, ui_first=24, fixed=(), grey=False):
+def make_palette(palette, weights, ui_first=24, fixed=()):
     """16 colour palette with the slot layout described above. palette: 32 rgb, weights: 32 values.
     ui_first: first UI colour which gets a fixed slot (8 + colour - 24). In the map area colour 24 is not needed
     by the UI (value 0 of the layout and the buttons is drawn black), so slot 8 is another free slot there.
     fixed: colours which get the slots 1, 2, ... (e.g. white for the dragged items, see WHITE_SLOT).
-    grey: slot 8 is LAYOUT_GREY (see there).
     Returns (16 rgb, lookup table of 32 slots)."""
     ui = palette[ui_first:32]
-    if grey:
-        ui = [LAYOUT_GREY] + ui[1:]
     fix = [snap(palette[c], 4) for c in fixed]
-    own = [i for i in range(1, ui_first) if i not in fixed] + ([24] if grey else [])
-    points = [palette[i] for i in own]
-    w = [math.sqrt(weights[i]) for i in own]
+    points = [palette[i] for i in range(1, ui_first) if i not in fixed]
+    w = [math.sqrt(weights[i]) for i in range(1, ui_first) if i not in fixed]
     # k-means with the fixed and the UI colours fixed
     result = kmeans(points, w, fix + ui, 15, 4)
     free = result[len(fix) + len(ui):]
@@ -228,9 +218,6 @@ def make_palette(palette, weights, ui_first=24, fixed=(), grey=False):
     for i in range(32):
         if i == 0:
             lut.append(0)
-        elif i == 24 and grey:
-            li = to_lab(palette[i])
-            lut.append(min((j for j in range(1, 16) if j != 8), key=lambda j: dist(li, labs[j])))
         elif i >= ui_first:
             lut.append(8 + i - 24)
         elif i in fixed:
@@ -400,8 +387,8 @@ def main():
     write('LAYOUT7.BIN', st_graphic([v and 8 + v for v in layout7], 320, 163))
 
     layout = planar(data.read('Layouts.amb/001'), 320, 163, 3)
-    # Value 0 is colour 24 of the map palette, which is red in palette 7 (the background around the frames).
-    # It is drawn black (ST colour 0) instead.
+    # Value 0 of the layouts and of all 3 bit graphics with base colour 24 is black : Put_unmasked_block
+    # (GRAPHICS.S) sets the bits of the base colour only where the mask (Make_mask_blitter) is set.
     write('LAYOUT.BIN', st_graphic([v and 8 + v for v in layout], 320, 163))
 
     # ---------- status block area ----------
@@ -427,8 +414,7 @@ def main():
     # (the skin tones need them). White is fixed anyway, Lighter_blue (names) is close to a UI grey.
     weights[16] += 500                     # Yellow (name of the active member)
     weights[6] += 4000                     # LP bar (7, 6) must differ from the SP bar (24, 23)
-    weights[24] += 4000                    # (colour 24 needs an own slot, slot 8 is the layout grey)
-    ui16, ui_lut = make_palette(main_pal, weights, fixed=WHITE, grey=True)
+    ui16, ui_lut = make_palette(main_pal, weights, fixed=WHITE)
     write('UIPAL.BIN', palette_file(ui16, ui_lut))
     write('PORTR.BIN', b''.join(st_graphic([ui_lut[v] for v in p], 32, 34) for p in portraits))
     write('NAMES.BIN', names)
@@ -450,21 +436,21 @@ def main():
         for v in p:
             weights[v] += portrait_weight
     weights[16] += 2000                    # text colour (Yellow)
-    inv16, inv_lut = make_palette(main_pal, weights, fixed=WHITE, grey=True)
+    inv16, inv_lut = make_palette(main_pal, weights, fixed=WHITE)
     write('INVPAL.BIN', palette_file(inv16, inv_lut))
     write('OBJICONS.BIN', b''.join(st_graphic([inv_lut[v] for v in ic], 16, 16) for ic in obj_icons))
     write('PORTRI.BIN', b''.join(st_graphic([inv_lut[v] for v in p], 32, 34) for p in portraits))
     write('OBJECTS.BIN', decode_file(open(os.path.join(AMBERFILES, 'Objects.amb'), 'rb').read()))
-    for n in (2, 6):                       # inventory & character screen (colour 24 is the background)
+    for n in (2, 6):                       # inventory & character screen
         layout = planar(data.read(f'Layouts.amb/{n:03}'), 320, 163, 3)
-        write(f'LAYOUT{n}.BIN', st_graphic([8 + v for v in layout], 320, 163))
+        write(f'LAYOUT{n}.BIN', st_graphic([v and 8 + v for v in layout], 320, 163))
     # door & chest screen (layout 3) : the 80x80 pictures of doors and chests in the inventory palette (the
     # items look the same there, and the pictures nearly as good as with an own palette)
     for n in PICS80:
         write(f'P80_{n}.BIN', st_graphic([inv_lut[v] for v in planar(data.read(f'Pics_80x80.amb/{n:03}'), 80, 80, 5)],
                                          80, 80), quiet=True)
     layout = planar(data.read('Layouts.amb/003'), 320, 163, 3)
-    write('LAYOUT3.BIN', st_graphic([8 + v for v in layout], 320, 163))
+    write('LAYOUT3.BIN', st_graphic([v and 8 + v for v in layout], 320, 163))
     # the chests of the initial savegame (Save.00/Chest_data.amb : AMBR container with 256 chests)
     raw = open(os.path.join(AMBERFILES, 'Save.00', 'Chest_data.amb'), 'rb').read()
     count = struct.unpack('>H', raw[4:6])[0]
@@ -489,7 +475,7 @@ def main():
     # which are converted when they are loaded), the monster graphics, characters and groups, the combat
     # effects (5 bit, also converted when loaded) and the tactical icons in the inventory palette
     layout = planar(data.read('Layouts.amb/004'), 320, 163, 3)
-    write('LAYOUT4.BIN', st_graphic([8 + v for v in layout], 320, 163))
+    write('LAYOUT4.BIN', st_graphic([v and 8 + v for v in layout], 320, 163))
     bg_table = source_data('KERNEL/DATA.S', 'Combat_bg_2D_table')
     write('CBGTAB.BIN', bg_table)
     monsters = {}
@@ -581,7 +567,7 @@ def main():
     # dialogue screen (layout 8) : the portraits of all persons in the inventory palette (loaded when needed),
     # the dictionary and the character data & texts of the persons
     layout = planar(data.read('Layouts.amb/008'), 320, 163, 3)
-    write('LAYOUT8.BIN', st_graphic([8 + v for v in layout], 320, 163))
+    write('LAYOUT8.BIN', st_graphic([v and 8 + v for v in layout], 320, 163))
     for n in sorted(data.names):
         if n.startswith('Portraits.amb/') and n[-1] != '/':
             write(f'PT{int(n[-3:])}.BIN', st_graphic([inv_lut[v] for v in planar(data.read(n), 32, 34, 5)], 32, 34),
@@ -607,7 +593,7 @@ def main():
             weights[v] += 1
     for c in (4, 16, 22):
         weights[c] += 2000
-    chr16, chr_lut = make_palette(main_pal, weights, fixed=WHITE, grey=True)
+    chr16, chr_lut = make_palette(main_pal, weights, fixed=WHITE)
     write('CHARPAL.BIN', palette_file(chr16, chr_lut))
     write('PORTRC.BIN', b''.join(st_graphic([chr_lut[v] for v in p], 32, 34) for p in portraits))
     # the portraits of all party characters (joining) in the UI palette (PUI<n>.BIN) and in the character
@@ -659,10 +645,7 @@ def main():
             raw += source_data('KERNEL/CHIP_DATA.S', 'GFX_char_value_bar_frames')
         if len(raw) < w * h * 3 // 8:
             raise SystemExit(f'{label}: only {len(raw)} bytes')
-        if label.startswith('Button'):   # map area: value 0 (colour 24, red in palette 7) is drawn black
-            status += st_graphic([v and 8 + v for v in planar(raw, w, h, 3)], w, h)
-        else:
-            status += st_graphic([8 + v for v in planar(raw, w, h, 3)], w, h)
+        status += st_graphic([v and 8 + v for v in planar(raw, w, h, 3)], w, h)
     write('UIGFX.BIN', status)
     raw = source_data('KERNEL/CHIP_DATA.S', 'Status_icons')   # status icons for the status block
     write('STATICUI.BIN', b''.join(st_graphic([ui_lut[v] for v in planar(raw, 16, 16, 5, i * 160)], 16, 16)

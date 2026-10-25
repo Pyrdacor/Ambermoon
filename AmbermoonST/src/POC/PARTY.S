@@ -273,7 +273,7 @@ Slide_empty_portrait:
 	movem.w	(sp)+,d0-d2
 	move.w	d3,d1			; Display empty portrait
 	lea.l	Empty_portrait,a0
-	jsr	Put_masked_block
+	jsr	Put_unmasked_block
 	jsr	Switch_screens		; Show
 	addq.w	#1,d3			; Move down
 	cmp.w	d4,d3			; Done ?
