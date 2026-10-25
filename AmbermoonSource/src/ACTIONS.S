@@ -1602,18 +1602,19 @@ Save_game:
 	bne.s	.Do
 	move.b	Saves_handle,d0		; No -> Remove saves file
 	jsr	Free_memory
-	bra	.Exit
+	bra	Save_game_exit
 .Do:	tst.b	Empty_save_selected		; Yes -> Empty save selected ?
-	bne.s	.Skip
+	bne.s	Save_game_selected
 	moveq.l	#95,d0			; No -> Are you sure ?
 	jsr	Prompt_req
 	tst.b	d0
-	bne.s	.Skip
+	bne.s	Save_game_selected
 	move.b	Saves_handle,d0		; No -> Destroy (!) saves file
 	jsr	Kill_memory
-	bra	.Exit
+	bra	Save_game_exit
 ; ---------- Save automapper data -----------------
-.Skip:	cmpi.b	#Map_3D,Current_map_type	; 3D map ?
+Save_game_selected:
+	cmpi.b	#Map_3D,Current_map_type	; 3D map ?
 	bmi.s	.No_3D
 	jsr	Save_automap
 ; ---------- Save party character data ------------
@@ -1651,7 +1652,7 @@ Save_game:
 	move.b	Saves_handle,d0		; Destroy saves file
 	jsr	Free_pointer
 	jsr	Free_memory
-.Exit:	rts
+Save_game_exit:	rts
 
 ; ********** Options - Load game ******************
 Load_game:

@@ -308,6 +308,9 @@ Update_mouse:
 	subq.w	#3,d0
 	add.w	d2,d0
 .Skip5:
+	IFD	Script
+	jsr	Script_mouse_position	; Script build only
+	ENDC
 	move.l	MA_Sp,a0		; If the cursor is trapped, ensure
 					; the cursor is inside the trap area.
 	move.l	(a0),a0		; Get current mouse trap area
@@ -334,6 +337,19 @@ Update_mouse:
 	move.w	d1,Mouse_Y		; Update new cursor Y
 	move.b	Button_state,d0
 	moveq.l	#0,d1
+	IFD	Script
+	tst.b	Script_mouse		; Script build only: scripted buttons
+	beq.s	.Real_buttons
+	btst.b	#0,Script_buttons+1
+	beq.s	.No_left
+	bset.l	#0,d1
+.No_left:
+	btst.b	#1,Script_buttons+1
+	beq.w	.Skip11
+	bset.l	#4,d1
+	bra.w	.Skip11
+.Real_buttons:
+	ENDC
 	btst.b	#6,$bfe001		; Left mouse pressed?
 	bne.w	.Skip10
 	bset.l	#0,d1		; If not, set bit 0 in D1

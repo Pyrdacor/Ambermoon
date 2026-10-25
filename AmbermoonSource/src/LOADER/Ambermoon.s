@@ -211,6 +211,13 @@ LAB_0021f272:
 	movea.l $4,A6
 	jsr (-$00d2,A6) ; exec.FreeMem
 	movea.l (SP)+,A6
+	IFD Script ; Script build only: no intros, start a new game
+	moveq #$00000001,D7
+	IFD ScriptContinue ; or continue the last saved game
+	moveq #$00000000,D7
+	ENDC
+	bra.w LAB_StartAM2
+	ENDC
 	jsr FUN_SetSpriteResolution
 	lea DAT_FantasyIntro,A1
 	jsr FUN_RunExecutable
@@ -244,6 +251,7 @@ LAB_0021f316:
 	movea.l (SP)+,A6
 	cmp.w #$0003,D7
 	beq.w LAB_Exit
+LAB_StartAM2:
 	move.w D7,DAT_IntroMenuChoice
 	move.l #$00abacab,DAT_AM2Parameters
 	jsr FUN_DetermineAssemblyToRun

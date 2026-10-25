@@ -285,6 +285,9 @@ Exit_module:
 ;*****************************************************************************
 Handle_input:
 	movem.l	d0-d3/a0/a1,-(sp)
+	IFD	Script
+	jsr	Script_flush		; Script build only
+	ENDC
 ; ---------- Handle mouse input -------------------
 	st	Key_or_mouse		; Mouse !
 	move.l	Module_Sp,d0		; Get Mev address

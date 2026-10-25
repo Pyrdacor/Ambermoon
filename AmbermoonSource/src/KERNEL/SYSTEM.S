@@ -291,6 +291,9 @@ Get_VBR:
 ;*****************************************************************************
 Vbl_handler:
 	addq.w	#1,VBL_counter
+	IFD	Script
+	jsr	Script_VBL		; Script build only
+	ENDC
 	jsr	Update_mouse
 	jsr	Update_mouse_sprite
 	jsr	Random

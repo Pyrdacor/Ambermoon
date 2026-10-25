@@ -1,0 +1,537 @@
+# Ambermoon 1.22 (english) speedrun: grandfather's house -> Thalion office -> temple of the brotherhood.
+
+# ---------- Character editor: OK, "are you happy" -> yes
+waituntil depth >= 1
+wait 25
+click 255 104
+waituntil depth >= 2
+wait 10
+key y
+
+# ---------- Grandfather's text
+waituntil map = 258
+mouse 160 150
+waituntil depth >= 2
+wait 25
+dismiss 1
+onmap 258 2 15
+log 1
+
+# ---------- Lower right room: the lockpicks of chest 5 (28,24)
+walkto 27 24 via 3
+log 11
+cil 2                           # second control icons (eye, hand, mouth, ...)
+key kp8                         # hand
+wait 10
+log 12
+clicktile 1 0
+wait 25
+log 13
+waituntil module = OpenedChest
+wait 10
+rclick 27 152                   # the lockpick stack
+wait 15
+click 28 16                     # into the inventory of the hero
+wait 15
+keyuntil kp9 depth <= 1  # exit
+steppedback                     # the party is moved back to the previous tile
+log 2
+
+# ---------- Upper right room: through the left fireplace (20,2) into the secret room
+walkto 20 3
+enter up                        # into the fireplace: trap, then the teleport
+dismiss 1
+onmap 262 6 4
+log 3
+
+# ---------- Secret room: chest 27 (5,9), locked: use the lockpicks
+walkto 5 8
+cil 2
+key kp8                         # hand
+wait 10
+clicktile 0 1
+waituntil module = ClosedChest
+wait 10
+key kp8                         # use item
+wait 25
+click 27 152                    # backpack slot 1: the lockpicks
+wait 25
+rclickuntil module = OpenedChest  # "... unlocks the chest using the lockpick."
+wait 10
+log 4
+rclick 27 152                   # Netsrak's staff
+wait 15
+click 28 16
+wait 15
+rclick 49 152                   # a lantern
+wait 15
+click 28 16
+wait 15
+keyuntil kp9 depth <= 1
+steppedback
+log 5
+
+# ---------- Back through the passage (6,2) to grandfather's house, then out (16,30)
+walkto 6 3
+enter up
+onmap 258 20 3
+walkto 16 29
+enter down
+onmap 157 25 12
+log 6
+
+# ---------- World map: west to Spannenberg (map 156), its south gate (34,27)
+walkto 1 12
+enter left
+onmap 156 50 12
+walkto 34 28
+enter up
+onmap 263 16 29 N
+log 7
+
+# ---------- Spannenberg (3D): battle positions first, the hero into the last row
+waituntil depth >= 2 timeout 150 goto no_text
+dismiss 1                       # "You will be able to return to this point later."
+no_text:
+cil 2
+keyuntil kp2 module = BattleOrder
+wait 10
+click 75 59                     # the hero (front row, slot 2)
+wait 10
+click 75 105                    # into the back row
+wait 10
+log 8
+keyuntil kp9 module = M3Map  # exit
+log 9
+savegame 1
+spannenberg:                    # run.py --load 1 --start spannenberg
+onmap 263 16 29 N
+
+# ---------- to the sign (12,3): north-east into the alley, then far west
+walkto 12 3 via 35 36 lane left nostop
+settle 50
+log 10
+
+# ---------- use Netsrak's staff on the sign square: teleport to the Thalion office (map 257)
+keyuntil f1 module = Inv2
+wait 25
+key kp8                         # use item
+wait 25
+click 139 88                    # backpack slot 2: Netsrak's staff
+onmap 257 18 13
+settle 25
+log 11
+savegame 2
+office:                         # run.py --load 2 --start office
+onmap 257 18 13
+
+# ---------- Erik (map character slot 2, starts at (38,13), walks around): talk to him, he joins (member 2)
+walkto 37 13 via 2
+talkto 2
+erik_join:
+key kp6                         # join the party
+waitclick 2 100                 # "It is a great honour ..."
+if members < 2 goto erik_join
+log 14
+click 288 153                   # exit
+waitclick 2                     # "It was nice to speak with you."
+waituntil depth <= 1
+settle 10
+
+# ---------- Netsrak (map character slot 0, starts at (37,19), walks around in his room): member 3
+walkto 34 19
+talkto 0
+netsrak_join:
+key kp6                         # join the party
+waitclick 2 100                 # "It is a great honour ..."
+if members < 3 goto netsrak_join
+log 15
+click 288 153                   # exit
+waitclick 2                     # "It was nice to speak with you."
+waituntil depth <= 1
+settle 10
+log 16
+savegame 3
+recruited:                      # run.py --load 3 --start recruited
+waituntil depth <= 1
+
+# ---------- options: fast combat on
+cil 2
+keyuntil kp3 depth >= 2         # disk icon: options menu
+keyuntil kp4 depth >= 3         # options window
+ready 15
+click 104 96                    # option 2: fast combat (on)
+ready 10
+click 240 133                   # exit the window
+waituntil depth <= 2
+keyuntil kp9 depth <= 1         # exit the options menu
+log 31
+
+# ---------- chest (21,3) (file 127): flute, crystal harp, healing potions IV -> Netsrak; spell points V -> Erik
+# (portraits: member n at x 32 + 48 * (n - 1); Erik 80, Netsrak 128)
+walkto 22 3 via 2
+settle 10
+cil 2
+key kp8                         # hand
+wait 10
+clicktile -1 0
+waituntil module = OpenedChest
+ready 10
+rclick 27 152                   # slot 1: flute
+click 128 16                    # -> Netsrak (backpack 1)
+rclick 71 152                   # slot 3: crystal harp
+click 128 16                    # -> Netsrak (backpack 2)
+keyuntil down scroll >= 12      # two rows down: slots 13-24 visible
+ready 10
+click 71 152                    # slot 15: healing potion IV -> "how many?"
+waituntil depth >= 3
+ready 10
+click 152 124                   # the number field: type 25, return
+ready 5
+type 25
+key return
+waituntil depth <= 2 timeout 30 goto hp25_ok
+goto hp25
+hp25_ok:                        # still open: confirm with space
+key space
+hp25:
+ready 5
+click 128 16                    # -> Netsrak (backpack 3)
+click 71 178                    # slot 21: spell points V -> "how many?"
+waituntil depth >= 3
+ready 10
+click 152 124                   # the number field: type 25, return
+ready 5
+type 25
+key return
+waituntil depth <= 2 timeout 30 goto sp25_ok
+goto sp25
+sp25_ok:                        # still open: confirm with space
+key space
+sp25:
+ready 5
+click 80 16                     # -> Erik (backpack 3)
+keyuntil kp9 depth <= 1         # exit
+settle 10
+log 12
+
+# ---------- chest (20,5) (file 129): Sansri's blood -> Netsrak
+walkto 21 5
+settle 10
+cil 2
+key kp8                         # hand
+wait 10
+clicktile -1 0
+waituntil module = OpenedChest
+ready 10
+rclick 49 152                   # slot 2: Sansri's blood
+click 128 16                    # -> Netsrak (backpack 4)
+keyuntil kp9 depth <= 1
+settle 10
+log 13
+
+# ---------- the lantern of the hero -> Netsrak (the hero will not survive)
+keyuntil f1 module = Inv2          # inventory of the hero
+rclick 161 88                   # backpack slot 3: lantern
+click 128 16                    # -> Netsrak (backpack 5)
+keyuntil kp9 depth <= 1
+log 17
+
+# ---------- out of the office: the teleporter (16-17, 12-13) leads back to the sign in Spannenberg
+walkto 17 12 via 1 2
+onmap 263 12 3
+log 18
+
+# ---------- a bandit attacks at the sign: fight, Netsrak casts earthquake
+waituntil depth >= 2 timeout 300 goto sign_nofight
+keyuntil y module = Combat      # "Do you want to fight?" yes
+ready 25
+key 3                           # Netsrak
+ready 10
+castspell 26                    # magic (keypad 3): fire pillar
+ready 10
+click 120 153                   # target: the bandit in row 1 (cells: x 104 + 16 * column, y 140 + 13 * row)
+ready 10
+key kp9                         # OK: the round starts
+log 30
+sign_fight:                     # further rounds: OK while the combat screen is on top
+if module = Apres goto sign_loot
+if depth <= 1 goto sign_wait
+if module <> Combat goto sign_fwait
+ready 15
+if module <> Combat goto sign_fight
+key kp9                         # OK
+wait 20
+goto sign_fight
+sign_fwait:
+wait 5
+goto sign_fight
+sign_wait:                      # the loot screen comes a moment after the battle
+waituntil module = Apres timeout 150 goto sign_noloot
+sign_loot:                      # "Everyone receives ... experience points." (click), then exit
+if depth <= 1 goto sign_noloot
+if depth >= 3 goto sign_text
+ready 15
+key kp9
+wait 25
+goto sign_loot
+sign_text:
+rclick
+wait 10
+goto sign_loot
+sign_noloot:
+log 32
+sign_nofight:
+
+# ---------- goto point "City gates" (16,29), then out through the gate (16,30) to the world map
+gotopoint 16 29
+onmap 263 16 29 S
+log 19
+savegame 4
+gate:                           # run.py --load 4 --start gate
+onmap 263 16 29 S
+enter down                      # through the gate (16,30) to the world map
+onmap 156 34 28
+log 20
+
+# ---------- the flute calls the eagle (Netsrak's backpack slot 1)
+keyuntil f3 module = Inv2          # inventory of Netsrak
+keyuntil kp8 depth >= 3         # use item
+ready 10
+clickitem FLUTE inv member 3
+waitclick 2                     # "... a majestic giant eagle flying towards you."
+waituntil depth <= 1 timeout 100 goto flute_inv
+goto flute_done
+flute_inv:
+keyuntil kp9 depth <= 1         # still in the inventory: exit
+flute_done:
+log 21
+
+# ---------- fly to Illien (world map part 88): land north of the city entrance (12-17, 6)
+flyto 88 38 23                  # the south-east corner of the city (every square of it enters)
+cil 2
+keyuntil kp4 travel = 0         # land: on foot (enters the city)
+waituntil map = 416 timeout 100 goto illien_step
+goto illien_in
+illien_step:
+step down 1
+illien_in:
+onmap 416 21 25 N
+waitclick 1 100                 # "You will be able to return to this point later."
+settle 10
+log 40
+
+# ---------- straight north to Pelanis' palace (teleporter (21,18) -> map 417 (16,29))
+walkto 21 19 nostop
+enter up                        # (21,18): teleporter
+onmap 417 16 29
+settle 10
+log 41
+savegame 7
+palace:                         # run.py --load 7 --start palace
+onmap 417 16 29
+
+# ---------- Pelanis (map character slot 0, right in the entrance room): Netsrak (active) gives him Sansri's blood
+settle 10
+walkto 16 26                    # 3 squares up (past the pillar)
+click 128 16                    # Netsrak is the active member
+ready 10
+talkto 0
+keyuntil kp1 depth >= 3         # give item
+ready 10
+clickitem SANSRI'S_BLOOD        # (dialogue item area: Netsrak's backpack)
+waitclick 2 200                 # Pelanis' answer
+ready 25
+dismiss 2                       # further pages
+ready 25
+dismiss 2
+ready 15
+log 42
+rclick 27 152                   # the items Pelanis gives: Pelani's key
+ready 15
+click 128 16                    # -> Netsrak
+ready 15
+rclick 49 152                   # and the flute
+ready 15
+click 128 16                    # -> Netsrak
+ready 15
+rclick 27 152                   # (the key once more, if it is still there)
+ready 15
+click 128 16
+ready 15
+log 43
+click 288 153                   # exit
+waitclick 2
+waituntil depth <= 1
+settle 10
+
+# ---------- the locked door (29-30, 7) (Pelani's key), the chest (28-30, 2): elf bow, magical arrows -> Erik
+walkto 29 8
+cil 1
+key kp8                         # up: the door screen opens
+waituntil depth >= 2
+ready 15
+keyuntil kp8 depth >= 3         # use item
+ready 10
+clickitem PELANI'S_KEY          # (door item area)
+waitclick 2 100                 # "... unlocks the door ..."
+rclickuntil depth <= 1          # the door is open
+settle 10
+enter up                        # through the door (29,7)
+walkto 29 3
+settle 10
+cil 2
+key kp8                         # hand
+wait 10
+clicktile 0 -1
+waituntil module = OpenedChest
+ready 10
+# Erik's scimitar and shield (equipped, replaced by bow and arrows) into the chest: too heavy otherwise
+keyuntil f2 depth >= 3          # Erik's inventory (chest: 'drop into the chest' icons)
+ready 10
+click 28 132                    # right hand: the scimitar
+ready 5
+click 117 117                   # -> backpack 4
+ready 5
+click 92 132                    # left hand: the shield
+ready 5
+click 139 117                   # -> backpack 5
+ready 10
+keyuntil kp4 depth >= 4         # drop item into the chest (the pointer stays in the backpack)
+clickitem SCIMITAR inv member 2
+waituntil depth <= 3
+ready 10
+keyuntil kp4 depth >= 4
+clickitem LARGE_SHIELD inv member 2
+waituntil depth <= 3
+ready 10
+keyuntil kp4 depth >= 4
+clickitem CROSSBOW inv member 2
+waituntil depth <= 3
+ready 10
+keyuntil kp9 depth <= 2         # back to the chest
+wait 50                         # (the chest screen fades in)
+rclick 49 178                   # slot 8: elf bow
+click 80 16                     # -> Erik
+wait 20
+rclick 71 178                   # slot 9: magical arrows
+click 80 16                     # -> Erik (backpack 5)
+keyuntil kp9 depth <= 1
+settle 10
+log 44
+
+# ---------- Erik equips them: bow -> right hand, arrows -> left hand (both free now)
+keyuntil f2 module = Inv2          # Erik's inventory
+ready 10
+rclickitem ELFBOW inv member 2
+ready 5
+click 28 132                    # right hand
+ready 5
+rclickitem MAGICAL_ARROW inv member 2
+ready 5
+click 92 132                    # left hand (only some arrows fit: the rest stays at the pointer)
+ready 5
+click 117 88                    # the rest -> backpack 1 (free again: the bow was there)
+ready 10
+log 45
+keyuntil kp9 depth <= 1
+
+# ---------- out: back through the door, palace exit (15-17, 31), goto point "City gates" (21,25), out (21,26)
+walkto 29 6
+enter down                      # the door (29,7)
+enter down                      # (29,8)
+at 29 8
+walkto 16 31 via 1
+onmap 416 21 19
+gotopoint 21 25
+onmap 416 21 25 S
+enter down
+log 46
+
+# ---------- the eagle again (Netsrak's flute: backpack slot 1)
+keyuntil f3 module = Inv2
+keyuntil kp8 depth >= 3
+ready 10
+clickitem FLUTE inv member 3
+waitclick 2
+waituntil depth <= 1 timeout 100 goto flute2_inv
+goto flute2_done
+flute2_inv:
+keyuntil kp9 depth <= 1
+flute2_done:
+log 47
+
+# ---------- to the temple island: land in the small water (29,44) of part 121: the hero drowns
+flyto 121 29 44
+cil 2
+keyuntil kp4 travel <> 5        # land (giant eagle = 5): swimming
+log 22
+settle 10
+# wait an hour in the water (hourglass): the hero drowns
+cil 1
+keyuntil kp5 depth >= 2         # hourglass: "how many hours?"
+ready 10
+click 152 124
+ready 5
+type 1
+key return
+waituntil depth <= 1 timeout 30 goto wait_ok
+goto wait_done
+wait_ok:
+key space
+wait_done:
+settle 25
+log 48
+walkto 44 49
+enter up                        # the entrance (44,48) -> temple (map 431)
+onmap 431 11 25
+log 23
+savegame 5
+temple:                         # run.py --load 5 --start temple
+onmap 431 11 25 N
+
+# ---------- the crystal wall (11,23): stand on (11,24); Netsrak: lantern (light), then the crystal harp
+walkto 11 24 via 3
+settle 10
+keyuntil f3 module = Inv2       # Netsrak's inventory
+keyuntil kp8 depth >= 3         # use item
+ready 10
+clickitem LANTERN inv member 3
+waitclick 2 100
+ready 15
+if module = Inv2 goto harp_use
+keyuntil f3 module = Inv2       # (the inventory was closed)
+harp_use:
+keyuntil kp8 depth >= 3
+ready 10
+clickitem CRYSTAL_HARP inv member 3
+waitclick 2 150                 # "... the wall suddenly bursts into myriads of tiny shards."
+waituntil depth <= 1 timeout 100 goto harp_inv
+goto harp_done
+harp_inv:
+keyuntil kp9 depth <= 1
+harp_done:
+log 25
+# (all members are in the back row already: no battle positions)
+
+# ---------- through the broken crystal wall to the teleporter (11,21) -> machine room (map 453)
+enter up                        # (11,23): the wall is gone
+enter up                        # (11,22)
+enter up                        # (11,21): teleporter
+onmap 453 9 8
+log 27
+savegame 6
+machine:                        # run.py --load 6 --start machine
+onmap 453 9 8
+
+# ---------- approach the machine (event squares around (4-7, 5-6)): text, then the battle
+glide 6 4 through               # north, west along row 3, south: no turning (battles: flight, at once on)
+glide 6 5 through fight         # (6,5): text and the battle against the machine
+waituntil module = Combat timeout 300 goto no_machine
+ready 30
+log 28
+wait 50
+end
+no_machine:
+log 29
+end

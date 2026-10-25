@@ -66,6 +66,9 @@ Start_program:
 	IFD	DEBUG
 	jsr	Install_AE_handler	; Debug build only
 	ENDC
+	IFD	Script
+	jsr	Script_init		; Script build only
+	ENDC
 	jsr	Init_blitter
 Restart_game:
 	lea.l	Return_value,sp
