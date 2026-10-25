@@ -69,6 +69,7 @@
 #   LAYOUT8.BIN layout 8 (dialogue), PT<n>.BIN portrait n in the inventory palette, DICT.BIN the dictionary
 #   NPC<n>.BIN, NPCT<n>.BIN  data & texts of person n (NPC_char.amb, NPC_texts.amb, unchanged)
 #   PC<n>.BIN, PCT<n>.BIN    data & texts of party member n (Party_char.amb, Party_texts.amb, unchanged)
+#   PUI<n>.BIN, PCH<n>.BIN   portrait n of a party character in the UI and the character screen palette
 import argparse, math, os, re, struct, sys, zipfile
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -586,6 +587,14 @@ def main():
     chr16, chr_lut = make_palette(main_pal, weights, fixed=WHITE)
     write('CHARPAL.BIN', palette_file(chr16, chr_lut))
     write('PORTRC.BIN', b''.join(st_graphic([chr_lut[v] for v in p], 32, 34) for p in portraits))
+    # the portraits of all party characters (joining) in the UI palette (PUI<n>.BIN) and in the character
+    # screen palette (PCH<n>.BIN), n = portrait number (in the inventory palette : PT<n>.BIN)
+    for n in sorted(data.names):
+        if n.startswith('Party_char.amb/') and n[-1] != '/':
+            p = data.read(n)[0x0a]
+            pix = planar(data.read(f'Portraits.amb/{p:03}'), 32, 34, 5)
+            write(f'PUI{p}.BIN', st_graphic([ui_lut[v] for v in pix], 32, 34), quiet=True)
+            write(f'PCH{p}.BIN', st_graphic([chr_lut[v] for v in pix], 32, 34), quiet=True)
     write('STATICON.BIN', b''.join(st_graphic([chr_lut[v] for v in g], 16, 16) for g in stat_icons))
     print('Character screen palette:', ' '.join(f'${st_word(c, 4):03x}' for c in chr16))
     inv_gfx = b''

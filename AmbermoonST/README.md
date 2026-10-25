@@ -13,7 +13,7 @@ inventory of the party members can be opened, and items can be moved between the
 other party members; items can be used (a subset of the spells), viewed and dropped. Doors and chests open
 their own screen (pick the lock, use a key or lockpick, find and disarm traps, take the items, gold and food),
 and persons can be talked to (the hand and mouth actions of the second control icon list or the right mouse
-button on the map). Traps, chance and data change events work, with the damage bursts, condition icons and
+button on the map), also the party members (mouth on the party), who can leave the party and join it again. Traps, chance and data change events work, with the damage bursts, condition icons and
 deaths in the status block. Places can be entered: trainers, healers, sages, inns (renting a room and resting in
 the camp), merchants and libraries, blacksmiths. Monsters on the map hunt the party, and encounters lead to the
 combat screen (moving, advancing, close- and long-range attacks, parading, fleeing, the monster logic of the
@@ -51,6 +51,11 @@ Talking to grandfather (right mouse button on him): the greeting, the word selec
 Giving gold to grandfather (he is not interested):
 
 ![Give gold](docs/givegold.png)
+
+Sabine leaves the party (mouth on the party, her portrait, Leave icon) in the healer's house of Burnville
+(map 286, `./build.sh --map 286 --pos 8,14,3 --time 12:00`), and joins again when she is talked to there:
+
+![Leave](docs/leave.png) ![Join](docs/join.png)
 
 A merchant (map 287, Theresa's Schmuckladen): the price of an item is shown above its name, buying asks with the
 original requester; a trainer (map 290) asks with the number input window:
@@ -202,8 +207,15 @@ palette that is computed in advance by the converter) and the info of the person
 person (greeting, asked words, farewell) are processed with their texts, queries (party members, items,
 words, conditions, gold, food) and modifications of the bit arrays, and new words are added to the known
 words. Items can be shown and given (the item moves from its slot to the portrait), gold and food can be
-given with the number input window of the original. Joining is refused because the party of the proof of
-concept is always full, and dialogues with party members (and so leaving the party) are not done yet.
+given with the number input window of the original. Dialogues with party members (mouth on the party) use
+their own texts.
+
+`src/POC/PARTY.S` contains joining and leaving the party (`Add_party_member`, `Show_arrival` of
+`DIALOGUE.S`, `Remove_party_member`, `Show_removal` of `MAIN.S`). An empty place has the character number 0
+and is skipped by the status block, the inventory and the member selection; its character data is cleared and
+marked as dead, so the routines for living members skip it too. The data of a character who left is kept in
+memory and used when he is talked to or joins again (the original saves it into his file), and the portraits
+of a character who joins are loaded in the three palettes. The CD bits hide and show the person on the map.
 
 `src/POC/STATUS.S` contains the status block parts of `DISPLAY.S` and `MAIN.S`: the condition icons (switched
 every 2 seconds like `AutoIcon_switch`), the damage burst with the amount on the portrait, the death mask and
@@ -257,7 +269,6 @@ Hatari (STE, 8 MHz):
   casting and learning spells (camp), a new leader when the active member dies, game over (the proof of
   concept ends), and 3D maps (riddle mouths, spinners, ...).
 * In the inventory: most spells of usable items, gold and food, and moving only a part of a stack.
-* Dialogues with party members, joining and leaving the party.
 * The module system, the memory manager and loading from the original containers (the data is converted in
   advance).
 * Sound and music.

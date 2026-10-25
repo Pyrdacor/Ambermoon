@@ -84,6 +84,8 @@ Redraw_member:
 	lea.l	Status_M,a0
 	jsr	Put_unmasked_block
 	move.w	d2,d7
+	jsr	Member_present		; Anyone there ?
+	beq.s	.Exit
 	jsr	Get_char_data
 	move.w	Body_conditions(a1),d0	; Dead ?
 	andi.w	#Dead_mask,d0
@@ -95,7 +97,7 @@ Redraw_member:
 	moveq.l	#0,d0
 	move.b	-1(a0,d7.w),d0
 .Icon:	jsr	Display_status_icon
-	movem.l	(sp)+,d0-d7/a0
+.Exit:	movem.l	(sp)+,d0-d7/a0
 	rts
 
 ;*****************************************************************************
@@ -109,7 +111,9 @@ AutoIcon_switch:
 	lea.l	Party_status_icons,a0
 	lea.l	AutoIcon_counters,a3
 	moveq.l	#1,d7
-.Loop1:	jsr	Get_char_data
+.Loop1:	jsr	Member_present		; Anyone there ?
+	beq	.Next1
+	jsr	Get_char_data
 	move.w	Body_conditions(a1),d1
 	move.w	d1,d2			; Dead ?
 	andi.w	#Dead_mask,d2

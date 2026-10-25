@@ -27,8 +27,23 @@ Visible_words	EQU	16
 ;*****************************************************************************
 Talk_2D:
 	movem.l	d0-d7/a0-a6,-(sp)
-	jsr	Find_person		; Anyone there ?
+	cmp.w	Map_Xcoord,d0		; The party ?
+	bne.s	.No_party
+	cmp.w	Map_Ycoord,d1
+	beq.s	.Party
+	move.w	d1,d2			; (or the head)
+	addq.w	#1,d2
+	cmp.w	Map_Ycoord,d2
+	bne.s	.No_party
+.Party:	jsr	Talk_to_yourself
+	bra	.Exit
+.No_party:	jsr	Find_person		; Anyone there ?
 	bmi	.Exit
+	move.l	a0,d2			; Store person index
+	sub.l	#VNPC_data,d2
+	divu.w	#VNPC_data_size,d2
+	move.w	d2,Dialogue_NPC_index
+	sf	NPC_or_member
 	move.b	NPC_status_bits(a0),d2	; Get NPC type
 	andi.b	#$03,d2
 	cmp.b	#Monster_type,d2		; Object or monster ?
@@ -38,6 +53,7 @@ Talk_2D:
 ; ---------- Long dialogue ------------------------
 	moveq.l	#0,d0			; Load data
 	move.b	NPC_char_nr(a0),d0
+	move.w	d0,Dialogue_char_nr
 	jsr	Load_person
 	bmi	.Exit
 	move.l	Dialogue_data_ptr,a1	; Compare languages
@@ -107,7 +123,7 @@ Find_person:
 ; NOTE :
 ;   - From [ Load_NPC_data ] (ACTIONS.S).
 Load_person:
-	movem.l	d0-d3/a1,-(sp)
+	movem.l	d0-d3/a0/a1,-(sp)
 	move.l	#'NPC_',d1		; (prefixes : NPC<n>, NPCT<n>)
 	move.l	#'NPCT',d3
 	tst.b	d2
@@ -117,14 +133,30 @@ Load_person:
 .NPC:	move.l	d1,d2
 	lea.l	Dialogue_data,a1
 	move.l	a1,Dialogue_data_ptr
-	move.l	#Max_dialogue_size,d1
+	cmp.l	#'PC__',d2		; Party character who left ?
+	bne.s	.Load
+	lea.l	Party_stored-1,a0
+	tst.b	0(a0,d0.w)
+	beq.s	.Load
+	move.l	d0,-(sp)			; Yes -> his data
+	subq.w	#1,d0
+	mulu.w	#512,d0
+	lea.l	Party_store,a0
+	add.l	d0,a0
+	move.w	#512/4-1,d0
+.Copy:	move.l	(a0)+,(a1)+
+	dbra	d0,.Copy
+	move.l	(sp)+,d0
+	bra.s	.Texts
+.Load:	move.l	#Max_dialogue_size,d1
 	jsr	Load_person_file
 	bmi.s	.Exit
+.Texts:
 	move.l	d3,d2
 	lea.l	Dialogue_texts,a1
 	move.l	#Max_dialogue_texts,d1
 	jsr	Load_person_file
-.Exit:	movem.l	(sp)+,d0-d3/a1
+.Exit:	movem.l	(sp)+,d0-d3/a0/a1
 	rts
 
 ; [ Load "DATA\<prefix><number>.BIN" (the prefix without "_") ]
@@ -186,12 +218,14 @@ Prompt_window:
 ; [ Dialogue screen ]
 ; All registers are restored
 ; NOTE :
-;   - From the Dialogue module (DIALOGUE.S). Leaving the party is not
-;     possible in the proof of concept.
+;   - From the Dialogue module (DIALOGUE.S), for persons and party members
+;     ([ NPC_or_member ]).
 ;*****************************************************************************
 Dialogue_screen:
 	movem.l	d0-d7/a0-a6,-(sp)
 	sf	Abort_dialogue
+	sf	Joined
+	sf	Left
 	move.w	#Active_member,Inventory_member	; (for ~INVN~)
 	move.w	#3,Inventory_mode		; (for the objects under the mouse)
 	move.l	#Lay3_bar,SB_ptr
@@ -221,7 +255,10 @@ Dialogue_screen:
 	jsr	DIA_event_handler
 	bpl.s	.Loop			; Anything ?
 	move.w	#117,d0			; "Greetings !"
-	jsr	Do_prompt
+	tst.b	NPC_or_member		; (member : "OK")
+	beq.s	.Greet
+	move.w	#119,d0
+.Greet:	jsr	Do_prompt
 ; ---------- Main loop ----------------------------
 .Loop:	tst.b	Abort_dialogue		; Aborted ?
 	bne	.Close
@@ -255,13 +292,15 @@ Dialogue_screen:
 	jsr	Copy_screen_to_both
 	bra	.Loop
 .Ptrs:	dc.l DIA_Ask_word,0,0
-	dc.l DIA_Show_item,0,DIA_Join_party
+	dc.l DIA_Show_item,DIA_Leave_party,DIA_Join_party
 	dc.l DIA_Give_item,DIA_Give_gold,DIA_Give_food
 .Exit:	jsr	Press_exit_icon
 .Leave:	moveq.l	#Exit_DIAC,d0		; The end
 	moveq.l	#0,d1
 	jsr	DIA_event_handler
 	bpl.s	.Close			; Anything ?
+	tst.b	NPC_or_member		; (not for members)
+	bne.s	.Close
 	move.w	#118,d0			; "Farewell !"
 	jsr	Do_prompt
 ; ---------- Back to the map ----------------------
@@ -291,9 +330,7 @@ DIA_Ask_word:
 ; [ Show the control icons that are possible ]
 ; All registers are restored
 ; NOTE :
-;   - From [ Dialogue_CIL_evaluate ] (DIALOGUE.S). Leaving the party is not
-;     possible, because the proof of concept has no dialogues with party
-;     members.
+;   - From [ Dialogue_CIL_evaluate ] (DIALOGUE.S).
 Dialogue_CIL_evaluate:
 	movem.l	d0/d7/a0-a2,-(sp)
 	lea.l	Dialogue_CIL,a0		; Copy
@@ -318,7 +355,17 @@ Dialogue_CIL_evaluate:
 .Gold:	tst.w	Food_rations(a1)		; Any food ?
 	bne.s	.Food
 	bset	#7,8*2(a0)
-.Food:	jsr	Display_CIL
+.Food:	tst.b	Joined			; Can join ?
+	bne.s	.No_join
+	tst.b	NPC_or_member
+	beq.s	.Join
+.No_join:	bset	#7,5*2(a0)
+.Join:	tst.b	Left			; Can leave ?
+	bne.s	.No_leave
+	tst.b	NPC_or_member
+	bne.s	.Leave
+.No_leave:	bset	#7,4*2(a0)
+.Leave:	jsr	Display_CIL
 	movem.l	(sp)+,d0/d7/a0-a2
 	rts
 
@@ -509,13 +556,108 @@ Dissolve_item_at_portrait:
 
 ; [ Join the party ]
 ; NOTE :
-;   - From [ DIA_Join_party ] : the party of the proof of concept always
-;     has six members.
+;   - From [ DIA_Join_party ] (DIALOGUE.S).
 DIA_Join_party:
-	move.l	d0,-(sp)
-	move.w	#121,d0			; "The party is full"
+	movem.l	d0/d1/a0,-(sp)
+	jsr	Count_party		; Party full ?
+	cmp.w	#6,d0
+	bmi.s	.No
+	move.w	#121,d0			; Yes !
 	jsr	Do_prompt
-	move.l	(sp)+,d0
+	bra.s	.Exit
+.No:	move.l	Dialogue_data_ptr,a0	; Is party ?
+	tst.b	Char_type(a0)
+	beq.s	.Party
+	move.w	#115,d0			; No -> Hah !
+	jsr	Do_prompt
+	bra.s	.Exit
+.Party:	moveq.l	#Join_party_DIAC,d0		; Yes -> Try
+	moveq.l	#0,d1
+	jsr	DIA_event_handler
+	bpl.s	.Exit			; Anything ?
+	st	Joined			; No -> Join anyway
+	jsr	Add_party_member
+.Exit:	movem.l	(sp)+,d0/d1/a0
+	rts
+
+; [ Leave the party ]
+; NOTE :
+;   - From [ DIA_Leave_party ] (DIALOGUE.S).
+DIA_Leave_party:
+	movem.l	d0/d1/d7/a0,-(sp)
+	move.l	Dialogue_data_ptr,a0	; Get conditions
+	move.w	Body_conditions(a0),d0
+	move.w	#Alive_mask,d1		; Alive and kicking ?
+	and.w	d0,d1
+	beq.s	.Alive
+	moveq.l	#98,d0			; No -> "No stiffs..."
+	bra.s	.Prompt
+.Alive:	btst	#Mad,d0			; Bonkers ?
+	beq.s	.Sane
+	moveq.l	#99,d0			; Yes -> "No loonies..."
+	bra.s	.Prompt
+.Sane:	btst	#Petrified,d0		; Petrified ?
+	beq.s	.Ok
+	moveq.l	#100,d0			; Yes -> "No petrified..."
+	bra.s	.Prompt
+.Ok:	tst.w	Current_world_nr		; On Lyramion ?
+	beq.s	.Lyramion
+	moveq.l	#97,d0			; No -> "No way!"
+.Prompt:	jsr	Do_prompt
+	bra.s	.Exit
+.Lyramion:	moveq.l	#Leave_party_DIAC,d0	; Try
+	moveq.l	#0,d1
+	jsr	DIA_event_handler
+	bpl.s	.Exit			; Anything ?
+	moveq.l	#116,d0			; No -> Kick out anyway
+	jsr	Do_prompt
+	move.w	Dialogue_NPC_index,d7
+	jsr	Remove_party_member
+	st	Left			; Indicate
+	st	Abort_dialogue		; Leave dialogue
+.Exit:	movem.l	(sp)+,d0/d1/d7/a0
+	rts
+
+;*****************************************************************************
+; [ Talk to a party member ]
+; All registers are restored
+; NOTE :
+;   - From [ Talk_to_yourself ] (ACTIONS.S).
+;*****************************************************************************
+Talk_to_yourself:
+	movem.l	d0-d7/a0-a6,-(sp)
+	jsr	Count_party		; All alone ?
+	cmp.w	#1,d0
+	beq	.Exit
+	move.l	Print_area_ptr,-(sp)	; Talk to whom ?
+	move.l	#Map_PA,Print_area_ptr
+	move.w	#103,d0
+	jsr	Select_member
+	move.l	(sp)+,Print_area_ptr
+	move.l	#-1,Last_position		; (redraw the position)
+	tst.w	d0			; No-one ?
+	beq	.Exit
+	cmp.w	#1,d0			; Yourself ?
+	bne.s	.Else
+	move.w	#104,d0			; Weirdo !
+	jsr	Prompt_window
+	bra	.Exit
+.Else:	move.w	d0,d7			; Set data
+	move.w	d0,Dialogue_NPC_index
+	jsr	Get_char_data
+	move.l	a1,Dialogue_data_ptr
+	lea.l	Member_nrs-2,a0		; Get character number
+	add.w	d0,d0
+	move.w	0(a0,d0.w),d0
+	move.w	d0,Dialogue_char_nr
+	move.l	#Max_dialogue_texts,d1	; Load character texts
+	move.l	#'PCT_',d2
+	lea.l	Dialogue_texts,a1
+	jsr	Load_person_file
+	bmi.s	.Exit
+	st	NPC_or_member		; With party member
+	jsr	Dialogue_screen
+.Exit:	movem.l	(sp)+,d0-d7/a0-a6
 	rts
 
 ; [ Give gold / food ]
@@ -787,15 +929,29 @@ Dia_action:
 
 ; [ Dialogue execute event ]
 ; NOTE :
-;   - From [ Dia_execute ] (EVENTS.S) : joining and leaving the party are
-;     not possible in the proof of concept.
+;   - From [ Dia_execute ] (EVENTS.S).
 Dia_execute:
 	move.w	Current_DIAC_value,d1	; Get parameters
 	moveq.l	#Active_member,d7
 	jsr	Get_char_data
 	move.l	a1,a0
 	move.w	Current_DIAC,d0
-	cmp.w	#Give_item_DIAC,d0		; Item ?
+	cmp.w	#Join_party_DIAC,d0		; Join ?
+	bne.s	.No_join
+	tst.b	NPC_or_member		; (just checking)
+	bne	.Exit
+	st	Joined			; Yay !
+	jmp	Add_party_member
+.No_join:	cmp.w	#Leave_party_DIAC,d0	; Leave ?
+	bne.s	.No_leave
+	tst.b	NPC_or_member		; (just checking)
+	beq	.Exit
+	move.w	Dialogue_NPC_index,d7	; Go !
+	jsr	Remove_party_member
+	st	Abort_dialogue		; Abort !
+	st	Left
+	rts
+.No_leave:	cmp.w	#Give_item_DIAC,d0		; Item ?
 	bne.s	.No_item
 	jsr	Dissolve_item_at_portrait	; Poof !
 	st	Item_accepted
@@ -1230,11 +1386,13 @@ Dialogue_RL:
 ; Print area of the dialogue screen (Dialogue_PA in MODULES.S)
 Dialogue_PA:	dc.w 16+1,191-1,43+1,122-1,31
 
-; Control icon list of the dialogue screen (Dialogue_CIL in DIALOGUE.S) :
-; leaving the party is not possible in the proof of concept
+; Print area of the map screen (prompts while a member is selected)
+Map_PA:	dc.w 208+2,304-2,49,49+6*(Char_height+2),White
+
+; Control icon list of the dialogue screen (Dialogue_CIL in DIALOGUE.S)
 Dialogue_CIL:
 	dc.w Talk_cicon,0,Exit_cicon
-	dc.w View_item_cicon,Leave_party_cicon+Disabled,Join_party_cicon
+	dc.w View_item_cicon,Leave_party_cicon,Join_party_cicon
 	dc.w Give_item_cicon,Give_gold_cicon,Give_food_cicon
 
 ; Scroll bar of the word selector (WSelW_scroll_bar in WORD_SEL.S : one word

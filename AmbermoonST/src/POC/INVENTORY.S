@@ -77,6 +77,8 @@ Condition_names	EQU	444
 ;*****************************************************************************
 Inventory_screen:
 	movem.l	d0-d7/a0-a6,-(sp)
+	jsr	Member_present		; Anyone there ?
+	beq	.None
 	move.w	d7,Inventory_member
 	sf	Moving_flag
 	clr.l	Ghost_text
@@ -113,7 +115,7 @@ Inventory_screen:
 	jsr	Fade_screen
 	jsr	Clear_keyboard
 	jsr	Read_mouse_clicks
-	movem.l	(sp)+,d0-d7/a0-a6
+.None:	movem.l	(sp)+,d0-d7/a0-a6
 	rts
 
 ;*****************************************************************************
@@ -314,6 +316,11 @@ Find_inventory_object:
 	cmp.w	#6,d0
 	bpl	.None
 	addq.w	#1,d0
+	move.l	d7,-(sp)			; Anyone there ?
+	move.w	d0,d7
+	jsr	Member_present
+	movem.l	(sp)+,d7
+	beq	.None
 	ori.w	#Obj_member<<8,d0
 	bra	.Exit
 ; ---------- Body slots ---------------------------

@@ -169,7 +169,15 @@ Display_portrait:
 	jsr	Put_unmasked_block
 	moveq.l	#35,d1			; Display bottom
 	jsr	Put_unmasked_block
-	lea.l	Portraits,a0		; Display portrait
+	move.w	d2,d7			; Anyone there ?
+	jsr	Member_present
+	bne.s	.Present
+	moveq.l	#1,d1			; No -> empty portrait
+	moveq.l	#34,d7
+	lea.l	Empty_portrait,a0
+	jsr	Put_unmasked_block
+	bra	.Exit
+.Present:	lea.l	Portraits,a0		; Display portrait
 	move.w	d2,d3
 	subq.w	#1,d3
 	mulu.w	#34*2*8,d3
@@ -208,7 +216,7 @@ Display_portrait:
 	moveq.l	#30,d2
 	lea.l	Temp_name,a0
 	jsr	Print_centered_string
-	movem.l	(sp)+,d0-d7/a0/a1
+.Exit:	movem.l	(sp)+,d0-d7/a0/a1
 	rts
 
 ;*****************************************************************************

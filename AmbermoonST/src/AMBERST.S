@@ -31,3 +31,4 @@
 	include	"POC/PLACES.S"
 	include	"POC/COMBAT.S"
 	include	"POC/COMBAT2.S"
+	include	"POC/PARTY.S"
