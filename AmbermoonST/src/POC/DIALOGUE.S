@@ -186,9 +186,8 @@ Prompt_window:
 ; [ Dialogue screen ]
 ; All registers are restored
 ; NOTE :
-;   - From the Dialogue module (DIALOGUE.S) : talking (asking words) and
-;     leaving. Showing and giving items, gold and food and joining or
-;     leaving the party are not possible in the proof of concept.
+;   - From the Dialogue module (DIALOGUE.S). Leaving the party is not
+;     possible in the proof of concept.
 ;*****************************************************************************
 Dialogue_screen:
 	movem.l	d0-d7/a0-a6,-(sp)

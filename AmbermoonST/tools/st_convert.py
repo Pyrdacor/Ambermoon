@@ -34,6 +34,7 @@
 #   E<i>.BIN    event picture i (320x92), Q<i>.BIN its palette (like P<t>.BIN)
 #   UIGFX.BIN   UI graphics of KERNEL/CHIP_DATA.S: Status_L, Status_M, Status_R (16x36 each),
 #               Status_TB (32x1), Empty_portrait (32x34), Button_up, Button_down (32x17 each)
+#   STATGFX.BIN Damage_star (32x26) and Death_mask (32x34) of KERNEL/CHIP_DATA.S in the UI palette
 #   WINICONS.BIN  the 9 parts of a window border (Window_icons of KERNEL/CHIP_DATA.S, 16x16 each)
 #   BUTTONS.BIN control icons of Button_graphics (78 x 32x13, colour 0 transparent)
 #   MPTR.BIN    default mouse pointer (Default_Mptr of KERNEL/DATA.S): hotspot X, Y (words), 16x16
@@ -523,6 +524,10 @@ def main():
     raw = source_data('KERNEL/CHIP_DATA.S', 'Status_icons')   # status icons for the status block
     write('STATICUI.BIN', b''.join(st_graphic([ui_lut[v] for v in planar(raw, 16, 16, 5, i * 160)], 16, 16)
                                    for i in range(22)))
+    star = source_data('KERNEL/CHIP_DATA.S', 'Damage_star')          # 32x26, 5 planes, colour 0 transparent
+    mask = source_data('KERNEL/CHIP_DATA.S', 'Death_mask')           # 32x34, 3 planes, colours 24-31
+    write('STATGFX.BIN', st_graphic([v and ui_lut[v] for v in planar(star, 32, 26, 5)], 32, 26) +
+          st_graphic([8 + v for v in planar(mask, 32, 34, 3)], 32, 34))
     winicons = source_data('KERNEL/CHIP_DATA.S', 'Window_icons')   # 9 parts 16x16, 3 bit, colour 0 transparent
     write('WINICONS.BIN', b''.join(st_graphic([v and 8 + v for v in planar(winicons, 16, 16, 3, i * 96)], 16, 16)
                                    for i in range(9)))

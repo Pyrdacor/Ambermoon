@@ -71,6 +71,7 @@ Program_main:
 	jsr	Display_2D_map
 	jsr	Handle_realtime_steps
 	jsr	Display_position
+	jsr	Update_status
 	jsr	Switch_screens
 	bra.s	.Loop
 .Exit:	moveq.l	#1,d0			; Fade out
@@ -139,8 +140,7 @@ Display_status_block:
 	subi.w	#32,d0
 	jsr	Put_unmasked_block
 	moveq.l	#1,d7			; Display portraits
-.Loop2:	jsr	Display_portrait
-	jsr	Update_member_bars
+.Loop2:	jsr	Redraw_member
 	addq.w	#1,d7
 	cmp.w	#6+1,d7
 	bmi.s	.Loop2
@@ -155,7 +155,7 @@ Display_status_block:
 ;   - From DISPLAY.S.
 ;*****************************************************************************
 Display_portrait:
-	movem.l	d0-d7/a0,-(sp)
+	movem.l	d0-d7/a0/a1,-(sp)
 	move.w	d7,d2
 	subq.w	#1,d7			; Calculate X-coordinate
 	mulu.w	#48,d7
@@ -173,7 +173,14 @@ Display_portrait:
 	subq.w	#1,d3
 	mulu.w	#34*2*8,d3
 	add.l	d3,a0
-	moveq.l	#1,d1
+	move.w	d2,d7			; Dead ?
+	jsr	Get_char_data
+	move.w	Body_conditions(a1),d4
+	move.w	d4,d3
+	andi.w	#Dead_mask,d3
+	beq.s	.Alive
+	lea.l	Death_mask,a0		; Yes -> death mask
+.Alive:	moveq.l	#1,d1
 	moveq.l	#34,d7
 	jsr	Put_unmasked_block
 	lea.l	Names,a0			; Display name (first 5 letters)
@@ -188,15 +195,19 @@ Display_portrait:
 	clr.b	(a1)
 	move.w	#Lighter_blue,Ink_colour	; Default ink
 	cmp.w	#1,d2			; Active member ?
-	bne.s	.Print
+	bne.s	.No
 	move.w	#Yellow,Ink_colour
+	bra.s	.Print
+.No:	andi.w	#Active_mask,d4		; Could be active ?
+	beq.s	.Print
+	move.w	#Red,Ink_colour		; No
 .Print:	move.w	#Default_shadow,Shadow_colour	; (Status_PA in DISPLAY.S)
 	addq.w	#2,d0
 	moveq.l	#31,d1
 	moveq.l	#30,d2
 	lea.l	Temp_name,a0
 	jsr	Print_centered_string
-	movem.l	(sp)+,d0-d7/a0
+	movem.l	(sp)+,d0-d7/a0/a1
 	rts
 
 ;*****************************************************************************
@@ -1841,6 +1852,9 @@ File_list:
 	even
 	dc.l	Status_icons_UI,22*16*8
 	dc.b	"DATA\STATICUI.BIN",0
+	even
+	dc.l	Damage_star,2*8*(26+34)
+	dc.b	"DATA\STATGFX.BIN",0
 	even
 	dc.l	Spell_data,7*30*5
 	dc.b	"DATA\SPELLS.BIN",0

@@ -27,3 +27,4 @@
 	include	"POC/ITEMS.S"
 	include	"POC/CHEST.S"
 	include	"POC/DIALOGUE.S"
+	include	"POC/STATUS.S"

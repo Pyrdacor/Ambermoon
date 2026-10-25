@@ -217,8 +217,8 @@ No_event:					; (events without effect here, e.g. music)
 ; Event routines (Event_ptrs in EVENTS.S)
 Event_ptrs:
 	dc.l Map_exit,Door,Item_found,Show_pictxt,Not_implemented	; 1 - 5
-	dc.l Not_implemented,Not_implemented,Not_implemented,Not_implemented,Change_icon	; 6 - 10
-	dc.l Not_implemented,Not_implemented,Query,Modify,Not_implemented	; 11 - 15
+	dc.l Event_trap,Not_implemented,Not_implemented,Datachange,Change_icon	; 6 - 10
+	dc.l Not_implemented,Not_implemented,Query,Modify,Chance	; 11 - 15
 	dc.l No_event,Dia_text,Dia_give,Requester,No_event	; 16 - 20
 	dc.l No_event,Not_implemented,Dia_execute,No_event	; 21 - 24
 
@@ -844,6 +844,7 @@ Close_window:
 	lsl.w	#4,d7
 	jsr	Put_unmasked_block
 	jsr	Copy_screen_to_both
+	move.l	#-1,Last_position		; (the background may be older)
 	movem.l	(sp)+,d0-d7/a0
 	rts
 
@@ -1017,3 +1018,354 @@ New_words:	ds.b 128			; New words (bit array)
 Window_background:	ds.b 18*9*16*8
 Event_palette:	ds.b 64
 Event_picture:	ds.b 20*ShowPicTxt_height*8
+
+	SECTION	Program,code
+;*****************************************************************************
+; [ Trap event ]
+; No registers are restored
+; NOTE :
+;   - From [ Event_trap ] (EVENTS.S). The active member is always member 1
+;     in the proof of concept.
+;*****************************************************************************
+Event_trap:
+	lea.l	Current_event_data,a5
+	moveq.l	#0,d5			; Get amount of damage
+	move.b	Event_b4(a5),d5
+	moveq.l	#0,d0			; Get condition
+	move.b	Event_b1(a5),d0
+	lea.l	.Table,a0
+	move.b	0(a0,d0.w),d6
+	ext.w	d6
+	tst.b	Event_b2(a5)		; Party or active ?
+	beq.s	.Active
+	sf	Success			; Party
+	moveq.l	#1,d7
+.Loop:	jsr	Get_char_data
+	move.w	Body_conditions(a1),d0	; Alive and kicking ?
+	andi.w	#Alive_mask,d0
+	bne.s	.Next
+	move.b	Char_sex(a1),d0		; Correct sex ?
+	btst	d0,Event_b3(a5)
+	beq.s	.Next
+	jsr	.Do_trap			; Do trap
+.Next:	addq.w	#1,d7			; Next member
+	cmp.w	#6+1,d7
+	bmi.s	.Loop
+	rts
+.Active:	moveq.l	#Active_member,d7		; Active member only
+	jsr	Get_char_data
+	move.b	Char_sex(a1),d0		; Correct sex ?
+	btst	d0,Event_b3(a5)
+	beq.s	.Exit
+	jsr	.Do_trap
+.Exit:	rts
+
+.Table:	dc.b -1,Mad,Blind,Stoned
+	dc.b Lamed,Poisoned,Petrified,Diseased
+	dc.b Aging,Dead
+	even
+
+; [ Do trap effect ]
+;   IN : d5 - Amount of damage (.w)
+;        d6 - Condition number / -1 (.w)
+;        d7 - Member number {1...6} (.w)
+;        a1 - Pointer to victim's character data (.l)
+; All registers are restored
+.Do_trap:
+	movem.l	d0/d1,-(sp)
+	move.w	ALuck(a1),d0		; Probe luck
+	add.w	ALuck+Magic(a1),d0
+	jsr	Probe_100
+	bmi.s	.Bad_luck
+	move.w	#279,d0			; "Lucky !"
+	jsr	Member_prompt_window
+	bra.s	.Done
+.Bad_luck:	st	Success
+	tst.w	d5			; Any damage ?
+	beq.s	.No_damage
+	move.w	d5,d1			; Yes -> 100% to 150%
+	lsr.w	#1,d1
+	jsr	Random
+	mulu.w	d1,d0
+	swap	d0
+	add.w	d5,d0
+	jsr	Do_damage			; Do
+.No_damage:	tst.w	d6			; Any condition ?
+	bmi.s	.Done
+	cmp.w	#Dead,d6			; Yes -> Kill ?
+	bne.s	.Not_kill
+	jsr	Get_char_data		; (if not already dead)
+	move.w	Body_conditions(a1),d0
+	btst	#Dead,d0
+	bne.s	.Done
+	jsr	Kill_member
+	bra.s	.Done
+.Not_kill:	move.w	Body_conditions(a1),d0	; No -> Set condition
+	bset	d6,d0
+	move.w	d0,Body_conditions(a1)
+	jsr	AutoIcon_switch		; (show it)
+.Done:	movem.l	(sp)+,d0/d1
+	rts
+
+;*****************************************************************************
+; [ Print a prompt referring to a party member in a window ]
+;   IN : d0 - Prompt number (.w)
+;        d7 - Member number {1...6} (.w)
+; All registers are restored
+; NOTE :
+;   - From [ Do_member_prompt_window ] (DISPLAY.S) : the name of the member
+;     followed by the prompt.
+;*****************************************************************************
+Member_prompt_window:
+	movem.l	d0/a0-a2,-(sp)
+	lea.l	Member_text,a2
+	move.l	a1,-(sp)
+	jsr	Get_char_data
+	lea.l	Char_name(a1),a0
+	move.l	(sp)+,a1
+.Copy1:	move.b	(a0)+,(a2)+
+	bne.s	.Copy1
+	subq.l	#1,a2
+	addi.w	#Messages,d0
+	jsr	Get_text
+.Copy2:	move.b	(a0)+,(a2)+
+	bne.s	.Copy2
+	lea.l	Member_text,a0
+	jsr	Text_window
+	movem.l	(sp)+,d0/a0-a2
+	rts
+
+;*****************************************************************************
+; [ Chance event ]
+; No registers are restored
+; NOTE :
+;   - From [ Chance ] (EVENTS.S).
+;*****************************************************************************
+Chance:
+	lea.l	Current_event_data,a5
+	moveq.l	#0,d0			; Get probe value
+	move.b	Event_b1(a5),d0
+	jsr	Probe_100			; Probe
+	bpl.s	.Exit			; Success ?
+	move.w	Event_w8(a5),Next_event_nr(a5)	; Negative chain
+.Exit:	rts
+
+;*****************************************************************************
+; [ Data change event ]
+; No registers are restored
+; NOTE :
+;   - From [ Datachange ] (EVENTS.S). The levels are not checked after a
+;     change of the experience points in the proof of concept.
+;*****************************************************************************
+Datachange:
+	lea.l	Current_event_data,a5
+	moveq.l	#0,d2			; Get change type
+	move.b	Event_b1(a5),d2
+	cmp.w	#8+1,d2			; Legal ?
+	bpl.s	.Exit_all
+	lsl.w	#2,d2			; Get handler address
+	move.l	.Ptrs1(pc,d2.w),a2
+	tst.b	Event_b4(a5)		; Active or party ?
+	beq.s	.Active
+	moveq.l	#1,d7			; Party
+.Loop:	jsr	Get_char_data
+	move.l	a1,a0
+	move.w	Body_conditions(a0),d0	; Alive and kicking ?
+	andi.w	#Alive_mask,d0
+	bne.s	.Next
+	moveq.l	#-1,d1			; Change data
+	jsr	(a2)
+	jsr	Force_status_update
+.Next:	addq.w	#1,d7			; Next member
+	cmp.w	#6+1,d7
+	bmi.s	.Loop
+	bra.s	.Exit_all
+.Active:	moveq.l	#Active_member,d7		; Active member only
+	jsr	Get_char_data
+	move.l	a1,a0
+	moveq.l	#-1,d1
+	jsr	(a2)
+	jsr	Force_status_update
+.Exit_all:	rts
+
+.Ptrs1:	dc.l .Attribute,.Skill,.LP,.SP,.SLP
+	dc.l .Conditions,.Spell_classes,.Languages,.XP
+
+; [ Data type handlers ]
+;   IN : d1 - -1 (default maximum value) (.l)
+;        a0 - Pointer to character data (.l)
+; Changed registers : d0,d1,d2,a1
+
+.Attribute:
+	lea.l	Attributes(a0),a1		; Select attribute
+	move.w	Event_w6(a5),d2
+	cmp.w	#Max_attrs,d2		; Legal ?
+	bpl.s	.Exit1
+	mulu.w	#Attr_data_size,d2
+	add.w	d2,a1
+	bra.s	.Value
+
+.Skill:
+	lea.l	Skills(a0),a1		; Select skill
+	move.w	Event_w6(a5),d2
+	cmp.w	#Max_skills,d2		; Legal ?
+	bpl.s	.Exit1
+	mulu.w	#Skill_data_size,d2
+	add.w	d2,a1
+.Value:	moveq.l	#0,d0			; Get values
+	move.w	(a1),d0
+	add.w	Magic(a1),d0
+	moveq.l	#0,d1
+	move.w	Maximum(a1),d1
+	jsr	.Do			; Change
+	move.w	d0,(a1)			; Store
+.Exit1:	rts
+
+.LP:
+	lea.l	Life_points(a0),a1
+	bra.s	.Points
+.SP:
+	lea.l	Power_points(a0),a1
+.Points:	moveq.l	#0,d0			; Get points & maximum
+	move.w	(a1),d0
+	moveq.l	#0,d1
+	move.w	Maximum(a1),d1
+	add.w	Magic(a1),d1
+	jsr	.Do			; Change
+	move.w	d0,(a1)			; Store
+	rts
+
+.SLP:
+	moveq.l	#0,d0			; Get SLP
+	move.w	Nr_spell_learn_points(a0),d0
+	jsr	.Do			; Change
+	move.w	d0,Nr_spell_learn_points(a0)	; Store
+	rts
+
+.Conditions:
+	moveq.l	#0,d0			; Get conditions
+	move.w	Body_conditions(a0),d0
+	jsr	.Do			; Change
+	move.w	d0,Body_conditions(a0)	; Store
+	jmp	AutoIcon_switch		; (show them)
+
+.Spell_classes:
+	moveq.l	#0,d0			; Get spell classes
+	move.b	Spell_class_counter(a0),d0
+	jsr	.Do			; Change
+	move.b	d0,Spell_class_counter(a0)	; Store
+	rts
+
+.Languages:
+	moveq.l	#0,d0			; Get languages
+	move.b	Learned_languages(a0),d0
+	jsr	.Do			; Change
+	move.b	d0,Learned_languages(a0)	; Store
+	rts
+
+.XP:
+	move.l	Experience_points(a0),d0	; Get experience points
+	jsr	.Do			; Change
+	move.l	d0,Experience_points(a0)	; Store
+	rts
+
+; [ Select & execute data changer ]
+;   IN : d0 - Data longword (.l)
+;        d1 - Maximum value (.l)
+;        a5 - Pointer to event data (.l)
+;  OUT : d0 - New data longword (.l)
+; Changed registers : d0
+.Do:
+	movem.l	d2/a1,-(sp)
+	moveq.l	#0,d2			; Get change type
+	move.b	Event_b2(a5),d2
+	cmp.w	#7+1,d2			; Legal ?
+	bpl.s	.Exit_do
+	lsl.w	#2,d2			; Change data
+	move.l	.Ptrs2(pc,d2.w),a1
+	jsr	(a1)
+.Exit_do:	movem.l	(sp)+,d2/a1
+	rts
+
+.Ptrs2:	dc.l .Inc,.Dec,.Inc_percent,.Dec_percent,.Full
+	dc.l .Bitclear,.Bitset,.Bitchange
+
+; [ Actual data changers ]
+;   IN : d0 - Data longword (.l)
+;        d1 - Maximum value (.l)
+;        a5 - Pointer to event data (.l)
+;  OUT : d0 - New data longword (.l)
+; Changed registers : d0,d2
+
+.Inc:	jsr	.Get_value		; Add
+	add.l	d2,d0
+	cmp.l	d1,d0			; Too much ?
+	bls.s	.Ok1
+	move.l	d1,d0			; Yes -> clip
+.Ok1:	rts
+
+.Dec:	jsr	.Get_value		; Subtract
+	sub.l	d2,d0
+	bpl.s	.Ok2			; Too little ?
+	moveq.l	#0,d0			; Yes -> clip
+.Ok2:	rts
+
+.Inc_percent:
+	tst.w	Event_w8(a5)
+	beq.s	.Ok3
+	jsr	.Get_value
+	mulu.w	d1,d2			; Get actual value
+	divu.w	#100,d2
+	andi.l	#$0000ffff,d2
+	add.l	d2,d0			; Add
+	cmp.l	d1,d0			; Too much ?
+	bls.s	.Ok3
+	move.l	d1,d0			; Yes -> clip
+.Ok3:	rts
+
+.Dec_percent:
+	tst.w	Event_w8(a5)
+	beq.s	.Ok4
+	jsr	.Get_value
+	mulu.w	d1,d2			; Get actual value
+	divu.w	#100,d2
+	andi.l	#$0000ffff,d2
+	sub.l	d2,d0			; Subtract
+	bpl.s	.Ok4			; Too little ?
+	moveq.l	#0,d0			; Yes -> clip
+.Ok4:	rts
+
+.Full:	move.l	d1,d0			; Maximum
+	rts
+
+.Bitclear:	move.w	Event_w6(a5),d2		; Clear bit
+	bclr	d2,d0
+	rts
+
+.Bitset:	move.w	Event_w6(a5),d2		; Set bit
+	bset	d2,d0
+	rts
+
+.Bitchange:	move.w	Event_w6(a5),d2		; Change bit
+	bchg	d2,d0
+	rts
+
+; Get the value (random 1...value if wanted) in d2
+.Get_value:	moveq.l	#0,d2
+	move.w	Event_w8(a5),d2
+	tst.b	Event_b3(a5)		; Random ?
+	beq.s	.No_random
+	tst.w	d2
+	beq.s	.No_random
+	move.l	d0,-(sp)			; Yes
+	jsr	Random
+	divu.w	d2,d0
+	swap	d0
+	move.w	d0,d2
+	addq.w	#1,d2
+	move.l	(sp)+,d0
+.No_random:	rts
+
+	SECTION	Fast_BSS,bss
+Member_text:	ds.b 160
+	even
