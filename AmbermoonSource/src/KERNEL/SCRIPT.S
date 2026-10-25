@@ -90,14 +90,24 @@
 ;                                   fits the current view direction
 ;  27 MOUSECELL member            combat: the scripted mouse pointer goes to
 ;                                   the cell of the member (1-6) in the
-;                                   tactic window (battle order slot: column
-;                                   slot % 6, row 3 + slot / 6)
+;                                   tactic window (its current position)
 ;  28 FLOW3D table               3D maps: like FLOW (only up, right, down,
 ;                                   left), one frame of moving without turning
 ;                                   (see MOVE3D); r5 = 0 moving, 1 at the
 ;                                   target, 2 no way from here
 ;  29 MOUSEMONSTER               combat: the scripted mouse pointer goes to
 ;                                   the cell of the first monster (it moves)
+;  30 CURVE3D x y                3D maps: one frame of running to the
+;                                   middle of the square x, y and steering on
+;                                   the way (mouse held in the top left /
+;                                   right zone: forward and turning, more to
+;                                   the outside = stronger); r5 = 1 when it is
+;                                   reached
+;  31 SEED hi lo                  sets the seed of the random generator
+;                                   (Seed, long word)
+;  32 SEEDLOCK hi lo              sets the seed of the random generator at
+;                                   the start of every frame (0 = off): every
+;                                   frame gets the same random numbers
 ;  17 SAVE slot                   save the game into slot 1-10 (name
 ;                                   "SCRIPT"), done by [ Script_flush ] in
 ;                                   the main loop; the script waits for it
@@ -137,6 +147,9 @@ SC_MOVE3D	EQU	26
 SC_MOUSECELL	EQU	27
 SC_FLOW3D	EQU	28
 SC_MOUSEMONSTER	EQU	29
+SC_CURVE3D	EQU	30
+SC_SEED		EQU	31
+SC_SEEDLOCK	EQU	32
 
 Script_max_size	EQU	65536
 Script_steps	EQU	64		; At most this many instructions per frame
@@ -181,6 +194,7 @@ Script_init:
 	clr.w	Script_save_slot
 	sf	Script_save_done
 	clr.w	Script_sp
+	clr.l	Script_seed_lock
 	st	Script_running
 .Exit:	movem.l	(sp)+,d0-d3/a0/a1/a6
 	rts
@@ -190,7 +204,10 @@ Script_init:
 ; All registers are restored
 ;*****************************************************************************
 Script_VBL:
-	tst.b	Script_running
+	tst.l	Script_seed_lock		; Random seed locked ?
+	beq.s	.No_lock
+	move.l	Script_seed_lock,Seed	; Yes -> the same numbers every frame
+.No_lock:	tst.b	Script_running
 	beq	.Exit2
 	movem.l	d0-d7/a0-a2,-(sp)
 	move.l	Module_Sp,d0		; Module stack changed ?
@@ -220,7 +237,7 @@ Script_VBL:
 	bhs	.Stop
 	lea.l	0(a2,d0.l),a0
 	move.w	(a0)+,d0			; Get opcode
-	cmp.w	#SC_MOUSEMONSTER,d0	; Known ?
+	cmp.w	#SC_SEEDLOCK,d0		; Known ?
 	bhi	.Stop
 	add.w	d0,d0
 	move.w	.Table(pc,d0.w),d0
@@ -233,7 +250,8 @@ Script_VBL:
 	dc.w	.Flow-.Table,.Mouseauto-.Table,.Mousespell-.Table
 	dc.w	.Worlddir-.Table,.Call-.Table,.Ret-.Table
 	dc.w	.Mouseitem-.Table,.Move3D-.Table,.Mousecell-.Table
-	dc.w	.Flow3D-.Table,.Mousemonster-.Table
+	dc.w	.Flow3D-.Table,.Mousemonster-.Table,.Curve3D-.Table
+	dc.w	.Seed-.Table,.Seedlock-.Table
 
 ; a0 points behind the opcode
 .Wait:	move.w	(a0)+,d0
@@ -601,22 +619,31 @@ Script_VBL:
 	bra.w	.Again
 .Mousecell:	move.w	(a0)+,d0			; Get member
 	bsr.w	.Next
-	subq.w	#1,d0
-	andi.w	#7,d0
-	lea.l	Order,a1
-	moveq.l	#0,d1
-	move.b	0(a1,d0.w),d1
-	divu.w	#6,d1			; Row (low), column (high)
-	move.w	d1,d2
-	addq.w	#3,d2
-	mulu.w	#Tactic_cell_height,d2
-	addi.w	#Tactic_Y+Tactic_cell_height/2,d2
-	swap	d1
+	subq.w	#1,d0			; Its participant data (current
+	andi.w	#7,d0			;  position, members can move)
+	mulu.w	#Participant_data_size,d0
+	lea.l	Combat_party,a1
+	add.l	d0,a1
+	move.w	Part_X(a1),d1		; X = Tactic_X + 16 * column + 8
 	lsl.w	#4,d1
 	addi.w	#Tactic_X+8,d1
+	move.w	Part_Y(a1),d2		; Y = Tactic_Y + 13 * row + 6
+	mulu.w	#Tactic_cell_height,d2
+	addi.w	#Tactic_Y+Tactic_cell_height/2,d2
 	move.w	d1,Script_X
 	move.w	d2,Script_Y
 	st	Script_mouse
+	bra.w	.Again
+.Seedlock:	move.l	(a0)+,Script_seed_lock	; Lock the random seed (0 = off)
+	bsr.w	.Next
+	bra.w	.Again
+.Seed:	move.l	(a0)+,Seed		; Set the random seed
+	bsr.w	.Next
+	bra.w	.Again
+.Curve3D:	move.w	(a0)+,d0			; Get target square
+	move.w	(a0)+,d1
+	bsr.w	.Next
+	jsr	Script_curve_3D
 	bra.w	.Again
 .Mousemonster:
 	bsr.w	.Next
@@ -695,9 +722,37 @@ Script_VBL:
 	bge.w	.Move3D_dir
 	moveq.l	#0,d1			; Too far south: north
 	bra.w	.Move3D_dir
-.F3_arrived:	clr.w	Script_buttons
+.F3_arrived:	move.w	Map_Xcoord,d2		; In the middle of the square ? (else
+	subq.w	#1,d2			;  move there first: turns and walks
+	moveq.l	#psize_log,d3		;  on from here do not hit corners)
+	lsl.w	d3,d2
+	addi.w	#patt_size/2,d2
+	move.w	Player_X,d3
+	sub.w	d2,d3
+	moveq.l	#3,d1			; Too far east: west
+	cmp.w	#64,d3
+	bgt.w	.F3_centre
+	moveq.l	#1,d1			; Too far west: east
+	cmp.w	#-64,d3
+	blt.w	.F3_centre
+	move.w	Height_of_map,d2
+	sub.w	Map_Ycoord,d2
+	moveq.l	#psize_log,d3
+	lsl.w	d3,d2
+	addi.w	#patt_size/2,d2
+	move.w	Player_Y,d3
+	sub.w	d2,d3
+	moveq.l	#2,d1			; Too far north: south
+	cmp.w	#64,d3
+	bgt.w	.F3_centre
+	moveq.l	#0,d1			; Too far south: north
+	cmp.w	#-64,d3
+	blt.w	.F3_centre
+	clr.w	Script_buttons		; Yes: arrived
 	move.w	#1,Script_regs+10
 	bra.w	.Again
+.F3_centre:	clr.w	Script_regs+10
+	bra.w	.Move3D_dir
 .F3_no_way:	clr.w	Script_buttons
 	move.w	#2,Script_regs+10
 	bra.w	.Again
@@ -910,6 +965,93 @@ Script_flush:
 	jsr	_LVOClose(a6)
 .Exit:	movem.l	(sp)+,d0-d3/a0/a1/a6
 .Exit2:	rts
+
+;*****************************************************************************
+; [ One frame of running to a square on a 3D map, steering on the way ]
+;   IN : d0 - Map X-coordinate of the target square (.w)
+;        d1 - Map Y-coordinate of the target square (.w)
+; NOTE :
+;   - The mouse button is held in the 3D view: top middle (straight on), or
+;     the top left / right zone (forward and turning; 45 degrees or more:
+;     strongly, else slightly).
+;   - Register 5 is 1 when the middle of the square is reached (100 units).
+; All registers are restored
+;*****************************************************************************
+Script_curve_3D:
+	movem.l	d0-d7/a0,-(sp)
+	subq.w	#1,d0			; Target in dungeon coordinates
+	moveq.l	#psize_log,d2
+	lsl.w	d2,d0
+	addi.w	#patt_size/2,d0
+	move.w	Height_of_map,d3
+	sub.w	d1,d3
+	lsl.w	d2,d3
+	addi.w	#patt_size/2,d3
+	sub.w	Player_X,d0		; Vector to the target (vx, vy)
+	sub.w	Player_Y,d3
+	move.w	d3,d1
+	move.w	d0,d2			; Reached ?
+	bpl.w	.Abs_x
+	neg.w	d2
+.Abs_x:	cmp.w	#100,d2
+	bhs.w	.Go
+	move.w	d1,d2
+	bpl.w	.Abs_y
+	neg.w	d2
+.Abs_y:	cmp.w	#100,d2
+	bhs.w	.Go
+	move.w	#1,Script_regs+10		; Yes
+	clr.w	Script_buttons
+	bra.w	.Exit
+.Go:	clr.w	Script_regs+10
+	lea.l	Sinus_table,a0		; Facing f = (-sin, cos)
+	move.w	Y_angle,d2
+	andi.w	#slang-1,d2
+	add.w	d2,d2
+	move.w	0(a0,d2.w),d4		; Sine
+	addi.w	#slang/2,d2
+	andi.w	#slang*2-1,d2
+	move.w	0(a0,d2.w),d5		; Cosine
+	neg.w	d4			; fx
+	move.w	d4,d6			; Dot = fx * vx + fy * vy
+	muls.w	d0,d6
+	move.w	d5,d2
+	muls.w	d1,d2
+	add.l	d2,d6
+	move.w	d4,d7			; Cross = fx * vy - fy * vx
+	muls.w	d1,d7
+	move.w	d5,d2
+	muls.w	d0,d2
+	sub.l	d2,d7
+	move.l	d7,d3			; |cross|
+	bpl.w	.Abs_c
+	neg.l	d3
+.Abs_c:	move.l	d3,d2			; More than 2 degrees ? (|cross| * 32 > dot)
+	lsl.l	#5,d2
+	tst.l	d6			; Behind (passed it) ? Reached
+	bgt.w	.Ahead			;  (else the party would circle around it)
+	move.w	#1,Script_regs+10
+	clr.w	Script_buttons
+	bra.w	.Exit
+.Ahead:	cmp.l	d6,d2
+	ble.w	.Straight
+	moveq.l	#4,d4			; Steering strength: slight
+.Mild:	tst.l	d7			; Left (cross >= 0) or right
+	bpl.w	.Left
+	move.w	#Map3D_X+96,d0		; Top right zone
+	add.w	d4,d0
+	bra.w	.Set
+.Left:	move.w	#Map3D_X+48-1,d0		; Top left zone
+	sub.w	d4,d0
+.Set:	move.w	d0,Script_X
+	move.w	#Map3D_Y+1,Script_Y
+	bra.w	.Hold
+.Straight:	move.w	#104,Script_X		; Top middle: forward at full speed
+	move.w	#50,Script_Y
+.Hold:	move.w	#1,Script_buttons
+	st	Script_mouse
+.Exit:	movem.l	(sp)+,d0-d7/a0
+	rts
 
 ;*****************************************************************************
 ; [ Save the game into the slot Script_save_slot ]
@@ -1453,6 +1595,7 @@ Script_last_sp:	ds.l	1
 Script_last_mev:	ds.l	1
 Script_sp_time:	ds.w	1
 Script_sp:	ds.w	1
+Script_seed_lock:	ds.l	1
 Script_stack:	ds.l	8
 	even
 Script_buffer:	ds.b	Script_max_size

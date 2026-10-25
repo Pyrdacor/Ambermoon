@@ -234,7 +234,7 @@ def main():
     ap.add_argument('--within', type=float, default=45)
     ap.add_argument('--attempts', type=int, default=5)
     ap.add_argument('--success', help='log tag (hex): the run is complete (e.g. the outro begins)')
-    ap.add_argument('--limit', type=float, default=360, help='with --success: at most this many seconds of game time')
+    ap.add_argument('--limit', type=float, default=420, help='with --success: at most this many seconds of game time')
     ap.add_argument('--boot', default=os.path.join(DOCS, 'Hard Drives', 'AmbermoonDE'))
     args = ap.parse_args()
 

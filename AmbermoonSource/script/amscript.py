@@ -19,6 +19,9 @@ The script (one command per line, '#' starts a comment, 'name:' defines a label)
   clickitem <item> [inv] [member <n>] click on the item (name with _ for spaces, or number) in the backpack of the
                                       active member (or member n): item area of chests / conversations / doors,
                                       'inv': the inventory; rclickitem: right click
+  seedlock <value>|off                the random seed is set at the start of every frame (same numbers)
+  seed <value>                        sets the seed of the random generator (it also changes every frame)
+  curve <x> <y>                       3D: run to the square, steering on the way (no turning on the spot)
   glide <x> <y> [through|via ..] [fight] 3D without turning (forward/back/sideways by the view direction)
   strafe left|right <x> <y>           3D: sideways without turning until the square x, y
   clickmonster                        combat: click on the cell of the first monster (it may move)
@@ -46,7 +49,8 @@ The script (one command per line, '#' starts a comment, 'name:' defines a label)
   log <tag>                           a line in Amberfiles/Script.log (tag, frame, map, x, y, module, depth, r0, r1)
   onmap <map> <x> <y> [N|E|S|W]       waits for the map and position; walkto plans on this map from here (3D maps:
                                       with the facing, it is kept up to date by walkto and enter)
-  walkto <x> <y> [through | via <chain> ...] [lane left] [nostop] [fight]
+  walkto <x> <y> [through | via <chain> ...] [lane left] [nostop] [fight] [near <slot>]
+                                      ('near': 2D, stop as soon as the map character is next to the party)
                                       ('fight': a battle ends the walk instead of a flight)
                                       (3D: 'lane left' walks on the left side of the squares, 'nostop' does not
                                       stop for monsters ahead)
@@ -78,7 +82,7 @@ GAME_OFF = os.path.join(HERE, '..', 'src', 'GAME_OFF.S')
 OPS = {'end': 0, 'wait': 1, 'key': 2, 'mouse': 3, 'buttons': 4, 'free': 5, 'jumpif': 6, 'jump': 7, 'set': 8, 'add': 9,
        'log': 10, 'mousetile': 11, 'steer3d': 12, 'get': 13, 'jumpifv': 14, 'align3d': 15, 'steermouse': 16, 'save': 17,
        'mousenpc': 18, 'flow': 19, 'mouseauto': 20, 'mousespell': 21, 'worlddir': 22,
-       'call': 23, 'ret': 24, 'mouseitem': 25, 'move3d': 26, 'mousecell': 27, 'flow3d': 28, 'mousemonster': 29}
+       'call': 23, 'ret': 24, 'mouseitem': 25, 'move3d': 26, 'mousecell': 27, 'flow3d': 28, 'mousemonster': 29, 'curve3d': 30, 'seed': 31, 'seedlock': 32}
 CMP = {'=': 0, '==': 0, '<>': 1, '!=': 1, '<': 2, '>=': 3, '>': 4, '<=': 5}
 NEGATE = {0: 1, 1: 0, 2: 3, 3: 2, 4: 5, 5: 4}
 VARS = {'map': 0, 'x': 1, 'y': 2, 'module': 3, 'depth': 4, 'frame': 5, 'mousex': 6, 'mousey': 7, 'travel': 8,
@@ -409,7 +413,7 @@ def compile_script(text, data=None, start=None):
         emit(OPS['wait'], 1, OPS['jump'], ('label', loop))
         here('__d' + loop)
 
-    def walk_flow(target, through, allowed):
+    def walk_flow(target, through, allowed, near=None):
         # 2D: walking with the mouse along a direction table (from any square: also after slides, events or
         # chasing a character)
         w, h, table = walker.flow(target, through, allowed)
@@ -428,13 +432,32 @@ def compile_script(text, data=None, start=None):
         nib += [15] * (-len(nib) % 4)
         emit(w, h, *[nib[i] << 12 | nib[i + 1] << 8 | nib[i + 2] << 4 | nib[i + 3] for i in range(0, len(nib), 4)])
         here(skip)
-        loop, done, lost = new_label(), new_label(), new_label()
+        # (no progress for 40 frames: a character blocks the way -> let go for 40 frames, it walks on)
+        loop, done, lost, moved = new_label(), new_label(), new_label(), new_label()
+        emit(OPS['get'], 1, VARS['x'], OPS['get'], 4, VARS['y'], OPS['set'], 3, 0)
         here(loop)
+        if near is not None:
+            # stop as soon as the map character (slot) is next to the party
+            emit(OPS['jumpif'], 0x20 + near, CMP['<='], 1, ('label', done))
         emit(OPS['flow'], ('label', data),
              OPS['jumpif'], VARS['r5'], CMP['='], 1, ('label', done),
              OPS['jumpif'], VARS['r5'], CMP['='], 2, ('label', lost))
         interrupt(loop, True)
-        emit(OPS['wait'], 1, OPS['jump'], ('label', loop))
+        emit(OPS['wait'], 1,
+             OPS['jumpifv'], VARS['x'], CMP['<>'], VARS['r1'], ('label', moved),
+             OPS['jumpifv'], VARS['y'], CMP['<>'], VARS['r4'], ('label', moved),
+             OPS['add'], 3, 1, OPS['jumpif'], VARS['r3'], CMP['<'], 40, ('label', loop),
+             OPS['log'], 0x58, OPS['buttons'], 0, OPS['wait'], 5)
+        # blocked (a character or an object the map data does not show): a step aside (up, right, down, left,
+        # 25 frames each) until the party moves, then on along the table
+        for dx, dy in ((0, -1), (1, 0), (0, 1), (-1, 0)):
+            emit(OPS['mousetile'], dx & 0xffff, dy & 0xffff, OPS['wait'], 1, OPS['buttons'], 1, OPS['wait'], 25,
+                 OPS['buttons'], 0, OPS['wait'], 2,
+                 OPS['jumpifv'], VARS['x'], CMP['<>'], VARS['r1'], ('label', moved),
+                 OPS['jumpifv'], VARS['y'], CMP['<>'], VARS['r4'], ('label', moved))
+        emit(OPS['set'], 3, 0, OPS['jump'], ('label', loop))
+        here(moved)
+        emit(OPS['get'], 1, VARS['x'], OPS['get'], 4, VARS['y'], OPS['set'], 3, 0, OPS['jump'], ('label', loop))
         here(lost)
         emit(OPS['log'], 0x4c, OPS['buttons'], 0, OPS['wait'], 25, OPS['jump'], ('label', loop))
         here(done)
@@ -525,8 +548,18 @@ def compile_script(text, data=None, start=None):
             here(nx_)
         here(pd)
         # 'y' (requesters like "Do you want to fight?"), then a right click only if still a popup and no battle
+        # requesters ("Do you want to fight?"): 'y', in the temple of the brotherhood (maps 431, 453) 'n' (Netsrak
+        # is active there: with full dexterity and luck the party always gets away)
+        yk, nk_, kd = new_label(), new_label(), new_label()
+        n_ = key_code('n')
         emit(OPS['jumpif'], VARS['depth'], CMP['<='], 1, ('label', done),
-             OPS['key'], y >> 16, y & 0xffff, OPS['wait'], 15,
+             OPS['jumpif'], VARS['map'], CMP['='], 431, ('label', nk_),
+             OPS['jumpif'], VARS['map'], CMP['='], 453, ('label', nk_),
+             OPS['key'], y >> 16, y & 0xffff, OPS['jump'], ('label', kd))
+        here(nk_)
+        emit(OPS['key'], n_ >> 16, n_ & 0xffff)
+        here(kd)
+        emit(OPS['wait'], 15,
              OPS['jumpif'], VARS['module'], CMP['='], MODULES['Combat'], ('label', combat),
              OPS['jumpif'], VARS['depth'], CMP['<='], 1, ('label', done),
              OPS['buttons'], 2, OPS['wait'], 4, OPS['buttons'], 0, OPS['wait'], 6, OPS['jump'], ('label', loop))
@@ -845,16 +878,25 @@ def compile_script(text, data=None, start=None):
                 # is visible, click on it
                 loop, found, fail, op = new_label(), new_label(), new_label(), new_label()
                 # combat: open the spell window with the magic icon (bottom right) until it is really open
+                # (an inventory opened instead, e.g. by the key of the active member: closed with keypad 9; the spell
+                # window is the only module above the combat screen without an ID)
                 emit(OPS['set'], 4, 0)
                 here(op)
-                emit(OPS['jumpif'], VARS['depth'], CMP['>='], 3, ('label', '__o' + op),
+                inv = new_label()
+                emit(OPS['jumpif'], VARS['module'], CMP['='], MODULES['Inv2'], ('label', inv),
+                     OPS['jumpif'], VARS['module'], CMP['='], MODULES['Inv1'], ('label', inv),
+                     OPS['jumpif'], VARS['depth'], CMP['>='], 3, ('label', '__o' + op),
                      OPS['add'], 4, 1, OPS['jumpif'], VARS['r4'], CMP['>='], 6, ('label', fail))
                 ready()
                 k3 = key_code('kp3')       # magic
                 emit(OPS['key'], k3 >> 16, k3 & 0xffff, OPS['wait'], 30, OPS['jump'], ('label', op))
+                here(inv)
+                k9_ = key_code('kp9')
+                ready()
+                emit(OPS['key'], k9_ >> 16, k9_ & 0xffff, OPS['wait'], 20, OPS['jump'], ('label', op))
                 here('__o' + op)
                 emit(OPS['log'], 0x5e)
-                ready(15)
+                ready(8)
                 emit(OPS['set'], 4, 0)
                 here(loop)
                 emit(OPS['mousespell'], int(t[1]), OPS['jumpif'], VARS['r5'], CMP['='], 1, ('label', found),
@@ -865,7 +907,7 @@ def compile_script(text, data=None, start=None):
                 emit(OPS['log'], 0x5f, OPS['end'])        # not found (window not open, or the spell is unknown)
                 here(found)
                 emit(OPS['wait'], 3, OPS['buttons'], 1, OPS['wait'], 4, OPS['buttons'], 0, OPS['wait'], 4)
-                ready(25)
+                ready(12)
                 # still open (e.g. "Not enough SP!"): abort the selection with a right click
                 emit(OPS['jumpif'], VARS['depth'], CMP['<'], 3, ('label', '__x' + found),
                      OPS['log'], 0x5d, OPS['buttons'], 2, OPS['wait'], 4, OPS['buttons'], 0, OPS['wait'], 10)
@@ -888,6 +930,39 @@ def compile_script(text, data=None, start=None):
                 here(found)
                 b = 2 if cmd == 'rclickitem' else 1
                 emit(OPS['wait'], 3, OPS['buttons'], b, OPS['wait'], 4, OPS['buttons'], 0, OPS['wait'], 4)
+            elif cmd == 'seed':
+                # seed <value>: the seed of the random generator (hex with 0x or decimal)
+                v = int(t[1], 0)
+                emit(OPS['seed'], (v >> 16) & 0xffff, v & 0xffff)
+            elif cmd == 'seedlock':
+                # seedlock <value> | off: the random seed is set at the start of every frame
+                v = 0 if t[1].lower() == 'off' else int(t[1], 0)
+                emit(OPS['seedlock'], (v >> 16) & 0xffff, v & 0xffff)
+            elif cmd == 'curve':
+                # curve <x> <y>: 3D, run to the middle of the square, steering on the way (no stop for turns)
+                # (no progress for 60 frames, e.g. a monster blocks the way: the eye at it, which starts the battle)
+                tx, ty = int(t[1]), int(t[2])
+                loop, done, moved, c2 = new_label(), new_label(), new_label(), new_label()
+                emit(OPS['get'], 1, VARS['px'], OPS['get'], 4, VARS['py'], OPS['set'], 3, 0)
+                here(loop)
+                emit(OPS['curve3d'], tx, ty, OPS['jumpif'], VARS['r5'], CMP['='], 1, ('label', done))
+                interrupt(loop, False)
+                emit(OPS['wait'], 1,
+                     OPS['jumpifv'], VARS['px'], CMP['<>'], VARS['r1'], ('label', moved),
+                     OPS['jumpifv'], VARS['py'], CMP['<>'], VARS['r4'], ('label', moved),
+                     OPS['add'], 3, 1, OPS['jumpif'], VARS['r3'], CMP['<'], 60, ('label', loop))
+                ke, k7 = key_code('enter'), key_code('kp7')
+                emit(OPS['log'], 0x57, OPS['buttons'], 0, OPS['wait'], 5, OPS['set'], 3, 0,
+                     OPS['jumpif'], VARS['cil'], CMP['='], 1, ('label', c2),
+                     OPS['key'], ke >> 16, ke & 0xffff, OPS['wait'], 10)
+                here(c2)
+                emit(OPS['key'], k7 >> 16, k7 & 0xffff, OPS['wait'], 30, OPS['jump'], ('label', loop))
+                here(moved)
+                emit(OPS['get'], 1, VARS['px'], OPS['get'], 4, VARS['py'], OPS['set'], 3, 0,
+                     OPS['jump'], ('label', loop))
+                here(done)
+                emit(OPS['buttons'], 0)
+                walker.prev, walker.pos = walker.pos, (tx, ty)
             elif cmd == 'glide':
                 # glide <x> <y> [through | via <chain> ...] [fight]: 3D without turning, along a direction table from
                 # the current square (forward, back or sideways by the view direction; battles turn the party or move
@@ -1005,22 +1080,32 @@ def compile_script(text, data=None, start=None):
                 here('__d' + wl)
                 ready(15)
                 # scroll (cursor keys) until the point is visible
-                # (at most 20 times: the automap stops scrolling at its edge)
+                # scroll (cursor keys) until the point is visible: each step redraws the map (keys pressed meanwhile
+                # are lost), so after each key a pause; at most 60 steps (the automap stops at its edge)
                 sl, sv = new_label(), new_label()
                 emit(OPS['set'], 7, 0)
                 here(sl)
                 emit(OPS['mouseauto'], gx, gy, OPS['jumpif'], VARS['r5'], CMP['='], 1, ('label', sv),
-                     OPS['add'], 7, 1, OPS['jumpif'], VARS['r7'], CMP['>='], 20, ('label', sv))
+                     OPS['add'], 7, 1, OPS['jumpif'], VARS['r7'], CMP['>='], 60, ('label', sv))
                 for reg, neg, pos in (('r6', 'up', 'down'), ('r2', 'left', 'right')):
                     for cmpop, key in (('<', neg), ('>', pos)):
                         nk = new_label()
                         emit(OPS['jumpif'], VARS[reg], CMP['>=' if cmpop == '<' else '<='], 0, ('label', nk))
                         k = key_code(key)
-                        emit(OPS['key'], k >> 16, k & 0xffff, OPS['wait'], 6)
+                        emit(OPS['key'], k >> 16, k & 0xffff, OPS['wait'], 12)
                         here(nk)
                 emit(OPS['jump'], ('label', sl))
                 here(sv)
-                emit(OPS['wait'], 3, OPS['buttons'], 1, OPS['wait'], 4, OPS['buttons'], 0)
+                # click on the point until the requester ("Are you sure?") is there
+                cl, cd = new_label(), new_label()
+                here(cl)
+                emit(OPS['mouseauto'], gx, gy, OPS['wait'], 3, OPS['buttons'], 1, OPS['wait'], 4, OPS['buttons'], 0,
+                     OPS['set'], 7, 0)
+                here('__w' + cl)
+                emit(OPS['jumpif'], VARS['depth'], CMP['>='], 3, ('label', cd),
+                     OPS['add'], 7, 1, OPS['jumpif'], VARS['r7'], CMP['>='], 40, ('label', cl),
+                     OPS['wait'], 1, OPS['jump'], ('label', '__w' + cl))
+                here(cd)
                 yl = new_label()
                 emit(OPS['wait'], 10)
                 here(yl)
@@ -1185,7 +1270,8 @@ def compile_script(text, data=None, start=None):
                 if walker.load(walker.map)['type'] == 1:
                     walk_3d(walker.path_3d((int(t[1]), int(t[2])), through, allowed), lane, 'nostop' not in opts)
                 else:
-                    walk_flow((int(t[1]), int(t[2])), through, allowed)
+                    walk_flow((int(t[1]), int(t[2])), through, allowed,
+                              int(opts[opts.index('near') + 1]) if 'near' in opts else None)
                 if fight_exit[0]:
                     emit(OPS['buttons'], 0)
                     here(fight_exit[0])

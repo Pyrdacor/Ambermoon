@@ -114,11 +114,17 @@ keyuntil kp9 module = M3Map  # exit
 log 9
 savegame 1
 spannenberg:                    # run.py --load 1 --start spannenberg
+seedlock 0x8006ffff             # the same random numbers every frame: the random encounters (10%) never happen
 onmap 263 16 29 N
 
-# ---------- to the sign (12,3): north-east into the alley, then far west
-walkto 12 3 via 35 36 lane left nostop
+# ---------- to the sign (12,3): sideways (right) into the alley x=22 and up without turning, then west
+glide 21 29 via 35 36            # 5 squares sideways (right), past the trees
+curve 22 25                      # north, turning slightly right into the alley
+curve 22 14                      # straightening up (left) in the alley
+glide 22 3 via 35 36             # straight up the alley
+walkto 12 3 via 35 36 nostop
 settle 50
+seedlock off
 log 10
 
 # ---------- use Netsrak's staff on the sign square: teleport to the Thalion office (map 257)
@@ -134,13 +140,13 @@ savegame 2
 office:                         # run.py --load 2 --start office
 onmap 257 18 13
 
-# ---------- Mando (map character slot 1, starts at (4,27), walks around): talk to him, he joins (member 2)
-walkto 6 27 via 2
-talkto 1
-mando_join:
+# ---------- Chris (map character slot 3, starts at (13,29), walks around): talk to him, he joins (member 2)
+walkto 13 28 via 2 near 3
+talkto 3
+chris_join:
 key kp6                         # join the party
 waitclick 2 100                 # "It is a great honour ..."
-if members < 2 goto mando_join
+if members < 2 goto chris_join
 log 14
 click 288 153                   # exit
 waitclick 2                     # "It was nice to speak with you."
@@ -148,7 +154,7 @@ waituntil depth <= 1
 settle 10
 
 # ---------- Netsrak (map character slot 0, starts at (37,19), walks around in his room): member 3
-walkto 34 19
+walkto 34 19 near 0
 talkto 0
 netsrak_join:
 key kp6                         # join the party
@@ -176,8 +182,9 @@ waituntil depth <= 2
 keyuntil kp9 depth <= 1         # exit the options menu
 log 31
 
-# ---------- chest (21,3) (file 127): flute, crystal harp, healing potions IV -> Netsrak; spell points V -> Mando
-# (portraits: member n at x 32 + 48 * (n - 1); Mando 80, Netsrak 128)
+# ---------- chest (21,3) (file 127): flute, crystal harp -> Netsrak; 50 spell points V, 25 healing potions IV -> Chris
+# (portraits: member n at x 32 + 48 * (n - 1); Chris 80, Netsrak 128; one amount dialog per opening of the chest: a
+# second one in a row swaps the stacks)
 walkto 22 3 via 2
 settle 10
 cil 2
@@ -192,21 +199,75 @@ rclick 71 152                   # slot 3: crystal harp
 click 128 16                    # -> Netsrak
 keyuntil down scroll >= 12      # two rows down: slots 13-24 visible
 ready 10
+click 71 178                    # slot 21: spell points V -> "how many?"
+waituntil depth >= 3
+ready 10
+click 152 124                   # the number field: type 50, return
+wait 25                         # (the input starts a moment after the click)
+type 50
+key return
+waituntil depth <= 2 timeout 30 goto sp50_ok
+goto sp50
+sp50_ok:                        # still open: confirm with space
+key space
+sp50:
 ready 15
-rclick 71 178                   # slot 21: spell points V (the whole stack: a second amount dialog swaps the stacks)
+mouse 80 16                     # -> Chris (press, hold, release; twice if needed)
+wait 10
+press
+wait 15
+release
+wait 15
+if depth <= 2 goto sp50_in
+press
+wait 15
+release
+wait 15
+sp50_in:
 ready 15
-click 80 16                     # -> Mando
+keyuntil kp9 depth <= 1         # exit
+settle 10
+walkto 22 3 via 2
+settle 10
+cil 2
+key kp8                         # hand
+wait 10
+clicktile -1 0
+waituntil module = OpenedChest
+ready 10
+keyuntil down scroll >= 12
+ready 10
+click 71 152                    # slot 15: healing potion IV -> "how many?"
+waituntil depth >= 3
+ready 10
+click 152 124                   # the number field: type 25, return
+wait 25                         # (the input starts a moment after the click)
+type 25
+key return
+waituntil depth <= 2 timeout 30 goto hp25_ok
+goto hp25
+hp25_ok:                        # still open: confirm with space
+key space
+hp25:
 ready 15
-ready 15
-rclick 71 152                   # slot 15: healing potion IV (the whole stack)
-ready 15
-click 128 16                    # -> Netsrak
+mouse 80 16                     # -> Chris (press, hold, release; twice if needed)
+wait 10
+press
+wait 15
+release
+wait 15
+if depth <= 2 goto hp25_in
+press
+wait 15
+release
+wait 15
+hp25_in:
 ready 15
 keyuntil kp9 depth <= 1         # exit
 settle 10
 log 12
 
-# ---------- chest (20,4) (file 128): the ring of Sobek (waterfall, 20 charges) -> Mando
+# ---------- chest (20,4) (file 128): the ring of Sobek (waterfall, 20 charges) -> Chris
 walkto 21 4
 settle 10
 cil 2
@@ -218,7 +279,7 @@ ready 10
 keyuntil down scroll >= 12      # slots 13-24 visible
 ready 10
 rclick 27 178                   # slot 19: ring of Sobek
-click 80 16                     # -> Mando
+click 80 16                     # -> Chris
 keyuntil kp9 depth <= 1
 settle 10
 log 13
@@ -229,10 +290,14 @@ rclick 161 88                   # backpack slot 3: lantern
 click 128 16                    # -> Netsrak (backpack 5)
 keyuntil kp9 depth <= 1
 log 17
+savegame 8                      # (check point: the items are handed out)
+chests_done:                    # run.py --load 8 --start chests_done
+onmap 257 22 4
 
 # ---------- out of the office: the teleporter (16-17, 12-13) leads back to the sign in Spannenberg
 walkto 17 12 via 1 2
 onmap 263 12 3
+seedlock 0x8006ffff             # (no random encounters)
 log 18
 
 # ---------- a bandit attacks at the sign: fight, Netsrak casts earthquake
@@ -278,6 +343,7 @@ sign_nofight:
 
 # ---------- goto point "City gates" (16,29), then out through the gate (16,30) to the world map
 gotopoint 16 29
+seedlock off
 onmap 263 16 29 S
 log 19
 savegame 4
@@ -300,34 +366,19 @@ keyuntil kp9 depth <= 1         # still in the inventory: exit
 flute_done:
 log 21
 
-# ---------- to the temple island: land in the small water (29,44) of part 121: the hero drowns
-flyto 121 29 44
+# ---------- to the temple island: straight to the entrance (part 121 (44,49), south of it), land, in
+flyto 121 44 49
 cil 2
-keyuntil kp4 travel <> 5        # land (giant eagle = 5): swimming
+keyuntil kp4 travel <> 5        # land (giant eagle = 5)
 log 22
 settle 10
-# wait an hour in the water (hourglass): the hero drowns
-cil 1
-keyuntil kp5 depth >= 2         # hourglass: "how many hours?"
-ready 10
-click 152 124
-ready 5
-type 1
-key return
-waituntil depth <= 1 timeout 30 goto wait_ok
-goto wait_done
-wait_ok:
-key space
-wait_done:
-settle 25
-log 48
-walkto 44 49
 enter up                        # the entrance (44,48) -> temple (map 431)
 onmap 431 11 25
 log 23
 savegame 5
 temple:                         # run.py --load 5 --start temple
 onmap 431 11 25 N
+key 3                           # Netsrak active (refuses battles: full dexterity and luck)
 
 # ---------- the crystal wall (11,23): stand on (11,24); Netsrak: lantern (light), then the crystal harp
 walkto 11 24 via 3
@@ -376,35 +427,38 @@ m_start_w:
 wait 2
 goto m_start
 m_started:
+seedlock 0x8006ffff             # the same high random numbers every frame: the machine never deflects a spell
 log 28
 
-# ---------- the machine battle: each round Netsrak ice shower (no target); Mando (member 2): the ring of Sobek
+# ---------- the machine battle: each round Netsrak ice shower (no target); Chris (member 2): the ring of Sobek
 # (waterfall) at the machine, 20 times (r0 counts), or a potion for Netsrak: healing at LP < 120, spell points at
-# SP < 560 (the potion works from the next round on: Netsrak acts before Mando)
+# SP < 560 (the potion works from the next round on: Netsrak acts before Chris)
 set r0 0
 m_round:
 if module = Apres goto m_loot
 if depth <= 1 goto m_over
 if module <> Combat goto m_busy
-ready 25
+ready 10
 if module <> Combat goto m_round
-if lp3 < 120 goto m_heal        # Netsrak drinks a healing potion instead of casting
 if active = 3 goto m_netsrak    # Netsrak (acts first: speed 99), only switch if needed
 key 3
 ready 10
 m_netsrak:
 castspell 30                    # magic (keypad 3): ice shower
-ready 15
+ready 8
 m_mando:
+if alive2 = 0 goto m_ok          # (Chris dead: nothing)
+if lp3 < 120 goto m_heal        # Chris: a healing potion on Netsrak
+if lp2 < 120 goto m_heal_chris  # or on himself
 if sp3 < 560 goto m_sp          # (before less than 2 ice showers: Netsrak never waits for spell points)
 if r0 >= 20 goto m_ok
-keyuntil f2 module = Inv2       # Mando's inventory
+keyuntil f2 module = Inv2       # Chris's inventory
 keyuntil kp8 depth >= 4         # use item
 clickitem RING_OF_SOBEK inv member 2
 waituntil module = Combat timeout 200 goto m_rt_done
 waituntil depth >= 3 timeout 200 goto m_rt_done
 m_rt:                           # target selection (a module of its own, opens a moment later)
-ready 15
+ready 8
 if depth <= 2 goto m_rt_done
 clickmonster                    # target: the machine (wherever it is now)
 goto m_rt
@@ -412,16 +466,27 @@ m_rt_done:
 add r0 1
 goto m_ok
 m_heal:
-keyuntil f3 module = Inv2       # Netsrak's inventory
+keyuntil f2 module = Inv2       # Chris's inventory
 keyuntil kp8 depth >= 4
-clickitem HEALING_POTION_IV inv member 3
-waituntil module = Combat timeout 200 goto m_mando
-waituntil depth >= 3 timeout 200 goto m_mando
+clickitem HEALING_POTION_IV inv member 2
+waituntil module = Combat timeout 200 goto m_ok
+waituntil depth >= 3 timeout 200 goto m_ok
 m_ht:
-ready 15
-if depth <= 2 goto m_mando
-clickcell 3                     # target: Netsrak himself
+ready 8
+if depth <= 2 goto m_ok
+clickcell 3                     # target: Netsrak
 goto m_ht
+m_heal_chris:
+keyuntil f2 module = Inv2       # Chris's inventory
+keyuntil kp8 depth >= 4
+clickitem HEALING_POTION_IV inv member 2
+waituntil module = Combat timeout 200 goto m_ok
+waituntil depth >= 3 timeout 200 goto m_ok
+m_hc:
+ready 8
+if depth <= 2 goto m_ok
+clickcell 2                     # target: Chris himself
+goto m_hc
 goto m_ok
 m_sp:
 keyuntil f2 module = Inv2
@@ -430,7 +495,7 @@ clickitem SPELLPOINTS_V inv member 2
 waituntil module = Combat timeout 200 goto m_ok
 waituntil depth >= 3 timeout 200 goto m_ok
 m_st:
-ready 15
+ready 8
 if depth <= 2 goto m_ok
 clickcell 3                     # target: Netsrak
 goto m_st
@@ -438,7 +503,7 @@ m_ok:
 ready 10
 key kp9                         # OK: the round starts
 log 50
-wait 30
+wait 10
 goto m_round
 m_busy:                         # the round is shown; texts like "The machine advances" wait for a click
 if stable < 40 goto m_busy_w
@@ -460,6 +525,7 @@ rclick
 wait 10
 goto m_loot
 m_done:
+seedlock off
 settle 50                       # the texts after the battle (the way opens)
 log 51
 
