@@ -122,7 +122,17 @@ Show_lay3:
 	lea.l	Extra_layout,a0
 	jsr	Put_unmasked_block
 	jsr	Display_80x80_picture
-	jsr	Erase_PA
+	moveq.l	#Window_colour,d4		; Clear large text area
+	move.w	#111,d0			; (from [ Init_Chest_layout ])
+	move.w	#44,d1
+	move.w	#302,d2
+	move.w	#99,d3
+	jsr	Draw_box
+	move.w	#110,d0			; Clear small text area
+	move.w	#101,d1
+	move.w	#303,d2
+	move.w	#121,d3
+	jsr	Draw_box
 	move.l	a2,a0			; Show icons
 	jsr	Display_CIL
 	jsr	Hide_Lay3_objects

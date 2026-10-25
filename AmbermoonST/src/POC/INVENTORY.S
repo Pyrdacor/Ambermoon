@@ -153,6 +153,12 @@ Show_inventory_mode:
 	jsr	Put_unmasked_block
 	cmp.w	#1,Inventory_mode
 	beq.s	.Inv1
+	moveq.l	#Window_colour,d4		; Clear text area
+	move.w	#20,d0			; (from [ Init_Inv2_layout ])
+	move.w	#50,d1
+	move.w	#182,d2
+	move.w	#70,d3
+	jsr	Draw_box
 	move.w	#31,Ink_colour		; Print headline
 	move.w	#Default_shadow,Shadow_colour
 	moveq.l	#Inventory_headline,d0

@@ -716,7 +716,17 @@ Build_dialogue_screen:
 	move.w	#199-Middle_Y,d7
 	lea.l	Extra_layout,a0
 	jsr	Put_unmasked_block
-	jsr	Erase_PA
+	moveq.l	#Window_colour,d4		; Clear large text area
+	move.w	#15,d0			; (from [ Init_Dia_layout ])
+	move.w	#43,d1
+	move.w	#191,d2
+	move.w	#122,d3
+	jsr	Draw_box
+	move.w	#208,d0			; Clear ID area
+	move.w	#43,d1
+	move.w	#303,d2
+	move.w	#122,d3
+	jsr	Draw_box
 	jsr	Dialogue_CIL_evaluate	; Show control icons
 	jsr	Hide_Lay3_objects		; Hide
 	move.w	#Dialogue_X,d0		; Display portrait
