@@ -63,12 +63,12 @@ struct MatchTrie
     static MatchTrie Create(int maxMatchOffset)
     {
         var trie = MatchTrie { _maxMatchOffset = maxMatchOffset, _error = "" };
-        trie._parent = new int[1024];
-        trie._key = new uint8[1024];
-        trie._lastMatchOffset = new int[1024];
-        trie._isLeaf = new bool[1024];
-        trie._leafOffset = new int[1024];
-        trie._leafLength = new int[1024];
+        trie._parent = new int[4096];
+        trie._key = new uint8[4096];
+        trie._lastMatchOffset = new int[4096];
+        trie._isLeaf = new bool[4096];
+        trie._leafOffset = new int[4096];
+        trie._leafLength = new int[4096];
         trie._NewNode(-1, 0, 0, false); // the root
         trie._rootChildren = new int[256];
         trie._slotParents = new int[8192];
@@ -94,21 +94,49 @@ struct MatchTrie
         int matchOffset = -1;
         int i = 0;
         int leafLength = 0; // the bytes that match the rest of the leaf that the walk ended in
+        bool nodeIsLeaf = false;
         while (i < length)
         {
-            int child = _GetChild(node, sequence[offset + i]);
+            // the child with the next byte (_GetChild written out: the walk knows whether the node is a leaf)
+            uint8 key = sequence[offset + i];
+            int child = -1;
+            if (node == 0)
+            {
+                int rootChild = _rootChildren[key];
+                if (rootChild != 0)
+                    child = rootChild;
+            }
+            else if (!nodeIsLeaf)
+            {
+                int mask = _slotParents.Length - 1;
+                int slot = unchecked(node ^ (key << 11) ^ (key << 3) ^ (node >> 9)) & mask;
+                int stored = node + 1;
+                while (true)
+                {
+                    int p = _slotParents[slot];
+                    if (p == stored && _slotBytes[slot] == key)
+                    {
+                        child = _slotNodes[slot];
+                        break;
+                    }
+                    if (p == 0)
+                        break;
+                    slot = (slot + 1) & mask;
+                }
+            }
             if (child >= 0)
             {
                 // found a child, go on in the trie
                 matchOffset = _lastMatchOffset[child];
-                if (!_isLeaf[child])
+                nodeIsLeaf = _isLeaf[child];
+                if (!nodeIsLeaf)
                     _lastMatchOffset[child] = offset;
                 node = child;
                 i += 1;
                 continue;
             }
 
-            if (_isLeaf[node])
+            if (nodeIsLeaf)
             {
                 // split the leaf
                 int leaf = node;
@@ -222,7 +250,16 @@ struct MatchTrie
 
     void _AddMatchNode(int offset, int node)
     {
-        // usually behind the last one; the RLE parts of the compressors add a few offsets later
+        // usually behind the last one, with room for it
+        int count = _matchCount;
+        if (count < _matchOffsets.Length && (count == _matchFirst || _matchOffsets[count - 1] < offset))
+        {
+            _matchOffsets[count] = offset;
+            _matchNodes[count] = node;
+            _matchCount = count + 1;
+            return;
+        }
+        // the RLE parts of the compressors add a few offsets later
         int position = _matchCount;
         while (position > _matchFirst && _matchOffsets[position - 1] > offset)
             position -= 1;
