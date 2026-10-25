@@ -17,7 +17,11 @@
 ;   .l  colour value (low word) or pointer to the 16 palette words
 ; Like the copper list of the Amiga version, a palette is set at the start
 ; of the line BEFORE its line (that line is always empty), a colour of a
-; range exactly at its line.
+; range exactly at its line. Only a colour on line 1 is set in the VBL : the
+; Timer B interrupt at the end of line 0 can come too late (while the CPU
+; finishes a long instruction), then the left part of line 1 would still
+; show the old colour (e.g. the purple colour 25 above the first portrait).
+; Line 0 does not use the colours of the ranges.
 
 	SECTION	Program,code
 
@@ -95,6 +99,10 @@ Set_raster_list:
 .Loop2:	move.w	(a4)+,d0			; Convert colour
 	jsr	Amiga_to_STE_colour
 	move.w	d1,(a1)+
+	cmp.w	#1,d1			; Line 1 ?
+	bne.s	.Not1
+	clr.w	-2(a1)			; Yes -> in the VBL
+.Not1:
 	move.w	d5,(a1)+
 	clr.w	(a1)+
 	move.w	d0,(a1)+
