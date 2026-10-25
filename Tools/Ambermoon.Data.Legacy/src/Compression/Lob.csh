@@ -24,8 +24,7 @@ struct Lob
 
         while (i <= length - _LobMaxMatchLength)
         {
-            var match = trie.GetLongestMatch(data, i, _LobMaxMatchLength);
-            trie.Add(data, i, _LobMaxMatchLength);
+            var match = trie.Add(data, i, _LobMaxMatchLength);
             if (match.Length > 2)
             {
                 w.AddMatch(i - match.Offset, match.Length, i + match.Length == length);
@@ -43,8 +42,7 @@ struct Lob
         while (i <= length - _LobMinMatchLength)
         {
             int rest = length - i;
-            var match = trie.GetLongestMatch(data, i, rest);
-            trie.Add(data, i, rest);
+            var match = trie.Add(data, i, rest);
             if (match.Length > 2)
             {
                 w.AddMatch(i - match.Offset, match.Length, i + match.Length == length);
