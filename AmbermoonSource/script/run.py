@@ -140,6 +140,84 @@ def window_rect(pid, timeout=20):
     raise SystemExit('the FS-UAE window was not found')
 
 
+def tag_frame(log, tag):
+    """The frame (VBL counter) of the first log line with the tag, else None."""
+    try:
+        for line in open(log, encoding='latin-1'):
+            f = line.split()
+            if len(f) > 1 and f[0] == '%04x' % int(tag, 16):
+                return int(f[1], 16)
+    except OSError:
+        pass
+    return None
+
+
+def expected(log, tag):
+    return tag_frame(log, tag) is not None
+
+
+def run_once(args, log, attempt):
+    """One emulator run. True: restart (the expected tag did not come in time, or the limit was reached)."""
+    emu = subprocess.Popen([FSUAE, CONFIG])
+    recorder = None
+    retry = False
+    try:
+        x, y, w, h, title = window_rect(emu.pid)
+        grab = ['-f', 'gdigrab', '-i', 'title=' + title]
+        target = None
+        if args.record:
+            target = args.record if attempt == 0 else '%s_%d%s' % (os.path.splitext(args.record)[0], attempt,
+                                                                    os.path.splitext(args.record)[1])
+            recorder = subprocess.Popen([ffmpeg(), '-y', '-loglevel', 'error', '-framerate', '50'] + grab +
+                                        ['-t', str(args.seconds), '-c:v', 'libx264', '-preset', 'veryfast',
+                                         '-pix_fmt', 'yuv420p', target], stdin=subprocess.PIPE)
+        start = time.time()
+        game_start = None
+        shot = 0
+        if args.frames:
+            os.makedirs(args.frames, exist_ok=True)
+        while time.time() - start < args.seconds:
+            if emu.poll() is not None:
+                break
+            # the time counts from the first log line (the game runs), not from the emulator start
+            if args.expect and game_start is None and os.path.exists(log):
+                game_start = time.time()
+            if args.expect and game_start and time.time() - game_start > args.within and                     not expected(log, args.expect):
+                retry = True
+                break
+            if args.success:
+                if game_start is None and os.path.exists(log):
+                    game_start = time.time()
+                frame = tag_frame(log, args.success)
+                if frame is not None:
+                    seconds = frame / 50.0
+                    print('attempt %d: complete after %d:%02d game time%s' % (
+                        attempt + 1, seconds // 60, seconds % 60,
+                        (' (video: %s)' % target) if args.record else ''))
+                    time.sleep(15)              # a little of the outro
+                    retry = seconds > args.limit
+                    break
+                if game_start and time.time() - game_start > args.limit + 30:
+                    print('attempt %d: no outro after %d seconds, aborted' % (attempt + 1, args.limit))
+                    retry = True
+                    break
+            if args.frames:
+                path = os.path.join(args.frames, '%d_%04d.png' % (attempt, shot))
+                subprocess.run([ffmpeg(), '-y', '-loglevel', 'error'] + grab + ['-frames:v', '1', path])
+                shot += 1
+                time.sleep(max(0, start + shot * args.every - time.time()))
+            else:
+                time.sleep(0.5)
+    finally:
+        if recorder:
+            if retry:
+                recorder.terminate()
+            recorder.wait()
+        emu.terminate()
+        emu.wait()
+    return retry
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument('script')
@@ -152,6 +230,11 @@ def main():
     ap.add_argument('--release', default=None)
     ap.add_argument('--load', type=int, help='continue the game saved in this slot (1-10)')
     ap.add_argument('--start', help='the script starts at this label (with --load)')
+    ap.add_argument('--expect', help='log tag (hex) that must appear within --within seconds, else restart')
+    ap.add_argument('--within', type=float, default=45)
+    ap.add_argument('--attempts', type=int, default=5)
+    ap.add_argument('--success', help='log tag (hex): the run is complete (e.g. the outro begins)')
+    ap.add_argument('--limit', type=float, default=360, help='with --success: at most this many seconds of game time')
     ap.add_argument('--boot', default=os.path.join(DOCS, 'Hard Drives', 'AmbermoonDE'))
     args = ap.parse_args()
 
@@ -180,33 +263,14 @@ def main():
     shutil.copyfile(script_bin, os.path.join(DRIVE, 'Amberfiles', 'Script.bin'))
     write_config(args.fast_cpu)
 
-    emu = subprocess.Popen([FSUAE, CONFIG])
-    recorder = None
-    try:
-        x, y, w, h, title = window_rect(emu.pid)
-        grab = ['-f', 'gdigrab', '-i', 'title=' + title]
-        if args.record:
-            recorder = subprocess.Popen([ffmpeg(), '-y', '-loglevel', 'error', '-framerate', '50'] + grab +
-                                        ['-t', str(args.seconds), '-c:v', 'libx264', '-preset', 'veryfast',
-                                         '-pix_fmt', 'yuv420p', args.record], stdin=subprocess.PIPE)
-        start = time.time()
-        shot = 0
-        if args.frames:
-            os.makedirs(args.frames, exist_ok=True)
-        while time.time() - start < args.seconds:
-            if emu.poll() is not None:
-                break
-            if args.frames:
-                path = os.path.join(args.frames, '%04d.png' % shot)
-                subprocess.run([ffmpeg(), '-y', '-loglevel', 'error'] + grab + ['-frames:v', '1', path])
-                shot += 1
-                time.sleep(max(0, start + shot * args.every - time.time()))
-            else:
-                time.sleep(0.5)
-    finally:
-        if recorder:
-            recorder.wait()
-        emu.terminate()
+    for attempt in range(args.attempts if args.expect or args.success else 1):
+        if os.path.exists(log):
+            os.remove(log)
+        if not run_once(args, log, attempt):
+            break
+        if args.expect:
+            print('attempt %d: tag %s not reached within %d seconds, restarting' % (attempt + 1, args.expect,
+                                                                                      args.within))
     if os.path.exists(log):
         print(open(log, encoding='latin-1').read())
 

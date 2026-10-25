@@ -21,6 +21,9 @@ The script (one command per line, '#' starts a comment, 'name:' defines a label)
                                       'inv': the inventory; rclickitem: right click
   glide <x> <y> [through|via ..] [fight] 3D without turning (forward/back/sideways by the view direction)
   strafe left|right <x> <y>           3D: sideways without turning until the square x, y
+  clickmonster                        combat: click on the cell of the first monster (it may move)
+  clickcell <member>                  combat: click on the cell of the member (1-6) in the tactic window
+  opensquare <x> <y>                  the square counts as walkable for the path finding (changed by events)
   ready [<frames>]                    waits until the module stack did not change for <frames> (default 8)
   keyuntil <key> <var> <op> <value>   presses the key (again every 50 frames) until the condition is true
   gotopoint <x> <y>                   travels to the (known) goto point x, y of the map with the automap
@@ -75,12 +78,14 @@ GAME_OFF = os.path.join(HERE, '..', 'src', 'GAME_OFF.S')
 OPS = {'end': 0, 'wait': 1, 'key': 2, 'mouse': 3, 'buttons': 4, 'free': 5, 'jumpif': 6, 'jump': 7, 'set': 8, 'add': 9,
        'log': 10, 'mousetile': 11, 'steer3d': 12, 'get': 13, 'jumpifv': 14, 'align3d': 15, 'steermouse': 16, 'save': 17,
        'mousenpc': 18, 'flow': 19, 'mouseauto': 20, 'mousespell': 21, 'worlddir': 22,
-       'call': 23, 'ret': 24, 'mouseitem': 25, 'move3d': 26}
+       'call': 23, 'ret': 24, 'mouseitem': 25, 'move3d': 26, 'mousecell': 27, 'flow3d': 28, 'mousemonster': 29}
 CMP = {'=': 0, '==': 0, '<>': 1, '!=': 1, '<': 2, '>=': 3, '>': 4, '<=': 5}
 NEGATE = {0: 1, 1: 0, 2: 3, 3: 2, 4: 5, 5: 4}
 VARS = {'map': 0, 'x': 1, 'y': 2, 'module': 3, 'depth': 4, 'frame': 5, 'mousex': 6, 'mousey': 7, 'travel': 8,
         'maptype': 9, 'members': 10, 'active': 11, 'mapbufx': 12, 'mapbufy': 13, 'view': 14, 'angle': 15, 'stable': 0x1e, 'cil': 0x1f, 'scroll': 0x40, 'alive1': 0x41, 'alive2': 0x42, 'alive3': 0x43, 'alive4': 0x44, 'alive5': 0x45,
         'alive6': 0x46, 'aliveactive': 0x47,
+        'lp1': 0x48, 'lp2': 0x49, 'lp3': 0x4a, 'lp4': 0x4b, 'lp5': 0x4c, 'lp6': 0x4d,
+        'eventbattle': 0x5a, 'sp1': 0x4e, 'sp2': 0x4f, 'sp3': 0x50, 'sp4': 0x51, 'sp5': 0x52, 'sp6': 0x53,
         'angle1024': 0x18, 'px': 0x19, 'py': 0x1a, 'mousemoving': 0x1b, 'monsterahead': 0x1c, 'mousetop': 0x1d}
 VARS.update({'r%d' % i: 0x10 + i for i in range(8)})
 
@@ -244,7 +249,7 @@ class Walker:
                 pieces.append([f, 1])
         return pieces
 
-    def flow(self, target, through, allowed=()):
+    def flow(self, target, through, allowed=(), diagonal=True):
         """2D: the direction table for FLOW: for each square the direction (1-8 = up, up right, right, ... up left)
         of the next step of a shortest way to the target, 0 at the target, 255 without a way. Diagonal steps cost the
         same as straight ones (one move each); straight ones are preferred."""
@@ -269,6 +274,8 @@ class Walker:
         while queue:
             q = queue.popleft()
             for dx, dy, _ in DIRECTIONS:
+                if not diagonal and dx and dy:
+                    continue
                 p = (q[0] - dx, q[1] - dy)        # a step from p in direction (dx, dy) reaches q
                 if p not in dist and free(*p):
                     dist[p] = dist[q] + 1
@@ -282,6 +289,8 @@ class Walker:
                 best = None
                 # also squares that are not free themselves (e.g. an event square the party stands on)
                 for dx, dy, name in DIRECTIONS:
+                    if not diagonal and dx and dy:
+                        continue
                     q = (x + dx, y + dy)
                     if q in dist and (best is None or dist[q] < best[0]):
                         best = (dist[q], FLOW_DIR[name])
@@ -466,12 +475,11 @@ def compile_script(text, data=None, start=None):
         # (on 3D maps walking with the mouse pushes the module Mousemove_3D_Mod: one level more)
         handler, cont, moving = new_label(), new_label(), new_label()
         if fight_exit[0]:
-            # walkto / glide ... fight: a battle on the target square ends the walk (no flight); others: flight
+            # walkto / glide ... fight: a battle of an event (e.g. the machine) ends the walk (no flight); battles
+            # with map monsters: flight
             nf = new_label()
-            fx, fy = fight_exit[1]
             emit(OPS['jumpif'], VARS['module'], CMP['<>'], MODULES['Combat'], ('label', nf),
-                 OPS['jumpif'], VARS['x'], CMP['<>'], fx, ('label', nf),
-                 OPS['jumpif'], VARS['y'], CMP['='], fy, ('label', fight_exit[0]))
+                 OPS['jumpif'], VARS['eventbattle'], CMP['='], 1, ('label', '__fx' + fight_exit[0]))
             here(nf)
         emit(OPS['jumpif'], VARS['module'], CMP['='], MODULES['Combat'], ('label', handler),
              OPS['jumpif'], VARS['mousetop'], CMP['<>'], 0, ('label', cont),
@@ -523,6 +531,12 @@ def compile_script(text, data=None, start=None):
              OPS['jumpif'], VARS['depth'], CMP['<='], 1, ('label', done),
              OPS['buttons'], 2, OPS['wait'], 4, OPS['buttons'], 0, OPS['wait'], 6, OPS['jump'], ('label', loop))
         here(combat)
+        # a battle of an event during walkto / glide ... fight (r0 = 1, e.g. the machine) is not fled: back to the
+        # caller (other event battles, e.g. random encounters: flight)
+        nf2 = new_label()
+        emit(OPS['jumpif'], VARS['r0'], CMP['<>'], 1, ('label', nf2),
+             OPS['jumpif'], VARS['eventbattle'], CMP['='], 1, ('label', done))
+        here(nf2)
         # flee at once: the clicks only after the module stack is stable for a moment (each push/pop clears the
         # buffers, then only the OK would arrive and a whole round would be fought)
         emit(OPS['jumpif'], VARS['stable'], CMP['>='], 15, ('label', '__f' + combat),
@@ -532,12 +546,15 @@ def compile_script(text, data=None, start=None):
         # keypad 9 = OK (the round starts)
         # (the combat screen fades in without a module change: keys before that are lost)
         emit(OPS['log'], 0xc0, OPS['wait'], 40)
+        # first the active member (no switch), then the other living members (key 1-6), each keypad 7 (flee)
         k7, k9 = key_code('kp7'), key_code('kp9')
+        ready(10)
+        emit(OPS['get'], 6, VARS['active'], OPS['key'], k7 >> 16, k7 & 0xffff, OPS['wait'], 15)
         for n in range(1, 7):
             skip = new_label()
             kn = key_code(str(n))
-            # (the icon feedback of a key takes a moment: keys right after it are lost)
-            emit(OPS['jumpif'], VARS['alive%d' % n], CMP['='], 0, ('label', skip))
+            emit(OPS['jumpif'], VARS['alive%d' % n], CMP['='], 0, ('label', skip),
+                 OPS['jumpif'], VARS['r6'], CMP['='], n, ('label', skip))     # (r6: the first active member)
             ready(10)
             emit(OPS['key'], kn >> 16, kn & 0xffff, OPS['wait'], 15)
             ready(10)
@@ -848,6 +865,11 @@ def compile_script(text, data=None, start=None):
                 emit(OPS['log'], 0x5f, OPS['end'])        # not found (window not open, or the spell is unknown)
                 here(found)
                 emit(OPS['wait'], 3, OPS['buttons'], 1, OPS['wait'], 4, OPS['buttons'], 0, OPS['wait'], 4)
+                ready(25)
+                # still open (e.g. "Not enough SP!"): abort the selection with a right click
+                emit(OPS['jumpif'], VARS['depth'], CMP['<'], 3, ('label', '__x' + found),
+                     OPS['log'], 0x5d, OPS['buttons'], 2, OPS['wait'], 4, OPS['buttons'], 0, OPS['wait'], 10)
+                here('__x' + found)
             elif cmd in ('clickitem', 'rclickitem'):
                 # clickitem <item name or number> [inv] [member <n>]: click on the item in the backpack of the active
                 # member (or member n), in the item area (chests, conversations, doors) or the inventory ('inv')
@@ -867,46 +889,51 @@ def compile_script(text, data=None, start=None):
                 b = 2 if cmd == 'rclickitem' else 1
                 emit(OPS['wait'], 3, OPS['buttons'], b, OPS['wait'], 4, OPS['buttons'], 0, OPS['wait'], 4)
             elif cmd == 'glide':
-                # glide <x> <y> [through | via <chain> ...] [fight]: 3D without turning: each piece of the way is
-                # walked forward, backward or sideways, depending on the current view direction (battles turn the
-                # party: no problem). No progress for 60 frames (a monster blocks the way): the eye at it.
+                # glide <x> <y> [through | via <chain> ...] [fight]: 3D without turning, along a direction table from
+                # the current square (forward, back or sideways by the view direction; battles turn the party or move
+                # it: no problem). No progress for 60 frames (a monster blocks the way): the eye at it.
                 opts = [o.lower() for o in t[3:]]
                 through = 'through' in opts
                 allowed = [int(o) for o in opts[opts.index('via') + 1:] if o.isdigit()] if 'via' in opts else []
                 if 'fight' in opts:
                     fight_exit[0], fight_exit[1] = new_label(), (int(t[1]), int(t[2]))
-                m = walker.load(walker.map)
-                for f, count in walker.path_3d((int(t[1]), int(t[2])), through, allowed):
-                    nx, ny = walker.pos[0] + VEC[f][0] * count, walker.pos[1] + VEC[f][1] * count
-                    cx, cy = (nx - 1) * 512 + 256, (m['height'] - ny) * 512 + 256
-                    cond = {0: ('py', '>=', cy - 40), 2: ('py', '<=', cy + 40), 1: ('px', '>=', cx - 40),
-                            3: ('px', '<=', cx + 40)}[f]
-                    loop, done, moved, eye, c2 = (new_label(), new_label(), new_label(), new_label(),
-                                                  new_label())
-                    emit(OPS['get'], 1, VARS['px'], OPS['get'], 4, VARS['py'], OPS['set'], 3, 0)
-                    here(loop)
-                    emit(OPS['jumpif'], VARS[cond[0]], CMP[cond[1]], cond[2] & 0xffff, ('label', done),
-                         OPS['move3d'], f)
-                    interrupt(loop, False)
-                    emit(OPS['wait'], 1,
-                         OPS['jumpifv'], VARS['px'], CMP['<>'], VARS['r1'], ('label', moved),
-                         OPS['jumpifv'], VARS['py'], CMP['<>'], VARS['r4'], ('label', moved),
-                         OPS['add'], 3, 1, OPS['jumpif'], VARS['r3'], CMP['<'], 60, ('label', loop))
-                    # blocked: the eye (second control icons, keypad 7) at what is ahead
-                    ke, k7 = key_code('enter'), key_code('kp7')
-                    emit(OPS['log'], 0x57, OPS['buttons'], 0, OPS['wait'], 5, OPS['set'], 3, 0,
-                         OPS['jumpif'], VARS['cil'], CMP['='], 1, ('label', c2),
-                         OPS['key'], ke >> 16, ke & 0xffff, OPS['wait'], 10)
-                    here(c2)
-                    emit(OPS['key'], k7 >> 16, k7 & 0xffff, OPS['wait'], 30, OPS['jump'], ('label', loop))
-                    here(moved)
-                    emit(OPS['get'], 1, VARS['px'], OPS['get'], 4, VARS['py'], OPS['set'], 3, 0,
-                         OPS['jump'], ('label', loop))
-                    here(done)
-                    walker.prev, walker.pos = walker.pos, (nx, ny)
+                    emit(OPS['set'], 0, 1)          # r0 = 1: an event battle ends the walk
+                target = (int(t[1]), int(t[2]))
+                w_, h_, table = walker.flow(target, through, allowed, diagonal=False)
+                data, skip = new_label(), new_label()
+                emit(OPS['jump'], ('label', skip))
+                here(data)
+                nib = [min(v, 15) for v in table]
+                nib += [15] * (-len(nib) % 4)
+                emit(w_, h_, *[nib[i] << 12 | nib[i + 1] << 8 | nib[i + 2] << 4 | nib[i + 3]
+                               for i in range(0, len(nib), 4)])
+                here(skip)
+                loop, done, moved, c2 = new_label(), new_label(), new_label(), new_label()
+                emit(OPS['get'], 1, VARS['px'], OPS['get'], 4, VARS['py'], OPS['set'], 3, 0)
+                here(loop)
+                emit(OPS['flow3d'], ('label', data), OPS['jumpif'], VARS['r5'], CMP['='], 1, ('label', done))
+                interrupt(loop, False)
+                emit(OPS['wait'], 1,
+                     OPS['jumpifv'], VARS['px'], CMP['<>'], VARS['r1'], ('label', moved),
+                     OPS['jumpifv'], VARS['py'], CMP['<>'], VARS['r4'], ('label', moved),
+                     OPS['add'], 3, 1, OPS['jumpif'], VARS['r3'], CMP['<'], 60, ('label', loop))
+                # blocked: the eye (second control icons, keypad 7) at what is ahead
+                ke, k7 = key_code('enter'), key_code('kp7')
+                emit(OPS['log'], 0x57, OPS['buttons'], 0, OPS['wait'], 5, OPS['set'], 3, 0,
+                     OPS['jumpif'], VARS['cil'], CMP['='], 1, ('label', c2),
+                     OPS['key'], ke >> 16, ke & 0xffff, OPS['wait'], 10)
+                here(c2)
+                emit(OPS['key'], k7 >> 16, k7 & 0xffff, OPS['wait'], 30, OPS['jump'], ('label', loop))
+                here(moved)
+                emit(OPS['get'], 1, VARS['px'], OPS['get'], 4, VARS['py'], OPS['set'], 3, 0,
+                     OPS['jump'], ('label', loop))
+                here(done)
                 emit(OPS['buttons'], 0, OPS['log'], 0xd1)
+                walker.prev, walker.pos = walker.pos, target
                 if fight_exit[0]:
                     here(fight_exit[0])
+                    here('__fx' + fight_exit[0])
+                    emit(OPS['set'], 0, 0)
                     emit(OPS['buttons'], 0)
                     fight_exit[0] = None
             elif cmd == 'strafe':
@@ -927,6 +954,19 @@ def compile_script(text, data=None, start=None):
                 here(done)
                 emit(OPS['buttons'], 0, OPS['wait'], 2)
                 walker.pos = (tx, ty)
+            elif cmd == 'clickmonster':
+                # combat: click on the cell of the (first) monster
+                ready()
+                emit(OPS['mousemonster'], OPS['wait'], 3, OPS['buttons'], 1, OPS['wait'], 4, OPS['buttons'], 0,
+                     OPS['wait'], 4)
+            elif cmd == 'clickcell':
+                # clickcell <member>: combat, click on the cell of the member in the tactic window
+                ready()
+                emit(OPS['mousecell'], int(t[1]), OPS['wait'], 3, OPS['buttons'], 1, OPS['wait'], 4,
+                     OPS['buttons'], 0, OPS['wait'], 4)
+            elif cmd == 'opensquare':
+                # opensquare <x> <y>: the square is walkable for the path finding (changed by an event)
+                walker.load(walker.map)['walk'][int(t[2]) - 1][int(t[1]) - 1] = True
             elif cmd == 'ready':
                 ready(int(t[1]) if len(t) > 1 else 8)
             elif cmd == 'keyuntil':
@@ -965,9 +1005,12 @@ def compile_script(text, data=None, start=None):
                 here('__d' + wl)
                 ready(15)
                 # scroll (cursor keys) until the point is visible
+                # (at most 20 times: the automap stops scrolling at its edge)
                 sl, sv = new_label(), new_label()
+                emit(OPS['set'], 7, 0)
                 here(sl)
-                emit(OPS['mouseauto'], gx, gy, OPS['jumpif'], VARS['r5'], CMP['='], 1, ('label', sv))
+                emit(OPS['mouseauto'], gx, gy, OPS['jumpif'], VARS['r5'], CMP['='], 1, ('label', sv),
+                     OPS['add'], 7, 1, OPS['jumpif'], VARS['r7'], CMP['>='], 20, ('label', sv))
                 for reg, neg, pos in (('r6', 'up', 'down'), ('r2', 'left', 'right')):
                     for cmpop, key in (('<', neg), ('>', pos)):
                         nk = new_label()
@@ -1138,6 +1181,7 @@ def compile_script(text, data=None, start=None):
                 lane = {'left': 90, 'center': 0}.get(opts[opts.index('lane') + 1], 0) if 'lane' in opts else 0
                 if 'fight' in opts:
                     fight_exit[0], fight_exit[1] = new_label(), (int(t[1]), int(t[2]))
+                    emit(OPS['set'], 0, 1)          # r0 = 1: an event battle ends the walk
                 if walker.load(walker.map)['type'] == 1:
                     walk_3d(walker.path_3d((int(t[1]), int(t[2])), through, allowed), lane, 'nostop' not in opts)
                 else:
@@ -1145,6 +1189,8 @@ def compile_script(text, data=None, start=None):
                 if fight_exit[0]:
                     emit(OPS['buttons'], 0)
                     here(fight_exit[0])
+                    here('__fx' + fight_exit[0])
+                    emit(OPS['set'], 0, 0)
                     emit(OPS['buttons'], 0)
                     fight_exit[0] = None
             elif cmd in ('at', 'steppedback'):

@@ -39,8 +39,17 @@ log 2
 
 # ---------- Upper right room: through the left fireplace (20,2) into the secret room
 walkto 20 3
-enter up                        # into the fireplace: trap, then the teleport
-dismiss 1
+enter up                        # into the fireplace: trap (texts), then the teleport
+fire_wait:                      # click the texts until the secret room is there
+if map = 262 goto fire_done
+if depth <= 1 goto fire_w
+ready 10
+rclick
+goto fire_wait
+fire_w:
+wait 2
+goto fire_wait
+fire_done:
 onmap 262 6 4
 log 3
 
@@ -125,13 +134,13 @@ savegame 2
 office:                         # run.py --load 2 --start office
 onmap 257 18 13
 
-# ---------- Erik (map character slot 2, starts at (38,13), walks around): talk to him, he joins (member 2)
-walkto 37 13 via 2
-talkto 2
-erik_join:
+# ---------- Mando (map character slot 1, starts at (4,27), walks around): talk to him, he joins (member 2)
+walkto 6 27 via 2
+talkto 1
+mando_join:
 key kp6                         # join the party
 waitclick 2 100                 # "It is a great honour ..."
-if members < 2 goto erik_join
+if members < 2 goto mando_join
 log 14
 click 288 153                   # exit
 waitclick 2                     # "It was nice to speak with you."
@@ -167,8 +176,8 @@ waituntil depth <= 2
 keyuntil kp9 depth <= 1         # exit the options menu
 log 31
 
-# ---------- chest (21,3) (file 127): flute, crystal harp, healing potions IV -> Netsrak; spell points V -> Erik
-# (portraits: member n at x 32 + 48 * (n - 1); Erik 80, Netsrak 128)
+# ---------- chest (21,3) (file 127): flute, crystal harp, healing potions IV -> Netsrak; spell points V -> Mando
+# (portraits: member n at x 32 + 48 * (n - 1); Mando 80, Netsrak 128)
 walkto 22 3 via 2
 settle 10
 cil 2
@@ -178,45 +187,27 @@ clicktile -1 0
 waituntil module = OpenedChest
 ready 10
 rclick 27 152                   # slot 1: flute
-click 128 16                    # -> Netsrak (backpack 1)
+click 128 16                    # -> Netsrak
 rclick 71 152                   # slot 3: crystal harp
-click 128 16                    # -> Netsrak (backpack 2)
+click 128 16                    # -> Netsrak
 keyuntil down scroll >= 12      # two rows down: slots 13-24 visible
 ready 10
-click 71 152                    # slot 15: healing potion IV -> "how many?"
-waituntil depth >= 3
-ready 10
-click 152 124                   # the number field: type 25, return
-ready 5
-type 25
-key return
-waituntil depth <= 2 timeout 30 goto hp25_ok
-goto hp25
-hp25_ok:                        # still open: confirm with space
-key space
-hp25:
-ready 5
-click 128 16                    # -> Netsrak (backpack 3)
-click 71 178                    # slot 21: spell points V -> "how many?"
-waituntil depth >= 3
-ready 10
-click 152 124                   # the number field: type 25, return
-ready 5
-type 25
-key return
-waituntil depth <= 2 timeout 30 goto sp25_ok
-goto sp25
-sp25_ok:                        # still open: confirm with space
-key space
-sp25:
-ready 5
-click 80 16                     # -> Erik (backpack 3)
+ready 15
+rclick 71 178                   # slot 21: spell points V (the whole stack: a second amount dialog swaps the stacks)
+ready 15
+click 80 16                     # -> Mando
+ready 15
+ready 15
+rclick 71 152                   # slot 15: healing potion IV (the whole stack)
+ready 15
+click 128 16                    # -> Netsrak
+ready 15
 keyuntil kp9 depth <= 1         # exit
 settle 10
 log 12
 
-# ---------- chest (20,5) (file 129): Sansri's blood -> Netsrak
-walkto 21 5
+# ---------- chest (20,4) (file 128): the ring of Sobek (waterfall, 20 charges) -> Mando
+walkto 21 4
 settle 10
 cil 2
 key kp8                         # hand
@@ -224,8 +215,10 @@ wait 10
 clicktile -1 0
 waituntil module = OpenedChest
 ready 10
-rclick 49 152                   # slot 2: Sansri's blood
-click 128 16                    # -> Netsrak (backpack 4)
+keyuntil down scroll >= 12      # slots 13-24 visible
+ready 10
+rclick 27 178                   # slot 19: ring of Sobek
+click 80 16                     # -> Mando
 keyuntil kp9 depth <= 1
 settle 10
 log 13
@@ -307,160 +300,6 @@ keyuntil kp9 depth <= 1         # still in the inventory: exit
 flute_done:
 log 21
 
-# ---------- fly to Illien (world map part 88): land north of the city entrance (12-17, 6)
-flyto 88 38 23                  # the south-east corner of the city (every square of it enters)
-cil 2
-keyuntil kp4 travel = 0         # land: on foot (enters the city)
-waituntil map = 416 timeout 100 goto illien_step
-goto illien_in
-illien_step:
-step down 1
-illien_in:
-onmap 416 21 25 N
-waitclick 1 100                 # "You will be able to return to this point later."
-settle 10
-log 40
-
-# ---------- straight north to Pelanis' palace (teleporter (21,18) -> map 417 (16,29))
-walkto 21 19 nostop
-enter up                        # (21,18): teleporter
-onmap 417 16 29
-settle 10
-log 41
-savegame 7
-palace:                         # run.py --load 7 --start palace
-onmap 417 16 29
-
-# ---------- Pelanis (map character slot 0, right in the entrance room): Netsrak (active) gives him Sansri's blood
-settle 10
-walkto 16 26                    # 3 squares up (past the pillar)
-click 128 16                    # Netsrak is the active member
-ready 10
-talkto 0
-keyuntil kp1 depth >= 3         # give item
-ready 10
-clickitem SANSRI'S_BLOOD        # (dialogue item area: Netsrak's backpack)
-waitclick 2 200                 # Pelanis' answer
-ready 25
-dismiss 2                       # further pages
-ready 25
-dismiss 2
-ready 15
-log 42
-rclick 27 152                   # the items Pelanis gives: Pelani's key
-ready 15
-click 128 16                    # -> Netsrak
-ready 15
-rclick 49 152                   # and the flute
-ready 15
-click 128 16                    # -> Netsrak
-ready 15
-rclick 27 152                   # (the key once more, if it is still there)
-ready 15
-click 128 16
-ready 15
-log 43
-click 288 153                   # exit
-waitclick 2
-waituntil depth <= 1
-settle 10
-
-# ---------- the locked door (29-30, 7) (Pelani's key), the chest (28-30, 2): elf bow, magical arrows -> Erik
-walkto 29 8
-cil 1
-key kp8                         # up: the door screen opens
-waituntil depth >= 2
-ready 15
-keyuntil kp8 depth >= 3         # use item
-ready 10
-clickitem PELANI'S_KEY          # (door item area)
-waitclick 2 100                 # "... unlocks the door ..."
-rclickuntil depth <= 1          # the door is open
-settle 10
-enter up                        # through the door (29,7)
-walkto 29 3
-settle 10
-cil 2
-key kp8                         # hand
-wait 10
-clicktile 0 -1
-waituntil module = OpenedChest
-ready 10
-# Erik's scimitar and shield (equipped, replaced by bow and arrows) into the chest: too heavy otherwise
-keyuntil f2 depth >= 3          # Erik's inventory (chest: 'drop into the chest' icons)
-ready 10
-click 28 132                    # right hand: the scimitar
-ready 5
-click 117 117                   # -> backpack 4
-ready 5
-click 92 132                    # left hand: the shield
-ready 5
-click 139 117                   # -> backpack 5
-ready 10
-keyuntil kp4 depth >= 4         # drop item into the chest (the pointer stays in the backpack)
-clickitem SCIMITAR inv member 2
-waituntil depth <= 3
-ready 10
-keyuntil kp4 depth >= 4
-clickitem LARGE_SHIELD inv member 2
-waituntil depth <= 3
-ready 10
-keyuntil kp4 depth >= 4
-clickitem CROSSBOW inv member 2
-waituntil depth <= 3
-ready 10
-keyuntil kp9 depth <= 2         # back to the chest
-wait 50                         # (the chest screen fades in)
-rclick 49 178                   # slot 8: elf bow
-click 80 16                     # -> Erik
-wait 20
-rclick 71 178                   # slot 9: magical arrows
-click 80 16                     # -> Erik (backpack 5)
-keyuntil kp9 depth <= 1
-settle 10
-log 44
-
-# ---------- Erik equips them: bow -> right hand, arrows -> left hand (both free now)
-keyuntil f2 module = Inv2          # Erik's inventory
-ready 10
-rclickitem ELFBOW inv member 2
-ready 5
-click 28 132                    # right hand
-ready 5
-rclickitem MAGICAL_ARROW inv member 2
-ready 5
-click 92 132                    # left hand (only some arrows fit: the rest stays at the pointer)
-ready 5
-click 117 88                    # the rest -> backpack 1 (free again: the bow was there)
-ready 10
-log 45
-keyuntil kp9 depth <= 1
-
-# ---------- out: back through the door, palace exit (15-17, 31), goto point "City gates" (21,25), out (21,26)
-walkto 29 6
-enter down                      # the door (29,7)
-enter down                      # (29,8)
-at 29 8
-walkto 16 31 via 1
-onmap 416 21 19
-gotopoint 21 25
-onmap 416 21 25 S
-enter down
-log 46
-
-# ---------- the eagle again (Netsrak's flute: backpack slot 1)
-keyuntil f3 module = Inv2
-keyuntil kp8 depth >= 3
-ready 10
-clickitem FLUTE inv member 3
-waitclick 2
-waituntil depth <= 1 timeout 100 goto flute2_inv
-goto flute2_done
-flute2_inv:
-keyuntil kp9 depth <= 1
-flute2_done:
-log 47
-
 # ---------- to the temple island: land in the small water (29,44) of part 121: the hero drowns
 flyto 121 29 44
 cil 2
@@ -527,10 +366,111 @@ onmap 453 9 8
 # ---------- approach the machine (event squares around (4-7, 5-6)): text, then the battle
 glide 6 4 through               # north, west along row 3, south: no turning (battles: flight, at once on)
 glide 6 5 through fight         # (6,5): text and the battle against the machine
-waituntil module = Combat timeout 300 goto no_machine
-ready 30
+m_start:                        # the machine's text (click), then the battle starts
+if module = Combat goto m_started
+if depth <= 1 goto m_start_w
+ready 10
+rclick
+goto m_start
+m_start_w:
+wait 2
+goto m_start
+m_started:
 log 28
-wait 50
+
+# ---------- the machine battle: each round Netsrak ice shower (no target); Mando (member 2): the ring of Sobek
+# (waterfall) at the machine, 20 times (r0 counts), or a potion for Netsrak: healing at LP < 120, spell points at
+# SP < 560 (the potion works from the next round on: Netsrak acts before Mando)
+set r0 0
+m_round:
+if module = Apres goto m_loot
+if depth <= 1 goto m_over
+if module <> Combat goto m_busy
+ready 25
+if module <> Combat goto m_round
+if lp3 < 120 goto m_heal        # Netsrak drinks a healing potion instead of casting
+if active = 3 goto m_netsrak    # Netsrak (acts first: speed 99), only switch if needed
+key 3
+ready 10
+m_netsrak:
+castspell 30                    # magic (keypad 3): ice shower
+ready 15
+m_mando:
+if sp3 < 560 goto m_sp          # (before less than 2 ice showers: Netsrak never waits for spell points)
+if r0 >= 20 goto m_ok
+keyuntil f2 module = Inv2       # Mando's inventory
+keyuntil kp8 depth >= 4         # use item
+clickitem RING_OF_SOBEK inv member 2
+waituntil module = Combat timeout 200 goto m_rt_done
+waituntil depth >= 3 timeout 200 goto m_rt_done
+m_rt:                           # target selection (a module of its own, opens a moment later)
+ready 15
+if depth <= 2 goto m_rt_done
+clickmonster                    # target: the machine (wherever it is now)
+goto m_rt
+m_rt_done:
+add r0 1
+goto m_ok
+m_heal:
+keyuntil f3 module = Inv2       # Netsrak's inventory
+keyuntil kp8 depth >= 4
+clickitem HEALING_POTION_IV inv member 3
+waituntil module = Combat timeout 200 goto m_mando
+waituntil depth >= 3 timeout 200 goto m_mando
+m_ht:
+ready 15
+if depth <= 2 goto m_mando
+clickcell 3                     # target: Netsrak himself
+goto m_ht
+goto m_ok
+m_sp:
+keyuntil f2 module = Inv2
+keyuntil kp8 depth >= 4
+clickitem SPELLPOINTS_V inv member 2
+waituntil module = Combat timeout 200 goto m_ok
+waituntil depth >= 3 timeout 200 goto m_ok
+m_st:
+ready 15
+if depth <= 2 goto m_ok
+clickcell 3                     # target: Netsrak
+goto m_st
+m_ok:
+ready 10
+key kp9                         # OK: the round starts
+log 50
+wait 30
+goto m_round
+m_busy:                         # the round is shown; texts like "The machine advances" wait for a click
+if stable < 40 goto m_busy_w
+rclick
+m_busy_w:
+wait 5
+goto m_round
+m_over:
+waituntil module = Apres timeout 150 goto m_done
+m_loot:                         # loot / experience: texts (click) and exit
+if depth <= 1 goto m_done
+if depth >= 3 goto m_text
+ready 15
+key kp9
+wait 25
+goto m_loot
+m_text:
+rclick
+wait 10
+goto m_loot
+m_done:
+settle 50                       # the texts after the battle (the way opens)
+log 51
+
+# ---------- to the exit (5,9): (5,8) is open now
+opensquare 5 8
+glide 5 9 through
+log 52
+waituntil depth >= 2 timeout 500 goto the_end
+log 53
+the_end:
+wait 500
 end
 no_machine:
 log 29

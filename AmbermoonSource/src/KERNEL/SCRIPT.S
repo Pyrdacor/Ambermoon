@@ -88,6 +88,16 @@
 ;                                   3 west) without turning: the mouse is held
 ;                                   in the forward / back / strafe zone that
 ;                                   fits the current view direction
+;  27 MOUSECELL member            combat: the scripted mouse pointer goes to
+;                                   the cell of the member (1-6) in the
+;                                   tactic window (battle order slot: column
+;                                   slot % 6, row 3 + slot / 6)
+;  28 FLOW3D table               3D maps: like FLOW (only up, right, down,
+;                                   left), one frame of moving without turning
+;                                   (see MOVE3D); r5 = 0 moving, 1 at the
+;                                   target, 2 no way from here
+;  29 MOUSEMONSTER               combat: the scripted mouse pointer goes to
+;                                   the cell of the first monster (it moves)
 ;  17 SAVE slot                   save the game into slot 1-10 (name
 ;                                   "SCRIPT"), done by [ Script_flush ] in
 ;                                   the main loop; the script waits for it
@@ -124,6 +134,9 @@ SC_CALL		EQU	23
 SC_RET		EQU	24
 SC_MOUSEITEM	EQU	25
 SC_MOVE3D	EQU	26
+SC_MOUSECELL	EQU	27
+SC_FLOW3D	EQU	28
+SC_MOUSEMONSTER	EQU	29
 
 Script_max_size	EQU	65536
 Script_steps	EQU	64		; At most this many instructions per frame
@@ -207,7 +220,7 @@ Script_VBL:
 	bhs	.Stop
 	lea.l	0(a2,d0.l),a0
 	move.w	(a0)+,d0			; Get opcode
-	cmp.w	#SC_MOVE3D,d0		; Known ?
+	cmp.w	#SC_MOUSEMONSTER,d0	; Known ?
 	bhi	.Stop
 	add.w	d0,d0
 	move.w	.Table(pc,d0.w),d0
@@ -219,7 +232,8 @@ Script_VBL:
 	dc.w	.Steermouse-.Table,.Save-.Table,.Mousenpc-.Table
 	dc.w	.Flow-.Table,.Mouseauto-.Table,.Mousespell-.Table
 	dc.w	.Worlddir-.Table,.Call-.Table,.Ret-.Table
-	dc.w	.Mouseitem-.Table,.Move3D-.Table
+	dc.w	.Mouseitem-.Table,.Move3D-.Table,.Mousecell-.Table
+	dc.w	.Flow3D-.Table,.Mousemonster-.Table
 
 ; a0 points behind the opcode
 .Wait:	move.w	(a0)+,d0
@@ -456,7 +470,7 @@ Script_VBL:
 	cmp.w	#Automap_window_Y+36,d1
 	bge.w	.Auto_y1
 	moveq.l	#-1,d3
-.Auto_y1:	cmp.w	#192,d1
+.Auto_y1:	cmp.w	#199,d1
 	ble.w	.Auto_y2
 	moveq.l	#1,d3
 .Auto_y2:	move.w	d2,Script_regs+4		; r2
@@ -585,9 +599,111 @@ Script_VBL:
 	st	Script_mouse
 	move.w	#1,Script_regs+10		; r5 = 1
 	bra.w	.Again
+.Mousecell:	move.w	(a0)+,d0			; Get member
+	bsr.w	.Next
+	subq.w	#1,d0
+	andi.w	#7,d0
+	lea.l	Order,a1
+	moveq.l	#0,d1
+	move.b	0(a1,d0.w),d1
+	divu.w	#6,d1			; Row (low), column (high)
+	move.w	d1,d2
+	addq.w	#3,d2
+	mulu.w	#Tactic_cell_height,d2
+	addi.w	#Tactic_Y+Tactic_cell_height/2,d2
+	swap	d1
+	lsl.w	#4,d1
+	addi.w	#Tactic_X+8,d1
+	move.w	d1,Script_X
+	move.w	d2,Script_Y
+	st	Script_mouse
+	bra.w	.Again
+.Mousemonster:
+	bsr.w	.Next
+	lea.l	Combat_monsters,a1
+	move.w	Part_X(a1),d0		; X = Tactic_X + 16 * column + 8
+	lsl.w	#4,d0
+	addi.w	#Tactic_X+8,d0
+	move.w	Part_Y(a1),d1		; Y = Tactic_Y + 13 * row + 6
+	mulu.w	#Tactic_cell_height,d1
+	addi.w	#Tactic_Y+Tactic_cell_height/2,d1
+	move.w	d0,Script_X
+	move.w	d1,Script_Y
+	st	Script_mouse
+	bra.w	.Again
+.Flow3D:	moveq.l	#0,d0			; Get table
+	move.w	(a0)+,d0
+	bsr.w	.Next
+	lea.l	0(a2,d0.l),a1
+	move.w	Map_Xcoord,d0		; Inside ?
+	subq.w	#1,d0
+	bmi.w	.F3_no_way
+	cmp.w	(a1),d0
+	bhs.w	.F3_no_way
+	move.w	Map_Ycoord,d1
+	subq.w	#1,d1
+	bmi.w	.F3_no_way
+	cmp.w	2(a1),d1
+	bhs.w	.F3_no_way
+	mulu.w	(a1),d1			; Direction of this square (nibble)
+	add.w	d0,d1
+	move.l	d1,d0
+	lsr.l	#1,d0
+	move.b	4(a1,d0.l),d0
+	btst	#0,d1
+	bne.w	.F3_low
+	lsr.b	#4,d0
+.F3_low:	andi.w	#$000f,d0
+	beq.w	.F3_arrived
+	cmp.w	#8,d0
+	bhi.w	.F3_no_way
+	clr.w	Script_regs+10		; r5 = 0
+	move.w	d0,d1			; 1/3/5/7 -> N/E/S/W
+	subq.w	#1,d1
+	lsr.w	#1,d1
+; Centred in the square across the direction ? (else the party hits the
+; corners): first sideways to the middle (tolerance 64 of 512)
+	btst	#0,d1			; North / south ?
+	bne.w	.F3_ew
+	move.w	Map_Xcoord,d2		; X centre = (x - 1) * 512 + 256
+	subq.w	#1,d2
+	moveq.l	#psize_log,d3
+	lsl.w	d3,d2
+	addi.w	#patt_size/2,d2
+	move.w	Player_X,d3
+	sub.w	d2,d3
+	cmp.w	#64,d3
+	ble.w	.F3_x1
+	moveq.l	#3,d1			; Too far east: west
+	bra.w	.Move3D_dir
+.F3_x1:	cmp.w	#-64,d3
+	bge.w	.Move3D_dir
+	moveq.l	#1,d1			; Too far west: east
+	bra.w	.Move3D_dir
+.F3_ew:	move.w	Height_of_map,d2		; Y centre = (h - y) * 512 + 256
+	sub.w	Map_Ycoord,d2		;  (dungeon Y is up)
+	moveq.l	#psize_log,d3
+	lsl.w	d3,d2
+	addi.w	#patt_size/2,d2
+	move.w	Player_Y,d3
+	sub.w	d2,d3
+	cmp.w	#64,d3
+	ble.w	.F3_y1
+	moveq.l	#2,d1			; Too far north: south
+	bra.w	.Move3D_dir
+.F3_y1:	cmp.w	#-64,d3
+	bge.w	.Move3D_dir
+	moveq.l	#0,d1			; Too far south: north
+	bra.w	.Move3D_dir
+.F3_arrived:	clr.w	Script_buttons
+	move.w	#1,Script_regs+10
+	bra.w	.Again
+.F3_no_way:	clr.w	Script_buttons
+	move.w	#2,Script_regs+10
+	bra.w	.Again
 .Move3D:	move.w	(a0)+,d1			; Get map direction
 	bsr.w	.Next
-	move.w	Y_angle,d0		; View: 0 north, 1 west, 2 south,
+.Move3D_dir:	move.w	Y_angle,d0		; View: 0 north, 1 west, 2 south,
 	addi.w	#slang/8,d0		;  3 east (the angle grows to the left)
 	andi.w	#slang-1,d0
 	lsr.w	#8,d0
@@ -1094,7 +1210,9 @@ Script_monster_ahead:
 ;   $1f 1 if the second control icons of the map are shown (eye, hand, ...),
 ;   $20-$3f distance (in squares, max(|dx|, |dy|)) of the map character in
 ;   slot 0-31 to the party (255 = not there), $41-$46 1 if member 1-6 is
-;   there and alive, $47 1 if the active member is alive, $40 the scroll
+;   there and alive, $47 1 if the active member is alive, $48-$4d LP and
+;   $4e-$53 SP of member 1-6, $54-$59 battle order slot (0-11) of member
+;   1-6, $5a 1 if the current battle was started by an event, $40 the scroll
 ;   bar position
 ;   (e.g. first visible slot - 1 of a chest),
 ;   $10-$17 registers 0-7. Others are 0.
@@ -1148,7 +1266,43 @@ Script_get_var:
 	beq.w	.Exit
 	moveq.l	#1,d0
 	bra.w	.Exit
-.No_cil:	cmp.w	#$47,d0			; Active member alive ?
+.No_cil:	cmp.w	#$5a,d0			; Battle of an event (not a map monster) ?
+	bne.w	.No_evbattle
+	moveq.l	#0,d0
+	tst.w	Combat_char_index
+	bpl.w	.Exit
+	moveq.l	#1,d0
+	bra.w	.Exit
+.No_evbattle:	cmp.w	#$48,d0			; LP / SP of member 1-6 ?
+	blt.w	.No_lpsp
+	cmp.w	#$53,d0
+	bgt.w	.No_lpsp
+	moveq.l	#0,d1			; Offset: LP or SP
+	subi.w	#$48,d0
+	cmp.w	#6,d0
+	blt.w	.Lpsp_lp
+	subq.w	#6,d0
+	moveq.l	#Power_points-Life_points,d1
+.Lpsp_lp:	lea.l	Party_handles,a0
+	move.b	0(a0,d0.w),d0
+	beq.w	.Zero
+	jsr	Check_handle		; (no claim: read only)
+	bne.w	.Zero
+	move.l	(a0),a0
+	add.w	d1,a0
+	move.w	Life_points(a0),d0
+	bra.w	.Exit
+.No_lpsp:	cmp.w	#$54,d0			; Battle order slot of member 1-6 ?
+	blt.w	.No_order
+	cmp.w	#$59,d0
+	bgt.w	.No_order
+	subi.w	#$54,d0
+	lea.l	Order,a0
+	moveq.l	#0,d1
+	move.b	0(a0,d0.w),d1
+	move.w	d1,d0
+	bra.w	.Exit
+.No_order:	cmp.w	#$47,d0			; Active member alive ?
 	bne.w	.No_act_alive
 	move.w	Active_member,d0
 	subq.w	#1,d0
