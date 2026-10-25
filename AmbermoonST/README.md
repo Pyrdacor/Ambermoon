@@ -13,7 +13,9 @@ inventory of the party members can be opened, and items can be moved between the
 other party members; items can be used (a subset of the spells), viewed and dropped. Doors and chests open
 their own screen (pick the lock, use a key or lockpick, find and disarm traps, take the items, gold and food),
 and persons can be talked to (the hand and mouth actions of the second control icon list or the right mouse
-button on the map). There is no music.
+button on the map). Traps, chance and data change events work, with the damage bursts, condition icons and
+deaths in the status block. Places can be entered: trainers, healers, sages, inns (renting a room and resting in
+the camp), merchants and libraries, blacksmiths. There is no music.
 
 ![Start](docs/start.png) ![After walking](docs/moved.png)
 
@@ -47,6 +49,16 @@ Talking to grandfather (right mouse button on him): the greeting, the word selec
 Giving gold to grandfather (he is not interested):
 
 ![Give gold](docs/givegold.png)
+
+A merchant (map 287, Theresa's Schmuckladen): the price of an item is shown above its name, buying asks with the
+original requester; a trainer (map 290) asks with the number input window:
+
+![Merchant](docs/merchant.png) ![Buy](docs/buy.png) ![Trainer](docs/trainer.png)
+
+Resting in the camp after renting a room (map 266), and a trap that kills (changed test data) with the death
+masks and the cross icons:
+
+![Camp](docs/camp.png) ![Death](docs/death.png)
 
 Map 264 "Zum hinkenden Gauner" at 14:00 (`./build.sh --map 264 --pos 11,13,2 --time 14:00`):
 
@@ -181,6 +193,18 @@ words. Items can be shown and given (the item moves from its slot to the portrai
 given with the number input window of the original. Joining is refused because the party of the proof of
 concept is always full, and dialogues with party members (and so leaving the party) are not done yet.
 
+`src/POC/STATUS.S` contains the status block parts of `DISPLAY.S` and `MAIN.S`: the condition icons (switched
+every 2 seconds like `AutoIcon_switch`), the damage burst with the amount on the portrait, the death mask and
+the death animation of `Show_death`. The status block is in both screens, so a changed member is redrawn in two
+frames. The trap, chance and data change events are in `src/POC/EVENTS.S`.
+
+`src/POC/PLACES.S` contains the Places event (with the opening hours) and the place screens of `PLACES.S`
+with the original control icon lists: trainers, healers (the patient is chosen with the portraits and gets
+the ankh), sages, inns with the camp of `ACTIONS.S` (resting until dawn or 8 hours), object and magic
+merchants and blacksmiths. The gold of the party is pooled in a place and divided when it is left. Bought
+items are taken from the slots like the items of a chest. The enchanter and the food merchant (not used in
+the 2D maps) and the transport merchants are not done.
+
 `src/POC/PERSONS.S` contains the persons and the time from `PERSONS.S`, `TIME.S` and `MAP/MAP.S`: persons
 on a path (one position per 5 minutes of the day) and randomly moving persons, sitting and sleeping
 persons, collisions with persons, and the time of day, which advances by one step (5 minutes) every 4
@@ -198,11 +222,11 @@ Hatari (STE, 8 MHz):
 
 ## Not done yet
 
-* The other events (places, riddle mouths, trapdoors, ...), monsters (movement, combat), light
-  spells, transports and travel modes other than on foot, and 3D maps.
+* Monsters (movement, combat, encounters), light spells, transports and travel modes other than on foot, the
+  transport merchants, casting and learning spells (camp), level ups, a new leader when the active member
+  dies, and 3D maps (riddle mouths, spinners, ...).
 * In the inventory: most spells of usable items, gold and food, and moving only a part of a stack.
 * Dialogues with party members, joining and leaving the party.
 * The module system, the memory manager and loading from the original containers (the data is converted in
   advance).
 * Sound and music.
-* Status icons of the party members.
