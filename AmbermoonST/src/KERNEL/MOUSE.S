@@ -149,7 +149,7 @@ Draw_mouse_pointer:
 	jsr	Add_overlay_rect
 ; ---------- Text ---------------------------------
 .No_drag:	move.l	Ghost_text,d0
-	beq.s	.No_text
+	beq	.No_text
 	move.l	d0,a0
 	moveq.l	#0,d2			; Get width
 .Len:	tst.b	(a0)+
@@ -174,6 +174,35 @@ Draw_mouse_pointer:
 .Top:	movem.w	d0/d1,Ghost_XY
 	add.w	d0,d2
 	addq.w	#1,d2			; (shadow)
+	move.w	d1,d3
+	addi.w	#Char_height+1,d3
+	jsr	Add_overlay_rect
+	move.l	Ghost_text2,d0		; Second text (above) ?
+	beq.s	.No_text
+	move.l	d0,a0
+	moveq.l	#0,d2			; Get width
+.Len2:	tst.b	(a0)+
+	beq.s	.Len2_done
+	addq.w	#Char_width+1,d2
+	bra.s	.Len2
+.Len2_done:	move.w	Mouse_X,d0		; Centre above the first
+	move.w	d2,d3
+	lsr.w	#1,d3
+	sub.w	d3,d0
+	bpl.s	.Left2
+	moveq.l	#0,d0
+.Left2:	move.w	#320-1,d3
+	sub.w	d2,d3
+	cmp.w	d3,d0
+	ble.s	.Right2
+	move.w	d3,d0
+.Right2:	move.w	Ghost_XY+2,d1
+	subi.w	#Char_height+2,d1
+	bpl.s	.Top2
+	moveq.l	#0,d1
+.Top2:	movem.w	d0/d1,Ghost2_XY
+	add.w	d0,d2
+	addq.w	#1,d2
 	move.w	d1,d3
 	addi.w	#Char_height+1,d3
 	jsr	Add_overlay_rect
@@ -221,7 +250,7 @@ Draw_mouse_pointer:
 	moveq.l	#1,d6
 	moveq.l	#16,d7
 	jsr	Put_masked_block
-	bra.s	.Done
+	bra	.Done
 .Normal:
 	move.l	Ghost_text,d0		; Text
 	beq.s	.No_text2
@@ -232,6 +261,13 @@ Draw_mouse_pointer:
 	move.w	#Default_shadow,Shadow_colour
 	movem.w	Ghost_XY,d0/d1
 	jsr	Put_text_line
+	move.l	Ghost_text2,d0		; Second text
+	beq.s	.No_second
+	move.l	d0,a0
+	move.w	Ghost_ink2,Ink_colour
+	movem.w	Ghost2_XY,d0/d1
+	jsr	Put_text_line
+.No_second:
 	move.w	(sp)+,Shadow_colour
 	move.w	(sp)+,Ink_colour
 .No_text2:	move.l	Drag_graphic,d0		; Dragged item
@@ -333,6 +369,9 @@ Current_Mptr:	ds.l 1
 Drag_graphic:	ds.l 1			; Dragged item (16x24) / 0
 Ghost_text:	ds.l 1			; Text above the mouse / 0
 Ghost_ink:	ds.w 1			; Its colour
+Ghost_text2:	ds.l 1			; Second text above the first (price) / 0
+Ghost_ink2:	ds.w 1
+Ghost2_XY:	ds.w 2
 Pointer_XY:	ds.w 2
 Ghost_XY:	ds.w 2
 Overlay_rect:	ds.w 4

@@ -421,8 +421,9 @@ Find_inventory_object:
 ;     name is drawn with the mouse pointer.
 ;*****************************************************************************
 Update_ghost:
-	movem.l	d0-d2/a0-a2,-(sp)
+	movem.l	d0-d2/d7/a0-a2,-(sp)
 	sub.l	a2,a2			; No name
+	clr.l	Ghost_text2
 	move.w	#White,Ghost_ink
 	cmp.w	#1,Inventory_mode		; Inventory 1 ?
 	bne.s	.Inv2
@@ -449,8 +450,20 @@ Update_ghost:
 	beq.s	.Done
 	jsr	Get_item_data
 	lea.l	Item_name(a1),a2
+	tst.b	Price_ghost		; Show price ?
+	beq.s	.Done
+	moveq.l	#0,d0			; Yes (like [ Create_object_price ])
+	move.w	Price(a1),d0
+	move.w	#White,Ghost_ink2
+	cmp.w	Current_gold,d0		; Affordable ?
+	bls.s	.Yes
+	move.w	#Red,Ghost_ink2
+.Yes:	lea.l	Price_text,a0
+	moveq.l	#5,d7
+	jsr	DecL_convert
+	move.l	#Price_text,Ghost_text2
 .Done:	move.l	a2,Ghost_text
-	movem.l	(sp)+,d0-d2/a0-a2
+	movem.l	(sp)+,d0-d2/d7/a0-a2
 	rts
 
 ;*****************************************************************************
@@ -2163,10 +2176,20 @@ Reset_party_weight:
 ;   IN : d0 - Message number (.w)
 ; All registers are restored
 Print_prompt:
-	movem.l	d0-d7/a0/a3/a4,-(sp)
-	jsr	Erase_PA
+	move.l	a0,-(sp)
 	addi.w	#Messages,d0
 	jsr	Get_text
+	addi.w	#-Messages,d0
+	jsr	Print_PA_text
+	move.l	(sp)+,a0
+	rts
+
+; [ Print a text in the print area (up to 3 lines) ]
+;   IN : a0 - Pointer to text (.l)
+; All registers are restored
+Print_PA_text:
+	movem.l	d0-d7/a0/a3/a4,-(sp)
+	jsr	Erase_PA
 	move.l	Print_area_ptr,a3
 	move.w	PA_X2(a3),d2		; Width
 	sub.w	PA_X1(a3),d2
@@ -2591,6 +2614,9 @@ Object_swap_flag:	ds.b 1
 Inventory_exit:	ds.b 1
 	even
 Number:	ds.b 12
+Price_text:	ds.b 8
+Price_ghost:	ds.b 1			; Show the price of an item above its name
+	even
 Number_digits:	ds.b 12
 Inv_text_buffer:	ds.b 64
 Drag_buffer:	ds.b 24*8			; Moved item (16x24)

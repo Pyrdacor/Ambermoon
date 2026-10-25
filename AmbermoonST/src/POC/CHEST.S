@@ -821,12 +821,13 @@ Take_chest_item:
 	rts
 
 ; [ Get a chest packet ]
-;   IN : d0 - Slot number {1...24} (.w)
+;   IN : d0 - Slot number {1...24} (.w) (of [ Slot_base ])
 ;  OUT : a0 - Pointer to packet (.l)
 ; Changed registers : a0
 Chest_packet:
 	move.l	d0,-(sp)
-	lea.l	Chest_work-Object_packet_size,a0
+	move.l	Slot_base,a0		; (chest or sold items)
+	lea.l	-Object_packet_size(a0),a0
 	mulu.w	#Object_packet_size,d0
 	add.l	d0,a0
 	move.l	(sp)+,d0
@@ -910,7 +911,7 @@ Chest_move_aborted:
 	jsr	Chest_packet
 	tst.w	Object_index(a0)		; Free ?
 	beq.s	.Put
-	lea.l	Chest_work,a0		; No -> find a free slot
+	move.l	Slot_base,a0		; No -> find a free slot
 	moveq.l	#Items_per_chest-1,d0
 .Loop:	tst.w	Object_index(a0)
 	beq.s	.Put

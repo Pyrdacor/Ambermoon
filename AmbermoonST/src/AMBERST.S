@@ -28,3 +28,4 @@
 	include	"POC/CHEST.S"
 	include	"POC/DIALOGUE.S"
 	include	"POC/STATUS.S"
+	include	"POC/PLACES.S"

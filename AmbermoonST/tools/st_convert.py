@@ -34,6 +34,8 @@
 #   E<i>.BIN    event picture i (320x92), Q<i>.BIN its palette (like P<t>.BIN)
 #   UIGFX.BIN   UI graphics of KERNEL/CHIP_DATA.S: Status_L, Status_M, Status_R (16x36 each),
 #               Status_TB (32x1), Empty_portrait (32x34), Button_up, Button_down (32x17 each)
+#   PLACES.BIN  the place data (Place_data/001), MERCHANT.BIN the items of the 32 merchants (144 bytes each)
+#   ANKH.BIN    Ankh_symbol (32x29) of KERNEL/CHIP_DATA.S in the UI palette (healer)
 #   STATGFX.BIN Damage_star (32x26) and Death_mask (32x34) of KERNEL/CHIP_DATA.S in the UI palette
 #   WINICONS.BIN  the 9 parts of a window border (Window_icons of KERNEL/CHIP_DATA.S, 16x16 each)
 #   BUTTONS.BIN control icons of Button_graphics (78 x 32x13, colour 0 transparent)
@@ -52,11 +54,12 @@
 #   INVGFX.BIN  Swordshield (2 x 16x9), Chequered (32x11), Pick_Mptr (hotspot X, Y (words), 16x16)
 #   TEXTS.BIN   64 UI texts, 16 race names, 16 class names, 300 messages, 16 short attribute names, 16 short
 #               skill names, 16 language names, 16 condition names, 32 item type names, 16 attribute names,
-#               16 skill names, 8 spell class names, 210 spell names (zero-terminated)
+#               16 skill names, 8 spell class names, 210 spell names, 32 format messages (with {0}, {1}, ...)
+#               (zero-terminated)
 #   SPELLS.BIN  Spell_data of KERNEL/DATA.S (5 bytes per spell), OT<i>.BIN the texts of the text scrolls
 #   STATICUI.BIN  the status icons in the UI palette (for the status block)
-#   LAYOUT3.BIN layout 3 (door & chest screen), P80_<n>.BIN the 80x80 pictures (Pics_80x80.amb) of doors and
-#               chests in the inventory palette
+#   LAYOUT3.BIN layout 3 (door & chest screen), P80_<n>.BIN the 80x80 pictures (Pics_80x80.amb) of doors,
+#               chests, places and camps in the inventory palette
 #   CHESTS.BIN  the data of all chests of the initial savegame (Chest_data.amb, 148 bytes each, from chest 0)
 #   LAYOUT8.BIN layout 8 (dialogue), PT<n>.BIN portrait n in the inventory palette, DICT.BIN the dictionary
 #   NPC<n>.BIN, NPCT<n>.BIN  data & texts of person n (NPC_char.amb, NPC_texts.amb, unchanged)
@@ -74,7 +77,7 @@ PARTY = (1, 8, 9, 10, 11, 12)               # Party_char.amb: hero, Egil, Selena
 AMBERFILES = os.path.join(ROOT, 'Disks', 'Bugfixing', 'German', 'Amberfiles')
 ALLTEXTS = os.path.join(ROOT, 'Disks', 'Bugfixing', 'German', 'AllTexts')
 WHITE = (2,)                                # Amiga colour White : ST colour 1 in the UI & inventory palettes
-PICS80 = (1, 2, 3, 11, 15)                  # 80x80 pictures : closed chest, door, empty chest, opened chest, pile
+PICS80 = range(1, 23)                       # 80x80 pictures : chests, door, places, riddle mouth, camps
 
 
 class Data:
@@ -443,6 +446,14 @@ def main():
         chests += raw[o:o + size].ljust(148, b'\0')[:148]
         o += size
     write('CHESTS.BIN', chests)
+    # places : the place data (prices, names) and the items of the merchants (Merchant_data.amb, 144 bytes
+    # each, from merchant 1)
+    write('PLACES.BIN', data.read('Place_data/001'))
+    merchants = b''
+    for n in range(1, 33):
+        name = f'Merchant_data.amb/{n:03}'
+        merchants += (data.read(name) if name in data.names else b'').ljust(144, b'\0')[:144]
+    write('MERCHANT.BIN', merchants)
 
     # dialogue screen (layout 8) : the portraits of all persons in the inventory palette (loaded when needed),
     # the dictionary and the character data & texts of the persons
@@ -492,7 +503,8 @@ def main():
     for folder, count in (('UITexts', 64), ('RaceNames', 16), ('ClassNames', 16), ('Messages', 300),
                           ('AttributeShortNames', 16), ('SkillShortNames', 16), ('LanguageNames', 16),
                           ('ConditionNames', 16), ('ItemTypeNames', 32), ('AttributeNames', 16),
-                          ('SkillNames', 16), ('SpellClassNames', 8), ('SpellNames', 7 * 30)):
+                          ('SkillNames', 16), ('SpellClassNames', 8), ('SpellNames', 7 * 30),
+                          ('FormatMessages', 32)):
         for i in range(count):
             fn = os.path.join(ALLTEXTS, 'Text.amb', folder, f'{i:03}.txt')
             t = ''
@@ -526,6 +538,8 @@ def main():
                                    for i in range(22)))
     star = source_data('KERNEL/CHIP_DATA.S', 'Damage_star')          # 32x26, 5 planes, colour 0 transparent
     mask = source_data('KERNEL/CHIP_DATA.S', 'Death_mask')           # 32x34, 3 planes, colours 24-31
+    ankh = source_data('KERNEL/CHIP_DATA.S', 'Ankh_symbol')          # 32x29, 5 planes : the healer's victim
+    write('ANKH.BIN', st_graphic([v and ui_lut[v] for v in planar(ankh, 32, 29, 5)], 32, 29))
     write('STATGFX.BIN', st_graphic([v and ui_lut[v] for v in planar(star, 32, 26, 5)], 32, 26) +
           st_graphic([8 + v for v in planar(mask, 32, 34, 3)], 32, 34))
     winicons = source_data('KERNEL/CHIP_DATA.S', 'Window_icons')   # 9 parts 16x16, 3 bit, colour 0 transparent

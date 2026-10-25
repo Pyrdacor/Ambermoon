@@ -1328,7 +1328,8 @@ Spell_data:	ds.b 7*30*Spell_data_size
 ; [ Input a number ]
 ;   IN : d0 - Prompt (message number) (.w)
 ;        d1 - Maximum number (.l)
-;        d2 - 1 = gold, 2 = food (icon and name) (.w)
+;        d2 - 0 = no icon, 1 = gold, 2 = food, 3 = item d3 (icon and name) (.w)
+;        d3 - Object index (for d2 = 3) (.w)
 ;  OUT : d0 - Number / 0 = none (.l)
 ; Changed registers : d0
 ; NOTE :
@@ -1343,23 +1344,39 @@ Input_number:
 	clr.l	InputNr_number
 	move.w	d0,d5			; Save prompt
 	move.w	d2,d6
+	move.w	d3,d7
 	move.w	#InputNr_X-16,d0		; Open window
 	move.w	#InputNr_Y-16,d1
 	moveq.l	#11,d2
 	moveq.l	#6,d3
 	jsr	Open_window
+	tst.w	d6			; Any icon ?
+	beq	.No_icon
+	lea.l	Object_icons+Gold_icon*16*8,a0	; Get icon & name
+	moveq.l	#Gold_txt,d0
+	jsr	Get_text
+	move.l	a0,a2
+	lea.l	Object_icons+Gold_icon*16*8,a0
+	cmp.w	#1,d6
+	beq.s	.Icon
+	moveq.l	#Food_txt,d0
+	jsr	Get_text
+	move.l	a0,a2
+	lea.l	Object_icons+Food_icon*16*8,a0
+	cmp.w	#2,d6
+	beq.s	.Icon
+	move.w	d7,d0			; Item
+	jsr	Get_item_data
+	lea.l	Item_name(a1),a2
+	jsr	Get_item_graphic
+.Icon:	move.l	a0,-(sp)
 	move.w	#InputNr_X-1,d0		; Draw box around icon
 	move.w	#InputNr_Y-1,d1
 	moveq.l	#16,d2
 	moveq.l	#16,d3
 	jsr	Draw_standard_box
-	lea.l	Object_icons+Gold_icon*16*8,a0	; Display icon
-	moveq.l	#Gold_txt,d7
-	cmp.w	#1,d6
-	beq.s	.Gold
-	lea.l	Object_icons+Food_icon*16*8,a0
-	moveq.l	#Food_txt,d7
-.Gold:	move.w	#InputNr_X,d0
+	move.l	(sp)+,a0			; Display icon
+	move.w	#InputNr_X,d0
 	move.w	#InputNr_Y,d1
 	jsr	Put_masked_icon
 	move.w	#InputNr_X+19,d0		; Draw box around name
@@ -1371,11 +1388,9 @@ Input_number:
 	move.w	#Default_shadow,Shadow_colour
 	addq.w	#1,d0
 	addq.w	#2,d1
-	exg	d0,d7
-	jsr	Get_text
-	exg	d0,d7
+	move.l	a2,a0
 	jsr	Print_centered_string
-	move.w	#InputNr_X-1,d0		; Draw box around prompt
+.No_icon:	move.w	#InputNr_X-1,d0		; Draw box around prompt
 	move.w	#InputNr_Y+16+2,d1
 	move.w	#142,d2
 	moveq.l	#8,d3

@@ -218,7 +218,7 @@ No_event:					; (events without effect here, e.g. music)
 Event_ptrs:
 	dc.l Map_exit,Door,Item_found,Show_pictxt,Not_implemented	; 1 - 5
 	dc.l Event_trap,Not_implemented,Not_implemented,Datachange,Change_icon	; 6 - 10
-	dc.l Not_implemented,Not_implemented,Query,Modify,Chance	; 11 - 15
+	dc.l Not_implemented,Places,Query,Modify,Chance	; 11 - 15
 	dc.l No_event,Dia_text,Dia_give,Requester,No_event	; 16 - 20
 	dc.l No_event,Not_implemented,Dia_execute,No_event	; 21 - 24
 
@@ -891,6 +891,12 @@ Process_text:
 	beq	.Insert_name
 	cmp.l	#'INVN',d1
 	beq	.Insert_inv_name
+	cmp.l	#'SUBJ',d1
+	beq	.Insert_subject
+	cmp.l	#'SEX1',d1
+	beq	.Insert_sex1
+	cmp.l	#'SEX2',d1
+	beq	.Insert_sex2
 	bra	.Loop
 .Char:	cmp.b	#' ',d0			; Space ?
 	bne.s	.Not_space
@@ -920,6 +926,34 @@ Process_text:
 	lea.l	Names,a4
 	add.w	d0,a4
 	bra.s	.Copy
+
+; Insert the name of the subject, or he/she (SEX1) or his/her (SEX2)
+.Insert_subject:
+	movem.l	a4,-(sp)
+	move.w	Subject_member,d0
+	subq.w	#1,d0
+	lsl.w	#4,d0
+	lea.l	Names,a4
+	add.w	d0,a4
+	bra.s	.Copy
+.Insert_sex1:
+	moveq.l	#He_txt,d1
+	bra.s	.Sex
+.Insert_sex2:
+	moveq.l	#His_txt,d1
+.Sex:	movem.l	a0/a1/a4,-(sp)
+	move.l	d7,-(sp)
+	move.w	Subject_member,d7
+	jsr	Get_char_data
+	move.l	(sp)+,d7
+	tst.b	Char_sex(a1)		; Female ?
+	beq.s	.Male
+	addq.w	#1,d1
+.Male:	move.w	d1,d0
+	jsr	Get_text
+	move.l	a0,a4
+	movem.l	(sp)+,a0/a1		; (a4 stays on the stack)
+	bra	.Copy
 
 ; Insert the name of the active member (the hero in the proof of concept)
 .Insert_name:
@@ -991,6 +1025,8 @@ ShowPicTxt_files:
 	SECTION	Fast_BSS,bss
 Max_line_length	EQU	48			; (buffer)
 Max_text_window_line	EQU	42
+He_txt	EQU	1			; Text numbers in TEXTS.BIN (+1 = female)
+His_txt	EQU	3
 ShowPicTxt_lines	EQU	7
 Line_stride	EQU	Max_line_length+2
 Max_lines	EQU	64
@@ -1368,4 +1404,5 @@ Datachange:
 
 	SECTION	Fast_BSS,bss
 Member_text:	ds.b 160
+Subject_member:	ds.w 1			; For ~SUBJ~, ~SEX1~ & ~SEX2~
 	even

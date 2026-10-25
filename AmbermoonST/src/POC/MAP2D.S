@@ -1856,6 +1856,15 @@ File_list:
 	dc.l	Damage_star,2*8*(26+34)
 	dc.b	"DATA\STATGFX.BIN",0
 	even
+	dc.l	Places_data,4032
+	dc.b	"DATA\PLACES.BIN",0
+	even
+	dc.l	Merchants,32*Items_per_chest*Object_packet_size
+	dc.b	"DATA\MERCHANT.BIN",0
+	even
+	dc.l	Ankh_symbol,2*8*29
+	dc.b	"DATA\ANKH.BIN",0
+	even
 	dc.l	Spell_data,7*30*5
 	dc.b	"DATA\SPELLS.BIN",0
 	even
