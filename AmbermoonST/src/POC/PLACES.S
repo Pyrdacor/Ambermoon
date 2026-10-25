@@ -1510,14 +1510,24 @@ Camp_screen:
 	movem.l	d0-d7/a0-a6,-(sp)
 	sf	Slept
 	sf	Place_exit
-	moveq.l	#Camp_inn_pic,d0		; Show camp
+	moveq.l	#Camp_inn_pic,d0		; Get picture
+	tst.b	Inn_flag			; Inn ?
+	bne.s	.Pic
+	moveq.l	#Camp_wilderness_pic,d0
+	btst	#Wilderness_bit,Map_data_buffer+Map_special+1
+	bne.s	.Pic
+	moveq.l	#Camp_dungeon_pic,d0
+.Pic:	move.w	d0,d7
+	move.w	Map_Xcoord,Old_Xcoord	; (the party stays here)
+	move.w	Map_Ycoord,Old_Ycoord
+	move.w	d7,d0			; Show camp
 	lea.l	Camp_CIL,a0
 	move.l	a0,Place_CIL_ptr
 	jsr	Show_lay3
 	jsr	Place_CIL_evaluate
 	jsr	Copy_screen_to_both
 .Loop:	tst.b	Place_exit		; Leave ?
-	bne.s	.Exit
+	bne	.Exit
 	jsr	Update_status
 	jsr	Switch_screens
 	jsr	Read_key
@@ -1537,16 +1547,29 @@ Camp_screen:
 	jsr	Press_exit_icon
 .Leave:	st	Place_exit
 	bra.s	.Loop
-.No_exit:	cmp.w	#7,d0			; Rest ?
+.No_exit:	cmp.w	#4,d0			; Learn spell ?
+	bne.s	.No_learn
+	btst	#7,Camp_CIL+6
 	bne.s	.Loop
+	jsr	Learn_spell
+	jsr	Place_CIL_evaluate
+	jsr	Copy_screen_to_both
+	bra	.Loop
+.No_learn:	cmp.w	#7,d0			; Rest ?
+	bne	.Loop
 	tst.b	Slept
 	bne.s	.Loop
 	jsr	Rest
 	jsr	Place_CIL_evaluate
 	jsr	Copy_screen_to_both
-	bra.s	.Loop
+	bra	.Loop
 ; ---------- Exit camp ----------------------------
-.Exit:	sf	Inn_flag
+.Exit:	tst.b	Inn_flag			; Inn ?
+	bne.s	.Inn
+	moveq.l	#0,d0			; No -> back to the map
+	jsr	Close_lay3
+	bra.s	.Return
+.Inn:	sf	Inn_flag
 	lea.l	Inn_destination,a0		; Set new coordinates
 	move.w	(a0)+,Map_Xcoord
 	move.w	(a0)+,Map_Ycoord
@@ -1565,14 +1588,113 @@ Camp_screen:
 	moveq.l	#1,d0
 	jsr	Close_lay3
 .Done:	jsr	After_map_change
-	movem.l	(sp)+,d0-d7/a0-a6
+.Return:	movem.l	(sp)+,d0-d7/a0-a6
 	rts
 
 Camp_CIL_evaluate:
+	movem.l	d7/a1,-(sp)
 	tst.b	Slept			; Already slept ?
 	beq.s	.Ok1
 	bset	#7,12(a0)			; Disable {Rest}
-.Ok1:	rts
+.Ok1:	moveq.l	#Active_member,d7		; Any spell classes ?
+	jsr	Get_char_data
+	tst.b	Spell_class_counter(a1)
+	beq.s	.Off
+	jsr	Check_active_backpack	; Any items ?
+	bne.s	.Exit
+.Off:	bset	#7,6(a0)			; Disable {Learn spell}
+.Exit:	movem.l	(sp)+,d7/a1
+	rts
+
+; ********** Map - Camp ***************************
+; NOTE :
+;   - From [ Camp ] (ACTIONS.S).
+Camp:
+	tst.b	Big_brother_flag		; Being watched ?
+	beq.s	.No
+	moveq.l	#39,d0			; Yes -> "Fool!"
+	jmp	Prompt_window
+.No:	sf	Inn_flag			; No -> Do
+	jmp	Camp_screen
+
+; ********** Camp screen - Learn spell ************
+; NOTE :
+;   - From [ Learn_spell ] (ACTIONS.S). The scroll simply disappears
+;     (the original dissolves or explodes it).
+Learn_spell:
+	movem.l	d0-d7/a0-a4,-(sp)
+.Repeat:	moveq.l	#19,d0			; Select item
+	jsr	Select_backpack_item
+	bmi	.Exit			; Anything selected ?
+	move.w	d0,d6			; Yes
+	moveq.l	#Active_member,d7
+	jsr	Get_char_data
+	move.l	a1,a0
+	move.w	Object_index(a2),d0		; Get object data
+	jsr	Get_item_data
+	cmp.b	#Spellscroll_itemtype,Item_type(a1)	; A scroll ?
+	beq.s	.Ok1
+	moveq.l	#20,d0			; "Not a scroll"
+	bra	.Prompt
+.Ok1:	move.b	Spell_class_counter(a0),d0	; Spell class known ?
+	move.b	Spell_class(a1),d1
+	btst	d1,d0
+	bne.s	.Ok2
+	moveq.l	#21,d0			; "Wrong class"
+	bra	.Prompt
+.Ok2:	lea.l	Spells_class_0(a0),a3	; Spell known ?
+	ext.w	d1
+	lsl.w	#2,d1
+	add.w	d1,a3
+	move.l	(a3),d0
+	moveq.l	#0,d1
+	move.b	Spell_number(a1),d1
+	btst	d1,d0
+	beq.s	.Ok3
+	moveq.l	#61,d0			; "Knows already!"
+	bra.s	.Prompt
+.Ok3:	lea.l	Spell_data,a4		; Get pointer to spell data
+	moveq.l	#0,d0
+	move.b	Spell_class(a1),d0
+	mulu.w	#Max_spells,d0
+	add.w	d1,d0
+	subq.w	#1,d0
+	mulu.w	#Spell_data_size,d0
+	add.w	d0,a4
+	moveq.l	#0,d0			; Get SLP cost
+	move.b	Spell_learn_point_cost(a4),d0
+	move.w	Nr_spell_learn_points(a0),d2	; Get SLP
+	sub.w	d0,d2			; Enough ?
+	bpl.s	.Ok4
+	moveq.l	#25,d0			; "Not enough SLP!"
+	bra.s	.Prompt
+.Ok4:	move.w	d2,Nr_spell_learn_points(a0)	; Store new SLP
+	move.l	a1,a4
+	move.w	d6,d2			; Remove item
+	addi.w	#9+1,d2
+	moveq.l	#1,d3
+	jsr	Remove_item
+	moveq.l	#0,d0			; Show slots
+	jsr	Set_scroll_row
+	jsr	Copy_screen_to_both
+	move.w	SRead_scrolls(a0),d0	; Probe {Read scrolls} skill
+	add.w	SRead_scrolls+Magic(a0),d0
+	jsr	Probe_100
+	bpl.s	.Pos
+	moveq.l	#23,d0			; "Bang!"
+	bra.s	.Prompt
+.Pos:	move.b	Spell_number(a4),d1		; Learn spell
+	move.l	(a3),d0
+	bset	d1,d0
+	move.l	d0,(a3)
+	moveq.l	#22,d0			; "Yay!"
+.Prompt:	jsr	Do_prompt
+	jsr	Check_active_backpack	; All gone ?
+	bne	.Repeat			; No -> Again
+.Exit:	jsr	Hide_Lay3_objects		; Hide
+	jsr	Copy_screen_to_both
+	movem.l	(sp)+,d0-d7/a0-a4
+	rts
 
 ; [ Leave layout 3 before a map change ]
 Close_lay3_to_map:
@@ -1591,7 +1713,13 @@ Close_lay3_to_map:
 
 ; ********** Camp screen - Rest *******************
 Rest:
-	st	Slept			; Set flag
+	tst.b	Inn_flag			; Inn ?
+	bne.s	.Ok
+	cmp.w	#Camp_time,Camp_counter	; Too early ?
+	bpl.s	.Ok
+	move.w	#176,d0			; "Too early !"
+	jmp	Do_prompt
+.Ok:	st	Slept			; Set flag
 	moveq.l	#1,d7			; De-exhaust people
 .Loop0:	jsr	Get_char_data
 	move.l	a1,a0
@@ -1600,6 +1728,11 @@ Rest:
 	cmp.w	#6+1,d7
 	bmi.s	.Loop0
 ; ---------- Wait x hours -------------------------
+	tst.b	Inn_flag			; (not in the inn)
+	bne.s	.Not_dungeon
+	btst	#Dungeon_bit,Map_data_buffer+Map_special+1	; Dungeon ?
+	bne.s	.8_hours
+.Not_dungeon:
 	cmp.w	#Morning_time,Hour		; Early ?
 	bmi.s	.Dawn
 	cmp.w	#Evening_time,Hour		; Evening ?
@@ -1627,17 +1760,39 @@ Rest:
 .8_hours:	moveq.l	#24,d0			; "8 hours..."
 	jsr	Do_prompt
 	move.w	#(8*Minutes_per_hour)/Minutes_per_step-1,d7
-.Wait:	bra.s	.Entry
+.Wait:	clr.w	Camp_counter		; Clear
+	bra.s	.Entry
 .Loop1:	jsr	Update_time		; Wait x hours
 .Entry:	dbra	d7,.Loop1
+	clr.w	Camp_counter		; Clear again
+	jsr	Update_light_status
 ; ---------- Gain LP & PP -------------------------
-	move.w	Current_inn_value,d2	; Get healing percentage
-	moveq.l	#1,d7
+	moveq.l	#50,d2			; Outside : 50%
+	tst.b	Inn_flag
+	beq.s	.Go_on
+	move.w	Current_inn_value,d2	; Inn : healing percentage
+.Go_on:	moveq.l	#1,d7
 .Loop2:	jsr	Get_char_data
 	move.w	Body_conditions(a1),d0	; Alive and kicking ?
 	andi.w	#Alive_mask,d0
 	bne.s	.Next2
-	jsr	Add_LP_and_PP		; Do it
+	tst.b	Inn_flag			; Outside ?
+	bne.s	.Recup
+	tst.w	Food_rations(a1)		; Yes -> Any food left ?
+	bne.s	.Enough
+	lea.l	Char_name(a1),a0		; "... has no food"
+	move.l	a0,Format_args
+	moveq.l	#9,d0
+	movem.l	a0/a1,-(sp)
+	lea.l	Format_buffer,a1
+	jsr	Format_text
+	lea.l	Format_buffer,a0
+	jsr	Show_PA_text
+	movem.l	(sp)+,a0/a1
+	bra.s	.Next2
+.Enough:	subq.w	#1,Food_rations(a1)		; Remove 1 food
+	subi.l	#Food_weight,Weight_normal(a1)
+.Recup:	jsr	Add_LP_and_PP		; Do it
 .Next2:	addq.w	#1,d7
 	cmp.w	#6+1,d7
 	bmi.s	.Loop2
@@ -1793,9 +1948,9 @@ Blacksmith_CIL:
 	dc.l Repair_item,0,0
 	dc.l 0,0,0
 	dc.l 0
-Camp_CIL:					; (casting and learning spells
-	dc.w Use_magic_cicon+Disabled,0,Exit_cicon	;  are not possible)
-	dc.w Read_scroll_cicon+Disabled,0,0
+Camp_CIL:					; (casting spells is not
+	dc.w Use_magic_cicon+Disabled,0,Exit_cicon	;  possible)
+	dc.w Read_scroll_cicon,0,0
 	dc.w Zzz_cicon,0,0
 	dc.l 0,0,0
 	dc.l 0,0,0

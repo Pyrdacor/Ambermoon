@@ -93,6 +93,7 @@ Init_persons_2D:
 ;*****************************************************************************
 NPC_manager_2D:
 	movem.l	d0/d1/d6/d7/a1/a2,-(sp)
+	sf	Big_brother_flag
 	tst.w	Monster_move_delay		; Waiting ?
 	beq.s	.Zero
 	subq.w	#1,Monster_move_delay	; Yes
@@ -400,6 +401,7 @@ Battle_check:
 	bne.s	.Exit
 	cmp.w	Map_Ycoord,d1		; Y the same ?
 	bne.s	.Exit
+	st	Big_brother_flag		; Gaze!
 	tst.w	Monster_move_delay		; Waiting ?
 	bne.s	.Exit
 	moveq.l	#0,d0			; Get monstergroup number
@@ -440,7 +442,8 @@ Hunting_monster_2D:
 	clr.w	VPathlen(a1)		; Force new path
 	jsr	Random_person_2D
 	bra	.Exit
-.Visible:	tst.w	Monster_move_delay		; Waiting ?
+.Visible:	st	Big_brother_flag		; Gaze!
+	tst.w	Monster_move_delay		; Waiting ?
 	bne	.Exit
 	ori.b	#3,VFlags(a1)		; Set bit 0 & 1
 	tst.b	New_step			; Update position ?
@@ -670,7 +673,10 @@ Update_time:
 	subi.w	#Minutes_per_hour,d0	; Next hour ?
 	bmi	.Exit
 	move.w	d0,Minute
-	move.w	Hour,d0			; Update hour
+	cmp.w	#1000,Camp_counter		; Hours since the last camp
+	bpl.s	.Max
+	addq.w	#1,Camp_counter
+.Max:	move.w	Hour,d0			; Update hour
 	addq.w	#1,d0
 	move.w	d0,Hour
 	subi.w	#Hours_per_day,d0		; Next day ?
@@ -752,7 +758,9 @@ Minute:	ds.w 1
 Frame:	ds.w 1
 Realtime_step:	ds.w 1
 Move_count:	ds.w 1
+Camp_counter:	ds.w 1			; Hours since last camp
 New_step:	ds.b 1
+Big_brother_flag:	ds.b 1			; Monster sees the party
 New_move:	ds.b 1
 Collision:	ds.b 1
 	even

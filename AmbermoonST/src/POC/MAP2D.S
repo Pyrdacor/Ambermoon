@@ -620,7 +620,7 @@ Handle_input:
 .Right_map:	cmp.w	#208,Mouse_X		; Control icons ?
 	bmi.s	.Action
 	cmp.w	#143,Mouse_Y
-	bmi.s	.Move_input
+	bmi	.Move_input
 	jsr	Switch_map_CIL
 	bra	.Exit
 ; ---------- Right button in the map : talk -------
@@ -644,8 +644,14 @@ Handle_input:
 	bmi	.Exit
 	jsr	Touch_map
 	bra	.Exit
-.No_hand:	cmp.w	#3,d0			; Talk ?
-	bne.s	.Move_input
+.No_hand:	cmp.w	#6,d0			; Camp ?
+	bne.s	.No_camp
+	moveq.l	#6,d0
+	jsr	Press_icon
+	jsr	Camp
+	bra	.Exit
+.No_camp:	cmp.w	#3,d0			; Talk ?
+	bne	.Move_input
 	moveq.l	#3,d0
 	jsr	Press_icon
 	lea.l	Mouth_pointer,a0
@@ -1774,9 +1780,9 @@ M2_CIL:	dc.w Upleft_2D_cicon,Up_2D_cicon,Upright_2D_cicon
 	dc.w Downleft_2D_cicon,Down_2D_cicon,Downright_2D_cicon
 
 ; Second control icon list of the 2D map (Second_CIL in ACTIONS.S) : only
-; Hand and Talk are possible in the proof of concept
+; Hand, Talk and Camp are possible in the proof of concept
 Second_CIL:	dc.w Look_cicon+Disabled,Hand_cicon,Talk_cicon
-	dc.w Change_trans_cicon+Disabled,Use_magic_cicon+Disabled,Camp_cicon+Disabled
+	dc.w Change_trans_cicon+Disabled,Use_magic_cicon+Disabled,Camp_cicon
 	dc.w Automapper_cicon+Disabled,Combat_pos_cicon+Disabled,Disk_cicon+Disabled
 
 ; Positions of the control icons (HULL/CONTROLS.S)

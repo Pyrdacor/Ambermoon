@@ -2191,7 +2191,7 @@ Print_prompt:
 	move.l	(sp)+,a0
 	rts
 
-; [ Print a text in the print area (up to 3 lines) ]
+; [ Print a text in the print area (as many lines as fit) ]
 ;   IN : a0 - Pointer to text (.l)
 ; All registers are restored
 Print_PA_text:
@@ -2209,10 +2209,14 @@ Print_PA_text:
 	move.w	PA_Ink(a3),Ink_colour
 	move.w	#Default_shadow,Shadow_colour
 	lea.l	Text_lines,a4
+	move.w	PA_Y2(a3),d0		; Lines that fit
+	sub.w	PA_Y1(a3),d0
+	ext.l	d0
+	divu.w	#Char_height+2,d0
 	move.w	Text_height,d7
-	cmp.w	#3,d7			; (3 lines)
+	cmp.w	d0,d7
 	bls.s	.Ok
-	moveq.l	#3,d7
+	move.w	d0,d7
 .Ok:	move.w	PA_X1(a3),d0
 	move.w	PA_Y1(a3),d1
 	addq.w	#1,d1

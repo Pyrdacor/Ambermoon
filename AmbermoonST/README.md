@@ -15,7 +15,8 @@ their own screen (pick the lock, use a key or lockpick, find and disarm traps, t
 and persons can be talked to (the hand and mouth actions of the second control icon list or the right mouse
 button on the map), also the party members (mouth on the party), who can leave the party and join it again. Traps, chance and data change events work, with the damage bursts, condition icons and
 deaths in the status block. Places can be entered: trainers, healers, sages, inns (renting a room and resting in
-the camp), merchants and libraries, blacksmiths. Monsters on the map hunt the party, and encounters lead to the
+the camp), merchants and libraries, blacksmiths. The party can camp (Camp icon), rest and learn spells from
+spell scrolls. Monsters on the map hunt the party, and encounters lead to the
 combat screen (moving, advancing, close- and long-range attacks, parading, fleeing, the monster logic of the
 original, loot and experience). There is no music.
 
@@ -76,6 +77,11 @@ divided on the screen of the trash pile:
 A hunting monster reaches the party (map 275) and the combat in the cave:
 
 ![Attack](docs/attack.png) ![Combat in the cave](docs/combat2.png)
+
+Learning a spell from a scroll in the camp (Read scroll icon; here Thalion got the scroll "Licht" in the test
+data, and the attempt fails):
+
+![Scroll](docs/scroll.png) ![Failed](docs/scroll2.png)
 
 Map 264 "Zum hinkenden Gauner" at 14:00 (`./build.sh --map 264 --pos 11,13,2 --time 14:00`):
 
@@ -225,7 +231,11 @@ frames. The trap, chance and data change events are in `src/POC/EVENTS.S`.
 `src/POC/PLACES.S` contains the Places event (with the opening hours) and the place screens of `PLACES.S`
 with the original control icon lists: trainers, healers (the patient is chosen with the portraits and gets
 the ankh), sages, inns with the camp of `ACTIONS.S` (resting until dawn or 8 hours), object and magic
-merchants and blacksmiths. The gold of the party is pooled in a place and divided when it is left. Bought
+merchants and blacksmiths. The gold of the party is pooled in a place and divided when it is left. The camp
+(Camp icon on the second control icon list, or after renting a room) rests (outside: 8 hours after the last
+rest, one food ration per member, 50% of the LP and SP) and learns spells from scrolls (`Learn_spell`: class,
+known spells, spell learning points, the Read scrolls skill; the scroll simply disappears instead of the
+dissolve or explosion animation). Casting spells and aging while resting are not done. Bought
 items are taken from the slots like the items of a chest. The enchanter and the food merchant (not used in
 the 2D maps) and the transport merchants are not done.
 
@@ -266,7 +276,7 @@ Hatari (STE, 8 MHz):
 ## Not done yet
 
 * Magic in combat, light spells, transports and travel modes other than on foot, the transport merchants,
-  casting and learning spells (camp), a new leader when the active member dies, game over (the proof of
+  casting spells, a new leader when the active member dies, game over (the proof of
   concept ends), and 3D maps (riddle mouths, spinners, ...).
 * In the inventory: most spells of usable items, gold and food, and moving only a part of a stack.
 * The module system, the memory manager and loading from the original containers (the data is converted in
