@@ -432,6 +432,8 @@ Drop_item:
 ;*****************************************************************************
 Ask_quantity:
 	movem.l	d1-d3,-(sp)
+	clr.l	Ghost_text		; (Destroy_ghosts)
+	jsr	Erase_PA
 	moveq.l	#0,d1			; Maximum
 	move.b	Quantity(a2),d1
 	moveq.l	#3,d2			; Item
