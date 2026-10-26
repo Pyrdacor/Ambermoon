@@ -194,7 +194,7 @@ def run_once(args, log, attempt):
                     print('attempt %d: complete after %d:%02d game time%s' % (
                         attempt + 1, seconds // 60, seconds % 60,
                         (' (video: %s)' % target) if args.record else ''))
-                    time.sleep(15)              # a little of the outro
+                    time.sleep(args.tail)       # a little more (e.g. of the outro)
                     retry = seconds > args.limit
                     break
                 if game_start and time.time() - game_start > args.limit + 30:
@@ -233,6 +233,7 @@ def main():
     ap.add_argument('--expect', help='log tag (hex) that must appear within --within seconds, else restart')
     ap.add_argument('--within', type=float, default=45)
     ap.add_argument('--attempts', type=int, default=5)
+    ap.add_argument('--tail', type=float, default=15, help='with --success: seconds to go on after the tag')
     ap.add_argument('--success', help='log tag (hex): the run is complete (e.g. the outro begins)')
     ap.add_argument('--limit', type=float, default=420, help='with --success: at most this many seconds of game time')
     ap.add_argument('--boot', default=os.path.join(DOCS, 'Hard Drives', 'AmbermoonDE'))

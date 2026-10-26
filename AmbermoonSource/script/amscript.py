@@ -82,7 +82,7 @@ GAME_OFF = os.path.join(HERE, '..', 'src', 'GAME_OFF.S')
 OPS = {'end': 0, 'wait': 1, 'key': 2, 'mouse': 3, 'buttons': 4, 'free': 5, 'jumpif': 6, 'jump': 7, 'set': 8, 'add': 9,
        'log': 10, 'mousetile': 11, 'steer3d': 12, 'get': 13, 'jumpifv': 14, 'align3d': 15, 'steermouse': 16, 'save': 17,
        'mousenpc': 18, 'flow': 19, 'mouseauto': 20, 'mousespell': 21, 'worlddir': 22,
-       'call': 23, 'ret': 24, 'mouseitem': 25, 'move3d': 26, 'mousecell': 27, 'flow3d': 28, 'mousemonster': 29, 'curve3d': 30, 'seed': 31, 'seedlock': 32}
+       'call': 23, 'ret': 24, 'mouseitem': 25, 'move3d': 26, 'mousecell': 27, 'flow3d': 28, 'mousemonster': 29, 'curve3d': 30, 'seed': 31, 'seedlock': 32, 'npcpath': 33}
 CMP = {'=': 0, '==': 0, '<>': 1, '!=': 1, '<': 2, '>=': 3, '>': 4, '<=': 5}
 NEGATE = {0: 1, 1: 0, 2: 3, 3: 2, 4: 5, 5: 4}
 VARS = {'map': 0, 'x': 1, 'y': 2, 'module': 3, 'depth': 4, 'frame': 5, 'mousex': 6, 'mousey': 7, 'travel': 8,
@@ -904,7 +904,11 @@ def compile_script(text, data=None, start=None):
                 k = key_code('down')
                 emit(OPS['key'], k >> 16, k & 0xffff, OPS['wait'], 8, OPS['jump'], ('label', loop))
                 here(fail)
-                emit(OPS['log'], 0x5f, OPS['end'])        # not found (window not open, or the spell is unknown)
+                # not found (window not open, or the spell is unknown to the active member): log the active member,
+                # close the window (right click) and go on
+                emit(OPS['get'], 0, VARS['active'], OPS['log'], 0x5f, OPS['set'], 0, 0,
+                     OPS['buttons'], 2, OPS['wait'], 4, OPS['buttons'], 0, OPS['wait'], 10,
+                     OPS['jump'], ('label', '__x' + found))
                 here(found)
                 emit(OPS['wait'], 3, OPS['buttons'], 1, OPS['wait'], 4, OPS['buttons'], 0, OPS['wait'], 4)
                 ready(12)
@@ -1069,14 +1073,17 @@ def compile_script(text, data=None, start=None):
                 k = key_code('enter')
                 emit(OPS['key'], k >> 16, k & 0xffff, OPS['wait'], 10)
                 here(skip)
+                # keypad 1 (automap), again every 50 frames until it is open (a key can get lost, e.g. right after
+                # a battle)
                 k = key_code('kp1')
-                emit(OPS['key'], k >> 16, k & 0xffff)
                 wl = new_label()
                 here(wl)
-                emit(OPS['jumpif'], VARS['module'], CMP['<>'], MODULES['Automap'], ('label', '__w' + wl),
-                     OPS['jump'], ('label', '__d' + wl))
+                ready()
+                emit(OPS['key'], k >> 16, k & 0xffff, OPS['set'], 7, 0)
                 here('__w' + wl)
-                emit(OPS['wait'], 1, OPS['jump'], ('label', wl))
+                emit(OPS['jumpif'], VARS['module'], CMP['='], MODULES['Automap'], ('label', '__d' + wl),
+                     OPS['add'], 7, 1, OPS['jumpif'], VARS['r7'], CMP['>='], 50, ('label', wl),
+                     OPS['wait'], 1, OPS['jump'], ('label', '__w' + wl))
                 here('__d' + wl)
                 ready(15)
                 # scroll (cursor keys) until the point is visible
@@ -1137,35 +1144,32 @@ def compile_script(text, data=None, start=None):
                 # party (characters may walk around), then mouth and click on it
                 slot = int(t[1])
                 dv = 0x20 + slot
-                # around obstacles: after 20 frames without a move the pointer goes 45 degrees left, then right of
-                # the character (r2 = mode 0-2, r3 = frames without a move, r6 = moves in the mode, r1/r4 = x/y)
-                loop, near, skip = new_label(), new_label(), new_label()
-                m1, m2, go, moved, stuck = new_label(), new_label(), new_label(), new_label(), new_label()
-                emit(OPS['set'], 2, 0, OPS['set'], 3, 0, OPS['set'], 6, 0,
-                     OPS['get'], 1, VARS['x'], OPS['get'], 4, VARS['y'])
+                talk_allowed = [int(o) for o in t[t.index('via') + 1:] if o.isdigit()] if 'via' in t else []
+                # along a shortest way over the walkable squares (breadth-first search from the character, which may
+                # move: every 4 frames); without a way: straight towards it
+                m = walker.load(walker.map)
+                w_, h_ = m['width'], m['height']
+                bits = []
+                for y_ in range(h_):
+                    for x_ in range(w_):
+                        e_ = m['event'][y_][x_]
+                        bits.append(1 if m['walk'][y_][x_] and (e_ == 0 or e_ in talk_allowed) else 0)
+                bits += [0] * (-len(bits) % 16)
+                grid, gskip = new_label(), new_label()
+                emit(OPS['jump'], ('label', gskip))
+                here(grid)
+                emit(w_, h_, *[int(''.join(map(str, bits[i:i + 16])), 2) for i in range(0, len(bits), 16)])
+                here(gskip)
+                loop, near, skip, straight = new_label(), new_label(), new_label(), new_label()
                 here(loop)
-                emit(OPS['jumpif'], dv, CMP['<='], 1, ('label', near),
-                     OPS['jumpif'], VARS['r2'], CMP['='], 1, ('label', m1),
-                     OPS['jumpif'], VARS['r2'], CMP['='], 2, ('label', m2),
-                     OPS['mousenpc'], slot, OPS['jump'], ('label', go))
-                here(m1)
-                emit(OPS['mousenpc'], slot | 0x100, OPS['jump'], ('label', go))
-                here(m2)
-                emit(OPS['mousenpc'], slot | 0x200)
-                here(go)
-                emit(OPS['buttons'], 1)
+                emit(OPS['npcpath'], ('label', grid), slot,
+                     OPS['jumpif'], VARS['r5'], CMP['='], 1, ('label', near),
+                     OPS['jumpif'], VARS['r5'], CMP['='], 2, ('label', straight))
                 interrupt(loop, True)
-                emit(OPS['wait'], 1,
-                     OPS['jumpifv'], VARS['x'], CMP['<>'], VARS['r1'], ('label', moved),
-                     OPS['jumpifv'], VARS['y'], CMP['<>'], VARS['r4'], ('label', moved),
-                     OPS['add'], 3, 1, OPS['jumpif'], VARS['r3'], CMP['<'], 20, ('label', loop),
-                     OPS['set'], 3, 0, OPS['set'], 6, 0, OPS['add'], 2, 1,
-                     OPS['jumpif'], VARS['r2'], CMP['<='], 2, ('label', loop),
-                     OPS['set'], 2, 0, OPS['jump'], ('label', loop))
-                here(moved)
-                emit(OPS['get'], 1, VARS['x'], OPS['get'], 4, VARS['y'], OPS['set'], 3, 0,
-                     OPS['add'], 6, 1, OPS['jumpif'], VARS['r6'], CMP['<'], 3, ('label', loop),
-                     OPS['set'], 2, 0, OPS['set'], 6, 0, OPS['jump'], ('label', loop))
+                emit(OPS['wait'], 4, OPS['jump'], ('label', loop))
+                here(straight)
+                emit(OPS['jumpif'], dv, CMP['<='], 1, ('label', near),
+                     OPS['mousenpc'], slot, OPS['buttons'], 1, OPS['wait'], 4, OPS['jump'], ('label', loop))
                 here(near)
                 emit(OPS['buttons'], 0, OPS['wait'], 4,
                      OPS['jumpif'], VARS['cil'], CMP['='], 1, ('label', skip))

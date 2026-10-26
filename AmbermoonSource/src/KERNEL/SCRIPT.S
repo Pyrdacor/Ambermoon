@@ -108,6 +108,14 @@
 ;  32 SEEDLOCK hi lo              sets the seed of the random generator at
 ;                                   the start of every frame (0 = off): every
 ;                                   frame gets the same random numbers
+;  33 NPCPATH grid slot           2D maps: one frame of walking towards the map
+;                                   character (slot 0-31) along a shortest way
+;                                   (breadth-first search from the character
+;                                   over the walkable squares of the grid:
+;                                   byte offset in the script, width, height
+;                                   (words), then 1 bit per square, 1 =
+;                                   walkable); r5 = 0 walking, 1 next to it
+;                                   (button released), 2 no way / not there
 ;  17 SAVE slot                   save the game into slot 1-10 (name
 ;                                   "SCRIPT"), done by [ Script_flush ] in
 ;                                   the main loop; the script waits for it
@@ -150,6 +158,7 @@ SC_MOUSEMONSTER	EQU	29
 SC_CURVE3D	EQU	30
 SC_SEED		EQU	31
 SC_SEEDLOCK	EQU	32
+SC_NPCPATH	EQU	33
 
 Script_max_size	EQU	65536
 Script_steps	EQU	64		; At most this many instructions per frame
@@ -237,7 +246,7 @@ Script_VBL:
 	bhs	.Stop
 	lea.l	0(a2,d0.l),a0
 	move.w	(a0)+,d0			; Get opcode
-	cmp.w	#SC_SEEDLOCK,d0		; Known ?
+	cmp.w	#SC_NPCPATH,d0		; Known ?
 	bhi	.Stop
 	add.w	d0,d0
 	move.w	.Table(pc,d0.w),d0
@@ -251,7 +260,7 @@ Script_VBL:
 	dc.w	.Worlddir-.Table,.Call-.Table,.Ret-.Table
 	dc.w	.Mouseitem-.Table,.Move3D-.Table,.Mousecell-.Table
 	dc.w	.Flow3D-.Table,.Mousemonster-.Table,.Curve3D-.Table
-	dc.w	.Seed-.Table,.Seedlock-.Table
+	dc.w	.Seed-.Table,.Seedlock-.Table,.Npcpath-.Table
 
 ; a0 points behind the opcode
 .Wait:	move.w	(a0)+,d0
@@ -634,6 +643,14 @@ Script_VBL:
 	move.w	d2,Script_Y
 	st	Script_mouse
 	bra.w	.Again
+.Npcpath:	moveq.l	#0,d0			; Get grid and slot
+	move.w	(a0)+,d0
+	move.w	(a0)+,d1
+	bsr.w	.Next
+	lea.l	0(a2,d0.l),a1
+	move.w	d1,d0
+	jsr	Script_npc_path
+	bra.w	.Again
 .Seedlock:	move.l	(a0)+,Script_seed_lock	; Lock the random seed (0 = off)
 	bsr.w	.Next
 	bra.w	.Again
@@ -965,6 +982,273 @@ Script_flush:
 	jsr	_LVOClose(a6)
 .Exit:	movem.l	(sp)+,d0-d3/a0/a1/a6
 .Exit2:	rts
+
+;*****************************************************************************
+; [ One frame of walking towards a map character along a shortest way ]
+;   IN : d0 - Map character slot (.w)
+;        a1 - Pointer to the grid: width, height (.w), 1 bit per square (.l)
+; NOTE :
+;   - Breadth-first search from the character's square until the party's
+;     square is reached; then the pointer is held next to the party in the
+;     direction of the neighbour square closest to the character (diagonal
+;     steps only if both straight squares are free).
+;   - Register 5: 0 walking, 1 next to it, 2 no way (or not there).
+; All registers are restored
+;*****************************************************************************
+Script_npc_path:
+	movem.l	d0-d7/a0-a6,-(sp)
+	andi.w	#Max_chars-1,d0
+	move.l	CD_value,d1		; Character there ?
+	btst	d0,d1
+	bne.w	.No_way
+	lea.l	VNPC_data,a0
+	mulu.w	#VNPC_data_size,d0
+	add.l	d0,a0
+	tst.b	NPC_char_nr(a0)
+	beq.w	.No_way
+	move.w	VMap_X(a0),d4		; Character square (1-based)
+	move.w	VMap_Y(a0),d5
+	move.w	Map_Xcoord,d6		; Party square
+	move.w	Map_Ycoord,d7
+	move.w	d4,d0			; Next to it ? (max(|dx|, |dy|) <= 1)
+	sub.w	d6,d0
+	bpl.s	.Ax
+	neg.w	d0
+.Ax:	move.w	d5,d1
+	sub.w	d7,d1
+	bpl.s	.Ay
+	neg.w	d1
+.Ay:	cmp.w	#1,d0
+	bhi.s	.Search
+	cmp.w	#1,d1
+	bhi.s	.Search
+	clr.w	Script_buttons		; Yes
+	move.w	#1,Script_regs+10
+	bra.w	.Exit
+; ---------- Breadth-first search -----------------
+.Search:	move.w	(a1),d2			; Width
+	move.w	2(a1),d3			; Height
+	lea.l	4(a1),a3			; Bits
+	move.w	d2,d0			; Clear the distances
+	mulu.w	d3,d0
+	subq.w	#1,d0
+	lea.l	Script_dist,a4
+.Clr:	move.b	#$ff,(a4)+
+	dbra	d0,.Clr
+	lea.l	Script_dist,a4
+	lea.l	Script_queue,a5
+	subq.w	#1,d4			; Start: the character
+	subq.w	#1,d5
+	move.w	d5,d0
+	mulu.w	d2,d0
+	add.w	d4,d0
+	clr.b	0(a4,d0.w)
+	move.w	d0,(a5)
+	moveq.l	#0,d1			; d1 = read, a6 = write
+	move.w	#1,a6
+	subq.w	#1,d6			; Goal: the party
+	subq.w	#1,d7
+	move.w	d7,d0
+	mulu.w	d2,d0
+	add.w	d6,d0
+	move.w	d0,Script_goal
+.Pop:	cmp.w	a6,d1			; Queue empty ?
+	bhs.w	.No_way
+	move.w	d1,d0
+	add.w	d0,d0
+	move.w	0(a5,d0.w),d0		; Square
+	addq.w	#1,d1
+	cmp.w	Script_goal,d0		; The party reached ?
+	beq.w	.Found
+	moveq.l	#0,d4			; x, y of it
+	move.w	d0,d4
+	divu.w	d2,d4
+	move.w	d4,d5			; y
+	swap	d4			; x
+	moveq.l	#0,d6
+	move.b	0(a4,d0.w),d6		; Its distance + 1
+	addq.w	#1,d6
+	cmp.w	#254,d6
+	bls.s	.Dist_ok
+	move.w	#254,d6
+.Dist_ok:	lea.l	.Dirs(pc),a0
+	moveq.l	#8-1,d7
+.Nb:	move.b	(a0)+,d0			; Neighbour x, y
+	ext.w	d0
+	add.w	d4,d0
+	move.b	(a0)+,d3
+	ext.w	d3
+	add.w	d5,d3
+	bsr.w	.Free			; Free (or the party) and not seen ?
+	bne.s	.Nb_next
+	move.w	d0,-(sp)			; Diagonal: both straight squares free
+	move.b	-2(a0),d0
+	beq.s	.Straight
+	tst.b	-1(a0)
+	beq.s	.Straight
+	move.w	d4,d0			; (x + dx, y)
+	add.b	-2(a0),d0
+	ext.w	d0
+	sub.w	d4,d0
+	add.w	d4,d0
+	move.w	d3,-(sp)
+	move.w	d5,d3
+	bsr.w	.Walkable
+	move.w	(sp)+,d3
+	bne.s	.Diag_no
+	move.w	d4,d0			; (x, y + dy)
+	bsr.w	.Walkable
+	bne.s	.Diag_no
+.Straight:	move.w	(sp)+,d0
+	bsr.w	.Index			; Mark and push
+	move.b	d6,0(a4,d0.w)
+	move.w	a6,d3
+	add.w	d3,d3
+	move.w	d0,0(a5,d3.w)
+	addq.w	#1,a6
+	bra.s	.Nb_next
+.Diag_no:	move.w	(sp)+,d0
+.Nb_next:	dbra	d7,.Nb
+	bra.w	.Pop
+; ---------- Step from the party ------------------
+.Found:	move.w	Map_Xcoord,d4		; Party x, y (0-based)
+	subq.w	#1,d4
+	move.w	Map_Ycoord,d5
+	subq.w	#1,d5
+	move.w	Script_goal,d0
+	moveq.l	#0,d6
+	move.b	0(a4,d0.w),d6		; Best distance so far
+	moveq.l	#-1,d1			; Best direction
+	lea.l	.Dirs(pc),a0
+	moveq.l	#0,d7
+.Best:	move.b	(a0)+,d0
+	ext.w	d0
+	add.w	d4,d0
+	move.b	(a0)+,d3
+	ext.w	d3
+	add.w	d5,d3
+	tst.w	d0			; Inside ?
+	bmi.s	.Best_next
+	cmp.w	d2,d0
+	bhs.s	.Best_next
+	tst.w	d3
+	bmi.s	.Best_next
+	cmp.w	2(a1),d3
+	bhs.s	.Best_next
+	tst.b	-2(a0)			; Diagonal: both straight squares free
+	beq.s	.Best_go
+	tst.b	-1(a0)
+	beq.s	.Best_go
+	movem.w	d0/d3,-(sp)
+	move.w	d5,d3			; (x + dx, y)
+	bsr.w	.Walkable
+	movem.w	(sp)+,d0/d3
+	bne.s	.Best_next
+	movem.w	d0/d3,-(sp)
+	move.w	d4,d0			; (x, y + dy)
+	bsr.w	.Walkable
+	movem.w	(sp)+,d0/d3
+	bne.s	.Best_next
+.Best_go:	bsr.w	.Index
+	move.b	0(a4,d0.w),d0
+	andi.w	#$ff,d0
+	cmp.w	d6,d0			; Closer ?
+	bhs.s	.Best_next
+	move.w	d0,d6
+	move.w	d7,d1
+.Best_next:	addq.w	#1,d7
+	cmp.w	#8,d7
+	blo.s	.Best
+	tst.w	d1			; Any ?
+	bmi.s	.No_way
+	add.w	d1,d1			; Pointer next to the party
+	lea.l	.Dirs(pc),a0
+	move.b	0(a0,d1.w),d0
+	ext.w	d0
+	add.w	Mapbuf_X,d0
+	lsl.w	#4,d0
+	addi.w	#Map2D_X+8,d0
+	move.w	d0,Script_X
+	move.b	1(a0,d1.w),d0
+	ext.w	d0
+	add.w	Mapbuf_Y,d0
+	lsl.w	#4,d0
+	addi.w	#Map2D_Y+8,d0
+	move.w	d0,Script_Y
+	move.w	#1,Script_buttons
+	st	Script_mouse
+	clr.w	Script_regs+10
+	bra.s	.Exit
+.No_way:	clr.w	Script_buttons
+	move.w	#2,Script_regs+10
+.Exit:	movem.l	(sp)+,d0-d7/a0-a6
+	rts
+
+; Square d0 (x), d3 (y) free and not seen yet (or the goal) ? eq = yes
+; (d0 becomes its index when inside)
+.Free:	tst.w	d0
+	bmi.s	.Ne
+	cmp.w	d2,d0
+	bhs.s	.Ne
+	tst.w	d3
+	bmi.s	.Ne
+	cmp.w	2(a1),d3
+	bhs.s	.Ne
+	move.w	d0,-(sp)
+	bsr.s	.Index
+	cmp.b	#$ff,0(a4,d0.w)		; Seen ?
+	bne.s	.Ne_pop
+	cmp.w	Script_goal,d0		; The goal ?
+	beq.s	.Eq_pop
+	bsr.s	.Bit
+	beq.s	.Ne_pop
+.Eq_pop:	move.w	(sp)+,d0
+	cmp.w	d0,d0			; eq
+	rts
+.Ne_pop:	addq.l	#2,sp
+.Ne:	moveq.l	#1,d0			; ne (d0 is not used then)
+	rts
+
+; Square d0 (x), d3 (y) walkable ? eq = yes
+.Walkable:	movem.l	d0,-(sp)
+	tst.w	d0
+	bmi.s	.W_no
+	cmp.w	d2,d0
+	bhs.s	.W_no
+	tst.w	d3
+	bmi.s	.W_no
+	cmp.w	2(a1),d3
+	bhs.s	.W_no
+	bsr.s	.Index
+	bsr.s	.Bit
+	beq.s	.W_no
+	movem.l	(sp)+,d0
+	cmp.w	d0,d0			; eq
+	rts
+.W_no:	movem.l	(sp)+,d0
+	moveq.l	#1,d0			; ne
+	tst.w	d0
+	rts
+
+; d0 = y * width + x (d0 = x, d3 = y)
+.Index:	move.l	d3,-(sp)
+	mulu.w	d2,d3
+	add.w	d3,d0
+	move.l	(sp)+,d3
+	rts
+
+; Bit of square d0 (index) -> ne if walkable
+.Bit:	movem.l	d0/d1,-(sp)
+	move.w	d0,d1
+	lsr.w	#3,d0
+	andi.w	#7,d1
+	eori.w	#7,d1
+	btst	d1,0(a3,d0.w)
+	movem.l	(sp)+,d0/d1
+	rts
+
+; The 8 directions (straight first)
+.Dirs:	dc.b	0,-1,1,0,0,1,-1,0,1,-1,1,1,-1,1,-1,-1
 
 ;*****************************************************************************
 ; [ One frame of running to a square on a 3D map, steering on the way ]
@@ -1596,6 +1880,9 @@ Script_last_mev:	ds.l	1
 Script_sp_time:	ds.w	1
 Script_sp:	ds.w	1
 Script_seed_lock:	ds.l	1
+Script_goal:	ds.w	1
+Script_dist:	ds.b	64*64
+Script_queue:	ds.w	64*64
 Script_stack:	ds.l	8
 	even
 Script_buffer:	ds.b	Script_max_size

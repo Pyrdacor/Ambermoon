@@ -142,7 +142,7 @@ onmap 257 18 13
 
 # ---------- Chris (map character slot 3, starts at (13,29), walks around): talk to him, he joins (member 2)
 walkto 13 28 via 2 near 3
-talkto 3
+talkto 3 via 2
 chris_join:
 key kp6                         # join the party
 waitclick 2 100                 # "It is a great honour ..."
@@ -155,7 +155,7 @@ settle 10
 
 # ---------- Netsrak (map character slot 0, starts at (37,19), walks around in his room): member 3
 walkto 34 19 near 0
-talkto 0
+talkto 0 via 2
 netsrak_join:
 key kp6                         # join the party
 waitclick 2 100                 # "It is a great honour ..."
@@ -378,7 +378,7 @@ log 23
 savegame 5
 temple:                         # run.py --load 5 --start temple
 onmap 431 11 25 N
-key 3                           # Netsrak active (refuses battles: full dexterity and luck)
+keyuntil 3 active = 3           # Netsrak active in the whole temple (refuses battles: full dexterity and luck)
 
 # ---------- the crystal wall (11,23): stand on (11,24); Netsrak: lantern (light), then the crystal harp
 walkto 11 24 via 3
@@ -413,6 +413,7 @@ log 27
 savegame 6
 machine:                        # run.py --load 6 --start machine
 onmap 453 9 8
+keyuntil 3 active = 3           # (Netsrak active)
 
 # ---------- approach the machine (event squares around (4-7, 5-6)): text, then the battle
 glide 6 4 through               # north, west along row 3, south: no turning (battles: flight, at once on)
@@ -427,7 +428,6 @@ m_start_w:
 wait 2
 goto m_start
 m_started:
-seedlock 0x8006ffff             # the same high random numbers every frame: the machine never deflects a spell
 log 28
 
 # ---------- the machine battle: each round Netsrak ice shower (no target); Chris (member 2): the ring of Sobek
@@ -440,18 +440,16 @@ if depth <= 1 goto m_over
 if module <> Combat goto m_busy
 ready 10
 if module <> Combat goto m_round
-if active = 3 goto m_netsrak    # Netsrak (acts first: speed 99), only switch if needed
-key 3
+keyuntil 3 active = 3           # Netsrak (acts first: speed 99)
 ready 10
-m_netsrak:
 castspell 30                    # magic (keypad 3): ice shower
 ready 8
 m_mando:
 if alive2 = 0 goto m_ok          # (Chris dead: nothing)
 if lp3 < 120 goto m_heal        # Chris: a healing potion on Netsrak
 if lp2 < 120 goto m_heal_chris  # or on himself
-if sp3 < 560 goto m_sp          # (before less than 2 ice showers: Netsrak never waits for spell points)
-if r0 >= 20 goto m_ok
+if sp3 < 300 goto m_sp          # (Chris acts first: speed 100 vs 99 - the potion works in the same round)
+goto m_ok                       # (no ring of Sobek: Chris only gives potions)
 keyuntil f2 module = Inv2       # Chris's inventory
 keyuntil kp8 depth >= 4         # use item
 clickitem RING_OF_SOBEK inv member 2
@@ -525,7 +523,6 @@ rclick
 wait 10
 goto m_loot
 m_done:
-seedlock off
 settle 50                       # the texts after the battle (the way opens)
 log 51
 
