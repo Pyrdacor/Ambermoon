@@ -29,11 +29,12 @@ depend on the Amiga hardware by an ST kernel with the same interface.
   palette), so tiles, icons and fonts are converted once; the cache is cleared when the memory manager
   moves or frees memory.
 * **Palettes:** like the proof of concept: 16 static colours per palette, precomputed per Amiga palette
-  (`tools/st_convert.py`), raster lists split the screen.
-* **Files:** the original containers (AMBR / AMPC / AMNP) are read with GEMDOS; the decompression is
-  plain 68000 code.
-* Original files which need small changes (memory allocation, file system calls, DMA) are copied to
-  `port/PATCHED/` with every change marked `; ST:`.
+  (`port/tools/port_palettes.py`), raster lists split the screen. The kernel finds the ST palette by the colours
+  of the Amiga palette.
+* **Files:** the original files of the German version are used unchanged (8.3 names, `port/tools/port_data.py`).
+  `KERNEL/FILES.S` and `KERNEL/MEMORY.S` call dos.library and exec.library; the ST kernel has jump tables with
+  the same offsets which call GEMDOS (`port/KERNEL/LIBS.S`).
+* Original files which need small changes are patched (`port/PATCHES/*.diff`, every change marked `; ST:`).
 
 ## State
 
