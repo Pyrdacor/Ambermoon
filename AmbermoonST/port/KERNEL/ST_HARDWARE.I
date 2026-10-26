@@ -9,6 +9,7 @@ Palette_regs	EQU	$ffff8240
 ; ---------- MFP 68901 -------------------------------
 MFP_IERA	EQU	$fffffa07	; Interrupt enable A (bit 0 = Timer B)
 MFP_IERB	EQU	$fffffa09	; Interrupt enable B (bit 6 = ACIA, bit 5 = Timer C)
+MFP_IPRA	EQU	$fffffa0b	; Interrupt pending A
 MFP_ISRA	EQU	$fffffa0f	; In service A
 MFP_ISRB	EQU	$fffffa11	; In service B
 MFP_IMRA	EQU	$fffffa13	; Interrupt mask A

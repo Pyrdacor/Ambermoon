@@ -108,7 +108,7 @@ def main():
                     p[1][i] += weights[i] / 20
     with open(out, 'w') as f:
         f.write('; Made by port/tools/port_palettes.py : Amiga palette (32 colours), ST palette (16 STE colours),\n')
-        f.write('; lookup table Amiga colour -> ST colour\n')
+        f.write('; lookup table Amiga colour -> ST colour, representative Amiga colour of every ST colour\n')
         f.write('ST_palettes:\n')
         for colours, weights, fixed in palettes:
             rgb = [amiga_rgb(c) for c in colours]
@@ -116,6 +116,13 @@ def main():
             f.write('\tdc.w\t' + ','.join(f'${c:03x}' for c in colours) + '\n')
             f.write('\tdc.w\t' + ','.join(f'${st_word(c, 4):03x}' for c in pal16) + '\n')
             f.write('\tdc.b\t' + ','.join(str(v) for v in lut) + '\n')
+            # representative Amiga colour of every ST colour (the fade of the Amiga colour is applied to it)
+            labs = [sc.to_lab(c) for c in pal16]
+            rep = []
+            for j in range(16):
+                members = [i for i in range(32) if lut[i] == j] or list(range(32))
+                rep.append(min(members, key=lambda i: sc.dist(sc.to_lab(rgb[i]), labs[j])))
+            f.write('\tdc.b\t' + ','.join(str(v) for v in rep) + '\n')
         f.write('\tdc.w\t-1\n')
     print(f'{len(palettes)} ST palettes')
 

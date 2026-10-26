@@ -44,6 +44,10 @@ depend on the Amiga hardware by an ST kernel with the same interface.
 * The changes of the original files are patches (`port/PATCHES`, marked `; ST:`): memory allocation and blitter
   (`MEMORY.S`), sound DMA (`VARIOUS.S`), and the palette of an event picture is loaded before the picture is
   drawn (`EVENTS.S`), because the ST converts the colours while drawing (the Amiga screen keeps colour numbers).
+* The ST palette of every palette of the raster list is found once, when its colours change (searching the
+  table every frame made the vertical blank longer than a frame during fades: wrong colours in parts of
+  the screen). The ST colours are faded like the Amiga colours they stand for.
+* Memory: 2 MB are enough, 1 MB is not (the program ends at once).
 * Open: music, zoom, 3D maps, diagnostic screen.
 
 ![Character editor](docs/port/editor.png) ![Event](docs/port/event.png) ![Map](docs/port/map.png)

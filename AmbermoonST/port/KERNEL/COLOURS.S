@@ -257,20 +257,41 @@ Clear_RL_entry:
 ; Changed registers : d7
 ; NOTE :
 ;   - The colours are copied : the source can change later (e.g. Batch).
+;   - The ST palette is found here, only when the colours have changed :
+;     searching is too slow to be done every frame.
 Store_RL_source:
 	move.l	a1,d7			; Index = offset / 66
 	sub.l	#Current_RL+2,d7
 	divu.w	#66,d7
 	cmp.w	#Max_RL_palettes,d7
 	bcc.s	.Exit
-	movem.l	a0/a2,-(sp)
+	movem.l	a0/a3/a4,-(sp)
+	lea.l	Current_RL_ST,a4
+	add.w	d7,a4
+	add.w	d7,a4
+	add.w	d7,a4
+	add.w	d7,a4
 	lsl.w	#6,d7
 	lea.l	Current_RL_targets,a0
 	add.w	d7,a0
+	tst.l	(a4)			; Same colours as before ?
+	beq.s	.Copy
+	move.l	a0,a3
+	move.l	a2,-(sp)
 	moveq.l	#32/2-1,d7
-.Copy:	move.l	(a2)+,(a0)+
-	dbra	d7,.Copy
-	movem.l	(sp)+,a0/a2
+.Cmp:	cmpm.l	(a2)+,(a3)+
+	dbne	d7,.Cmp
+	move.l	(sp)+,a2
+	beq.s	.Done
+.Copy:	move.l	a0,a3			; Copy
+	move.l	a2,-(sp)
+	moveq.l	#32/2-1,d7
+.Copy2:	move.l	(a2)+,(a3)+
+	dbra	d7,.Copy2
+	move.l	(sp)+,a2
+	jsr	Find_ST_palette		; Find the ST palette
+	move.l	a0,(a4)
+.Done:	movem.l	(sp)+,a0/a3/a4
 .Exit:	rts
 
 ;*****************************************************************************
@@ -467,15 +488,12 @@ Render_raster:
 	divu.w	#66,d6			;  ranges are between the palettes)
 	cmp.w	#Max_RL_palettes,d6
 	bcc	.Skip_pal
-	move.w	d6,d2			; Target colours
-	lsl.w	#6,d2
-	lea.l	Current_RL_targets,a2
-	add.w	d2,a2
-	movem.l	a0/a1,-(sp)
-	move.l	a2,a0
-	jsr	Find_ST_palette
-	move.l	a0,a4			; ST palette & LUT
-	movem.l	(sp)+,a0/a1
+	move.w	d6,d2			; ST palette & LUT
+	lsl.w	#2,d2			;  (see Store_RL_source)
+	lea.l	Current_RL_ST,a4
+	move.l	0(a4,d2.w),d2
+	beq	.Skip_pal
+	move.l	d2,a4
 	lea.l	32(a4),a3			; LUT
 	move.l	a5,a2			; Fade the ST colours like the Amiga colours
 	jsr	Fade_ST_palette
@@ -529,17 +547,16 @@ Max_RL_palettes	EQU	32			; (index = offset in Current_RL / 66)
 
 ;*****************************************************************************
 ; [ Fade the colours of an ST palette like the Amiga colours ]
-;   IN : a0 - Pointer to the current Amiga colours (32 words) (.l)
+;   IN : d6 - Index of the target colours (.w)
+;        a0 - Pointer to the current Amiga colours (32 words) (.l)
 ;        a2 - Pointer to target buffer (16 words) (.l)
-;        a4 - Pointer to the ST palette (16 STE words) (.l)
+;        a4 - Pointer to the ST palette (16 STE words, LUT, representatives) (.l)
 ;        [ Current_RL_targets ] - target Amiga colours
 ; All registers are restored
 ; NOTE :
-;   - The Amiga version counts every component of the colours towards the
-;     target. While fading in, a component is min(target, steps), while
-;     fading out max(0, target - steps). The number of steps is found from
-;     the brightest component of the current and the target colours and
-;     applied to the ST colours in the same way.
+;   - The Amiga version counts every component of every colour towards the
+;     target. Every ST colour stands for one Amiga colour (made in advance) :
+;     it gets the same difference to its target colour.
 ;*****************************************************************************
 Fade_ST_palette:
 	movem.l	d0-d7/a0-a6,-(sp)
@@ -547,76 +564,45 @@ Fade_ST_palette:
 	lsl.w	#6,d0
 	lea.l	Current_RL_targets,a1
 	add.w	d0,a1
-	jsr	Max_component		; Current maximum
-	move.w	d0,d4
-	move.l	a1,a0			; Target maximum
-	jsr	Max_component
-	move.w	d0,d5
+	lea.l	64(a4),a6			; Representatives
 	lea.l	STE_to_linear,a3
 	lea.l	STE_nibbles,a5
 	moveq.l	#16-1,d7
-	cmp.w	#4,Fade_command		; Fading in ?
-	beq.s	.In
-; ---------- Out / static : max(0, c - (target - current)) ---------
-	sub.w	d4,d5			; Steps
-.Loop:	move.w	(a4)+,d0
+.Loop:	moveq.l	#0,d0			; Representative
+	move.b	(a6)+,d0
+	add.w	d0,d0
+	move.w	0(a0,d0.w),d3		; Current & target Amiga colour
+	move.w	0(a1,d0.w),d4
+	move.w	(a4)+,d0			; ST colour
 	moveq.l	#0,d1
 	moveq.l	#3-1,d6
 	rol.w	#4,d0			; Skip the unused top nibble
+	rol.w	#4,d3
+	rol.w	#4,d4
 .Comp:	rol.w	#4,d0
-	moveq.l	#$f,d2
+	rol.w	#4,d3
+	rol.w	#4,d4
+	moveq.l	#$f,d2			; ST component 0...15
 	and.w	d0,d2
-	move.b	0(a3,d2.w),d2		; 0...15
+	move.b	0(a3,d2.w),d2
+	moveq.l	#$f,d5			; + (current - target)
+	and.w	d3,d5
+	add.w	d5,d2
+	moveq.l	#$f,d5
+	and.w	d4,d5
 	sub.w	d5,d2
 	bpl.s	.Pos
 	moveq.l	#0,d2
-.Pos:	move.b	0(a5,d2.w),d2		; STE nibble
+.Pos:	cmp.w	#15,d2
+	ble.s	.Max
+	moveq.l	#15,d2
+.Max:	move.b	0(a5,d2.w),d2		; STE nibble
 	lsl.w	#4,d1
 	or.w	d2,d1
 	dbra	d6,.Comp
 	move.w	d1,(a2)+
 	dbra	d7,.Loop
-	bra.s	.Exit
-; ---------- In : min(c, current) ---------
-.In:	move.w	(a4)+,d0
-	moveq.l	#0,d1
-	moveq.l	#3-1,d6
-	rol.w	#4,d0
-.Comp2:	rol.w	#4,d0
-	moveq.l	#$f,d2
-	and.w	d0,d2
-	move.b	0(a3,d2.w),d2
-	cmp.w	d4,d2
-	ble.s	.Min
-	move.w	d4,d2
-.Min:	move.b	0(a5,d2.w),d2
-	lsl.w	#4,d1
-	or.w	d2,d1
-	dbra	d6,.Comp2
-	move.w	d1,(a2)+
-	dbra	d7,.In
-.Exit:	movem.l	(sp)+,d0-d7/a0-a6
-	rts
-
-; [ Get the brightest component of 32 Amiga colours ]
-;   IN : a0 - Pointer to colours (.l)
-;  OUT : d0 - Maximum component (0...15) (.w)
-; Changed registers : d0
-Max_component:
-	movem.l	d1-d3/d7/a0,-(sp)
-	moveq.l	#0,d0
-	moveq.l	#32-1,d7
-.Loop:	move.w	(a0)+,d1
-	moveq.l	#3-1,d3
-.Comp:	moveq.l	#$f,d2
-	and.w	d1,d2
-	cmp.w	d0,d2
-	ble.s	.No
-	move.w	d2,d0
-.No:	lsr.w	#4,d1
-	dbra	d3,.Comp
-	dbra	d7,.Loop
-	movem.l	(sp)+,d1-d3/d7/a0
+	movem.l	(sp)+,d0-d7/a0-a6
 	rts
 
 ;*****************************************************************************
@@ -629,14 +615,29 @@ Max_component:
 ;     are not found, the palette with the nearest colours is taken.
 ;*****************************************************************************
 Find_ST_palette:
-	movem.l	d0-d7/a1-a3,-(sp)
+	movem.l	d0-d7/a1-a4,-(sp)
 	move.l	a0,a2
-	lea.l	ST_palettes,a1
+	lea.l	ST_palettes,a4
+; ---------- Same colours ? -----------------------
+.Loop:	tst.w	(a4)			; End ? (colour 0 is always black,
+	bmi.s	.Near			;  the end is marked with -1)
+	move.l	a4,a1
+	move.l	a2,a0
+	moveq.l	#32/2-1,d7
+.Cmp:	cmpm.l	(a0)+,(a1)+
+	dbne	d7,.Cmp
+	beq.s	.Exact
+	lea.l	ST_entry_size(a4),a4
+	bra.s	.Loop
+.Exact:	lea.l	64(a4),a3
+	bra.s	.Found
+; ---------- Nearest colours ----------------------
+.Near:	lea.l	ST_palettes,a4
 	sub.l	a3,a3			; Best so far
 	move.l	#$7fffffff,d6
-.Loop:	tst.w	(a1)			; End ? (colour 0 is always black,
-	bmi.s	.Done			;  the end is marked with -1)
-	move.l	a1,d0			; Compare
+.Loop2:	tst.w	(a4)			; End ?
+	bmi.s	.Done
+	move.l	a4,a1
 	move.l	a2,a0
 	moveq.l	#0,d5			; Distance
 	moveq.l	#32-1,d7
@@ -656,23 +657,21 @@ Find_ST_palette:
 	lsr.w	#4,d0
 	lsr.w	#4,d1
 	dbra	d4,.Comp
-.Same:	dbra	d7,.Colour
-	tst.l	d5			; Exact ?
-	bne.s	.Not
-	move.l	a1,a3
-	bra.s	.Found
-.Not:	cmp.l	d6,d5			; Nearer ?
+	cmp.l	d6,d5			; Already further away ?
 	bge.s	.Next
-	move.l	d5,d6
-	move.l	a1,a3
-.Next:	lea.l	64(a1),a1			; Next entry
-	bra.s	.Loop
+.Same:	dbra	d7,.Colour
+	move.l	d5,d6			; Nearer
+	lea.l	64(a4),a3
+.Next:	lea.l	ST_entry_size(a4),a4
+	bra.s	.Loop2
 .Done:	move.l	a3,d0			; Any ?
 	bne.s	.Found
 	lea.l	ST_palettes+64,a3		; (cannot happen)
 .Found:	move.l	a3,a0
-	movem.l	(sp)+,d0-d7/a1-a3
+	movem.l	(sp)+,d0-d7/a1-a4
 	rts
+
+ST_entry_size	EQU	64+32+32+16		; Amiga colours, ST colours, LUT, representatives
 
 ;*****************************************************************************
 ; [ Get the ST colour of an Amiga colour ]
@@ -767,8 +766,14 @@ Palette_checksum:
 ; Executes the events on line 0 and starts Timer B for the others.
 ;*****************************************************************************
 Raster_VBL:
-	clr.b	MFP_TBCR
-	move.l	Next_raster,d0		; New raster list ?
+	move.w	sr,-(sp)			; A pending Timer B interrupt
+	move.w	#$2700,sr			;  would continue the old list,
+	clr.b	MFP_TBCR			;  which is made anew now
+	move.b	#$fe,MFP_IPRA
+	bsr.s	.Do
+	move.w	(sp)+,sr
+	rts
+.Do:	move.l	Next_raster,d0		; New raster list ?
 	beq.s	.No
 	move.l	d0,Active_raster
 	clr.l	Next_raster
@@ -913,6 +918,7 @@ Raster_event_ptr:	ds.l 1
 LUT_cache_source:	ds.l 1
 LUT_cache_checksum:	ds.l 1
 Current_RL_targets:	ds.w 32*Max_RL_palettes
+Current_RL_ST:	ds.l Max_RL_palettes
 LUT_cache_LUT:	ds.l 1
 Raster_events1:	ds.b 8*256
 Raster_events2:	ds.b 8*256
