@@ -453,7 +453,6 @@ Render_raster:
 	lea.l	Raster_palettes2,a5
 .Go:	move.l	a1,a6
 	lea.l	Current_RL,a0
-	moveq.l	#0,d6			; Palette entry index
 	sub.l	a3,a3			; LUT of the palette above (none)
 .Loop:	move.b	(a0)+,d0			; Get entry type
 	cmp.b	#-1,d0
@@ -463,6 +462,9 @@ Render_raster:
 	tst.b	d0
 	bne	.Range
 ; ---------- Palette ------------------------------
+	move.l	a0,d6			; Index of the target colours :
+	sub.l	#Current_RL+2,d6		;  offset / 66 (like Store_RL_source,
+	divu.w	#66,d6			;  ranges are between the palettes)
 	cmp.w	#Max_RL_palettes,d6
 	bcc	.Skip_pal
 	move.w	d6,d2			; Target colours
@@ -484,7 +486,6 @@ Render_raster:
 	move.w	#-1,(a1)+
 	move.l	a5,(a1)+
 	lea.l	32(a5),a5
-	addq.w	#1,d6
 	lea.l	64(a0),a0
 	bra	.Loop
 .Skip_pal:	lea.l	64(a0),a0
@@ -524,7 +525,7 @@ Render_raster:
 	movem.l	(sp)+,d0-d7/a0-a6
 	rts
 
-Max_RL_palettes	EQU	8
+Max_RL_palettes	EQU	32			; (index = offset in Current_RL / 66)
 
 ;*****************************************************************************
 ; [ Fade the colours of an ST palette like the Amiga colours ]
