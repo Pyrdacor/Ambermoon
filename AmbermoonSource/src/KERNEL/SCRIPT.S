@@ -85,9 +85,10 @@
 ;                                   r5 = 1 if found (first 12 slots), else 0
 ;  26 MOVE3D dir                 3D maps: one frame of moving in the map
 ;                                   direction dir (0 north, 1 east, 2 south,
-;                                   3 west) without turning: the mouse is held
-;                                   in the forward / back / strafe zone that
-;                                   fits the current view direction
+;                                   3 west) without turning: cursor up / down
+;                                   (forward / back) or the mouse held in the
+;                                   strafe zone (sideways), by the current
+;                                   view direction
 ;  27 MOUSECELL member            combat: the scripted mouse pointer goes to
 ;                                   the cell of the member (1-6) in the
 ;                                   tactic window (its current position)
@@ -230,7 +231,13 @@ Script_VBL:
 .Changed:	move.l	d0,Script_last_sp		; Yes -> Remember the time
 	move.l	d1,Script_last_mev
 	move.w	VBL_counter,Script_sp_time
-.No_sp:	move.w	VBL_counter,d0		; Heartbeat in the log every 256 frames
+.No_sp:	tst.w	Script_comob_full		; COMOB table overflowed ? (log $ee,
+	beq.s	.No_full			;  r0 = the number of calls)
+	move.w	Script_comob_full,Script_regs
+	clr.w	Script_comob_full
+	move.w	#$ee,d0
+	jsr	Script_log_line
+.No_full:	move.w	VBL_counter,d0		; Heartbeat in the log every 256 frames
 	andi.w	#$ff,d0
 	bne.w	.No_beat
 	move.w	#$ff,d0
@@ -425,8 +432,11 @@ Script_VBL:
 	bra.w	.Again
 .Mousenpc:	move.w	(a0)+,d0			; Get slot
 	bsr.w	.Next
+	btst	#10,d0			; Bit 10: its own square (2 squares
+	bne.w	.Npc_far			;  at most: mouth / eye selection)
 	move.w	d0,d5			; (bits 8-9: 1 = 45 degrees left,
 	lsr.w	#8,d5			;  2 = 45 degrees right of it)
+	andi.w	#3,d5
 	andi.w	#Max_chars-1,d0
 	lea.l	VNPC_data,a1
 	mulu.w	#VNPC_data_size,d0
@@ -721,7 +731,7 @@ Script_VBL:
 	moveq.l	#3,d1			; Too far east: west
 	bra.w	.Move3D_dir
 .F3_x1:	cmp.w	#-64,d3
-	bge.w	.Move3D_dir
+	bge.w	.F3_main
 	moveq.l	#1,d1			; Too far west: east
 	bra.w	.Move3D_dir
 .F3_ew:	move.w	Height_of_map,d2		; Y centre = (h - y) * 512 + 256
@@ -736,9 +746,23 @@ Script_VBL:
 	moveq.l	#2,d1			; Too far north: south
 	bra.w	.Move3D_dir
 .F3_y1:	cmp.w	#-64,d3
-	bge.w	.Move3D_dir
+	bge.w	.F3_main
 	moveq.l	#0,d1			; Too far south: north
 	bra.w	.Move3D_dir
+.F3_main:	move.w	Y_angle,d0		; Centred: the main direction. Not
+	addi.w	#slang/8,d0		;  forward (e.g. after a battle turned
+	andi.w	#slang-1,d0		;  the party) ? Then r5 = 3, r6 = the
+	lsr.w	#8,d0			;  turn (1 right, 2 back, 3 left): the
+	neg.w	d0			;  script turns (right click in a
+	andi.w	#3,d0			;  corner of the 3D view, at once):
+	move.w	d1,d2			;  forward is 4 times faster than
+	sub.w	d0,d2			;  sideways
+	andi.w	#3,d2
+	beq.w	.Move3D_dir
+	move.w	#3,Script_regs+10		; r5 = 3
+	move.w	d2,Script_regs+12		; r6 = turn
+	clr.w	Script_buttons
+	bra.w	.Exit
 .F3_arrived:	move.w	Map_Xcoord,d2		; In the middle of the square ? (else
 	subq.w	#1,d2			;  move there first: turns and walks
 	moveq.l	#psize_log,d3		;  on from here do not hit corners)
@@ -783,15 +807,23 @@ Script_VBL:
 	andi.w	#3,d0
 	sub.w	d0,d1			; Relative: 0 forward, 1 right,
 	andi.w	#3,d1			;  2 back, 3 left
+	btst	#0,d1			; Sideways ?
+	bne.s	.Move_side
+	clr.w	Script_buttons		; No -> cursor up / down (one key
+	add.w	d1,d1			;  event per frame: like a held key)
 	add.w	d1,d1
-	add.w	d1,d1
-	lea.l	.Move_zones(pc),a1
-	move.w	0(a1,d1.w),Script_X
-	move.w	2(a1,d1.w),Script_Y
+	move.l	.Move_keys(pc,d1.w),d0
+	jsr	Store_Kev
+	bra.w	.Exit			; One step per frame
+.Move_side:	move.w	#174,Script_X		; Yes -> the mouse held in the right
+	cmp.w	#1,d1			;  / left strafe zone of the 3D view
+	beq.s	.Side_set			;  (no cursor key for it, the keypad
+	move.w	#33,Script_X		;  keys are slow: icon feedback)
+.Side_set:	move.w	#120,Script_Y
 	move.w	#1,Script_buttons
 	st	Script_mouse
-	bra.w	.Again
-.Move_zones:	dc.w	104,50,174,120,104,191,33,120
+	bra.w	.Exit
+.Move_keys:	dc.l	$004c0000,0,$004d0000	; Cursor up, -, cursor down
 .Call:	moveq.l	#0,d1			; Get target
 	move.w	(a0)+,d1
 	bsr.w	.Next
@@ -811,6 +843,46 @@ Script_VBL:
 	lsl.w	#2,d0
 	lea.l	Script_stack,a1
 	move.l	0(a1,d0.w),Script_pc
+	bra.w	.Again
+.Npc_far:	andi.w	#Max_chars-1,d0		; Its own square (the selection area
+	lea.l	VNPC_data,a1		;  of mouth and eye: 2 squares left /
+	mulu.w	#VNPC_data_size,d0	;  up, 2 right, 1 down; the outer
+	add.l	d0,a1			;  squares only partly)
+	move.w	VMap_X(a1),d0		; dx, clipped to -2..2
+	sub.w	Map_Xcoord,d0
+	cmp.w	#2,d0
+	ble.s	.Nf1
+	moveq.l	#2,d0
+.Nf1:	cmp.w	#-2,d0
+	bge.s	.Nf2
+	moveq.l	#-2,d0
+.Nf2:	moveq.l	#8,d2			; X in the square: left of the party
+	tst.w	d0			;  more to the right
+	bpl.s	.Nf3
+	moveq.l	#12,d2
+.Nf3:	add.w	Mapbuf_X,d0
+	lsl.w	#4,d0
+	add.w	d2,d0
+	addi.w	#Map2D_X,d0
+	move.w	VMap_Y(a1),d1		; dy, clipped to -2..1
+	sub.w	Map_Ycoord,d1
+	cmp.w	#1,d1
+	ble.s	.Nf4
+	moveq.l	#1,d1
+.Nf4:	cmp.w	#-2,d1
+	bge.s	.Nf5
+	moveq.l	#-2,d1
+.Nf5:	moveq.l	#8,d2			; Y in the square: below the party
+	tst.w	d1			;  more to the top
+	ble.s	.Nf6
+	moveq.l	#3,d2
+.Nf6:	add.w	Mapbuf_Y,d1
+	lsl.w	#4,d1
+	add.w	d2,d1
+	addi.w	#Map2D_Y,d1
+	move.w	d0,Script_X
+	move.w	d1,Script_Y
+	st	Script_mouse
 	bra.w	.Again
 ; The 8 directions clockwise (dx, dy), up first
 .Dir_ring:	dc.b	0,-1,1,-1,1,0,1,1,0,1,-1,1,-1,0,-1,-1
@@ -1320,6 +1392,16 @@ Script_curve_3D:
 .Ahead:	cmp.l	d6,d2
 	ble.w	.Straight
 	moveq.l	#4,d4			; Steering strength: slight
+	move.l	d3,d2			; More than 7 degrees ? (|cross| * 8 > dot)
+	lsl.l	#3,d2
+	cmp.l	d6,d2
+	ble.w	.Mild
+	moveq.l	#12,d4			; Yes: stronger (else the party drifts
+	move.l	d3,d2			;  into the wall before it is straight)
+	lsl.l	#2,d2			; More than 14 degrees ? (|cross| * 4 > dot)
+	cmp.l	d6,d2
+	ble.w	.Mild
+	moveq.l	#24,d4			; Yes: strong
 .Mild:	tst.l	d7			; Left (cross >= 0) or right
 	bpl.w	.Left
 	move.w	#Map3D_X+96,d0		; Top right zone
@@ -1638,7 +1720,8 @@ Script_monster_ahead:
 ;   slot 0-31 to the party (255 = not there), $41-$46 1 if member 1-6 is
 ;   there and alive, $47 1 if the active member is alive, $48-$4d LP and
 ;   $4e-$53 SP of member 1-6, $54-$59 battle order slot (0-11) of member
-;   1-6, $5a 1 if the current battle was started by an event, $40 the scroll
+;   1-6, $5a 1 if the current battle was started by an event, $5b the map
+;   character slot that started it + $100 (0 for an event), $40 the scroll
 ;   bar position
 ;   (e.g. first visible slot - 1 of a chest),
 ;   $10-$17 registers 0-7. Others are 0.
@@ -1692,7 +1775,14 @@ Script_get_var:
 	beq.w	.Exit
 	moveq.l	#1,d0
 	bra.w	.Exit
-.No_cil:	cmp.w	#$5a,d0			; Battle of an event (not a map monster) ?
+.No_cil:	cmp.w	#$5b,d0			; Map character of the battle + $100 ?
+	bne.w	.No_cchar			;  (0: an event / encounter battle)
+	moveq.l	#0,d0
+	move.w	Combat_char_index,d0
+	bmi.w	.Zero
+	addi.w	#$100,d0
+	bra.w	.Exit
+.No_cchar:	cmp.w	#$5a,d0			; Battle of an event (not a map monster) ?
 	bne.w	.No_evbattle
 	moveq.l	#0,d0
 	tst.w	Combat_char_index
@@ -1880,6 +1970,7 @@ Script_last_mev:	ds.l	1
 Script_sp_time:	ds.w	1
 Script_sp:	ds.w	1
 Script_seed_lock:	ds.l	1
+Script_comob_full:	ds.w	1
 Script_goal:	ds.w	1
 Script_dist:	ds.b	64*64
 Script_queue:	ds.w	64*64

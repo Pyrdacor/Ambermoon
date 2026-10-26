@@ -32,7 +32,14 @@ Add_COMOB:
 	beq.s	.Found
 	lea.l	COMOB_data_size(a0),a0	; Yes -> Next COMOB slot
 	dbra	d0,.Loop
-	bra.s	.Exit
+	IFD	Script
+	addq.w	#1,Script_comob_full	; Script build only: count
+	ENDC
+	lea.l	Dummy_COMOB,a0		; FIX: The table is full. Before, a0 pointed
+	clr.b	COMOB_Flags(a0)		;  behind the table and the callers (which
+	bra.s	.Exit			;  do not check) overwrote the data there.
+					;  Now they write into a dummy COMOB
+					;  that is never shown.
 .Found:	clr.w	COMOB_3D_vector_X(a0)	; Initialize COMOB
 	clr.w	COMOB_3D_vector_Y(a0)
 	clr.w	COMOB_3D_vector_Z(a0)
@@ -606,6 +613,7 @@ Nr_combat_CAs:	ds.w 1
 
 COMOB_sort_list:	ds.l Max_COMOBs
 COMOB_table:	ds.w Max_COMOBs*COMOB_data_size/2
+Dummy_COMOB:	ds.w COMOB_data_size/2		; (for a full table)
 	ds.w COMOB_data_size/2		; When table is full
 Combat_CA_list:	ds.w Max_COMOBs*CA_data_size/2
 COMOBs_data_size	EQU *-COMOBs_data

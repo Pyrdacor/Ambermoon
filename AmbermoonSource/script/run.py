@@ -185,6 +185,10 @@ def run_once(args, log, attempt):
             if args.expect and game_start and time.time() - game_start > args.within and                     not expected(log, args.expect):
                 retry = True
                 break
+            if args.fail and expected(log, args.fail):
+                print('attempt %d: failed (tag %s), restarting' % (attempt + 1, args.fail))
+                retry = True
+                break
             if args.success:
                 if game_start is None and os.path.exists(log):
                     game_start = time.time()
@@ -212,6 +216,12 @@ def run_once(args, log, attempt):
         if recorder:
             if retry:
                 recorder.terminate()
+            else:
+                # stop the recording now ('q': ffmpeg finishes the file properly), not after --seconds
+                try:
+                    recorder.communicate(b'q', timeout=30)
+                except (subprocess.TimeoutExpired, OSError, ValueError):
+                    recorder.terminate()
             recorder.wait()
         emu.terminate()
         emu.wait()
@@ -233,8 +243,10 @@ def main():
     ap.add_argument('--expect', help='log tag (hex) that must appear within --within seconds, else restart')
     ap.add_argument('--within', type=float, default=45)
     ap.add_argument('--attempts', type=int, default=5)
-    ap.add_argument('--tail', type=float, default=15, help='with --success: seconds to go on after the tag')
+    ap.add_argument('--tail', type=float, default=3, help='with --success: seconds to go on after the tag')
     ap.add_argument('--success', help='log tag (hex): the run is complete (e.g. the outro begins)')
+    ap.add_argument('--define', action='append', default=[], help='script define (ifdef), e.g. TAR')
+    ap.add_argument('--fail', help='log tag (hex): the run failed (e.g. a bad battle), restart')
     ap.add_argument('--limit', type=float, default=420, help='with --success: at most this many seconds of game time')
     ap.add_argument('--boot', default=os.path.join(DOCS, 'Hard Drives', 'AmbermoonDE'))
     args = ap.parse_args()
@@ -250,7 +262,8 @@ def main():
     unpack_data()
     script_bin = os.path.join(BUILD, 'Script.bin')
     subprocess.run([sys.executable, os.path.join(HERE, 'amscript.py'), args.script, script_bin, '--data=' + DATA] +
-                   (['--start=' + args.start] if args.start else []), check=True)
+                   (['--start=' + args.start] if args.start else []) + ['--define=' + d for d in args.define],
+                   check=True)
     saves = os.path.join(DRIVE, 'Amberfiles', 'Saves')
     with open(saves, 'r+b') as f:
         # the game continues the "current" save (first word); 0 for a new game

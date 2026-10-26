@@ -1,6 +1,7 @@
 """Compiles a text script for the script player of AM2 (KERNEL/SCRIPT.S, script build) into Script.bin.
 
 Usage: python amscript.py <script.txt> [<Script.bin>] [--data=<folder of unpacked map data>] [--start=<label>]
+                           [--define=<NAME> ...]   (ifdef / ifndef / else / endif in the script)
 
 The script (one command per line, '#' starts a comment, 'name:' defines a label):
 
@@ -29,7 +30,10 @@ The script (one command per line, '#' starts a comment, 'name:' defines a label)
   opensquare <x> <y>                  the square counts as walkable for the path finding (changed by events)
   ready [<frames>]                    waits until the module stack did not change for <frames> (default 8)
   keyuntil <key> <var> <op> <value>   presses the key (again every 50 frames) until the condition is true
+  gotopoint <x> <y> [else <label>]    ('else': refused, e.g. a monster nearby -> go on there; default: again)
   gotopoint <x> <y>                   travels to the (known) goto point x, y of the map with the automap
+  talkfar <slot>                      2D: talk to the character from where the party stands (the mouth reaches
+                                      2 squares; waiting until it comes near)
   waitclick <depth> [<timeout>]       waits for a text that waits for a click (one level deeper than <depth>,
                                       at most <timeout> frames, default 150) and closes it
   talkto <slot>                       2D: walks to the map character <slot> (0-based, it may move) and talks
@@ -89,9 +93,10 @@ VARS = {'map': 0, 'x': 1, 'y': 2, 'module': 3, 'depth': 4, 'frame': 5, 'mousex':
         'maptype': 9, 'members': 10, 'active': 11, 'mapbufx': 12, 'mapbufy': 13, 'view': 14, 'angle': 15, 'stable': 0x1e, 'cil': 0x1f, 'scroll': 0x40, 'alive1': 0x41, 'alive2': 0x42, 'alive3': 0x43, 'alive4': 0x44, 'alive5': 0x45,
         'alive6': 0x46, 'aliveactive': 0x47,
         'lp1': 0x48, 'lp2': 0x49, 'lp3': 0x4a, 'lp4': 0x4b, 'lp5': 0x4c, 'lp6': 0x4d,
-        'eventbattle': 0x5a, 'sp1': 0x4e, 'sp2': 0x4f, 'sp3': 0x50, 'sp4': 0x51, 'sp5': 0x52, 'sp6': 0x53,
+        'eventbattle': 0x5a, 'battlechar': 0x5b, 'sp1': 0x4e, 'sp2': 0x4f, 'sp3': 0x50, 'sp4': 0x51, 'sp5': 0x52, 'sp6': 0x53,
         'angle1024': 0x18, 'px': 0x19, 'py': 0x1a, 'mousemoving': 0x1b, 'monsterahead': 0x1c, 'mousetop': 0x1d}
 VARS.update({'r%d' % i: 0x10 + i for i in range(8)})
+VARS.update({'npc%d' % i: 0x20 + i for i in range(32)})     # distance of the map character to the party
 
 # Amiga raw key codes
 RAW = {'esc': 0x45, 'escape': 0x45, 'space': 0x40, 'return': 0x44, 'enter': 0x43, 'backspace': 0x41, 'tab': 0x42,
@@ -378,7 +383,34 @@ def load_items(folder):
         ITEMS.setdefault(d[2 + (n - 1) * 60 + 40:2 + (n - 1) * 60 + 59].split(b'\0')[0].decode('latin-1'), n)
 
 
-def compile_script(text, data=None, start=None):
+def preprocess(text, defines):
+    """ifdef <NAME> / ifndef <NAME> / else / endif (nested): lines outside the active branches become empty (the
+    line numbers stay the same)."""
+    out, stack = [], []
+    for line in text.split('\n'):
+        t = line.split('#')[0].split()
+        active = all(stack)
+        if t and t[0].lower() in ('ifdef', 'ifndef'):
+            stack.append((t[1] in defines) == (t[0].lower() == 'ifdef'))
+            out.append('')
+        elif t and t[0].lower() == 'else':
+            if not stack:
+                raise ScriptError('else without ifdef')
+            stack[-1] = not stack[-1]
+            out.append('')
+        elif t and t[0].lower() == 'endif':
+            if not stack:
+                raise ScriptError('endif without ifdef')
+            stack.pop()
+            out.append('')
+        else:
+            out.append(line if active else '')
+    if stack:
+        raise ScriptError('ifdef without endif')
+    return '\n'.join(out)
+
+
+def compile_script(text, data=None, start=None, defines=()):
     code = []          # words; label references as ('label', name)
     labels = {}
     unique = [0]
@@ -396,6 +428,7 @@ def compile_script(text, data=None, start=None):
     def here(name):
         labels[name] = len(code)
 
+    text = preprocess(text, set(defines))
     walker = Walker(data)
     if data:
         load_items(data)
@@ -502,6 +535,9 @@ def compile_script(text, data=None, start=None):
             # with map monsters: flight
             nf = new_label()
             emit(OPS['jumpif'], VARS['module'], CMP['<>'], MODULES['Combat'], ('label', nf),
+                 OPS['jumpif'], VARS['r0'], CMP['='], 2, ('label', '__fx' + fight_exit[0]),
+                 OPS['jumpifv'], VARS['battlechar'], CMP['='], VARS['r0'], ('label', '__fx' + fight_exit[0]),
+                 OPS['jumpif'], VARS['r0'], CMP['<>'], 1, ('label', nf),     # (event battles only with 'fight')
                  OPS['jumpif'], VARS['eventbattle'], CMP['='], 1, ('label', '__fx' + fight_exit[0]))
             here(nf)
         emit(OPS['jumpif'], VARS['module'], CMP['='], MODULES['Combat'], ('label', handler),
@@ -552,12 +588,22 @@ def compile_script(text, data=None, start=None):
         # is active there: with full dexterity and luck the party always gets away)
         yk, nk_, kd = new_label(), new_label(), new_label()
         n_ = key_code('n')
+        # (Spannenberg too, except near the house of healers, where the single bandit is fought)
+        sp_ = new_label()
         emit(OPS['jumpif'], VARS['depth'], CMP['<='], 1, ('label', done),
              OPS['jumpif'], VARS['map'], CMP['='], 431, ('label', nk_),
              OPS['jumpif'], VARS['map'], CMP['='], 453, ('label', nk_),
+             OPS['jumpif'], VARS['map'], CMP['='], 263, ('label', sp_),
              OPS['key'], y >> 16, y & 0xffff, OPS['jump'], ('label', kd))
+        here(sp_)
+        # ('n' only works with Netsrak active (dexterity, luck): else 'y' and flight in the battle)
+        emit(OPS['jumpif'], VARS['active'], CMP['<>'], 3, ('label', yk),
+             OPS['jumpifv'], VARS['battlechar'], CMP['<>'], VARS['r0'], ('label', nk_),
+             OPS['key'], y >> 16, y & 0xffff, OPS['jump'], ('label', kd))
+        here(yk)
+        emit(OPS['log'], 0xc2, OPS['key'], y >> 16, y & 0xffff, OPS['jump'], ('label', kd))
         here(nk_)
-        emit(OPS['key'], n_ >> 16, n_ & 0xffff)
+        emit(OPS['log'], 0xc3, OPS['key'], n_ >> 16, n_ & 0xffff)      # (log $c3: 'n', $c2: 'y')
         here(kd)
         emit(OPS['wait'], 15,
              OPS['jumpif'], VARS['module'], CMP['='], MODULES['Combat'], ('label', combat),
@@ -566,8 +612,14 @@ def compile_script(text, data=None, start=None):
         here(combat)
         # a battle of an event during walkto / glide ... fight (r0 = 1, e.g. the machine) is not fled: back to the
         # caller (other event battles, e.g. random encounters: flight)
-        nf2 = new_label()
-        emit(OPS['jumpif'], VARS['r0'], CMP['<>'], 1, ('label', nf2),
+        # (r0 = 2, walkto / glide ... fightany: any battle ends the walk)
+        # (r0 = 0: no fightchar walk - a random encounter has battlechar 0 too, it must not end the handler)
+        nf2, nc = new_label(), new_label()
+        emit(OPS['jumpif'], VARS['r0'], CMP['='], 0, ('label', nc),
+             OPS['jumpifv'], VARS['battlechar'], CMP['='], VARS['r0'], ('label', done))
+        here(nc)
+        emit(OPS['jumpif'], VARS['r0'], CMP['='], 2, ('label', done),
+             OPS['jumpif'], VARS['r0'], CMP['<>'], 1, ('label', nf2),
              OPS['jumpif'], VARS['eventbattle'], CMP['='], 1, ('label', done))
         here(nf2)
         # flee at once: the clicks only after the module stack is stable for a moment (each push/pop clears the
@@ -799,6 +851,11 @@ def compile_script(text, data=None, start=None):
             cmd = t[0].lower()
             if cmd == 'wait':
                 emit(OPS['wait'], int(t[1]))
+            elif cmd == 'keynow':
+                # keys without waiting for a calm module stack (text windows that never are)
+                for k in t[1:]:
+                    c = key_code(k)
+                    emit(OPS['key'], c >> 16, c & 0xffff, OPS['wait'], 4)
             elif cmd == 'key':
                 for k in t[1:]:
                     c = key_code(k)
@@ -892,6 +949,7 @@ def compile_script(text, data=None, start=None):
                 emit(OPS['key'], k3 >> 16, k3 & 0xffff, OPS['wait'], 30, OPS['jump'], ('label', op))
                 here(inv)
                 k9_ = key_code('kp9')
+                emit(OPS['get'], 0, VARS['active'], OPS['log'], 0x59, OPS['set'], 0, 0)    # (log: an inventory open)
                 ready()
                 emit(OPS['key'], k9_ >> 16, k9_ & 0xffff, OPS['wait'], 20, OPS['jump'], ('label', op))
                 here('__o' + op)
@@ -922,7 +980,10 @@ def compile_script(text, data=None, start=None):
                 opts = [o.lower() for o in t[2:]]
                 mode = (1 if 'inv' in opts else 0) | (int(opts[opts.index('member') + 1]) << 8 if 'member' in opts else 0)
                 item = item_number(t[1])
-                ready()
+                if 'noready' in opts:
+                    emit(OPS['wait'], 15)
+                else:
+                    ready()
                 loop, found = new_label(), new_label()
                 emit(OPS['set'], 7, 0)
                 here(loop)
@@ -974,9 +1035,12 @@ def compile_script(text, data=None, start=None):
                 opts = [o.lower() for o in t[3:]]
                 through = 'through' in opts
                 allowed = [int(o) for o in opts[opts.index('via') + 1:] if o.isdigit()] if 'via' in opts else []
-                if 'fight' in opts:
+                if 'fight' in opts or 'fightany' in opts or 'fightchar' in opts:
                     fight_exit[0], fight_exit[1] = new_label(), (int(t[1]), int(t[2]))
-                    emit(OPS['set'], 0, 1)          # r0 = 1: an event battle ends the walk
+                    # r0 = 1: an event battle ends the walk, 2: any battle, $100 + slot: the battle of that map
+                    # character (its requester is answered with 'y', others in Spannenberg with 'n')
+                    r0 = 0x100 + int(opts[opts.index('fightchar') + 1]) if 'fightchar' in opts else                         (2 if 'fightany' in opts else 1)
+                    emit(OPS['set'], 0, r0)
                 target = (int(t[1]), int(t[2]))
                 w_, h_, table = walker.flow(target, through, allowed, diagonal=False)
                 data, skip = new_label(), new_label()
@@ -988,9 +1052,19 @@ def compile_script(text, data=None, start=None):
                                for i in range(0, len(nib), 4)])
                 here(skip)
                 loop, done, moved, c2 = new_label(), new_label(), new_label(), new_label()
+                # (keys of the movement icons: the first control icons must be shown)
+                c1 = new_label()
+                emit(OPS['buttons'], 0, OPS['jumpif'], VARS['cil'], CMP['='], 0, ('label', c1))
+                ke_ = key_code('enter')
+                emit(OPS['key'], ke_ >> 16, ke_ & 0xffff, OPS['wait'], 10)
+                here(c1)
                 emit(OPS['get'], 1, VARS['px'], OPS['get'], 4, VARS['py'], OPS['set'], 3, 0)
                 here(loop)
-                emit(OPS['flow3d'], ('label', data), OPS['jumpif'], VARS['r5'], CMP['='], 1, ('label', done))
+                # (another map: a teleporter / entrance was used -> done)
+                trn = new_label()
+                emit(OPS['jumpif'], VARS['map'], CMP['<>'], walker.map, ('label', done),
+                     OPS['flow3d'], ('label', data), OPS['jumpif'], VARS['r5'], CMP['='], 1, ('label', done),
+                     OPS['jumpif'], VARS['r5'], CMP['='], 3, ('label', trn))
                 interrupt(loop, False)
                 emit(OPS['wait'], 1,
                      OPS['jumpifv'], VARS['px'], CMP['<>'], VARS['r1'], ('label', moved),
@@ -1003,6 +1077,25 @@ def compile_script(text, data=None, start=None):
                      OPS['key'], ke >> 16, ke & 0xffff, OPS['wait'], 10)
                 here(c2)
                 emit(OPS['key'], k7 >> 16, k7 & 0xffff, OPS['wait'], 30, OPS['jump'], ('label', loop))
+                # not facing the way (e.g. a battle turned the party): turn at once (right click in a corner of the
+                # 3D view: top right 90 degrees right, top left 90 left, bottom left 180), then forward
+                # (first the left button released and the walking module gone: else the right click does nothing)
+                here(trn)
+                tw = new_label()
+                emit(OPS['buttons'], 0, OPS['set'], 7, 0)
+                here(tw)
+                emit(OPS['jumpif'], VARS['depth'], CMP['<='], 1, ('label', '__d' + tw),
+                     OPS['add'], 7, 1, OPS['jumpif'], VARS['r7'], CMP['>='], 50, ('label', loop),
+                     OPS['wait'], 1, OPS['jump'], ('label', tw))
+                here('__d' + tw)
+                for r6, (cx, cy) in ((1, TURN_CLICK[1]), (3, TURN_CLICK[3]), (2, TURN_CLICK[2])):
+                    nt = new_label()
+                    emit(OPS['jumpif'], VARS['r6'], CMP['<>'], r6, ('label', nt),
+                         OPS['mouse'], cx, cy, OPS['wait'], 2,
+                         OPS['buttons'], 2, OPS['wait'], 4, OPS['buttons'], 0, OPS['wait'], 10,
+                         OPS['jump'], ('label', moved))
+                    here(nt)
+                emit(OPS['jump'], ('label', loop))
                 here(moved)
                 emit(OPS['get'], 1, VARS['px'], OPS['get'], 4, VARS['py'], OPS['set'], 3, 0,
                      OPS['jump'], ('label', loop))
@@ -1051,8 +1144,10 @@ def compile_script(text, data=None, start=None):
             elif cmd == 'keyuntil':
                 # keyuntil <key> <var> <op> <value>: key press, repeated every 50 frames until the condition is true
                 # (a key can get lost, e.g. while the game is still busy after loading)
+                # (the condition first: e.g. the key of the already active member would open its inventory)
                 c = key_code(t[1])
                 loop, done = new_label(), new_label()
+                emit(OPS['jumpif'], var(t[2]), CMP[t[3]], value(t[4]), ('label', done))
                 here(loop)
                 ready()
                 emit(OPS['key'], c >> 16, c & 0xffff, OPS['set'], 7, 0)
@@ -1113,14 +1208,78 @@ def compile_script(text, data=None, start=None):
                      OPS['add'], 7, 1, OPS['jumpif'], VARS['r7'], CMP['>='], 40, ('label', cl),
                      OPS['wait'], 1, OPS['jump'], ('label', '__w' + cl))
                 here(cd)
-                yl = new_label()
-                emit(OPS['wait'], 10)
+                # 'y' to "Are you sure?" (at most 3 times: a text like "The way back is too dangerous - there's a
+                # monster in the vicinity!" is no requester: then close it and the automap, go on at the 'else' label)
+                yl, yf = new_label(), new_label()
+                emit(OPS['wait'], 10, OPS['set'], 7, 0)
                 here(yl)
                 ready()
                 k = key_code('y')
-                emit(OPS['key'], k >> 16, k & 0xffff, OPS['wait'], 10,
-                     OPS['jumpif'], VARS['module'], CMP['='], MODULES['Automap'], ('label', yl))
+                # (success only at the point: the text "too dangerous" also leaves the automap module)
+                emit(OPS['key'], k >> 16, k & 0xffff, OPS['wait'], 30,
+                     OPS['jumpif'], VARS['x'], CMP['<>'], gx, ('label', '__nx' + yl),
+                     OPS['jumpif'], VARS['y'], CMP['='], gy, ('label', '__ok' + yl))
+                here('__nx' + yl)
+                emit(OPS['jumpif'], VARS['module'], CMP['<>'], MODULES['Automap'], ('label', yf),
+                     OPS['jumpif'], VARS['depth'], CMP['<'], 3, ('label', yf),
+                     OPS['add'], 7, 1, OPS['jumpif'], VARS['r7'], CMP['<'], 3, ('label', yl))
+                here(yf)
+                emit(OPS['log'], 0x5c)
+                cf = new_label()
+                here(cf)
+                emit(OPS['jumpif'], VARS['depth'], CMP['<='], 1, ('label', '__cl' + cf),
+                     OPS['buttons'], 2, OPS['wait'], 5, OPS['buttons'], 0, OPS['wait'], 20,
+                     OPS['jump'], ('label', cf))
+                here('__cl' + cf)
+                if 'else' in [o.lower() for o in t[3:]]:
+                    emit(OPS['jump'], ('label', t[[o.lower() for o in t].index('else') + 1]))
+                else:
+                    emit(OPS['jump'], ('label', start))
+                here('__ok' + yl)
                 walker.pos = (gx, gy)
+            elif cmd == 'talkfar':
+                # talkfar <slot>: 2D, talk to the map character from where the party stands (the mouth reaches 2
+                # squares): wait (click on the party: 5 minutes pass, the character takes a step) until it is in reach
+                slot = int(t[1])
+                wl, tk = new_label(), new_label()
+                here(wl)
+                emit(OPS['jumpif'], 0x20 + slot, CMP['<='], 2, ('label', tk))
+                ready()
+                emit(OPS['mousetile'], 0, 0, OPS['wait'], 2, OPS['buttons'], 1, OPS['wait'], 4, OPS['buttons'], 0,
+                     OPS['wait'], 20, OPS['jump'], ('label', wl))
+                here(tk)
+                skip = new_label()
+                emit(OPS['jumpif'], VARS['cil'], CMP['='], 1, ('label', skip))
+                k = key_code('enter')
+                emit(OPS['key'], k >> 16, k & 0xffff, OPS['wait'], 10)
+                here(skip)
+                ready()
+                k = key_code('kp9')
+                emit(OPS['key'], k >> 16, k & 0xffff, OPS['wait'], 10,
+                     OPS['mousenpc'], slot | 0x400, OPS['wait'], 3, OPS['buttons'], 1, OPS['wait'], 4,
+                     OPS['buttons'], 0, OPS['set'], 7, 0)
+                w2 = new_label()
+                here(w2)
+                emit(OPS['jumpif'], VARS['module'], CMP['='], MODULES['Dialogue'], ('label', '__d' + w2),
+                     OPS['add'], 7, 1, OPS['jumpif'], VARS['r7'], CMP['>='], 60, ('label', wl),
+                     OPS['wait'], 1, OPS['jump'], ('label', w2))
+                here('__d' + w2)
+                # the greeting (a text that waits for a click)
+                gl, gd, gc = new_label(), new_label(), new_label()
+                emit(OPS['set'], 7, 0)
+                here(gl)
+                emit(OPS['jumpif'], VARS['depth'], CMP['>='], 3, ('label', gc),
+                     OPS['add'], 7, 1, OPS['jumpif'], VARS['r7'], CMP['>='], 400, ('label', gd),
+                     OPS['wait'], 1, OPS['jump'], ('label', gl))
+                here(gc)
+                emit(OPS['wait'], 5)
+                here('__c' + gc)
+                emit(OPS['jumpif'], VARS['depth'], CMP['<='], 2, ('label', gd),
+                     OPS['mouse'], 100, 80, OPS['wait'], 3, OPS['buttons'], 1, OPS['wait'], 5, OPS['buttons'], 0,
+                     OPS['wait'], 10, OPS['buttons'], 2, OPS['wait'], 5, OPS['buttons'], 0, OPS['wait'], 15,
+                     OPS['jump'], ('label', '__c' + gc))
+                here(gd)
+                emit(OPS['wait'], 20)
             elif cmd == 'waitclick':
                 # a text that waits for a click (module Wait_4_user: one level deeper): wait until it opens (at
                 # most <timeout> frames, default 150), then right clicks until the depth is <depth> again
@@ -1205,6 +1364,22 @@ def compile_script(text, data=None, start=None):
                 walker.pos = None
             elif cmd == 'savegame':
                 emit(OPS['save'], int(t[1]))
+            elif cmd == 'settle' and 'fightchar' in [o.lower() for o in t[2:]]:
+                # settle <frames> fightchar <slot>: like settle, but the battle of that map character is accepted
+                # ('y') and ends the wait (module Combat on top then)
+                slot = int(t[t.index('fightchar') + 1])
+                start, loop, done = new_label(), new_label(), new_label()
+                fight_exit[0], fight_exit[1] = done, None
+                emit(OPS['set'], 0, 0x100 + slot)
+                here(start)
+                emit(OPS['set'], 7, 0)
+                here(loop)
+                interrupt(start, False)
+                emit(OPS['add'], 7, 1, OPS['jumpif'], VARS['r7'], CMP['>='], int(t[1]), ('label', done),
+                     OPS['wait'], 1, OPS['jump'], ('label', loop))
+                here('__fx' + done)
+                here(done)
+                fight_exit[0] = None
             elif cmd == 'settle':
                 # handle popups and battles until nothing happened for <n> frames
                 start, loop, done = new_label(), new_label(), new_label()
@@ -1242,16 +1417,24 @@ def compile_script(text, data=None, start=None):
                 here(done)
             elif cmd == 'set':
                 emit(OPS['set'], var(t[1]) - 0x10, value(t[2]))
+            elif cmd == 'get':
+                # get <reg> <var>: register = variable (e.g. to log a value: the log line shows r0)
+                emit(OPS['get'], var(t[1]) - 0x10, var(t[2]))
             elif cmd == 'add':
                 emit(OPS['add'], var(t[1]) - 0x10, value(t[2]))
             elif cmd == 'log':
                 emit(OPS['log'], value(t[1]))
             elif cmd == 'onmap':
+                # onmap <map> <x> <y> [N|E|S|W] [anypos]: wait for the map and the square ('anypos': only the map;
+                # x, y are the planning position for the path finding)
                 walker.map, walker.pos = int(t[1]), (int(t[2]), int(t[3]))
-                if len(t) > 4:
+                anypos = 'anypos' in [o.lower() for o in t[4:]]
+                if len(t) > 4 and t[4].upper() in ('N', 'E', 'S', 'W'):
                     walker.facing = 'NESW'.index(t[4].upper())
                 loop, done = new_label(), new_label()
                 here(loop)
+                if anypos:
+                    emit(OPS['jumpif'], VARS['map'], CMP['='], walker.map, ('label', done))
                 emit(OPS['jumpif'], VARS['map'], CMP['<>'], walker.map, ('label', '__w' + loop),
                      OPS['jumpif'], VARS['x'], CMP['<>'], walker.pos[0], ('label', '__w' + loop),
                      OPS['jumpif'], VARS['y'], CMP['='], walker.pos[1], ('label', done))
@@ -1268,9 +1451,12 @@ def compile_script(text, data=None, start=None):
                             break
                         allowed.append(int(o))
                 lane = {'left': 90, 'center': 0}.get(opts[opts.index('lane') + 1], 0) if 'lane' in opts else 0
-                if 'fight' in opts:
+                if 'fight' in opts or 'fightany' in opts or 'fightchar' in opts:
                     fight_exit[0], fight_exit[1] = new_label(), (int(t[1]), int(t[2]))
-                    emit(OPS['set'], 0, 1)          # r0 = 1: an event battle ends the walk
+                    # r0 = 1: an event battle ends the walk, 2: any battle, $100 + slot: the battle of that map
+                    # character (its requester is answered with 'y', others in Spannenberg with 'n')
+                    r0 = 0x100 + int(opts[opts.index('fightchar') + 1]) if 'fightchar' in opts else                         (2 if 'fightany' in opts else 1)
+                    emit(OPS['set'], 0, r0)
                 if walker.load(walker.map)['type'] == 1:
                     walk_3d(walker.path_3d((int(t[1]), int(t[2])), through, allowed), lane, 'nostop' not in opts)
                 else:
@@ -1371,11 +1557,12 @@ def main():
         sys.exit(1)
     args = [a for a in sys.argv[1:] if not a.startswith('--')]
     start = next((a[8:] for a in sys.argv[1:] if a.startswith('--start=')), None)
+    defines = [a[9:] for a in sys.argv[1:] if a.startswith('--define=')]
     folder = next((a[7:] for a in sys.argv[1:] if a.startswith('--data=')), os.environ.get('AMSCRIPT_DATA'))
     source = args[0]
     target = args[1] if len(args) > 1 else os.path.splitext(source)[0] + '.bin'
     try:
-        data = compile_script(open(source, encoding='utf-8').read(), folder, start)
+        data = compile_script(open(source, encoding='utf-8').read(), folder, start, defines)
     except ScriptError as e:
         print('error:', e)
         sys.exit(1)

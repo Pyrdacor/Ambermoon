@@ -87,6 +87,7 @@ onmap 258 20 3
 walkto 16 29
 enter down
 onmap 157 25 12
+settle 10                       # (the world map fades in: a click before is lost, the walk would step aside)
 log 6
 
 # ---------- World map: west to Spannenberg (map 156), its south gate (34,27)
@@ -118,9 +119,39 @@ seedlock 0x8006ffff             # the same random numbers every frame: the rando
 onmap 263 16 29 N
 
 # ---------- to the sign (12,3): sideways (right) into the alley x=22 and up without turning, then west
-glide 21 29 via 35 36            # 5 squares sideways (right), past the trees
-curve 22 25                      # north, turning slightly right into the alley
-curve 22 14                      # straightening up (left) in the alley
+# (sideways is 4 times slower than forward: turn right (right click top right, 90 degrees at once), forward east
+# along row 29 past the trees, then a left turn while walking (left button held top left) into the alley north)
+waituntil depth >= 2 timeout 150 goto sp_text   # (after loading: "You will be able to return to this point later.")
+dismiss 1
+sp_text:
+ready 10
+sp_turn:
+rclick 152 60                    # 90 degrees right: east (again if the click got lost)
+waituntil angle1024 > 600 timeout 25 goto sp_turn
+mouse 104 50                     # top middle: forward at full speed
+press
+waituntil px >= 9216             # (tuned)
+mouse 33 50                      # top left, fast: 45 degrees left (768 east -> 896 north-east)
+waituntil angle1024 >= 890
+mouse 104 50                     # straight on (north-east)
+get r0 px
+log 0x78
+waituntil px >= 10700            # (tuned: the arc ends in the middle of x=22 - else glide first centres sideways)
+mouse 33 50                      # fast 45 degrees left again: north
+sp_arc:                          # (896 -> 1024 = 0: wraps)
+if angle1024 < 512 goto sp_north
+if angle1024 >= 1016 goto sp_north
+wait 1
+goto sp_arc
+sp_north:
+release
+get r0 px                        # (log: where the arc ended)
+log 0x75
+get r0 py
+log 0x76
+get r0 angle1024
+log 0x77
+set r0 0
 glide 22 3 via 35 36             # straight up the alley
 walkto 12 3 via 35 36 nostop
 settle 50
@@ -182,9 +213,9 @@ waituntil depth <= 2
 keyuntil kp9 depth <= 1         # exit the options menu
 log 31
 
-# ---------- chest (21,3) (file 127): flute, crystal harp -> Netsrak; 50 spell points V, 25 healing potions IV -> Chris
-# (portraits: member n at x 32 + 48 * (n - 1); Chris 80, Netsrak 128; one amount dialog per opening of the chest: a
-# second one in a row swaps the stacks)
+# ---------- chest (21,3) (file 127): flute -> Netsrak, crystal harp -> the hero (he has the lantern: both at the
+# crystal wall); 50 spell points V, 25 healing potions IV -> Chris (one opening of the chest)
+# (portraits: member n at x 32 + 48 * (n - 1); the hero 32, Chris 80, Netsrak 128)
 walkto 22 3 via 2
 settle 10
 cil 2
@@ -196,7 +227,7 @@ ready 10
 rclick 27 152                   # slot 1: flute
 click 128 16                    # -> Netsrak
 rclick 71 152                   # slot 3: crystal harp
-click 128 16                    # -> Netsrak
+click 32 16                     # -> the hero
 keyuntil down scroll >= 12      # two rows down: slots 13-24 visible
 ready 10
 click 71 178                    # slot 21: spell points V -> "how many?"
@@ -225,18 +256,6 @@ release
 wait 15
 sp50_in:
 ready 15
-keyuntil kp9 depth <= 1         # exit
-settle 10
-walkto 22 3 via 2
-settle 10
-cil 2
-key kp8                         # hand
-wait 10
-clicktile -1 0
-waituntil module = OpenedChest
-ready 10
-keyuntil down scroll >= 12
-ready 10
 click 71 152                    # slot 15: healing potion IV -> "how many?"
 waituntil depth >= 3
 ready 10
@@ -265,9 +284,50 @@ hp25_in:
 ready 15
 keyuntil kp9 depth <= 1         # exit
 settle 10
+ifdef TAR
+walkto 22 3 via 2               # once more: 15 spell points V -> Netsrak (for Tar)
+settle 10
+cil 2
+key kp8                         # hand
+wait 10
+clicktile -1 0
+waituntil module = OpenedChest
+ready 10
+keyuntil down scroll >= 12
+ready 10
+click 71 178                    # slot 21: spell points V -> "how many?"
+waituntil depth >= 3
+ready 10
+click 152 124                   # the number field: type 15, return
+wait 25                         # (the input starts a moment after the click)
+type 15
+key return
+waituntil depth <= 2 timeout 30 goto sp15_ok
+goto sp15
+sp15_ok:                        # still open: confirm with space
+key space
+sp15:
+ready 15
+mouse 128 16                    # -> Netsrak (press, hold, release; twice if needed)
+wait 10
+press
+wait 15
+release
+wait 15
+if depth <= 2 goto sp15_in
+press
+wait 15
+release
+wait 15
+sp15_in:
+ready 15
+keyuntil kp9 depth <= 1         # exit
+settle 10
+endif
 log 12
 
-# ---------- chest (20,4) (file 128): the ring of Sobek (waterfall, 20 charges) -> Chris
+# ---------- chest (20,4) (file 128): the T A R B O S amulet (for the madman in the healers' cellar), Alkem's ring
+# (for Tar) -> Netsrak
 walkto 21 4
 settle 10
 cil 2
@@ -278,77 +338,386 @@ waituntil module = OpenedChest
 ready 10
 keyuntil down scroll >= 12      # slots 13-24 visible
 ready 10
-rclick 27 178                   # slot 19: ring of Sobek
-click 80 16                     # -> Chris
+ifdef TAR
+rclick 27 152                   # slot 13: T A R B O S amulet
+click 128 16                    # -> Netsrak
+endif
+rclick 115 178                  # slot 23: Alkem's ring (SP maximum +50)
+click 128 16                    # -> Netsrak
 keyuntil kp9 depth <= 1
 settle 10
 log 13
 
-# ---------- the lantern of the hero -> Netsrak (the hero will not survive)
-keyuntil f1 module = Inv2          # inventory of the hero
-rclick 161 88                   # backpack slot 3: lantern
-click 128 16                    # -> Netsrak (backpack 5)
+ifndef TAR
+# ---------- Netsrak puts on Alkem's ring (left ring finger: the iron ring is on the right one)
+keyuntil f3 module = Inv2       # Netsrak's inventory
+clickitem ALKEM'S_RING inv member 3
+ready 5
+click 92 184                    # left ring finger
+ready 10
 keyuntil kp9 depth <= 1
+endif
 log 17
 savegame 8                      # (check point: the items are handed out)
 chests_done:                    # run.py --load 8 --start chests_done
 onmap 257 22 4
 
-# ---------- out of the office: the teleporter (16-17, 12-13) leads back to the sign in Spannenberg
+# ---------- out of the office (Netsrak active: he refuses all battles), the teleporter back to the sign
+keyuntil 3 active = 3
 walkto 17 12 via 1 2
 onmap 263 12 3
 seedlock 0x8006ffff             # (no random encounters)
 log 18
 
-# ---------- a bandit attacks at the sign: fight, Netsrak casts earthquake
-waituntil depth >= 2 timeout 300 goto sign_nofight
-keyuntil y module = Combat      # "Do you want to fight?" yes
-ready 25
-key 3                           # Netsrak
+ifdef TAR
+# ---------- to the house of healers (6,9) in the west; the single bandit in front of it (6,10) is fought: Chris
+# attacks him (the other battles are refused: 'n', near the house 'y')
+healer_walk:
+glide 7 10 via 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 31 32 34 35 36 39 40 41 fightchar 5
+if module = Combat goto bandit
+glide 6 9 through fightchar 5   # (6,9): the entrance
+if module = Combat goto bandit
+goto healer_in
+bandit:
+seedlock off                    # (the locked seed makes every attack miss)
+log 60
+b_round:
+if module = Apres goto b_loot
+if depth <= 1 goto b_wait
+if module <> Combat goto b_busy
+ready 15
+if module <> Combat goto b_round
+keyuntil 2 active = 2           # Chris
 ready 10
-castspell 26                    # magic (keypad 3): fire pillar
+key kp1                         # attack
 ready 10
-click 120 153                   # target: the bandit in row 1 (cells: x 104 + 16 * column, y 140 + 13 * row)
+clickmonster                    # the bandit
 ready 10
 key kp9                         # OK: the round starts
-log 30
-sign_fight:                     # further rounds: OK while the combat screen is on top
-if module = Apres goto sign_loot
-if depth <= 1 goto sign_wait
-if module <> Combat goto sign_fwait
-ready 15
-if module <> Combat goto sign_fight
-key kp9                         # OK
 wait 20
-goto sign_fight
-sign_fwait:
+goto b_round
+b_busy:
+if stable < 40 goto b_busy_w
+rclick
+b_busy_w:
 wait 5
-goto sign_fight
-sign_wait:                      # the loot screen comes a moment after the battle
-waituntil module = Apres timeout 150 goto sign_noloot
-sign_loot:                      # "Everyone receives ... experience points." (click), then exit
-if depth <= 1 goto sign_noloot
-if depth >= 3 goto sign_text
+goto b_round
+b_wait:
+waituntil module = Apres timeout 150 goto b_done
+b_loot:                         # loot / experience: texts (click), then exit
+if depth <= 1 goto b_done
+if depth >= 3 goto b_text
 ready 15
 key kp9
 wait 25
-goto sign_loot
-sign_text:
+goto b_loot
+b_text:
 rclick
 wait 10
-goto sign_loot
-sign_noloot:
-log 32
-sign_nofight:
+goto b_loot
+b_done:
+settle 10
+seedlock 0x8006ffff             # (no random encounters)
+keyuntil 3 active = 3           # Netsrak active again
+goto healer_walk
+healer_in:
+onmap 266 20 15 anypos
+seedlock off
+settle 10
+log 61
+
+# ---------- house of healers: west, then north-west to the cellar stairs (11,10-11)
+walkto 11 11
+onmap 267 13 4
+settle 10
+log 62
+
+# ---------- cellar: south-east to the cell; the spiders (11,12): Netsrak casts earthquake
+cellar_walk:
+walkto 10 10 via 3 4 fight
+if module = Combat goto spiders
+goto at_cell
+spiders:
+log 63
+s_round:
+if module = Apres goto s_loot
+if depth <= 1 goto s_wait
+if module <> Combat goto s_busy
+ready 15
+if module <> Combat goto s_round
+keyuntil 3 active = 3           # Netsrak
+ready 10
+castspell 18                    # magic (keypad 3): earthquake
+ready 10
+key kp9                         # OK
+wait 20
+goto s_round
+s_busy:
+if stable < 40 goto s_busy_w
+rclick
+s_busy_w:
+wait 5
+goto s_round
+s_wait:
+waituntil module = Apres timeout 150 goto s_done
+s_loot:
+if depth <= 1 goto s_done
+if depth >= 3 goto s_text
+ready 15
+key kp9
+wait 25
+goto s_loot
+s_text:
+rclick
+wait 10
+goto s_loot
+s_done:
+settle 10
+goto cellar_walk
+at_cell:
+settle 10
+log 64
+savegame 10
+cell:                           # run.py --load 10 --start cell
+onmap 267 10 10
+
+# ---------- the madman in the cell (map character slot 0): Netsrak gives him the T A R B O S amulet
+talkfar 0
+keyuntil kp1 depth >= 3         # give item
+wait 15
+clickitem T_A_R_B_O_S_AMULET noready  # (dialogue item area: Netsrak's backpack)
+mad_end:                        # the texts: left clicks scroll to the end, then the free scroll mode is ended
+log 70                          # with a right click; until the conversation is over, else exit (no 'click' /
+if depth <= 1 goto mad_done     # 'key': they wait for a calm module stack, the text window never is)
+mouse 100 80
+wait 3
+press
+wait 5
+release
+wait 10
+press right
+wait 5
+release
+wait 15
+if depth <= 1 goto mad_done
+if depth >= 3 goto mad_end
+mouse 288 153                   # exit
+wait 3
+press
+wait 5
+release
+wait 25
+goto mad_end
+mad_done:
+settle 10
+log 65
+
+# ---------- he is Tar the dark now (party member, map character slot 1): talk to him again, he joins (member 4)
+talkfar 1
+tar_join:                       # (raw keys and clicks: the text windows are never calm)
+keynow kp6                      # join the party
+wait 25
+tar_text:                       # "It is a great honour ...": left clicks, then a right click ends the free scroll
+if members >= 4 goto tar_in
+log 71
+mouse 100 80
+wait 3
+press
+wait 5
+release
+wait 10
+press right
+wait 5
+release
+wait 15
+if depth >= 3 goto tar_text
+if members < 4 goto tar_join
+tar_in:
+log 66
+tar_exit:                       # leave the conversation: exit, then the goodbye texts
+if depth <= 1 goto tar_done
+if depth >= 3 goto tar_bye
+mouse 288 153                   # exit
+wait 3
+press
+wait 5
+release
+wait 25
+goto tar_exit
+tar_bye:
+mouse 100 80
+wait 3
+press
+wait 5
+release
+wait 10
+press right
+wait 5
+release
+wait 15
+goto tar_exit
+tar_done:
+settle 10
+
+# ---------- Alkem's ring: Netsrak gives it to Tar (portrait 4), Tar puts it on (right ring finger)
+keyuntil f3 module = Inv2       # Netsrak's inventory
+clickitem ALKEM'S_RING inv member 3
+ready 5
+click 176 16                    # -> Tar
+ready 10
+rclickitem SPELLPOINTS_V inv member 3   # the 15 spell point potions (whole stack)
+ready 5
+click 176 16                    # -> Tar
+ready 10
+key f4                          # switch to Tar's inventory
+wait 25
+clickitem ALKEM'S_RING inv member 4
+ready 5
+click 28 184                    # right ring finger
+ready 10
+keyuntil kp9 depth <= 1
+log 69
+savegame 9
+tar:                            # run.py --load 9 --start tar
+keyuntil 3 active = 3
+
+# ---------- out: the cellar stairs (12-13,2), the house exit (19-20,17) -> Spannenberg (6,10)
+walkto 12 3 via 3 4
+enter up
+onmap 266 12 11
+walkto 19 16
+enter down
+onmap 263 6 10
+seedlock 0x8006ffff             # (no random encounters)
+set r3 0
+out_check:                      # the single bandit, if he was not met on the way in (e.g. he was in a side alley):
+if npc5 >= 255 goto out_ok      # (255: not there any more) wait until he attacks, Chris kills him (at most 3 x 8 s)
+if r3 >= 3 goto out_ok
+add r3 1
+seedlock off
+settle 400 fightchar 5
+if module = Combat goto o_fight
+seedlock 0x8006ffff
+goto out_check
+o_fight:                        # (the seed stays unlocked: else every attack misses)
+log 68
+o_round:
+if module = Apres goto o_loot
+if depth <= 1 goto o_wait
+if module <> Combat goto o_busy
+ready 15
+if module <> Combat goto o_round
+keyuntil 2 active = 2           # Chris
+ready 10
+key kp1                         # attack
+ready 10
+clickmonster
+ready 10
+key kp9
+wait 20
+goto o_round
+o_busy:
+if stable < 40 goto o_busy_w
+rclick
+o_busy_w:
+wait 5
+goto o_round
+o_wait:
+waituntil module = Apres timeout 150 goto o_done
+o_loot:
+if depth <= 1 goto o_done
+if depth >= 3 goto o_text
+ready 15
+key kp9
+wait 25
+goto o_loot
+o_text:
+rclick
+wait 10
+goto o_loot
+o_done:
+settle 10
+seedlock 0x8006ffff
+keyuntil 3 active = 3
+goto out_check
+out_ok:
+settle 10
+log 67
+
+endif
 
 # ---------- goto point "City gates" (16,29), then out through the gate (16,30) to the world map
-gotopoint 16 29
+# (the 3 bandits at the sign: the battle is accepted, Netsrak casts whirlwind every round; the locked seed would
+# make the spell fail: unlocked during the battle)
+glide 13 3                      # (1 square towards them: the battle starts earlier)
+waituntil depth >= 2 timeout 1000 goto k_done
+seedlock off
+ready 10
+key y
+waituntil module = Combat timeout 200 goto k_done
+log 50
+k_round:
+if module = Apres goto k_loot
+if depth <= 1 goto k_wait
+if module <> Combat goto k_busy
+ready 15
+if module <> Combat goto k_round
+keyuntil 3 active = 3           # Netsrak
+ready 10
+castspell 22                    # magic (keypad 3): whirlwind
+ready 10
+key kp9                         # OK
+wait 20
+goto k_round
+k_busy:
+if stable < 40 goto k_busy_w
+rclick
+k_busy_w:
+wait 5
+goto k_round
+k_wait:
+waituntil module = Apres timeout 150 goto k_done
+k_loot:
+if depth <= 1 goto k_done
+if depth >= 3 goto k_text
+ready 15
+key kp9
+wait 25
+goto k_loot
+k_text:
+rclick
+wait 10
+goto k_loot
+k_done:
+settle 10
+seedlock 0x8006ffff
+log 51
+gotopoint 16 29 else to_gate
+goto at_gate
+to_gate:                        # (refused: a monster nearby) on foot to the gate
+glide 16 29 via 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 31 32 34 35 36 39 40 41
+at_gate:
 seedlock off
 onmap 263 16 29 S
 log 19
 savegame 4
 gate:                           # run.py --load 4 --start gate
 onmap 263 16 29 S
+
+# ---------- battle positions: Chris to the front row, column 3 (in front of the machine: it only attacks him, his
+# M-B-R 6 is above its M-B-W 5), Netsrak behind him (the hero stays in the back row, column 2)
+cil 2
+keyuntil kp2 module = BattleOrder
+wait 10
+click 272 105                   # Chris (back row, column 6)
+wait 10
+click 128 59                    # -> front row, column 3
+wait 10
+click 224 105                   # Netsrak (back row, column 5)
+wait 10
+click 128 105                   # -> back row, column 3
+wait 10
+keyuntil kp9 module = M3Map     # exit
 enter down                      # through the gate (16,30) to the world map
 onmap 156 34 28
 log 20
@@ -366,13 +735,11 @@ keyuntil kp9 depth <= 1         # still in the inventory: exit
 flute_done:
 log 21
 
-# ---------- to the temple island: straight to the entrance (part 121 (44,49), south of it), land, in
-flyto 121 44 49
+# ---------- to the temple island: straight onto the entrance (part 121 (44,48)), land: the temple (map 431)
+flyto 121 44 48
 cil 2
 keyuntil kp4 travel <> 5        # land (giant eagle = 5)
 log 22
-settle 10
-enter up                        # the entrance (44,48) -> temple (map 431)
 onmap 431 11 25
 log 23
 savegame 5
@@ -380,21 +747,22 @@ temple:                         # run.py --load 5 --start temple
 onmap 431 11 25 N
 keyuntil 3 active = 3           # Netsrak active in the whole temple (refuses battles: full dexterity and luck)
 
-# ---------- the crystal wall (11,23): stand on (11,24); Netsrak: lantern (light), then the crystal harp
+# ---------- the crystal wall (11,23): stand on (11,24); the hero (his inventory): lantern (light), then the crystal
+# harp (Netsrak stays active)
 walkto 11 24 via 3
 settle 10
-keyuntil f3 module = Inv2       # Netsrak's inventory
+keyuntil f1 module = Inv2       # the hero's inventory
 keyuntil kp8 depth >= 3         # use item
 ready 10
-clickitem LANTERN inv member 3
+clickitem LANTERN inv member 1
 waitclick 2 100
 ready 15
 if module = Inv2 goto harp_use
-keyuntil f3 module = Inv2       # (the inventory was closed)
+keyuntil f1 module = Inv2       # (the inventory was closed)
 harp_use:
 keyuntil kp8 depth >= 3
 ready 10
-clickitem CRYSTAL_HARP inv member 3
+clickitem CRYSTAL_HARP inv member 1
 waitclick 2 150                 # "... the wall suddenly bursts into myriads of tiny shards."
 waituntil depth <= 1 timeout 100 goto harp_inv
 goto harp_done
@@ -402,7 +770,7 @@ harp_inv:
 keyuntil kp9 depth <= 1
 harp_done:
 log 25
-# (all members are in the back row already: no battle positions)
+keyuntil 3 active = 3           # (Netsrak active)
 
 # ---------- through the broken crystal wall to the teleporter (11,21) -> machine room (map 453)
 enter up                        # (11,23): the wall is gone
@@ -416,7 +784,8 @@ onmap 453 9 8
 keyuntil 3 active = 3           # (Netsrak active)
 
 # ---------- approach the machine (event squares around (4-7, 5-6)): text, then the battle
-glide 6 4 through               # north, west along row 3, south: no turning (battles: flight, at once on)
+glide 6 3 through               # north, west along row 3 (not over (7,4): a dragon starts there), no turning
+glide 6 4 through
 glide 6 5 through fight         # (6,5): text and the battle against the machine
 m_start:                        # the machine's text (click), then the battle starts
 if module = Combat goto m_started
@@ -430,25 +799,116 @@ goto m_start
 m_started:
 log 28
 
+# ---------- the party advances (keypad 5) twice: then the machine stands in front of Chris (an advance only counts
+# with its text "The party advances!": a key can get lost; at most 6 tries)
+wait 40                         # (the combat screen fades in: keys before are lost)
+set r1 0
+set r3 0
+m_adv:
+if r1 >= 2 goto m_adv_done
+if r3 >= 6 goto m_adv_done
+add r3 1
+ready 15
+key kp5
+waituntil depth >= 3 timeout 60 goto m_adv
+add r1 1
+m_adv_t:                        # the text (click)
+if depth <= 2 goto m_adv
+ready 10
+rclick
+wait 10
+goto m_adv_t
+m_adv_done:
+
 # ---------- the machine battle: each round Netsrak ice shower (no target); Chris (member 2): the ring of Sobek
 # (waterfall) at the machine, 20 times (r0 counts), or a potion for Netsrak: healing at LP < 120, spell points at
-# SP < 560 (the potion works from the next round on: Netsrak acts before Chris)
+# SP < 400 (the spell is chosen before: Netsrak needs 200 SP at the start of each round)
 set r0 0
+set r2 0
 m_round:
 if module = Apres goto m_loot
 if depth <= 1 goto m_over
 if module <> Combat goto m_busy
 ready 10
 if module <> Combat goto m_round
-keyuntil 3 active = 3           # Netsrak (acts first: speed 99)
-ready 10
+get r0 sp3                      # (log: Netsrak's SP, LP, Chris's LP at the start of the round)
+log 0x70
+get r0 lp3
+log 0x71
+get r0 lp2
+log 0x72
+set r0 0
+if alive3 = 0 goto m_tar        # Netsrak (acts first: speed 99): ice shower
+if sp3 < 200 goto m_tar         # (ice shower costs 200 SP: too few - Chris gives him a potion this round)
+if active = 3 goto m_cast       # (the key of the active member would open his inventory)
+key 3
+wait 10
+get r0 active                   # (log: who is active after the key, and the module)
+log 0x73
+get r0 module
+log 0x74
+set r0 0
+if active <> 3 goto m_tar       # (cannot act: e.g. paralysed)
+m_cast:
 castspell 30                    # magic (keypad 3): ice shower
 ready 8
+m_tar:                          # Tar (member 4, speed 42: still before the machine) casts ice shower too; he must
+ifdef TAR
+if r2 >= 5 goto m_tar_ok        # cast it at least 5 times (r2 counts), else the run is aborted (log $ab)
+if alive4 = 0 goto m_abort
+m_tar_ok:
+if alive4 = 0 goto m_mando
+if sp4 >= 270 goto m_tar_go
+if alive2 = 0 goto m_tar_self   # too few spell points: Chris gives him a potion - unless Chris is busy (or dead)
+if lp3 < 120 goto m_tar_self
+if lp2 < 120 goto m_tar_self
+if lp4 < 120 goto m_tar_self
+if sp3 < 300 goto m_tar_self
+goto m_mando
+m_tar_self:                     # Tar drinks a spell point potion himself
+key 4
+wait 10
+if active <> 4 goto m_mando
+keyuntil f4 module = Inv2
+keyuntil kp8 depth >= 4
+clickitem SPELLPOINTS_V inv member 4
+waituntil module = Combat timeout 200 goto m_mando
+waituntil depth >= 3 timeout 200 goto m_mando
+m_tst:
+ready 8
+if depth <= 2 goto m_mando
+clickcell 4                     # target: Tar himself
+goto m_tst
+m_tar_go:
+key 4
+wait 10
+if active = 4 goto m_tar_cast
+if r2 < 5 goto m_abort          # (cannot act, e.g. drugged)
+goto m_mando
+m_tar_cast:
+set r5 0
+castspell 30
+ready 8
+if r5 = 0 goto m_tar_fail       # (the spell window did not open)
+add r2 1
+goto m_mando
+m_tar_fail:
+if r2 < 5 goto m_abort
+endif
 m_mando:
 if alive2 = 0 goto m_ok          # (Chris dead: nothing)
 if lp3 < 120 goto m_heal        # Chris: a healing potion on Netsrak
 if lp2 < 120 goto m_heal_chris  # or on himself
-if sp3 < 300 goto m_sp          # (Chris acts first: speed 100 vs 99 - the potion works in the same round)
+ifdef TAR
+if alive4 = 0 goto m_mando_sp
+if lp4 < 120 goto m_heal_tar    # or on Tar
+endif
+m_mando_sp:
+if sp3 < 400 goto m_sp          # (after this round's cast fewer than 200 left: the potion now - Chris acts first)
+ifdef TAR
+if alive4 = 0 goto m_ok
+if sp4 < 300 goto m_sp_tar      # spell points for Tar
+endif
 goto m_ok                       # (no ring of Sobek: Chris only gives potions)
 keyuntil f2 module = Inv2       # Chris's inventory
 keyuntil kp8 depth >= 4         # use item
@@ -497,14 +957,51 @@ ready 8
 if depth <= 2 goto m_ok
 clickcell 3                     # target: Netsrak
 goto m_st
+m_heal_tar:
+keyuntil f2 module = Inv2
+keyuntil kp8 depth >= 4
+clickitem HEALING_POTION_IV inv member 2
+waituntil module = Combat timeout 200 goto m_ok
+waituntil depth >= 3 timeout 200 goto m_ok
+m_htt:
+ready 8
+if depth <= 2 goto m_ok
+clickcell 4                     # target: Tar
+goto m_htt
+m_sp_tar:
+keyuntil f2 module = Inv2
+keyuntil kp8 depth >= 4
+clickitem SPELLPOINTS_V inv member 2
+waituntil module = Combat timeout 200 goto m_ok
+waituntil depth >= 3 timeout 200 goto m_ok
+m_stt:
+ready 8
+if depth <= 2 goto m_ok
+clickcell 4                     # target: Tar
+goto m_stt
+m_abort:
+log 0xab                        # Tar failed: abort (run.py --fail ab restarts)
+end
 m_ok:
 ready 10
-key kp9                         # OK: the round starts
+keyuntil kp9 module <> Combat   # OK: the round starts (again if the key got lost: else the actions are chosen twice)
 log 50
-wait 10
 goto m_round
 m_busy:                         # the round is shown; texts like "The machine advances" wait for a click
+if aliveactive = 1 goto m_busy_t
+mouse 128 16                    # "Select a new leader." (the active member died): Netsrak
+if alive3 = 1 goto m_leader
+mouse 80 16                     # (or Chris)
+m_leader:
+wait 3
+press
+wait 5
+release
+wait 20
+goto m_round
+m_busy_t:
 if stable < 40 goto m_busy_w
+mouse 40 150                    # (the text area: a right click on a figure in the grid opens his inventory)
 rclick
 m_busy_w:
 wait 5
@@ -523,13 +1020,16 @@ rclick
 wait 10
 goto m_loot
 m_done:
-settle 50                       # the texts after the battle (the way opens)
+settle 10                       # the texts after the battle (the way opens; at once on: the dragons come)
 log 51
+savegame 7
+exit:                           # run.py --load 7 --start exit
 
 # ---------- to the exit (5,9): (5,8) is open now
 opensquare 5 8
+glide 5 8 through
+log 52                          # (the outro begins with the next step: in the outro the log is not written any more)
 glide 5 9 through
-log 52
 waituntil depth >= 2 timeout 500 goto the_end
 log 53
 the_end:

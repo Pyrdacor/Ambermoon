@@ -20,16 +20,22 @@ SECTIONS = [
     ('spannenberg', 1,    'spannenberg', '0b', 120),   # alley, sign, staff -> Thalion office (savegame 2)
     ('office',      2,    'office',      '10', 120),   # Chris and Netsrak join (savegame 3)
     ('recruited',   3,    'recruited',   '11', 150),   # options, chests, lantern (savegame 8)
-    ('chests_done', 8,    'chests_done', '13', 120),   # sign battle, goto point city gates (savegame 4)
+    ('chests_done', 8,    'chests_done', '13', 90),    # to the sign, goto point city gates (savegame 4)
+    ('healer',      8,    'chests_done', '42', 240),   # TAR: house of healers, bandit, cellar, spiders, Tar (savegame 9)
+    ('tar',         9,    'tar',         '13', 90),    # TAR: out of the cellar and the house, city gates (savegame 4)
     ('gate',        4,    'gate',        '17', 90),    # flute, eagle, temple entrance (savegame 5)
     ('temple',      5,    'temple',      '1b', 90),    # lantern, harp, machine room (savegame 6)
     ('machine',     6,    'machine',     '34', 300),   # machine battle, exit (outro)
 ]
 
 
-def run_section(script, name, slot, label, tag, limit):
+TAR_ONLY = ('healer', 'tar')     # with --tar instead of chests_done
+
+
+def run_section(script, name, slot, label, tag, limit, defines=()):
     cmd = [sys.executable, os.path.join(HERE, 'run.py'), script, '--success', tag, '--limit', str(limit),
-           '--attempts', '1', '--seconds', str(limit + 60), '--tail', '3']
+           '--attempts', '1', '--seconds', str(limit + 60), '--tail', '3', '--fail', 'ab']
+    cmd += ['--define=' + d for d in defines]
     if slot is not None:
         cmd += ['--load', str(slot), '--start', label]
     out = subprocess.run(cmd, cwd=HERE, capture_output=True, text=True, errors='replace').stdout
@@ -45,15 +51,17 @@ def main():
     ap.add_argument('script', nargs='?', default=os.path.join(HERE, 'speedrun.txt'))
     ap.add_argument('--from', dest='start')
     ap.add_argument('--only')
+    ap.add_argument('--tar', action='store_true', help='the route with Tar (house of healers)')
     args = ap.parse_args()
-    names = [s[0] for s in SECTIONS]
-    todo = SECTIONS
+    sections = [s for s in SECTIONS if (s[0] in TAR_ONLY) == args.tar or s[0] not in TAR_ONLY + ('chests_done',)]
+    names = [s[0] for s in sections]
+    todo = sections
     if args.only:
-        todo = [s for s in SECTIONS if s[0] == args.only]
+        todo = [s for s in sections if s[0] == args.only]
     elif args.start:
-        todo = SECTIONS[names.index(args.start):]
+        todo = sections[names.index(args.start):]
     for name, slot, label, tag, limit in todo:
-        seconds, last = run_section(args.script, name, slot, label, tag, limit)
+        seconds, last = run_section(args.script, name, slot, label, tag, limit, ['TAR'] if args.tar else [])
         if seconds is None:
             print('%-12s FAILED (tag %s not reached within %d s)' % (name, tag, limit))
             for line in last:
