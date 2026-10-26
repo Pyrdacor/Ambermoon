@@ -35,6 +35,18 @@ depend on the Amiga hardware by an ST kernel with the same interface.
 * Original files which need small changes (memory allocation, file system calls, DMA) are copied to
   `port/PATCHED/` with every change marked `; ST:`.
 
+## State
+
+* Stage 1 and 2 are done, stage 3 is in progress: in Hatari (STE, 4 MB) the original code runs from the
+  character editor through the first event (picture and scrolling text, the right mouse button ends it) to
+  the 2D map of grandfather's house.
+* The changes of the original files are patches (`port/PATCHES`, marked `; ST:`): memory allocation and blitter
+  (`MEMORY.S`), sound DMA (`VARIOUS.S`), and the palette of an event picture is loaded before the picture is
+  drawn (`EVENTS.S`), because the ST converts the colours while drawing (the Amiga screen keeps colour numbers).
+* Open: the colours of the map look too dark (night?), music, zoom, 3D maps, diagnostic screen.
+
+![Character editor](docs/port/editor.png) ![Event](docs/port/event.png) ![Map](docs/port/map.png)
+
 ## Stages
 
 1. Build: `port/AMBERST.S` assembles all original files with an ST kernel of stubs; the program links.
