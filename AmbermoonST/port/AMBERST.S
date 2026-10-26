@@ -30,6 +30,8 @@
 ; ---------- Modules (in link order) --------------
 	opt	o1-,o2-,o4-,o5-,o11-		; reconstructed code : explicit encodings
 ;include	KERNEL/START.S		; ST: replaced by the ST kernel
+	SECTION	Program,code		; ST: TOS starts at the beginning of the
+	jmp	Start			;  text segment
 	IFD	DEBUG
 	include	KERNEL/DEBUG_AE.S	; Debug build only
 	ENDC
@@ -69,8 +71,8 @@
 ;include	KERNEL/MOUSE.S		; ST: replaced by the ST kernel
 ;include	KERNEL/TEXT.S		; ST: replaced by the ST kernel
 	include	KERNEL/MEMORY.S
-;include	KERNEL/FILES.S		; ST: replaced by the ST kernel
-;include	KERNEL/INPUT.S		; ST: replaced by the ST kernel
+	include	KERNEL/FILES.S
+	include	KERNEL/INPUT.S
 ;include	KERNEL/DI_SCREEN.S		; ST: replaced by the ST kernel
 	opt	o2+,o4+,o5+,o11+		; original code : optimizations of the original assembler
 	include	HULL/VARIOUS.S
@@ -87,7 +89,7 @@
 	include	KERNEL/DATA.S
 	include	KERNEL/CHIP_DATA.S
 	include	KERNEL/CHIP_BSS.S
-;include	KERNEL/FILES2.S		; ST: replaced by the ST kernel
+	include	KERNEL/FILES2.S
 ;include	MAP/3D_RENDER.S		; ST: replaced by the ST kernel
 ;include	MUSIC/SONIC_ARRANGER.S		; ST: replaced by the ST kernel
 ;include	KERNEL/ZOOM.S		; ST: replaced by the ST kernel
@@ -97,4 +99,13 @@
 	include	KERNEL/BUFFERS.S
 
 ; ---------- ST kernel ----------------------------
+	include	ST_KERNEL/START.S		; ST:
+	include	ST_KERNEL/SYSTEM.S		; ST:
+	include	ST_KERNEL/COLOURS.S		; ST:
+	include	ST_KERNEL/MOUSE.S		; ST:
+	include	ST_KERNEL/POINTER.S		; ST:
+	include	ST_KERNEL/GRAPHICS.S		; ST:
+	include	ST_KERNEL/TEXT.S		; ST:
+	include	ST_KERNEL/IKBD.S		; ST:
+	include	ST_KERNEL/LIBS.S		; ST:
 	include	ST_KERNEL/STUBS.S		; ST: (stage 1)

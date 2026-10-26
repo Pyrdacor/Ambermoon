@@ -42,7 +42,15 @@ Fopen	EQU	$3d
 Fclose	EQU	$3e
 Fread	EQU	$3f
 Mshrink	EQU	$4a
+Fsetdta	EQU	$1a
+Fcreate	EQU	$3c
+Fwrite	EQU	$40
+Fseek	EQU	$42
+Malloc	EQU	$48
+Mfree	EQU	$49
+Fsfirst	EQU	$4e
 Physbase	EQU	2
 Logbase	EQU	3
 Getrez	EQU	4
 Setscreen	EQU	5
+Keytbl	EQU	16
