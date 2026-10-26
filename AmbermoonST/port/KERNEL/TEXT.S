@@ -358,10 +358,9 @@ Render_glyph:
 	SECTION	Fast_BSS,bss
 Text_line_bit_plane_buffer:
 	ds.b	200
-Mouse_buffer_end:			; (flag of the Amiga version)
-	ds.b	1
-Rune_flag:
-	ds.b	1
+Rune_flag:				; (Mouse_buffer_end, the flag of the
+	ds.b	1			;  Amiga version, is in MOUSE.S)
+	even
 Ink_colour:
 	ds.w	1
 Shadow_colour:

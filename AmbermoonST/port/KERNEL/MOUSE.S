@@ -303,12 +303,12 @@ Update_mouse:
 	move.b	Button_state,d0
 	moveq.l	#0,d1
 	btst.b	#1,ST_mouse_buttons	; Left mouse pressed?	; ST:
-	bne.w	.Skip10
-	bset.l	#0,d1		; If not, set bit 0 in D1
+	beq.w	.Skip10
+	bset.l	#0,d1		; If so, set bit 0 in D1
 .Skip10:
 	btst.b	#0,ST_mouse_buttons	; Right mouse pressed?	; ST:
-	bne.w	.Skip11
-	bset.l	#4,d1		; If not, set bit 4 in D1
+	beq.w	.Skip11
+	bset.l	#4,d1		; If so, set bit 4 in D1
 .Skip11:
 	move.b	d0,d2		; After this code:
 					; D0 holds the last D1 (last state info)
@@ -457,5 +457,8 @@ Last_mouse_y:
 	ds.w	1
 Mev_buffer:
 	ds.b	300
+Mouse_buffer_end:			; ST: the end of the buffer (in the Amiga
+	ds.b	1			;  version the next object, see TEXT.S)
+	even
 ST_pointer_gfx:			; ST: mouse pointer (mask, 4 planes) * 16 lines
 	ds.w	16*5

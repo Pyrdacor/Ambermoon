@@ -1,0 +1,108 @@
+--- a/KERNEL/MEMORY.S
++++ b/KERNEL/MEMORY.S
+@@ -1982,14 +1982,14 @@
+ 	move.l	d6,d1		; Allocate flags
+ 	ori.l	#$20000,d1		; MEMF_LARGEST
+ 	move.l	a6,-(sp)
+-	move.l	4,a6		; Exec base
++	move.l	ST_exec_base,a6	; Exec base	; ST: (address 4 is ROM)
+ 	jsr	_LVOAvailMem(a6)
+ 	move.l	(sp)+,a6
+ 	cmp.l	#$1400,d0		; Is largest chunk size >= 5120 bytes?
+ 	bmi.s	.Skip		; If not try another approach
+ 	move.l	d0,d2		; If so, save the block size
+ 	move.l	a6,-(sp)
+-	move.l	4,a6		; Exec base
++	move.l	ST_exec_base,a6	; Exec base	; ST: (address 4 is ROM)
+ 	jsr	_LVOAllocMem(a6)		; And allocate this block
+ 	move.l	(sp)+,a6
+ 	tst.l	d0
+@@ -2008,7 +2008,7 @@
+ .Skip:
+ 	move.l	d6,d1		; This time without MEMF_LARGEST
+ 	move.l	a6,-(sp)
+-	move.l	4,a6		; Exec base
++	move.l	ST_exec_base,a6	; Exec base	; ST: (address 4 is ROM)
+ 	jsr	_LVOAvailMem(a6)
+ 	move.l	(sp)+,a6
+ 	sub.l	d0,d3		; More memory available then needed, just return
+@@ -2027,7 +2027,7 @@
+ 	move.l	4(a2),d0		; Get block size
+ 	move.l	(a2),a1		; Get block mem pointer
+ 	move.l	a6,-(sp)
+-	move.l	4,a6		; Exec base
++	move.l	ST_exec_base,a6	; Exec base	; ST: (address 4 is ROM)
+ 	jsr	_LVOFreeMem(a6)		; Free it
+ 	move.l	(sp)+,a6
+ 	subq.w	#1,d7		; Decrease chain element index
+@@ -2042,7 +2042,7 @@
+ 	move.l	4(a2),d0
+ 	move.l	(a2),a1
+ 	move.l	a6,-(sp)
+-	move.l	4,a6		; Exec base
++	move.l	ST_exec_base,a6	; Exec base	; ST: (address 4 is ROM)
+ 	jsr	_LVOFreeMem(a6)
+ 	move.l	(sp)+,a6
+ 	subq.w	#1,d7
+@@ -2055,7 +2055,7 @@
+ 	add.l	d0,a1
+ 	move.l	d3,d0
+ 	move.l	a6,-(sp)
+-	move.l	4,a6		; Exec base
++	move.l	ST_exec_base,a6	; Exec base	; ST: (address 4 is ROM)
+ 	jsr	_LVOFreeMem(a6)
+ 	move.l	(sp)+,a6
+ 	lea.l	18(a2),a2
+@@ -2076,7 +2076,7 @@
+ 	move.l	4(a2),d0
+ 	move.l	(a2),a1
+ 	move.l	a6,-(sp)
+-	move.l	4,a6		; Exec base
++	move.l	ST_exec_base,a6	; Exec base	; ST: (address 4 is ROM)
+ 	jsr	_LVOFreeMem(a6)
+ 	move.l	(sp)+,a6
+ 	lea.l	18(a2),a2
+@@ -2089,41 +2089,16 @@
+ ; [ Release the blitter (DisownBlitter) ]
+ ; All registers are restored
+ ;*****************************************************************************
+-Free_blitter_usage:
+-	movem.l	d0/d1/a0/a1,-(sp)
+-	tst.b	Blitter_is_not_owned
+-	bne.s	.Exit
++Free_blitter_usage:			; ST: no blitter
+ 	st	Blitter_is_not_owned
+-	move.w	#$400,Custom+dmacon
+-	move.l	a6,-(sp)
+-	move.l	Library_graphics,a6
+-	jsr	_LVODisownBlitter(a6)		; DisownBlitter (free blitter for other use)
+-	move.l	(sp)+,a6
+-.Exit:
+-	movem.l	(sp)+,d0/d1/a0/a1
+ 	rts
+ 
+ ;*****************************************************************************
+ ; [ Get the blitter (OwnBlitter) ]
+ ; All registers are restored
+ ;*****************************************************************************
+-Own_blitter:
+-	movem.l	d0/d1/a0/a1,-(sp)
+-	tst.b	Blitter_is_not_owned
+-	beq.s	.Exit
++Own_blitter:				; ST: no blitter
+ 	sf	Blitter_is_not_owned
+-.Wait:
+-	btst.b	#6,Custom+dmaconr		; Wait for blitter finish
+-	btst.b	#6,Custom+dmaconr
+-	bne.s	.Wait
+-	move.l	a6,-(sp)
+-	move.l	Library_graphics,a6
+-	jsr	_LVOOwnBlitter(a6)		; OwnBlitter
+-	move.l	(sp)+,a6
+-	move.w	#-$7c00,Custom+dmacon
+-	move.w	#$40,Custom+intena
+-.Exit:
+-	movem.l	(sp)+,d0/d1/a0/a1
+ 	rts
+ 
+ 

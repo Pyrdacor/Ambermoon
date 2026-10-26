@@ -35,9 +35,14 @@ def main():
     palettes = []                         # (32 Amiga words, weights, fixed colours)
 
     def add(colours, weights=None, fixed=()):
-        if any(p[0] == colours for p in palettes):
-            return
-        palettes.append((colours, weights or [1] * 32, fixed))
+        """Adds a palette, or the weights to a palette which is there already."""
+        weights = weights or [1] * 32
+        for p in palettes:
+            if p[0] == colours:
+                for i in range(32):
+                    p[1][i] += weights[i]
+                return
+        palettes.append((colours, list(weights), fixed))
 
     # ---------- UI palettes ----------
     main_pal = sc.source_words('KERNEL/DATA.S', 'Main_pal', 32)
@@ -79,6 +84,28 @@ def main():
         add(colours, weights)
         # in the combat screen the last 6 colours come from the tactic palette (Set_layout_colours)
         add(colours[:26] + tactic_pal[26:], weights)
+    # ---------- event pictures (Event_pix_palette_table, the 9th picture uses the palette of the others) ----------
+    pal_table = list(sc.source_data('KERNEL/DATA.S', 'Event_pix_palette_table')) + [0x21]
+    for i in range(9):
+        name = f'Event_pix.amb/{i + 1:03}'
+        if name not in data.names:
+            continue
+        weights = [0] * 32
+        for v in planar(data.read(name), 320, 92, 5):
+            weights[v] += 1
+        add(words(data.read(f'Palettes.amb/{pal_table[i]:03}')), weights)
+    # ---------- combat backgrounds : weighted into all palettes with the tactic colours (which background is
+    # shown with which palette is a table in the code) ----------
+    for n in sorted(x for x in data.names if x.startswith('Combat_background.amb/') and x[-1] != '/'):
+        raw = data.read(n)
+        pix = planar(raw[-320 * 95 * 5 // 8:], 320, 95, 5)   # (background 16 has 4 more bytes)
+        weights = [0] * 32
+        for v in pix:
+            weights[v] += 1
+        for p in palettes:
+            if p[0][26:] == tactic_pal[26:] and p[0] != tactic_pal:
+                for i in range(32):
+                    p[1][i] += weights[i] / 20
     with open(out, 'w') as f:
         f.write('; Made by port/tools/port_palettes.py : Amiga palette (32 colours), ST palette (16 STE colours),\n')
         f.write('; lookup table Amiga colour -> ST colour\n')

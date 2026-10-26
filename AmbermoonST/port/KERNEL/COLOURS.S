@@ -191,7 +191,7 @@ Colour_handler:
 ;        a0 - Pointer to source raster list entry (.l)
 ;        a1 - Pointer to target raster list entry (.l)
 ; NOTE :
-;   - ST: the source of a palette is kept in [ Current_RL_sources ].
+;   - ST: the target colours of a palette are kept in [ Current_RL_targets ].
 ;*****************************************************************************
 Copy_RL_entry:
 	tst.b	d0
@@ -251,21 +251,26 @@ Clear_RL_entry:
 .Exit:
 	rts
 
-; [ Remember the source palette of a palette entry of Current_RL ]
+; [ Remember the target colours of a palette entry of Current_RL ]
 ;   IN : a1 - Pointer to the colours of the entry in Current_RL (.l)
 ;        a2 - Pointer to the source palette (.l)
 ; Changed registers : d7
+; NOTE :
+;   - The colours are copied : the source can change later (e.g. Batch).
 Store_RL_source:
 	move.l	a1,d7			; Index = offset / 66
 	sub.l	#Current_RL+2,d7
 	divu.w	#66,d7
 	cmp.w	#Max_RL_palettes,d7
 	bcc.s	.Exit
-	lsl.w	#2,d7
-	move.l	a0,-(sp)
-	lea.l	Current_RL_sources,a0
-	move.l	a2,0(a0,d7.w)
-	move.l	(sp)+,a0
+	movem.l	a0/a2,-(sp)
+	lsl.w	#6,d7
+	lea.l	Current_RL_targets,a0
+	add.w	d7,a0
+	moveq.l	#32/2-1,d7
+.Copy:	move.l	(a2)+,(a0)+
+	dbra	d7,.Copy
+	movem.l	(sp)+,a0/a2
 .Exit:	rts
 
 ;*****************************************************************************
@@ -460,10 +465,10 @@ Render_raster:
 ; ---------- Palette ------------------------------
 	cmp.w	#Max_RL_palettes,d6
 	bcc	.Skip_pal
-	move.w	d6,d2			; Source palette
-	lsl.w	#2,d2
-	lea.l	Current_RL_sources,a2
-	move.l	0(a2,d2.w),a2
+	move.w	d6,d2			; Target colours
+	lsl.w	#6,d2
+	lea.l	Current_RL_targets,a2
+	add.w	d2,a2
 	movem.l	a0/a1,-(sp)
 	move.l	a2,a0
 	jsr	Find_ST_palette
@@ -526,7 +531,7 @@ Max_RL_palettes	EQU	8
 ;   IN : a0 - Pointer to the current Amiga colours (32 words) (.l)
 ;        a2 - Pointer to target buffer (16 words) (.l)
 ;        a4 - Pointer to the ST palette (16 STE words) (.l)
-;        [ Current_RL_sources ] - target Amiga colours (.l)
+;        [ Current_RL_targets ] - target Amiga colours
 ; All registers are restored
 ; NOTE :
 ;   - The Amiga version counts every component of the colours towards the
@@ -538,9 +543,9 @@ Max_RL_palettes	EQU	8
 Fade_ST_palette:
 	movem.l	d0-d7/a0-a6,-(sp)
 	move.w	d6,d0			; Target colours
-	lsl.w	#2,d0
-	lea.l	Current_RL_sources,a1
-	move.l	0(a1,d0.w),a1
+	lsl.w	#6,d0
+	lea.l	Current_RL_targets,a1
+	add.w	d0,a1
 	jsr	Max_component		; Current maximum
 	move.w	d0,d4
 	move.l	a1,a0			; Target maximum
@@ -906,7 +911,7 @@ Next_raster:	ds.l 1
 Raster_event_ptr:	ds.l 1
 LUT_cache_source:	ds.l 1
 LUT_cache_checksum:	ds.l 1
-Current_RL_sources:	ds.l Max_RL_palettes
+Current_RL_targets:	ds.w 32*Max_RL_palettes
 LUT_cache_LUT:	ds.l 1
 Raster_events1:	ds.b 8*256
 Raster_events2:	ds.b 8*256
