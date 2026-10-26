@@ -7,12 +7,14 @@ Usage: python run.py <script.txt> [--record <video.mp4>] [--seconds <n>] [--fram
 - compiles the script to Script.bin (amscript.py),
 - prepares the FS-UAE hard drive "AmbermoonEN_Script" (with --setup or if it is missing: boot files of an
   existing Ambermoon drive and the extracted english release),
-- writes the configuration AmbermoonEN_Script.fs-uae and starts FS-UAE,
+- writes the configurations AmbermoonEN_Script.fs-uae (FS-UAE) and build/AmbermoonEN_Script.uae (WinUAE) and starts
+  the emulator (--emu: WinUAE minimized, the default without a recording; FS-UAE with a window),
 - --load/--start: continues the game saved in the slot (script command savegame), the script starts at the label,
 - --record: records the window with ffmpeg (no sound), --frames: saves a screenshot every --every seconds.
 FS-UAE is closed after --seconds (default: 60).
 """
 import argparse
+import json
 import ctypes
 import ctypes.wintypes
 import os
@@ -33,7 +35,9 @@ CONFIG = os.path.join(DOCS, 'Configurations', 'AmbermoonEN_Script.fs-uae')
 FSUAE = os.path.join(os.path.expanduser('~'), 'AppData', 'Local', 'Programs', 'FS-UAE', 'FS-UAE', 'Windows',
                      'x86-64', 'fs-uae.exe')
 KICKSTART = os.path.join(DOCS, 'Kickstarts', 'Kickstart-v3.1-rev-40.68-1993-Commodore-A1200.rom')
+WINUAE = os.path.join(os.environ.get('ProgramFiles', 'C:/Program Files'), 'WinUAE', 'winuae64.exe')
 BUILD = os.path.join(HERE, 'build')
+UAE_CONFIG = os.path.join(BUILD, 'AmbermoonEN_Script.uae')
 BOOT_DIRS = ['C', 'Devs', 'L', 'S', 'System']
 
 
@@ -84,7 +88,6 @@ def write_config(fast_cpu=False):
                 'kickstart_file = %s\n'
                 'hard_drive_0 = %s\n'
                 'hard_drive_0_label = Ambermoon\n'
-                'fast_memory = 8192\n'
                 'floppy_drive_volume = 0\n'
                 'fullscreen = 0\n'
                 'window_width = 960\n'
@@ -92,6 +95,32 @@ def write_config(fast_cpu=False):
                 'automatic_input_grab = 0\n'
                 'initial_input_grab = 0\n'
                 '%s' % (KICKSTART.replace('\\', '/'), DRIVE.replace('\\', '/'), FAST_CPU))
+
+
+def write_uae_config(fast_cpu=False):
+    """WinUAE: A1200 like the FS-UAE configuration; started minimized and running on while minimized (no window
+    in the way)."""
+    # (WinUAE's A1200 model: cycle exact like a real A1200)
+    cpu = ('cpu_speed=max\ncpu_cycle_exact=false\ncpu_memory_cycle_exact=false\n' if fast_cpu else
+           'cycle_exact=true\ncpu_cycle_exact=true\ncpu_memory_cycle_exact=true\nblitter_cycle_exact=true\n')
+    with open(UAE_CONFIG, 'w') as f:
+        f.write('config_description=Ambermoon script player\n'
+                'use_gui=no\n'
+                'quickstart=a1200,0\n'
+                'kickstart_rom_file=%s\n'
+                '%s'
+                'filesystem2=rw,DH0:Ambermoon:%s,0\n'
+                'uaehf0=dir,rw,DH0:Ambermoon:%s,0\n'
+                'sound_output=none\n'
+                'floppy0type=-1\n'
+                'win32.start_iconified=true\n'
+                'win32.iconified_pause=false\n'
+                'win32.iconified_nosound=true\n'
+                'win32.inactive_pause=false\n'
+                'win32.inactive_nosound=true\n'
+                'win32.inactive_input=0\n'
+                'win32.iconified_input=0\n'
+                % (KICKSTART, cpu, DRIVE, DRIVE))
 
 
 PACK = os.path.join(REPO, 'Tools', 'bin', 'AmbermoonPack.exe')
@@ -158,14 +187,18 @@ def expected(log, tag):
 
 def run_once(args, log, attempt):
     """One emulator run. True: restart (the expected tag did not come in time, or the limit was reached)."""
-    emu = subprocess.Popen([FSUAE, CONFIG])
+    if args.emu == 'winuae':
+        emu = subprocess.Popen([WINUAE, '-f', UAE_CONFIG])
+    else:
+        emu = subprocess.Popen([FSUAE, CONFIG])
     recorder = None
     retry = False
     try:
-        x, y, w, h, title = window_rect(emu.pid)
-        grab = ['-f', 'gdigrab', '-i', 'title=' + title]
         target = None
-        if args.record:
+        if args.emu == 'fsuae':
+            x, y, w, h, title = window_rect(emu.pid)
+            grab = ['-f', 'gdigrab', '-i', 'title=' + title]
+        if args.record and args.emu == 'fsuae':
             target = args.record if attempt == 0 else '%s_%d%s' % (os.path.splitext(args.record)[0], attempt,
                                                                     os.path.splitext(args.record)[1])
             recorder = subprocess.Popen([ffmpeg(), '-y', '-loglevel', 'error', '-framerate', '50'] + grab +
@@ -174,6 +207,7 @@ def run_once(args, log, attempt):
         start = time.time()
         game_start = None
         shot = 0
+        seen = {}                   # wall clock when the timer tags appeared in the log (for timer.py)
         if args.frames:
             os.makedirs(args.frames, exist_ok=True)
         while time.time() - start < args.seconds:
@@ -189,6 +223,10 @@ def run_once(args, log, attempt):
                 print('attempt %d: failed (tag %s), restarting' % (attempt + 1, args.fail))
                 retry = True
                 break
+            if args.record:
+                for tag in ('30', args.success):
+                    if tag and tag not in seen and tag_frame(log, tag) is not None:
+                        seen[tag] = time.time()
             if args.success:
                 if game_start is None and os.path.exists(log):
                     game_start = time.time()
@@ -199,6 +237,12 @@ def run_once(args, log, attempt):
                         attempt + 1, seconds // 60, seconds % 60,
                         (' (video: %s)' % target) if args.record else ''))
                     time.sleep(args.tail)       # a little more (e.g. of the outro)
+                    if args.record:
+                        # the tags for the timer overlay (timer.py): the timer starts at the click on 'OK' in the
+                        # character editor ($30) and stops when the outro begins (shortly after the success tag)
+                        with open(os.path.splitext(target)[0] + '.json', 'w') as f:
+                            json.dump({'start_tag': seen.get('30', 0) - start,
+                                       'end_tag': seen.get(args.success, 0) - start}, f)
                     retry = seconds > args.limit
                     break
                 if game_start and time.time() - game_start > args.limit + 30:
@@ -236,6 +280,9 @@ def main():
     ap.add_argument('--every', type=float, default=2.0)
     ap.add_argument('--seconds', type=float, default=60)
     ap.add_argument('--setup', action='store_true')
+    ap.add_argument('--emu', choices=('winuae', 'fsuae'),
+                    help='WinUAE (minimized: no window in the way) or FS-UAE (a window, recorded from the screen); '
+                         'default: FS-UAE with --record / --frames, else WinUAE')
     ap.add_argument('--fast-cpu', action='store_true', help='CPU as fast as possible (not like a real A1200)')
     ap.add_argument('--release', default=None)
     ap.add_argument('--load', type=int, help='continue the game saved in this slot (1-10)')
@@ -251,6 +298,8 @@ def main():
     ap.add_argument('--boot', default=os.path.join(DOCS, 'Hard Drives', 'AmbermoonDE'))
     args = ap.parse_args()
 
+    if args.emu is None:
+        args.emu = 'fsuae' if args.record or args.frames else 'winuae'
     if bool(args.load) != bool(args.start):
         raise SystemExit('--load and --start belong together')
     am2, loader = build(bool(args.load))
@@ -276,6 +325,7 @@ def main():
     shutil.copyfile(loader, os.path.join(DRIVE, 'Ambermoon'))
     shutil.copyfile(script_bin, os.path.join(DRIVE, 'Amberfiles', 'Script.bin'))
     write_config(args.fast_cpu)
+    write_uae_config(args.fast_cpu)
 
     for attempt in range(args.attempts if args.expect or args.success else 1):
         if os.path.exists(log):

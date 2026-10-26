@@ -4,6 +4,7 @@
 waituntil depth >= 1
 wait 25
 click 255 104
+log 0x30                        # (the timer of the video starts here: timer.py)
 waituntil depth >= 2
 wait 10
 key y
@@ -114,8 +115,10 @@ log 8
 keyuntil kp9 module = M3Map  # exit
 log 9
 savegame 1
-spannenberg:                    # run.py --load 1 --start spannenberg
 seedlock 0x8006ffff             # the same random numbers every frame: the random encounters (10%) never happen
+goto sp_text                    # (the text below only comes after loading the savegame)
+spannenberg:                    # run.py --load 1 --start spannenberg
+seedlock 0x8006ffff
 onmap 263 16 29 N
 
 # ---------- to the sign (12,3): sideways (right) into the alley x=22 and up without turning, then west
@@ -654,12 +657,14 @@ endif
 # ---------- goto point "City gates" (16,29), then out through the gate (16,30) to the world map
 # (the 3 bandits at the sign: the battle is accepted, Netsrak casts whirlwind every round; the locked seed would
 # make the spell fail: unlocked during the battle)
-glide 13 3                      # (1 square towards them: the battle starts earlier)
-waituntil depth >= 2 timeout 1000 goto k_done
 seedlock off
+glide 13 3 fightany             # (1 square towards them: the battle starts earlier; their requester: 'y' at once)
+if module = Combat goto k_fight
+waituntil depth >= 2 timeout 1000 goto k_done
 ready 10
 key y
 waituntil module = Combat timeout 200 goto k_done
+k_fight:
 log 50
 k_round:
 if module = Apres goto k_loot
@@ -1032,9 +1037,9 @@ exit:                           # run.py --load 7 --start exit
 
 # ---------- to the exit (5,9): (5,8) is open now
 opensquare 5 8
-glide 5 8 through
-log 52                          # (the outro begins with the next step: in the outro the log is not written any more)
-glide 5 9 through
+glide 5 7 through
+log 52                          # (the outro begins 2 steps later, about 0.7 s: in the outro the log is not written any
+glide 5 9 through               #  more, and glide is too fast to log on (5,8))
 waituntil depth >= 2 timeout 500 goto the_end
 log 53
 the_end:

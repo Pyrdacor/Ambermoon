@@ -467,7 +467,7 @@ def compile_script(text, data=None, start=None, defines=()):
         here(skip)
         # (no progress for 40 frames: a character blocks the way -> let go for 40 frames, it walks on)
         loop, done, lost, moved = new_label(), new_label(), new_label(), new_label()
-        emit(OPS['get'], 1, VARS['x'], OPS['get'], 4, VARS['y'], OPS['set'], 3, 0)
+        emit(OPS['get'], 1, VARS['x'], OPS['get'], 4, VARS['y'], OPS['set'], 3, 0, OPS['set'], 6, 0)
         here(loop)
         if near is not None:
             # stop as soon as the map character (slot) is next to the party
@@ -481,6 +481,11 @@ def compile_script(text, data=None, start=None, defines=()):
              OPS['jumpifv'], VARS['y'], CMP['<>'], VARS['r4'], ('label', moved),
              OPS['add'], 3, 1, OPS['jumpif'], VARS['r3'], CMP['<'], 40, ('label', loop),
              OPS['log'], 0x58, OPS['buttons'], 0, OPS['wait'], 5)
+        # first only a new press (e.g. right after a map change the held button is not taken: no step aside then)
+        rp = new_label()
+        emit(OPS['jumpif'], VARS['r6'], CMP['<>'], 0, ('label', rp),
+             OPS['set'], 6, 1, OPS['set'], 3, 0, OPS['jump'], ('label', loop))
+        here(rp)
         # blocked (a character or an object the map data does not show): a step aside (up, right, down, left,
         # 25 frames each) until the party moves, then on along the table
         for dx, dy in ((0, -1), (1, 0), (0, 1), (-1, 0)):
@@ -598,6 +603,7 @@ def compile_script(text, data=None, start=None, defines=()):
         here(sp_)
         # ('n' only works with Netsrak active (dexterity, luck): else 'y' and flight in the battle)
         emit(OPS['jumpif'], VARS['active'], CMP['<>'], 3, ('label', yk),
+             OPS['jumpif'], VARS['r0'], CMP['='], 2, ('label', yk),        # (walk ... fightany: 'y')
              OPS['jumpifv'], VARS['battlechar'], CMP['<>'], VARS['r0'], ('label', nk_),
              OPS['key'], y >> 16, y & 0xffff, OPS['jump'], ('label', kd))
         here(yk)
