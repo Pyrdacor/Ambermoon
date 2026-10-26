@@ -381,8 +381,7 @@ Draw_standard_box:
 ; [ Drop an item ]
 ; All registers are restored
 ; NOTE :
-;   - From [ Drop_item ] (INVENTOR.S). The whole stack is dropped (the Amiga
-;     version asks how many).
+;   - From [ Drop_item ] (INVENTOR.S).
 ;*****************************************************************************
 Drop_item:
 	movem.l	d0-d3/a0-a2,-(sp)
@@ -400,19 +399,264 @@ Drop_item:
 	moveq.l	#29,d0			; "This item is important !"
 	jsr	Do_prompt
 	bra.s	.Exit
-.Drop:	moveq.l	#47,d0			; Are you sure ?
+.Drop:	moveq.l	#1,d3			; Single
+	btst	#Multiple,Item_bits_STATIC(a1)	; Multiple item ?
+	beq.s	.Ask
+	cmpi.b	#1,Quantity(a2)		; More than one ?
+	beq.s	.Ask
+	moveq.l	#40,d0			; How much ?
+	jsr	Ask_quantity
+	move.l	d0,d3
+	beq.s	.Exit
+.Ask:	moveq.l	#47,d0			; Are you sure ?
 	jsr	Ask_yes_no
 	tst.w	d0
 	beq.s	.Exit
-	moveq.l	#0,d3			; Drop
-	move.b	Quantity(a2),d3
-	jsr	Get_inventory_char
+	jsr	Get_inventory_char		; Drop
 	move.l	a1,a0
 	jsr	Remove_item
 	jsr	Update_objects
 	jsr	Update_weight
 	jsr	Copy_screen_to_both
 .Exit:	movem.l	(sp)+,d0-d3/a0-a2
+	rts
+
+;*****************************************************************************
+; [ Ask how many items of a stack ]
+;   IN : d0 - Prompt (message number) (.w)
+;        a2 - Pointer to object packet (.l)
+;  OUT : d0 - Number / 0 = none (.l)
+; Changed registers : d0
+; NOTE :
+;   - Like the InputNr module with the icon and the name of the item.
+;*****************************************************************************
+Ask_quantity:
+	movem.l	d1-d3,-(sp)
+	moveq.l	#0,d1			; Maximum
+	move.b	Quantity(a2),d1
+	moveq.l	#3,d2			; Item
+	move.w	Object_index(a2),d3
+	jsr	Input_number
+	movem.l	(sp)+,d1-d3
+	rts
+
+;*****************************************************************************
+; [ Drop gold / food ]
+; All registers are restored
+; NOTE :
+;   - From [ Drop_gold ] and [ Drop_food ] (INVENTOR.S).
+;*****************************************************************************
+Drop_gold:
+	movem.l	d0-d7/a0-a2,-(sp)
+	move.w	#Gold_coins,d4
+	moveq.l	#1,d5			; (gold icon)
+	moveq.l	#Gold_weight,d6
+	moveq.l	#32,d0
+	moveq.l	#49,d7
+	bra.s	Drop_goldfood
+
+Drop_food:
+	movem.l	d0-d7/a0-a2,-(sp)
+	move.w	#Food_rations,d4
+	moveq.l	#2,d5			; (food icon)
+	move.w	#Food_weight,d6
+	moveq.l	#33,d0
+	moveq.l	#50,d7
+Drop_goldfood:
+	jsr	Get_inventory_char		; How much ?
+	moveq.l	#0,d1
+	move.w	0(a1,d4.w),d1
+	beq.s	.Exit
+	move.w	d5,d2
+	jsr	Input_number
+	move.l	d0,d3
+	beq.s	.Exit
+	move.w	d7,d0			; Are you sure ?
+	jsr	Ask_yes_no
+	tst.w	d0
+	beq.s	.Exit
+	jsr	Get_inventory_char		; Drop
+	sub.w	d3,0(a1,d4.w)
+	mulu.w	d6,d3
+	sub.l	d3,Weight_normal(a1)
+	jsr	Update_goldfood_info
+.Exit:	movem.l	(sp)+,d0-d7/a0-a2
+	rts
+
+;*****************************************************************************
+; [ Transfer gold / food to another member ]
+; All registers are restored
+; NOTE :
+;   - From [ Transfer_gold ] and [ Transfer_food ] (INVENTOR.S), and from
+;     [ Transfer_gold_CHEST ] and [ Transfer_food_CHEST ] (EVENTS.S) : then
+;     the gold or food comes from the chest and every member can take it.
+;*****************************************************************************
+Transfer_gold:
+	movem.l	d0-d7/a0-a2,-(sp)
+	sf	From_chest
+	bra.s	Transfer_gold2
+Transfer_gold_chest:
+	movem.l	d0-d7/a0-a2,-(sp)
+	st	From_chest
+Transfer_gold2:
+	move.w	#Gold_coins,d4
+	moveq.l	#1,d5			; (gold icon)
+	moveq.l	#Gold_weight,d6
+	moveq.l	#52,d0
+	bra.s	Transfer_goldfood
+
+Transfer_food:
+	movem.l	d0-d7/a0-a2,-(sp)
+	sf	From_chest
+	bra.s	Transfer_food2
+Transfer_food_chest:
+	movem.l	d0-d7/a0-a2,-(sp)
+	st	From_chest
+Transfer_food2:
+	move.w	#Food_rations,d4
+	moveq.l	#2,d5			; (food icon)
+	move.w	#Food_weight,d6
+	moveq.l	#53,d0
+Transfer_goldfood:
+	jsr	Goldfood_source		; How much ?
+	moveq.l	#0,d1
+	move.w	(a0),d1
+	beq	.Exit
+	move.w	d5,d2
+	jsr	Input_number
+	move.l	d0,d3
+	beq	.Exit
+	jsr	Scan_goldfood_victims	; Anyone interested ?
+	bne.s	.Do
+	moveq.l	#90,d0			; No !
+	jsr	Do_prompt
+	bra.s	.Exit
+.Do:	move.w	d0,d5
+	jsr	Show_goldfood_victims	; Show
+.Again:	moveq.l	#44,d0			; Who ?
+	jsr	Select_member
+	tst.w	d0
+	beq.s	.Done
+	btst	d0,d5			; Interested ?
+	beq.s	.Again
+	move.w	d0,d7
+	jsr	Goldfood_source		; Remove
+	sub.w	d3,(a0)
+	move.l	d3,d1
+	mulu.w	d6,d1
+	tst.b	From_chest
+	bne.s	.Chest
+	jsr	Get_inventory_char
+	sub.l	d1,Weight_normal(a1)
+.Chest:	jsr	Get_char_data		; Add
+	add.w	d3,0(a1,d4.w)
+	add.l	d1,Weight_normal(a1)
+.Done:	jsr	Hide_status_icons
+	tst.b	From_chest
+	bne.s	.Exit
+	jsr	Update_goldfood_info
+.Exit:	movem.l	(sp)+,d0-d7/a0-a2
+	rts
+
+; [ Get the address of the gold or food which is transferred ]
+;   IN : d4 - Offset in the character data (.w)
+;  OUT : a0 - Pointer to the amount (.l)
+; Changed registers : a0
+Goldfood_source:
+	move.l	a1,-(sp)
+	tst.b	From_chest		; From the chest ?
+	beq.s	.Member
+	lea.l	Chest_work+Chest_gold,a0
+	cmp.w	#Gold_coins,d4
+	beq.s	.Exit
+	lea.l	Chest_work+Chest_food,a0
+	bra.s	.Exit
+.Member:	jsr	Get_inventory_char
+	lea.l	0(a1,d4.w),a0
+.Exit:	move.l	(sp)+,a1
+	rts
+
+; [ Update the gold, food and weight in the member info ]
+; All registers are restored
+Update_goldfood_info:
+	jsr	Update_weight
+	jsr	Update_small_member_info
+	jmp	Copy_screen_to_both
+
+;*****************************************************************************
+; [ Who can take the gold / food ? ]
+;   IN : d3 - Amount (.w)
+;        d4 - Offset of the gold or food in the character data (.w)
+;        d6 - Weight of one unit (.w)
+;        [ From_chest ] - The inventory member gives it (no) / chest (yes)
+;  OUT : d0 - Bit 1...6 set for the members who can take it (.w)
+;        eq - Nobody, ne - Someone
+; Changed registers : d0
+; NOTE :
+;   - From [ Scan_4_gold_victims ] and [ Scan_4_food_victims ] (INVENTOR.S).
+;*****************************************************************************
+Scan_goldfood_victims:
+	movem.l	d1-d7/a1,-(sp)
+	move.w	d3,d1			; Extra weight
+	mulu.w	d6,d1
+	moveq.l	#0,d2			; Giving member
+	tst.b	From_chest
+	bne.s	.Go
+	move.w	Inventory_member,d2
+.Go:	moveq.l	#0,d5
+	moveq.l	#1,d7
+.Loop:	cmp.w	d2,d7			; Giving member ?
+	beq.s	.Next
+	jsr	Member_present		; Anyone there ?
+	beq.s	.Next
+	jsr	Get_char_data
+	moveq.l	#0,d0			; Special or monster ?
+	move.b	Char_race(a1),d0
+	move.w	#Special_race_mask,d6
+	btst	d0,d6
+	bne.s	.Next
+	move.w	#Alive_mask,d0		; Alive ?
+	and.w	Body_conditions(a1),d0
+	bne.s	.Next
+	tst.b	Secret_inventory(a1)	; Secretive ?
+	bne.s	.Next
+	move.w	AStrength(a1),d0		; Not too heavy ?
+	add.w	AStrength+Magic(a1),d0
+	mulu.w	#1000,d0
+	addi.l	#999,d0
+	sub.l	Weight_normal(a1),d0
+	cmp.l	d1,d0
+	bmi.s	.Next
+	move.w	0(a1,d4.w),d0		; Not too many ?
+	add.w	d3,d0
+	bvs.s	.Next
+	bset	d7,d5			; Yes
+.Next:	addq.w	#1,d7
+	cmp.w	#6+1,d7
+	bmi.s	.Loop
+	move.w	d5,d0
+	movem.l	(sp)+,d1-d7/a1
+	tst.w	d0
+	rts
+
+; [ Show who can take the gold / food ]
+;   IN : d5 - Bit 1...6 set for the members who can take it (.w)
+; All registers are restored
+; NOTE :
+;   - From [ Show_transfer_victims ] (INVENTOR.S).
+Show_goldfood_victims:
+	movem.l	d0/d7,-(sp)
+	moveq.l	#1,d7
+.Loop:	moveq.l	#Accept_icon,d0
+	btst	d7,d5
+	bne.s	.Yes
+	moveq.l	#Refuse_icon,d0
+.Yes:	jsr	Display_status_icon
+	addq.w	#1,d7
+	cmp.w	#6+1,d7
+	bmi.s	.Loop
+	jsr	Copy_screen_to_both
+	movem.l	(sp)+,d0/d7
 	rts
 
 ;*****************************************************************************
@@ -1317,6 +1561,7 @@ Selected_spell:	ds.w 1
 Special_item_flags:	ds.w 1
 Req_icon_Y:	ds.w 1
 Cursed_flag:	ds.b 1
+From_chest:	ds.b 1			; Gold / food from the chest ?
 	even
 Charges_txt:	ds.b 8
 Status_icons_UI:	ds.b 22*16*8

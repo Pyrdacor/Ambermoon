@@ -222,7 +222,13 @@ Inventory_input:
 	beq.s	.Right2
 	jsr	Move_aborted		; Yes -> put it back
 	bra	.Exit
-.Right2:	cmp.w	#Obj_member,d1		; Portrait ?
+.Right2:	cmp.w	#Obj_backpack,d1		; Backpack item ?
+	bne.s	.Right3
+	st	Right_move		; Yes -> take all
+	jsr	Move_backpack_item
+	sf	Right_move
+	bra	.Exit
+.Right3:	cmp.w	#Obj_member,d1		; Portrait ?
 	bne	.Exit
 	move.w	d0,d7			; Yes -> switch
 	jsr	Switch_inventory_member
@@ -271,8 +277,24 @@ Inventory_input:
 	jsr	Drop_item
 	bra	.Exit
 .No_drop:	cmp.w	#7,d0			; View item ?
-	bne.s	.No_items
+	bne.s	.No_view
 	jsr	View_item
+	bra	.Exit
+.No_view:	cmp.w	#5,d0			; Drop gold ?
+	bne.s	.No_dgold
+	jsr	Drop_gold
+	bra	.Exit
+.No_dgold:	cmp.w	#6,d0			; Drop food ?
+	bne.s	.No_dfood
+	jsr	Drop_food
+	bra	.Exit
+.No_dfood:	cmp.w	#8,d0			; Transfer gold ?
+	bne.s	.No_tgold
+	jsr	Transfer_gold
+	bra	.Exit
+.No_tgold:	cmp.w	#9,d0			; Transfer food ?
+	bne.s	.No_items
+	jsr	Transfer_food
 	bra	.Exit
 .No_items:	cmp.w	#3,d0			; Exit ?
 	bne	.Exit
@@ -1434,9 +1456,11 @@ Move_body_item:
 ;*****************************************************************************
 ; [ Take an item from the backpack ]
 ;   IN : d0 - Slot number {1...12} (.w)
+;        [ Right_move ] - Take the whole stack (right mouse button) (.b)
 ; All registers are restored
 ; NOTE :
-;   - From [ Move_all_backpack_items ] (the whole stack is taken).
+;   - From [ Move_backpack_item ] and [ Move_all_backpack_items ] : the
+;     left mouse button asks how many items of a stack are taken.
 ;*****************************************************************************
 Move_backpack_item:
 	movem.l	d0-d3/a0-a2,-(sp)
@@ -1448,11 +1472,20 @@ Move_backpack_item:
 	move.l	a0,a2
 	tst.w	Object_index(a2)		; Anything there ?
 	beq.s	.Exit
-	lea.l	Inter_packet,a0		; Copy packet
-	Copy_packet a2,a0
-	moveq.l	#0,d3			; Remove item(s)
+	moveq.l	#0,d3			; How many ?
 	move.b	Quantity(a2),d3
-	jsr	Get_inventory_char
+	cmp.w	#1,d3
+	beq.s	.Take
+	tst.b	Right_move		; All ?
+	bne.s	.Take
+	moveq.l	#54,d0			; No -> ask
+	jsr	Ask_quantity
+	move.l	d0,d3
+	beq.s	.Exit
+.Take:	lea.l	Inter_packet,a0		; Copy packet
+	Copy_packet a2,a0
+	move.b	d3,Quantity(a0)
+	jsr	Get_inventory_char		; Remove item(s)
 	move.l	a1,a0
 	jsr	Remove_item
 	move.w	d1,d0
@@ -2539,8 +2572,8 @@ Inv1_CIL:	dc.w Backpack_cicon,0,Exit_cicon
 	dc.w 0,0,0
 	dc.w 0,0,0
 Inv2_CIL:	dc.w Stats_cicon,Use_item_cicon,Exit_cicon
-	dc.w Drop_item_cicon,Drop_gold_cicon+Disabled,Drop_food_cicon+Disabled
-	dc.w View_item_cicon,Transfer_gold_cicon+Disabled,Transfer_food_cicon+Disabled
+	dc.w Drop_item_cicon,Drop_gold_cicon,Drop_food_cicon
+	dc.w View_item_cicon,Transfer_gold_cicon,Transfer_food_cicon
 
 ; Objects under the mouse
 	rsreset
@@ -2628,6 +2661,7 @@ Inter_packet:	ds.b Object_packet_size
 Swap_packet:	ds.b Object_packet_size
 Moving_flag:	ds.b 1
 Object_swap_flag:	ds.b 1
+Right_move:	ds.b 1			; Take the whole stack
 Inventory_exit:	ds.b 1
 	even
 Number:	ds.b 12

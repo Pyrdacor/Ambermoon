@@ -718,9 +718,15 @@ Opened_chest_loop:
 	btst	#Right_pressed,d6		; Right button ?
 	beq.s	.Left
 	tst.b	Moving_flag
-	beq.s	.Loop
-	jsr	Chest_move_aborted
-	bra.s	.Loop
+	bne.s	.Abort
+	cmp.w	#Obj_backpack,d1		; Chest slot ?
+	bne	.Loop
+	st	Right_move		; Yes -> take all
+	jsr	Take_chest_item
+	sf	Right_move
+	bra	.Loop
+.Abort:	jsr	Chest_move_aborted
+	bra	.Loop
 .Left:	btst	#Left_pressed,d6
 	beq.s	.Loop
 	cmp.w	#Obj_scroll_bar,d1		; Scroll bar ?
@@ -754,9 +760,17 @@ Opened_chest_loop:
 	jsr	Divide
 	bra.s	.Check
 .No_food:	cmp.w	#7,d0			; View item ?
-	bne	.Loop
+	bne.s	.No_view
 	jsr	View_item
 	bra	.Loop
+.No_view:	cmp.w	#8,d0			; Transfer gold ?
+	bne.s	.No_tgold
+	jsr	Transfer_gold_chest
+	bra.s	.Check
+.No_tgold:	cmp.w	#9,d0			; Transfer food ?
+	bne	.Loop
+	jsr	Transfer_food_chest
+	bra.s	.Check
 .Moving:	cmp.w	#Obj_member,d1		; Portrait ?
 	bne.s	.No_member
 	jsr	Chest_member_moved
@@ -814,10 +828,23 @@ Take_chest_item:
 	move.l	a0,a2
 	tst.w	Object_index(a2)		; Anything there ?
 	beq.s	.Exit
-	lea.l	Inter_packet,a1		; Copy packet
+	moveq.l	#0,d3			; How many ?
+	move.b	Quantity(a2),d3
+	cmp.w	#1,d3
+	beq.s	.Take
+	tst.b	Right_move		; All ?
+	bne.s	.Take
+	moveq.l	#54,d0			; No -> ask
+	jsr	Ask_quantity
+	move.l	d0,d3
+	beq.s	.Exit
+.Take:	lea.l	Inter_packet,a1		; Copy packet
 	Copy_packet a2,a1
-	clr.b	Quantity(a2)		; Remove
+	move.b	d3,Quantity(a1)
+	sub.b	d3,Quantity(a2)		; Remove
+	bne.s	.Left
 	clr.w	Object_index(a2)
+.Left:
 	st	Moving_flag
 	clr.l	Ghost_text
 	jsr	Init_moving_item
@@ -917,20 +944,29 @@ Chest_item_moved:
 ; [ Put the moved item back into the chest ]
 Chest_move_aborted:
 	movem.l	d0/a0/a2,-(sp)
+	lea.l	Inter_packet,a2
 	move.w	Source_slot,d0
 	jsr	Chest_packet
 	tst.w	Object_index(a0)		; Free ?
 	beq.s	.Put
-	move.l	Slot_base,a0		; No -> find a free slot
+	move.w	Object_index(a0),d0		; Rest of the same stack ?
+	cmp.w	Object_index(a2),d0
+	bne.s	.Find
+	move.b	Quantity(a0),d0
+	add.b	Quantity(a2),d0
+	cmp.b	#99,d0
+	bhi.s	.Find
+	move.b	d0,Quantity(a0)		; Yes -> add
+	bra.s	.Gone
+.Find:	move.l	Slot_base,a0		; No -> find a free slot
 	moveq.l	#Items_per_chest-1,d0
 .Loop:	tst.w	Object_index(a0)
 	beq.s	.Put
 	addq.w	#Object_packet_size,a0
 	dbra	d0,.Loop
 	bra.s	.Exit
-.Put:	lea.l	Inter_packet,a2
-	Copy_packet a2,a0
-	clr.w	Object_index(a2)
+.Put:	Copy_packet a2,a0
+.Gone:	clr.w	Object_index(a2)
 	jsr	Stop_moving
 	jsr	Update_objects
 	jsr	Copy_screen_to_both
@@ -1096,7 +1132,7 @@ ClosedChest_CIL:
 OpenedChest_CIL:
 	dc.w 0,0,Exit_cicon
 	dc.w 0,Divide_gold_cicon,Divide_food_cicon
-	dc.w View_item_cicon,Transfer_gold_cicon+Disabled,Transfer_food_cicon+Disabled
+	dc.w View_item_cicon,Transfer_gold_cicon,Transfer_food_cicon
 
 Lay3_files:
 	dc.l	Extra_layout,320*163/2
