@@ -153,7 +153,12 @@ get r0 angle1024
 log 0x77
 set r0 0
 glide 22 3 via 35 36             # straight up the alley
-walkto 12 3 via 35 36 nostop
+glide 13 3 via 35 36             # west along row 3 (glide turns to face west)
+mouse 104 50                     # on into (12,3) only: its middle is not reachable (the sign), the staff works
+press                            #  anywhere on the square
+waituntil x = 12 timeout 100 goto sign_in
+sign_in:
+release
 settle 50
 seedlock off
 log 10

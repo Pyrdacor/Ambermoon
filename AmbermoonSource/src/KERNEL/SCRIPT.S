@@ -758,10 +758,38 @@ Script_VBL:
 	move.w	d1,d2			;  forward is 4 times faster than
 	sub.w	d0,d2			;  sideways
 	andi.w	#3,d2
-	beq.w	.Move3D_dir
+	beq.w	.F3_align
 	move.w	#3,Script_regs+10		; r5 = 3
 	move.w	d2,Script_regs+12		; r6 = turn
 	clr.w	Script_buttons
+	bra.w	.Exit
+.F3_align:	move.w	Y_angle,d0		; Forward with the mouse (top middle:
+	addi.w	#slang/8,d0		;  about 1.4 times as fast as cursor
+	andi.w	#slang/4-1,d0		;  up). Not straight (more than 3 of
+	subi.w	#slang/8,d0		;  1024) ? Then the mouse in the top
+	move.w	d0,d2			;  left / right zone: turning, walking
+	bpl.w	.Al_abs			;  on a little slower (the keys would
+	neg.w	d2			;  be ignored with the button held)
+.Al_abs:	cmp.w	#3,d2
+	bgt.w	.Al_turn
+	move.w	#104,Script_X		; Straight: top middle, full speed
+	move.w	#50,Script_Y
+	bra.w	.Al_hold
+.Al_turn:	add.w	d2,d2			; Turning speed by the deviation (it
+	cmp.w	#47,d2			;  turns less than the deviation per
+	bls.w	.Al_k			;  frame: no overshooting)
+	moveq.l	#47,d2
+.Al_k:	tst.w	d0			; Turned left (angle too big): right
+	bmi.w	.Al_left
+	move.w	#Map3D_X+96,d3
+	add.w	d2,d3
+	bra.w	.Al_set
+.Al_left:	move.w	#Map3D_X+47,d3
+	sub.w	d2,d3
+.Al_set:	move.w	d3,Script_X
+	move.w	#Map3D_Y+1,Script_Y
+.Al_hold:	move.w	#1,Script_buttons
+	st	Script_mouse
 	bra.w	.Exit
 .F3_arrived:	move.w	Map_Xcoord,d2		; In the middle of the square ? (else
 	subq.w	#1,d2			;  move there first: turns and walks

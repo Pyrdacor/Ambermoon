@@ -630,7 +630,7 @@ def compile_script(text, data=None, start=None, defines=()):
         # every living member flees (each one for itself): key 1-6 selects the member, keypad 7 = flee, then
         # keypad 9 = OK (the round starts)
         # (the combat screen fades in without a module change: keys before that are lost)
-        emit(OPS['log'], 0xc0, OPS['wait'], 40)
+        emit(OPS['log'], 0xc0, OPS['wait'], 60)
         # first the active member (no switch), then the other living members (key 1-6), each keypad 7 (flee)
         k7, k9 = key_code('kp7'), key_code('kp9')
         ready(10)
@@ -787,10 +787,11 @@ def compile_script(text, data=None, start=None, defines=()):
              OPS['add'], 2, 1, OPS['jumpif'], VARS['r2'], CMP['>='], 250, ('label', check),
              OPS['wait'], 1, OPS['jump'], ('label', mwait))
         # ---- after a battle: forward at once (the monster waits a moment, then attacks again), if the party
-        # faces roughly the right direction (45 degrees); aligning only after 100 frames or at the target
+        # faces nearly the right direction (8 degrees: else it would run into a wall for 100 frames); aligning only
+        # after 100 frames or at the target
         here(after)
-        emit(OPS['align3d'], target, OPS['jumpif'], VARS['r6'], CMP['>'], 128, ('label', align),
-             OPS['jumpif'], VARS['r6'], CMP['<'], -128 & 0xffff, ('label', align),
+        emit(OPS['align3d'], target, OPS['jumpif'], VARS['r6'], CMP['>'], 24, ('label', align),
+             OPS['jumpif'], VARS['r6'], CMP['<'], -24 & 0xffff, ('label', align),
              OPS['log'], 0xaf, OPS['jump'], ('label', check))
         here(mgo)
         yk = key_code('y')
@@ -1031,7 +1032,7 @@ def compile_script(text, data=None, start=None, defines=()):
             elif cmd == 'glide':
                 # glide <x> <y> [through | via <chain> ...] [fight]: 3D without turning, along a direction table from
                 # the current square (forward, back or sideways by the view direction; battles turn the party or move
-                # it: no problem). No progress for 60 frames (a monster blocks the way): the eye at it.
+                # it: no problem). No progress for 25 frames (a monster blocks the way): the eye at it.
                 opts = [o.lower() for o in t[3:]]
                 through = 'through' in opts
                 allowed = [int(o) for o in opts[opts.index('via') + 1:] if o.isdigit()] if 'via' in opts else []
@@ -1063,13 +1064,13 @@ def compile_script(text, data=None, start=None, defines=()):
                 # (another map: a teleporter / entrance was used -> done)
                 trn = new_label()
                 emit(OPS['jumpif'], VARS['map'], CMP['<>'], walker.map, ('label', done),
-                     OPS['flow3d'], ('label', data), OPS['jumpif'], VARS['r5'], CMP['='], 1, ('label', done),
-                     OPS['jumpif'], VARS['r5'], CMP['='], 3, ('label', trn))
-                interrupt(loop, False)
+                     OPS['flow3d'], ('label', data), OPS['jumpif'], VARS['r5'], CMP['='], 1, ('label', done))
+                interrupt(loop, False)      # (popups first: also before a turn)
+                emit(OPS['jumpif'], VARS['r5'], CMP['='], 3, ('label', trn))
                 emit(OPS['wait'], 1,
                      OPS['jumpifv'], VARS['px'], CMP['<>'], VARS['r1'], ('label', moved),
                      OPS['jumpifv'], VARS['py'], CMP['<>'], VARS['r4'], ('label', moved),
-                     OPS['add'], 3, 1, OPS['jumpif'], VARS['r3'], CMP['<'], 60, ('label', loop))
+                     OPS['add'], 3, 1, OPS['jumpif'], VARS['r3'], CMP['<'], 25, ('label', loop))
                 # blocked: the eye (second control icons, keypad 7) at what is ahead
                 ke, k7 = key_code('enter'), key_code('kp7')
                 emit(OPS['log'], 0x57, OPS['buttons'], 0, OPS['wait'], 5, OPS['set'], 3, 0,
