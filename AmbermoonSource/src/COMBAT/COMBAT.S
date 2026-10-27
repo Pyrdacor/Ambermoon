@@ -735,6 +735,14 @@ Do_combat_round:
 .Next1:	dbra	d7,.Loop1			; Next participant
 	jsr	Erase_PA			; Erase last message
 	jsr	Update_screen
+; ---------- Check for a stalemate ----------------
+	jsr	Combat_stalemate		; FIX: Can anything still happen ?
+	bne.s	.Go_on
+	move.b	#Combat_lost,Combat_result	; No -> Lost...
+	Pop	Module			; Leave combat
+	Pop	Module
+	bra	.Leave
+.Go_on:
 ; ---------- Check if leader is still capable -----
 	Get	Active_handle,a0		; Leader still capable ?
 	move.w	Body_conditions(a0),d0
@@ -773,6 +781,68 @@ Do_combat_round:
 .Leave:	sf	Fighting			; Stop !
 	st	Random_animating
 	jmp	Update_screen
+
+;*****************************************************************************
+; [ Check if the battle can still go on ]
+;  OUT : ne - Yes
+;        eq - No (stalemate -> game over)
+; All registers are restored
+; NOTES :
+;  - A participant is capable if he is not mad, asleep, panicked, lamed or
+;    petrified. Mad participants count as incapable (they stay mad after the
+;    battle), lamed party members too (even if they could still cast spells).
+;  - The battle goes on if :
+;    - a party member is capable, or
+;    - any participant is only panicked (he will flee), or
+;    - a party member is only asleep and a monster is capable (it can wake
+;      him up).
+;*****************************************************************************
+Combat_stalemate:
+	movem.l	d0/d4/d7/a0-a2,-(sp)
+	moveq.l	#0,d4			; Flags
+	lea.l	Combat_matrix,a1		; Search matrix
+	moveq.l	#30-1,d7
+.Loop:	move.l	(a1)+,d0			; Anything there ?
+	beq.s	.Next
+	move.l	d0,a0
+	Get	Part_handle(a0),a2		; Get conditions
+	move.w	Body_conditions(a2),d0
+	Free	Part_handle(a0)
+	andi.w	#(1<<Mad)|(1<<Asleep)|(1<<Panicked)|(1<<Lamed)|(1<<Petrified),d0
+	cmp.b	#1,Part_type(a0)		; Party or monster ?
+	bne.s	.Monster
+	bset	#4,d4			; Party member present
+	tst.w	d0			; Capable ?
+	bne.s	.Party2
+	bset	#0,d4			; Yes
+	bra.s	.Next
+.Party2:	cmp.w	#1<<Asleep,d0		; Only asleep ?
+	bne.s	.Panic
+	bset	#2,d4			; Yes
+	bra.s	.Next
+.Monster:	tst.w	d0			; Capable ?
+	bne.s	.Panic
+	bset	#3,d4			; Yes
+	bra.s	.Next
+.Panic:	cmp.w	#1<<Panicked,d0		; Only panicked ?
+	bne.s	.Next
+	bset	#1,d4			; Yes
+.Next:	dbra	d7,.Loop
+	moveq.l	#-1,d0			; Default : goes on
+	btst	#4,d4			; Any party member ?
+	beq.s	.Exit			; No -> handled elsewhere
+	btst	#0,d4			; Capable party member ?
+	bne.s	.Exit
+	btst	#1,d4			; Only panicked participant ?
+	bne.s	.Exit
+	btst	#2,d4			; Sleeper and capable monster ?
+	beq.s	.Stalemate
+	btst	#3,d4
+	bne.s	.Exit
+.Stalemate:	moveq.l	#0,d0			; Stalemate !
+.Exit:	tst.l	d0
+	movem.l	(sp)+,d0/d4/d7/a0-a2		; (doesn't change the flags)
+	rts
 
 ;*****************************************************************************
 ; [ Any party member still on the battlefield ? ]
