@@ -28,6 +28,11 @@ if [ ! -f $OUT/STPALS.I ] || [ port/tools/port_palettes.py -nt $OUT/STPALS.I ]; 
 fi
 cp $OUT/STPALS.I $OUT/src/ST_KERNEL/
 cd $OUT/src
-$VASM -quiet -nowarn=53 -nowarn=62 -nowarn=86 -nowarn=40 -maxerrors=5000 -m68000 -Ftos -align -o ../AMBERST.PRG AMBERST.S
-cp ../AMBERST.PRG ../hd/
+# (older vasm versions do not know warning 86)
+NOWARN86=-nowarn=86
+echo | $VASM -quiet $NOWARN86 -Fbin -o /dev/null - >/dev/null 2>&1 || NOWARN86=
+$VASM -quiet -nowarn=53 -nowarn=62 $NOWARN86 -nowarn=40 -maxerrors=5000 -m68000 -Ftos -align -o ../AMBERST.PRG AMBERST.S
+cd ../../..
+python3 port/tools/fix_prg.py $OUT/AMBERST.PRG		# (older vasm: data length 2 bytes too short)
+cp $OUT/AMBERST.PRG $OUT/hd/
 echo "Built build/port/hd/AMBERST.PRG"
