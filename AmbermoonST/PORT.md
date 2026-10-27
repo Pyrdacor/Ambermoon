@@ -4,6 +4,8 @@ The proof of concept (`src/`) re-implements the game routine by routine. The por
 assembles the original source files of `AmbermoonSource/src` unchanged and replaces only the parts which
 depend on the Amiga hardware by an ST kernel with the same interface.
 
+Working notes for continuing the port (build, tests in Hatari, pitfalls, open points): [HANDOVER.md](HANDOVER.md).
+
 ## Findings
 
 * The original is built as one include list (`AMBERMOON.S`). Without the Amiga kernel files
