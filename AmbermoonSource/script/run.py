@@ -16,8 +16,10 @@ FS-UAE is closed after --seconds (default: 60).
 import argparse
 import json
 import ctypes
+import glob
 import ctypes.wintypes
 import os
+import re
 import shutil
 import struct
 import subprocess
@@ -97,9 +99,11 @@ def write_config(fast_cpu=False):
                 '%s' % (KICKSTART.replace('\\', '/'), DRIVE.replace('\\', '/'), FAST_CPU))
 
 
-def write_uae_config(fast_cpu=False):
+def write_uae_config(fast_cpu=False, record=False):
     """WinUAE: A1200 like the FS-UAE configuration; started minimized and running on while minimized (no window
-    in the way)."""
+    in the way). record: started as a window (minimized nothing is drawn, so nothing recorded; it is moved off the
+    screen instead) and F11 starts / stops WinUAE's own video recording (its codec and file in the WinUAE settings,
+    Output panel)."""
     # (WinUAE's A1200 model: cycle exact like a real A1200)
     cpu = ('cpu_speed=max\ncpu_cycle_exact=false\ncpu_memory_cycle_exact=false\n' if fast_cpu else
            'cycle_exact=true\ncpu_cycle_exact=true\ncpu_memory_cycle_exact=true\nblitter_cycle_exact=true\n')
@@ -113,14 +117,99 @@ def write_uae_config(fast_cpu=False):
                 'uaehf0=dir,rw,DH0:Ambermoon:%s,0\n'
                 'sound_output=none\n'
                 'floppy0type=-1\n'
-                'win32.start_iconified=true\n'
+                'win32.start_iconified=%s\n'
                 'win32.iconified_pause=false\n'
                 'win32.iconified_nosound=true\n'
                 'win32.inactive_pause=false\n'
                 'win32.inactive_nosound=true\n'
                 'win32.inactive_input=0\n'
                 'win32.iconified_input=0\n'
-                % (KICKSTART, cpu, DRIVE, DRIVE))
+                % (KICKSTART, cpu, DRIVE, DRIVE, 'false' if record else 'true'))
+        if record:
+            f.write('input.config=1\n'
+                    'input.1.keyboard.0.friendlyname=WinUAE keyboard\n'
+                    'input.1.keyboard.0.name=NULLKEYBOARD\n'
+                    'input.1.keyboard.0.empty=false\n'
+                    'input.1.keyboard.0.disabled=false\n'
+                    'input.1.keyboard.0.button.87.F11=SPC_VIDEORECORD.0\n')
+
+
+def winuae_video_folder():
+    """The folder of WinUAE's video recordings (output.avi, output_1.avi, ...), from its settings."""
+    import winreg
+    try:
+        with winreg.OpenKey(winreg.HKEY_CURRENT_USER, r'Software\Arabuusimiehet\WinUAE\AVConfiguration') as k:
+            return os.path.dirname(winreg.QueryValueEx(k, 'FileName')[0])
+    except OSError:
+        return os.path.join(os.environ.get('PUBLIC', 'C:/Users/Public'), 'Documents', 'Amiga Files', 'WinUAE')
+
+
+def winuae_window(pid, timeout=20):
+    user32 = ctypes.windll.user32
+    found = []
+
+    @ctypes.WINFUNCTYPE(ctypes.c_bool, ctypes.wintypes.HWND, ctypes.wintypes.LPARAM)
+    def callback(hwnd, _):
+        p = ctypes.wintypes.DWORD()
+        user32.GetWindowThreadProcessId(hwnd, ctypes.byref(p))
+        if p.value == pid and user32.IsWindowVisible(hwnd):
+            found.append(hwnd)
+        return True
+
+    end = time.time() + timeout
+    while time.time() < end:
+        found.clear()
+        user32.EnumWindows(callback, 0)
+        if found:
+            return found[0]
+        time.sleep(0.25)
+    raise SystemExit('the WinUAE window was not found')
+
+
+class _KeyInput(ctypes.Structure):
+    _fields_ = [('wVk', ctypes.c_ushort), ('wScan', ctypes.c_ushort), ('dwFlags', ctypes.c_ulong),
+                ('time', ctypes.c_ulong), ('extra', ctypes.c_size_t)]
+
+
+class _Input(ctypes.Structure):
+    _fields_ = [('type', ctypes.c_ulong), ('ki', _KeyInput), ('pad', ctypes.c_ubyte * 8)]
+
+
+def send_scancode(scan):
+    """A key press (scan code: WinUAE reads raw input) to the window in the foreground."""
+    for flags in (0x0008, 0x0008 | 0x0002):
+        i = _Input(1, _KeyInput(0, scan, flags, 0, 0))
+        ctypes.windll.user32.SendInput(1, ctypes.byref(i), ctypes.sizeof(i))
+        time.sleep(0.1)
+
+
+def winuae_start_recording(pid):
+    """F11 (the recording) to the WinUAE window, until its video file appears; then the window is moved off the
+    screen (still drawn, so recorded, but not in the way). Returns the window and the video file."""
+    user32 = ctypes.windll.user32
+    hwnd = winuae_window(pid)
+    folder = winuae_video_folder()
+    before = set(glob.glob(os.path.join(folder, '*.avi')))
+    time.sleep(1.0)
+    video = None
+    for _ in range(3):
+        # (the Alt key allows taking the foreground from another program)
+        user32.keybd_event(0x12, 0, 0, 0)
+        user32.SetForegroundWindow(hwnd)
+        user32.keybd_event(0x12, 0, 2, 0)
+        time.sleep(0.3)
+        send_scancode(0x57)     # F11
+        end = time.time() + 3
+        while time.time() < end and not video:
+            new = set(glob.glob(os.path.join(folder, '*.avi'))) - before
+            video = max(new, key=os.path.getmtime) if new else None
+            time.sleep(0.2)
+        if video:
+            break
+    user32.SetWindowPos(hwnd, 0, -4000, 100, 0, 0, 0x0001 | 0x0004 | 0x0010)
+    if not video:
+        raise SystemExit('the WinUAE recording did not start (video codec and file set in its Output settings?)')
+    return hwnd, video
 
 
 PACK = os.path.join(REPO, 'Tools', 'bin', 'AmbermoonPack.exe')
@@ -188,13 +277,19 @@ def expected(log, tag):
 def run_once(args, log, attempt):
     """One emulator run. True: restart (the expected tag did not come in time, or the limit was reached)."""
     if args.emu == 'winuae':
+        write_uae_config(args.fast_cpu, bool(args.record))
         emu = subprocess.Popen([WINUAE, '-f', UAE_CONFIG])
     else:
         emu = subprocess.Popen([FSUAE, CONFIG])
     recorder = None
     retry = False
+    hwnd = avi = None
     try:
         target = None
+        if args.record and args.emu == 'winuae':
+            target = args.record if attempt == 0 else '%s_%d%s' % (os.path.splitext(args.record)[0], attempt,
+                                                                    os.path.splitext(args.record)[1])
+            hwnd, avi = winuae_start_recording(emu.pid)
         if args.emu == 'fsuae':
             x, y, w, h, title = window_rect(emu.pid)
             grab = ['-f', 'gdigrab', '-i', 'title=' + title]
@@ -267,8 +362,31 @@ def run_once(args, log, attempt):
                 except (subprocess.TimeoutExpired, OSError, ValueError):
                     recorder.terminate()
             recorder.wait()
+        if hwnd:
+            # WinUAE closes the video file properly when its window is closed
+            ctypes.windll.user32.PostMessageW(hwnd, 0x0010, 0, 0)     # WM_CLOSE
+            try:
+                emu.wait(60)
+            except subprocess.TimeoutExpired:
+                pass
         emu.terminate()
         emu.wait()
+        if avi:
+            # the uncompressed recording of WinUAE -> mp4 (no sound), then away with it; WinUAE splits it into parts
+            # of 2 GB (output_1.avi, output_1_1.avi, output_1_2.avi, ...): all of them, in order
+            base = os.path.splitext(avi)[0]
+            parts = [avi] + sorted(glob.glob(base + '_*.avi'),
+                                   key=lambda f: int(re.search(r'_(\d+)\.avi$', f).group(1)))
+            if not retry:
+                concat = base + '_parts.txt'
+                with open(concat, 'w') as f:
+                    f.write(''.join("file '%s'\n" % part.replace('\\', '/') for part in parts))
+                subprocess.run([ffmpeg(), '-y', '-loglevel', 'error', '-f', 'concat', '-safe', '0', '-i', concat,
+                                '-an', '-c:v', 'libx264', '-preset', 'veryfast', '-pix_fmt', 'yuv420p', target],
+                               check=True)
+                os.remove(concat)
+            for part in parts:
+                os.remove(part)
     return retry
 
 
@@ -281,8 +399,8 @@ def main():
     ap.add_argument('--seconds', type=float, default=60)
     ap.add_argument('--setup', action='store_true')
     ap.add_argument('--emu', choices=('winuae', 'fsuae'),
-                    help='WinUAE (minimized: no window in the way) or FS-UAE (a window, recorded from the screen); '
-                         'default: FS-UAE with --record / --frames, else WinUAE')
+                    help='WinUAE (minimized or off the screen: no window in the way, records itself) or FS-UAE (a '
+                         'window, recorded from the screen); default: FS-UAE with --frames, else WinUAE')
     ap.add_argument('--fast-cpu', action='store_true', help='CPU as fast as possible (not like a real A1200)')
     ap.add_argument('--release', default=None)
     ap.add_argument('--load', type=int, help='continue the game saved in this slot (1-10)')
@@ -299,7 +417,7 @@ def main():
     args = ap.parse_args()
 
     if args.emu is None:
-        args.emu = 'fsuae' if args.record or args.frames else 'winuae'
+        args.emu = 'fsuae' if args.frames else 'winuae'
     if bool(args.load) != bool(args.start):
         raise SystemExit('--load and --start belong together')
     am2, loader = build(bool(args.load))
