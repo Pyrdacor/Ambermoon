@@ -1,0 +1,20 @@
+--- a/HULL/VARIOUS.S
++++ b/HULL/VARIOUS.S
+@@ -554,7 +554,7 @@
+ 	clr.w	Loaded_music		; Yes
+ 	tst.b	Music_handle		; Any music loaded ?
+ 	beq	.Exit
+-	move.w	#$000f,Custom+dmacon	; Yes -> DMA channels off
++	nop				; ST: (no Amiga sound DMA)	; Yes -> DMA channels off
+ 	jsr	Remove_music
+ 	bra	.Exit
+ ; ---------- Restart music ------------------------
+@@ -626,7 +626,7 @@
+ .On:	music	Music_stop		; Stop it
+ 	clr.w	Playing_music
+ 	sf	Music_flag		; Off
+-	move.w	#$000f,Custom+dmacon
++	nop				; ST: (no Amiga sound DMA)
+ 	jsr	Copy_memory		; Move music
+ 	st	Restart_music		; On later
+ .Exit:	movem.l	(sp)+,d0-d7/a0-a6

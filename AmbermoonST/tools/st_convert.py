@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # Converts the game data of Ambermoon for the Atari ST proof of concept.
 #
-#   python3 st_convert.py <output folder> [--map 257] [--data ExtractedGameFiles.zip]
+#   python3 st_convert.py <output folder> [--map 258] [--pos 2,15,1] [--time 22:30] [--data <zip>]
 #
 # The ST shows 16 colours. The screen is split like on the Amiga (see the raster lists in MODULES.S):
 #   lines 0..36   : status block (portraits) with the UI palette (Main_pal)
@@ -10,6 +10,8 @@
 #   slot 0        : colour 0 (black, transparent for masked graphics)
 #   slots 1..7    : 7 colours chosen by a weighted k-means for the graphics of the area (map tiles, portraits)
 #   slots 8..15   : colours 24..31 (the UI colours: layouts, status block and all 3 bit graphics use them)
+#                   In the map area slot 8 (colour 24) is another free colour, because value 0 of the layout and
+#                   the buttons is drawn black there.
 # So 3 bit graphics with base colour 24 look the same in both areas, and every Amiga colour of an area is
 # translated with a lookup table of 32 bytes (written to the palette files, used by the kernel for Draw_box
 # and the text colours).
@@ -18,25 +20,56 @@
 #
 # Output files (all big endian):
 #   UIPAL.BIN   16 STE colour words + 32 byte lookup table (Amiga colour -> slot), status block area
-#   MAPPAL.BIN  the same for the map area
-#   LAYOUT.BIN  layout 1 (2D map), 320x163
+#   P<t>.BIN    the same for the map area of the maps with tileset t
+#   I<t>.BIN    icon graphics of tileset t (16x16 each), D<t>.BIN its icon data (unchanged)
+#   G<w>_<t>.BIN  party graphics of world w (17 frames of 16x32) for tileset t
+#   T<m>_<t>.BIN  travel graphics of travel mode m for tileset t (4 directions : width in truncs, height, X & Y offset
+#               (words), graphic), STA<t>.BIN the stationary transports (horse, raft, ship, sand crawler, sand skimmer)
+#   N<n>_<t>.BIN  NPC graphics file n for tileset t (number of frames (byte), 0 (byte), frames of 16x32)
+#   M<nnn>.BIN  data of 2D map nnn, X<nnn>.BIN its map texts (both unchanged)
+#   SAVE.BIN    the initial savegame (Party_data.sav: event bits, map characters, ...)
+#   START.BIN   start map, X, Y, view direction, hour, minute (words)
+#   WORLDS.BIN  the names of the 3 worlds (32 bytes each)
+#   LAYOUT.BIN  layout 1 (2D map), 320x163, LAYOUT7.BIN layout 7 (show picture + text)
+#   E<i>.BIN    event picture i (320x92), Q<i>.BIN its palette (like P<t>.BIN)
 #   UIGFX.BIN   UI graphics of KERNEL/CHIP_DATA.S: Status_L, Status_M, Status_R (16x36 each),
 #               Status_TB (32x1), Empty_portrait (32x34), Button_up, Button_down (32x17 each)
+#   LAYOUT4.BIN layout 4 (combat), CBGTAB.BIN the combat backgrounds of the 2D maps (Combat_bg_2D_table),
+#               CB<i>_<p>.BIN background i with palette p (16 ST colours, lookup table for the monster graphics,
+#               320x95), MG<n>.BIN monster graphics n (5 bit, per 16 pixels 5 plane words), MC<n>.BIN monster n (Monster_char_data),
+#               MGROUPS.BIN the monster groups 1...128 (36 bytes each), COMBFX.BIN combat effects (blood, scratches,
+#               slash, explosion, 5 bit like MG), TACTIC.BIN Fighting_FXGFX (32x36) and the tactical icons (16x14)
+#   PLACES.BIN  the place data (Place_data/001), MERCHANT.BIN the items of the 32 merchants (144 bytes each)
+#   ANKH.BIN    Ankh_symbol (32x29) of KERNEL/CHIP_DATA.S in the UI palette (healer)
+#   STATGFX.BIN Damage_star (32x26) and Death_mask (32x34) of KERNEL/CHIP_DATA.S in the UI palette
+#   WINICONS.BIN  the 9 parts of a window border (Window_icons of KERNEL/CHIP_DATA.S, 16x16 each)
 #   BUTTONS.BIN control icons of Button_graphics (78 x 32x13, colour 0 transparent)
 #   MPTR.BIN    default mouse pointer (Default_Mptr of KERNEL/DATA.S): hotspot X, Y (words), 16x16
-#   MAPNAME.BIN map name (0-terminated)
-#   START.BIN   start position X, Y, view direction, hour, minute (words), CD bits of the map (4 bytes, as in
-#               the savegame: which map characters are not present)
-#   NPCGFX.BIN  NPC graphics of the map (NPC_gfx.amb, same structure: number of frames (byte), 0 (byte),
-#               frames of 16x32)
+#   MPTRS2.BIN  the mouse pointers Hand_Mptr and Mouth_Mptr (like MPTR.BIN)
 #   PORTR.BIN   6 portraits (32x34) of the party used by the proof of concept
 #   NAMES.BIN   6 names (16 bytes each)
 #   CHARS.BIN   character data of the 6 party members (Party_char.amb, first 512 bytes each)
 #   FONT.BIN    Glyph_mapping (224 bytes) + Glyph_data (5 bytes per glyph), unchanged
-#   ICONS.BIN   all icon graphics of the tileset of the map (16x16 each)
-#   ICONDAT.BIN icon data of the tileset (unchanged)
-#   MAP.BIN     map data (unchanged)
-#   PARTY.BIN   17 frames 16x32 of the party graphics of the world of the map
+#   INVPAL.BIN  palette of the inventory screen below the status block (like UIPAL.BIN)
+#   OBJICONS.BIN  item graphics (Object_icons, 16x16 each), PORTRI.BIN the portraits in the inventory palette
+#   OBJECTS.BIN item data (Objects.amb, unchanged : number of items (word) + 60 bytes per item)
+#   LAYOUT2.BIN layout 2 (inventory), LAYOUT6.BIN layout 6 (character screen), 320x163
+#   CHARPAL.BIN palette of the character screen below the status block, PORTRC.BIN the portraits in it
+#   STATICON.BIN  status icons 1...22 (Status_icons of KERNEL/CHIP_DATA.S, 16x16) in the character palette
+#   INVGFX.BIN  Swordshield (2 x 16x9), Chequered (32x11), Pick_Mptr (hotspot X, Y (words), 16x16)
+#   TEXTS.BIN   64 UI texts, 16 race names, 16 class names, 300 messages, 16 short attribute names, 16 short
+#               skill names, 16 language names, 16 condition names, 32 item type names, 16 attribute names,
+#               16 skill names, 8 spell class names, 210 spell names, 32 format messages (with {0}, {1}, ...)
+#               (zero-terminated)
+#   SPELLS.BIN  Spell_data of KERNEL/DATA.S (5 bytes per spell), OT<i>.BIN the texts of the text scrolls
+#   STATICUI.BIN  the status icons in the UI palette (for the status block)
+#   LAYOUT3.BIN layout 3 (door & chest screen), P80_<n>.BIN the 80x80 pictures (Pics_80x80.amb) of doors,
+#               chests, places and camps in the inventory palette
+#   CHESTS.BIN  the data of all chests of the initial savegame (Chest_data.amb, 148 bytes each, from chest 0)
+#   LAYOUT8.BIN layout 8 (dialogue), PT<n>.BIN portrait n in the inventory palette, DICT.BIN the dictionary
+#   NPC<n>.BIN, NPCT<n>.BIN  data & texts of person n (NPC_char.amb, NPC_texts.amb, unchanged)
+#   PC<n>.BIN, PCT<n>.BIN    data & texts of party member n (Party_char.amb, Party_texts.amb, unchanged)
+#   PUI<n>.BIN, PCH<n>.BIN   portrait n of a party character in the UI and the character screen palette
 import argparse, math, os, re, struct, sys, zipfile
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -48,6 +81,9 @@ from st_map_preview import planar, amiga_rgb, kmeans, snap, st_word, to_lab, dis
 SRC = os.path.join(ROOT, 'AmbermoonSource', 'src')
 PARTY = (1, 8, 9, 10, 11, 12)               # Party_char.amb: hero, Egil, Selena, Nelvin, Sabine, Valdyn
 AMBERFILES = os.path.join(ROOT, 'Disks', 'Bugfixing', 'German', 'Amberfiles')
+ALLTEXTS = os.path.join(ROOT, 'Disks', 'Bugfixing', 'German', 'AllTexts')
+WHITE = (2,)                                # Amiga colour White : ST colour 1 in the UI & inventory palettes
+PICS80 = range(1, 23)                       # 80x80 pictures : chests, door, places, riddle mouth, camps
 
 
 class Data:
@@ -163,27 +199,59 @@ def st_graphic(pix, w, h):
     return bytes(out)
 
 
-def make_palette(palette, weights):
+def make_palette(palette, weights, ui_first=24, fixed=()):
     """16 colour palette with the slot layout described above. palette: 32 rgb, weights: 32 values.
+    ui_first: first UI colour which gets a fixed slot (8 + colour - 24). In the map area colour 24 is not needed
+    by the UI (value 0 of the layout and the buttons is drawn black), so slot 8 is another free slot there.
+    fixed: colours which get the slots 1, 2, ... (e.g. white for the dragged items, see WHITE_SLOT).
     Returns (16 rgb, lookup table of 32 slots)."""
-    ui = palette[24:32]
-    points = palette[1:24]
-    w = [math.sqrt(x) for x in weights[1:24]]
-    # k-means with the UI colours fixed: result = 8 UI colours + 7 free colours
-    result = kmeans(points, w, ui, 15, 4)
-    free = result[8:]
-    pal16 = [snap(palette[0], 4)] + free + [snap(c, 4) for c in ui]
+    ui = palette[ui_first:32]
+    fix = [snap(palette[c], 4) for c in fixed]
+    points = [palette[i] for i in range(1, ui_first) if i not in fixed]
+    w = [math.sqrt(weights[i]) for i in range(1, ui_first) if i not in fixed]
+    # k-means with the fixed and the UI colours fixed
+    result = kmeans(points, w, fix + ui, 15, 4)
+    free = result[len(fix) + len(ui):]
+    pal16 = [snap(palette[0], 4)] + fix + free + [snap(c, 4) for c in ui]
     labs = [to_lab(c) for c in pal16]
     lut = []
     for i in range(32):
         if i == 0:
             lut.append(0)
-        elif i >= 24:
+        elif i >= ui_first:
             lut.append(8 + i - 24)
+        elif i in fixed:
+            lut.append(1 + fixed.index(i))
         else:            # never slot 0: it is transparent
             li = to_lab(palette[i])
             lut.append(min(range(1, 16), key=lambda j: dist(li, labs[j])))
     return pal16, lut
+
+
+def sprite_lut(palette, pal16):
+    """Lookup table for sprites (party and NPC graphics) into an existing 16 colour palette. The colours are
+    matched with more weight on the hue and less on the lightness than in Lab, so that e.g. yellow hair becomes
+    yellowish brown instead of green when the palette has no yellow (the tiles of the world maps use most of the
+    colours)."""
+    labs = [to_lab(c) for c in pal16]
+
+    def hue_dist(l1, l2):
+        dl = l1[0] - l2[0]
+        c1, c2 = math.hypot(l1[1], l1[2]), math.hypot(l2[1], l2[2])
+        dc = c1 - c2
+        dh2 = max((l1[1] - l2[1]) ** 2 + (l1[2] - l2[2]) ** 2 - dc * dc, 0)
+        return math.sqrt((0.5 * dl) ** 2 + dc * dc + 4 * dh2)
+
+    lut = []
+    for i in range(32):
+        if i == 0:
+            lut.append(0)
+        elif i >= 25:
+            lut.append(8 + i - 24)
+        else:
+            li = to_lab(palette[i])
+            lut.append(min(range(1, 16), key=lambda j: hue_dist(li, labs[j])))
+    return lut
 
 
 def palette_file(pal16, lut):
@@ -193,69 +261,134 @@ def palette_file(pal16, lut):
 def main():
     ap = argparse.ArgumentParser(description='Converts the game data for the Atari ST proof of concept.')
     ap.add_argument('out')
-    ap.add_argument('--map', type=int, default=258)
-    ap.add_argument('--pos', default='2,15,1', help='start position x,y,direction (default: start of the game)')
-    ap.add_argument('--time', default='22:30', help='time of day (default: start of the game)')
+    ap.add_argument('--map', type=int, help='start map (default: from the initial savegame)')
+    ap.add_argument('--pos', help='start position x,y,direction (default: from the initial savegame)')
+    ap.add_argument('--time', help='time of day hh:mm (default: from the initial savegame)')
     ap.add_argument('--data', default=os.path.join(ROOT, 'ExtractedGameFiles.zip'))
     args = ap.parse_args()
     os.makedirs(args.out, exist_ok=True)
     data = Data(args.data)
 
-    def write(name, content):
+    def write(name, content, quiet=False):
         with open(os.path.join(args.out, name), 'wb') as f:
             f.write(content)
-        print(f'{name:12} {len(content):7} bytes')
+        if not quiet:
+            print(f'{name:12} {len(content):7} bytes')
 
-    # ---------- map area ----------
-    m = data.find('Map_data.amb', args.map)
-    if m[2] != 2:
-        raise SystemExit('Only 2D maps are supported')
-    tileset, pal_index, world = m[6], m[9], m[10]
-    pd = data.read(f'Palettes.amb/{pal_index:03}')
-    map_pal = [amiga_rgb(struct.unpack('>H', pd[i * 2:i * 2 + 2])[0] & 0xfff) for i in range(32)]
-    gfx = data.find('Icon_gfx.amb', tileset)
-    tiles = [planar(gfx, 16, 16, 5, i * 160) for i in range(len(gfx) // 160)]
-    idata = data.read(f'Icon_data.amb/{tileset:03}')
-    icons = [struct.unpack('>IHBB', idata[2 + i * 8:10 + i * 8]) for i in range(struct.unpack('>H', idata[:2])[0])]
-    party_gfx = data.read(f'Party_gfx.amb/{world + 1:03}')
-    party = [planar(party_gfx, 16, 32, 5, i * 320) for i in range(len(party_gfx) // 320)]
-    npc_raw = data.read(f'NPC_gfx.amb/{m[7]:03}') if m[7] else b''
-    npcs = []                                # list of lists of frames
-    i = 0
-    while i + 2 <= len(npc_raw) and npc_raw[i]:
-        n = npc_raw[i]
-        npcs.append([planar(npc_raw, 16, 32, 5, i + 2 + k * 320) for k in range(n)])
-        i += 2 + n * 320
+    # ---------- map area : all 2D maps ----------
+    maps = {}
+    for name in sorted(data.names):
+        if name[1:13] == 'Map_data.amb' and name[-1] != '/':
+            md = data.read(name)
+            if md[2] == 2:
+                maps[int(name[-3:])] = md
+    for nr, md in maps.items():
+        write(f'M{nr:03}.BIN', md, quiet=True)
+        texts = b''
+        for c in '123':
+            tn = f'{c}Map_texts.amb/{nr:03}'
+            if tn in data.names:
+                texts = data.read(tn)
+        write(f'X{nr:03}.BIN', texts, quiet=True)
+    print(f'{len(maps)} maps (M*.BIN) and map texts (X*.BIN)')
 
-    # weights: pixels of all maps with this tileset and palette (all animation frames) + party graphics
-    weights = [0] * 32
-    for md in data.maps():
-        if md[2] != 2 or md[6] != tileset or md[9] != pal_index:
+    party_raw = {w: data.read(f'Party_gfx.amb/{w + 1:03}') for w in range(3)}
+    npc_files = {}
+    for n in set(md[7] for md in maps.values() if md[7]):
+        raw = data.read(f'NPC_gfx.amb/{n:03}')
+        npcs = []                            # list of lists of frames
+        i = 0
+        while i + 2 <= len(raw) and raw[i]:
+            k = raw[i]
+            npcs.append([planar(raw, 16, 32, 5, i + 2 + j * 320) for j in range(k)])
+            i += 2 + k * 320
+        npc_files[n] = npcs
+
+    for tileset in sorted(set(md[6] for md in maps.values())):
+        tmaps = [md for md in maps.values() if md[6] == tileset]
+        pal_index = tmaps[0][9]
+        pd = data.read(f'Palettes.amb/{pal_index:03}')
+        map_pal = [amiga_rgb(struct.unpack('>H', pd[i * 2:i * 2 + 2])[0] & 0xfff) for i in range(32)]
+        gfx = data.find('Icon_gfx.amb', tileset)
+        tiles = [planar(gfx, 16, 16, 5, i * 160) for i in range(len(gfx) // 160)]
+        idata = data.read(f'Icon_data.amb/{tileset:03}')
+        icons = [struct.unpack('>IHBB', idata[2 + i * 8:10 + i * 8])
+                 for i in range(struct.unpack('>H', idata[:2])[0])]
+        worlds = sorted(set(md[10] for md in tmaps))
+        npcs_used = sorted(set(md[7] for md in tmaps if md[7]))
+        party = {w: [planar(party_raw[w], 16, 32, 5, i * 320) for i in range(len(party_raw[w]) // 320)]
+                 for w in worlds}
+        # weights: pixels of all maps with this tileset (all animation frames) + party & NPC graphics
+        weights = [0] * 32
+        for md in tmaps:
+            for i in range(md[4] * md[5]):
+                o = 0x14c + i * 4
+                for ti in (md[o], md[o + 2] << 8 | md[o + 3]):
+                    if 0 < ti <= len(icons):
+                        _, g, n, _ = icons[ti - 1]
+                        for k in range(max(n, 1)):
+                            if g - 1 + k < len(tiles):
+                                for v in tiles[g - 1 + k]:
+                                    weights[v] += 1
+        sprites = [f for w in worlds for f in party[w]] + [f for n in npcs_used for g in npc_files[n] for f in g]
+        for frame in sprites:
+            for v in frame:
+                weights[v] += 16       # small but important
+        map16, map_lut = make_palette(map_pal, weights, 25)
+        spr_lut = sprite_lut(map_pal, map16)
+        write(f'P{tileset}.BIN', palette_file(map16, map_lut))
+        write(f'I{tileset}.BIN', b''.join(st_graphic([map_lut[v] for v in t], 16, 16) for t in tiles))
+        write(f'D{tileset}.BIN', idata)
+        for w in worlds:
+            write(f'G{w}_{tileset}.BIN', b''.join(st_graphic([spr_lut[v] for v in f], 16, 32) for f in party[w]))
+        # travel graphics "on foot" (used instead of the party graphics on the world maps): per direction
+        # width (truncs), height, X & Y offset (words) and the graphic
+        for mode in range(11):                      # all travel modes (Travel_gfx.amb 1...11)
+            raw = data.read(f'Travel_gfx.amb/{mode + 1:03}')
+            out = b''
+            o = 0
+            for _ in range(4):
+                w, h, xo, yo = struct.unpack('>4h', raw[o:o + 8])
+                out += raw[o:o + 8] + st_graphic([map_lut[v] for v in planar(raw, w * 16, h, 5, o + 8)], w * 16, h)
+                o += 8 + w * h * 10
+            write(f'T{mode}_{tileset}.BIN', out, quiet=mode > 0)
+        # stationary transports (horse, raft, ship, sand crawler, sand skimmer : Stationary_dimensions)
+        raw = data.read('Stationary/001')
+        out = b''
+        o = 0
+        for w, h in ((32, 22), (32, 11), (48, 34), (48, 21), (48, 39)):
+            out += st_graphic([map_lut[v] for v in planar(raw, w, h, 5, o)], w, h)
+            o += w // 8 * 5 * h
+        write(f'STA{tileset}.BIN', out, quiet=True)
+        for n in npcs_used:
+            write(f'N{n}_{tileset}.BIN', b''.join(
+                bytes([len(g), 0]) + b''.join(st_graphic([spr_lut[v] for v in f], 16, 32) for f in g)
+                for g in npc_files[n]) + b'\0\0')
+        print(f'Tileset {tileset}: palette {pal_index}', ' '.join(f'${st_word(c, 4):03x}' for c in map16))
+
+    # event pictures (Show picture + text event) with their own palettes (Event_pix_palette_table of
+    # KERNEL/DATA.S; the table has only 8 entries, the 9th picture uses the palette of the others)
+    pal_table = list(source_data('KERNEL/DATA.S', 'Event_pix_palette_table')) + [0x21]
+    for i in range(9):
+        name = f'Event_pix.amb/{i + 1:03}'
+        if name not in data.names:
             continue
-        for i in range(md[4] * md[5]):
-            o = 0x14c + i * 4
-            for ti in (md[o], md[o + 2] << 8 | md[o + 3]):
-                if 0 < ti <= len(icons):
-                    _, g, n, _ = icons[ti - 1]
-                    for k in range(max(n, 1)):
-                        if g - 1 + k < len(tiles):
-                            for v in tiles[g - 1 + k]:
-                                weights[v] += 1
-    for frame in party + [f for g in npcs for f in g]:
-        for v in frame:
-            weights[v] += 16       # small but important
-    map16, map_lut = make_palette(map_pal, weights)
-    write('MAPPAL.BIN', palette_file(map16, map_lut))
-    write('ICONS.BIN', b''.join(st_graphic([map_lut[v] for v in t], 16, 16) for t in tiles))
-    write('ICONDAT.BIN', idata)
-    write('MAP.BIN', m)
-    write('PARTY.BIN', b''.join(st_graphic([map_lut[v] for v in f], 16, 32) for f in party))
-    write('NPCGFX.BIN', b''.join(bytes([len(g), 0]) + b''.join(st_graphic([map_lut[v] for v in f], 16, 32)
-                                                               for f in g) for g in npcs) + b'\0\0')
+        pd = data.read(f'Palettes.amb/{pal_table[i]:03}')
+        epal = [amiga_rgb(struct.unpack('>H', pd[k * 2:k * 2 + 2])[0] & 0xfff) for k in range(32)]
+        pic = planar(data.read(name), 320, 92, 5)
+        weights = [0] * 32
+        for v in pic:
+            weights[v] += 1
+        e16, elut = make_palette(epal, weights, 25)
+        write(f'Q{i}.BIN', palette_file(e16, elut), quiet=True)
+        write(f'E{i}.BIN', st_graphic([elut[v] for v in pic], 320, 92), quiet=True)
+    print('Event pictures (E*.BIN) and their palettes (Q*.BIN)')
+    layout7 = planar(data.read('Layouts.amb/007'), 320, 163, 3)
+    write('LAYOUT7.BIN', st_graphic([v and 8 + v for v in layout7], 320, 163))
 
     layout = planar(data.read('Layouts.amb/001'), 320, 163, 3)
-    # Value 0 is colour 24 of the map palette, which is red in palette 7 (the background around the frames).
-    # It is drawn black (ST colour 0) instead.
+    # Value 0 of the layouts and of all 3 bit graphics with base colour 24 is black : Put_unmasked_block
+    # (GRAPHICS.S) sets the bits of the base colour only where the mask (Make_mask_blitter) is set.
     write('LAYOUT.BIN', st_graphic([v and 8 + v for v in layout], 320, 163))
 
     # ---------- status block area ----------
@@ -268,20 +401,239 @@ def main():
         portraits.append(planar(data.read(f'Portraits.amb/{ch[0x0a]:03}'), 32, 34, 5))
         names += ch[0x112:0x112 + 15].split(b'\0')[0][:15].ljust(16, b'\0')
         chars += ch[:512].ljust(512, b'\0')
+    # The palettes are chosen once for all portraits of Portraits.amb (not only for the current party), so they
+    # need not be recalculated when the party changes. The weights are scaled to 6 portraits.
+    all_portraits = [planar(data.read(n), 32, 34, 5) for n in sorted(data.names)
+                     if n.startswith('Portraits.amb/') and n[-1] != '/']
+    portrait_weight = 6 / len(all_portraits)
     weights = [0] * 32
-    for p in portraits:
+    for p in all_portraits:
         for v in p:
-            weights[v] += 1
-    for c in (2, 4, 16, 19, 20, 21, 22):   # text colours (White, Lighter_blue, Yellow, reds, Light_green)
-        weights[c] += 2000
-    for c in (6,):                         # LP bar (7, 6) must differ from the SP bar (24, 23)
-        weights[c] += 4000
-    ui16, ui_lut = make_palette(main_pal, weights)
+            weights[v] += portrait_weight
+    # Only the colours which the status block uses get extra weight, the other slots are left to the portraits
+    # (the skin tones need them). White is fixed anyway, Lighter_blue (names) is close to a UI grey.
+    weights[16] += 500                     # Yellow (name of the active member)
+    weights[6] += 4000                     # LP bar (7, 6) must differ from the SP bar (24, 23)
+    ui16, ui_lut = make_palette(main_pal, weights, fixed=WHITE)
     write('UIPAL.BIN', palette_file(ui16, ui_lut))
     write('PORTR.BIN', b''.join(st_graphic([ui_lut[v] for v in p], 32, 34) for p in portraits))
     write('NAMES.BIN', names)
     write('CHARS.BIN', chars)
     print('UI colours of the bars: LP', ui_lut[7], ui_lut[6], ' SP', ui_lut[24], ui_lut[23])
+
+    # ---------- inventory : area below the status block ----------
+    # The Amiga version uses Main_pal there too (Inv_RL in MODULES.S). Here the palette is chosen for the items
+    # and the portraits (the portrait of the inventory member is shown there). The items are not drawn in the
+    # status block area : a dragged item is shown as a white silhouette (like Amberstar), and white has the same
+    # slot in both palettes.
+    raw = data.read('Object_icons/001')
+    obj_icons = [planar(raw, 16, 16, 5, i * 160) for i in range(len(raw) // 160)]
+    weights = [0] * 32
+    for ic in obj_icons:
+        for v in ic:
+            weights[v] += 1
+    for p in all_portraits:
+        for v in p:
+            weights[v] += portrait_weight
+    weights[16] += 2000                    # text colour (Yellow)
+    inv16, inv_lut = make_palette(main_pal, weights, fixed=WHITE)
+    write('INVPAL.BIN', palette_file(inv16, inv_lut))
+    write('OBJICONS.BIN', b''.join(st_graphic([inv_lut[v] for v in ic], 16, 16) for ic in obj_icons))
+    write('PORTRI.BIN', b''.join(st_graphic([inv_lut[v] for v in p], 32, 34) for p in portraits))
+    write('OBJECTS.BIN', decode_file(open(os.path.join(AMBERFILES, 'Objects.amb'), 'rb').read()))
+    for n in (2, 6):                       # inventory & character screen
+        layout = planar(data.read(f'Layouts.amb/{n:03}'), 320, 163, 3)
+        write(f'LAYOUT{n}.BIN', st_graphic([v and 8 + v for v in layout], 320, 163))
+    # door & chest screen (layout 3) : the 80x80 pictures of doors and chests in the inventory palette (the
+    # items look the same there, and the pictures nearly as good as with an own palette)
+    for n in PICS80:
+        write(f'P80_{n}.BIN', st_graphic([inv_lut[v] for v in planar(data.read(f'Pics_80x80.amb/{n:03}'), 80, 80, 5)],
+                                         80, 80), quiet=True)
+    layout = planar(data.read('Layouts.amb/003'), 320, 163, 3)
+    write('LAYOUT3.BIN', st_graphic([v and 8 + v for v in layout], 320, 163))
+    # the chests of the initial savegame (Save.00/Chest_data.amb : AMBR container with 256 chests)
+    raw = open(os.path.join(AMBERFILES, 'Save.00', 'Chest_data.amb'), 'rb').read()
+    count = struct.unpack('>H', raw[4:6])[0]
+    sizes = struct.unpack(f'>{count}I', raw[6:6 + 4 * count])
+    o = 6 + 4 * count
+    chests = b''
+    for size in sizes:
+        chests += raw[o:o + size].ljust(148, b'\0')[:148]
+        o += size
+    write('CHESTS.BIN', chests)
+    # places : the place data (prices, names) and the items of the merchants (Merchant_data.amb, 144 bytes
+    # each, from merchant 1)
+    write('PLACES.BIN', data.read('Place_data/001'))
+    merchants = b''
+    for n in range(1, 33):
+        name = f'Merchant_data.amb/{n:03}'
+        merchants += (data.read(name) if name in data.names else b'').ljust(144, b'\0')[:144]
+    write('MERCHANT.BIN', merchants)
+
+    # combat : layout 4, the combat backgrounds of the 2D maps (each with its palette : 16 ST colours computed
+    # from the background and the colours of all monsters, the image and a lookup table for the monster graphics,
+    # which are converted when they are loaded), the monster graphics, characters and groups, the combat
+    # effects (5 bit, also converted when loaded) and the tactical icons in the inventory palette
+    layout = planar(data.read('Layouts.amb/004'), 320, 163, 3)
+    write('LAYOUT4.BIN', st_graphic([v and 8 + v for v in layout], 320, 163))
+    bg_table = source_data('KERNEL/DATA.S', 'Combat_bg_2D_table')
+    write('CBGTAB.BIN', bg_table)
+    monsters = {}
+    for name in sorted(data.names):
+        if name.startswith('Monster_char_data.amb/') and name[-1] != '/':
+            n = int(name[-3:])
+            monsters[n] = data.read(name)
+            write(f'MC{n}.BIN', monsters[n], quiet=True)
+    def word_interleave(raw, w):
+        """5 bit graphic with interleaved lines -> per line and per 16 pixels 5 plane words (converted at
+        runtime into the ST format)."""
+        rb = w // 8
+        out = bytearray()
+        for y in range(len(raw) // (rb * 5)):
+            base = y * rb * 5
+            for g in range(0, rb, 2):
+                for p in range(5):
+                    out += raw[base + p * rb + g:base + p * rb + g + 2]
+        return bytes(out)
+
+    mon_hist = [0] * 32
+    gfx_done = set()
+    for n, mc in monsters.items():
+        g = mc[12]
+        w, h = struct.unpack('>HH', mc[802:806])
+        recol = mc[768:800]
+        raw = data.read(f'Monster_gfx.amb/{g:03}')
+        if g not in gfx_done:
+            write(f'MG{g}.BIN', word_interleave(raw, w), quiet=True)
+            gfx_done.add(g)
+        frames = len(raw) // (w // 16 * 10 * h)
+        for v in planar(raw, w, h * frames, 5):
+            if v:
+                mon_hist[recol[v]] += 1
+    groups = b''
+    for n in range(1, 129):
+        name = f'Monster_groups.amb/{n:03}'
+        groups += (data.read(name) if name in data.names else b'').ljust(36, b'\0')[:36]
+    write('MGROUPS.BIN', groups)
+    combos = sorted(set((bg_table[i], bg_table[i + j]) for i in range(0, len(bg_table), 4) for j in (1, 2, 3)))
+    for img, pal in combos:
+        pd = data.read(f'Palettes.amb/{pal:03}')
+        cpal = [amiga_rgb(struct.unpack('>H', pd[i * 2:i * 2 + 2])[0] & 0xfff) for i in range(32)]
+        pix = planar(data.read(f'Combat_background.amb/{img:03}')[-320 * 95 * 5 // 8:], 320, 95, 5)  # (16 : 4 more bytes)
+        hist = [0] * 32
+        for v in pix:
+            hist[v] += 1
+        tot_bg, tot_mon = sum(hist), max(1, sum(mon_hist))
+        weights = [hist[i] + mon_hist[i] * tot_bg / tot_mon for i in range(32)]
+        pal16, lut = make_palette(cpal, weights, ui_first=32)
+        labs = [to_lab(c) for c in pal16]
+        bg_lut = [min(range(16), key=lambda j: dist(to_lab(cpal[i]), labs[j])) for i in range(32)]
+        write(f'CB{img}_{pal}.BIN', palette_file(pal16, lut) +
+              st_graphic([bg_lut[v] for v in pix], 320, 95), quiet=True)
+    # combat effects (offsets of the battle FX graphics in GAME_OFF.S, all 5 bit)
+    fx_sizes, active = [], False
+    for line in open(os.path.join(SRC, 'GAME_OFF.S'), encoding='latin-1'):
+        if line.startswith('Fireball_fro_FXGFX:'):
+            active = True
+        if active:
+            m = re.match(r'([A-Za-z_]+_FXGFX):', line)
+            if m:
+                fx_sizes.append([m.group(1), 0])
+            m = re.match(r'\s+rsgfx\s+(\d+),(\d+),(\d+)', line)
+            if m:
+                w, h, f = map(int, m.groups())
+                fx_sizes[-1][1] = w // 16 * 10 * h * f
+            if line.startswith('Tactical_GFX:'):
+                break
+    fx_sizes[-1][1] = 2 * 6 * 36                       # Fighting_FXGFX (3 bit, 32x36)
+    fx_off, o = {}, 0
+    for name, size in fx_sizes:
+        fx_off[name] = o
+        o += size
+    cg = data.read('Combat_graphics/001')
+    fx = b''
+    for name, w, size in (('Blood_FXGFX', 32, 32 // 16 * 10 * 32 * 4), ('Scratches_FXGFX', 32, 32 // 16 * 10 * 32 * 4),
+                          ('Slash_FXGFX', 16, 43 * 10 * 3), ('Explosion_FXGFX', 48, 3 * 59 * 10 * 14)):
+        fx += word_interleave(cg[fx_off[name]:fx_off[name] + size], w)
+    write('COMBFX.BIN', fx)
+    fight = planar(cg[fx_off['Fighting_FXGFX']:], 32, 36, 3)
+    tact = cg[o:]
+    icons = len(tact) // 140
+    write('TACTIC.BIN', st_graphic([v and 12 + v for v in fight], 32, 36) +
+          b''.join(st_graphic([inv_lut[v] for v in planar(tact, 16, 14, 5, i * 140)], 16, 14) for i in range(icons)))
+    print(f'Combat: {len(combos)} backgrounds (CB*.BIN), {len(monsters)} monsters (MC*.BIN), '
+          f'{len(gfx_done)} monster graphics (MG*.BIN), {icons} tactical icons')
+
+    # dialogue screen (layout 8) : the portraits of all persons in the inventory palette (loaded when needed),
+    # the dictionary and the character data & texts of the persons
+    layout = planar(data.read('Layouts.amb/008'), 320, 163, 3)
+    write('LAYOUT8.BIN', st_graphic([v and 8 + v for v in layout], 320, 163))
+    for n in sorted(data.names):
+        if n.startswith('Portraits.amb/') and n[-1] != '/':
+            write(f'PT{int(n[-3:])}.BIN', st_graphic([inv_lut[v] for v in planar(data.read(n), 32, 34, 5)], 32, 34),
+                  quiet=True)
+    write('DICT.BIN', data.read('Dictionary.german/001'))
+    for folder, prefix in (('NPC_char.amb', 'NPC'), ('NPC_texts.amb', 'NPCT'), ('Party_char.amb', 'PC'),
+                           ('Party_texts.amb', 'PCT')):
+        for n in sorted(data.names):
+            if n.startswith(folder + '/') and n[-1] != '/':
+                write(f'{prefix}{int(n[-3:])}.BIN', data.read(n), quiet=True)
+    print('Portraits (PT*.BIN), person data & texts (NPC*.BIN, NPCT*.BIN, PC*.BIN, PCT*.BIN)')
+
+    # character screen : no items there, so its palette is chosen for the portraits, the status icons and the
+    # text colours (Light_green : headlines, Yellow & Lighter_blue : condition names)
+    raw = source_data('KERNEL/CHIP_DATA.S', 'Status_icons')   # 22 status icons (16x16, 5 bit, from icon 1)
+    stat_icons = [planar(raw, 16, 16, 5, i * 160) for i in range(22)]
+    weights = [0] * 32
+    for p in all_portraits:
+        for v in p:
+            weights[v] += portrait_weight
+    for g in stat_icons:
+        for v in g:
+            weights[v] += 1
+    for c in (4, 16, 22):
+        weights[c] += 2000
+    chr16, chr_lut = make_palette(main_pal, weights, fixed=WHITE)
+    write('CHARPAL.BIN', palette_file(chr16, chr_lut))
+    write('PORTRC.BIN', b''.join(st_graphic([chr_lut[v] for v in p], 32, 34) for p in portraits))
+    # the portraits of all party characters (joining) in the UI palette (PUI<n>.BIN) and in the character
+    # screen palette (PCH<n>.BIN), n = portrait number (in the inventory palette : PT<n>.BIN)
+    for n in sorted(data.names):
+        if n.startswith('Party_char.amb/') and n[-1] != '/':
+            p = data.read(n)[0x0a]
+            pix = planar(data.read(f'Portraits.amb/{p:03}'), 32, 34, 5)
+            write(f'PUI{p}.BIN', st_graphic([ui_lut[v] for v in pix], 32, 34), quiet=True)
+            write(f'PCH{p}.BIN', st_graphic([chr_lut[v] for v in pix], 32, 34), quiet=True)
+    write('STATICON.BIN', b''.join(st_graphic([chr_lut[v] for v in g], 16, 16) for g in stat_icons))
+    print('Character screen palette:', ' '.join(f'${st_word(c, 4):03x}' for c in chr16))
+    inv_gfx = b''
+    raw = source_data('KERNEL/CHIP_DATA.S', 'Swordshield')
+    for i in range(2):                     # sword & shield (16x9, 3 bit, base colour 24, colour 0 transparent)
+        inv_gfx += st_graphic([v and 8 + v for v in planar(raw, 16, 9, 3, i * 54)], 16, 9)
+    raw = source_data('KERNEL/CHIP_DATA.S', 'Chequered')   # disabled control icon (32x11, 1 bit)
+    inv_gfx += st_graphic([inv_lut[28] if v else 0 for v in planar(raw, 32, 11, 1)], 32, 11)
+    raw = source_data('KERNEL/DATA.S', 'Pick_Mptr')         # mouse pointer while moving an item
+    inv_gfx += struct.pack('>HH', 1, 1) + st_graphic([v and 8 + v for v in planar(raw, 16, 16, 3)], 16, 16)
+    write('INVGFX.BIN', inv_gfx)
+    # texts : 64 UI texts, 16 race names, 16 class names, 300 messages (zero-terminated, cp850 like the game texts)
+    texts = b''
+    for folder, count in (('UITexts', 64), ('RaceNames', 16), ('ClassNames', 16), ('Messages', 300),
+                          ('AttributeShortNames', 16), ('SkillShortNames', 16), ('LanguageNames', 16),
+                          ('ConditionNames', 16), ('ItemTypeNames', 32), ('AttributeNames', 16),
+                          ('SkillNames', 16), ('SpellClassNames', 8), ('SpellNames', 7 * 30),
+                          ('FormatMessages', 32)):
+        for i in range(count):
+            fn = os.path.join(ALLTEXTS, 'Text.amb', folder, f'{i:03}.txt')
+            t = ''
+            if os.path.exists(fn):
+                with open(fn, encoding='utf-8-sig') as f:
+                    t = f.read().rstrip('\0\r\n')
+            texts += t.encode('cp850') + b'\0'
+    write('TEXTS.BIN', texts)
+    write('SPELLS.BIN', source_data('KERNEL/DATA.S', 'Spell_data')[:7 * 30 * 5])   # 5 bytes per spell
+    for i in range(1, 6):                  # texts of the text scrolls (like the map texts)
+        write(f'OT{i}.BIN', data.read(f'Object_texts.amb/{i:03}'), quiet=True)
+    print('Inventory palette:', ' '.join(f'${st_word(c, 4):03x}' for c in inv16))
 
     status = b''
     for label, w, h in (('Status_L', 16, 36), ('Status_M', 16, 36), ('Status_R', 16, 36),
@@ -293,36 +645,55 @@ def main():
             raw += source_data('KERNEL/CHIP_DATA.S', 'GFX_char_value_bar_frames')
         if len(raw) < w * h * 3 // 8:
             raise SystemExit(f'{label}: only {len(raw)} bytes')
-        if label.startswith('Button'):   # map area: value 0 (colour 24, red in palette 7) is drawn black
-            status += st_graphic([v and 8 + v for v in planar(raw, w, h, 3)], w, h)
-        else:
-            status += st_graphic([8 + v for v in planar(raw, w, h, 3)], w, h)
+        status += st_graphic([v and 8 + v for v in planar(raw, w, h, 3)], w, h)
     write('UIGFX.BIN', status)
+    raw = source_data('KERNEL/CHIP_DATA.S', 'Status_icons')   # status icons for the status block
+    write('STATICUI.BIN', b''.join(st_graphic([ui_lut[v] for v in planar(raw, 16, 16, 5, i * 160)], 16, 16)
+                                   for i in range(22)))
+    star = source_data('KERNEL/CHIP_DATA.S', 'Damage_star')          # 32x26, 5 planes, colour 0 transparent
+    mask = source_data('KERNEL/CHIP_DATA.S', 'Death_mask')           # 32x34, 3 planes, colours 24-31
+    ankh = source_data('KERNEL/CHIP_DATA.S', 'Ankh_symbol')          # 32x29, 5 planes : the healer's victim
+    write('ANKH.BIN', st_graphic([v and ui_lut[v] for v in planar(ankh, 32, 29, 5)], 32, 29))
+    write('STATGFX.BIN', st_graphic([v and ui_lut[v] for v in planar(star, 32, 26, 5)], 32, 26) +
+          st_graphic([8 + v for v in planar(mask, 32, 34, 3)], 32, 34))
+    winicons = source_data('KERNEL/CHIP_DATA.S', 'Window_icons')   # 9 parts 16x16, 3 bit, colour 0 transparent
+    write('WINICONS.BIN', b''.join(st_graphic([v and 8 + v for v in planar(winicons, 16, 16, 3, i * 96)], 16, 16)
+                                   for i in range(9)))
 
     buttons = decode_file(open(os.path.join(AMBERFILES, 'Button_graphics'), 'rb').read())
     write('BUTTONS.BIN', b''.join(st_graphic([v and 8 + v for v in planar(buttons, 32, 13, 3, i * 156)], 32, 13)
                                   for i in range(len(buttons) // 156)))
     mptr = source_data('KERNEL/DATA.S', 'Default_Mptr')   # the hotspot words are dc.w, not part of it
     write('MPTR.BIN', struct.pack('>HH', 1, 1) + st_graphic([v and 8 + v for v in planar(mptr, 16, 16, 3)], 16, 16))
+    ptrs = b''
+    for label in ('Hand_Mptr', 'Mouth_Mptr'):  # mouse pointers of the 2D actions (hotspot 7, 7)
+        raw = source_data('KERNEL/DATA.S', label)
+        ptrs += struct.pack('>HH', 7, 7) + st_graphic([v and 8 + v for v in planar(raw, 16, 16, 3)], 16, 16)
+    write('MPTRS2.BIN', ptrs)
 
-    texts = data.find('Map_texts.amb', args.map)
-    name = b''
-    if len(texts) >= 4:
-        count = struct.unpack('>H', texts[:2])[0]
-        size = struct.unpack('>H', texts[2:4])[0]
-        name = texts[2 + 2 * count:2 + 2 * count + size].split(b'\0')[0].strip()
-    write('MAPNAME.BIN', name + b'\0')
-    hour, minute = map(int, args.time.split(':'))
     save = open(os.path.join(AMBERFILES, 'Save.00', 'Party_data.sav'), 'rb').read()
-    cd = save[0x2504 + (args.map - 1) * 4:0x2504 + args.map * 4]
-    write('START.BIN', struct.pack('>5H', *map(int, args.pos.split(',')), hour, minute) + cd)
+    write('SAVE.BIN', save)
+    x, y, d = struct.unpack('>3H', save[0x0c:0x12])
+    hour, minute = struct.unpack('>2H', save[6:10])
+    map_nr = struct.unpack('>H', save[0x0a:0x0c])[0]
+    if args.map:
+        map_nr = args.map
+    if args.pos:
+        x, y, d = map(int, args.pos.split(','))
+    if args.time:
+        hour, minute = map(int, args.time.split(':'))
+    write('START.BIN', struct.pack('>6H', map_nr, x, y, d, hour, minute))
+    names = b''
+    for i in range(3):
+        with open(os.path.join(ALLTEXTS, 'Text.amb', 'WorldNames',
+                               f'{i:03}.txt'), encoding='utf-8-sig') as f:
+            names += f.read().strip().encode('cp850')[:31].ljust(32, b'\0')
+    write('WORLDS.BIN', names)
 
     font = source_data('KERNEL/TEXTS.S', 'Glyph_mapping')
     glyphs = source_data('KERNEL/TEXTS.S', 'Glyph_data')
     write('FONT.BIN', font[:224] + glyphs)
 
-    print(f'Map {args.map}: tileset {tileset}, palette {pal_index}, world {world}')
-    print('Map palette:', ' '.join(f'${st_word(c, 4):03x}' for c in map16))
     print('UI palette: ', ' '.join(f'${st_word(c, 4):03x}' for c in ui16))
 
 

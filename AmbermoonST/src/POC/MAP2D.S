@@ -49,29 +49,34 @@ Program_main:
 	move.w	#160,Mouse_X
 	move.w	#100,Mouse_Y
 	jsr	Init_map
-	jsr	Calculate_map_data_offsets
-	jsr	Init_persons_2D
 	jsr	Init_time
 	move.l	#Realtime,VblQ_ptr_ST
-	jsr	Invalidate_tile_caches
 ; ---------- Draw the static parts ----------------
 	jsr	Display_status_block
-	jsr	Show_map_layout
-	jsr	Print_headline
-	jsr	Display_control_icons
-	jsr	Display_2D_map
-	jsr	Copy_screen_to_both
+	jsr	Draw_map_screen
 	moveq.l	#0,d0			; Fade in
 	jsr	Fade_screen
 	jsr	Clear_keyboard
 	jsr	Read_mouse_clicks
+	st	Pending_events		; Handle first step
 ; ---------- Main loop ----------------------------
-.Loop:	jsr	Handle_input
+.Loop:	tst.b	Pending_events		; Events after a move ?
+	beq.s	.No_events
+	sf	Pending_events
+	jsr	Event_handler
+	bra.s	.Loop
+.No_events:	jsr	Handle_input
 	tst.b	Quit_flag
 	bne.s	.Exit
 	jsr	Display_2D_map
+	jsr	Combat_check
 	jsr	Handle_realtime_steps
 	jsr	Display_position
+	tst.w	Icons_redraw		; Control icons changed ?
+	beq.s	.No_icons
+	subq.w	#1,Icons_redraw
+	jsr	Display_control_icons
+.No_icons:	jsr	Update_status
 	jsr	Switch_screens
 	bra.s	.Loop
 .Exit:	moveq.l	#1,d0			; Fade out
@@ -91,6 +96,7 @@ Copy_screen_to_both:
 	move.w	#ST_screen_size/4-1,d7
 .Loop:	move.l	(a0)+,(a1)+
 	dbra	d7,.Loop
+	jsr	Forget_mouse_pointer
 .Exit:	movem.l	(sp)+,d0-d7/a0-a6
 	rts
 
@@ -100,30 +106,16 @@ Copy_screen_to_both:
 ;*****************************************************************************
 Init_map:
 	movem.l	d0/a0,-(sp)
-	lea.l	Map_data_buffer,a0
-	moveq.l	#0,d0
-	move.b	4(a0),d0			; Width & height
-	move.w	d0,Width_of_map
-	move.b	5(a0),d0
-	move.w	d0,Height_of_map
 	lea.l	Start_position,a0
+	move.w	(a0)+,d0			; Map
 	move.w	(a0)+,Map_Xcoord
 	move.w	(a0)+,Map_Ycoord
 	move.w	(a0)+,View_direction
 	move.w	(a0)+,Hour
 	move.w	(a0)+,Minute
-	move.b	3(a0),d0			; CD bits (as in Get_CD_value)
-	lsl.w	#8,d0
-	move.b	2(a0),d0
-	swap	d0
-	move.b	1(a0),d0
-	lsl.w	#8,d0
-	move.b	(a0),d0
-	move.l	d0,CD_value
 	move.w	#1,Party_frame
-	move.b	#C2_animspeed,Anim_speed	; Animation parameters (2D city)
-	move.b	#C2_animspeed,Anim_count
-	move.w	#C2_animbias,Anim_bias
+	move.w	#-1,Current_tileset
+	jsr	Load_map
 	movem.l	(sp)+,d0/a0
 	rts
 
@@ -153,8 +145,7 @@ Display_status_block:
 	subi.w	#32,d0
 	jsr	Put_unmasked_block
 	moveq.l	#1,d7			; Display portraits
-.Loop2:	jsr	Display_portrait
-	jsr	Update_member_bars
+.Loop2:	jsr	Redraw_member
 	addq.w	#1,d7
 	cmp.w	#6+1,d7
 	bmi.s	.Loop2
@@ -169,7 +160,7 @@ Display_status_block:
 ;   - From DISPLAY.S.
 ;*****************************************************************************
 Display_portrait:
-	movem.l	d0-d7/a0,-(sp)
+	movem.l	d0-d7/a0/a1,-(sp)
 	move.w	d7,d2
 	subq.w	#1,d7			; Calculate X-coordinate
 	mulu.w	#48,d7
@@ -182,12 +173,27 @@ Display_portrait:
 	jsr	Put_unmasked_block
 	moveq.l	#35,d1			; Display bottom
 	jsr	Put_unmasked_block
-	lea.l	Portraits,a0		; Display portrait
+	move.w	d2,d7			; Anyone there ?
+	jsr	Member_present
+	bne.s	.Present
+	moveq.l	#1,d1			; No -> empty portrait
+	moveq.l	#34,d7
+	lea.l	Empty_portrait,a0
+	jsr	Put_unmasked_block
+	bra	.Exit
+.Present:	lea.l	Portraits,a0		; Display portrait
 	move.w	d2,d3
 	subq.w	#1,d3
 	mulu.w	#34*2*8,d3
 	add.l	d3,a0
-	moveq.l	#1,d1
+	move.w	d2,d7			; Dead ?
+	jsr	Get_char_data
+	move.w	Body_conditions(a1),d4
+	move.w	d4,d3
+	andi.w	#Dead_mask,d3
+	beq.s	.Alive
+	lea.l	Death_mask,a0		; Yes -> death mask
+.Alive:	moveq.l	#1,d1
 	moveq.l	#34,d7
 	jsr	Put_unmasked_block
 	lea.l	Names,a0			; Display name (first 5 letters)
@@ -202,15 +208,19 @@ Display_portrait:
 	clr.b	(a1)
 	move.w	#Lighter_blue,Ink_colour	; Default ink
 	cmp.w	#1,d2			; Active member ?
-	bne.s	.Print
+	bne.s	.No
 	move.w	#Yellow,Ink_colour
+	bra.s	.Print
+.No:	andi.w	#Active_mask,d4		; Could be active ?
+	beq.s	.Print
+	move.w	#Red,Ink_colour		; No
 .Print:	move.w	#Default_shadow,Shadow_colour	; (Status_PA in DISPLAY.S)
 	addq.w	#2,d0
 	moveq.l	#31,d1
 	moveq.l	#30,d2
 	lea.l	Temp_name,a0
 	jsr	Print_centered_string
-	movem.l	(sp)+,d0-d7/a0
+.Exit:	movem.l	(sp)+,d0-d7/a0/a1
 	rts
 
 ;*****************************************************************************
@@ -375,16 +385,128 @@ Print_centered_string:
 ;     (M2_CIL in MAP/2D_MAP.S).
 ;*****************************************************************************
 Display_control_icons:
-	movem.l	d0-d3/a2/a3,-(sp)
-	lea.l	M2_CIL,a2
-	lea.l	Icon_pos,a3
-	moveq.l	#9-1,d2
-.Loop:	move.w	(a3)+,d0			; Get coordinates
-	move.w	(a3)+,d1
-	move.w	(a2)+,d3			; Display button
-	jsr	Display_up_button
-	dbra	d2,.Loop
-	movem.l	(sp)+,d0-d3/a2/a3
+	movem.l	d0/d7/a0/a1,-(sp)
+	lea.l	M2_CIL,a0			; Movement or actions ?
+	tst.b	Second_CIL_flag
+	beq.s	.First
+	lea.l	Second_CIL,a1		; Evaluate actions
+	lea.l	Second_CIL_work,a0
+	moveq.l	#9-1,d7
+.Copy:	move.w	(a1)+,(a0)+
+	dbra	d7,.Copy
+	lea.l	Second_CIL_work,a0
+	jsr	Travel_mode_possible	; Change travel mode ?
+	bne.s	.Trans
+	bset	#7,3*2(a0)
+.Trans:	move.w	Travel_mode,d0		; Camp ?
+	move.w	#Camp_mask,d7
+	btst	d0,d7
+	bne.s	.First
+	bset	#7,5*2(a0)
+.First:	jsr	Display_CIL
+	movem.l	(sp)+,d0/d7/a0/a1
+	rts
+
+;*****************************************************************************
+; [ Switch between the two control icon lists of the map ]
+; All registers are restored
+; NOTE :
+;   - Like [ Switch_map_CIL ] (MAP/MAP.S).
+;*****************************************************************************
+Switch_map_CIL:
+	not.b	Second_CIL_flag
+	jsr	Display_control_icons
+	jmp	Copy_screen_to_both
+
+;*****************************************************************************
+; [ Select a map position next to the party ]
+;   IN : a0 - Pointer to mouse pointer (.l)
+;  OUT : d0/d1 - Map coordinates (.w)
+;        mi - Aborted (right mouse button or ESC)
+; Changed registers : d0,d1
+; NOTE :
+;   - Like the Hand and Mouth modules (ACTIONS.S, MODULES.S) : the position
+;     must be next to the party (or the tile above, for persons).
+;*****************************************************************************
+Select_map_target:
+	movem.l	d2-d7/a0-a6,-(sp)
+	jsr	Change_Mptr
+	jsr	Read_mouse_clicks
+.Loop:	jsr	Display_2D_map
+	jsr	Handle_realtime_steps
+	jsr	Switch_screens
+	jsr	Read_key			; ESC ?
+	cmp.w	#$01,d0
+	beq.s	.Abort
+	jsr	Read_mouse_clicks
+	btst	#Right_pressed,d0
+	bne.s	.Abort
+	btst	#Left_pressed,d0
+	beq.s	.Loop
+	move.w	Mouse_X,d0		; Inside the map window ?
+	subi.w	#Map2D_X,d0
+	bmi.s	.Loop
+	cmp.w	#Mapbuf_width*16,d0
+	bpl.s	.Loop
+	move.w	Mouse_Y,d1
+	subi.w	#Map2D_Y,d1
+	bmi.s	.Loop
+	cmp.w	#Mapbuf_height*16,d1
+	bpl.s	.Loop
+	lsr.w	#4,d0			; Relative to the party
+	lsr.w	#4,d1
+	sub.w	Mapbuf_X,d0
+	sub.w	Mapbuf_Y,d1
+	move.w	d0,d2			; Next to the party ?
+	addq.w	#1,d2
+	cmp.w	#2,d2
+	bhi.s	.Loop
+	move.w	d1,d2
+	addq.w	#2,d2
+	cmp.w	#3,d2
+	bhi.s	.Loop
+	add.w	Map_Xcoord,d0		; Map coordinates
+	add.w	Map_Ycoord,d1
+	moveq.l	#0,d2
+	bra.s	.Exit
+.Abort:	moveq.l	#-1,d2
+.Exit:	lea.l	Mouse_pointer,a0
+	jsr	Change_Mptr
+	tst.w	d2
+	movem.l	(sp)+,d2-d7/a0-a6
+	rts
+
+;*****************************************************************************
+; [ Touch a map position (Hand action) ]
+;   IN : d0/d1 - Map coordinates (.w)
+; All registers are restored
+; NOTE :
+;   - From [ Touch ] (ACTIONS.S) : doors, chests and riddle mouths, and
+;     queries for touching.
+;*****************************************************************************
+Touch_map:
+	movem.l	d0-d2/a5,-(sp)
+	move.w	Map_Xcoord,Old_Xcoord	; (the party stays here)
+	move.w	Map_Ycoord,Old_Ycoord
+	jsr	Find_event		; Find event
+	bmi.s	.Exit
+	jsr	Check_event_save_status	; Already saved ?
+	bne.s	.Exit
+	lea.l	Current_event_data,a5	; No -> Examine event
+	moveq.l	#0,d0			; Get event type
+	move.b	(a5),d0
+	move.l	#Handable_event_mask,d1	; Touchable ?
+	btst	d0,d1
+	bne.s	.Do
+	cmp.b	#Query_type,d0		; Query ?
+	bne.s	.Exit
+	cmp.b	#Touched_QM_type,Event_b1(a5)	; For touch ?
+	bne.s	.Exit
+.Do:	st	Hand_flag			; Handle event
+	jsr	Handle_event_chain
+	sf	Hand_flag
+	st	Pending_events		; (the position may have changed)
+.Exit:	movem.l	(sp)+,d0-d2/a5
 	rts
 
 ;*****************************************************************************
@@ -483,11 +605,90 @@ Handle_input:
 	cmp.w	#$01,d0			; ESC ?
 	beq.s	.Quit
 	cmp.w	#$61,d0			; UNDO ?
-	bne.s	.Keys
+	beq.s	.Quit
+	cmp.w	#$3b,d0			; F1...F6 : inventory
+	bmi.s	.Keys
+	cmp.w	#$40+1,d0
+	bpl.s	.Keys
+	subi.w	#$3b-1,d0
+	move.w	d0,d7
+	jsr	Inventory_screen
+	bra	.Exit
 .Quit:	st	Quit_flag
 	bra	.Exit
+; ---------- Inventory ----------------------------
+.Mouse:	jsr	Read_mouse_clicks		; Right button on a portrait ?
+	move.w	d0,d6
+	btst	#Right_pressed,d6
+	beq	.No_right
+	cmp.w	#Middle_Y+1,Mouse_Y
+	bpl.s	.Right_map
+	move.w	Mouse_X,d7
+	subi.w	#16,d7
+	bmi	.Move_input
+	ext.l	d7
+	divu.w	#48,d7
+	cmp.w	#6,d7
+	bpl	.Move_input
+	addq.w	#1,d7
+	jsr	Inventory_screen
+	bra	.Exit
+; ---------- Right button on the icons : switch ---
+.Right_map:	cmp.w	#208,Mouse_X		; Control icons ?
+	bmi.s	.Action
+	cmp.w	#143,Mouse_Y
+	bmi	.Move_input
+	jsr	Switch_map_CIL
+	bra	.Exit
+; ---------- Right button in the map : talk -------
+.Action:	lea.l	Mouth_pointer,a0		; (Mouse_action_on)
+	jsr	Select_map_target
+	bmi	.Exit
+	jsr	Talk_2D
+	bra	.Exit
+; ---------- Second control icons -----------------
+.No_right:	tst.b	Second_CIL_flag		; Action icons ?
+	beq	.Move_input
+	btst	#Left_pressed,d6
+	beq	.Move_input
+	jsr	Control_icon_number
+	cmp.w	#2,d0			; Hand ?
+	bne.s	.No_hand
+	moveq.l	#2,d0
+	jsr	Press_icon
+	lea.l	Hand_pointer,a0
+	jsr	Select_map_target
+	bmi	.Exit
+	jsr	Touch_map
+	bra	.Exit
+.No_hand:	cmp.w	#4,d0			; Change travel mode ?
+	bne.s	.No_trans
+	btst	#7,Second_CIL_work+3*2
+	bne	.Exit
+	moveq.l	#4,d0
+	jsr	Press_icon
+	jsr	Change_travel_mode
+	bra	.Exit
+.No_trans:	cmp.w	#6,d0			; Camp ?
+	bne.s	.No_camp
+	btst	#7,Second_CIL_work+5*2
+	bne	.Exit
+	moveq.l	#6,d0
+	jsr	Press_icon
+	jsr	Camp
+	bra	.Exit
+.No_camp:	cmp.w	#3,d0			; Talk ?
+	bne	.Move_input
+	moveq.l	#3,d0
+	jsr	Press_icon
+	lea.l	Mouth_pointer,a0
+	jsr	Select_map_target
+	bmi	.Exit
+	jsr	Talk_2D
+	bra	.Exit
 ; ---------- Movement -----------------------------
-.Mouse:	moveq.l	#-1,d7			; No direction
+.Move_input:
+	moveq.l	#-1,d7			; No direction
 	lea.l	Direction_keys,a0		; Keys held down ?
 .Loop:	move.w	(a0)+,d0
 	bmi.s	.No_key
@@ -506,6 +707,63 @@ Handle_input:
 	rts
 
 ;*****************************************************************************
+; [ Get the number of the control icon under the mouse ]
+;  OUT : d0 - Icon number {1...9} / 0 = none (.w)
+; Changed registers : d0
+;*****************************************************************************
+Control_icon_number:
+	movem.l	d1,-(sp)
+	moveq.l	#0,d0
+	move.w	Mouse_X,d1
+	subi.w	#208,d1
+	bmi.s	.Exit
+	ext.l	d1
+	divu.w	#32,d1
+	cmp.w	#3,d1
+	bpl.s	.Exit
+	move.w	d1,d0
+	move.w	Mouse_Y,d1
+	subi.w	#143,d1
+	bmi.s	.None
+	ext.l	d1
+	divu.w	#17,d1
+	cmp.w	#3,d1
+	bpl.s	.None
+	mulu.w	#3,d1
+	add.w	d1,d0
+	addq.w	#1,d0
+	bra.s	.Exit
+.None:	moveq.l	#0,d0
+.Exit:	movem.l	(sp)+,d1
+	rts
+
+; [ Show a control icon pressed until the mouse button is released ]
+;   IN : d0 - Icon number {1...9} (.w)
+; All registers are restored
+Press_icon:
+	movem.l	d0-d3/a0,-(sp)
+	move.w	d0,d2
+	lea.l	M2_CIL-2,a0		; Get icon
+	tst.b	Second_CIL_flag
+	beq.s	.First
+	lea.l	Second_CIL-2,a0
+.First:	add.w	d2,d2
+	move.w	0(a0,d2.w),d3
+	add.w	d2,d2			; Get position
+	lea.l	Icon_pos-4,a0
+	move.w	0(a0,d2.w),d0
+	move.w	2(a0,d2.w),d1
+	jsr	Display_down_button
+	jsr	Copy_screen_to_both
+.Wait:	jsr	Switch_screens
+	btst	#Left_pressed,Mouse_buttons
+	bne.s	.Wait
+	jsr	Display_up_button
+	jsr	Copy_screen_to_both
+	movem.l	(sp)+,d0-d3/a0
+	rts
+
+;*****************************************************************************
 ; [ Get the movement direction from the mouse position ]
 ;  OUT : d7 - Direction {0...7} / -1 = none (.w)
 ; Changed registers : d7
@@ -520,6 +778,8 @@ Mouse_direction_2D:
 	move.w	Mouse_Y,d1
 	cmp.w	#208,d0			; Control icons ?
 	bmi.s	.Map
+	tst.b	Second_CIL_flag		; (not the action icons)
+	bne	.Exit
 	cmp.w	#143,d1
 	bmi.s	.Exit
 	subi.w	#208,d0
@@ -581,7 +841,9 @@ Make_2D_move:
 	movem.l	d2/d3/d6/d7,-(sp)
 	move.w	VBL_counter,d2		; Is it time ?
 	sub.w	Last_move,d2
-	cmp.w	#M2_movement_speed,d2
+	move.w	#M2_movement_speed,d3	; (faster with transports)
+	sub.w	Time_warp,d3
+	cmp.w	d3,d2
 	bmi.s	.Exit
 	sf	Moved
 	move.w	Map_Xcoord,d2		; Get party coordinates
@@ -615,28 +877,38 @@ Make_2D_move:
 ;   - From MAP/2D_MAP.S.
 ;*****************************************************************************
 Try_2D_move:
-	movem.l	d0-d3/d7,-(sp)
-	move.b	.View(pc,d7.w),d0		; Set view direction
+	movem.l	d0-d3/d7/a0,-(sp)
+	lea.l	.View(pc),a0		; Set view direction
+	move.b	0(a0,d7.w),d0
 	ext.w	d0
 	move.w	d0,View_direction
 	move.w	d2,d0			; Get party coordinates
 	move.w	d3,d1
 	add.w	d7,d7			; Get coordinate offsets
-	move.b	.Offsets(pc,d7.w),d2
-	move.b	.Offsets+1(pc,d7.w),d3
+	lea.l	.Offsets(pc),a0
+	move.b	0(a0,d7.w),d2
+	move.b	1(a0,d7.w),d3
 	ext.w	d2
 	ext.w	d3
 	add.w	d2,d0			; Move
 	add.w	d3,d1
 	jsr	Movement_check_2D
 	bne.s	.Exit			; Possible ?
-	move.w	d0,Map_Xcoord		; Yes -> store new coordinates
+	move.w	Map_Xcoord,Old_Xcoord	; Yes -> remember old coordinates
+	move.w	Map_Ycoord,Old_Ycoord
+	move.w	d0,Map_Xcoord		;  & store new coordinates
 	move.w	d1,Map_Ycoord
 	st	Moved			; Yay!
-	jsr	Animate_party
+	jsr	World_evaluate		; World map : next submap ?
+	jsr	Check_swimming		; Swimming ?
+	tst.b	Second_CIL_flag		; (icons may change)
+	beq.s	.No_icons
+	move.w	#2,Icons_redraw
+.No_icons:	jsr	Animate_party
 	jsr	Time_after_move
+	st	Pending_events		; Handle events
 	move.w	VBL_counter,Last_move	; Reset clock
-.Exit:	movem.l	(sp)+,d0-d3/d7
+.Exit:	movem.l	(sp)+,d0-d3/d7/a0
 	rts
 
 .View:	dc.b 0,0,1,2,2,2,3,0
@@ -656,6 +928,8 @@ Try_2D_move:
 Movement_check_2D:
 	movem.l	d0-d2,-(sp)
 	moveq.l	#-1,d2			; Zero flag off
+	tst.b	World_map			; 2D city map ?
+	bne.s	.World
 	cmp.w	#1,d0			; X too low ?
 	blt.s	.Exit
 	cmp.w	Width_of_map,d0		; X too high ?
@@ -664,11 +938,19 @@ Movement_check_2D:
 	blt.s	.Exit
 	cmp.w	Height_of_map,d1		; Y too high ?
 	bgt.s	.Exit
-	jsr	Get_location_status		; Get location status
+.World:	jsr	Get_location_status		; Get location status
+	moveq.l	#0,d1			; Get travel mode
+	tst.b	World_map			; (only on world maps)
+	beq.s	.Skip
+	move.w	Travel_mode,d1
+	cmp.w	#Swimming,d1		; Swimming ?
+	bne.s	.Skip
+	moveq.l	#On_foot,d1		; Yes -> Equals on foot
+.Skip:	add.w	#Blocked_foot_bit,d1
 	btst.l	#Way_blocked_bit,d0		; Way blocked ?
 	bne.s	.Exit
-	btst.l	#Blocked_foot_bit,d0	; Way possible on foot ?
-	seq	d2
+	btst.l	d1,d0			; Way possible for current
+	seq	d2			;  travel mode ?
 .Exit:	tst.b	d2			; Get zero flag
 	movem.l	(sp)+,d0-d2
 	rts
@@ -686,13 +968,11 @@ Get_location_status:
 	movem.l	d1-d7/a0/a1,-(sp)
 	move.w	d0,d4			; Save coordinates
 	move.w	d1,d5
-	lea.l	Map_data_buffer+Map_data,a1	; Get map pointer
-	subq.w	#1,d1
-	mulu.w	Width_of_map,d1
-	subq.w	#1,d0
-	add.w	d0,d1
-	lsl.l	#2,d1
-	add.l	d1,a1
+	jsr	Get_map_tile		; Get map pointer
+	bne.s	.Inside
+	move.l	#1<<Way_blocked_bit,d0	; Outside : blocked
+	bra	.Exit
+.Inside:	move.l	a0,a1
 	lea.l	Icon_data_buffer+2,a0	; Get icon data
 	moveq.l	#0,d0			; Get underlay icon number
 	move.b	(a1),d0
@@ -795,6 +1075,8 @@ Recalc_mapbuf_coords:
 	movem.l	d0/d1,-(sp)
 	move.w	#Mapbuf_centreX,Mapbuf_X	; Reset map buffer coordinates
 	move.w	#Mapbuf_centreY,Mapbuf_Y
+	tst.b	World_map			; World map : always centred
+	bne	.Go_on2
 	move.w	Map_Xcoord,d0		; Load party coordinates
 	move.w	Map_Ycoord,d1
 	cmpi.w	#Mapbuf_centreX+1,d0	; Left boundary check
@@ -827,35 +1109,35 @@ Recalc_mapbuf_coords:
 ;   - From [ C2_DisUpd ] (MAP/2D_CITY.S).
 ;*****************************************************************************
 Fill_map_buffers:
-	movem.l	d0/d1/d6/d7/a1-a3,-(sp)
+	movem.l	d0-d7/a0-a3,-(sp)
 	jsr	Clear_persons_buffer
 	jsr	Recalc_mapbuf_coords	; Set map buffer coordinates
-	lea.l	Map_data_buffer+Map_data,a1	; Calculate map address
-	move.w	Map_Ycoord,d0
-	subq.w	#1,d0
-	sub.w	Mapbuf_Y,d0
-	move.w	Width_of_map,d1
-	mulu.w	d1,d0
-	add.w	Map_Xcoord,d0
-	subq.w	#1,d0
-	sub.w	Mapbuf_X,d0
-	lsl.l	#2,d0
-	adda.l	d0,a1
-	subi.w	#Mapbuf_width,d1		; Calculate offset
-	lsl.w	#2,d1
-	lea.l	Underlay_buffer,a2		; Copy maps to buffer
+	lea.l	Underlay_buffer,a2		; Copy map part to buffers
 	lea.l	Overlay_buffer,a3
+	move.w	Map_Ycoord,d5		; First map position
+	sub.w	Mapbuf_Y,d5
 	moveq.l	#Mapbuf_height-1,d7
-.Loop1:	moveq.l	#Mapbuf_width-1,d6
-.Loop2:	move.b	(a1)+,(a2)+		; Copy underlay
-	addq.l	#1,a1			; Skip event
-	move.b	(a1)+,(a3)+		; Copy overlay
-	move.b	(a1)+,(a3)+
+.Loop1:	move.w	Map_Xcoord,d4
+	sub.w	Mapbuf_X,d4
+	moveq.l	#Mapbuf_width-1,d6
+.Loop2:	move.w	d4,d0
+	move.w	d5,d1
+	jsr	Get_map_tile
+	beq.s	.Outside
+	move.b	(a0),(a2)+		; Copy underlay
+	move.b	2(a0),(a3)+		; Copy overlay
+	move.b	3(a0),(a3)+
+	bra.s	.Next2
+.Outside:	clr.b	(a2)+			; Outside the map
+	clr.w	(a3)+
+.Next2:	addq.w	#1,d4
 	dbra	d6,.Loop2
-	adda.w	d1,a1
+	addq.w	#1,d5
 	dbra	d7,.Loop1
+	tst.b	World_map			; Persons ?
+	bne.s	.Exit
 	jsr	NPC_manager_2D		; Handle persons
-	movem.l	(sp)+,d0/d1/d6/d7/a1-a3
+.Exit:	movem.l	(sp)+,d0-d7/a0-a3
 	rts
 
 ;*****************************************************************************
@@ -880,6 +1162,7 @@ Display_2D_map:
 	add.w	Mapbuf_X,d0
 	move.w	d0,Party_cell
 	jsr	Mark_sprite_cells
+	jsr	Prepare_light
 	lea.l	Underlay_buffer,a1
 	lea.l	Overlay_buffer,a2
 	lea.l	Redraw_flags,a3
@@ -901,7 +1184,27 @@ Display_2D_map:
 	moveq.l	#0,d3			; Party or person here ?
 	lea.l	Sprite_cells,a0
 	move.b	0(a0,d4.w),d3
-	tst.w	d3			; Sprites : always redraw
+	lea.l	Cell_light,a0		; Light
+	cmp.b	#1,0(a0,d4.w)
+	bmi.s	.Lit			; Inside the light ?
+	beq.s	.Edge			; On the edge ?
+	tst.b	d3			; Dark : sprite here ?
+	bne.s	.Dark_sprite
+	cmp.w	#2,4(a4)			; Already black ?
+	beq	.Skip
+	jsr	Clear_icon		; No -> erase
+	move.l	#-1,(a4)
+	move.w	#2,4(a4)
+	bra	.Skip
+.Dark_sprite:
+	tst.b	Stygian			; Complete darkness ?
+	beq.s	.Edge
+	jsr	Clear_icon		; Yes -> only the sprite
+	move.l	#-1,(a4)
+	move.w	#1,4(a4)
+	bra	.Skip
+.Edge:	moveq.l	#1,d3			; Always redraw
+.Lit:	tst.w	d3			; Sprites : always redraw
 	bne.s	.Redraw
 	cmp.l	(a4),d2			; Same icons ?
 	bne.s	.Redraw
@@ -947,6 +1250,7 @@ Display_2D_map:
 	add.w	Width_of_map,d5
 	dbra	d7,.Loop1
 ; ---------- Display persons & party -------------
+	jsr	Display_2D_transports
 	lea.l	Icon_graphics,a0
 	lea.l	Persons_buffer,a1
 	jsr	Get_hashable_number
@@ -971,6 +1275,7 @@ Display_2D_map:
 	dbra	d7,.Loop5
 ; ---------- Display sky overlays -----------------
 	jsr	Display_2D_sky
+	jsr	Display_2D_night		; Light circle
 	jsr	Pop_CA
 	subq.b	#1,Anim_count		; Time for an update ?
 	bne.s	.Exit
@@ -992,6 +1297,7 @@ Mark_sprite_cells:
 .Clear:	clr.b	(a0)+
 	dbra	d7,.Clear
 	lea.l	Sprite_cells,a0
+	jsr	Mark_transport_cells	; Transports
 	move.w	Party_cell,d0		; Party
 	jsr	.Mark
 	lea.l	Persons_buffer,a1		; Persons
@@ -1268,11 +1574,34 @@ Get_hashable_number:
 ; [ Display party ]
 ; All registers are restored
 ; NOTE :
-;   - From MAP/2D_MAP.S (on foot).
+;   - From MAP/2D_MAP.S (on foot : the travel graphics on world maps).
 ;*****************************************************************************
 Display_2D_party:
 	movem.l	d0/d1/d5-d7/a0,-(sp)
-	lea.l	Party_graphics,a0		; Seek graphics
+	tst.b	World_map			; Show travel modes in this
+	beq	.No_trans			;  map ?
+	lea.l	Travel_graphics,a0		; Seek graphics
+	move.w	View_direction,d7
+	bra.s	.Entry
+.Loop:	move.w	(a0)+,d0			; Skip frame
+	mulu.w	(a0)+,d0
+	lsl.l	#3,d0			; (8 bytes per trunc)
+	lea.l	4(a0,d0.l),a0
+.Entry:	dbra	d7,.Loop
+	move.w	(a0)+,d6			; Get dimensions
+	move.w	(a0)+,d7
+	move.w	Mapbuf_X,d0		; Get coordinates
+	lsl.w	#4,d0
+	addi.w	#Map2D_X-16,d0
+	move.w	Mapbuf_Y,d1
+	lsl.w	#4,d1
+	addi.w	#Map2D_Y-16,d1
+	add.w	(a0)+,d0
+	add.w	(a0)+,d1
+	moveq.l	#5,d5			; Display transport
+	jsr	Put_masked_block
+	bra	.Exit
+.No_trans:	lea.l	Party_graphics,a0		; Seek graphics
 	move.w	Map_Xcoord,d0		; Get sit/sleep status
 	move.w	Map_Ycoord,d1
 	jsr	Get_sit_sleep_status
@@ -1295,7 +1624,7 @@ Display_2D_party:
 	moveq.l	#1,d6
 	moveq.l	#32,d7
 	jsr	Put_masked_block
-	movem.l	(sp)+,d0/d1/d5-d7/a0
+.Exit:	movem.l	(sp)+,d0/d1/d5-d7/a0
 	rts
 
 ;*****************************************************************************
@@ -1495,6 +1824,12 @@ M2_CIL:	dc.w Upleft_2D_cicon,Up_2D_cicon,Upright_2D_cicon
 	dc.w Left_2D_cicon,Hourglass_cicon,Right_2D_cicon
 	dc.w Downleft_2D_cicon,Down_2D_cicon,Downright_2D_cicon
 
+; Second control icon list of the 2D map (Second_CIL in ACTIONS.S) : only
+; Hand, Talk, Change travel mode and Camp are possible in the proof of concept
+Second_CIL:	dc.w Look_cicon+Disabled,Hand_cicon,Talk_cicon
+	dc.w Change_trans_cicon,Use_magic_cicon+Disabled,Camp_cicon
+	dc.w Automapper_cicon+Disabled,Combat_pos_cicon+Disabled,Disk_cicon+Disabled
+
 ; Positions of the control icons (HULL/CONTROLS.S)
 Icon_pos:	dc.w 208,143,240,143,272,143
 	dc.w 208,160,240,160,272,160
@@ -1512,9 +1847,6 @@ File_list:
 	dc.l	UI_palette,64
 	dc.b	"DATA\UIPAL.BIN",0
 	even
-	dc.l	Map_palette,64
-	dc.b	"DATA\MAPPAL.BIN",0
-	even
 	dc.l	Layout,320*163/2
 	dc.b	"DATA\LAYOUT.BIN",0
 	even
@@ -1526,6 +1858,9 @@ File_list:
 	even
 	dc.l	Mouse_pointer,4+16*8
 	dc.b	"DATA\MPTR.BIN",0
+	even
+	dc.l	Hand_pointer,2*(4+16*8)
+	dc.b	"DATA\MPTRS2.BIN",0
 	even
 	dc.l	Portraits,6*34*2*8
 	dc.b	"DATA\PORTR.BIN",0
@@ -1539,26 +1874,71 @@ File_list:
 	dc.l	Font_data,1024
 	dc.b	"DATA\FONT.BIN",0
 	even
-	dc.l	Icon_graphics,Max_icons*16*8
-	dc.b	"DATA\ICONS.BIN",0
-	even
-	dc.l	Icon_data_buffer,2+Max_icons*8
-	dc.b	"DATA\ICONDAT.BIN",0
-	even
-	dc.l	Map_data_buffer,Max_map_size
-	dc.b	"DATA\MAP.BIN",0
-	even
-	dc.l	Party_graphics,17*32*8
-	dc.b	"DATA\PARTY.BIN",0
-	even
-	dc.l	Map_name,64
-	dc.b	"DATA\MAPNAME.BIN",0
-	even
-	dc.l	Start_position,14
+	dc.l	Start_position,12
 	dc.b	"DATA\START.BIN",0
 	even
-	dc.l	NPC_graphics,Max_NPC_graphics
-	dc.b	"DATA\NPCGFX.BIN",0
+	dc.l	Savegame,Savegame_size
+	dc.b	"DATA\SAVE.BIN",0
+	even
+	dc.l	World_names,3*32
+	dc.b	"DATA\WORLDS.BIN",0
+	even
+	dc.l	Window_icons,9*16*8
+	dc.b	"DATA\WINICONS.BIN",0
+	even
+	dc.l	Inv_palette,64
+	dc.b	"DATA\INVPAL.BIN",0
+	even
+	dc.l	Inv_portraits,6*34*2*8
+	dc.b	"DATA\PORTRI.BIN",0
+	even
+	dc.l	Inv_graphics,2*9*8+11*2*8+4+16*8
+	dc.b	"DATA\INVGFX.BIN",0
+	even
+	dc.l	Object_icons,188*16*8
+	dc.b	"DATA\OBJICONS.BIN",0
+	even
+	dc.l	Object_data,2+402*Item_data_size
+	dc.b	"DATA\OBJECTS.BIN",0
+	even
+	dc.l	Char_palette,64
+	dc.b	"DATA\CHARPAL.BIN",0
+	even
+	dc.l	Char_portraits,6*34*2*8
+	dc.b	"DATA\PORTRC.BIN",0
+	even
+	dc.l	Status_icons,22*16*8
+	dc.b	"DATA\STATICON.BIN",0
+	even
+	dc.l	Status_icons_UI,22*16*8
+	dc.b	"DATA\STATICUI.BIN",0
+	even
+	dc.l	Damage_star,2*8*(26+34)
+	dc.b	"DATA\STATGFX.BIN",0
+	even
+	dc.l	Places_data,4032
+	dc.b	"DATA\PLACES.BIN",0
+	even
+	dc.l	Merchants,32*Items_per_chest*Object_packet_size
+	dc.b	"DATA\MERCHANT.BIN",0
+	even
+	dc.l	Ankh_symbol,2*8*29
+	dc.b	"DATA\ANKH.BIN",0
+	even
+	dc.l	Spell_data,7*30*5
+	dc.b	"DATA\SPELLS.BIN",0
+	even
+	dc.l	Chests,256*(Items_per_chest*Object_packet_size+4)
+	dc.b	"DATA\CHESTS.BIN",0
+	even
+	dc.l	Texts,20*1024
+	dc.b	"DATA\TEXTS.BIN",0
+	even
+	dc.l	Combat_bg_table,16*4
+	dc.b	"DATA\CBGTAB.BIN",0
+	even
+	dc.l	Monster_groups,128*Max_monsters*2
+	dc.b	"DATA\MGROUPS.BIN",0
 	even
 	dc.l	0
 
@@ -1569,9 +1949,9 @@ Load_error_text:
 	even
 
 	SECTION	Fast_BSS,bss
-Max_icons	EQU	2048
-Max_NPC_graphics	EQU	64*1024
-Max_map_size	EQU	12+320+100*100*4+16384
+Max_icons	EQU	1552			; (largest tileset : 1545 icons)
+Max_NPC_graphics	EQU	16*1024			; (largest file : 14886 bytes)
+Max_map_size	EQU	20*1024			; (largest map : 16124 bytes)
 UI_graphics_size	EQU	3*36*8+8+34*2*8+2*17*2*8
 
 UI_palette:	ds.b 64
@@ -1584,12 +1964,23 @@ Empty_portrait:	ds.b 34*2*8
 Button_up:	ds.b 17*2*8
 Button_down:	ds.b 17*2*8
 Mouse_pointer:	ds.b 4+16*8
+Hand_pointer:	ds.b 4+16*8
+Mouth_pointer:	ds.b 4+16*8
+Second_CIL_flag:	ds.b 1
+	even
+Second_CIL_work:	ds.w 9
+	even
 Names:	ds.b 6*16
 Temp_name:	ds.b 6
 Map_name:	ds.b 64
 	even
-Start_position:	ds.w 5			; X, Y, direction, hour, minute
-	ds.b	4			; CD bits
+Start_position:	ds.w 6			; Map, X, Y, direction, hour, minute
+Savegame_size	EQU	16*1024
+Savegame:	ds.b Savegame_size
+World_names:	ds.b 3*32
+Window_icons:	ds.b 9*16*8
+Pending_events:	ds.b 1
+	even
 Quit_flag:	ds.b 1
 Moved:	ds.b 1
 Party_animate_state:	ds.b 1
@@ -1626,6 +2017,7 @@ Underlay_buffer:	ds.b Mapbuf_size
 Overlay_buffer:	ds.w Mapbuf_size
 Font_data:	ds.b 1024
 Layout:	ds.b 320*163/2
+Extra_layout:	ds.b 320*163/2		; Layout 2 or 7 (loaded when needed)
 Control_icons:	ds.b 78*13*2*8
 Portraits:	ds.b 6*34*2*8
 Party_chars:	ds.b 6*512

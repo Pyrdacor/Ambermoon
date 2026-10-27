@@ -123,6 +123,41 @@ Put_unmasked_block:
 	rts
 
 ;*****************************************************************************
+; [ Get a block from the work screen ]
+;   IN : d0 - X-coordinate (.w)
+;        d1 - Y-coordinate (.w)
+;        d5 - Number of planes (.w) (ignored)
+;        d6 - Width in truncs (.w)
+;        d7 - Height in pixels (.w)
+;        a0 - Pointer to buffer (.l)
+; All registers are restored
+; NOTE :
+;   - The X-coordinate is rounded down to a multiple of 16. The block can be
+;     put back with [ Put_unmasked_block ].
+;*****************************************************************************
+Get_block:
+	movem.l	d0-d7/a0-a2,-(sp)
+	tst.w	d6
+	ble.s	.Exit
+	tst.w	d7
+	ble.s	.Exit
+	move.l	Work_screen,a1
+	andi.w	#-$10,d0
+	jsr	Get_screen_offset
+	add.l	d2,a1
+	subq.w	#1,d6
+	subq.w	#1,d7
+.Loop:	move.l	a1,a2
+	move.w	d6,d5
+.Loop2:	move.l	(a2)+,(a0)+
+	move.l	(a2)+,(a0)+
+	dbra	d5,.Loop2
+	lea.l	ST_bytes_per_line(a1),a1
+	dbra	d7,.Loop
+.Exit:	movem.l	(sp)+,d0-d7/a0-a2
+	rts
+
+;*****************************************************************************
 ; [ Put a masked block on the work screen ]
 ;   IN : d0 - X-coordinate (.w)
 ;        d1 - Y-coordinate (.w)

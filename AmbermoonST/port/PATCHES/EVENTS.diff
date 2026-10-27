@@ -1,0 +1,51 @@
+--- a/EVENTS.S
++++ b/EVENTS.S
+@@ -1836,9 +1836,24 @@
+ 	moveq.l	#ShowPicTxt_layout,d0	; Show new layout
+ 	jsr	Show_layout
+ 	lea.l	Current_event_data,a5
++; ---------- Load & install palette ---------------	; ST: before the picture, which
++	moveq.l	#0,d2			;  is converted to the ST colours of
++	move.b	Event_b1(a5),d2		;  the palette when it is drawn
++	lea.l	Event_pix_palette_table,a0	; Get palette number
++	move.b	0(a0,d2.w),d0
++	moveq.l	#Palette_file,d1		; Load palette
++	jsr	Load_subfile
++	move.b	d0,d7
++	jsr	Claim_pointer
++	move.l	d0,a0
++	lea.l	Batch,a1			; Copy palette
++	moveq.l	#Pal_size-1,d6
++.Loop:	move.w	(a0)+,(a1)+
++	dbra	d6,.Loop
++	move.b	d7,d0			; Destroy palette
++	jsr	Free_pointer
++	jsr	Free_memory
+ ; ---------- Load & display picture ---------------
+-	moveq.l	#0,d2			; Get picture number
+-	move.b	Event_b1(a5),d2
+ 	move.w	d2,d0			; Load picture
+ 	addq.w	#1,d0			; !!!
+ 	moveq.l	#Event_pix_file,d1
+@@ -1855,21 +1870,6 @@
+ 	move.w	(sp)+,d0			; Remove picture
+ 	jsr	Free_pointer
+ 	jsr	Free_memory
+-; ---------- Load & install palette ---------------
+-	lea.l	Event_pix_palette_table,a0	; Get palette number
+-	move.b	0(a0,d2.w),d0
+-	moveq.l	#Palette_file,d1		; Load palette
+-	jsr	Load_subfile
+-	move.b	d0,d7
+-	jsr	Claim_pointer
+-	move.l	d0,a0
+-	lea.l	Batch,a1			; Copy palette
+-	moveq.l	#Pal_size-1,d6
+-.Loop:	move.w	(a0)+,(a1)+
+-	dbra	d6,.Loop
+-	move.b	d7,d0			; Destroy palette
+-	jsr	Free_pointer
+-	jsr	Free_memory
+ 	jsr	Fade_in_bottom		; Fade in
+ ; ---------- Do text ------------------------------
+ 	move.w	#31,Ink_colour		; Set ink

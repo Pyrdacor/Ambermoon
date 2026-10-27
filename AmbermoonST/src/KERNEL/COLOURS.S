@@ -17,7 +17,11 @@
 ;   .l  colour value (low word) or pointer to the 16 palette words
 ; Like the copper list of the Amiga version, a palette is set at the start
 ; of the line BEFORE its line (that line is always empty), a colour of a
-; range exactly at its line.
+; range exactly at its line. Only a colour on line 1 is set in the VBL : the
+; Timer B interrupt at the end of line 0 can come too late (while the CPU
+; finishes a long instruction), then the left part of line 1 would still
+; show the old colour (e.g. the purple colour 25 above the first portrait).
+; Line 0 does not use the colours of the ranges.
 
 	SECTION	Program,code
 
@@ -95,6 +99,10 @@ Set_raster_list:
 .Loop2:	move.w	(a4)+,d0			; Convert colour
 	jsr	Amiga_to_STE_colour
 	move.w	d1,(a1)+
+	cmp.w	#1,d1			; Line 1 ?
+	bne.s	.Not1
+	clr.w	-2(a1)			; Yes -> in the VBL
+.Not1:
 	move.w	d5,(a1)+
 	clr.w	(a1)+
 	move.w	d0,(a1)+
@@ -146,6 +154,7 @@ Amiga_to_STE_colour:
 	movem.l	d1/d2/a0,-(sp)
 	lea.l	STE_nibbles,a0
 	moveq.l	#0,d1
+	rol.w	#4,d0			; Skip the unused top nibble
 	moveq.l	#3-1,d2
 .Loop:	rol.w	#4,d1
 	rol.w	#4,d0
@@ -216,10 +225,12 @@ Raster_VBL:
 	lea.l	Palette_regs,a1
 .Loop:	move.w	(a0),d0			; Line 0 ?
 	bne.s	.Arm
-	move.w	2(a0),d0			; Execute event
+	move.w	2(a0),d1			; Execute event
 	bmi.s	.Full
-	add.w	d0,d0
-	move.w	6(a0),0(a1,d0.w)
+	add.w	d1,d1
+	move.w	6(a0),d0
+	jsr	Fade_colour
+	move.w	d0,0(a1,d1.w)
 	addq.l	#8,a0
 	bra.s	.Loop
 .Full:	move.l	4(a0),a2
@@ -246,7 +257,16 @@ Timer_B_interrupt:
 .Loop:	move.w	2(a0),d0
 	bmi.s	.Full
 	add.w	d0,d0			; One colour
+	tst.w	Fade_level
+	bne.s	.Fade1
 	move.w	6(a0),0(a1,d0.w)
+	bra.s	.Next
+.Fade1:	move.l	d1,-(sp)
+	move.w	d0,d1
+	move.w	6(a0),d0
+	jsr	Fade_colour
+	move.w	d0,0(a1,d1.w)
+	move.l	(sp)+,d1
 	bra.s	.Next
 .Full:	move.l	4(a0),a2			; Complete palette
 	tst.w	Fade_level
@@ -287,28 +307,31 @@ Timer_B_interrupt:
 ;  OUT : d0-d7 - faded colours (.l)
 ; All other registers are restored
 ; NOTE :
-;   - [ Fade_level ] is 0 (full colours) ... 15 (black).
+;   - [ Fade_level ] is 0 (full colours) ... 15 (black). The colours are
+;     scaled, unlike the Amiga version, which counts every component down.
 ;*****************************************************************************
 Fade_palette_regs:
 	tst.w	Fade_level
 	beq.s	.Exit
 	movem.l	d0-d7,Fade_buffer
 	movem.l	a0/a1/d0-d3,-(sp)
+	move.w	Fade_level,d0		; Table offset
+	lsl.w	#4,d0
+	move.w	d0,Fade_offset
 	lea.l	Fade_buffer,a0
 	lea.l	STE_to_linear,a1
 	moveq.l	#16-1,d3
 .Loop:	move.w	(a0),d0
 	moveq.l	#0,d1
+	rol.w	#4,d0			; Skip the unused top nibble
 	moveq.l	#3-1,d2
 .Loop2:	rol.w	#4,d1
 	rol.w	#4,d0
 	move.w	d0,-(sp)
 	andi.w	#$f,d0
 	move.b	0(a1,d0.w),d0		; 0...15
-	sub.w	Fade_level,d0
-	bpl.s	.Ok
-	moveq.l	#0,d0
-.Ok:	move.b	STE_nibbles(pc,d0.w),d0
+	add.w	Fade_offset,d0		; Scale & convert
+	move.b	Fade_scale(pc,d0.w),d0
 	or.b	d0,d1
 	move.w	(sp)+,d0
 	dbra	d2,.Loop2
@@ -318,9 +341,61 @@ Fade_palette_regs:
 	movem.l	Fade_buffer,d0-d7
 .Exit:	rts
 
+;*****************************************************************************
+; [ Fade one colour towards black ]
+;   IN : d0 - STE colour (.w)
+;  OUT : d0 - faded colour (.w)
+; All other registers are restored
+; NOTE :
+;   - Like [ Fade_palette_regs ], for the colours of the ranges.
+;*****************************************************************************
+Fade_colour:
+	tst.w	Fade_level
+	beq.s	.Exit
+	movem.l	d1-d3/a1/a2,-(sp)
+	move.w	Fade_level,d3		; Table offset
+	lsl.w	#4,d3
+	lea.l	STE_to_linear,a1
+	lea.l	Fade_scale,a2
+	moveq.l	#0,d1
+	rol.w	#4,d0			; Skip the unused top nibble
+	moveq.l	#3-1,d2
+.Loop:	rol.w	#4,d1
+	rol.w	#4,d0
+	move.w	d0,-(sp)
+	andi.w	#$f,d0
+	move.b	0(a1,d0.w),d0		; 0...15
+	add.w	d3,d0			; Scale & convert
+	move.b	0(a2,d0.w),d0
+	or.b	d0,d1
+	move.w	(sp)+,d0
+	dbra	d2,.Loop
+	move.w	d1,d0
+	movem.l	(sp)+,d1-d3/a1/a2
+.Exit:	rts
+
 ; Amiga nibble (0...15) -> STE nibble (bit 3 is the lowest bit)
 STE_nibbles:
 	dc.b	$0,$8,$1,$9,$2,$a,$3,$b,$4,$c,$5,$d,$6,$e,$7,$f
+; Fade level (0...15) x linear value (0...15) -> STE nibble of value * (15 - level) / 15
+; (all colour components are scaled, so the colours keep their hue while fading)
+Fade_scale:
+	dc.b	$0,$8,$1,$9,$2,$a,$3,$b,$4,$c,$5,$d,$6,$e,$7,$f
+	dc.b	$0,$8,$1,$9,$2,$a,$3,$b,$b,$4,$c,$5,$d,$6,$e,$7
+	dc.b	$0,$8,$1,$9,$9,$2,$a,$3,$b,$4,$c,$5,$5,$d,$6,$e
+	dc.b	$0,$8,$1,$1,$9,$2,$a,$3,$3,$b,$4,$c,$5,$5,$d,$6
+	dc.b	$0,$8,$8,$1,$9,$2,$2,$a,$3,$b,$b,$4,$c,$5,$5,$d
+	dc.b	$0,$8,$8,$1,$9,$9,$2,$a,$a,$3,$b,$b,$4,$c,$c,$5
+	dc.b	$0,$8,$8,$1,$1,$9,$2,$2,$a,$a,$3,$b,$b,$4,$4,$c
+	dc.b	$0,$8,$8,$1,$1,$9,$9,$2,$2,$a,$a,$3,$3,$b,$b,$4
+	dc.b	$0,$0,$8,$8,$1,$1,$9,$9,$2,$2,$a,$a,$3,$3,$b,$b
+	dc.b	$0,$0,$8,$8,$1,$1,$1,$9,$9,$2,$2,$2,$a,$a,$3,$3
+	dc.b	$0,$0,$8,$8,$8,$1,$1,$1,$9,$9,$9,$2,$2,$2,$a,$a
+	dc.b	$0,$0,$8,$8,$8,$8,$1,$1,$1,$1,$9,$9,$9,$9,$2,$2
+	dc.b	$0,$0,$0,$8,$8,$8,$8,$8,$1,$1,$1,$1,$1,$9,$9,$9
+	dc.b	$0,$0,$0,$0,$8,$8,$8,$8,$8,$8,$8,$8,$1,$1,$1,$1
+	dc.b	$0,$0,$0,$0,$0,$0,$0,$0,$8,$8,$8,$8,$8,$8,$8,$8
+	dc.b	$0,$0,$0,$0,$0,$0,$0,$0,$0,$0,$0,$0,$0,$0,$0,$0
 ; STE nibble -> linear value (0...15)
 STE_to_linear:
 	dc.b	0,2,4,6,8,10,12,14,1,3,5,7,9,11,13,15
@@ -358,6 +433,7 @@ Next_raster:	ds.l 1
 Raster_event_ptr:	ds.l 1
 Current_RL_ptr:	ds.l 1
 Fade_level:	ds.w 1
+Fade_offset:	ds.w 1
 Fade_buffer:	ds.w 16
 Raster_events1:	ds.b 8*256
 Raster_events2:	ds.b 8*256

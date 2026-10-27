@@ -1,0 +1,28 @@
+# Character editor -> first event -> 2D map of grandfather's house and back (about 3000 VBLs)
+# Detect a late vertical blank (palette changes on the wrong lines) :
+b pc = {Raster_VBL} && HBL > 2 :trace
+sleep 22
+move 255 104
+sleep 0.7
+# OK in the character editor, then "JA"
+click left
+sleep 4.7
+move 125 113
+sleep 0.7
+click left
+sleep 13.6
+# event text pages, the free scrolling text ends with the right button
+click left
+sleep 2.6
+click left
+sleep 2.6
+click left
+sleep 2.6
+click left
+sleep 2.6
+click right
+sleep 5.6
+click left
+sleep 2.6
+click right
+sleep 11
