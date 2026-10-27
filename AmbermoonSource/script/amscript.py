@@ -426,6 +426,8 @@ def compile_script(text, data=None, start=None, defines=()):
         return '__%d' % unique[0]
 
     def here(name):
+        if name in labels:
+            raise ScriptError('label defined twice: ' + name)
         labels[name] = len(code)
 
     text = preprocess(text, set(defines))
@@ -479,12 +481,19 @@ def compile_script(text, data=None, start=None, defines=()):
         emit(OPS['wait'], 1,
              OPS['jumpifv'], VARS['x'], CMP['<>'], VARS['r1'], ('label', moved),
              OPS['jumpifv'], VARS['y'], CMP['<>'], VARS['r4'], ('label', moved),
-             OPS['add'], 3, 1, OPS['jumpif'], VARS['r3'], CMP['<'], 40, ('label', loop),
-             OPS['log'], 0x58, OPS['buttons'], 0, OPS['wait'], 5)
-        # first only a new press (e.g. right after a map change the held button is not taken: no step aside then)
+             OPS['add'], 3, 1,
+             # (no progress for 10 frames while new presses are still to come, else 40)
+             OPS['jumpif'], VARS['r6'], CMP['>='], 8, ('label', '__s' + loop),
+             OPS['jumpif'], VARS['r3'], CMP['>='], 10, ('label', '__t' + loop))
+        here('__s' + loop)
+        emit(OPS['jumpif'], VARS['r3'], CMP['<'], 40, ('label', loop))
+        here('__t' + loop)
+        emit(OPS['log'], 0x58, OPS['buttons'], 0, OPS['wait'], 5)
+        # first only new presses, up to 8 (right after a map change presses are not taken for a while; a step aside
+        # could go back through the entrance)
         rp = new_label()
-        emit(OPS['jumpif'], VARS['r6'], CMP['<>'], 0, ('label', rp),
-             OPS['set'], 6, 1, OPS['set'], 3, 0, OPS['jump'], ('label', loop))
+        emit(OPS['jumpif'], VARS['r6'], CMP['>='], 8, ('label', rp),
+             OPS['add'], 6, 1, OPS['set'], 3, 0, OPS['jump'], ('label', loop))
         here(rp)
         # blocked (a character or an object the map data does not show): a step aside (up, right, down, left,
         # 25 frames each) until the party moves, then on along the table

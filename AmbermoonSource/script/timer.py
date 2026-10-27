@@ -46,11 +46,13 @@ def find_start(video, near):
 
 
 def find_end(video, near):
-    """The outro: the first frame (from 1 s before the tag on) that is darker by more than 20 percent."""
+    """The outro: the first frame (from 1 s before the tag on) where the fade to black begins (darker, and 3
+    frames later below 60 percent; the fade takes several frames)."""
     frames = brightness(video, near - 1, 10)
-    for (t0, y0), (t1, y1) in zip(frames, frames[1:]):
-        if y0 > 20 and y1 < 0.8 * y0:
-            return t1
+    for i in range(1, len(frames) - 3):
+        y0, y1, y3 = frames[i - 1][1], frames[i][1], frames[i + 3][1]
+        if y0 > 20 and y1 < 0.95 * y0 and y3 < 0.6 * y0:
+            return frames[i][0]
     raise SystemExit('the outro was not found near %.2f s' % near)
 
 
