@@ -371,20 +371,25 @@ def run_once(args, log, attempt):
                 pass
         emu.terminate()
         emu.wait()
+        if target and os.path.exists(log):
+            # the script log of this run next to its video (the next run starts a new one)
+            shutil.copyfile(log, os.path.splitext(target)[0] + ('_failed' if retry else '') + '.log')
         if avi:
             # the uncompressed recording of WinUAE -> mp4 (no sound), then away with it; WinUAE splits it into parts
             # of 2 GB (output_1.avi, output_1_1.avi, output_1_2.avi, ...): all of them, in order
             base = os.path.splitext(avi)[0]
             parts = [avi] + sorted(glob.glob(base + '_*.avi'),
                                    key=lambda f: int(re.search(r'_(\d+)\.avi$', f).group(1)))
-            if not retry:
-                concat = base + '_parts.txt'
-                with open(concat, 'w') as f:
-                    f.write(''.join("file '%s'\n" % part.replace('\\', '/') for part in parts))
-                subprocess.run([ffmpeg(), '-y', '-loglevel', 'error', '-f', 'concat', '-safe', '0', '-i', concat,
-                                '-an', '-c:v', 'libx264', '-preset', 'veryfast', '-pix_fmt', 'yuv420p', target],
-                               check=True)
-                os.remove(concat)
+            if retry:
+                # (a failed run: its video is kept for the analysis)
+                target = os.path.splitext(target)[0] + '_failed.mp4'
+            concat = base + '_parts.txt'
+            with open(concat, 'w') as f:
+                f.write(''.join("file '%s'\n" % part.replace('\\', '/') for part in parts))
+            subprocess.run([ffmpeg(), '-y', '-loglevel', 'error', '-f', 'concat', '-safe', '0', '-i', concat,
+                            '-an', '-c:v', 'libx264', '-preset', 'veryfast', '-pix_fmt', 'yuv420p', target],
+                           check=True)
+            os.remove(concat)
             for part in parts:
                 os.remove(part)
     return retry
