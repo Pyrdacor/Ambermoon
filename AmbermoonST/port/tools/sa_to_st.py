@@ -63,6 +63,7 @@ NOISE_LIMIT = 0.3                         # autocorrelation below : the sample i
 HARMONICS = {round(12 * math.log2(h)) for h in range(2, 12)}   # semitones above the fundamental
 LOWEST = 25                                # lowest (median) note of an instrument : C3
 QUIET = 4                                 # YM level : a track can play in the channel of another one
+HIT = 3                                    # ticks of noise at the start of a strike
 ECHO = 8                                   # volume (0..64) of a repeated note : an echo, left out
 CUT = 1.5                                  # a note cuts another one when it brings more sound than this * the rest
 
@@ -89,6 +90,22 @@ def amplitude(level):
 
 def signed(b):
     return b - 256 if b > 127 else b
+
+
+# Decided by listening, per Amiga song : 'instruments' {number : {'kind' : 'noise' / 'hit' (a strike : noise at
+# the start, then the tone) / 'tone', 'noise' : period of the noise (1 bright - 31 dark), 'octave' : +-n,
+# 'volume' : +-YM levels, 'drop' : True (left out)}},
+# 'keep' : tracks (1-4) which are never left out
+OVERRIDES = {
+    1: {'instruments': {4: {'kind': 'hit', 'noise': 4, 'octave': -1}}},  # RobotHit02 : a pickaxe on metal
+    13: {'instruments': {4: {'octave': 1, 'volume': -2}}},              # Deephorns : droning
+    19: {'instruments': {4: {'kind': 'hit'}}},                          # XNSRadiator09 : a strike
+    20: {'instruments': {2: {'octave': 1}, 3: {'octave': 1}}},          # dull (a witch's broom)
+    23: {'instruments': {1: {'kind': 'hit'}}},                          # Pauke : a bit dull
+    24: {'instruments': {3: {'kind': 'noise'}}},                        # Ort7 : scraping
+    26: {'keep': (3,)},                                                 # the choir is the main voice
+    27: {'instruments': {2: {'drop': True}}},                           # Mega Bass Sound : droning
+}
 
 
 # ---------------------------------------------------------------------------------------------------------------
@@ -276,15 +293,26 @@ def find_period(x, circular, min_lag=2, max_lag=None):
     return None, 0
 
 
+def noise_period(x, rate):
+    """the period of the noise generator for a sample : like its zero crossings"""
+    crossings = sum(1 for a, b in zip(x, x[1:]) if (a < 0) != (b < 0))
+    zcr = crossings / max(1, len(x)) * rate
+    return max(1, min(31, round(YM_CLOCK / 32 / max(zcr, 1))))
+
+
 class Sound:
     """An Amiga instrument as the ST will play it"""
 
-    def __init__(self, module, number, notes):
+    def __init__(self, module, number, notes, override=None):
         self.number = number
         ins = self.ins = module.instruments[number - 1] if 0 < number <= len(module.instruments) else None
+        override = override or {}
+        kind = override.get('kind')
         self.ref = sorted(notes)[len(notes) // 2] if notes else 49
         self.noise = None
+        self.hit = None                           # noise period at the start of the notes (a strike)
         self.chord = None
+        self.volume = override.get('volume', 0)   # YM levels more (+) or less (-)
         self.shape = None                         # amplitude of the sample in every tick (None : synth)
         if ins is None:
             self.period = 32
@@ -305,15 +333,20 @@ class Sound:
             period, quality = find_period(x, False, 8, 1024)
             if len(loop) >= 16 and len(loop) < 256 and loop:
                 period, quality = find_period([signed(b) for b in loop], True)
-            if period is not None and quality >= NOISE_LIMIT:
+            if kind == 'tone' and period is not None:
+                quality = 1
+            if period is not None and quality >= NOISE_LIMIT and kind != 'noise':
                 self.period, self.chord = self.harmony([signed(b) for b in first[:8192]], period)
-                if self.chord and min(b - a for a, b in zip(self.chord, self.chord[1:])) <= 2:
+                if self.chord and min(b - a for a, b in zip(self.chord, self.chord[1:])) <= 2 and kind != 'tone':
                     period = None                 # tones a second apart : no chord, noise
-            if period is None or quality < NOISE_LIMIT:
+            if kind == 'hit':
+                self.hit = override.get('noise') or noise_period([signed(b) for b in first[:1024]], rate)
                 self.chord = None
-                crossings = sum(1 for a, b in zip(x, x[1:]) if (a < 0) != (b < 0))
-                zcr = crossings / max(1, len(x)) * rate
-                self.noise = max(1, min(31, round(YM_CLOCK / 32 / max(zcr, 1))))
+                if period is None or quality < NOISE_LIMIT:
+                    self.period = period or 32
+            elif period is None or quality < NOISE_LIMIT or kind == 'noise':
+                self.chord = None
+                self.noise = override.get('noise') or noise_period(x, rate)
                 self.period = 32
         # the ST note of an Amiga note : the same frequency, octaves moved into the range of the ST player
         f = PAULA / (SA_PERIODS[self.ref] * self.period)
@@ -326,6 +359,7 @@ class Sound:
         while lo < 1 and hi + 12 < len(ST_PERIODS):
             self.shift += 12
             lo, hi = lo + 12, hi + 12
+        self.shift += 12 * override.get('octave', 0)
         while hi >= len(ST_PERIODS):
             self.shift -= 12
             lo, hi = lo - 12, hi - 12
@@ -426,7 +460,7 @@ class Sound:
         vols = adsr_volumes(self.ins, module.adsr, volume, ticks)
         if self.shape is not None:
             vols = [v * (self.shape[t] if t < len(self.shape) else 0) for t, v in enumerate(vols)]
-        return [ym_level(v / 64) for v in vols]
+        return [max(0, min(15, lv + self.volume)) if lv else 0 for lv in (ym_level(v / 64) for v in vols)]
 
     def vibrato(self, st_note):
         """the parameter of the vibrato effect of the ST player and the delay in ticks (None : no vibrato)"""
@@ -452,9 +486,12 @@ class Cell:
 
 
 class Converter:
-    def __init__(self, module, verbose=False):
+    def __init__(self, module, verbose=False, override=None):
         self.module = module
         self.verbose = verbose
+        override = override or {}
+        self.keep = {k - 1 for k in override.get('keep', ())}
+        self.dropped = {n for n, o in override.get('instruments', {}).items() if o.get('drop')}
         rows, self.restart, self.speed = module.rows()
         self.rows = rows
         used = {}
@@ -465,7 +502,8 @@ class Converter:
                     current[t] = ins
                 if 0 < note < 0x7f and current[t]:
                     used.setdefault(current[t], []).append(note)
-        self.sounds = {n: Sound(module, n, notes) for n, notes in used.items()}
+        self.sounds = {n: Sound(module, n, notes, override.get('instruments', {}).get(n))
+                       for n, notes in used.items()}
         self.variants = {}                         # (sound, volume step) -> ST instrument number
         self.boost = 0
         self.tracks = self.play()
@@ -532,6 +570,8 @@ class Converter:
                         self.slide(cell, s, signed(param), speed)
                         tracks[t][r] = cell
                     continue
+                if s['ins'] in self.dropped:
+                    continue                      # (left out by the overrides)
                 if 0 < note < 0x7f and note == s.get('last') and s['volume'] <= ECHO and cmd == 0xc:
                     continue                      # an echo of the last note (quiet) : the YM is too loud
                 sound = self.sounds.get(s['ins'])
@@ -616,7 +656,7 @@ class Converter:
         best = None
         for p in range(4):
             for s in range(4):
-                if p == s:
+                if p == s or s in self.keep:
                     continue
                 # the channel plays p; a note of s replaces the note of p when it brings more sound than the
                 # rest of the note of p (until the next note of p), which is lost then
@@ -778,8 +818,10 @@ class Converter:
         levels = levels[::speed + 1]
         noise = 0
         if sound is not None and sound.noise:
-            noise = noises.setdefault(sound.noise, len(noises))
+            noise = noises.setdefault((sound.noise,), len(noises))
             levels = [lv | 0x20 for lv in levels]
+        elif sound is not None and sound.hit:
+            noise = noises.setdefault((sound.hit,) * HIT, len(noises))
         arp = 0
         if sound is not None and sound.arp:
             arp = arps.setdefault(sound.arp, len(arps))
@@ -805,7 +847,7 @@ class Converter:
         noise_data = [bytes([0, 0x20, 0xff])] * len(noises)
         for v, i in noises.items():
             if v:
-                noise_data[i] = bytes([0, v, 0xff])
+                noise_data[i] = bytes([0, *v, 0xff] if len(v) == 1 else [0, *v, 0x20, 0xff])
         # the patterns, the same ones once
         unique, order = [], []
         for _, channels in pats:
@@ -844,7 +886,7 @@ class Converter:
 def describe(conv):
     for n, s in sorted(conv.sounds.items()):
         ins = s.ins
-        kind = 'noise %d' % s.noise if s.noise else ('synth' if ins and ins.synth else 'sample')
+        kind = 'noise %d' % s.noise if s.noise else 'hit %d' % s.hit if s.hit else             ('synth' if ins and ins.synth else 'sample')
         print(f'  instrument {n:2} {ins.name if ins else "?":20} {kind:9} period {s.period:6.1f} '
               f'shift {s.shift:+d}{" chord %s" % s.chord if s.chord else " amf" if s.arp else ""}')
 
@@ -865,7 +907,7 @@ def main():
     for a in args:
         n = int(a)
         print(f'{n} {NAMES[n]}')
-        conv = Converter(Module(os.path.join(SONGS, f'SONIC.{NAMES[n]}.sa')), verbose)
+        conv = Converter(Module(os.path.join(SONGS, f'SONIC.{NAMES[n]}.sa')), verbose, OVERRIDES.get(n))
         if verbose:
             describe(conv)
         data = conv.song()
