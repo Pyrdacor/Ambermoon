@@ -9,9 +9,10 @@ the player finds the data behind itself (lea table(pc), plus the offsets). So th
 kernel (the include written here, see KERNEL/MUSIC.S) and Music.amb gets only the data of the songs (songs()),
 which the kernel copies behind the player. port/MUSIC holds both unpacked (made from the original files by
 --extract) : PLAYER.BIN (the original player) and AMBER<n>.BIN (the data of the songs). The numbers of the files
-are not the numbers of the Amiga songs (ST_FILES, found by listening); the Amiga songs without ST version are
-empty (size 0 : no music). AMBER19 is AMBER11 and AMBER20 is AMBER15 with another order of the patterns (they
-start at another place) : not used.
+are not the numbers of the Amiga songs (ST_FILES, found by listening). The Amiga songs without ST version are
+taken from SONG<nn>.BIN (converted from the Amiga version by sa_to_st.py) when there is one, else they are empty
+(size 0 : no music). AMBER19 is AMBER11 and AMBER20 is AMBER15 with another order of the patterns (they start at
+another place) : not used.
 
 The player uses Timer A and Timer B of the MFP for its effects, but the kernel needs Timer B for the raster
 (event count mode). Its Timer B is moved to Timer D (same prescalers, not used by the kernel) : the addresses
@@ -93,7 +94,13 @@ def songs():
     """{Amiga song number: data for Music.amb} : the size (.l), then the data behind the player"""
     out = {}
     for n in range(1, SONGS + 1):
-        d = open(os.path.join(FOLDER, f'AMBER{ST_FILES[n]}.BIN'), 'rb').read() if n in ST_FILES else b''
+        converted = os.path.join(FOLDER, f'SONG{n:02}.BIN')          # (sa_to_st.py)
+        if n in ST_FILES:
+            d = open(os.path.join(FOLDER, f'AMBER{ST_FILES[n]}.BIN'), 'rb').read()
+        elif os.path.exists(converted):
+            d = open(converted, 'rb').read()
+        else:
+            d = b''
         out[n] = struct.pack('>I', len(d)) + d
     return out
 

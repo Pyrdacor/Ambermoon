@@ -15,10 +15,11 @@ player is identical in all of them and writes:
 | --- | --- |
 | `PLAYER.BIN` | The player, unchanged: 8294 bytes of 68000 code and tables, then a table of 5 offsets (20 bytes, the same in every file). 8314 bytes. |
 | `AMBER<n>.BIN` | The data of one song: what follows the player in the original file `AMBER<n>.BIN`. |
+| `SONG<nn>.BIN` | An Amiga song without ST version, converted by `port/tools/sa_to_st.py` (`<nn>` is the number of the Amiga song). Only the converted songs which were accepted by listening are here; the tool doesn't replace them without `-f`. |
 
 The build doesn't need `ORIGINAL`. `port_music.py` makes `MUSPLAY.I` for the kernel from `PLAYER.BIN`: the player
 once, with its Timer B moved to Timer D (see the notes in `port_music.py` and `KERNEL/MUSIC.S`). `Music.amb` gets
-the song files.
+the song files: the ST version of the song, else the converted one, else nothing (silence).
 
 ## The songs
 
@@ -43,18 +44,24 @@ The numbers of the ST files are not the numbers of the Amiga songs. They were ma
 | `AMBER19.BIN` | Variant of `AMBER11` (other order of the patterns) | - |
 | `AMBER20.BIN` | Variant of `AMBER15` (starts at the end of the song) | - |
 
-`AMBER3` and `AMBER6`-`AMBER9` don't exist on the ST disks. The other Amiga songs have no ST version and are
-silent in the port.
+`AMBER3` and `AMBER6`-`AMBER9` don't exist on the ST disks. The other Amiga songs have no ST version; they are
+converted from the Amiga version (`SONG<nn>.BIN`).
 
 ## Song data format
 
-All values are big-endian. Offsets are relative to the start of the song data.
+The last 20 bytes of `PLAYER.BIN` are a table of 5 offsets (long words, relative to the table): instruments,
+arpeggio tables, noise tables, order list, patterns. The table is the same in every file, so every song has the
+same layout. Offsets below are relative to the start of the song data (the table + 20):
 
 | Offset | Size | Contents |
 | --- | --- | --- |
-| `$00` | 5 × long | Offsets: instruments, arpeggio tables, noise tables, order list, patterns |
-| `$14` | byte | Song length (entries in the order list) |
-| `$15` | byte | Restart position |
+| `$000` | byte | Song length (entries in the order list) |
+| `$001` | byte | Restart position |
+| `$002` | `$800` | Instruments |
+| `$802` | `$240` | Arpeggio tables |
+| `$A42` | `$140` | Noise tables |
+| `$B82` | `$100` | Order list |
+| `$C82` | `$300` per pattern | Patterns |
 
 **Instruments, arpeggio and noise tables** each start with a table of word offsets (relative to that
 table). An instrument or table number in the song uses only its lower 5 bits.
