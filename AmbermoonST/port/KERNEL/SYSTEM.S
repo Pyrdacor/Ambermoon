@@ -163,7 +163,7 @@ Init_screens:
 Update_screen:
 	move.l	a0,-(sp)
 	jsr	Draw_HDOBs
-	jsr	Hide_pointer		; ST: no sprites (see POINTER.S)
+	jsr	Pointer_into_work		; ST: no sprites (see POINTER.S)
 	move.l	Off_screen,a0
 	move.l	On_screen,Off_screen
 	move.l	a0,On_screen
@@ -172,7 +172,7 @@ Update_screen:
 	not.b	Screen_flag
 	jsr	Erase_HDOBs
 	jsr	Copy_screen
-	jsr	Show_pointer
+	jsr	Pointer_out_of_work
 	jsr	ScrQ_handler
 	move.l	(sp)+,a0
 	rts
@@ -185,15 +185,15 @@ Update_screen:
 Switch_screens:
 	move.l	a0,-(sp)
 	jsr	Draw_HDOBs
-	jsr	Hide_pointer		; ST: no sprites (see POINTER.S)
+	jsr	Pointer_into_work		; ST: no sprites (see POINTER.S)
 	move.l	Off_screen,a0
 	move.l	On_screen,Off_screen
 	move.l	a0,On_screen
 	jsr	Show_screen
 	move.l	Off_screen,Work_screen
 	not.b	Screen_flag
+	jsr	Pointer_out_of_work		; (drawn after the HDOBs)
 	jsr	Erase_HDOBs
-	jsr	Show_pointer
 	jsr	ScrQ_handler
 	move.l	(sp)+,a0
 	rts
@@ -224,7 +224,7 @@ Show_screen:
 ;     screen are erased from the copy.
 ;*****************************************************************************
 Copy_screen:
-	jsr	Hide_pointer		; (not into the copy)
+	addq.b	#1,Pointer_frozen		; (the pointer stays where it is)
 	movem.l	d0-d7/a0-a6,-(sp)
 	move.l	On_screen,a0
 	move.l	Off_screen,a1
@@ -236,10 +236,11 @@ Copy_screen:
 	movem.l	(a0)+,d0-d7		; Rest (32000 = 666 * 48 + 32)
 	movem.l	d0-d7,(a1)
 	movem.l	(sp)+,d0-d7/a0-a6
+	jsr	Pointer_out_of_copy		; (drawn after the HDOBs)
 	not.b	Screen_flag
 	jsr	Erase_HDOBs
 	not.b	Screen_flag
-	jsr	Show_pointer
+	subq.b	#1,Pointer_frozen
 	rts
 
 ;*****************************************************************************
