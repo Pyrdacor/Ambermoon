@@ -30,7 +30,9 @@ cp $OUT/STPALS.I $OUT/src/ST_KERNEL/
 cd $OUT/src
 # (older vasm versions do not know warning 86)
 NOWARN86=-nowarn=86
-echo | $VASM -quiet $NOWARN86 -Fbin -o /dev/null - >/dev/null 2>&1 || NOWARN86=
+echo ' nop' > ../nowarn86.s
+$VASM -quiet $NOWARN86 -Fbin -o ../nowarn86.bin ../nowarn86.s >/dev/null 2>&1 || NOWARN86=
+rm -f ../nowarn86.s ../nowarn86.bin
 $VASM -quiet -nowarn=53 -nowarn=62 $NOWARN86 -nowarn=40 -maxerrors=5000 -m68000 -Ftos -align -o ../AMBERST.PRG AMBERST.S
 cd ../../..
 python3 port/tools/fix_prg.py $OUT/AMBERST.PRG		# (older vasm: data length 2 bytes too short)

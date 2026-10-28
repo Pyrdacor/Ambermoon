@@ -97,6 +97,12 @@ Make_clip_masks:
 	move.w	CA_Y2(a0),Clip_Y2
 	move.w	CA_X1(a0),d0
 	move.w	CA_X2(a0),d1
+	cmp.w	Clip_X1_masks,d0		; Masks of these edges made already ?
+	bne.s	.New
+	cmp.w	Clip_X2_masks,d1
+	beq.s	.Done
+.New:	move.w	d0,Clip_X1_masks
+	move.w	d1,Clip_X2_masks
 	lea.l	Clip_masks,a1
 	moveq.l	#0,d2			; Left X of the chunk
 	moveq.l	#20-1,d7
@@ -124,7 +130,7 @@ Make_clip_masks:
 .Store:	move.w	d3,(a1)+
 	addi.w	#16,d2
 	dbra	d7,.Loop
-	movem.l	(sp)+,d0-d5/d7/a0/a1
+.Done:	movem.l	(sp)+,d0-d5/d7/a0/a1
 	rts
 
 ;*****************************************************************************
@@ -463,6 +469,63 @@ Draw_block:
 	move.w	d5,d4
 	asr.w	#4,d4
 	andi.w	#15,d5
+	bne.w	.Line			; Fast : at a multiple of 16, ST chunks
+	cmp.w	#Decode_cache,Blit_decoder	;  of the cache and not clipped
+	bne.w	.Line			;  left or right (tiles, icons, ...),
+	cmp.w	#Blit_silhouette,Blit_mode	;  not as a silhouette
+	beq.w	.Line
+	tst.w	d4
+	bmi.w	.Line
+	move.w	d4,d0			; First and last chunk fully visible ?
+	add.w	Blit_width,d0
+	cmp.w	#20,d0
+	bgt.w	.Line
+	lea.l	Clip_masks,a1
+	add.w	d4,d4
+	cmp.w	#-1,0(a1,d4.w)
+	bne.w	.Slow
+	add.w	d0,d0
+	cmp.w	#-1,-2(a1,d0.w)
+	bne.w	.Slow
+	add.w	d4,d4			; (8 bytes per screen chunk)
+	add.w	d4,d4
+	add.w	d4,a5
+	move.w	Blit_width,d0		; Source : line d6 of the chunks
+	mulu.w	#10,d0
+	move.w	d0,d1
+	mulu.w	d6,d1
+	move.l	Blit_cached,a0
+	add.l	d1,a0
+	move.w	Blit_width,d3
+	subq.w	#1,d3
+	cmp.w	#Blit_unmasked,Blit_mode
+	beq.s	.Copy
+.Mline:	move.l	a5,a1			; Masked (the planes are not 0
+	move.w	d3,d2			;  outside the mask : and)
+.Mchunk:	move.w	(a0)+,d0
+	move.w	d0,d4
+	not.w	d4
+	moveq.l	#4-1,d5
+.Mplane:	move.w	(a0)+,d1
+	and.w	d0,d1
+	and.w	d4,(a1)
+	or.w	d1,(a1)+
+	dbra	d5,.Mplane
+	dbra	d2,.Mchunk
+	lea.l	ST_bytes_per_line(a5),a5
+	dbra	d7,.Mline
+	bra.w	.Exit
+.Copy:	move.l	a5,a1			; Unmasked
+	move.w	d3,d2
+.Cchunk:	addq.l	#2,a0
+	move.l	(a0)+,(a1)+
+	move.l	(a0)+,(a1)+
+	dbra	d2,.Cchunk
+	lea.l	ST_bytes_per_line(a5),a5
+	dbra	d7,.Copy
+	bra.w	.Exit
+.Slow:	move.w	Blit_X,d4			; (restore the first chunk)
+	asr.w	#4,d4
 .Line:	move.w	d6,d0			; Decode source line
 	lea.l	Line_chunks,a0
 	move.w	Blit_decoder,d2
@@ -1024,6 +1087,8 @@ Show_MOVEP_screen:
 	include	ST_KERNEL/RECOLOUR.S	; (Recolour_block of the Amiga version)
 
 	SECTION	Fast_DATA,data
+Clip_X1_masks:	dc.w -1			; (the edges of Clip_masks : none yet)
+Clip_X2_masks:	dc.w -1
 Default_CA:
 	dc.w	0		; Rect.Left
 	dc.w	$13f		; Rect.Right
