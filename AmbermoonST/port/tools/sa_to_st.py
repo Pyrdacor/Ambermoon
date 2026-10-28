@@ -95,15 +95,18 @@ def signed(b):
 # Decided by listening, per Amiga song : 'instruments' {number : {'kind' : 'noise' / 'hit' (a strike : noise at
 # the start, then the tone) / 'tone', 'noise' : period of the noise (1 bright - 31 dark), 'octave' : +-n,
 # 'volume' : +-YM levels, 'drop' : True (left out)}},
-# 'keep' : tracks (1-4) which are never left out
+# 'keep' : tracks (1-4) which are never left out, 'keep_echoes' : True (quiet repeated notes are played),
+# 'chords' : tracks (1-4) played in one channel, the notes which sound together as an arpeggio
 OVERRIDES = {
     1: {'instruments': {4: {'kind': 'hit', 'noise': 4, 'octave': -1}}},  # RobotHit02 : a pickaxe on metal
     13: {'instruments': {4: {'octave': 1, 'volume': -2}}},              # Deephorns : droning
     19: {'instruments': {4: {'kind': 'hit'}}},                          # XNSRadiator09 : a strike
     20: {'instruments': {2: {'octave': 1}, 3: {'octave': 1}}},          # dull (a witch's broom)
-    23: {'instruments': {1: {'kind': 'hit'}}},                          # Pauke : a bit dull
-    24: {'instruments': {3: {'kind': 'noise'}}},                        # Ort7 : scraping
-    26: {'keep': (3,)},                                                 # the choir is the main voice
+    23: {'keep': (4,), 'instruments': {1: {'kind': 'hit'}}},            # the Pauke stays
+    24: {'instruments': {3: {'kind': 'hit', 'hit_ticks': 4, 'noise': 31, 'volume': 3},   # Ort7 : scraping notes
+                         2: {'kind': 'hit', 'noise': 28, 'hit_ticks': 3, 'octave': -1, 'volume': 2},  # Hole2 : a door
+                         1: {'vibrato': (2, 10)}}},                     # the organ : creepy
+    26: {'keep': (3,), 'instruments': {2: {'volume': 2}, 1: {'volume': -2}, 5: {'volume': -2}}},  # the choir
     27: {'instruments': {2: {'drop': True}}},                           # Mega Bass Sound : droning
 }
 
@@ -502,6 +505,8 @@ class Converter:
         self.verbose = verbose
         override = override or {}
         self.keep = {k - 1 for k in override.get('keep', ())}
+        self.keep_echoes = override.get('keep_echoes', False)
+        self.chord_tracks = [k - 1 for k in override.get('chords', ())]
         self.dropped = {n for n, o in override.get('instruments', {}).items() if o.get('drop')}
         self.echoes = {n: o['echo'] for n, o in override.get('instruments', {}).items() if o.get('echo')}
         rows, self.restart, self.speed = module.rows()
@@ -518,13 +523,13 @@ class Converter:
                        for n, notes in used.items()}
         self.variants = {}                         # (sound, volume step) -> ST instrument number
         self.boost = 0
-        self.tracks = self.play()
+        self.tracks = self.combine(self.play())
         # the loudest note gets the highest level (on the YM2149 quiet songs sound far away)
         peak = max((max(c.levels) for t in self.tracks for c in t if c is not None and c.levels), default=15)
         if 0 < peak < 15:
             self.boost = 15 - peak
             self.variants = {}
-            self.tracks = self.play()
+            self.tracks = self.combine(self.play())
 
     def variant(self, number, volume):
         step = 0 if volume >= 64 else 99 if volume <= 0 else round(-20 * math.log10(volume / 64) / 3)
@@ -533,8 +538,15 @@ class Converter:
             self.variants[key] = len(self.variants) + 1
         return self.variants[key], key
 
+    def chord_variant(self, st, arp):
+        """the ST instrument st with an arpeggio (a chord of several tracks)"""
+        key = next(k for k, n in self.variants.items() if n == st)[:2] + (arp,)
+        if key not in self.variants:
+            self.variants[key] = len(self.variants) + 1
+        return self.variants[key], key
+
     def levels_of(self, key):
-        number, step = key
+        number, step = key[:2]
         sound = self.sounds.get(number)
         if sound is None or step >= 15:
             return [0]
@@ -584,7 +596,7 @@ class Converter:
                     continue
                 if s['ins'] in self.dropped:
                     continue                      # (left out by the overrides)
-                if 0 < note < 0x7f and note == s.get('last') and s['volume'] <= ECHO and cmd == 0xc:
+                if 0 < note < 0x7f and note == s.get('last') and s['volume'] <= ECHO and cmd == 0xc and                         not self.keep_echoes:
                     continue                      # an echo of the last note (quiet) : the YM is too loud
                 sound = self.sounds.get(s['ins'])
                 if sound is None:
@@ -620,6 +632,45 @@ class Converter:
             number, key = self.variant(s['ins'], volume)
             echo = Cell(cell.note, number, self.levels_of(key), cell.note)
             track[e] = echo
+
+    def combine(self, tracks):
+        """the tracks of 'chords' (overrides) in one : the notes which sound together as an arpeggio"""
+        if not self.chord_tracks:
+            return tracks
+        n = len(self.rows)
+        sounding = {k: self.sounding(tracks[k], 0, n) for k in self.chord_tracks}
+        out = [None] * n
+        current = {}
+        last = None
+        for r in range(n):
+            newest = None
+            for k in self.chord_tracks:
+                c = tracks[k][r]
+                if c is not None and c.levels is not None:
+                    pitch = c.note or (c.pitch if isinstance(c.pitch, int) else 0)
+                    if pitch and max(c.levels):
+                        current[k] = (pitch, c)
+                    else:
+                        current.pop(k, None)
+                    newest = c
+            for k in list(current):
+                if sounding[k][r] <= QUIET and newest is not current[k][1]:
+                    del current[k]
+            notes = sorted({p for p, _ in current.values()})[:3]
+            if newest is None and tuple(notes) == last:
+                continue
+            last = tuple(notes)
+            if not notes:
+                continue
+            c = newest or max(current.values(), key=lambda x: id(x[1]))[1]
+            base = notes[0]
+            number = c.ins
+            if len(notes) > 1:
+                number, _ = self.chord_variant(c.ins, tuple(v - base for v in notes))
+            cell = Cell(base, number, c.levels, base)
+            cell.effect, cell.param = (c.effect, c.param) if newest is not None else (0, 0)
+            out[r] = cell
+        return [t for k, t in enumerate(tracks) if k not in self.chord_tracks] + [out]
 
     def slide(self, cell, s, param, speed):
         """Amiga command 1 : the period changes by param in every tick but the first one"""
@@ -678,6 +729,8 @@ class Converter:
     def merge(self, first, last, previous):
         """the 3 channels of the pattern (rows first..last-1) : [[cells]], and the order of the tracks"""
         tracks = [t[first:last] for t in self.tracks]
+        if len(tracks) <= 3:
+            return tracks + [[None] * (last - first) for _ in range(3 - len(tracks))], None
         sounding = [self.sounding(t, first, last) for t in self.tracks]
         n = last - first
         best = None
@@ -771,9 +824,9 @@ class Converter:
                 i += 1
 
     def instrument_of(self, st):
-        for (number, _), n in self.variants.items():
+        for key, n in self.variants.items():
             if n == st:
-                return number
+                return key[0]
         return 0
 
     def portamentos(self, channel, first):
@@ -834,7 +887,7 @@ class Converter:
     # -----------------------------------------------------------------------------------------------------------
 
     def instrument_data(self, key, arps, noises):
-        number, step = key
+        number, step = key[:2]
         sound = self.sounds.get(number)
         levels = self.levels_of(key)
         while len(levels) > 1 and levels[-1] == levels[-2]:
@@ -850,7 +903,9 @@ class Converter:
         elif sound is not None and sound.hit:
             noise = noises.setdefault((sound.hit,) * sound.hit_ticks, len(noises))
         arp = 0
-        if sound is not None and sound.arp:
+        if len(key) > 2:
+            arp = arps.setdefault((key[2], True), len(arps))
+        elif sound is not None and sound.arp:
             arp = arps.setdefault(sound.arp, len(arps))
         return bytes([0, arp, noise, 0, speed] + levels + [0xff])
 
