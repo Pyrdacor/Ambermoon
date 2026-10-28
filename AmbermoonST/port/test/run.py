@@ -9,6 +9,7 @@ sends the commands through the command FIFO in real time instead, which Hatari f
 
 Environment : HATARI (hatari program), MACHINE (ste), MEM (4096 KB), TMO (timeout in s, 300), TOS (TOS image,
               default: the EmuTOS of the Hatari folder), HD (build/port/hd), PRG (HD/AMBERST.PRG),
+              SOUND (off or a frequency, e.g. 44100 : the music in the AVI),
               TEXT_BASE (start of the text segment, hex; 1b018 with the EmuTOS 1.4 of Hatari 2.6 and a GEMDOS
               drive, see "info basepage" in the debugger)
 Scenario lines :
@@ -99,7 +100,7 @@ def main():
             f.write('b VBL = %d :once :quiet :trace :file %s\n' % (v, name))
     env = dict(os.environ, SDL_VIDEODRIVER='dummy', SDL_AUDIODRIVER='dummy')
     args = [exe, '--machine', os.environ.get('MACHINE', 'ste'), '--tos', tos, '--memsize',
-            os.environ.get('MEM', '4096'), '--harddrive', hd, '--auto', 'C:\\AMBERST.PRG', '--sound', 'off',
+            os.environ.get('MEM', '4096'), '--harddrive', hd, '--auto', 'C:\\AMBERST.PRG', '--sound', os.environ.get('SOUND', 'off'),
             '--run-vbls', str(vbls), '--avirecord', '--avi-vcodec', 'png', '--avi-file', out, '--confirm-quit',
             'off', '--statusbar', 'off', '--drive-led', 'off', '--borders', 'off', '--log-level', 'error',
             '--parse', parse]

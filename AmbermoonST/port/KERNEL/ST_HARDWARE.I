@@ -4,6 +4,7 @@
 Video_base_high	EQU	$ffff8201
 Video_base_mid	EQU	$ffff8203
 Video_resolution	EQU	$ffff8260
+Video_sync	EQU	$ffff820a	; Bit 1 : 50 Hz
 Palette_regs	EQU	$ffff8240
 
 ; ---------- MFP 68901 -------------------------------
@@ -17,6 +18,7 @@ MFP_IMRB	EQU	$fffffa15	; Interrupt mask B
 MFP_VR	EQU	$fffffa17	; Vector register
 MFP_TBCR	EQU	$fffffa1b	; Timer B control (8 = event count mode)
 MFP_TBDR	EQU	$fffffa21	; Timer B data
+MFP_TCDCR	EQU	$fffffa1d	; Timer C / D control (C : bits 4-6, D : bits 0-2)
 
 ; ---------- ACIAs -----------------------------------
 ACIA_kbd_ctrl	EQU	$fffffc00

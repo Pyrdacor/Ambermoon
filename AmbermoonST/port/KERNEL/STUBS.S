@@ -1,5 +1,5 @@
 ; ST kernel - stubs : the parts which are not ported yet (see PORT.md)
-; diagnostic screen, 3D map drawing, zoom of the combat monsters, music.
+; diagnostic screen, 3D map drawing, zoom of the combat monsters.
 
 	SECTION	Program,code
 DI_CR:
@@ -23,14 +23,6 @@ Exit_diagnostic_screen:
 Init_diagnostic_screen:
 	rts
 Insert_horizon:
-	rts
-_SA_Hardcalc:
-	rts
-_SA_IrqLowLevel:
-	rts
-_SA_StartSong:
-	rts
-_SA_StopSong:
 	rts
 draw_zoomshape:
 	rts

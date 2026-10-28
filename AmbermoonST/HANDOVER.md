@@ -24,6 +24,7 @@ State of the work and what is needed to continue it. The plan, the design and th
 | `port/KERNEL/` | ST kernel with the interface of the Amiga kernel (the 99 missing symbols). |
 | `port/PATCHES/` | Patches of original files: `MEMORY` (memory, blitter), `VARIOUS` (sound DMA), `EVENTS` (palette before picture). |
 | `port/tools/port_data.py` | Game files (German 1.20 + `Disks/Bugfixing/German/Amberfiles`) with 8.3 names → `build/port/hd/DATA`, `FILEMAP.I`. |
+| `port/tools/port_music.py`, `ice.py` | Music of the ST version (`ORIGINAL/AMBR`, Pack-Ice): the player once → `MUSPLAY.I`, the songs → `Music.amb`. |
 | `port/tools/port_palettes.py` | ST palettes of all Amiga palettes → `build/port/STPALS.I` (made again only when the script changed). |
 | `port/test/` | Hatari test runner, scenarios, symbol and frame tools (below). |
 
@@ -86,6 +87,15 @@ Hatari as STE (a plain ST works too), **at least 2 MB** (with 1 MB the program e
   entry) on top of GEMDOS. Timer C runs only during file access.
 * **Graphics:** Amiga planar data (1-5 planes, line interleaved, base colour); value 0 is transparent in
   masked blocks and black in unmasked ones. Converted blocks are cached (`Convert_block`).
+* **Music:** the ST version (`ORIGINAL/AMBR/AMBER<n>.BIN`, n = Amiga song number; 1, 2, 4, 5, 10-20) has
+  one player (8294 bytes + offset table) in front of every song; the player finds the song directly behind
+  itself. `port_music.py` stores the player once (`MUSIC.S`, `Music_player`, followed by `Music_data`),
+  `Music.amb` gets size + data of every song (32 entries, the missing ones size 0 = silence).
+  `_SA_Hardcalc` copies the song behind the player, init/stop is offset 0 (d0 = 1/0), play is offset 8
+  (VBL). The player uses Timer A and Timer B for effects; its Timer B is moved to **Timer D** (Timer B is
+  the raster), the accesses to the shared C/D control register call `Music_timer_D_*`. The kernel switches
+  to 50 Hz (`Video_sync`), like the PAL Amiga. `SOUND=44100` puts the music into the AVI of `run.py`
+  (Hatari writes 60 fps into the AVI header : convert with `-r 50`, video and audio separately).
 * **Pitfalls:** the original sources are Latin-1 (`encoding='latin-1'` in Python). With `-align` vasm can
   put a label which stands alone before `ds.w` on an odd address: use `even`. The program needs the
   `jmp Start` at the start of the text segment (TOS starts there).
@@ -101,4 +111,5 @@ Hatari as STE (a plain ST works too), **at least 2 MB** (with 1 MB the program e
 * With 1 MB the program ends without a message.
 * Next stages (PORT.md): play through the 2D map (movement, events, dialogues, inventory, places, chests),
   combat (zoom of the monsters, `STUBS.S`), 3D maps (68000 replacement of `divsl.l` in `MAP/3D_RENDER.S`,
-  drawing of walls, floor and ceiling), music (Sonic Arranger), diagnostic screen, speed and memory.
+  drawing of walls, floor and ceiling), music of the songs without ST version (3, 6-9, 21-32, e.g. 31 in the
+  character editor), diagnostic screen, speed and memory.

@@ -8,7 +8,8 @@
 ; All registers are restored
 ; NOTE :
 ;   - Called in supervisor mode while the TOS is still active.
-;   - Switches to low resolution, installs the VBL, Timer B (raster
+;   - Switches to low resolution and 50 Hz (like the PAL Amiga : the timing
+;     of the game and the music), installs the VBL, Timer B (raster
 ;     interrupts) and ACIA (keyboard & mouse) handlers.
 ;*****************************************************************************
 Init_system:
@@ -37,6 +38,8 @@ Init_system:
 	move.w	#Setscreen,-(sp)
 	trap	#XBIOS
 	lea.l	12(sp),sp
+	move.b	Video_sync,Old_sync		; 50 Hz
+	bset	#1,Video_sync
 	lea.l	Palette_regs,a0		; Black
 	moveq.l	#8-1,d7
 .Loop:	clr.l	(a0)+
@@ -91,6 +94,7 @@ Exit_system:
 	move.w	(sp)+,sr
 	movem.l	Old_palette,d0-d7
 	movem.l	d0-d7,Palette_regs
+	move.b	Old_sync,Video_sync
 	move.w	Old_rez,-(sp)
 	move.l	Old_physbase,-(sp)
 	move.l	Old_logbase,-(sp)
@@ -314,4 +318,6 @@ Old_IMRA:	ds.b 1
 Old_IMRB:	ds.b 1
 Old_TBCR:	ds.b 1
 Old_VR:	ds.b 1
+Old_sync:	ds.b 1
+	even
 Screen_buffers:	ds.b 2*ST_screen_size+256

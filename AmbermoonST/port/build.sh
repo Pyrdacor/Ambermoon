@@ -30,6 +30,7 @@ fi
 python3 port/tools/port_data.py $OUT/hd $OUT/src/ST_KERNEL/FILEMAP.I $OUT/STPALS.json
 python3 port/tools/port_chipgfx.py $OUT/src/KERNEL/CHIP_DATA.S $OUT/STPALS.json	# (5-plane program graphics)
 cp $OUT/STPALS.I $OUT/src/ST_KERNEL/
+python3 port/tools/port_music.py $OUT/src/ST_KERNEL/MUSPLAY.I	# (the player of the ST music)
 cd $OUT/src
 # (older vasm versions do not know warning 86)
 NOWARN86=-nowarn=86

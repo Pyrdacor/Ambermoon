@@ -108,4 +108,5 @@
 	include	ST_KERNEL/TEXT.S		; ST:
 	include	ST_KERNEL/IKBD.S		; ST:
 	include	ST_KERNEL/LIBS.S		; ST:
+	include	ST_KERNEL/MUSIC.S		; ST:
 	include	ST_KERNEL/STUBS.S		; ST: (stage 1)
