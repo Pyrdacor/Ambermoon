@@ -16,6 +16,8 @@
 ;     27 -> 11, 28/29 -> 12, 30/31 -> 14, port/tools/port_palettes.py), so the
 ;     ST planes are p0 = a0 & ~a2, p1 = a1, p2 = a2 and p3 = the mask (fast,
 ;     done line by line).
+;   - 5 planes : the graphics are stored as ST chunks already (all files and
+;     the program graphics, port/tools/port_gfx.py), nothing is converted.
 ;   - else every pixel goes through the lookup table, and the converted block
 ;     is kept in a cache (key : address, size, planes, base colour, lookup
 ;     table and a checksum of the data), so tiles, icons and portraits are
@@ -398,8 +400,14 @@ Put_block:
 	move.w	d0,Blit_raw_planes		; Yes
 	move.w	#Decode_raw,Blit_decoder
 	bra	.Draw
+; ---------- 5 planes : ST chunks already --------
+.Amiga:	cmp.w	#5,Blit_planes		; (all 5-plane graphics are stored as
+	bne.s	.Lut			;  ST chunks, port/tools/port_gfx.py)
+	move.l	Blit_source,Blit_cached
+	move.w	#Decode_cache,Blit_decoder
+	bra	.Draw
 ; ---------- Amiga graphics -----------------------
-.Amiga:	move.w	Blit_Y,d1			; Lookup table
+.Lut:	move.w	Blit_Y,d1			; Lookup table
 	jsr	Get_ST_LUT
 	move.l	a0,Blit_LUT
 	lea.l	Blit_table,a1		; Colours of the pixel values

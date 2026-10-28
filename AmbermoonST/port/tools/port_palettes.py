@@ -1,7 +1,10 @@
 #!/usr/bin/env python3
 """Makes the static ST palettes of the port (see PORT.md, port/KERNEL/COLOURS.S).
 
-    port_palettes.py <include file>
+    port_palettes.py <include file> [<json file>]
+
+The json file has the lookup tables for the conversion of the graphics (port_gfx.py): a list of {"amiga": 32
+Amiga colours, "st": 16 STE colours, "lut": 32 ST colour numbers}.
 
 Every Amiga palette of the game (32 colours) gets a 16 colour ST palette, made in advance : ST colour 0 is
 black, the UI colours (Amiga 25-31, also the colours of the mouse pointer) get 5 fixed ST colours, the other 10
@@ -27,6 +30,7 @@ The include file contains per palette : the 32 Amiga colours (dc.w), the 16 STE 
 table Amiga colour -> ST colour (32 bytes); the end is marked with -1. The ST kernel finds the ST palette by
 the colours of the Amiga palette ([ Find_ST_palette ]).
 """
+import json
 import math
 import os
 import struct
@@ -250,6 +254,9 @@ def main():
                 rep.append(min(members, key=lambda i: sc.dist(sc.to_lab(rgb[i]), labs[j])))
             f.write('\tdc.b\t' + ','.join(str(v) for v in rep) + '\n')
         f.write('\tdc.w\t-1\n')
+    if len(sys.argv) > 2:                 # the lookup tables for port_gfx.py
+        json.dump([{'amiga': list(colours), 'st': [st_word(c, 4) for c in made[n][0]], 'lut': list(made[n][1])}
+                   for n, (colours, _, _, _) in enumerate(palettes)], open(sys.argv[2], 'w'))
     print(f'{len(palettes)} ST palettes in {groups} groups')
 
 

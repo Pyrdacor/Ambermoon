@@ -1,12 +1,14 @@
 #!/usr/bin/env python3
 """Prepares the game data for the port (see PORT.md).
 
-    port_data.py <hd folder> <filemap include>
+    port_data.py <hd folder> <filemap include> [<ST palettes json>]
 
 The original files of the German version 1.20 (Disks/German/ambermoon_german_1.20_extracted.zip) with the
 fixed files of Disks/Bugfixing/German/Amberfiles on top are copied unchanged into <hd folder>/DATA. The ST has
 8.3 file names, so every file gets a short name; the table long name -> short name is written as an include
 file for the ST kernel (File_map in port/KERNEL/LIBS.S), which translates the names the original code uses.
+With the json of port_palettes.py the graphics are converted to the ST format and the containers are stored
+raw (port_gfx.py).
 """
 import os
 import sys
@@ -57,6 +59,10 @@ def main():
             p = os.path.join(dp, f)
             files[os.path.relpath(p, FIXED).replace(os.sep, '/')] = open(p, 'rb').read()
     files = {k: v for k, v in files.items() if k.split('/')[-1] not in SKIP}
+    if len(sys.argv) > 3:
+        sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+        import port_gfx
+        files = port_gfx.convert_all(files, port_gfx.Palettes(sys.argv[3]))
     short = short_names(files)
     data = os.path.join(hd, 'DATA')
     for name, content in files.items():

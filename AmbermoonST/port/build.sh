@@ -21,11 +21,14 @@ for p in port/PATCHES/*.diff; do		# changes of the original files (marked "; ST:
 done
 cp -r port/KERNEL $OUT/src/ST_KERNEL
 cp port/AMBERST.S $OUT/src/
-python3 port/tools/port_data.py $OUT/hd $OUT/src/ST_KERNEL/FILEMAP.I
-# the ST palettes take a while : made again only when the script changed
-if [ ! -f $OUT/STPALS.I ] || [ port/tools/port_palettes.py -nt $OUT/STPALS.I ]; then
-	python3 port/tools/port_palettes.py $OUT/STPALS.I
+# the ST palettes take a while : made again only when the script changed (also the lookup tables in json for
+# the conversion of the graphics)
+if [ ! -f $OUT/STPALS.I ] || [ ! -f $OUT/STPALS.json ] || [ port/tools/port_palettes.py -nt $OUT/STPALS.I ]; then
+	python3 port/tools/port_palettes.py $OUT/STPALS.I $OUT/STPALS.json
 fi
+# the game data, the graphics converted to the ST format (port_gfx.py)
+python3 port/tools/port_data.py $OUT/hd $OUT/src/ST_KERNEL/FILEMAP.I $OUT/STPALS.json
+python3 port/tools/port_chipgfx.py $OUT/src/KERNEL/CHIP_DATA.S $OUT/STPALS.json	# (5-plane program graphics)
 cp $OUT/STPALS.I $OUT/src/ST_KERNEL/
 cd $OUT/src
 # (older vasm versions do not know warning 86)

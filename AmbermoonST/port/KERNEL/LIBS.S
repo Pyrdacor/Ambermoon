@@ -500,8 +500,10 @@ Translate_path:
 	jsr	Upper_case
 	cmp.b	d0,d1
 	beq.s	.Compare
-	bra.s	.Lookup
+	bra.s	.Plain
 .Skip:	move.l	a2,a0
+.Plain:	move.l	a0,Plain_name
+	jsr	Palette_copy_name		; (the copy of the map palette ?)
 .Lookup:	lea.l	File_map,a1		; Search the name
 .Entry:	tst.b	(a1)			; End ?
 	beq.s	.Unknown
@@ -530,7 +532,11 @@ Translate_path:
 .Short:	tst.b	(a1)+			; Skip the short name
 	bne.s	.Short
 	bra.s	.Entry
-.Unknown:	lea.l	ST_path,a2		; Shorten : "DATA\" + components
+.Unknown:	cmp.l	Plain_name,a0		; Not found : the copy of a palette ?
+	beq.s	.Shorten
+	move.l	Plain_name,a0		; Yes -> the file itself
+	bra	.Lookup
+.Shorten:	lea.l	ST_path,a2		; Shorten : "DATA\" + components
 	lea.l	.Data(pc),a3
 .Copy3:	move.b	(a3)+,(a2)+
 	bne.s	.Copy3
@@ -571,6 +577,66 @@ Translate_path:
 .Data:	dc.b	"DATA\",0
 	even
 
+;*****************************************************************************
+; [ Name of the copy of a graphics file for the palette of the current map ]
+;   IN : a0 - Pointer to the file name (without volume and folder) (.l)
+;  OUT : a0 - Pointer to "<name>#<palette number>" or the same name (.l)
+; All other registers are restored
+; NOTE :
+;   - The party, NPC and transport graphics are shown with the palettes of
+;     all 2D maps : the files have a copy per palette, converted to the ST
+;     format with that palette (port/tools/port_gfx.py).
+;*****************************************************************************
+Palette_copy_name:
+	movem.l	d0-d2/a1-a3,-(sp)
+	lea.l	.Names(pc),a1
+.Name:	tst.b	(a1)			; End of the list ?
+	beq.s	.Exit
+	move.l	a0,a2
+.Char:	move.b	(a1)+,d0
+	move.b	(a2)+,d1
+	jsr	Upper_case
+	exg	d0,d1
+	jsr	Upper_case
+	cmp.b	d0,d1
+	bne.s	.Next
+	tst.b	d0
+	bne.s	.Char
+	moveq.l	#0,d0			; This one : palette of the map
+	move.b	Mapdata_handle,d0
+	beq.s	.Exit
+	jsr	Claim_pointer
+	move.l	d0,a3
+	moveq.l	#0,d2
+	move.b	Colourpal_filenr(a3),d2
+	move.b	Mapdata_handle,d0
+	jsr	Free_pointer
+	lea.l	Palette_copy,a2		; "<name>#<number>"
+.Copy:	move.b	(a0)+,(a2)+
+	bne.s	.Copy
+	move.b	#'#',-1(a2)
+	divu.w	#10,d2
+	tst.w	d2
+	beq.s	.Units
+	add.b	#'0',d2
+	move.b	d2,(a2)+
+.Units:	swap	d2
+	add.b	#'0',d2
+	move.b	d2,(a2)+
+	clr.b	(a2)
+	lea.l	Palette_copy,a0
+	bra.s	.Exit
+.Next:	tst.b	-1(a1)			; Skip the rest of the name
+	beq.s	.Name
+.Rest:	tst.b	(a1)+
+	bne.s	.Rest
+	bra.s	.Name
+.Exit:	movem.l	(sp)+,d0-d2/a1-a3
+	rts
+
+.Names:	dc.b	"Party_gfx.amb",0,"NPC_gfx.amb",0,"Travel_gfx.amb",0,"Stationary",0,0
+	even
+
 ; [ Upper case ]
 ;   IN : d0 - Character (.b)
 ;  OUT : d0 - Upper case character (.b)
@@ -582,6 +648,11 @@ Upper_case:
 	subi.b	#'a'-'A',d0
 .Exit:	rts
 
+	SECTION	Fast_BSS,bss
+Plain_name:	ds.l 1			; (Translate_path)
+Palette_copy:	ds.b 64
+
+	SECTION	Program,code
 	include	ST_KERNEL/FILEMAP.I		; [ File_map ] (made by build.sh)
 
 	SECTION	Fast_BSS,bss
