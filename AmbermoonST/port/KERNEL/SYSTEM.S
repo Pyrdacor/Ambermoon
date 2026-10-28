@@ -163,16 +163,16 @@ Init_screens:
 Update_screen:
 	move.l	a0,-(sp)
 	jsr	Draw_HDOBs
-	jsr	Draw_mouse_pointer		; ST: no sprites
+	jsr	Hide_pointer		; ST: no sprites (see POINTER.S)
 	move.l	Off_screen,a0
 	move.l	On_screen,Off_screen
 	move.l	a0,On_screen
 	jsr	Show_screen
 	move.l	Off_screen,Work_screen
 	not.b	Screen_flag
-	jsr	Erase_mouse_pointer
 	jsr	Erase_HDOBs
 	jsr	Copy_screen
+	jsr	Show_pointer
 	jsr	ScrQ_handler
 	move.l	(sp)+,a0
 	rts
@@ -185,15 +185,15 @@ Update_screen:
 Switch_screens:
 	move.l	a0,-(sp)
 	jsr	Draw_HDOBs
-	jsr	Draw_mouse_pointer		; ST: no sprites
+	jsr	Hide_pointer		; ST: no sprites (see POINTER.S)
 	move.l	Off_screen,a0
 	move.l	On_screen,Off_screen
 	move.l	a0,On_screen
 	jsr	Show_screen
 	move.l	Off_screen,Work_screen
 	not.b	Screen_flag
-	jsr	Erase_mouse_pointer
 	jsr	Erase_HDOBs
+	jsr	Show_pointer
 	jsr	ScrQ_handler
 	move.l	(sp)+,a0
 	rts
@@ -224,6 +224,7 @@ Show_screen:
 ;     screen are erased from the copy.
 ;*****************************************************************************
 Copy_screen:
+	jsr	Hide_pointer		; (not into the copy)
 	movem.l	d0-d7/a0-a6,-(sp)
 	move.l	On_screen,a0
 	move.l	Off_screen,a1
@@ -236,9 +237,9 @@ Copy_screen:
 	movem.l	d0-d7,(a1)
 	movem.l	(sp)+,d0-d7/a0-a6
 	not.b	Screen_flag
-	jsr	Copy_mouse_pointer
 	jsr	Erase_HDOBs
 	not.b	Screen_flag
+	jsr	Show_pointer
 	rts
 
 ;*****************************************************************************

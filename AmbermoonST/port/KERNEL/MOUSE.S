@@ -4,9 +4,9 @@
 ;
 ; ST: copy of KERNEL/MOUSE.S. The ST has no sprites and no mouse counters :
 ; [ Update_mouse ] reads the movement and the buttons which the ACIA
-; interrupt collected (IKBD.S), and the mouse pointer is drawn into the work
-; screen by [ Draw_mouse_pointer ] before the screens are switched
-; (SYSTEM.S). The changes are marked "; ST:".
+; interrupt collected (IKBD.S), and the mouse pointer is drawn into the shown
+; screen by the vertical blank handler ([ VBL_pointer ], POINTER.S). The
+; changes are marked "; ST:".
 
 	SECTION	Program,code
 
@@ -221,6 +221,7 @@ Set_mouse_pointer_gfx:			; ST: converted to the ST format
 	move.w	d2,(a1)+
 	move.w	d3,(a1)+
 	dbra	d7,.Loop
+	st	Pointer_changed		; (drawn again by the next VBL)
 	movem.l	(sp)+,d0-d3/d7/a0/a1
 	rts
 
@@ -229,8 +230,8 @@ Set_mouse_pointer_gfx:			; ST: converted to the ST format
 ; NOTE :
 ;   - Called by the vertical blank handler.
 ;*****************************************************************************
-Update_mouse_sprite:			; ST: no sprites (see Draw_mouse_pointer)
-	rts
+Update_mouse_sprite:			; ST: no sprites, drawn into the shown
+	jmp	VBL_pointer		;  screen (POINTER.S)
 
 ;*****************************************************************************
 ; [ Read the mouse and update the mouse position & buttons ]

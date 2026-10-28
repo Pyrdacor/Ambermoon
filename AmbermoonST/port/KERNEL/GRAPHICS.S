@@ -1059,6 +1059,7 @@ Find_raw_buffer:
 ;   IN : d0 - X, d1 - Y, d5 - Number of planes, d6 - Width in truncs,
 ;        d7 - Height (.w)
 Duplicate_block:
+	jsr	Hide_pointer		; (the pointer is in the shown screen)
 	movem.l	d0-d7/a0-a2,-(sp)
 	tst.w	d6
 	ble.s	.Exit
@@ -1082,6 +1083,7 @@ Duplicate_block:
 	lea.l	ST_bytes_per_line(a1),a1
 	dbra	d7,.Line
 .Exit:	movem.l	(sp)+,d0-d7/a0-a2
+	jsr	Show_pointer
 	rts
 
 ; [ Clear a block in one plane of the work screen ] (3D map)
