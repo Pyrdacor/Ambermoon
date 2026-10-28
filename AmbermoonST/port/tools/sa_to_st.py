@@ -313,6 +313,9 @@ class Sound:
         self.hit = None                           # noise period at the start of the notes (a strike)
         self.chord = None
         self.volume = override.get('volume', 0)   # YM levels more (+) or less (-)
+        self.length = override.get('length')      # ticks (the notes are cut)
+        self.hit_ticks = override.get('hit_ticks', HIT)
+        self.vibrato_override = override.get('vibrato')
         self.shape = None                         # amplitude of the sample in every tick (None : synth)
         if ins is None:
             self.period = 32
@@ -363,7 +366,11 @@ class Sound:
         while hi >= len(ST_PERIODS):
             self.shift -= 12
             lo, hi = lo - 12, hi - 12
+        if 'chord' in override:
+            self.chord = list(override['chord'])
         self.arp = (tuple(self.chord), True) if self.chord else self.amf_arpeggio(module)
+        if 'sweep' in override:                  # the pitch at the start of the notes (semitones per tick)
+            self.arp = (tuple(override['sweep']), False)
         if self.arp and min(self.arp[0]) < 0:
             # the ST player adds only positive values (negative ones end the table) : a lower note
             low = min(self.arp[0])
@@ -460,11 +467,15 @@ class Sound:
         vols = adsr_volumes(self.ins, module.adsr, volume, ticks)
         if self.shape is not None:
             vols = [v * (self.shape[t] if t < len(self.shape) else 0) for t, v in enumerate(vols)]
+        if self.length:
+            vols = vols[:self.length] + [0] * (ticks - self.length)
         return [max(0, min(15, lv + self.volume)) if lv else 0 for lv in (ym_level(v / 64) for v in vols)]
 
     def vibrato(self, st_note):
         """the parameter of the vibrato effect of the ST player and the delay in ticks (None : no vibrato)"""
         ins = self.ins
+        if self.vibrato_override is not None:
+            return self.vibrato_override or None
         if ins is None or (ins.vibdelay & 0xff) == 0xff or not ins.viblevel or not ins.vibspeed:
             return None
         level = ins.viblevel - 65536 if ins.viblevel > 32767 else ins.viblevel
@@ -492,6 +503,7 @@ class Converter:
         override = override or {}
         self.keep = {k - 1 for k in override.get('keep', ())}
         self.dropped = {n for n, o in override.get('instruments', {}).items() if o.get('drop')}
+        self.echoes = {n: o['echo'] for n, o in override.get('instruments', {}).items() if o.get('echo')}
         rows, self.restart, self.speed = module.rows()
         self.rows = rows
         used = {}
@@ -592,7 +604,22 @@ class Converter:
                     cell.effect, cell.param = 3, max(1, min(255, round(s['porta'] * ratio)))
                     cell.pitch = ('porta', s['last'], note, s['porta'])
                 tracks[t][r] = cell
+                if s['ins'] in self.echoes and cell.note:
+                    self.echo(tracks[t], t, r, cell, s)
         return tracks
+
+    def echo(self, track, t, r, cell, s):
+        """the note again, quieter, some rows later (when the track has nothing to play in between)"""
+        delay, quieter = self.echoes[s['ins']][:2]
+        repeats = self.echoes[s['ins']][2] if len(self.echoes[s['ins']]) > 2 else 1
+        for k in range(1, repeats + 1):
+            e = r + delay * k
+            if e >= len(track) or any(self.rows[i][t][0] or self.rows[i][t][1] for i in range(r + 1, e + 1)):
+                return
+            volume = s['volume'] * 10 ** (-quieter * k * 3 / 20)
+            number, key = self.variant(s['ins'], volume)
+            echo = Cell(cell.note, number, self.levels_of(key), cell.note)
+            track[e] = echo
 
     def slide(self, cell, s, param, speed):
         """Amiga command 1 : the period changes by param in every tick but the first one"""
@@ -821,7 +848,7 @@ class Converter:
             noise = noises.setdefault((sound.noise,), len(noises))
             levels = [lv | 0x20 for lv in levels]
         elif sound is not None and sound.hit:
-            noise = noises.setdefault((sound.hit,) * HIT, len(noises))
+            noise = noises.setdefault((sound.hit,) * sound.hit_ticks, len(noises))
         arp = 0
         if sound is not None and sound.arp:
             arp = arps.setdefault(sound.arp, len(arps))
