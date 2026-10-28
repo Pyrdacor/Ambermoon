@@ -2,13 +2,16 @@
 """The music of the ST version (AmbermoonST/ORIGINAL/AMBR/AMBER<n>.BIN, packed with Pack-Ice).
 
     port_music.py <player include>
+    port_music.py --extract
 
 Every file is the same player (8294 bytes of code, then a table of 5 offsets) followed by the data of one song;
 the player finds the data behind itself (lea table(pc), plus the offsets). So the player is stored once in the
 kernel (the include written here, see KERNEL/MUSIC.S) and Music.amb gets only the data of the songs (songs()),
-which the kernel copies behind the player. The numbers of the files are not the numbers of the Amiga songs
-(ST_FILES, found by listening); the Amiga songs without ST version are empty (size 0 : no music). AMBER19 is
-AMBER11 and AMBER20 is AMBER15 with another order of the patterns (they start at another place) : not used.
+which the kernel copies behind the player. port/MUSIC holds both unpacked (made from the original files by
+--extract) : PLAYER.BIN (the original player) and AMBER<n>.BIN (the data of the songs). The numbers of the files
+are not the numbers of the Amiga songs (ST_FILES, found by listening); the Amiga songs without ST version are
+empty (size 0 : no music). AMBER19 is AMBER11 and AMBER20 is AMBER15 with another order of the patterns (they
+start at another place) : not used.
 
 The player uses Timer A and Timer B of the MFP for its effects, but the kernel needs Timer B for the raster
 (event count mode). Its Timer B is moved to Timer D (same prescalers, not used by the kernel) : the addresses
@@ -24,7 +27,8 @@ sys.dont_write_bytecode = True
 sys.path.insert(0, HERE)
 import ice                                 # noqa: E402
 
-FOLDER = os.path.normpath(os.path.join(HERE, '..', '..', 'ORIGINAL', 'AMBR'))
+ORIGINAL = os.path.normpath(os.path.join(HERE, '..', '..', 'ORIGINAL', 'AMBR'))
+FOLDER = os.path.normpath(os.path.join(HERE, '..', 'MUSIC'))
 PLAYER = 8294 + 20                         # code + table of the offsets (the same in all files)
 SONGS = 32                                 # (Music.amb of the Amiga version, Max_songs)
 ST_FILES = {                               # Amiga song : number of the ST file
@@ -65,31 +69,37 @@ CALLS.update({o: ('11c1fa1b', 'bsr.w\tMusic_timer_D_set') for o in (0x05de, 0x07
 
 
 def unpacked():
-    """{song number: unpacked file}"""
+    """{file number: unpacked original file}"""
     out = {}
-    for f in os.listdir(FOLDER):
+    for f in os.listdir(ORIGINAL):
         if f.upper().startswith('AMBER') and f.upper().endswith('.BIN'):
-            out[int(f[5:-4])] = ice.unpack(open(os.path.join(FOLDER, f), 'rb').read())[0]
+            out[int(f[5:-4])] = ice.unpack(open(os.path.join(ORIGINAL, f), 'rb').read())[0]
     return out
+
+
+def extract():
+    """The original files -> port/MUSIC (the player once, the data of the songs)"""
+    files = unpacked()
+    player = files[min(files)][:PLAYER]
+    os.makedirs(FOLDER, exist_ok=True)
+    open(os.path.join(FOLDER, 'PLAYER.BIN'), 'wb').write(player)
+    for n, d in files.items():
+        if d[:PLAYER] != player:
+            raise ValueError(f'AMBER{n}.BIN : another player')
+        open(os.path.join(FOLDER, f'AMBER{n}.BIN'), 'wb').write(d[PLAYER:])
 
 
 def songs():
     """{Amiga song number: data for Music.amb} : the size (.l), then the data behind the player"""
-    files = unpacked()
-    player = files[min(files)][:PLAYER]
-    for n, d in files.items():
-        if d[:PLAYER] != player:
-            raise ValueError(f'AMBER{n}.BIN : another player')
     out = {}
     for n in range(1, SONGS + 1):
-        d = files[ST_FILES[n]] if n in ST_FILES else player
-        out[n] = struct.pack('>I', len(d) - PLAYER) + d[PLAYER:]
+        d = open(os.path.join(FOLDER, f'AMBER{ST_FILES[n]}.BIN'), 'rb').read() if n in ST_FILES else b''
+        out[n] = struct.pack('>I', len(d)) + d
     return out
 
 
 def player_source():
-    files = unpacked()
-    code = bytearray(files[min(files)][:PLAYER])
+    code = bytearray(open(os.path.join(FOLDER, 'PLAYER.BIN'), 'rb').read())
     for o, (old, new) in BYTES.items():
         old, new = bytes.fromhex(old), bytes.fromhex(new)
         if code[o:o + len(old)] != old:
@@ -114,6 +124,9 @@ def player_source():
 
 
 def main():
+    if sys.argv[1] == '--extract':
+        extract()
+        return
     open(sys.argv[1], 'w', newline='\n').write(player_source())
     data = songs()
     print(f'music : {sum(1 for d in data.values() if len(d) > 4)} songs, the largest '

@@ -24,7 +24,7 @@ State of the work and what is needed to continue it. The plan, the design and th
 | `port/KERNEL/` | ST kernel with the interface of the Amiga kernel (the 99 missing symbols). |
 | `port/PATCHES/` | Patches of original files: `MEMORY` (memory, blitter), `VARIOUS` (sound DMA), `EVENTS` (palette before picture). |
 | `port/tools/port_data.py` | Game files (German 1.20 + `Disks/Bugfixing/German/Amberfiles`) with 8.3 names → `build/port/hd/DATA`, `FILEMAP.I`. |
-| `port/tools/port_music.py`, `ice.py` | Music of the ST version (`ORIGINAL/AMBR`, Pack-Ice): the player once → `MUSPLAY.I`, the songs → `Music.amb`. |
+| `port/tools/port_music.py`, `ice.py` | Music of the ST version (`port/MUSIC`: `PLAYER.BIN` + `AMBER<n>.BIN` song data, made by `--extract` from `ORIGINAL/AMBR`, Pack-Ice): the player once → `MUSPLAY.I`, the songs → `Music.amb`. |
 | `port/tools/port_palettes.py` | ST palettes of all Amiga palettes → `build/port/STPALS.I` (made again only when the script changed). |
 | `port/test/` | Hatari test runner, scenarios, symbol and frame tools (below). |
 
@@ -87,7 +87,7 @@ Hatari as STE (a plain ST works too), **at least 2 MB** (with 1 MB the program e
   entry) on top of GEMDOS. Timer C runs only during file access.
 * **Graphics:** Amiga planar data (1-5 planes, line interleaved, base colour); value 0 is transparent in
   masked blocks and black in unmasked ones. Converted blocks are cached (`Convert_block`).
-* **Music:** the ST version (`ORIGINAL/AMBR/AMBER<n>.BIN`, 1, 2, 4, 5, 10-20; the Amiga song of every file is
+* **Music:** the ST version (`ORIGINAL/AMBR/AMBER<n>.BIN`, unpacked in `port/MUSIC`, 1, 2, 4, 5, 10-20; the Amiga song of every file is
   in `ST_FILES` of `port_music.py`, 13 songs, 19 and 20 are variants of 11 and 15) has
   one player (8294 bytes + offset table) in front of every song; the player finds the song directly behind
   itself. `port_music.py` stores the player once (`MUSIC.S`, `Music_player`, followed by `Music_data`),
