@@ -6,8 +6,9 @@
 Every file is the same player (8294 bytes of code, then a table of 5 offsets) followed by the data of one song;
 the player finds the data behind itself (lea table(pc), plus the offsets). So the player is stored once in the
 kernel (the include written here, see KERNEL/MUSIC.S) and Music.amb gets only the data of the songs (songs()),
-which the kernel copies behind the player. The numbers of the files are the numbers of the Amiga songs; the
-missing songs (3, 6-9, 21-32) are empty (size 0 : no music).
+which the kernel copies behind the player. The numbers of the files are not the numbers of the Amiga songs
+(ST_FILES, found by listening); the Amiga songs without ST version are empty (size 0 : no music). AMBER19 is
+AMBER11 and AMBER20 is AMBER15 with another order of the patterns (they start at another place) : not used.
 
 The player uses Timer A and Timer B of the MFP for its effects, but the kernel needs Timer B for the raster
 (event count mode). Its Timer B is moved to Timer D (same prescalers, not used by the kernel) : the addresses
@@ -26,6 +27,21 @@ import ice                                 # noqa: E402
 FOLDER = os.path.normpath(os.path.join(HERE, '..', '..', 'ORIGINAL', 'AMBR'))
 PLAYER = 8294 + 20                         # code + table of the offsets (the same in all files)
 SONGS = 32                                 # (Music.amb of the Amiga version, Max_songs)
+ST_FILES = {                               # Amiga song : number of the ST file
+    2: 15,                                 # Mellow Camel Funk
+    4: 10,                                 # Voice of the Bagpipe
+    5: 5,                                  # Downtown
+    6: 1,                                  # Ship
+    7: 18,                                 # Whole Lotta Dove
+    8: 12,                                 # Horse is no Disgrace
+    9: 4,                                  # Don't look Bach
+    11: 16,                                # Sapphire Fireballs of Pure Love
+    14: 14,                                # Plodding Along
+    15: 2,                                 # Compact Disc
+    16: 13,                                # Riverside Travelling Blues
+    17: 11,                                # Nobody's Vault but Mine
+    18: 17,                                # La Crypta Strangiato
+}
 
 # offset : (original bytes, new bytes) - Timer B -> Timer D
 BYTES = {
@@ -58,16 +74,16 @@ def unpacked():
 
 
 def songs():
-    """{song number: data for Music.amb} : the size (.l), then the data behind the player"""
+    """{Amiga song number: data for Music.amb} : the size (.l), then the data behind the player"""
     files = unpacked()
     player = files[min(files)][:PLAYER]
-    out = {}
     for n, d in files.items():
         if d[:PLAYER] != player:
             raise ValueError(f'AMBER{n}.BIN : another player')
-        out[n] = struct.pack('>I', len(d) - PLAYER) + d[PLAYER:]
+    out = {}
     for n in range(1, SONGS + 1):
-        out.setdefault(n, struct.pack('>I', 0))
+        d = files[ST_FILES[n]] if n in ST_FILES else player
+        out[n] = struct.pack('>I', len(d) - PLAYER) + d[PLAYER:]
     return out
 
 

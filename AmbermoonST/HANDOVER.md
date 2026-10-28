@@ -87,7 +87,8 @@ Hatari as STE (a plain ST works too), **at least 2 MB** (with 1 MB the program e
   entry) on top of GEMDOS. Timer C runs only during file access.
 * **Graphics:** Amiga planar data (1-5 planes, line interleaved, base colour); value 0 is transparent in
   masked blocks and black in unmasked ones. Converted blocks are cached (`Convert_block`).
-* **Music:** the ST version (`ORIGINAL/AMBR/AMBER<n>.BIN`, n = Amiga song number; 1, 2, 4, 5, 10-20) has
+* **Music:** the ST version (`ORIGINAL/AMBR/AMBER<n>.BIN`, 1, 2, 4, 5, 10-20; the Amiga song of every file is
+  in `ST_FILES` of `port_music.py`, 13 songs, 19 and 20 are variants of 11 and 15) has
   one player (8294 bytes + offset table) in front of every song; the player finds the song directly behind
   itself. `port_music.py` stores the player once (`MUSIC.S`, `Music_player`, followed by `Music_data`),
   `Music.amb` gets size + data of every song (32 entries, the missing ones size 0 = silence).
@@ -111,5 +112,5 @@ Hatari as STE (a plain ST works too), **at least 2 MB** (with 1 MB the program e
 * With 1 MB the program ends without a message.
 * Next stages (PORT.md): play through the 2D map (movement, events, dialogues, inventory, places, chests),
   combat (zoom of the monsters, `STUBS.S`), 3D maps (68000 replacement of `divsl.l` in `MAP/3D_RENDER.S`,
-  drawing of walls, floor and ceiling), music of the songs without ST version (3, 6-9, 21-32, e.g. 31 in the
+  drawing of walls, floor and ceiling), music of the songs without ST version (1, 3, 10, 12, 13, 19-32, e.g. 31 in the
   character editor), diagnostic screen, speed and memory.
