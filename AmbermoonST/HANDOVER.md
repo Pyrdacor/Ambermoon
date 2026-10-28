@@ -42,6 +42,7 @@ Hatari as STE (a plain ST works too), **at least 2 MB** (with 1 MB the program e
 `build/port/hd` as GEMDOS drive, EmuTOS (here `/opt/tools/emutos/emutos-256k-1.4/etos256us.img`).
 
     TMO=120 port/test/run.sh port/test/scenarios/editor_event_map.txt out.avi 3000
+    python3 port/test/run.py port/test/scenarios/editor_event_map_vbl.txt out.avi 2700   # Windows too
     python3 port/test/frames.py out.avi scan 30                       # where the screen changes
     python3 port/test/frames.py out.avi sheet sheet.png 400,1500,2316,2999
     python3 port/test/frames.py out.avi get -1 last.png
@@ -74,7 +75,9 @@ Hatari as STE (a plain ST works too), **at least 2 MB** (with 1 MB the program e
   `EVENTS.diff`).
 * **Palettes:** an entry of `STPALS.I` is 32 Amiga colours, 16 STE colours, the lookup table (32 bytes)
   and the representative Amiga colour of every ST colour (16 bytes); `Find_ST_palette` takes the exact
-  match, else the nearest one. Amiga colours 25-31 (UI) are ST colours 9-15.
+  match, else the nearest one. The UI colours have fixed ST colours in every palette: Amiga 25 → 9, 26 → 10,
+  27 → 11, 28/29 → 12, 30/31 → 14 (the 6 frame shades merged to 4); the other 10 ST colours (1-8, 13, 15) are
+  chosen per palette. A 3-plane UI graphic becomes p0 = a0 & ~a2, p1 = a1, p2 = a2, p3 = mask.
 * **Fading** is the original `Current_RL` logic. `Store_RL_source` keeps the target colours of every
   palette (index = offset in `Current_RL` / 66) and finds its ST palette once; `Render_raster` makes the
   raster events (Timer B) from it, `Fade_ST_palette` fades every ST colour like its representative.

@@ -213,6 +213,9 @@ Set_mouse_pointer_gfx:			; ST: converted to the ST format
 	or.w	d1,d3
 	or.w	d2,d3
 	move.w	d3,(a1)+
+	move.w	d2,-(sp)			; Plane 0 = a0 & ~a2 (the ST colours
+	not.w	(sp)			;  of the UI colours, see GRAPHICS.S)
+	and.w	(sp)+,d0
 	move.w	d0,(a1)+
 	move.w	d1,(a1)+
 	move.w	d2,(a1)+

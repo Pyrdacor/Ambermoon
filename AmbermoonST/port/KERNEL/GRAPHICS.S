@@ -12,8 +12,10 @@
 ; A block is converted into "ST chunks" : per line and 16 pixels the mask and
 ; the 4 planes (5 words, the same size as 5 Amiga planes). The conversion :
 ;   - 3 planes with base colour 24 (layouts, buttons, windows) : the Amiga
-;     colours 25-31 are the ST colours 9-15 in every palette, so the planes
-;     are copied and plane 3 is the mask (fast, done line by line).
+;     colours 25-31 have fixed ST colours in every palette (25 -> 9, 26 -> 10,
+;     27 -> 11, 28/29 -> 12, 30/31 -> 14, port/tools/port_palettes.py), so the
+;     ST planes are p0 = a0 & ~a2, p1 = a1, p2 = a2 and p3 = the mask (fast,
+;     done line by line).
 ;   - else every pixel goes through the lookup table, and the converted block
 ;     is kept in a cache (key : address, size, planes, base colour, lookup
 ;     table and a checksum of the data), so tiles, icons and portraits are
@@ -409,12 +411,11 @@ Put_block:
 	cmp.w	#3,Blit_planes		; 3 planes, base colour 24 ?
 	bne.s	.Slow
 	lea.l	Blit_table+1,a1
-	moveq.l	#9,d2
-.Check:	cmp.b	(a1)+,d2
+	lea.l	UI_ST_colours,a2
+	moveq.l	#7-1,d2
+.Check:	cmpm.b	(a1)+,(a2)+
 	bne.s	.Slow
-	addq.w	#1,d2
-	cmp.w	#16,d2
-	bmi.s	.Check
+	dbra	d2,.Check
 	move.w	#Decode_3planes,Blit_decoder	; Yes -> fast
 	bra.s	.Draw
 .Slow:	jsr	Convert_block		; Convert (or from the cache)
@@ -482,6 +483,11 @@ Decode_raw	EQU	0
 Decode_3planes	EQU	4
 Decode_cache	EQU	8
 Decode_pixels	EQU	12
+
+; ST colours of the Amiga colours 25-31 (the UI colours, port_palettes.py)
+UI_ST_colours:
+	dc.b	9,10,11,12,12,14,14
+	even
 
 ; [ Draw one line of ST chunks ]
 ;   IN : d4 - First chunk X (may be negative) (.w)
@@ -612,7 +618,7 @@ Line_raw:
 
 ; [ 3 planes with base colour 24 ]
 Line_3planes:
-	movem.l	d1-d4/d6/d7/a1,-(sp)
+	movem.l	d1-d7/a1,-(sp)
 	move.l	Blit_source,a1
 	move.w	Blit_width,d1
 	mulu.w	#6,d1
@@ -633,11 +639,14 @@ Line_3planes:
 	or.w	d2,d4
 	or.w	d3,d4
 	move.w	d4,(a0)+			; Mask
+	move.w	d3,d5			; p0 = a0 & ~a2 (the UI colours of
+	not.w	d5			;  port_palettes.py)
+	and.w	d5,d1
 	movem.w	d1-d4,(a0)
 	addq.l	#8,a0
 	dbra	d7,.Chunk
 	move.l	(sp)+,a0
-	movem.l	(sp)+,d1-d4/d6/d7/a1
+	movem.l	(sp)+,d1-d7/a1
 	rts
 
 ; [ Converted block in the cache ]

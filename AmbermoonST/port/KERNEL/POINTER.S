@@ -4,7 +4,7 @@
 ; drawn into the work screen before the screens are switched, and erased
 ; afterwards with the saved background (like the HDOBs). The graphic comes
 ; from [ Set_mouse_pointer_gfx ] (MOUSE.S) : mask and 4 planes per line, the
-; colours are the Amiga colours 24-31 (ST colours 8-15).
+; colours are the Amiga colours 24-31 (their fixed ST colours, see GRAPHICS.S).
 
 	SECTION	Program,code
 
