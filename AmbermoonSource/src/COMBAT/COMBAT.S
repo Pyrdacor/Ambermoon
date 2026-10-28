@@ -1240,7 +1240,7 @@ Calculate_damage_and_protection:
 	add.w	AConstitution+Magic(a3),d2
 	divu.w	#25,d2
 	add.w	d0,d2
-	cmp.b	#1,Part_type(a0)		; Party ?
+	cmp.b	#1,Part_type(a1)		; Party ? (FIX: was the attacker in a0)
 	bne.s	.Zero2
 	move.w	Spell_2_data,d0		; Add spell's effect (if any)
 	beq.s	.Zero2
