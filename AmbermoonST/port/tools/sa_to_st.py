@@ -94,7 +94,9 @@ def signed(b):
 
 # Decided by listening, per Amiga song : 'instruments' {number : {'kind' : 'noise' / 'hit' (a strike : noise at
 # the start, then the tone) / 'tone', 'noise' : period of the noise (1 bright - 31 dark), 'octave' : +-n,
-# 'volume' : +-YM levels, 'drop' : True (left out)}},
+# 'volume' : +-YM levels, 'drop' : True (left out), 'length' : ticks (the notes are cut), 'echo' : (rows, levels
+# quieter[, repeats]), 'sweep' : semitones per tick at the start, 'chord' : semitones (arpeggio), 'arp_speed' :
+# ticks - 1 per note of the arpeggio, 'vibrato' : (parameter, delay in ticks), 'hit_ticks' : ticks of noise}},
 # 'keep' : tracks (1-4) which are never left out, 'keep_echoes' : True (quiet repeated notes are played),
 # 'chords' : tracks (1-4) played in one channel, the notes which sound together as an arpeggio
 OVERRIDES = {
@@ -324,6 +326,7 @@ class Sound:
         self.length = override.get('length')      # ticks (the notes are cut)
         self.hit_ticks = override.get('hit_ticks', HIT)
         self.vibrato_override = override.get('vibrato')
+        self.arp_speed = override.get('arp_speed', 0)  # ticks - 1 per note of the arpeggio
         self.shape = None                         # amplitude of the sample in every tick (None : synth)
         if ins is None:
             self.period = 32
@@ -908,10 +911,11 @@ class Converter:
         elif sound is not None and sound.hit:
             noise = noises.setdefault((sound.hit,) * sound.hit_ticks, len(noises))
         arp = 0
+        arp_speed = sound.arp_speed if sound is not None else 0
         if len(key) > 2:
-            arp = arps.setdefault((key[2], True), len(arps))
+            arp = arps.setdefault((key[2], True, arp_speed), len(arps))
         elif sound is not None and sound.arp:
-            arp = arps.setdefault(sound.arp, len(arps))
+            arp = arps.setdefault(sound.arp + (arp_speed,), len(arps))
         return bytes([0, arp, noise, 0, speed] + levels + [0xff])
 
     def song(self):
@@ -926,11 +930,11 @@ class Converter:
         arp_data = [bytes([0, 0, 0xff])] * len(arps)
         for a, i in arps.items():
             if a:
-                values, loop = a
+                values, loop, speed = a
                 low = min(values)
                 if low < 0:
                     raise ValueError('negative arpeggio')
-                arp_data[i] = bytes([0] + list(values) + [0xfe if loop else 0xff])
+                arp_data[i] = bytes([speed] + list(values) + [0xfe if loop else 0xff])
         noise_data = [bytes([0, 0x20, 0xff])] * len(noises)
         for v, i in noises.items():
             if v:
