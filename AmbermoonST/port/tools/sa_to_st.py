@@ -98,11 +98,16 @@ def signed(b):
 # 'keep' : tracks (1-4) which are never left out, 'keep_echoes' : True (quiet repeated notes are played),
 # 'chords' : tracks (1-4) played in one channel, the notes which sound together as an arpeggio
 OVERRIDES = {
-    1: {'instruments': {4: {'kind': 'hit', 'noise': 4, 'octave': -1}}},  # RobotHit02 : a pickaxe on metal
+    1: {'instruments': {4: {'kind': 'hit', 'noise': 4, 'octave': -1, 'length': 6},       # RobotHit02 : a pickaxe
+                        3: {'kind': 'hit', 'noise': 31, 'hit_ticks': 1, 'length': 12, 'volume': -2},  # Trommel
+                        2: {'volume': -2}}},
     13: {'instruments': {4: {'octave': 1, 'volume': -2}}},              # Deephorns : droning
     19: {'instruments': {4: {'kind': 'hit'}}},                          # XNSRadiator09 : a strike
-    20: {'instruments': {2: {'octave': 1}, 3: {'octave': 1}}},          # dull (a witch's broom)
-    23: {'keep': (4,), 'instruments': {1: {'kind': 'hit'}}},            # the Pauke stays
+    20: {'instruments': {1: {'kind': 'hit', 'noise': 6, 'hit_ticks': 2, 'octave': 1, 'volume': 2},  # the guitar
+                         2: {'octave': 1, 'volume': 2},                 # (a witch's broom : not dull)
+                         3: {'octave': 1, 'chord': (0, 12), 'volume': -2},  # brass : unlike the melody
+                         4: {'volume': -1}, 5: {'volume': -1}, 6: {'volume': -1}, 7: {'volume': -1}}},
+    23: {'keep': (4,), 'instruments': {1: {'kind': 'hit', 'noise': 12, 'hit_ticks': 3}}},  # the Pauke stays
     24: {'instruments': {3: {'kind': 'hit', 'hit_ticks': 4, 'noise': 31, 'volume': 3},   # Ort7 : scraping notes
                          2: {'kind': 'hit', 'noise': 28, 'hit_ticks': 3, 'octave': -1, 'volume': 2},  # Hole2 : a door
                          1: {'vibrato': (2, 10)}}},                     # the organ : creepy
