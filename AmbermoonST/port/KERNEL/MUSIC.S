@@ -8,6 +8,8 @@
 ; effects, and is called by the vertical blank handler.
 ; The routines replace those of the Amiga player (see INCLUDES/MACROS.I).
 
+MUSIC_DATA_SIZE	EQU	20480			; (port_music.py checks the songs)
+
 	SECTION	Program,code
 
 ;*****************************************************************************
@@ -22,7 +24,7 @@ _SA_Hardcalc:
 	move.l	d0,Music_size
 	beq.s	.Exit			; (no ST version of this song)
 	lea.l	Music_data,a1
-	addq.w	#1,d0			; (at most 16K)
+	addq.w	#1,d0			; (at most MUSIC_DATA_SIZE)
 	lsr.w	#1,d0
 	subq.w	#1,d0
 .Copy:	move.w	(a0)+,(a1)+
@@ -98,7 +100,7 @@ Music_timer_D_set:
 	rts
 
 	include	ST_KERNEL/MUSPLAY.I
-Music_data:	ds.b 16384			; The song (behind the player)
+Music_data:	ds.b MUSIC_DATA_SIZE		; The song (behind the player)
 	IFNE	Music_data-Music_player-8314
 	FAIL	"Music_data must follow the player directly"
 	ENDC

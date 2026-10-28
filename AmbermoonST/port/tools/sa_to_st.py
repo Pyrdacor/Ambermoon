@@ -59,9 +59,12 @@ MAX_INSTRUMENTS = 31
 # the parts of the song data (the table of the player points to them) : offset, size, name
 LAYOUT = ((0x002, 0x800, 'instruments'), (0x802, 0x240, 'arpeggios'), (0xa42, 0x140, 'noise'),
           (0xb82, 0x100, 'order'), (0xc82, 0, 'patterns'))
-NOISE_LIMIT = 0.45                         # autocorrelation below : the sample is noise
+NOISE_LIMIT = 0.3                         # autocorrelation below : the sample is noise
 HARMONICS = {round(12 * math.log2(h)) for h in range(2, 12)}   # semitones above the fundamental
+LOWEST = 25                                # lowest (median) note of an instrument : C3
 QUIET = 4                                 # YM level : a track can play in the channel of another one
+ECHO = 8                                   # volume (0..64) of a repeated note : an echo, left out
+CUT = 1.5                                  # a note cuts another one when it brings more sound than this * the rest
 
 
 def st_periods():
@@ -302,17 +305,24 @@ class Sound:
             period, quality = find_period(x, False, 8, 1024)
             if len(loop) >= 16 and len(loop) < 256 and loop:
                 period, quality = find_period([signed(b) for b in loop], True)
+            if period is not None and quality >= NOISE_LIMIT:
+                self.period, self.chord = self.harmony([signed(b) for b in first[:8192]], period)
+                if self.chord and min(b - a for a, b in zip(self.chord, self.chord[1:])) <= 2:
+                    period = None                 # tones a second apart : no chord, noise
             if period is None or quality < NOISE_LIMIT:
+                self.chord = None
                 crossings = sum(1 for a, b in zip(x, x[1:]) if (a < 0) != (b < 0))
                 zcr = crossings / max(1, len(x)) * rate
                 self.noise = max(1, min(31, round(YM_CLOCK / 32 / max(zcr, 1))))
                 self.period = 32
-            else:
-                self.period, self.chord = self.harmony([signed(b) for b in first[:8192]], period)
         # the ST note of an Amiga note : the same frequency, octaves moved into the range of the ST player
         f = PAULA / (SA_PERIODS[self.ref] * self.period)
         self.shift = round(1 + 12 * math.log2(f / ST_C1)) - self.ref
         lo, hi = min(notes, default=self.ref) + self.shift, max(notes, default=self.ref) + self.shift
+        # square waves below C3 drone : such instruments an octave higher (like the ST arranger did)
+        while self.noise is None and self.ref + self.shift < LOWEST and hi + 12 < len(ST_PERIODS):
+            self.shift += 12
+            lo, hi = lo + 12, hi + 12
         while lo < 1 and hi + 12 < len(ST_PERIODS):
             self.shift += 12
             lo, hi = lo + 12, hi + 12
@@ -361,27 +371,30 @@ class Sound:
             classes[s % 12] = max(classes.get(s % 12, 0), tones[s])
         loudest = max(classes.values())
         kept = sorted((c for c in classes if classes[c] >= 0.2 * loudest), key=lambda c: -classes[c])[:3]
-        low = min(s for s in own if s % 12 in kept)
+        low = min(s for s in own if s % 12 in kept) % 12      # (not above the octave of the period)
         chord = sorted((c - low) % 12 for c in kept)
-        return period / 2 ** (low / 12), chord if len(chord) > 1 else None
+        # 2 tones are mostly a harmonic (the fifth) : a chord has 3
+        return period / 2 ** (low / 12), chord if len(chord) > 2 else None
 
     @staticmethod
     def sample_shape(first, loop, rate):
+        """The amplitude of the sample (0..1) in every tick : the RMS (a square wave of the same level sounds
+        louder than the peak of the sample), smoothed (changes from tick to tick
+        would be a tremolo of 50 Hz : rough), after its peak only falling, the repeated part a constant level"""
         per_tick = max(1, int(rate / TICKS))
-        out = []
-        data = first
-        pos = 0
-        for _ in range(256):
-            if pos >= len(data):
-                if not loop:
-                    break
-                data, pos = loop, 0
-            chunk = data[pos:pos + per_tick]
-            while len(chunk) < per_tick and loop:
-                chunk += loop[:per_tick - len(chunk)]
-            pos += per_tick
-            out.append(max((abs(signed(b)) for b in chunk), default=0) / 128)
-        return out
+
+        def rms(chunk):
+            return math.sqrt(sum(signed(b) ** 2 for b in chunk) / len(chunk)) / 128 if chunk else 0
+        out = [rms(first[p:p + per_tick]) for p in range(0, len(first), per_tick)][:256]
+        out = [sum(out[max(0, i - 2):i + 3]) / len(out[max(0, i - 2):i + 3]) for i in range(len(out))]
+        if out:
+            peak = out.index(max(out))
+            for i in range(peak + 1, len(out)):
+                out[i] = min(out[i], out[i - 1])
+        if loop:
+            level = min(rms(loop), out[-1] if out else 1)
+            out += [level] * max(0, 256 - len(out))
+        return [min(1.0, v) for v in out]
 
     def amf_arpeggio(self, module):
         """the change of the pitch by the AMF wave in semitones, per tick (None : none)"""
@@ -454,7 +467,14 @@ class Converter:
                     used.setdefault(current[t], []).append(note)
         self.sounds = {n: Sound(module, n, notes) for n, notes in used.items()}
         self.variants = {}                         # (sound, volume step) -> ST instrument number
+        self.boost = 0
         self.tracks = self.play()
+        # the loudest note gets the highest level (on the YM2149 quiet songs sound far away)
+        peak = max((max(c.levels) for t in self.tracks for c in t if c is not None and c.levels), default=15)
+        if 0 < peak < 15:
+            self.boost = 15 - peak
+            self.variants = {}
+            self.tracks = self.play()
 
     def variant(self, number, volume):
         step = 0 if volume >= 64 else 99 if volume <= 0 else round(-20 * math.log10(volume / 64) / 3)
@@ -468,7 +488,8 @@ class Converter:
         sound = self.sounds.get(number)
         if sound is None or step >= 15:
             return [0]
-        return sound.levels(self.module, 64 * 10 ** (-step * 3 / 20))
+        return [min(15, v + self.boost) if v else 0
+                for v in sound.levels(self.module, 64 * 10 ** (-step * 3 / 20))]
 
     def play(self):
         """[track][row] -> Cell or None, like the Amiga player plays it; the speed of every row"""
@@ -511,6 +532,8 @@ class Converter:
                         self.slide(cell, s, signed(param), speed)
                         tracks[t][r] = cell
                     continue
+                if 0 < note < 0x7f and note == s.get('last') and s['volume'] <= ECHO and cmd == 0xc:
+                    continue                      # an echo of the last note (quiet) : the YM is too loud
                 sound = self.sounds.get(s['ins'])
                 if sound is None:
                     tracks[t][r] = Cell(0, self.variant(0, 0)[0], [0], None)
@@ -595,21 +618,42 @@ class Converter:
             for s in range(4):
                 if p == s:
                     continue
+                # the channel plays p; a note of s replaces the note of p when it brings more sound than the
+                # rest of the note of p (until the next note of p), which is lost then
                 merged = list(tracks[p])
                 lost = 0.0
+                current = p
                 for r in range(n):
                     c = tracks[s][r]
+                    own = tracks[p][r]
+                    if own is not None and own.levels is not None:
+                        current = p
+                    elif own is not None and current == s:
+                        merged[r] = None                  # (an effect of p for its note, which is cut)
                     if c is None:
                         continue
-                    if merged[r] is None and sounding[p][r] <= QUIET:
-                        merged[r] = c
+                    if c.levels is None:                  # an effect of s for its note
+                        if current == s and merged[r] is None:
+                            merged[r] = c
+                        else:
+                            lost += 0.1
                         continue
                     e = self.energy(self.tracks[s], first + r, last)
                     doubled = any(tracks[k][r] is not None and tracks[k][r].note and c.note and
                                   (tracks[k][r].note - c.note) % 12 == 0 for k in range(4) if k != s)
-                    lost += e * (0.2 if doubled else 1)
-                    if c.levels is None:              # an effect only
-                        lost += 0.1
+                    gain = e * (0.2 if doubled else 1)
+                    tail = 0.0
+                    if current == p and own is None:
+                        i = r
+                        while i < n and (i == r or tracks[p][i] is None or tracks[p][i].levels is None):
+                            tail += amplitude(sounding[p][i]) * self.speeds[first + i]
+                            i += 1
+                    if own is None and (sounding[p][r] <= QUIET or gain > tail * CUT):
+                        merged[r] = c
+                        lost += tail if current == p else 0
+                        current = s
+                    else:
+                        lost += gain
                 if best is None or lost < best[0] - 1e-9:
                     best = (lost, p, s, merged)
         lost, p, s, merged = best
