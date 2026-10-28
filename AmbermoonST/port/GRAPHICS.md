@@ -74,11 +74,14 @@ format; their colours are the colours 0-15 of the map palette.
 1. **3-plane graphics with base 24** (layouts, buttons, riddlemouth, most program graphics) use only the UI
    colours 24-31, which are fixed ST colours (9-15): one conversion, independent of the palette.
 2. **1-plane graphics** (font, patterns, automap walls) are drawn as silhouettes in a colour: stay 1 plane.
-3. **3D textures, floors, horizon** (4 planes, base 0): only the format changes (chunks → ST), no colour
-   reduction; the ST palette of a 3D map is colours 0-15 of its Amiga palette (+ UI colours).
-4. **2D tiles, NPCs, party, travel** (5 planes, 32 colours): one ST palette per map palette; the colour indices
-   are built so that they have the same purpose in all palettes which share graphics (tilesets 4-7 with
-   palettes 7-9 are one case anyway, the party graphics of a world are the other).
+3. **3D textures, floors, horizon** (4 planes, base 0, colours 0-15): the 3D palettes are one palette group
+   (one lookup table, `port_palettes.py`): the textures are converted once, every 3D palette has its own ST
+   colours. The UI colours share the lines of the 3D view, so 16 colours become 10 here too.
+4. **2D tiles** (5 planes, 32 colours): every tileset is shown with one palette only, so they are converted with
+   the ST palette of that map palette (no group). **NPCs, party, travel, stationary transports** are shown with
+   the palettes of all maps of a world: they get a converted copy per palette (the game loads the copy of the
+   map palette, a small patch). A common lookup table for world and town palettes was tried: the town maps
+   get clearly worse colours (those palettes were not made alike).
 5. **Event pictures** (3 palettes) and **combat backgrounds** (day/twilight/night palettes of the same
    picture): one index assignment per picture, an ST palette per Amiga palette.
 6. **Monsters** are drawn with the palette of the combat background and recoloured per monster
