@@ -9,8 +9,11 @@
 ; NOTE :
 ;   - Called by [ Init_system ] while the TOS is active, after the screens
 ;     were made ([ On_screen ]).
-;   - 320 x 200 with 256 colours, 50 Hz (like the PAL Amiga), all colours
-;     black. (A VGA monitor has no 50 Hz modes : not yet.)
+;   - 320 x 200 with 256 colours, all colours black. On an RGB monitor or a
+;     TV at 50 Hz (like the PAL Amiga). A VGA monitor has no 50 Hz modes :
+;     60 Hz with every line twice, the game runs at 50 Hz with Timer C
+;     ([ Tick_timer ], SYSTEM.S). That mode has 240 lines : the VIDEL shows
+;     only the middle 200 (VDB / VDE, black above and below).
 ;*****************************************************************************
 Init_video:
 	movem.l	d0-d7/a0-a2,-(sp)
@@ -34,14 +37,30 @@ Init_video:
 	dbra	d7,.Save
 	movem.l	ST_palette_regs,d0-d7
 	movem.l	d0-d7,Old_ST_palette
-	move.w	#Mode_BPS8+Mode_PAL,-(sp)	; 320 x 200, 256 colours, 50 Hz
+	move.w	#VgetMonitor,-(sp)		; Which monitor ?
+	trap	#XBIOS
+	addq.l	#2,sp
+	move.w	#Mode_BPS8+Mode_PAL,d1	; 320 x 200, 256 colours, 50 Hz
+	cmp.w	#Monitor_VGA,d0
+	bne.s	.Mode
+	move.w	#Mode_BPS8+Mode_VGA+Mode_VERTFLAG,d1	; VGA : 60 Hz, lines twice
+	st	Tick_timer
+.Mode:	move.w	d1,-(sp)
 	move.w	#3,-(sp)
 	move.l	On_screen,-(sp)
 	move.l	On_screen,-(sp)
 	move.w	#Vsetscreen,-(sp)
 	trap	#XBIOS
 	lea.l	14(sp),sp
-	lea.l	Videl_palette,a0		; Black
+	tst.b	Tick_timer		; VGA : 200 of the 240 lines
+	beq.s	.Lines_ok
+	move.w	Videl_VDE,d0		; (the display in half lines)
+	sub.w	Videl_VDB,d0
+	ext.l	d0
+	divu.w	#12,d0			; (20 of the 240 lines)
+	add.w	d0,Videl_VDB
+	sub.w	d0,Videl_VDE
+.Lines_ok:	lea.l	Videl_palette,a0		; Black
 	move.w	#256-1,d7
 .Black:	clr.l	(a0)+
 	dbra	d7,.Black

@@ -14,6 +14,10 @@
 ;     the game and the music, [ Init_video ]), installs the VBL, the raster
 ;     interrupts ([ Install_raster ]) and the ACIA (keyboard & mouse)
 ;     handlers.
+;   - A video mode without 50 Hz (the VGA monitor of the Falcon) sets
+;     [ Tick_timer ] : the game runs at 50 Hz with Timer C (200 Hz, every
+;     4th interrupt, [ Tick_interrupt ]), the vertical blank only shows the
+;     colours ([ Vbl_interrupt ]).
 ;*****************************************************************************
 Init_system:
 	movem.l	d0-d7/a0-a6,-(sp)
@@ -28,6 +32,7 @@ Init_system:
 	move.w	#$2700,sr
 	move.l	Vec_VBL.w,Old_VBL
 	move.l	Vec_ACIA.w,Old_ACIA
+	move.l	Vec_Timer_C.w,Old_Timer_C
 	move.b	MFP_IERA,Old_IERA
 	move.b	MFP_IERB,Old_IERB
 	move.b	MFP_IMRA,Old_IMRA
@@ -40,6 +45,8 @@ Init_system:
 	move.b	#$40,MFP_IERB		; Only ACIA (no Timer C)
 	move.b	#$40,MFP_IMRB
 	bset	#3,MFP_VR			; Software end of interrupt
+	move.b	#4,Tick_divider		; The game at 50 Hz with Timer C ?
+	jsr	Enable_tick_timer
 	jsr	Install_raster
 	st	System_active
 	move.w	(sp)+,sr
@@ -84,6 +91,7 @@ Exit_system:
 	jsr	Remove_raster
 	move.l	Old_VBL,Vec_VBL.w
 	move.l	Old_ACIA,Vec_ACIA.w
+	move.l	Old_Timer_C,Vec_Timer_C.w
 	move.b	Old_IERA,MFP_IERA
 	move.b	Old_IERB,MFP_IERB
 	move.b	Old_IMRA,MFP_IMRA
@@ -101,13 +109,72 @@ Exit_system:
 ;   - Like [ Run_copper ] (COLOURS.S) of the Amiga version : the colours are
 ;     set (raster events), the fades are handled, then the vertical blank
 ;     handler.
+;   - With [ Tick_timer ] only the colours : the rest is done at 50 Hz by
+;     [ Tick_interrupt ].
 ;*****************************************************************************
 Vbl_interrupt:
 	movem.l	d0-d7/a0-a6,-(sp)
+	addq.w	#1,Frame_counter
 	jsr	Raster_VBL
+	tst.b	Tick_timer
+	bne.s	.Exit
+	jsr	Colour_handler
+	jsr	Vbl_handler
+.Exit:	movem.l	(sp)+,d0-d7/a0-a6
+	rte
+
+;*****************************************************************************
+; [ Switch on Timer C for the 50 Hz of the game ] (if [ Tick_timer ])
+; All registers are restored
+; NOTE :
+;   - Also after the music player was started or stopped : it switches
+;     Timer C off (MUSIC.S).
+;*****************************************************************************
+Enable_tick_timer:
+	tst.b	Tick_timer
+	beq.s	.Exit
+	move.l	d0,-(sp)
+	move.w	sr,-(sp)
+	ori.w	#$0700,sr
+	move.l	#Tick_interrupt,Vec_Timer_C.w	; 200 Hz : 2457600 / 64 / 192
+	move.b	MFP_TCDCR,d0		; (Timer D : the music)
+	andi.b	#$70,d0
+	cmp.b	#$50,d0			; Running already ?
+	beq.s	.Running
+	andi.b	#$0f,MFP_TCDCR
+	move.b	#192,MFP_TCDR
+	ori.b	#$50,MFP_TCDCR
+.Running:	bset	#5,MFP_IERB
+	bset	#5,MFP_IMRB
+	move.w	(sp)+,sr
+	move.l	(sp)+,d0
+.Exit:	rts
+
+;*****************************************************************************
+; [ Timer C interrupt : the 50 Hz of the game ] (see [ Init_system ])
+; NOTE :
+;   - Every 4th interrupt (200 Hz) : the fades and the vertical blank handler,
+;     like [ Vbl_interrupt ] at 50 Hz. At the level of the vertical blank, so
+;     the ACIA (keyboard & mouse) gets through.
+;   - While a file is accessed ([ TOS_timer_C ], LIBS.S) the TOS handler of
+;     Timer C runs too (it ends the interrupt).
+;*****************************************************************************
+Tick_interrupt:
+	subq.b	#1,Tick_divider
+	bne.s	.Done
+	move.b	#4,Tick_divider
+	move.w	sr,-(sp)
+	move.w	#$2400,sr
+	movem.l	d0-d7/a0-a6,-(sp)
 	jsr	Colour_handler
 	jsr	Vbl_handler
 	movem.l	(sp)+,d0-d7/a0-a6
+	move.w	(sp)+,sr
+.Done:	tst.b	TOS_timer_C		; The TOS too ?
+	beq.s	.Exit
+	move.l	Old_Timer_C,-(sp)		; Yes
+	rts
+.Exit:	bclr	#5,MFP_ISRB		; End of interrupt
 	rte
 
 ;*****************************************************************************
@@ -264,13 +331,21 @@ Clear_screen:
 ;*****************************************************************************
 ; [ Wait for the next vertical blank ]
 ; All registers are restored
+; NOTE :
+;   - With [ Tick_timer ] : the next 50 Hz tick, then the next frame of the
+;     screen (a new video base or new colours are shown when this returns).
 ;*****************************************************************************
 My_vsync:
 	move.l	d0,-(sp)
 	move.w	VBL_counter,d0
 .Loop:	cmp.w	VBL_counter,d0
 	beq.s	.Loop
-	move.l	(sp)+,d0
+	tst.b	Tick_timer
+	beq.s	.Exit
+	move.w	Frame_counter,d0
+.Frame:	cmp.w	Frame_counter,d0
+	beq.s	.Frame
+.Exit:	move.l	(sp)+,d0
 	rts
 
 	SECTION	Fast_BSS,bss
@@ -281,7 +356,12 @@ Return_address:	ds.l 1
 Stack_pointer:	ds.l 1
 CPU_68020_plus:	ds.b 1
 System_active:	ds.b 1
-VBL_counter:	ds.w 1
+VBL_counter:	ds.w 1			; (the 50 Hz of the game)
+Frame_counter:	ds.w 1			; (the frames of the screen)
+Tick_timer:	ds.b 1			; The game at 50 Hz with Timer C
+Tick_divider:	ds.b 1
+TOS_timer_C:	ds.b 1			; The TOS gets Timer C (a file access)
+	even
 Library_dos:	ds.l 1
 Library_graphics:	ds.l 1
 Console_device_pointer:	ds.l 1
@@ -294,6 +374,7 @@ Work_screen:	ds.l 1
 Shown_screen:	ds.l 1
 Old_VBL:	ds.l 1
 Old_ACIA:	ds.l 1
+Old_Timer_C:	ds.l 1
 Old_IERA:	ds.b 1
 Old_IERB:	ds.b 1
 Old_IMRA:	ds.b 1

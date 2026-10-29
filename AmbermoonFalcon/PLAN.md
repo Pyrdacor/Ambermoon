@@ -57,5 +57,9 @@ test runner of the ST port (`AmbermoonST/port/test/run.py`, `MACHINE=falcon`).
   position in the `Party_data.sav` files, `AmbermoonST/port/test/set_start.py`, e.g. map 416 at 28,11).
 * Combat : the zoom of the monsters (`KERNEL/ZOOM.S`, the blitter in the Amiga version) zooms the visible part
   into a buffer as an Amiga graphic, `Put_masked_block` / `Put_masked_silhouette` draw it.
-* Open: VGA monitors (no 50 Hz modes), the graphics unpacked in advance (the data are the original files, the game unpacks them
+* VGA monitors : 320 x 200 (the middle 200 lines of the 240 of the VGA mode, VDB / VDE) at 60 Hz. The game
+  runs at 50 Hz with Timer C (200 Hz, every 4th interrupt : fades, vertical blank handler, music), the vertical
+  blank only shows the colours; while a file is accessed the TOS gets Timer C too (SYSTEM.S, LIBS.S). Test :
+  `HATARI_ARGS="--monitor vga"` (the frames of a scenario times 1.2 : Hatari counts 60 frames per second).
+* Open: the graphics unpacked in advance (the data are the original files, the game unpacks them
   itself), the zoom and the 3D maps on the ST (68000 replacements of the 68020 code).

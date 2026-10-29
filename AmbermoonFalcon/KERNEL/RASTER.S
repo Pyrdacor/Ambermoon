@@ -15,7 +15,9 @@
 ; screen for every line (from the raster list of the module), [ Render_raster ]
 ; puts the (faded) colours of [ Current_RL ] at the same places of the shadow
 ; palette and copies it into the VIDEL at once (it runs in the vertical blank :
-; the colours change with the same frame as a screen switch, see there).
+; the colours change with the same frame as a screen switch, see there). On a
+; VGA monitor the game runs with Timer C ([ Tick_timer ], SYSTEM.S) : the
+; colours are copied in the next vertical blank ([ Raster_VBL ]).
 
 	SECTION	Program,code
 
@@ -133,8 +135,12 @@ Render_raster:
 .Skip:	add.w	d1,d1			; (no room)
 	add.w	d1,a0
 	bra.s	.Loop
-.End:	jsr	Copy_palette
-	movem.l	(sp)+,d0-d7/a0-a3
+.End:	tst.b	Tick_timer		; In the vertical blank ?
+	bne.s	.Later
+	jsr	Copy_palette		; Yes -> now
+	bra.s	.Done
+.Later:	st	Palette_dirty		; No -> in the next one
+.Done:	movem.l	(sp)+,d0-d7/a0-a3
 	rts
 
 ; [ Convert an Amiga colour into a VIDEL colour ]
@@ -166,10 +172,15 @@ Amiga_to_videl:
 ;*****************************************************************************
 ; [ Raster handling in the vertical blank ]
 ; NOTE :
-;   - Nothing to do : [ Render_raster ] sets the colours.
+;   - The colours of [ Render_raster ] when it does not run in the vertical
+;     blank (VGA, [ Tick_timer ]).
 ;*****************************************************************************
 Raster_VBL:
-	rts
+	tst.b	Palette_dirty
+	beq.s	.Exit
+	sf	Palette_dirty
+	jsr	Copy_palette
+.Exit:	rts
 
 ;*****************************************************************************
 ; [ Copy the shadow palette into the VIDEL ]
@@ -305,6 +316,8 @@ Nibble_to_videl:
 
 	SECTION	Fast_BSS,bss
 Banks_RL:	ds.l 1
+Palette_dirty:	ds.b 1
+	even
 Line_banks:	ds.b Screen_height		; (these three one after the other)
 Line_range_colour:	ds.b Screen_height
 Line_range_index:	ds.b Screen_height

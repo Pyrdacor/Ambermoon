@@ -15,6 +15,7 @@ MFP_VR	EQU	$fffffa17	; Vector register
 MFP_TBCR	EQU	$fffffa1b	; Timer B control (8 = event count mode)
 MFP_TBDR	EQU	$fffffa21	; Timer B data
 MFP_TCDCR	EQU	$fffffa1d	; Timer C / D control (C : bits 4-6, D : bits 0-2)
+MFP_TCDR	EQU	$fffffa23	; Timer C data
 
 ; ---------- ACIAs -----------------------------------
 ACIA_kbd_ctrl	EQU	$fffffc00
@@ -24,6 +25,7 @@ ACIA_midi_data	EQU	$fffffc06
 
 ; ---------- Exception vectors -----------------------
 Vec_VBL	EQU	$70
+Vec_Timer_C	EQU	$114
 Vec_ACIA	EQU	$118
 Vec_Timer_B	EQU	$120
 
