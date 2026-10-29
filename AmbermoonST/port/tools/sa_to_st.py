@@ -98,10 +98,11 @@ def signed(b):
 # quieter[, repeats]), 'sweep' : semitones per tick at the start, 'chord' : semitones (arpeggio), 'arp_speed' :
 # ticks - 1 per note of the arpeggio, 'vibrato' : (parameter, delay in ticks), 'hit_ticks' : ticks of noise,
 # 'envelope' : YM levels per tick, 'attack' : ticks (soft start), 'noise_sweep' : True (the noise gets brighter
-# or darker like the sample), 'tone_sweep' : True (the pitch follows the main frequency of the sample), 'gate' :
+# or darker like the sample; 'brighter' : that much lower periods), 'tone_sweep' : True (the pitch follows the main frequency of the sample), 'gate' :
 # YM level (a note ends when it gets quieter)}}, 'track_instruments' : {track : {number : the same for the
 # instrument in this track}},
 # 'keep' : tracks (1-4) which are never left out, 'keep_echoes' : True (quiet repeated notes are played),
+# 'layers' : {number : overrides} (the notes of the instrument once more with another sound, together),
 # 'chords' : tracks (1-4) played in one channel, the notes which sound together as an arpeggio, 'boost' : YM levels
 # for all notes (else the loudest note gets the highest level)
 OVERRIDES = {
@@ -113,8 +114,8 @@ OVERRIDES = {
         3: {'vibrato': False, 'volume': -2},                            # LongLead : the melody in the middle
         1: {'attack': 4, 'vibrato': False, 'volume': -2},               # SynthVoice : the accent at the start
         2: {'octave': 1, 'volume': -3, 'length': 20, 'vibrato': False}}},  # Hole2 : the bass, not droning
-    19: {'instruments': {4: {'kind': 'noise', 'noise_sweep': True, 'gate': 8, 'echo': (2, 3)},  # XNSRadiator09 :
-                         3: {'octave': -1},                             #  a short strike with an echo
+    19: {'instruments': {4: {'kind': 'noise', 'noise_sweep': True, 'brighter': 8, 'gate': 8, 'echo': (2, 5)},
+                         3: {'octave': -1},                             # (XNSRadiator09 : a short strike, echo)
                          1: {'volume': -3, 'length': 40, 'attack': 4, 'vibrato': False}}},  # DDstr2 : no drone
     20: {'instruments': {1: {'kind': 'hit', 'noise': 6, 'hit_ticks': 2, 'octave': 1, 'volume': 2},  # the guitar
                          2: {'octave': 1, 'volume': 2},                 # (a witch's broom : not dull)
@@ -385,7 +386,8 @@ class Sound:
                 speed = 0
                 while len(seq[::speed + 1]) > 60:
                     speed += 1
-                self.noise_seq = (speed, tuple(seq[::speed + 1]))
+                bright = override.get('brighter', 0)
+                self.noise_seq = (speed, tuple(max(1, v - bright) for v in seq[::speed + 1]))
         # the ST note of an Amiga note : the same frequency, octaves moved into the range of the ST player
         f = PAULA / (SA_PERIODS[self.ref] * self.period)
         self.shift = round(1 + 12 * math.log2(f / ST_C1)) - self.ref
@@ -592,9 +594,25 @@ class Converter:
         rows, self.restart, self.speed = module.rows()
         rows = [[(note, 100 * (t + 1) + ins if 100 * (t + 1) + ins in self.real else ins, cmd, param)
                  for t, (note, ins, cmd, param) in enumerate(row)] for row in rows]
+        # a layer : the notes of an instrument once more in an own track (number 900 + instrument), with another
+        # sound, played together
+        for number, o in override.get('layers', {}).items():
+            layer = 900 + number
+            self.real[layer] = number
+            overrides[layer] = o
+            self.keep.add(len(rows[0]))
+            current = [0] * len(rows[0])
+            for i, row in enumerate(rows):
+                entry = (0, 0, 0, 0)
+                for t, (note, ins, cmd, param) in enumerate(row):
+                    if ins:
+                        current[t] = ins
+                    if 0 < note < 0x7f and current[t] == number and entry == (0, 0, 0, 0):
+                        entry = (note, layer, cmd, param)
+                rows[i] = row + [entry]
         self.rows = rows
         used = {}
-        current = [0] * 4
+        current = [0] * len(rows[0])
         for row in rows:
             for t, (note, ins, _, _) in enumerate(row):
                 if ins:
@@ -653,10 +671,10 @@ class Converter:
 
     def play(self):
         """[track][row] -> Cell or None, like the Amiga player plays it; the speed of every row"""
-        tracks = [[None] * len(self.rows) for _ in range(4)]
+        tracks = [[None] * len(self.rows) for _ in range(len(self.rows[0]))]
         self.speeds = []
         speed = self.speed
-        state = [{'ins': 0, 'volume': 0, 'note': 0, 'porta': 0} for _ in range(4)]
+        state = [{'ins': 0, 'volume': 0, 'note': 0, 'porta': 0} for _ in range(len(self.rows[0]))]
         for r, row in enumerate(self.rows):
             for note, ins, cmd, param in row:
                 if cmd == 0xf and 0 < param <= 16:
@@ -830,67 +848,80 @@ class Converter:
         tracks = [t[first:last] for t in self.tracks]
         if len(tracks) <= 3:
             return tracks + [[None] * (last - first) for _ in range(3 - len(tracks))], None
-        sounding = [self.sounding(t, first, last) for t in self.tracks]
+        labels = list(range(len(tracks)))         # (the original track of a working track)
+        full = list(self.tracks)
         n = last - first
-        best = None
-        for p in range(4):
-            for s in range(4):
-                if p == s or s in self.keep:
-                    continue
-                # the channel plays p; a note of s replaces the note of p when it brings more sound than the
-                # rest of the note of p (until the next note of p), which is lost then
-                merged = list(tracks[p])
-                lost = 0.0
-                current = p
-                for r in range(n):
-                    c = tracks[s][r]
-                    own = tracks[p][r]
-                    if own is not None and own.levels is not None:
-                        current = p
-                    elif own is not None and current == s:
-                        merged[r] = None                  # (an effect of p for its note, which is cut)
-                    if c is None:
+        while len(tracks) > 3:
+            sounding = [self.sounding(t, first, last) for t in full]
+            best = None
+            for p in range(len(tracks)):
+                for s in range(len(tracks)):
+                    if p == s or labels[s] in self.keep:
                         continue
-                    if c.levels is None:                  # an effect of s for its note
-                        if current == s and merged[r] is None:
-                            merged[r] = c
-                        else:
-                            lost += 0.1
-                        continue
-                    e = self.energy(self.tracks[s], first + r, last)
-                    doubled = any(tracks[k][r] is not None and tracks[k][r].note and c.note and
-                                  (tracks[k][r].note - c.note) % 12 == 0 for k in range(4) if k != s)
-                    gain = e * (0.2 if doubled else 1)
-                    tail = 0.0
-                    if current == p and own is None:
-                        i = r
-                        while i < n and (i == r or tracks[p][i] is None or tracks[p][i].levels is None):
-                            tail += amplitude(sounding[p][i]) * self.speeds[first + i]
-                            i += 1
-                    if own is None and (sounding[p][r] <= QUIET or gain > tail * CUT):
-                        merged[r] = c
-                        lost += tail if current == p else 0
-                        current = s
-                    else:
-                        lost += gain
-                if best is None or lost < best[0] - 1e-9:
-                    best = (lost, p, s, merged)
-        lost, p, s, merged = best
-        kept = [k for k in range(4) if k != s]
-        channels = {k: (merged if k == p else tracks[k]) for k in kept}
+                    lost, merged = self.merge_pair(tracks, full, sounding, p, s, first, last)
+                    if best is None or lost < best[0] - 1e-9:
+                        best = (lost, p, s, merged)
+            if best is None:
+                raise ValueError(f'rows {first}-{last - 1} : too many tracks to keep')
+            lost, p, s, merged = best
+            if self.verbose:
+                print(f'  rows {first}-{last - 1}: track {labels[s] + 1} into track {labels[p] + 1}, lost {lost:.1f}')
+            tracks[p] = merged
+            full[p] = full[p][:first] + merged + full[p][last:]
+            del tracks[s], full[s], labels[s]
         # the tracks stay in their channels when possible
         order = [None] * 3
         if previous:
             for c, k in enumerate(previous):
-                if k in kept and k not in order:
+                if k in labels and k not in order:
                     order[c] = k
-        for k in kept:
+        for k in labels:
             if k not in order:
                 order[order.index(None)] = k
         if self.verbose:
-            print(f'  rows {first}-{last - 1}: track {s + 1} into track {p + 1}, lost {lost:.1f}, channels '
-                  f'{[k + 1 for k in order]}')
-        return [channels[k] for k in order], order
+            print(f'  rows {first}-{last - 1}: channels {[k + 1 for k in order]}')
+        return [tracks[labels.index(k)] for k in order], order
+
+    def merge_pair(self, tracks, full, sounding, p, s, first, last):
+        """track s into the channel of track p : (the sound which is lost, the cells of the channel)"""
+        # the channel plays p; a note of s replaces the note of p when it brings more sound than the rest of the
+        # note of p (until the next note of p), which is lost then
+        n = last - first
+        merged = list(tracks[p])
+        lost = 0.0
+        current = p
+        for r in range(n):
+            c = tracks[s][r]
+            own = tracks[p][r]
+            if own is not None and own.levels is not None:
+                current = p
+            elif own is not None and current == s:
+                merged[r] = None                  # (an effect of p for its note, which is cut)
+            if c is None:
+                continue
+            if c.levels is None:                  # an effect of s for its note
+                if current == s and merged[r] is None:
+                    merged[r] = c
+                else:
+                    lost += 0.1
+                continue
+            e = self.energy(full[s], first + r, last)
+            doubled = any(tracks[k][r] is not None and tracks[k][r].note and c.note and
+                          (tracks[k][r].note - c.note) % 12 == 0 for k in range(len(tracks)) if k != s)
+            gain = e * (0.2 if doubled else 1)
+            tail = 0.0
+            if current == p and own is None:
+                i = r
+                while i < n and (i == r or tracks[p][i] is None or tracks[p][i].levels is None):
+                    tail += amplitude(sounding[p][i]) * self.speeds[first + i]
+                    i += 1
+            if own is None and (sounding[p][r] <= QUIET or gain > tail * CUT):
+                merged[r] = c
+                lost += tail if current == p else 0
+                current = s
+            else:
+                lost += gain
+        return lost, merged
 
     def vibratos(self, channel, first):
         """the vibrato of the instruments : effect 4 when its delay is over"""
