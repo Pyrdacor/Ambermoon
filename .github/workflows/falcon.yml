@@ -1,0 +1,82 @@
+# Builds a test release of the Atari Falcon version (AmbermoonFalcon, built from the original source and the ST port in
+# AmbermoonST, see AmbermoonFalcon/PLAN.md). Later the Falcon and ST versions become part of the normal releases
+# (release.yml); until then this workflow makes separate alpha releases.
+#
+# Trigger: a pushed tag falcon-vX.Y[-suffix] (e.g. falcon-v0.1-alpha): the archive is attached to a draft pre-release
+# "Ambermoon Falcon X.Y[-suffix]" of the tag, which is published by hand. By hand (Actions -> falcon -> Run workflow)
+# with a version: only the artifact of the run, no release.
+#
+# vasm is built from its source (version 2.0f, checked with its SHA-256: the server has no https), the package is made
+# by AmbermoonFalcon/package.sh (AMBERFAL.PRG, the game files of the German version 1.20 and README.TXT in one zip).
+
+name: falcon
+
+on:
+  push:
+    tags:
+      - "falcon-v*"
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "The version of the release (X.Y with an optional suffix, e.g. 0.1-alpha)"
+        required: true
+
+permissions:
+  contents: write # the draft release
+
+jobs:
+  falcon:
+    name: Falcon version
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Determine version
+        id: version
+        run: |
+          version="${{ github.event.inputs.version }}"
+          if [ -z "$version" ]; then
+            if [[ ! "${{ github.ref_name }}" =~ ^falcon-v(.+)$ ]]; then
+              echo "::error::'${{ github.ref_name }}' is not a Falcon release tag. Expected falcon-vX.Y, e.g. falcon-v0.1-alpha"
+              exit 1
+            fi
+            version="${BASH_REMATCH[1]}"
+          fi
+          if [[ ! "$version" =~ ^[0-9]+\.[0-9]+(-[a-z]+[0-9]*)?$ ]]; then
+            echo "::error::The version '$version' does not have the form X.Y or X.Y-suffix (e.g. 0.1-alpha)"
+            exit 1
+          fi
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+          echo "Version: $version"
+
+      - name: Build vasm
+        run: |
+          curl -sSfL -o vasm.tar.gz http://phoenix.owl.de/tags/vasm2_0f.tar.gz
+          echo "c84b2de1cbb87831795fe64a85c5d9a7002a766e3a7c30b0a2d7d5e99d878f49  vasm.tar.gz" | sha256sum -c -
+          tar xzf vasm.tar.gz -C "$RUNNER_TEMP"
+          make -C "$RUNNER_TEMP/vasm" CPU=m68k SYNTAX=mot -j"$(nproc)"
+          echo "VASM=$RUNNER_TEMP/vasm/vasmm68k_mot" >> "$GITHUB_ENV"
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+
+      - name: Install Pillow
+        run: pip install pillow
+
+      - name: Build and pack
+        run: sh AmbermoonFalcon/package.sh "${{ steps.version.outputs.version }}" "$GITHUB_WORKSPACE/release"
+
+      - uses: actions/upload-artifact@v6
+        with:
+          name: ambermoon_falcon_${{ steps.version.outputs.version }}
+          path: release/*.zip
+
+      - name: Draft release
+        if: startsWith(github.ref, 'refs/tags/')
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "${{ github.ref_name }}" release/*.zip --draft --prerelease \
+            --title "Ambermoon Falcon ${{ steps.version.outputs.version }}" \
+            --notes-file AmbermoonFalcon/RELEASE_NOTES.md
