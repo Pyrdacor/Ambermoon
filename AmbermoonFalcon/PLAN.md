@@ -61,5 +61,7 @@ test runner of the ST port (`AmbermoonST/port/test/run.py`, `MACHINE=falcon`).
   runs at 50 Hz with Timer C (200 Hz, every 4th interrupt : fades, vertical blank handler, music), the vertical
   blank only shows the colours; while a file is accessed the TOS gets Timer C too (SYSTEM.S, LIBS.S). Test :
   `HATARI_ARGS="--monitor vga"` (the frames of a scenario times 1.2 : Hatari counts 60 frames per second).
+* Memory : 4 MB (the usual Falcon) are enough, tested with a 3D map with floor and ceiling and a combat with
+  zoomed monsters; even 2 MB work. With 1 MB the TOS does not start the program (not enough memory).
 * Open: the graphics unpacked in advance (the data are the original files, the game unpacks them
   itself), the zoom and the 3D maps on the ST (68000 replacements of the 68020 code).
