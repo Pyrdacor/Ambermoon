@@ -604,6 +604,7 @@ class Converter:
         self.sounds = {n: Sound(module, self.real.get(n, n), notes, overrides.get(n))
                        for n, notes in used.items()}
         self.variants = {}                         # (sound, volume step) -> ST instrument number
+        self.step_map = {}                         # volume steps merged (too many instruments)
         self.boost = 0
         self.tracks = self.combine(self.play())
         # the loudest note gets the highest level (on the YM2149 quiet songs sound far away)
@@ -613,10 +614,24 @@ class Converter:
             self.boost = boost
             self.variants = {}
             self.tracks = self.combine(self.play())
-
+        # too many instruments : the volume steps of a sound which are closest become one
+        while len(self.variants) > MAX_INSTRUMENTS:
+            steps = {}
+            for key in self.variants:
+                if len(key) == 2 and key[1] < 15:
+                    steps.setdefault(key[0], []).append(key[1])
+            pairs = [(b - a, -b, n, a, b) for n, st in steps.items() for a, b in zip(sorted(st), sorted(st)[1:])]
+            if not pairs:
+                break
+            _, _, n, a, b = min(pairs)
+            self.step_map[(n, b)] = (n, a)
+            self.variants = {}
+            self.tracks = self.combine(self.play())
     def variant(self, number, volume):
         step = 0 if volume >= 64 else 99 if volume <= 0 else round(-20 * math.log10(volume / 64) / 3)
         key = (number, min(step, 15))
+        while key in self.step_map:
+            key = self.step_map[key]
         if key not in self.variants:
             self.variants[key] = len(self.variants) + 1
         return self.variants[key], key
