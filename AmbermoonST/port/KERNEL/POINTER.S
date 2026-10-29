@@ -86,6 +86,11 @@ Pointer_out_of_work:
 ; NOTE :
 ;   - For routines which copy parts of the shown screen. Calls can be
 ;     nested.
+;   - [ Show_pointer ] draws the pointer again at once (not in the next
+;     vertical blank) : the combat copies its window every frame
+;     ([ Duplicate_block ]), the pointer must not be missing when the frame
+;     is shown (the Falcon shows the whole frame from the memory at the
+;     vertical blank).
 ;*****************************************************************************
 Hide_pointer:
 	movem.l	d0/a2/a3,-(sp)
@@ -100,7 +105,12 @@ Hide_pointer:
 	rts
 
 Show_pointer:
+	move.w	sr,-(sp)
+	ori.w	#$0700,sr
 	subq.b	#1,Pointer_frozen
+	bne.s	.Exit
+	jsr	VBL_pointer		; (draws it into the shown screen)
+.Exit:	move.w	(sp)+,sr
 	rts
 
 ;*****************************************************************************
