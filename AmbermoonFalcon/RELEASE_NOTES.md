@@ -5,8 +5,8 @@ issues.
 **Requirements:** Falcon030 (or Hatari with `--machine falcon`), 4 MB RAM, an RGB monitor, a TV or a VGA monitor,
 and about 6 MB on the hard disk.
 
-**Installation:** unpack the zip, copy the folder `AMBERMOO` to the hard disk and start `AMBERFAL.PRG`. More in
-`README.TXT` in the archive.
+**Installation:** unpack the archive (the zip on a PC, the lzh also directly on the Atari with LHarc/LZH), copy
+the folder `AMBERMOO` to the hard disk and start `AMBERFAL.PRG`. More in `README.TXT` in the archive.
 
 **Not there yet:**
 - The sampled Amiga music: the songs play on the YM2149, 13 of them from the Atari ST version of Ambermoon, 19

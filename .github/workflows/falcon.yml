@@ -7,7 +7,8 @@
 # with a version: only the artifact of the run, no release.
 #
 # vasm is built from its source (version 2.0f, checked with its SHA-256: the server has no https), the package is made
-# by AmbermoonFalcon/package.sh (AMBERFAL.PRG, the game files of the German version 1.20 and README.TXT in one zip).
+# by AmbermoonFalcon/package.sh (AMBERFAL.PRG, the game files of the German version 1.20 and README.TXT, as zip and as
+# lzh for the unpackers of the Atari).
 
 name: falcon
 
@@ -61,8 +62,10 @@ jobs:
         with:
           python-version: "3.12"
 
-      - name: Install Pillow
-        run: pip install pillow
+      - name: Install Pillow and lha
+        run: |
+          pip install pillow
+          sudo apt-get update && sudo apt-get install -y jlha-utils
 
       - name: Build and pack
         run: sh AmbermoonFalcon/package.sh "${{ steps.version.outputs.version }}" "$GITHUB_WORKSPACE/release"
@@ -70,13 +73,15 @@ jobs:
       - uses: actions/upload-artifact@v6
         with:
           name: ambermoon_falcon_${{ steps.version.outputs.version }}
-          path: release/*.zip
+          path: |
+            release/*.zip
+            release/*.lzh
 
       - name: Draft release
         if: startsWith(github.ref, 'refs/tags/')
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          gh release create "${{ github.ref_name }}" release/*.zip --draft --prerelease \
+          gh release create "${{ github.ref_name }}" release/*.zip release/*.lzh --draft --prerelease \
             --title "Ambermoon Falcon ${{ steps.version.outputs.version }}" \
             --notes-file AmbermoonFalcon/RELEASE_NOTES.md
