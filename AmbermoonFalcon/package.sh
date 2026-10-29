@@ -11,6 +11,7 @@ cd "$(dirname "$0")"
 VERSION=$1
 OUT=${2:-build/release}
 [ -n "$VERSION" ] || { echo "usage: ./package.sh <version> [out folder]"; exit 1; }
+rm -rf build/hd			# (no files the game wrote while testing)
 sh build.sh
 PKG=build/package/AMBERMOO
 rm -rf build/package
