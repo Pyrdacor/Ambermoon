@@ -1,6 +1,8 @@
 ; Recolour_block of the Amiga version (KERNEL/GRAPHICS.S, plain CPU code) :
 ; recolours Amiga graphics in memory.
 
+	SECTION	Program,code
+
 ;*****************************************************************************
 ; [ Recolour a block of graphics ]
 ;        d6 - Width in truncs (.w)
