@@ -46,96 +46,6 @@ Get_screen_offset:
 	rts
 
 ;*****************************************************************************
-; [ Clip area stack ]
-;*****************************************************************************
-; [ Push a clip area on the stack ]
-;   IN : a0 - Pointer to CA (.l)
-; All registers are restored
-Push_CA:
-	move.l	a1,-(sp)
-	move.l	CA_Sp,a1
-	addq.l	#4,a1
-	cmp.l	#CA_stack_end,a1
-	beq.s	.Exit
-	move.l	a0,(a1)
-	move.l	a1,CA_Sp
-.Exit:
-	move.l	(sp)+,a1
-	rts
-
-; [ Pop a clip area from the stack ]
-; All registers are restored
-Pop_CA:
-	move.l	a0,-(sp)
-	move.l	CA_Sp,a0
-	cmp.l	#CA_Sp+4,a0
-	beq.s	.Exit
-	subq.l	#4,a0
-	move.l	a0,CA_Sp
-.Exit:
-	move.l	(sp)+,a0
-	rts
-
-; [ Reset the clip area stack ]
-; All registers are restored
-Reset_CA_stack:
-	move.l	a0,-(sp)
-	lea.l	CA_Sp+4,a0
-	move.l	a0,CA_Sp
-	move.l	#Default_CA,(a0)
-	move.l	(sp)+,a0
-	rts
-
-; [ Make the clip masks of the 20 chunks of a line ]
-;   IN : current CA
-; All registers are restored
-; NOTE :
-;   - [ Clip_masks ] : per chunk the visible pixels, [ Clip_Y1 ] / [ Clip_Y2 ].
-Make_clip_masks:
-	movem.l	d0-d5/d7/a0/a1,-(sp)
-	move.l	CA_Sp,a0
-	move.l	(a0),a0
-	move.w	CA_Y1(a0),Clip_Y1
-	move.w	CA_Y2(a0),Clip_Y2
-	move.w	CA_X1(a0),d0
-	move.w	CA_X2(a0),d1
-	cmp.w	Clip_X1_masks,d0		; Masks of these edges made already ?
-	bne.s	.New
-	cmp.w	Clip_X2_masks,d1
-	beq.s	.Done
-.New:	move.w	d0,Clip_X1_masks
-	move.w	d1,Clip_X2_masks
-	lea.l	Clip_masks,a1
-	moveq.l	#0,d2			; Left X of the chunk
-	moveq.l	#20-1,d7
-.Loop:	moveq.l	#0,d3			; Invisible ?
-	move.w	d2,d4
-	addi.w	#15,d4
-	cmp.w	d0,d4
-	blt.s	.Store
-	cmp.w	d1,d2
-	bgt.s	.Store
-	moveq.l	#-1,d3			; Left edge inside ?
-	move.w	d0,d4
-	sub.w	d2,d4
-	ble.s	.No_left
-	lsr.w	d4,d3
-.No_left:	move.w	d1,d4			; Right edge inside ?
-	sub.w	d2,d4
-	cmp.w	#15,d4
-	bge.s	.Store
-	addq.w	#1,d4			; (visible pixels from the left)
-	moveq.l	#-1,d5
-	lsr.w	d4,d5
-	not.w	d5
-	and.w	d5,d3
-.Store:	move.w	d3,(a1)+
-	addi.w	#16,d2
-	dbra	d7,.Loop
-.Done:	movem.l	(sp)+,d0-d5/d7/a0/a1
-	rts
-
-;*****************************************************************************
 ; [ Draw a filled box ]
 ;   IN : d0 - Left X (.w)
 ;        d1 - Top Y (.w)
@@ -241,37 +151,6 @@ Fill_chunk:
 	bra.s	.Exit
 .C3:	and.w	d1,(a1)+
 .Exit:	move.l	(sp)+,d1
-	rts
-
-;*****************************************************************************
-; [ Draw a horizontal / vertical line, plot a pixel ]
-;*****************************************************************************
-; [ Draw a horizontal line ]
-;   IN : d0 - Left X, d1 - Y, d2 - Right X, d4 - Colour (.w)
-Draw_hline:
-	move.l	d3,-(sp)
-	move.w	d1,d3
-	jsr	Draw_box
-	move.l	(sp)+,d3
-	rts
-
-; [ Draw a vertical line ]
-;   IN : d0 - X, d1 - Top Y, d3 - Bottom Y, d4 - Colour (.w)
-Draw_vline:
-	move.l	d2,-(sp)
-	move.w	d0,d2
-	jsr	Draw_box
-	move.l	(sp)+,d2
-	rts
-
-; [ Plot a pixel ]
-;   IN : d0 - X, d1 - Y, d4 - Colour (.w)
-Plot_pixel:
-	movem.l	d2/d3,-(sp)
-	move.w	d0,d2
-	move.w	d1,d3
-	jsr	Draw_box
-	movem.l	(sp)+,d2/d3
 	rts
 
 ; [ Get the colour of a pixel ]
@@ -644,6 +523,99 @@ Put_planes:
 .Off:	move.w	d1,(a1)+
 	dbra	d6,.Plane2
 .Exit:	movem.l	(sp)+,d0/d1/d4/d6/a0
+	rts
+
+;*****************************************************************************
+; [ Put the text line buffer on the work screen ]
+;   IN : d0 - X-coordinate (multiple of 16) (.w)
+;        d1 - Y-coordinate (.w)
+;        d4 - Colour of the screen ([ Get_screen_colour ]) (.w)
+;        d5 - Shift to the right (0 or 1) (.w)
+;        d6 - Number of truncs (.w)
+; All registers are restored
+;*****************************************************************************
+Put_text_buffer:
+	movem.l	d0-d7/a0-a6,-(sp)
+	jsr	Make_clip_masks		; (clipped like the Amiga version)
+	move.w	d1,a4			; Y
+	move.w	d0,d2
+	lsr.w	#3,d2			; (chunk * 2)
+	lea.l	Clip_masks,a5
+	add.w	d2,a5
+	move.l	Work_screen,a1
+	jsr	Get_screen_offset
+	add.l	d2,a1
+	lea.l	Text_line_bit_plane_buffer,a0
+	move.w	d6,d7			; Truncs to draw
+	add.w	d5,d7
+	lsr.w	#4,d0			; Not more than the screen
+	moveq.l	#20,d2
+	sub.w	d0,d2
+	cmp.w	d2,d7
+	ble.s	.Ok
+	move.w	d2,d7
+.Ok:	subq.w	#1,d7
+	bmi	.Exit
+	move.w	#200,d3			; Lines
+	sub.w	d1,d3
+	ble	.Exit
+	cmp.w	#Char_height,d3
+	ble.s	.Ok2
+	moveq.l	#Char_height,d3
+.Ok2:	subq.w	#1,d3
+.Line:	cmpa.w	Clip_Y1,a4		; Line visible ?
+	blt	.Skip_line
+	cmpa.w	Clip_Y2,a4
+	bgt	.Skip_line
+	move.l	a0,a2
+	move.l	a1,a3
+	move.l	a5,-(sp)
+	moveq.l	#0,d2			; Previous word
+	move.w	d7,d0
+	move.w	d6,a6			; Words left in the buffer line
+.Trunc:	swap	d2			; Previous word -> high word
+	clr.w	d2
+	cmp.w	#0,a6
+	ble.s	.Empty
+	move.w	(a2)+,d2
+	subq.w	#1,a6
+.Empty:	move.l	d2,d1			; Mask
+	lsr.l	d5,d1
+	and.w	(a5)+,d1			; Clip
+	btst	#0,d4			; Plane 0
+	beq.s	.C0
+	or.w	d1,(a3)+
+	bra.s	.P1
+.C0:	not.w	d1
+	and.w	d1,(a3)+
+	not.w	d1
+.P1:	btst	#1,d4			; Plane 1
+	beq.s	.C1
+	or.w	d1,(a3)+
+	bra.s	.P2
+.C1:	not.w	d1
+	and.w	d1,(a3)+
+	not.w	d1
+.P2:	btst	#2,d4			; Plane 2
+	beq.s	.C2
+	or.w	d1,(a3)+
+	bra.s	.P3
+.C2:	not.w	d1
+	and.w	d1,(a3)+
+	not.w	d1
+.P3:	btst	#3,d4			; Plane 3
+	beq.s	.C3
+	or.w	d1,(a3)+
+	bra.s	.Next
+.C3:	not.w	d1
+	and.w	d1,(a3)+
+.Next:	dbra	d0,.Trunc
+	move.l	(sp)+,a5
+.Skip_line:	lea.l	40(a0),a0			; Next line
+	lea.l	ST_bytes_per_line(a1),a1
+	addq.w	#1,a4
+	dbra	d3,.Line
+.Exit:	movem.l	(sp)+,d0-d7/a0-a6
 	rts
 
 ;*****************************************************************************
@@ -1094,25 +1066,10 @@ Clear_1plane_block:
 Show_MOVEP_screen:
 	rts
 
-	include	ST_KERNEL/RECOLOUR.S	; (Recolour_block of the Amiga version)
-
 	SECTION	Fast_DATA,data
-Clip_X1_masks:	dc.w -1			; (the edges of Clip_masks : none yet)
-Clip_X2_masks:	dc.w -1
-Default_CA:
-	dc.w	0		; Rect.Left
-	dc.w	$13f		; Rect.Right
-	dc.w	0		; Rect.Top
-	dc.w	$c7		; Rect.Bottom
 Cache_free:	dc.l Cache_pool
 
 	SECTION	Fast_BSS,bss
-CA_Sp:	ds.b 52
-CA_stack_end:
-Pixel_buffer:	ds.b 16
-Clip_masks:	ds.w 20
-Clip_Y1:	ds.w 1
-Clip_Y2:	ds.w 1
 Blit_mode:	ds.w 1
 Blit_X:	ds.w 1
 Blit_Y:	ds.w 1

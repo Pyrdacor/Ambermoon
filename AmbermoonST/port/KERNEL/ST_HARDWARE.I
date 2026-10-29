@@ -1,11 +1,7 @@
-; Atari ST/STE hardware registers and system vectors
+; Atari hardware registers and system vectors (ST, STE and Falcon)
+; The video hardware is in VIDEO.I (the Falcon version has its own).
 
-; ---------- Video (Shifter) -------------------------
-Video_base_high	EQU	$ffff8201
-Video_base_mid	EQU	$ffff8203
-Video_resolution	EQU	$ffff8260
-Video_sync	EQU	$ffff820a	; Bit 1 : 50 Hz
-Palette_regs	EQU	$ffff8240
+	include	ST_KERNEL/VIDEO.I
 
 ; ---------- MFP 68901 -------------------------------
 MFP_IERA	EQU	$fffffa07	; Interrupt enable A (bit 0 = Timer B)
@@ -30,10 +26,6 @@ ACIA_midi_data	EQU	$fffffc06
 Vec_VBL	EQU	$70
 Vec_ACIA	EQU	$118
 Vec_Timer_B	EQU	$120
-
-; ---------- Screen ----------------------------------
-ST_bytes_per_line	EQU	160
-ST_screen_size	EQU	32000
 
 ; ---------- GEMDOS / BIOS / XBIOS -------------------
 GEMDOS	EQU	1

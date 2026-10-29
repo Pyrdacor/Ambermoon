@@ -16,8 +16,8 @@
 ;     where it is and is erased from the copy afterwards ([ Copy_screen ]).
 ; Meanwhile the vertical blank handler leaves the pointer alone
 ; ([ Pointer_frozen ]). The graphic comes from [ Set_mouse_pointer_gfx ]
-; (MOUSE.S) : mask and 4 planes per line, the colours are the Amiga colours
-; 24-31 (their fixed ST colours, see GRAPHICS.S).
+; (MOUSE.S, the colours are the Amiga colours 24-31). Drawing the pointer and
+; its background is done by SPRITE.S (the screen format).
 
 	SECTION	Program,code
 
@@ -121,14 +121,7 @@ Pointer_out_of_copy:
 	tst.b	Rec_drawn(a2)
 	beq.s	.Exit
 	move.l	Work_screen,a0
-	add.l	Rec_offset(a2),a0
-	move.w	Rec_height(a2),d7
-	lea.l	Rec_data(a2),a1
-	subq.w	#1,d7
-.Line:	movem.l	(a1)+,d0-d3
-	movem.l	d0-d3,(a0)
-	lea.l	ST_bytes_per_line(a0),a0
-	dbra	d7,.Line
+	jsr	Put_pointer_background
 .Exit:	movem.l	(sp)+,d0-d7/a0-a3
 	rts
 
@@ -170,85 +163,6 @@ Pointer_position:
 	rts
 
 ;*****************************************************************************
-; [ Draw the mouse pointer ]
-;   IN : d0 - Left X (.w)
-;        d1 - Top Y (.w)
-;        a2 - Pointer to the save record of the screen (.l)
-;        a3 - Pointer to screen (.l)
-; All registers are restored
-;*****************************************************************************
-Draw_pointer:
-	movem.l	d0-d7/a0-a2,-(sp)
-	move.w	d0,Rec_X(a2)
-	move.w	d1,Rec_Y(a2)
-	lea.l	ST_pointer_gfx,a1
-	moveq.l	#16,d7			; Clip vertically
-	tst.w	d1
-	bpl.s	.Top
-	add.w	d1,d7
-	ble	.Exit
-	neg.w	d1
-	mulu.w	#10,d1
-	add.w	d1,a1
-	moveq.l	#0,d1
-.Top:	move.w	#Screen_height,d2
-	sub.w	d1,d2
-	ble	.Exit
-	cmp.w	d2,d7
-	ble.s	.Height
-	move.w	d2,d7
-.Height:	tst.w	d0			; Clip horizontally (whole chunks)
-	bpl.s	.Left
-	moveq.l	#0,d0
-.Left:	cmp.w	#320-32,d0
-	ble.s	.Right
-	move.w	#320-32,d0
-.Right:	mulu.w	#ST_bytes_per_line,d1	; Offset in the screen
-	move.w	d0,d2
-	lsr.w	#4,d2
-	lsl.w	#3,d2
-	add.w	d2,d1
-	move.l	d1,Rec_offset(a2)
-	move.w	d7,Rec_height(a2)
-	st	Rec_drawn(a2)
-	lea.l	Rec_data(a2),a2
-	move.l	a3,a0
-	add.l	d1,a0
-	andi.w	#15,d0			; Shift
-	subq.w	#1,d7
-.Line:	movem.l	(a0),d1-d4		; Save background (2 chunks)
-	movem.l	d1-d4,(a2)
-	lea.l	16(a2),a2
-	moveq.l	#0,d1			; Mask
-	move.w	(a1)+,d1
-	swap	d1
-	lsr.l	d0,d1
-	not.l	d1
-	moveq.l	#4-1,d6			; 4 planes
-.Plane:	moveq.l	#0,d2
-	move.w	(a1)+,d2
-	swap	d2
-	lsr.l	d0,d2
-	move.w	(a0),d3			; Left chunk
-	swap	d1
-	and.w	d1,d3
-	swap	d2
-	or.w	d2,d3
-	move.w	d3,(a0)
-	move.w	8(a0),d3			; Right chunk
-	swap	d1
-	and.w	d1,d3
-	swap	d2
-	or.w	d2,d3
-	move.w	d3,8(a0)
-	addq.l	#2,a0
-	dbra	d6,.Plane
-	lea.l	ST_bytes_per_line-8(a0),a0
-	dbra	d7,.Line
-.Exit:	movem.l	(sp)+,d0-d7/a0-a2
-	rts
-
-;*****************************************************************************
 ; [ Restore the background of the mouse pointer ]
 ;   IN : a2 - Pointer to the save record of the screen (.l)
 ; All registers are restored
@@ -256,18 +170,11 @@ Draw_pointer:
 Restore_pointer:
 	tst.b	Rec_drawn(a2)		; Drawn ?
 	beq.s	.Exit
-	movem.l	d0-d7/a0/a1,-(sp)
+	move.l	a0,-(sp)
 	sf	Rec_drawn(a2)
 	move.l	Rec_screen(a2),a0
-	add.l	Rec_offset(a2),a0
-	move.w	Rec_height(a2),d7
-	lea.l	Rec_data(a2),a1
-	subq.w	#1,d7
-.Line:	movem.l	(a1)+,d0-d3
-	movem.l	d0-d3,(a0)
-	lea.l	ST_bytes_per_line(a0),a0
-	dbra	d7,.Line
-	movem.l	(sp)+,d0-d7/a0/a1
+	jsr	Put_pointer_background
+	move.l	(sp)+,a0
 .Exit:	rts
 
 ; Save record of a screen
@@ -279,7 +186,7 @@ Rec_X:	rs.w 1			; Position of the pointer
 Rec_Y:	rs.w 1
 Rec_drawn:	rs.b 1			; The pointer is in this screen
 	rseven
-Rec_data:	rs.b 16*16			; 16 lines * 2 chunks
+Rec_data:	rs.b Pointer_save_size		; (VIDEO.I)
 Rec_size:	rs.b 0
 
 	SECTION	Fast_BSS,bss

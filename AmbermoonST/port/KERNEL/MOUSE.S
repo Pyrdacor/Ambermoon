@@ -202,27 +202,13 @@ Reset_Mptr_stack:
 ; NOTE :
 ;   - The sprite data is double buffered.
 ;*****************************************************************************
-Set_mouse_pointer_gfx:			; ST: converted to the ST format
-	movem.l	d0-d3/d7/a0/a1,-(sp)
+Set_mouse_pointer_gfx:			; ST: converted to the format of the
+	move.l	a0,-(sp)			;  screen (SPRITE.S)
 	move.w	(a0)+,Mouse_hotspot_X
 	move.w	(a0)+,Mouse_hotspot_Y
-	lea.l	ST_pointer_gfx,a1		; Mask, 4 planes per line
-	moveq.l	#16-1,d7
-.Loop:	movem.w	(a0)+,d0-d2		; Planes 0-2 (colours 24-31)
-	move.w	d0,d3			; Mask = plane 3
-	or.w	d1,d3
-	or.w	d2,d3
-	move.w	d3,(a1)+
-	move.w	d2,-(sp)			; Plane 0 = a0 & ~a2 (the ST colours
-	not.w	(sp)			;  of the UI colours, see GRAPHICS.S)
-	and.w	(sp)+,d0
-	move.w	d0,(a1)+
-	move.w	d1,(a1)+
-	move.w	d2,(a1)+
-	move.w	d3,(a1)+
-	dbra	d7,.Loop
+	jsr	Convert_pointer_gfx
 	st	Pointer_changed		; (drawn again by the next VBL)
-	movem.l	(sp)+,d0-d3/d7/a0/a1
+	move.l	(sp)+,a0
 	rts
 
 ;*****************************************************************************
@@ -464,5 +450,3 @@ Mev_buffer:
 Mouse_buffer_end:			; ST: the end of the buffer (in the Amiga
 	ds.b	1			;  version the next object, see TEXT.S)
 	even
-ST_pointer_gfx:			; ST: mouse pointer (mask, 4 planes) * 16 lines
-	ds.w	16*5

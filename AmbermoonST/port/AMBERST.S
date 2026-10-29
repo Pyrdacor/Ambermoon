@@ -99,12 +99,19 @@
 	include	KERNEL/BUFFERS.S
 
 ; ---------- ST kernel ----------------------------
+; (VIDEO, RASTER, GRAPHICS and SPRITE depend on the video hardware : the
+; Falcon version has its own, the other files are common.)
 	include	ST_KERNEL/START.S		; ST:
 	include	ST_KERNEL/SYSTEM.S		; ST:
+	include	ST_KERNEL/VIDEO.S		; ST:
 	include	ST_KERNEL/COLOURS.S		; ST:
+	include	ST_KERNEL/RASTER.S		; ST:
 	include	ST_KERNEL/MOUSE.S		; ST:
 	include	ST_KERNEL/POINTER.S		; ST:
+	include	ST_KERNEL/SPRITE.S		; ST:
+	include	ST_KERNEL/CLIP.S		; ST:
 	include	ST_KERNEL/GRAPHICS.S		; ST:
+	include	ST_KERNEL/RECOLOUR.S		; ST: (Recolour_block of the Amiga version)
 	include	ST_KERNEL/TEXT.S		; ST:
 	include	ST_KERNEL/IKBD.S		; ST:
 	include	ST_KERNEL/LIBS.S		; ST:
