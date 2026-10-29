@@ -90,7 +90,7 @@
 	include	KERNEL/CHIP_DATA.S
 	include	KERNEL/CHIP_BSS.S
 	include	KERNEL/FILES2.S
-;include	MAP/3D_RENDER.S		; ST: replaced by the ST kernel
+;include	MAP/3D_RENDER.S		; ST: replaced by the ST kernel (3D.S)
 ;include	MUSIC/SONIC_ARRANGER.S		; ST: replaced by the ST kernel
 ;include	KERNEL/ZOOM.S		; ST: replaced by the ST kernel
 	include	KERNEL/TEXTS.S
@@ -117,3 +117,4 @@
 	include	ST_KERNEL/LIBS.S		; ST:
 	include	ST_KERNEL/MUSIC.S		; ST:
 	include	ST_KERNEL/STUBS.S		; ST: (stage 1)
+	include	ST_KERNEL/3D.S		; ST: (the 3D renderer : MAP/3D_RENDER.S on the Falcon)

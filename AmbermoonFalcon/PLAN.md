@@ -50,5 +50,10 @@ test runner of the ST port (`AmbermoonST/port/test/run.py`, `MACHINE=falcon`).
 * Colour ranges (one colour in every line : the gradient behind the portraits, the sky of the cities) : every
   line gets its own colour from the end of the 256 colours downwards (RASTER.S), the graphics routines draw the
   pixels of the colour of the range in the colour of the line.
+* 3D maps (dungeons, cities with sky, horizon and stars) : the CPU renderer of the original
+  (`MAP/3D_RENDER.S`) runs on the 68030 as it is (`KERNEL/3D.S`, the ST kernel has stubs in its `3D.S`), it
+  draws the 3D view into the MOVEP screen (4 planes), `Show_MOVEP_screen` (GRAPHICS.S) puts it on the screen
+  with the bank of the line and the sky range. Tested by starting a test copy of the data in a 3D map (the
+  position in the `Party_data.sav` files, `AmbermoonST/port/test/set_start.py`, e.g. map 416 at 28,11).
 * Open: VGA monitors (no 50 Hz modes), the graphics unpacked in advance (the data are the original files, the game unpacks them
-  itself), everything the ST port does not have yet (combat, 3D maps).
+  itself), the zoom of the combat monsters, the 3D maps on the ST (68000 replacements of the 68020 code).

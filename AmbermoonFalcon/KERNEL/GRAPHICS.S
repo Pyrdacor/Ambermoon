@@ -809,11 +809,97 @@ Duplicate_block:
 	rts
 
 ; [ Clear a block in one plane of the work screen ] (3D map)
+; NOTE :
+;   - Only used for plane 4 of the 3D view, which [ Show_MOVEP_screen ] has
+;     cleared already.
 Clear_1plane_block:
 	rts
 
-; [ Show a MOVEP screen ] (3D map)
+;*****************************************************************************
+; [ Copy MOVEP graphics to the work screen ] (the 3D view)
+;   IN : d0 - X-coordinate (a multiple of 16) (.w)
+;        d1 - Y-coordinate (.w)
+;        d6 - Width in truncs (.w)
+;        d7 - Height in pixels (.w)
+;        a0 - Pointer to MOVEP graphics (.l)
+; All registers are restored
+; NOTE :
+;   - MOVEP graphics store 4 planes interleaved per byte : 8 pixels are 4
+;     bytes, the planes 0-3. The pixels get colours 0-15 (plane 4 is
+;     cleared : on the Amiga [ Clear_1plane_block ] does this for the sky,
+;     the rest of the 3D view has plane 4 clear anyway), the planes 5-7 are
+;     the bank of the line, the colour of a range (the sky) gets the colour
+;     of the line. Not clipped, like the Amiga version.
+;*****************************************************************************
 Show_MOVEP_screen:
+	movem.l	d0-d7/a0-a6,-(sp)
+	tst.w	d6
+	ble	.Exit
+	tst.w	d7
+	ble	.Exit
+	cmp.w	#Max_chunks,d6
+	ble.s	.Width_ok
+	moveq.l	#Max_chunks,d6
+.Width_ok:	move.w	d6,Blit_width		; (for Fix_range_line)
+	move.l	Work_screen,a5		; Screen line
+	jsr	Get_screen_offset
+	add.l	d2,a5
+	move.l	a0,a4			; (MOVEP graphics)
+	jsr	Get_line_banks		; Bank & range of the line
+	lea.l	0(a0,d1.w),a6
+	subq.w	#1,d7
+.Line:	move.b	Line_range_colour-Line_banks(a6),d0	; (a range on the line ?)
+	ext.w	d0
+	move.w	d0,Range_colour
+	moveq.l	#0,d0
+	move.b	Line_range_index-Line_banks(a6),d0
+	move.w	d0,Range_index
+	move.b	(a6)+,d0			; Planes 5-7 : the bank
+	moveq.l	#0,d3
+	moveq.l	#0,d4
+	moveq.l	#0,d5
+	lsr.b	#1,d0
+	bcc.s	.B5
+	moveq.l	#-1,d3
+.B5:	lsr.b	#1,d0
+	bcc.s	.B6
+	moveq.l	#-1,d4
+.B6:	lsr.b	#1,d0
+	bcc.s	.B7
+	moveq.l	#-1,d5
+.B7:	lea.l	Line_chunks,a0		; Decode the line
+	move.w	d6,d2
+	subq.w	#1,d2
+.Chunk:	move.w	#-1,(a0)+			; (all pixels)
+	moveq.l	#4-1,d1			; Planes 0-3 : the byte of the
+.Plane:	move.b	(a4),d0			;  left 8 pixels, the byte of the
+	lsl.w	#8,d0			;  right 8 pixels 4 bytes later
+	move.b	4(a4),d0
+	move.w	d0,(a0)+
+	addq.l	#1,a4
+	dbra	d1,.Plane
+	addq.l	#4,a4
+	clr.w	(a0)+			; Plane 4
+	move.w	d3,(a0)+			; Planes 5-7
+	move.w	d4,(a0)+
+	move.w	d5,(a0)+
+	dbra	d2,.Chunk
+	lea.l	Line_chunks,a0
+	tst.w	Range_colour
+	bmi.s	.No_range
+	jsr	Fix_range_line
+.No_range:	move.l	a5,a1			; Put the line on the screen
+	move.w	d6,d2
+	subq.w	#1,d2
+.Copy:	addq.l	#2,a0			; (pixels)
+	move.l	(a0)+,(a1)+
+	move.l	(a0)+,(a1)+
+	move.l	(a0)+,(a1)+
+	move.l	(a0)+,(a1)+
+	dbra	d2,.Copy
+	lea.l	Screen_bytes_per_line(a5),a5
+	dbra	d7,.Line
+.Exit:	movem.l	(sp)+,d0-d7/a0-a6
 	rts
 
 Max_chunks	EQU	32			; (widest block, in truncs)
