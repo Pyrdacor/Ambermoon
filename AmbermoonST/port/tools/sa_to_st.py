@@ -96,14 +96,21 @@ def signed(b):
 # the start, then the tone) / 'tone', 'noise' : period of the noise (1 bright - 31 dark), 'octave' : +-n,
 # 'volume' : +-YM levels, 'drop' : True (left out), 'length' : ticks (the notes are cut), 'echo' : (rows, levels
 # quieter[, repeats]), 'sweep' : semitones per tick at the start, 'chord' : semitones (arpeggio), 'arp_speed' :
-# ticks - 1 per note of the arpeggio, 'vibrato' : (parameter, delay in ticks), 'hit_ticks' : ticks of noise}},
+# ticks - 1 per note of the arpeggio, 'vibrato' : (parameter, delay in ticks), 'hit_ticks' : ticks of noise,
+# 'envelope' : YM levels per tick, 'attack' : ticks (soft start)}}, 'track_instruments' : {track : {number : the same for the instrument in
+# this track}},
 # 'keep' : tracks (1-4) which are never left out, 'keep_echoes' : True (quiet repeated notes are played),
-# 'chords' : tracks (1-4) played in one channel, the notes which sound together as an arpeggio
+# 'chords' : tracks (1-4) played in one channel, the notes which sound together as an arpeggio, 'boost' : YM levels
+# for all notes (else the loudest note gets the highest level)
 OVERRIDES = {
     1: {'instruments': {4: {'kind': 'hit', 'noise': 4, 'octave': -1, 'length': 6},       # RobotHit02 : a pickaxe
                         3: {'kind': 'hit', 'noise': 31, 'hit_ticks': 1, 'length': 12, 'volume': -2},  # Trommel
                         2: {'volume': -2}}},
-    13: {'instruments': {4: {'octave': 1, 'volume': -2}}},              # Deephorns : droning
+    13: {'keep': (3,), 'boost': 0, 'instruments': {                                 # not too much like a chip tune
+        4: {'octave': 1, 'volume': -3, 'attack': 10, 'vibrato': False},    # Deephorns : soft, not droning
+        3: {'vibrato': False, 'volume': -2},                            # LongLead : the melody in the middle
+        1: {'attack': 4, 'vibrato': False, 'volume': -2},               # SynthVoice : the accent at the start
+        2: {'octave': 1, 'volume': -3, 'length': 20, 'vibrato': False}}},  # Hole2 : the bass, not droning
     19: {'instruments': {4: {'kind': 'hit'}}},                          # XNSRadiator09 : a strike
     20: {'instruments': {1: {'kind': 'hit', 'noise': 6, 'hit_ticks': 2, 'octave': 1, 'volume': 2},  # the guitar
                          2: {'octave': 1, 'volume': 2},                 # (a witch's broom : not dull)
@@ -327,6 +334,8 @@ class Sound:
         self.hit_ticks = override.get('hit_ticks', HIT)
         self.vibrato_override = override.get('vibrato')
         self.arp_speed = override.get('arp_speed', 0)  # ticks - 1 per note of the arpeggio
+        self.envelope = override.get('envelope')  # YM levels per tick (instead of the Amiga instrument)
+        self.attack = override.get('attack', 0)   # ticks : the notes begin softly
         self.shape = None                         # amplitude of the sample in every tick (None : synth)
         if ins is None:
             self.period = 32
@@ -475,12 +484,18 @@ class Sound:
         """the YM levels of a note with the volume (0..64), in every tick"""
         if self.ins is None:
             return [0]
+        if self.envelope:
+            off = ym_level(volume / 64) - 15 + self.volume
+            return [max(0, min(15, e + off)) if e else 0 for e in self.envelope]
         vols = adsr_volumes(self.ins, module.adsr, volume, ticks)
         if self.shape is not None:
             vols = [v * (self.shape[t] if t < len(self.shape) else 0) for t, v in enumerate(vols)]
         if self.length:
             vols = vols[:self.length] + [0] * (ticks - self.length)
-        return [max(0, min(15, lv + self.volume)) if lv else 0 for lv in (ym_level(v / 64) for v in vols)]
+        out = [max(0, min(15, lv + self.volume)) if lv else 0 for lv in (ym_level(v / 64) for v in vols)]
+        for t in range(min(self.attack, len(out))):
+            out[t] = max(0, out[t] - round((self.attack - t) * 10 / self.attack))
+        return out
 
     def vibrato(self, st_note):
         """the parameter of the vibrato effect of the ST player and the delay in ticks (None : no vibrato)"""
@@ -515,9 +530,18 @@ class Converter:
         self.keep = {k - 1 for k in override.get('keep', ())}
         self.keep_echoes = override.get('keep_echoes', False)
         self.chord_tracks = [k - 1 for k in override.get('chords', ())]
-        self.dropped = {n for n, o in override.get('instruments', {}).items() if o.get('drop')}
-        self.echoes = {n: o['echo'] for n, o in override.get('instruments', {}).items() if o.get('echo')}
+        # an instrument with other overrides in a track : another sound (number 100 * track + instrument)
+        overrides = dict(override.get('instruments', {}))
+        self.real = {}
+        for track, instruments in override.get('track_instruments', {}).items():
+            for n, o in instruments.items():
+                self.real[100 * track + n] = n
+                overrides[100 * track + n] = o
+        self.dropped = {n for n, o in overrides.items() if o.get('drop')}
+        self.echoes = {n: o['echo'] for n, o in overrides.items() if o.get('echo')}
         rows, self.restart, self.speed = module.rows()
+        rows = [[(note, 100 * (t + 1) + ins if 100 * (t + 1) + ins in self.real else ins, cmd, param)
+                 for t, (note, ins, cmd, param) in enumerate(row)] for row in rows]
         self.rows = rows
         used = {}
         current = [0] * 4
@@ -527,15 +551,16 @@ class Converter:
                     current[t] = ins
                 if 0 < note < 0x7f and current[t]:
                     used.setdefault(current[t], []).append(note)
-        self.sounds = {n: Sound(module, n, notes, override.get('instruments', {}).get(n))
+        self.sounds = {n: Sound(module, self.real.get(n, n), notes, overrides.get(n))
                        for n, notes in used.items()}
         self.variants = {}                         # (sound, volume step) -> ST instrument number
         self.boost = 0
         self.tracks = self.combine(self.play())
         # the loudest note gets the highest level (on the YM2149 quiet songs sound far away)
         peak = max((max(c.levels) for t in self.tracks for c in t if c is not None and c.levels), default=15)
-        if 0 < peak < 15:
-            self.boost = 15 - peak
+        boost = override.get('boost', 15 - peak if 0 < peak < 15 else 0)
+        if boost:
+            self.boost = boost
             self.variants = {}
             self.tracks = self.combine(self.play())
 
@@ -576,10 +601,11 @@ class Converter:
                 s = state[t]
                 start = False
                 if ins and (note == 0 or 0 < note < 0x7f):
-                    if 0 < ins <= len(self.module.instruments):
+                    real = self.real.get(ins, ins)
+                    if 0 < real <= len(self.module.instruments):
                         s['ins'] = ins
-                        s['volume'] = self.module.instruments[ins - 1].volume
-                        s['porta'] = self.module.instruments[ins - 1].porta
+                        s['volume'] = self.module.instruments[real - 1].volume
+                        s['porta'] = self.module.instruments[real - 1].porta
                     start = True
                 if note == 0x7f:
                     s['ins'] = 0
