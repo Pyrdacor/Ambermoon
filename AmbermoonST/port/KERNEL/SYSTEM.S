@@ -18,6 +18,7 @@
 Init_system:
 	movem.l	d0-d7/a0-a6,-(sp)
 	dc.w	$a00a			; Line-A : hide mouse
+	jsr	Find_CPU
 ; ---------- Screens ------------------------------
 	jsr	Init_screens
 	jsr	Init_video
@@ -44,6 +45,31 @@ Init_system:
 	move.w	(sp)+,sr
 	jsr	My_vsync
 	movem.l	(sp)+,d0-d7/a0-a6
+	rts
+
+;*****************************************************************************
+; [ Find the processor ]
+; All registers are restored
+; NOTE :
+;   - [ CPU_68020_plus ] is set from the cookie "_CPU" of the TOS (20, 30, ...
+;     on a 68020 or better, e.g. the Falcon) : like the Amiga version with
+;     the AttnFlags (the floor and ceiling textures of the 3D maps).
+;*****************************************************************************
+Find_CPU:
+	movem.l	d0/a0,-(sp)
+	sf	CPU_68020_plus
+	move.l	$5a0.w,d0		; Cookie jar
+	beq.s	.Exit
+	move.l	d0,a0
+.Loop:	move.l	(a0)+,d0			; End ?
+	beq.s	.Exit
+	cmp.l	#'_CPU',d0
+	beq.s	.Found
+	addq.l	#4,a0
+	bra.s	.Loop
+.Found:	cmp.l	#20,(a0)			; 68020 or better ?
+	scc	CPU_68020_plus
+.Exit:	movem.l	(sp)+,d0/a0
 	rts
 
 ;*****************************************************************************
