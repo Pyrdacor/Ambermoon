@@ -1,0 +1,48 @@
+diff -ru a/COMBAT/COMBAT.S b/COMBAT/COMBAT.S
+--- a/COMBAT/COMBAT.S
++++ b/COMBAT/COMBAT.S
+@@ -276,7 +276,7 @@
+ 	LOCAL
+ ; ---------- Do -----------------------------------
+ 	jsr	Update_control_status	; Set control status
+-	move.l	#2*Combat_height*Bytes_per_line,d0	; Make zoom screen
++	move.l	#2*Combat_height*Dummy_bytes_per_line,d0	; ST: (the line of the screen)	; Make zoom screen
+ 	jsr	Allocate_CHIP
+ 	move.b	d0,Combat_zoom_screen_handle
+ 	clr.w	Nr_apres_objects		; Initialize apres pool
+diff -ru a/COMBAT/COMOBS.S b/COMBAT/COMOBS.S
+--- a/COMBAT/COMOBS.S
++++ b/COMBAT/COMOBS.S
+@@ -146,7 +146,7 @@
+ ; ---------- Display all COMOBs -------------------
+ 	Get	Combat_zoom_screen_handle,a0	; Set pointers
+ 	move.l	a0,Zoomscreen1_ptr
+-	lea.l	Combat_height*Bytes_per_line(a0),a0
++	lea.l	Combat_height*Dummy_bytes_per_line(a0),a0	; ST: (the line of the screen)
+ 	move.l	a0,Zoomscreen2_ptr
+ 	Free	Combat_zoom_screen_handle
+ 	tst.b	Complete_update		; Update all ?
+diff -ru a/HULL/CONTROLS.S b/HULL/CONTROLS.S
+--- a/HULL/CONTROLS.S
++++ b/HULL/CONTROLS.S
+@@ -1266,7 +1266,7 @@
+ 	mulu.w	#5*(Char_height+1),d0
+ 	jsr	Allocate_CHIP
+ 	move.b	d0,d4
+-	move.l	#(Char_height+1)*Bytes_per_line,d0	; Make dummy screen
++	move.l	#(Char_height+1)*Dummy_bytes_per_line,d0	; ST: (the line of the screen)	; Make dummy screen
+ 	jsr	Allocate_CHIP
+ 	jsr	Clear_memory
+ 	move.w	d0,-(sp)
+diff -ru a/INVENTOR.S b/INVENTOR.S
+--- a/INVENTOR.S
++++ b/INVENTOR.S
+@@ -3046,7 +3046,7 @@
+ 	opt	o4+
+ 	jsr	Allocate_CHIP
+ 	move.b	d0,d4
+-	move.l	#24*Bytes_per_line,d0	; Make dummy screen
++	move.l	#24*Dummy_bytes_per_line,d0	; ST: (the line of the screen)	; Make dummy screen
+ 	jsr	Allocate_CHIP
+ 	jsr	Clear_memory
+ 	move.w	d0,-(sp)

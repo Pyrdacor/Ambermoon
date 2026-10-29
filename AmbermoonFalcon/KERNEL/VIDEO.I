@@ -26,6 +26,10 @@ Mode_VERTFLAG	EQU	$0100		; (VGA : every line twice)
 Screen_bytes_per_line	EQU	320
 Screen_size	EQU	64000
 Chunk_bytes	EQU	16
+; The dummy screens of the original (text, items and combat are drawn there
+; and taken with Get_block) : the line of the Falcon is longer than the
+; Amiga line.
+Dummy_bytes_per_line	EQU	Screen_bytes_per_line
 
 ; ---------- Mouse pointer ---------------------------
 Pointer_save_size	EQU	16*32		; Background : 16 lines * 2 chunks
