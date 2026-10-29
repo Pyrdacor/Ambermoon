@@ -14,7 +14,8 @@
 ; [ Get_line_banks ] gives the bank, the range colour and its colour on the
 ; screen for every line (from the raster list of the module), [ Render_raster ]
 ; puts the (faded) colours of [ Current_RL ] at the same places of the shadow
-; palette, the next vertical blank copies it into the VIDEL ([ Raster_VBL ]).
+; palette and copies it into the VIDEL at once (it runs in the vertical blank :
+; the colours change with the same frame as a screen switch, see there).
 
 	SECTION	Program,code
 
@@ -28,7 +29,7 @@ Init_raster:
 	move.w	#256-1,d7
 .Loop:	clr.l	(a0)+
 	dbra	d7,.Loop
-	st	Palette_dirty
+	jsr	Copy_palette
 	move.l	#-1,Banks_RL
 	movem.l	(sp)+,d7/a0
 	rts
@@ -92,8 +93,10 @@ Place_RL_entry:
 ; [ Make the colours of the banks from Current_RL ]
 ; All registers are restored
 ; NOTE :
-;   - Called by [ Colour_handler ] in the vertical blank. The next vertical
-;     blank shows them.
+;   - Called by [ Colour_handler ] in the vertical blank. The colours go into
+;     the VIDEL at once : a fade starts like [ Fade_in_bottom ] (set the fade,
+;     wait for the vertical blank, switch the screens), the new screen must
+;     not be shown with the colours of the old one for a frame.
 ;*****************************************************************************
 Render_raster:
 	movem.l	d0-d7/a0-a3,-(sp)
@@ -130,7 +133,7 @@ Render_raster:
 .Skip:	add.w	d1,d1			; (no room)
 	add.w	d1,a0
 	bra.s	.Loop
-.End:	st	Palette_dirty
+.End:	jsr	Copy_palette
 	movem.l	(sp)+,d0-d7/a0-a3
 	rts
 
@@ -162,12 +165,17 @@ Amiga_to_videl:
 
 ;*****************************************************************************
 ; [ Raster handling in the vertical blank ]
-; The colours made by [ Render_raster ] are copied into the VIDEL.
+; NOTE :
+;   - Nothing to do : [ Render_raster ] sets the colours.
 ;*****************************************************************************
 Raster_VBL:
-	tst.b	Palette_dirty
-	beq.s	.Exit
-	sf	Palette_dirty
+	rts
+
+;*****************************************************************************
+; [ Copy the shadow palette into the VIDEL ]
+; All registers are restored
+;*****************************************************************************
+Copy_palette:
 	movem.l	d7/a0/a1,-(sp)
 	lea.l	Shadow_palette,a0
 	lea.l	Videl_palette,a1
@@ -178,7 +186,7 @@ Raster_VBL:
 	move.l	(a0)+,(a1)+
 	dbra	d7,.Loop
 	movem.l	(sp)+,d7/a0/a1
-.Exit:	rts
+	rts
 
 ;*****************************************************************************
 ; [ Get the colour of the screen for an Amiga colour ]
@@ -297,8 +305,6 @@ Nibble_to_videl:
 
 	SECTION	Fast_BSS,bss
 Banks_RL:	ds.l 1
-Palette_dirty:	ds.b 1
-	even
 Line_banks:	ds.b Screen_height		; (these three one after the other)
 Line_range_colour:	ds.b Screen_height
 Line_range_index:	ds.b Screen_height
