@@ -39,3 +39,14 @@ is a fix for both versions.
 
 Hatari as Falcon (`--machine falcon`), EmuTOS of the Hatari folder (the 1 MB image supports the Falcon), the
 test runner of the ST port (`AmbermoonST/port/test/run.py`, `MACHINE=falcon`).
+
+## State
+
+* Stages 1-3 are done for the parts which the ST port has: in Hatari (Falcon, 14 MB, RGB monitor) the
+  character editor, the first event and the 2D map of grandfather's house run with the original colours.
+* Build: `./build.sh` (needs vasm and Python 3 with Pillow) → `build/hd/AMBERFAL.PRG`; start: `./run_hatari.sh`.
+* Test: `AmbermoonST/port/test/run.py` with `TEXT_BASE=20018 MACHINE=falcon MEM=14336 HATARI_ARGS="--monitor rgb"`,
+  `HD` and `PRG` of this build (the text segment starts at `$20018` with the EmuTOS of Hatari 2.6 on a Falcon).
+* Open: the colour ranges (one colour in every line : the gradient behind the portraits), VGA monitors (no
+  50 Hz modes), the graphics unpacked in advance (the data are the original files, the game unpacks them
+  itself), everything the ST port does not have yet (combat, 3D maps).
