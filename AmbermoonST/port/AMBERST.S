@@ -92,7 +92,7 @@
 	include	KERNEL/FILES2.S
 ;include	MAP/3D_RENDER.S		; ST: replaced by the ST kernel (3D.S)
 ;include	MUSIC/SONIC_ARRANGER.S		; ST: replaced by the ST kernel
-;include	KERNEL/ZOOM.S		; ST: replaced by the ST kernel
+;include	KERNEL/ZOOM.S		; ST: replaced by the ST kernel (ZOOM.S)
 	include	KERNEL/TEXTS.S
 ;include	MAP/3D_BLIT.S		; ST: replaced by the ST kernel
 ;include	MAP/3D_BLIT2.S		; ST: replaced by the ST kernel
@@ -118,3 +118,4 @@
 	include	ST_KERNEL/MUSIC.S		; ST:
 	include	ST_KERNEL/STUBS.S		; ST: (stage 1)
 	include	ST_KERNEL/3D.S		; ST: (the 3D renderer : MAP/3D_RENDER.S on the Falcon)
+	include	ST_KERNEL/ZOOM.S		; ST: (the zoom of the combat monsters)

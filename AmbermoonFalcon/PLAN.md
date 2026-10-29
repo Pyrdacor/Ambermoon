@@ -55,5 +55,7 @@ test runner of the ST port (`AmbermoonST/port/test/run.py`, `MACHINE=falcon`).
   draws the 3D view into the MOVEP screen (4 planes), `Show_MOVEP_screen` (GRAPHICS.S) puts it on the screen
   with the bank of the line and the sky range. Tested by starting a test copy of the data in a 3D map (the
   position in the `Party_data.sav` files, `AmbermoonST/port/test/set_start.py`, e.g. map 416 at 28,11).
+* Combat : the zoom of the monsters (`KERNEL/ZOOM.S`, the blitter in the Amiga version) zooms the visible part
+  into a buffer as an Amiga graphic, `Put_masked_block` / `Put_masked_silhouette` draw it.
 * Open: VGA monitors (no 50 Hz modes), the graphics unpacked in advance (the data are the original files, the game unpacks them
-  itself), the zoom of the combat monsters, the 3D maps on the ST (68000 replacements of the 68020 code).
+  itself), the zoom and the 3D maps on the ST (68000 replacements of the 68020 code).
