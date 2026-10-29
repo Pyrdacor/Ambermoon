@@ -9,7 +9,8 @@
 # jlha-utils on Linux), without it only the zip is made.
 # The .lzh is for the unpackers of the Atari (LHarc, LZH): method -lh5- (-lh0- for files which do not get smaller),
 # header level 0 with the path in the name and "\" between the folders, like MS-DOS and TOS (older Atari versions do
-# not know the folder headers of level 1 and 2). The separators are set and everything is checked after packing.
+# not know the folder headers of level 1 and 2): lha writes level 2, lzh_level0.py rewrites the headers (the packed
+# data stay), 7-Zip tests the result if it is there.
 set -e
 cd "$(dirname "$0")"
 VERSION=$1
@@ -42,31 +43,13 @@ if ! command -v lha >/dev/null; then
 	exit 0
 fi
 LZH="$OUT/ambermoon_falcon_$VERSION.lzh"
-rm -f "$LZH"
-(cd build/package && lha aq0 "$LZH" AMBERMOO)
-python3 - "$LZH" "$(find build/package -type f | wc -l)" <<'PY'
-import struct, sys
-lzh, expected = sys.argv[1], int(sys.argv[2])
-d = bytearray(open(lzh, 'rb').read())
-pos, files = 0, 0
-while pos < len(d) and d[pos] != 0:
-    size, method, level = d[pos], bytes(d[pos + 2:pos + 7]), d[pos + 20]
-    packed = struct.unpack_from('<I', d, pos + 7)[0]
-    if level != 0 or method not in (b'-lh5-', b'-lh0-', b'-lhd-'):
-        sys.exit('%s: header level %d, method %s (expected level 0, -lh5- or -lh0-)' % (lzh, level, method))
-    n = d[pos + 21]
-    name = bytes(d[pos + 22:pos + 22 + n]).replace(b'/', b'\\')    # (TOS paths)
-    d[pos + 22:pos + 22 + n] = name
-    d[pos + 1] = sum(d[pos + 2:pos + 2 + size]) & 0xff               # (header checksum)
-    if method != b'-lhd-':
-        if not name.startswith(b'AMBERMOO\\'):
-            sys.exit('%s: %r is not in AMBERMOO' % (lzh, name))
-        files += 1
-    pos += 2 + size + packed
-if files != expected:
-    sys.exit('%s: %d files, expected %d' % (lzh, files, expected))
-open(lzh, 'wb').write(d)
-print('%s: %d files, -lh5- / -lh0-, header level 0, paths with \\' % (lzh, files))
-PY
-lha tq "$LZH"			# (the CRCs and the header checksums)
+TMP="$OUT/level2.lzh"
+rm -f "$LZH" "$TMP"
+(cd build/package && lha a "$TMP" AMBERMOO >/dev/null)	# (level 2 headers)
+python3 lzh_level0.py "$TMP" "$LZH" "$(find build/package -type f | wc -l)"
+rm -f "$TMP"
+if command -v 7z >/dev/null; then
+	7z t "$LZH" >/dev/null			# (the CRCs)
+	echo "7-Zip: $LZH is ok"
+fi
 echo "Packed $LZH"
