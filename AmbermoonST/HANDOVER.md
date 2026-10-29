@@ -25,6 +25,7 @@ State of the work and what is needed to continue it. The plan, the design and th
 | `port/PATCHES/` | Patches of original files: `MEMORY` (memory, blitter), `VARIOUS` (sound DMA), `EVENTS` (palette before picture). |
 | `port/tools/port_data.py` | Game files (German 1.20 + `Disks/Bugfixing/German/Amberfiles`) with 8.3 names → `build/port/hd/DATA`, `FILEMAP.I`. |
 | `port/tools/port_music.py`, `ice.py` | Music of the ST version (`port/MUSIC`: `PLAYER.BIN` + `AMBER<n>.BIN` song data, made by `--extract` from `ORIGINAL/AMBR`, Pack-Ice): the player once → `MUSPLAY.I`, the songs → `Music.amb`. |
+| `port/tools/sa_to_st.py` | Converts Amiga songs (Sonic Arranger) for the ST player → `port/MUSIC/SONG<nn>.BIN`; `OVERRIDES` per song. |
 | `port/tools/port_palettes.py` | ST palettes of all Amiga palettes → `build/port/STPALS.I` (made again only when the script changed). |
 | `port/test/` | Hatari test runner, scenarios, symbol and frame tools (below). |
 
@@ -91,7 +92,15 @@ Hatari as STE (a plain ST works too), **at least 2 MB** (with 1 MB the program e
   in `ST_FILES` of `port_music.py`, 13 songs, 19 and 20 are variants of 11 and 15) has
   one player (8294 bytes + offset table) in front of every song; the player finds the song directly behind
   itself. `port_music.py` stores the player once (`MUSIC.S`, `Music_player`, followed by `Music_data`),
-  `Music.amb` gets size + data of every song (32 entries, the missing ones size 0 = silence).
+  `Music.amb` gets size + data of every song (32 entries; at most `MUSIC_DATA_SIZE` = 20K, `MUSIC.S`).
+  The 19 Amiga songs without ST version are converted by `port/tools/sa_to_st.py` from the Sonic Arranger
+  modules (`Music/SONIC.*.sa`) and stored as `port/MUSIC/SONG<nn>.BIN` (accepted by listening, the tool
+  replaces them only with `-f`). The conversion is general (rows as played, instruments simulated, 4 tracks
+  -> 3 channels); what the ear decided is in `OVERRIDES` of the tool (per song : noise/strike/tone, octave,
+  volume, echo, chords, layers ...). Songs 3, 10, 21, 22, 28-31 were accepted with the first version of the
+  tool and are no longer reproduced exactly by it (the others are, `cmp` after a change of the tool).
+  The YM2149 can't do some Amiga samples (song 19 : a dark metal strike, darker than its noise); playing
+  samples (digi) would be the way, but costs much CPU time.
   `_SA_Hardcalc` copies the song behind the player, init/stop is offset 0 (d0 = 1/0), play is offset 8
   (VBL). The player uses Timer A and Timer B for effects; its Timer B is moved to **Timer D** (Timer B is
   the raster), the accesses to the shared C/D control register call `Music_timer_D_*`. The kernel switches
