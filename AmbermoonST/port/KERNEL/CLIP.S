@@ -98,21 +98,33 @@ Make_clip_masks:
 ; [ Draw a horizontal / vertical line, plot a pixel ]
 ;*****************************************************************************
 ; [ Draw a horizontal line ]
-;   IN : d0 - Left X, d1 - Y, d2 - Right X, d4 - Colour (.w)
+;   IN : d0 - X1, d1 - Y, d2 - X2, d4 - Colour (.w)
+; NOTE :
+;   - The ends may be in any order ([ Draw_rectangle ] draws the bottom line
+;     from right to left).
 Draw_hline:
-	move.l	d3,-(sp)
-	move.w	d1,d3
+	movem.l	d0/d2/d3,-(sp)
+	cmp.w	d0,d2
+	bge.s	.Ok
+	exg	d0,d2
+.Ok:	move.w	d1,d3
 	jsr	Draw_box
-	move.l	(sp)+,d3
+	movem.l	(sp)+,d0/d2/d3
 	rts
 
 ; [ Draw a vertical line ]
-;   IN : d0 - X, d1 - Top Y, d3 - Bottom Y, d4 - Colour (.w)
+;   IN : d0 - X, d1 - Y1, d3 - Y2, d4 - Colour (.w)
+; NOTE :
+;   - The ends may be in any order ([ Draw_rectangle ] draws the left line
+;     from the bottom to the top).
 Draw_vline:
-	move.l	d2,-(sp)
-	move.w	d0,d2
+	movem.l	d1-d3,-(sp)
+	cmp.w	d1,d3
+	bge.s	.Ok
+	exg	d1,d3
+.Ok:	move.w	d0,d2
 	jsr	Draw_box
-	move.l	(sp)+,d2
+	movem.l	(sp)+,d1-d3
 	rts
 
 ; [ Plot a pixel ]
