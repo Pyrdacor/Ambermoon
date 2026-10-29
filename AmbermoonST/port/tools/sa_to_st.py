@@ -97,8 +97,10 @@ def signed(b):
 # 'volume' : +-YM levels, 'drop' : True (left out), 'length' : ticks (the notes are cut), 'echo' : (rows, levels
 # quieter[, repeats]), 'sweep' : semitones per tick at the start, 'chord' : semitones (arpeggio), 'arp_speed' :
 # ticks - 1 per note of the arpeggio, 'vibrato' : (parameter, delay in ticks), 'hit_ticks' : ticks of noise,
-# 'envelope' : YM levels per tick, 'attack' : ticks (soft start)}}, 'track_instruments' : {track : {number : the same for the instrument in
-# this track}},
+# 'envelope' : YM levels per tick, 'attack' : ticks (soft start), 'noise_sweep' : True (the noise gets brighter
+# or darker like the sample), 'tone_sweep' : True (the pitch follows the main frequency of the sample), 'gate' :
+# YM level (a note ends when it gets quieter)}}, 'track_instruments' : {track : {number : the same for the
+# instrument in this track}},
 # 'keep' : tracks (1-4) which are never left out, 'keep_echoes' : True (quiet repeated notes are played),
 # 'chords' : tracks (1-4) played in one channel, the notes which sound together as an arpeggio, 'boost' : YM levels
 # for all notes (else the loudest note gets the highest level)
@@ -111,7 +113,9 @@ OVERRIDES = {
         3: {'vibrato': False, 'volume': -2},                            # LongLead : the melody in the middle
         1: {'attack': 4, 'vibrato': False, 'volume': -2},               # SynthVoice : the accent at the start
         2: {'octave': 1, 'volume': -3, 'length': 20, 'vibrato': False}}},  # Hole2 : the bass, not droning
-    19: {'instruments': {4: {'kind': 'hit'}}},                          # XNSRadiator09 : a strike
+    19: {'instruments': {4: {'kind': 'noise', 'noise_sweep': True, 'gate': 8, 'echo': (2, 3)},  # XNSRadiator09 :
+                         3: {'octave': -1},                             #  a short strike with an echo
+                         1: {'volume': -3, 'length': 40, 'attack': 4, 'vibrato': False}}},  # DDstr2 : no drone
     20: {'instruments': {1: {'kind': 'hit', 'noise': 6, 'hit_ticks': 2, 'octave': 1, 'volume': 2},  # the guitar
                          2: {'octave': 1, 'volume': 2},                 # (a witch's broom : not dull)
                          3: {'octave': 1, 'chord': (0, 12), 'volume': -2},  # brass : unlike the melody
@@ -328,6 +332,7 @@ class Sound:
         self.ref = sorted(notes)[len(notes) // 2] if notes else 49
         self.noise = None
         self.hit = None                           # noise period at the start of the notes (a strike)
+        self.noise_seq = None                     # (speed, noise periods) : the noise changes like the sample
         self.chord = None
         self.volume = override.get('volume', 0)   # YM levels more (+) or less (-)
         self.length = override.get('length')      # ticks (the notes are cut)
@@ -336,6 +341,7 @@ class Sound:
         self.arp_speed = override.get('arp_speed', 0)  # ticks - 1 per note of the arpeggio
         self.envelope = override.get('envelope')  # YM levels per tick (instead of the Amiga instrument)
         self.attack = override.get('attack', 0)   # ticks : the notes begin softly
+        self.gate = override.get('gate', 0)       # YM level : quieter ones are silence (no tail)
         self.shape = None                         # amplitude of the sample in every tick (None : synth)
         if ins is None:
             self.period = 32
@@ -371,6 +377,15 @@ class Sound:
                 self.chord = None
                 self.noise = override.get('noise') or noise_period(x, rate)
                 self.period = 32
+            if override.get('noise_sweep') and (self.noise or self.hit):
+                # the noise like the sample : its brightness (zero crossings) in every tick
+                per_tick = max(1, int(rate / TICKS))
+                seq = [noise_period([signed(b) for b in first[p:p + per_tick]], rate)
+                       for p in range(0, len(first) - per_tick + 1, per_tick)][:120] or [31]
+                speed = 0
+                while len(seq[::speed + 1]) > 60:
+                    speed += 1
+                self.noise_seq = (speed, tuple(seq[::speed + 1]))
         # the ST note of an Amiga note : the same frequency, octaves moved into the range of the ST player
         f = PAULA / (SA_PERIODS[self.ref] * self.period)
         self.shift = round(1 + 12 * math.log2(f / ST_C1)) - self.ref
@@ -391,11 +406,41 @@ class Sound:
         self.arp = (tuple(self.chord), True) if self.chord else self.amf_arpeggio(module)
         if 'sweep' in override:                  # the pitch at the start of the notes (semitones per tick)
             self.arp = (tuple(override['sweep']), False)
+        if override.get('tone_sweep') and self.shape is not None:
+            self.tone_sweep(first, PAULA / SA_PERIODS[self.ref])
         if self.arp and min(self.arp[0]) < 0:
             # the ST player adds only positive values (negative ones end the table) : a lower note
             low = min(self.arp[0])
             self.shift += low
             self.arp = (tuple(v - low for v in self.arp[0]), self.arp[1])
+
+    def tone_sweep(self, first, rate):
+        """The pitch follows the sample : its main frequency (half of the zero crossings) in every tick, as an
+        arpeggio above the lowest one"""
+        per_tick = max(1, int(rate / TICKS))
+        notes = []
+        for p in range(0, len(first) - per_tick + 1, per_tick):
+            x = [signed(b) for b in first[p:p + per_tick]]
+            zcr = sum(1 for a, b in zip(x, x[1:]) if (a < 0) != (b < 0)) / len(x) * rate
+            if max(abs(v) for v in x) < 6 or zcr <= 0:
+                if notes:
+                    break                         # (the end of the sound)
+                notes.append(None)                # (silence at the start)
+                continue
+            notes.append(1 + 12 * math.log2(zcr / 2 / ST_C1))
+        lead = notes.count(None)
+        notes = notes[lead:]
+        notes = [sum(notes[max(0, i - 1):i + 2]) / len(notes[max(0, i - 1):i + 2]) for i in range(len(notes))]
+        if not notes:
+            return
+        low = min(notes)
+        values = ([round(notes[0] - low)] * lead + [round(n - low) for n in notes])[:120]
+        self.arp_speed = 0
+        while len(values[::self.arp_speed + 1]) > 60:
+            self.arp_speed += 1
+        self.arp = (tuple(values[::self.arp_speed + 1]), False)
+        self.shift = round(low) - self.ref
+        self.period = 32
 
     @staticmethod
     def harmony(x, period):
@@ -495,6 +540,11 @@ class Sound:
         out = [max(0, min(15, lv + self.volume)) if lv else 0 for lv in (ym_level(v / 64) for v in vols)]
         for t in range(min(self.attack, len(out))):
             out[t] = max(0, out[t] - round((self.attack - t) * 10 / self.attack))
+        if self.gate:
+            for t in range(len(out)):
+                if out[t] < self.gate:
+                    out[t:] = [0] * (len(out) - t)
+                    break
         return out
 
     def vibrato(self, st_note):
@@ -931,7 +981,11 @@ class Converter:
             speed += 1
         levels = levels[::speed + 1]
         noise = 0
-        if sound is not None and sound.noise:
+        if sound is not None and sound.noise_seq:
+            noise = noises.setdefault(('seq',) + sound.noise_seq, len(noises))
+            if sound.noise:
+                levels = [lv | 0x20 for lv in levels]
+        elif sound is not None and sound.noise:
             noise = noises.setdefault((sound.noise,), len(noises))
             levels = [lv | 0x20 for lv in levels]
         elif sound is not None and sound.hit:
@@ -964,7 +1018,10 @@ class Converter:
         noise_data = [bytes([0, 0x20, 0xff])] * len(noises)
         for v, i in noises.items():
             if v:
-                noise_data[i] = bytes([0, *v, 0xff] if len(v) == 1 else [0, *v, 0x20, 0xff])
+                if v[0] == 'seq':
+                    noise_data[i] = bytes([v[1], *v[2], 0xff])
+                else:
+                    noise_data[i] = bytes([0, *v, 0xff] if len(v) == 1 else [0, *v, 0x20, 0xff])
         # the patterns, the same ones once
         unique, order = [], []
         for _, channels in pats:
