@@ -4,7 +4,7 @@
 #   port/run_hatari.sh [hd folder] [further Hatari options]
 #
 # Hatari is taken from PATH, else from %LOCALAPPDATA%/Programs/Hatari (Windows); TOS is the EmuTOS image of
-# the Hatari folder unless TOS is set.
+# the Hatari folder unless TOS is set. The mouse stays in the window (--grab; AltGr+M releases it).
 cd "$(dirname "$0")/.."
 HD=${1:-build/port/hd}
 [ $# -gt 0 ] && shift
@@ -18,4 +18,4 @@ if command -v cygpath >/dev/null; then		# (Windows: Hatari wants Windows paths)
 	HD=$(cygpath -w "$HD")
 	TOS=$(cygpath -w "$TOS")
 fi
-exec "$HATARI" --machine ste --memsize 4096 --tos "$TOS" --harddrive "$HD" --auto 'C:\AMBERST.PRG' "$@"
+exec "$HATARI" --machine ste --memsize 4096 --tos "$TOS" --harddrive "$HD" --auto 'C:\AMBERST.PRG' --grab "$@"
