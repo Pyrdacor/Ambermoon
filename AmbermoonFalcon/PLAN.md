@@ -47,6 +47,8 @@ test runner of the ST port (`AmbermoonST/port/test/run.py`, `MACHINE=falcon`).
 * Build: `./build.sh` (needs vasm and Python 3 with Pillow) → `build/hd/AMBERFAL.PRG`; start: `./run_hatari.sh`.
 * Test: `AmbermoonST/port/test/run.py` with `TEXT_BASE=20018 MACHINE=falcon MEM=14336 HATARI_ARGS="--monitor rgb"`,
   `HD` and `PRG` of this build (the text segment starts at `$20018` with the EmuTOS of Hatari 2.6 on a Falcon).
-* Open: the colour ranges (one colour in every line : the gradient behind the portraits), VGA monitors (no
-  50 Hz modes), the graphics unpacked in advance (the data are the original files, the game unpacks them
+* Colour ranges (one colour in every line : the gradient behind the portraits, the sky of the cities) : every
+  line gets its own colour from the end of the 256 colours downwards (RASTER.S), the graphics routines draw the
+  pixels of the colour of the range in the colour of the line.
+* Open: VGA monitors (no 50 Hz modes), the graphics unpacked in advance (the data are the original files, the game unpacks them
   itself), everything the ST port does not have yet (combat, 3D maps).

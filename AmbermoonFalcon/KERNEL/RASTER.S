@@ -4,15 +4,17 @@
 ;
 ; Every palette of a raster list gets a bank of 32 colours : the first
 ; palette (from the top of the screen) bank 0 (colours 0-31), the second
-; bank 1 (32-63) and so on, at most 8. A pixel is bank * 32 + Amiga colour,
-; the graphics routines set the planes 5-7 to the bank of the line
-; ([ Get_line_banks ]). So the original colours are shown, without raster
-; interrupts.
-; [ Render_raster ] puts the (faded) colours of [ Current_RL ] into the
-; shadow palette, the next vertical blank copies it into the VIDEL
-; ([ Raster_VBL ]).
-; Not yet : the colour ranges (one colour changed in every line, e.g. the
-; gradient behind the portraits).
+; bank 1 (32-63) and so on. A pixel is bank * 32 + Amiga colour, the graphics
+; routines set the planes 5-7 to the bank of the line. So the original
+; colours are shown, without raster interrupts.
+; A colour range (one Amiga colour changed in every line, e.g. the gradient
+; behind the portraits) gets one colour per line, from the end of the 256
+; colours downwards : on these lines the graphics routines draw the pixels
+; of that Amiga colour in the colour of the line.
+; [ Get_line_banks ] gives the bank, the range colour and its colour on the
+; screen for every line (from the raster list of the module), [ Render_raster ]
+; puts the (faded) colours of [ Current_RL ] at the same places of the shadow
+; palette, the next vertical blank copies it into the VIDEL ([ Raster_VBL ]).
 
 	SECTION	Program,code
 
@@ -26,9 +28,8 @@ Init_raster:
 	move.w	#256-1,d7
 .Loop:	clr.l	(a0)+
 	dbra	d7,.Loop
-	move.w	#8,Shadow_banks
 	st	Palette_dirty
-	clr.l	Banks_RL
+	move.l	#-1,Banks_RL
 	movem.l	(sp)+,d7/a0
 	rts
 
@@ -50,6 +51,44 @@ Store_RL_source:
 	rts
 
 ;*****************************************************************************
+; [ Where the colours of the entries of a raster list go ]
+;   IN : d0 - Entry type (0 = palette, 1 = range) (.b)
+;        d1 - Number of colours of a range (.w)
+;        d6 - Number of palettes so far (.w)
+;        d5 - First colour of the ranges so far (256 : none) (.w)
+;  OUT : d2 - First colour on the screen (-1 : no room) (.w)
+;        d5, d6 - Updated (.w)
+; Changed registers : d2, d5, d6
+; NOTE :
+;   - The same for [ Get_line_banks ] (the raster list of the module) and
+;     [ Render_raster ] (Current_RL) : the colours meet.
+;*****************************************************************************
+Place_RL_entry:
+	tst.b	d0
+	bne.s	.Range
+	move.w	d6,d2			; Palette : the next bank
+	lsl.w	#5,d2
+	addq.w	#1,d6
+	move.w	d2,-(sp)			; Room below the ranges ?
+	addi.w	#32,d2
+	cmp.w	d5,d2
+	movem.w	(sp)+,d2			; (flags unchanged)
+	bls.s	.Exit
+	moveq.l	#-1,d2
+	rts
+.Range:	move.w	d5,d2			; Range : below the last range
+	sub.w	d1,d2
+	move.w	d6,-(sp)			; Room above the palettes ?
+	lsl.w	#5,d6
+	cmp.w	d6,d2
+	movem.w	(sp)+,d6
+	bge.s	.Ok
+	moveq.l	#-1,d2
+	rts
+.Ok:	move.w	d2,d5
+.Exit:	rts
+
+;*****************************************************************************
 ; [ Make the colours of the banks from Current_RL ]
 ; All registers are restored
 ; NOTE :
@@ -57,37 +96,42 @@ Store_RL_source:
 ;     blank shows them.
 ;*****************************************************************************
 Render_raster:
-	movem.l	d0-d7/a0-a2,-(sp)
+	movem.l	d0-d7/a0-a3,-(sp)
 	lea.l	Current_RL,a0
-	lea.l	Shadow_palette,a1
 	lea.l	Nibble_to_videl,a2
-	moveq.l	#0,d6			; Number of banks
+	moveq.l	#0,d6			; Number of palettes
+	move.w	#256,d5			; (no ranges yet)
 .Loop:	move.b	(a0)+,d0			; Get entry type
 	cmp.b	#-1,d0
 	beq.s	.End
 	addq.l	#1,a0			; (line)
+	moveq.l	#32,d1			; Number of colours
 	tst.b	d0
-	bne.s	.Range
-	cmp.w	#8,d6			; Bank left ?
-	bcc.s	.Skip
-	moveq.l	#32-1,d7
+	beq.s	.Place
+	addq.l	#1,a0			; (Amiga colour of the range)
+	moveq.l	#0,d1
+	move.b	(a0)+,d1
+.Place:	movem.w	d0/d1,-(sp)
+	jsr	Place_RL_entry
+	movem.w	(sp)+,d0/d1
+	tst.w	d2
+	bmi.s	.Skip
+	lea.l	Shadow_palette,a1		; Colours
+	add.w	d2,d2
+	add.w	d2,d2
+	add.w	d2,a1
+	move.w	d1,d7
+	bra.s	.Next
 .Colour:	move.w	(a0)+,d0			; Amiga colour $0RGB
 	jsr	Amiga_to_videl
 	move.l	d1,(a1)+
-	dbra	d7,.Colour
-	addq.w	#1,d6
+.Next:	dbra	d7,.Colour
 	bra.s	.Loop
-.Skip:	lea.l	64(a0),a0
-	bra.s	.Loop
-.Range:	addq.l	#1,a0			; (colour : not yet)
-	moveq.l	#0,d1			; Skip the colours
-	move.b	(a0)+,d1
-	add.w	d1,d1
+.Skip:	add.w	d1,d1			; (no room)
 	add.w	d1,a0
 	bra.s	.Loop
-.End:	move.w	d6,Shadow_banks
-	st	Palette_dirty
-	movem.l	(sp)+,d0-d7/a0-a2
+.End:	st	Palette_dirty
+	movem.l	(sp)+,d0-d7/a0-a3
 	rts
 
 ; [ Convert an Amiga colour into a VIDEL colour ]
@@ -97,9 +141,9 @@ Render_raster:
 ; Changed registers : d1, d2
 Amiga_to_videl:
 	moveq.l	#0,d1
-	moveq.l	#$f,d2			; Red
+	moveq.l	#$f,d2			; Blue
 	and.w	d0,d2
-	move.b	0(a2,d2.w),d1		; (blue : bits 0-7)
+	move.b	0(a2,d2.w),d1		; (bits 0-7)
 	move.w	d0,d2			; Green
 	lsr.w	#4,d2
 	andi.w	#$f,d2
@@ -112,7 +156,6 @@ Amiga_to_videl:
 	andi.w	#$f,d2
 	move.b	0(a2,d2.w),d2
 	ror.l	#8,d2
-	clr.w	d2
 	andi.l	#$ff000000,d2
 	or.l	d2,d1
 	rts
@@ -128,11 +171,12 @@ Raster_VBL:
 	movem.l	d7/a0/a1,-(sp)
 	lea.l	Shadow_palette,a0
 	lea.l	Videl_palette,a1
-	move.w	Shadow_banks,d7
-	lsl.w	#5,d7			; 32 colours per bank
-	bra.s	.Next
+	move.w	#256/4-1,d7
 .Loop:	move.l	(a0)+,(a1)+
-.Next:	dbra	d7,.Loop
+	move.l	(a0)+,(a1)+
+	move.l	(a0)+,(a1)+
+	move.l	(a0)+,(a1)+
+	dbra	d7,.Loop
 	movem.l	(sp)+,d7/a0/a1
 .Exit:	rts
 
@@ -140,7 +184,7 @@ Raster_VBL:
 ; [ Get the colour of the screen for an Amiga colour ]
 ;   IN : d1 - Y-coordinate (.w)
 ;        d4 - Amiga colour number (.w)
-;  OUT : d4 - Colour of the screen (bank * 32 + colour) (.w)
+;  OUT : d4 - Colour of the screen (.w)
 ; Changed registers : d4
 ;*****************************************************************************
 Get_screen_colour:
@@ -153,23 +197,33 @@ Get_screen_colour:
 .Top:	cmp.w	#Screen_height-1,d1
 	ble.s	.Bottom
 	move.w	#Screen_height-1,d1
-.Bottom:	move.b	0(a0,d1.w),d1		; Bank
+.Bottom:	add.w	d1,a0
+	cmp.b	Line_range_colour-Line_banks(a0),d4	; The colour of a range ?
+	bne.s	.Bank
+	moveq.l	#0,d4
+	move.b	Line_range_index-Line_banks(a0),d4
+	bra.s	.Exit
+.Bank:	moveq.l	#0,d1			; Bank
+	move.b	(a0),d1
 	lsl.w	#5,d1
 	or.w	d1,d4
-	movem.l	(sp)+,d1/a0
+.Exit:	movem.l	(sp)+,d1/a0
 	rts
 
 ;*****************************************************************************
 ; [ Get the banks of the lines ]
-;  OUT : a0 - Pointer to the bank of every line (200 bytes) (.l)
+;  OUT : a0 - Pointer to [ Line_banks ] (.l)
 ; Changed registers : a0
 ; NOTE :
+;   - [ Line_banks ] : the bank of every line (200 bytes), followed by
+;     [ Line_range_colour ] (the Amiga colour of a range on the line, -1 :
+;     none) and [ Line_range_index ] (its colour on the screen).
 ;   - From the raster list of the current module (the screen of a module is
-;     drawn before its colours are set), else the current one. The table is
+;     drawn before its colours are set), else the current one. The tables are
 ;     made again only when the raster list is another one.
 ;*****************************************************************************
 Get_line_banks:
-	movem.l	d0-d3/d7/a1,-(sp)
+	movem.l	d0-d7/a1,-(sp)
 	move.l	Module_Sp,d0		; Raster list of the module
 	beq.s	.Current
 	move.l	d0,a0
@@ -177,39 +231,60 @@ Get_line_banks:
 	bne.s	.Got
 .Current:	move.l	Fade_RL_ptr,d0
 .Got:	cmp.l	Banks_RL,d0		; The same as last time ?
-	beq.s	.Exit
+	beq	.Exit
 	move.l	d0,Banks_RL
-	lea.l	Line_banks,a1		; All bank 0
+	lea.l	Line_banks,a1		; All bank 0, no ranges
 	move.w	#Screen_height/4-1,d7
 .Clear:	clr.l	(a1)+
+	move.l	#-1,Line_range_colour-Line_banks-4(a1)
 	dbra	d7,.Clear
 	tst.l	d0
-	beq.s	.Exit
+	beq	.Exit
 	move.l	d0,a0
-	moveq.l	#0,d3			; Bank
+	moveq.l	#0,d6			; Number of palettes
+	move.w	#256,d5			; (no ranges yet)
+	moveq.l	#0,d4			; Bank of the palette
 .Loop:	move.b	(a0)+,d0			; Get entry type
-	bmi.s	.Exit
-	moveq.l	#0,d2			; Get line
-	move.b	(a0)+,d2
+	bmi	.Exit
+	moveq.l	#0,d3			; Get line
+	move.b	(a0)+,d3
+	moveq.l	#32,d1			; Number of colours
+	tst.b	d0
+	beq.s	.Place
+	moveq.l	#0,d7			; Range : Amiga colour & number
+	move.b	(a0)+,d7
+	move.b	(a0)+,d1
+.Place:	addq.l	#4,a0			; (pointer to the colours)
+	jsr	Place_RL_entry
+	tst.w	d2
+	bmi.s	.Loop
 	tst.b	d0
 	bne.s	.Range
-	addq.l	#4,a0			; (pointer to the colours)
-	cmp.w	#8,d3			; Bank left ?
-	bcc.s	.Loop
-	lea.l	Line_banks,a1		; From this line on
+	move.w	d2,d4			; Palette : its bank from this line on
+	lsr.w	#5,d4
+	lea.l	Line_banks,a1
 	move.w	#Screen_height,d7
-	sub.w	d2,d7
-	ble.s	.Next
-	add.w	d2,a1
+	sub.w	d3,d7
+	ble.s	.Loop
+	add.w	d3,a1
 	subq.w	#1,d7
-.Fill:	move.b	d3,(a1)+
+.Fill:	move.b	d4,(a1)+
 	dbra	d7,.Fill
-.Next:	addq.w	#1,d3
 	bra.s	.Loop
-.Range:	addq.l	#6,a0
-	bra.s	.Loop
+.Range:	lea.l	Line_range_colour,a1	; Range : the colour of every line
+	add.w	d3,a1
+	subq.w	#1,d1
+.Line:	cmp.w	#Screen_height,d3
+	bcc.s	.Loop
+	move.b	d7,(a1)
+	move.b	d2,Line_range_index-Line_range_colour(a1)
+	addq.l	#1,a1
+	addq.w	#1,d2
+	addq.w	#1,d3
+	dbra	d1,.Line
+	bra	.Loop
 .Exit:	lea.l	Line_banks,a0
-	movem.l	(sp)+,d0-d3/d7/a1
+	movem.l	(sp)+,d0-d7/a1
 	rts
 
 	SECTION	Fast_DATA,data
@@ -222,8 +297,10 @@ Nibble_to_videl:
 
 	SECTION	Fast_BSS,bss
 Banks_RL:	ds.l 1
-Shadow_banks:	ds.w 1
 Palette_dirty:	ds.b 1
 	even
-Line_banks:	ds.b Screen_height
+Line_banks:	ds.b Screen_height		; (these three one after the other)
+Line_range_colour:	ds.b Screen_height
+Line_range_index:	ds.b Screen_height
+	even
 Shadow_palette:	ds.l 256

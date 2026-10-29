@@ -99,9 +99,15 @@ Draw_box:
 	moveq.l	#-1,d2
 .Lines:	move.l	a0,a1
 	moveq.l	#0,d1			; Colour of the screen
-	move.b	(a2)+,d1
+	cmp.b	Line_range_colour-Line_banks(a2),d4	; (the colour of a range ?)
+	bne.s	.Bank
+	move.b	Line_range_index-Line_banks(a2),d1
+	addq.l	#1,a2
+	bra.s	.Colour
+.Bank:	move.b	(a2)+,d1
 	lsl.w	#5,d1
 	or.w	d4,d1
+.Colour:
 	move.w	d0,d7			; First chunk
 	jsr	Fill_chunk
 	move.w	d6,d5
@@ -153,15 +159,22 @@ Get_pixel:
 	move.w	#$8000,d2
 	lsr.w	d3,d2
 	moveq.l	#0,d4
-	moveq.l	#5-1,d5			; Planes 0-4 (5-7 : the bank)
+	moveq.l	#8-1,d5			; Colour of the screen
 .Plane:	ror.b	#1,d4
 	move.w	(a0)+,d3
 	and.w	d2,d3
 	beq.s	.Zero
 	bset	#7,d4
 .Zero:	dbra	d5,.Plane
-	lsr.b	#3,d4			; (bits 3-7 -> 0-4)
-	andi.w	#31,d4
+	andi.w	#$ff,d4
+	jsr	Get_line_banks		; The colour of a range on the line ?
+	add.w	d1,a0
+	cmp.b	Line_range_index-Line_banks(a0),d4
+	bne.s	.Bank
+	tst.b	Line_range_colour-Line_banks(a0)
+	bmi.s	.Bank
+	move.b	Line_range_colour-Line_banks(a0),d4
+.Bank:	andi.w	#31,d4			; (planes 5-7 : the bank)
 	movem.l	(sp)+,d0-d3/d5/a0
 	rts
 
@@ -297,8 +310,18 @@ Draw_block:
 	asr.w	#4,d4
 	andi.w	#15,d5
 .Line:	lea.l	Line_chunks,a0		; Decode the source line
+	move.b	Line_range_colour-Line_banks(a6),d0	; (a range on the line ?)
+	ext.w	d0
+	move.w	d0,Range_colour
+	moveq.l	#0,d0
+	move.b	Line_range_index-Line_banks(a6),d0
+	move.w	d0,Range_index
 	move.b	(a6)+,d0
 	jsr	Decode_line
+	tst.w	Range_colour
+	bmi.s	.No_range
+	jsr	Fix_range_line
+.No_range:
 	jsr	Draw_chunk_line
 	add.l	a3,a4
 	lea.l	Screen_bytes_per_line(a5),a5
@@ -435,6 +458,48 @@ Decode_line:
 	swap	d1
 .Done:	move.w	(sp)+,a5
 	move.w	Blit_mode,d4
+	rts
+
+;*****************************************************************************
+; [ The pixels of the colour of a range get the colour of the line ]
+;   IN : a0 - Pointer to the Falcon chunks of a line (.l)
+;        [ Blit_width ], [ Range_colour ], [ Range_index ]
+; All registers are restored
+; NOTE :
+;   - On a line with a colour range (RASTER.S) the pixels of that Amiga
+;     colour are drawn in the colour of the line.
+;*****************************************************************************
+Fix_range_line:
+	movem.l	d0-d4/d6/d7/a0/a1,-(sp)
+	move.w	Blit_width,d7
+	subq.w	#1,d7
+.Chunk:	move.w	(a0)+,d0			; The pixels of the colour (which are
+	move.w	Range_colour,d1		;  drawn)
+	move.l	a0,a1
+	moveq.l	#5-1,d6
+.Plane:	move.w	(a1)+,d2
+	lsr.w	#1,d1
+	bcs.s	.Set
+	not.w	d2
+.Set:	and.w	d2,d0
+	dbra	d6,.Plane
+	tst.w	d0
+	beq.s	.Next
+	move.w	d0,d3			; Yes -> the planes of the colour of
+	not.w	d3			;  the line
+	move.w	Range_index,d1
+	move.l	a0,a1
+	moveq.l	#8-1,d6
+.Plane2:	move.w	(a1),d2
+	and.w	d3,d2
+	lsr.w	#1,d1
+	bcc.s	.Clear
+	or.w	d0,d2
+.Clear:	move.w	d2,(a1)+
+	dbra	d6,.Plane2
+.Next:	lea.l	16(a0),a0
+	dbra	d7,.Chunk
+	movem.l	(sp)+,d0-d4/d6/d7/a0/a1
 	rts
 
 ;*****************************************************************************
@@ -625,13 +690,13 @@ Put_text_buffer:
 ;     line interleaved) : the Put routines draw them like any other graphic.
 ;*****************************************************************************
 Get_block:
-	movem.l	d0-d7/a0-a2,-(sp)
+	movem.l	d0-d7/a0-a4,-(sp)
 	tst.w	d6
-	ble.s	.Exit
+	ble	.Exit
 	tst.w	d7
-	ble.s	.Exit
+	ble	.Exit
 	tst.w	d5
-	ble.s	.Exit
+	ble	.Exit
 	cmp.w	#5,d5
 	ble.s	.Planes
 	moveq.l	#5,d5
@@ -639,8 +704,14 @@ Get_block:
 	andi.w	#-16,d0
 	jsr	Get_screen_offset
 	add.l	d2,a1
+	move.l	a0,a3
+	jsr	Get_line_banks		; (the colour ranges of the lines)
+	add.w	d1,a0
+	move.l	a0,a4
+	move.l	a3,a0
 	subq.w	#1,d7
-.Line:	moveq.l	#0,d3			; Plane
+.Line:	move.l	a0,a3			; (start of the line in the buffer)
+	moveq.l	#0,d3			; Plane
 .Plane:	move.l	a1,a2
 	add.w	d3,a2
 	add.w	d3,a2
@@ -652,9 +723,53 @@ Get_block:
 	addq.w	#1,d3
 	cmp.w	d5,d3
 	bmi.s	.Plane
+	tst.b	Line_range_colour-Line_banks(a4)	; A colour range on the line ?
+	bmi.s	.Next
+	jsr	.Range
+.Next:	addq.l	#1,a4
 	lea.l	Screen_bytes_per_line(a1),a1
 	dbra	d7,.Line
-.Exit:	movem.l	(sp)+,d0-d7/a0-a2
+.Exit:	movem.l	(sp)+,d0-d7/a0-a4
+	rts
+; The pixels in the colour of the line become the Amiga colour of the range
+.Range:	movem.l	d0-d4/d7/a0-a2,-(sp)
+	move.l	a1,a2			; Screen chunk
+	moveq.l	#0,d7			; Chunk
+.R_chunk:	moveq.l	#-1,d0			; The pixels of the colour of the line
+	move.b	Line_range_index-Line_banks(a4),d1
+	move.l	a2,a0
+	moveq.l	#8-1,d2
+.R_plane:	move.w	(a0)+,d3
+	lsr.b	#1,d1
+	bcs.s	.R_set
+	not.w	d3
+.R_set:	and.w	d3,d0
+	dbra	d2,.R_plane
+	tst.w	d0
+	beq.s	.R_next
+	move.w	d0,d4			; Yes -> the Amiga colour in the
+	not.w	d4			;  stored planes
+	move.b	Line_range_colour-Line_banks(a4),d1
+	move.l	a3,a0
+	add.w	d7,a0
+	add.w	d7,a0
+	moveq.l	#0,d2			; Plane
+.R_store:	move.w	(a0),d3
+	and.w	d4,d3
+	btst	d2,d1
+	beq.s	.R_clear
+	or.w	d0,d3
+.R_clear:	move.w	d3,(a0)
+	add.w	d6,a0
+	add.w	d6,a0
+	addq.w	#1,d2
+	cmp.w	d5,d2
+	bmi.s	.R_store
+.R_next:	lea.l	Chunk_bytes(a2),a2
+	addq.w	#1,d7
+	cmp.w	d6,d7
+	bmi.s	.R_chunk
+	movem.l	(sp)+,d0-d4/d7/a0-a2
 	rts
 
 ;*****************************************************************************
@@ -714,4 +829,6 @@ Blit_height:	ds.w 1
 Blit_text_truncs:	ds.w 1
 Blit_source:	ds.l 1
 Blit_banks:	ds.l 1
+Range_colour:	ds.w 1			; (-1 : no range on the line)
+Range_index:	ds.w 1
 Line_chunks:	ds.w 9*Max_chunks
