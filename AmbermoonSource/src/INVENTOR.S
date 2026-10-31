@@ -2801,7 +2801,7 @@ Remove_item:
 	move.b	Item_skill_1(a1),d0
 	beq.s	.No1
 	subq.w	#1,d0
-	mulu.w	#6,d0
+	mulu.w	#Skill_data_size,d0		; FIX: Was "mulu.w #6,d0" (skills are 8 bytes)
 	moveq.l	#0,d1
 	move.b	Malus_1(a1),d1
 	add.w	d1,Magic(a3,d0.w)
@@ -2809,7 +2809,7 @@ Remove_item:
 	move.b	Item_skill_2(a1),d0
 	beq.s	.No2
 	subq.w	#1,d0
-	mulu.w	#6,d0
+	mulu.w	#Skill_data_size,d0		; FIX: Was "mulu.w #6,d0" (skills are 8 bytes)
 	moveq.l	#0,d1
 	move.b	Malus_2(a1),d1
 	add.w	d1,Magic(a3,d0.w)
