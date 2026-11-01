@@ -9,7 +9,7 @@ and about 6 MB on the hard disk.
 the folder `AMBERMOO` to the hard disk and start `AMBERFAL.PRG`. More in `README.TXT` in the archive.
 
 **Not there yet:**
-- The Thalion logo with the fairy before the intro, and the ending sequence.
+- The ending sequence.
 - The wobbling screen when the party is drugged.
 
 Tested in Hatari only so far, not on a real Falcon.

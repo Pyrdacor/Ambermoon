@@ -16,8 +16,15 @@
 ; position : the channels 0 and 3 left, 1 and 2 right, like the Amiga. The
 ; volume (0-64) comes from tables : a sample * volume * 2, two channels fit
 ; into 16 bits.
+;
+; There are two players of the channels :
+;   - The DSP (MUSIC_DSP.S, DSP_MIX.ASM) : it mixes on its own, the CPU is free.
+;   - The CPU (below) : for a Falcon whose DSP does not answer.
+; [ Music_use_dsp ] chooses, [ Music_player ] is the one which runs.
 
 	include	MUSIC/SONIC_ARRANGER.S
+
+Music_use_dsp	EQU	1		; 1 : DSP, 0 : CPU
 
 Sound_prescale	EQU	3		; 25.175 MHz / 256 / (3 + 1) = 24585 Hz
 Sound_rate	EQU	24585
@@ -35,6 +42,8 @@ Ch_base:	rs.l 1			; The sample (taken from the registers)
 Ch_end:	rs.l 1			; Its length in bytes
 Ch_offset:	rs.l 1			; Position in the sample ...
 Ch_frac:	rs.w 1			;  ... and the fraction
+Ch_cmd:	rs.b 1			; For the DSP : 1 started, 2 stopped
+	rs.b 1
 Ch_size:	rs.b 0
 
 ; XBIOS (Falcon sound)
@@ -45,6 +54,7 @@ Setbuffer	EQU	131
 Setmode	EQU	132
 Settracks	EQU	133
 Buffoper	EQU	136
+Dsptristate	EQU	137
 Devconnect	EQU	139
 Sndstatus	EQU	140
 
@@ -77,10 +87,12 @@ Paula_dmacon:
 	btst	#15,d0			; Yes : on ?
 	bne.s	.On
 	sf	Ch_on(a1)			; No -> off
+	move.b	#2,Ch_cmd(a1)
 	bra.s	.Next
 .On:	tst.b	Ch_on(a1)			; Yes : started now ?
 	bne.s	.Next
 	jsr	Paula_take		; Yes -> the registers
+	move.b	#1,Ch_cmd(a1)
 	clr.l	Ch_offset(a1)
 	clr.w	Ch_frac(a1)
 .Next:	lea.l	16(a0),a0
@@ -126,6 +138,8 @@ Paula_take:
 Music_VBL:
 	tst.b	Sound_on
 	beq	.Exit
+	tst.b	Music_player		; On the DSP ?
+	bne	Dsp_VBL
 	movem.l	d0-d7/a0-a6,-(sp)
 .Count:	jsr	Sound_count		; Play position (frame)
 	move.l	d0,d1
@@ -287,6 +301,34 @@ Mix_channel:
 Init_sound:
 	movem.l	d0-d7/a0-a6,-(sp)
 	move.l	$42e.w,Memory_top		; (phystop)
+	sf	Music_player
+	IFNE	Music_use_dsp
+	move.w	#Locksnd,-(sp)		; The DSP ?
+	trap	#XBIOS
+	addq.l	#2,sp
+	move.w	#2,-(sp)			; Soundcmd(ADDERIN, matrix)
+	move.w	#4,-(sp)
+	move.w	#Soundcmd,-(sp)
+	trap	#XBIOS
+	addq.l	#6,sp
+	clr.w	-(sp)			; Soundcmd(LTATTEN / RTATTEN, 0)
+	clr.w	-(sp)
+	move.w	#Soundcmd,-(sp)
+	trap	#XBIOS
+	addq.l	#6,sp
+	clr.w	-(sp)
+	move.w	#1,-(sp)
+	move.w	#Soundcmd,-(sp)
+	trap	#XBIOS
+	addq.l	#6,sp
+	jsr	Dsp_init_sound
+	bne.s	.No_dsp
+	st	Music_player
+	st	Sound_on
+	movem.l	(sp)+,d0-d7/a0-a6
+	rts
+.No_dsp:
+	ENDC
 	lea.l	Volume_tables,a0		; Volume tables : sample * volume * 2
 	moveq.l	#0,d1			; Volume
 .Volume:	moveq.l	#0,d2			; Byte of the sample
@@ -365,11 +407,15 @@ Exit_sound:
 	tst.b	Sound_on
 	beq.s	.Exit
 	sf	Sound_on
-	clr.w	-(sp)			; Buffoper(0)
+	tst.b	Music_player
+	beq.s	.Cpu
+	jsr	Dsp_exit_sound
+	bra.s	.Unlock
+.Cpu:	clr.w	-(sp)			; Buffoper(0)
 	move.w	#Buffoper,-(sp)
 	trap	#XBIOS
 	addq.l	#4,sp
-	move.w	#Unlocksnd,-(sp)
+.Unlock:	move.w	#Unlocksnd,-(sp)
 	trap	#XBIOS
 	addq.l	#2,sp
 .Exit:	movem.l	(sp)+,d0-d2/a0-a2
@@ -380,6 +426,7 @@ Paula:	ds.b $100			; (the registers of the custom chips)
 Paula_dmacon_value:	ds.w 1
 Paula_filter:	ds.b 1			; (the filter of the Amiga : not used)
 Sound_on:	ds.b 1
+Music_player:	ds.b 1			; 0 : CPU, else DSP
 Mix_write:	ds.w 1			; Frame where the mixer goes on
 Mix_count:	ds.w 1
 Memory_top:	ds.l 1
@@ -387,3 +434,5 @@ Mix_channels:	ds.b 4*Ch_size
 Cia_b_dummy:	ds.b 4096			; (the CIA timer : not used)
 Volume_tables:	ds.w 65*256
 Ring:	ds.l Ring_frames			; (frames : left word, right word)
+
+	include	ST_KERNEL/MUSIC_DSP.S

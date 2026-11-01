@@ -31,8 +31,7 @@ The savegames are written into AMBERMOO\DATA.
 What is different from the Amiga version
 ----------------------------------------
 
-- The Thalion logo with the fairy before the intro and the ending sequence
-  are not there yet.
+- The ending sequence is not there yet.
 - On a VGA monitor the picture runs at 60 Hz with black bars above and below,
   the game itself runs at 50 Hz like on the Amiga.
 - The wobbling screen when the party is drugged is missing.

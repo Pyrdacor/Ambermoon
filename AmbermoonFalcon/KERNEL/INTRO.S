@@ -6,6 +6,7 @@
 ; tools/intro_data.py.
 
 	include	ST_KERNEL/INTRO_HW.S
+	include	ST_KERNEL/FANTASY.S
 
 	SECTION	Program,code
 

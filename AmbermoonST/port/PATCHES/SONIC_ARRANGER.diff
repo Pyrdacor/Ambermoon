@@ -1,6 +1,14 @@
 --- a/MUSIC/SONIC_ARRANGER.S
 +++ b/MUSIC/SONIC_ARRANGER.S
-@@ -128,8 +128,9 @@
+@@ -121,6 +121,7 @@
+ 	subq.l	#1,d0
+ 	bne.s	.Loop
+ .Exit:
+ 	movem.l	(sp)+,d0-d7/a0-a6
++	jsr	Paula_new_song	; ST: (Falcon : the samples go to the DSP)
+ 	rts
+ 
+@@ -128,8 +129,9 @@
  ; [ SA_LoadSong ]
  ;*****************************************************************************
  SA_LoadSong:

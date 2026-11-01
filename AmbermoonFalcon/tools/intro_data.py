@@ -1,17 +1,20 @@
 #!/usr/bin/env python3
 """Writes the data of the intro for the Falcon version (port_data.py --falcon): the data hunks of Ambermoon_intro
-as binary files, its first data hunk as an include (it has pointers), and the Sonic Arranger module of Intro_music."""
+and Fantasy_intro as binary files, its first data hunk as an include (it has pointers), and the Sonic Arranger module of Intro_music."""
 import os
 import struct
 import tempfile
 
-from hunks import hunks
+from dsp_asm import assemble
+from hunks import deplode, hunks
 
 MODULE = 0x197c    # in Intro_music : the replay of the Amiga, then the module
 
 
-def write(folder, intro, music):
+def write(folder, intro, music, fantasy):
     os.makedirs(folder, exist_ok=True)
+    assemble(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'KERNEL', 'DSP_MIX.ASM'),
+             os.path.join(folder, 'DSP_MIX.BIN'))
     with tempfile.NamedTemporaryFile(delete=False) as f:
         f.write(intro)
     H = hunks(f.name)
@@ -29,5 +32,10 @@ def write(folder, intro, music):
             out.append('\tdc.b\t$%02x' % b[p])
             p += 1
     open(os.path.join(folder, 'INTRO_H1.I'), 'w').write('\n'.join(out) + '\n')
+    with tempfile.NamedTemporaryFile(delete=False) as f:
+        f.write(fantasy)
+    F = deplode(hunks(f.name))
+    os.unlink(f.name)
+    open(os.path.join(folder, 'FANT_H1.BIN'), 'wb').write(F[1]['data'])
     assert struct.unpack_from('>I', music, MODULE)[0] == 0x28, 'Intro_music : no module'
     open(os.path.join(folder, 'INTRO_MU.BIN'), 'wb').write(music[MODULE:])

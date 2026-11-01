@@ -27,6 +27,7 @@ Videl_VFT	EQU	$ffff82a2
 ;   - Called in [ Start_program ] after [ Init_system ].
 ;*****************************************************************************
 Run_intro:
+	jsr	Fantasy_main		; The fairy
 	jsr	Timer_C_on		; Is there a savegame ?
 	clr.w	-(sp)			; Fopen("DATA\SAVES", read)
 	pea	.Saves
@@ -194,6 +195,7 @@ Intro_video:
 ;*****************************************************************************
 Intro_present:
 	movem.l	d0-d7/a0-a6,-(sp)
+	jsr	Intro_wait_shown
 	move.l	Intro_h5+$20,a0		; The Amiga screen
 	move.l	Off_screen,a1
 	lea.l	Intro_line_used,a6		; (the lines of this screen)
@@ -285,12 +287,7 @@ Intro_present:
 	add.l	d1,a1
 	jsr	Intro_clear_lines
 .Window:
-; ---------- Show it -------------------------------
-	jsr	Pointer_into_work
-	move.l	Off_screen,a0
-	move.l	On_screen,Off_screen
-	move.l	a0,On_screen
-	jsr	Show_screen
+	jsr	Intro_show
 	move.l	Off_screen,Work_screen
 	jsr	Pointer_out_of_work
 	movem.l	(sp)+,d0-d7/a0-a6
@@ -311,6 +308,35 @@ Intro_clear_lines:
 	dbra	d3,.Chunk
 	dbra	d7,.Line
 .Exit:	rts
+
+;*****************************************************************************
+; [ Show the converted screen ]
+; Changed registers : a0 and those of the called routines
+;*****************************************************************************
+Intro_show:
+	jsr	Pointer_into_work
+	move.l	Off_screen,a0
+	move.l	On_screen,Off_screen
+	move.l	a0,On_screen
+	move.l	a0,Shown_screen		; (no wait : the Amiga does not wait
+	jsr	Set_video_base		;  for the copper either)
+	move.w	VBL_counter,Intro_shown_vbl
+	rts
+
+;*****************************************************************************
+; [ Wait until the last screen is really shown ]
+; All registers are restored
+; NOTE :
+;   - The new screen is shown after the next vertical blank, the old one can
+;     only be used then.
+;*****************************************************************************
+Intro_wait_shown:
+	move.l	d0,-(sp)
+	move.w	Intro_shown_vbl,d0
+.Wait:	cmp.w	VBL_counter,d0
+	beq.s	.Wait
+	move.l	(sp)+,d0
+	rts
 
 ;*****************************************************************************
 ; [ Wait for a frame in the main menu ]
@@ -551,6 +577,10 @@ Blt_adat	EQU	$74
 Intro_blit:
 	movem.l	d0-d7/a0-a6,-(sp)
 	lea.l	Intro_custom,a6
+	andi.w	#$fffe,Blt_apt+2(a6)	; (the blitter has even addresses only)
+	andi.w	#$fffe,Blt_bpt+2(a6)
+	andi.w	#$fffe,Blt_cpt+2(a6)
+	andi.w	#$fffe,Blt_dpt+2(a6)
 	move.w	Blt_size(a6),d0		; Size
 	moveq.l	#63,d6
 	and.w	d0,d6
@@ -827,12 +857,11 @@ Intro_blit_fast:
 	lsr.w	#4,d2
 	cmp.w	d1,d2
 	bne	.No
-	move.w	Blt_bmod(a6),d0
-	addq.w	#2,d0
-	move.w	d0,Bl_bstep
+	move.w	Blt_bmod(a6),d6		; (the steps in registers, in the loop)
+	addq.w	#2,d6
 	move.w	Blt_dmod(a6),d0
 	addq.w	#2,d0
-	move.w	d0,Bl_dstep
+	move.w	d0,a6
 .Ca:	move.w	(a0),d0			; A : (A & B) | (!A & C)
 	add.w	a4,a0
 	and.w	d5,d0
@@ -841,7 +870,7 @@ Intro_blit_fast:
 	move.l	d3,d0
 	lsr.l	d1,d0
 	move.w	(a1),d2			; B
-	add.w	Bl_bstep,a1
+	add.w	d6,a1
 	swap	d4
 	move.w	d2,d4
 	move.l	d4,d2
@@ -852,8 +881,9 @@ Intro_blit_fast:
 	add.w	a5,a2
 	or.w	d2,d0
 	move.w	d0,(a3)
-	add.w	Bl_dstep,a3
+	add.w	a6,a3
 	dbra	d7,.Ca
+	lea.l	Intro_custom,a6
 	bra.s	.Done
 .Be2:	cmp.w	#$0be2,d0
 	bne	.No
@@ -904,6 +934,7 @@ Intro_blit_fast:
 	move.w	#-2,d6
 	sub.w	Blt_bmod(a6),d6
 	move.w	d6,Bl_bstep
+	move.w	Bl_dstep,a6		; (in a register, in the loop)
 .Ca_d:	move.w	(a0),d0			; A
 	add.w	a4,a0
 	and.w	d5,d0
@@ -927,8 +958,9 @@ Intro_blit_fast:
 	add.w	a5,a2
 	or.w	d2,d0
 	move.w	d0,(a3)
-	add.w	Bl_dstep,a3
+	add.w	a6,a3
 	dbra	d7,.Ca_d
+	lea.l	Intro_custom,a6
 	bra	.Done
 .Be2_d:	cmp.w	#$0be2,d0
 	bne	.No
@@ -1126,6 +1158,7 @@ Bl_generic:
 	SECTION	Fast_BSS,bss
 Intro_custom:	ds.b $200			; The custom chips
 Intro_ciaa:	ds.w 1			; CIAA PRA
+Intro_shown_vbl:	ds.w 1
 Intro_dirty:	ds.w 1
 Intro_last_save:	ds.w 1
 Intro_planes:	ds.w 1

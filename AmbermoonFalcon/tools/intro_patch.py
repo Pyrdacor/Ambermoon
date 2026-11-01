@@ -3,36 +3,14 @@
 
     intro_patch.py <generated.s> <INTRO.S>
 """
-import re
+import os
 import sys
 
-L = open(sys.argv[1]).read().split('\n')[2:]
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from patchlib import Source
 
-
-def off(line):
-    return int(line.rsplit('; ', 1)[1], 16) if re.search(r'; [0-9a-f]{5}$', line) else None
-
-
-def index(a):
-    for i, line in enumerate(L):
-        if off(line) == a:
-            return i
-    raise SystemExit('no line at %x' % a)
-
-
-def replace(a, b, new):
-    """The lines of the offsets a up to b (not including b) become new. The labels there stay."""
-    i, j = index(a), index(b)
-    while L[j - 1].endswith(':'):       # (the labels of the line b stay in front of it)
-        j -= 1
-    keep = [line for line in L[i:j] if line.endswith(':')]
-    L[i:j] = keep + ['\t' + x for x in new]
-
-
-def after(a, new):
-    i = index(a)
-    L[i + 1:i + 1] = ['\t' + x for x in new]
-
+S = Source(sys.argv[1])
+replace, after = S.replace, S.after
 
 H5 = '(Intro_h5+$%x).l'
 # entry : no system, no interrupts
@@ -78,17 +56,6 @@ replace(0x283a, 0x2848, ['rts'])
 # the stars : offsets in a screen of the Falcon (plane 4)
 replace(0x1ac4, 0x1acc, ['mulu.w\t#Screen_bytes_per_line,d3', 'move.w\td2,d0', 'lsr.w\t#4,d0', 'lsl.w\t#4,d0',
                          'add.w\td0,d3', 'addq.w\t#8,d3', 'btst\t#3,d2', 'beq.s\t*+4', 'addq.w\t#1,d3'])
-text = '\n'.join(L)
-# the custom chips and the CIA are memory
-text = text.replace('$dff000.l', 'Intro_custom')
-text = re.sub(r'\$dff([0-9a-f]{3})\.l', lambda m: '(Intro_custom+$%s).l' % m.group(1), text)
-text = text.replace('$bfe001.l', '(Intro_ciaa).l')
-# a blit starts with BLTSIZE
-out = []
-for line in text.split('\n'):
-    out.append(line)
-    if re.search(r',\$58\(a6\)', line) or re.search(r'^\tmove\.w\td6,\(a5\)\t', line):
-        out.append('\tjsr\tIntro_blit')
 HEAD = '''; Falcon kernel : the intro and the main menu
 ; The code of the Amiga program Ambermoon_intro (made from the executable with
 ; tools/intro_source.py and tools/intro_patch.py : without the changes it
@@ -97,6 +64,7 @@ HEAD = '''; Falcon kernel : the intro and the main menu
 ; tools/intro_data.py.
 
 	include	ST_KERNEL/INTRO_HW.S
+	include	ST_KERNEL/FANTASY.S
 
 	SECTION	Program,code
 
@@ -136,4 +104,4 @@ Intro_h5:	ds.b	$%x
 	even
 Intro_h6:	ds.b	$%x
 ''' % (0x488c * 4, 0x915b * 4)
-open(sys.argv[2], 'w', newline='\n').write(HEAD + '\n'.join(out) + TAIL)
+open(sys.argv[2], 'w', newline='\n').write(HEAD + S.text() + TAIL)
