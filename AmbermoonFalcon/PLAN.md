@@ -64,6 +64,10 @@ test runner of the ST port (`AmbermoonST/port/test/run.py`, `MACHINE=falcon`).
   `HATARI_ARGS="--monitor vga"` (the frames of a scenario times 1.2 : Hatari counts 60 frames per second).
 * Memory : 4 MB (the usual Falcon) are enough, tested with a 3D map with floor and ceiling and a combat with
   zoomed monsters; even 2 MB work. With 1 MB the TOS does not start the program (not enough memory).
-* Open: the intro, main menu and ending (separate Amiga programs without source: `Fantasy_intro`, `Ambermoon_intro`,
-  `Ambermoon_extro`), the CPU load of the mixer is not measured yet, the graphics unpacked in advance (the data are the original files, the game unpacks them
+* Intro and main menu : `KERNEL/INTRO.S` is the code of `Ambermoon_intro`, made by `tools/intro_source.py` (byte
+  identical without changes) and `tools/intro_patch.py`; the hardware in `KERNEL/INTRO_HW.S` : a blitter in software,
+  the Amiga screens are converted to the Falcon screen, the sprite is the kernel pointer. The data comes from
+  `tools/intro_data.py` at build time. The ST has an empty `Run_intro`.
+* Open: `Fantasy_intro` and `Ambermoon_extro` (separate Amiga programs), the CPU load of the mixer is not measured
+  yet, the graphics unpacked in advance (the data are the original files, the game unpacks them
   itself), the zoom and the 3D maps on the ST (68000 replacements of the 68020 code).

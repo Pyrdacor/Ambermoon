@@ -9,8 +9,7 @@ and about 6 MB on the hard disk.
 the folder `AMBERMOO` to the hard disk and start `AMBERFAL.PRG`. More in `README.TXT` in the archive.
 
 **Not there yet:**
-- The intro, the main menu and the ending sequence: the game starts directly with the last savegame, or with the
-  character editor if there is none.
+- The Thalion logo with the fairy before the intro, and the ending sequence.
 - The wobbling screen when the party is drugged.
 
 Tested in Hatari only so far, not on a real Falcon.

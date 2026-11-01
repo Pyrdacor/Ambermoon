@@ -188,6 +188,11 @@ Vbl_handler:
 	jsr	Update_mouse_sprite
 	jsr	Random
 	jsr	VblQ_handler
+	tst.l	VBL_hook			; (the intro of the Falcon)
+	beq.s	.No_hook
+	move.l	VBL_hook,a0
+	jsr	(a0)
+.No_hook:
 	tst.b	Music_flag
 	beq.s	.Exit
 	jsr	_SA_IrqLowLevel
@@ -360,6 +365,7 @@ Stack_pointer:	ds.l 1
 CPU_68020_plus:	ds.b 1
 System_active:	ds.b 1
 VBL_counter:	ds.w 1			; (the 50 Hz of the game)
+VBL_hook:	ds.l 1
 Frame_counter:	ds.w 1			; (the frames of the screen)
 Tick_timer:	ds.b 1			; The game at 50 Hz with Timer C
 Tick_divider:	ds.b 1
