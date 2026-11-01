@@ -69,6 +69,18 @@ _SA_StopSong:
 .Exit:	rts
 
 ;*****************************************************************************
+; [ The sound hardware ] (the Falcon : the DMA sound and its mixer)
+; NOTE :
+;   - The YM2149 needs nothing : [ Init_sound ] / [ Exit_sound ] (system
+;     start and end) and [ Music_VBL ] (every vertical blank, after the
+;     player) do nothing on the ST.
+;*****************************************************************************
+Init_sound:
+Exit_sound:
+Music_VBL:
+	rts
+
+;*****************************************************************************
 ; [ Play the song (vertical blank) ]
 ;*****************************************************************************
 _SA_IrqLowLevel:

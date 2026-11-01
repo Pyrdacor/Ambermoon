@@ -31,9 +31,9 @@ The savegames are written into AMBERMOO\DATA.
 What is different from the Amiga version
 ----------------------------------------
 
-- Music: the songs play on the YM2149 sound chip. 13 of them come from the
-  Atari ST version of Ambermoon, the other 19 were converted from the Amiga
-  songs. The sampled Amiga music is not there yet.
+- There is no intro, main menu or ending sequence yet: the game starts
+  directly with the last savegame, or with the character editor if there is
+  none.
 - On a VGA monitor the picture runs at 60 Hz with black bars above and below,
   the game itself runs at 50 Hz like on the Amiga.
 - The wobbling screen when the party is drugged is missing.

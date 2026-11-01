@@ -27,6 +27,7 @@ Init_system:
 	jsr	Init_screens
 	jsr	Init_video
 	jsr	Init_copper
+	jsr	Init_sound		; (the Falcon : DMA sound, MUSIC.S)
 ; ---------- Take over interrupts -----------------
 	move.w	sr,-(sp)
 	move.w	#$2700,sr
@@ -98,6 +99,7 @@ Exit_system:
 	move.b	Old_IMRB,MFP_IMRB
 	move.b	Old_VR,MFP_VR
 	move.w	(sp)+,sr
+	jsr	Exit_sound
 	jsr	Exit_video
 	dc.w	$a009			; Line-A : show mouse
 	movem.l	(sp)+,d0-d7/a0-a6
@@ -190,6 +192,7 @@ Vbl_handler:
 	beq.s	.Exit
 	jsr	_SA_IrqLowLevel
 .Exit:
+	jsr	Music_VBL			; (the Falcon : the mixer, MUSIC.S)
 	rts
 
 ;*****************************************************************************

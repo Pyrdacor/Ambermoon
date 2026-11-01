@@ -1,0 +1,261 @@
+--- a/MUSIC/SONIC_ARRANGER.S
++++ b/MUSIC/SONIC_ARRANGER.S
+@@ -128,8 +128,9 @@
+ ; [ SA_LoadSong ]
+ ;*****************************************************************************
+ SA_LoadSong:
+-	lea.l	$dff000,a0
+-	move.w	#15,150(a0)
++	lea.l	Paula,a0	; ST: (Falcon)
++	move.w	#15,Paula_dmacon_value	; ST: (Falcon)
++	jsr	Paula_dmacon	; ST: (Falcon)
+ 	move.w	#255,158(a0)
+ 	move.w	#1920,154(a0)
+ 	move.w	#1920,156(a0)
+@@ -219,7 +220,7 @@
+ 	bsr.w	SA_LoadSong
+ 	lea.l	sa_overLinePos,a0
+ 	addq.w	#1,(a0)
+-	lea.l	$bfd000,a0
++	lea.l	Cia_b_dummy,a0	; ST: (Falcon)
+ 	move.b	#17,3840(a0)
+ 	move.b	#-126,3328(a0)
+ .Exit:
+@@ -244,7 +245,8 @@
+ 	move.l	4,a6		; Exec base
+ 	jsr	_LVOEnable(a6)
+ 	bsr.s	SA_SilenceAllTracks
+-	move.w	#$f,Custom+dmacon
++	move.w	#$f,Paula_dmacon_value	; ST: (Falcon)
++	jsr	Paula_dmacon	; ST: (Falcon)
+ .Exit:
+ 	move.l	(sp)+,a6
+ 	rts
+@@ -253,7 +255,7 @@
+ ; [ SA_GetTimerCounter ]
+ ;*****************************************************************************
+ SA_GetTimerCounter:
+-	lea.l	$bfd000,a0
++	lea.l	Cia_b_dummy,a0	; ST: (Falcon)
+ 	move.b	1792(a0),d0
+ 	move.b	1536(a0),d1
+ 	cmp.b	1792(a0),d0
+@@ -268,10 +270,10 @@
+ SA_SetTimerCounter:
+ 	move.l	d1,-(sp)
+ 	move.l	#709379,d0
++	lea.l	Cia_b_dummy,a0	; ST: (Falcon; also without a tempo)
+ 	move.w	sa_songState-2,d1
+ 	beq.s	.Skip
+ 	divu.w	d1,d0
+-	lea.l	$bfd000,a0
+ .Skip:
+ 	clr.b	3840(a0)
+ 	move.b	d0,1536(a0)
+@@ -296,7 +298,7 @@
+ ; [ SA_StartSong ]
+ ;*****************************************************************************
+ SA_StartSong:
+-	bset.b	#1,$bfe001
++	bset.b	#1,Paula_filter	; ST: (Falcon)
+ 	movem.l	d0-d7/a0-a6,-(sp)
+ 	lea.l	sa_songState,a6
+ 	clr.w	(a6)
+@@ -322,13 +324,15 @@
+ ; [ SA_StopSong ]
+ ;*****************************************************************************
+ SA_StopSong:
+-	bclr.b	#1,$bfe001
++	bclr.b	#1,Paula_filter	; ST: (Falcon)
+ 	movem.l	d0-d7/a0-a6,-(sp)
+ 	lea.l	sa_songState,a0
+ 	clr.w	(a0)
+ 	lea.l	sa_sampleRepeat,a0
+ 	clr.l	(a0)
+ 	bsr.w	SA_SilenceAllTracks
++	move.w	#$f,Paula_dmacon_value	; ST: (Falcon : the channels off)
++	jsr	Paula_dmacon	; ST: (Falcon)
+ 	movem.l	(sp)+,d0-d7/a0-a6
+ 	rts
+ 
+@@ -401,25 +405,25 @@
+ 	beq.s	.Skip5
+ 	tst.b	(a6)
+ 	beq.s	.Skip
+-	lea.l	Custom+aud0+ac_ptr,a3
++	lea.l	Paula+aud0+ac_ptr,a3	; ST: (Falcon)
+ 	lea.l	sa_track,a4
+ 	bsr.w	SA_RepTrackSample
+ .Skip:
+ 	tst.b	1(a6)
+ 	beq.s	.Skip2
+-	lea.l	Custom+aud1+ac_ptr,a3
++	lea.l	Paula+aud1+ac_ptr,a3	; ST: (Falcon)
+ 	lea.l	sa_track+206,a4
+ 	bsr.w	SA_RepTrackSample
+ .Skip2:
+ 	tst.b	2(a6)
+ 	beq.s	.Skip3
+-	lea.l	Custom+aud2+ac_ptr,a3
++	lea.l	Paula+aud2+ac_ptr,a3	; ST: (Falcon)
+ 	lea.l	sa_track+412,a4
+ 	bsr.w	SA_RepTrackSample
+ .Skip3:
+ 	tst.b	3(a6)
+ 	beq.s	.Skip4
+-	lea.l	Custom+aud3+ac_ptr,a3
++	lea.l	Paula+aud3+ac_ptr,a3	; ST: (Falcon)
+ 	lea.l	sa_track+618,a4
+ 	bsr.w	SA_RepTrackSample
+ .Skip4:
+@@ -439,7 +443,8 @@
+ 	lea.l	sa_dmaConValue,a0
+ 	tst.w	(a0)
+ 	beq.s	.Exit
+-	move.w	(a0),Custom+dmacon
++	move.w	(a0),Paula_dmacon_value	; ST: (Falcon)
++	jsr	Paula_dmacon	; ST: (Falcon)
+ 	clr.w	(a0)
+ .Exit:
+ 	movem.l	(sp)+,d0-d7/a0-a6
+@@ -536,7 +541,7 @@
+ 	move.w	sa_overTranspose,d6
+ 	moveq.l	#1,d2
+ 	lea.l	sa_sampleRepeat,a2
+-	lea.l	Custom+aud0+ac_ptr,a3
++	lea.l	Paula+aud0+ac_ptr,a3	; ST: (Falcon)
+ 	lea.l	sa_track,a4
+ 	bsr.w	SA_AdvanceTrack
+ .Skip5:
+@@ -553,7 +558,7 @@
+ 	move.w	sa_overTranspose+2,d6
+ 	moveq.l	#2,d2
+ 	lea.l	sa_insertLockTime-3,a2
+-	lea.l	Custom+aud1+ac_ptr,a3
++	lea.l	Paula+aud1+ac_ptr,a3	; ST: (Falcon)
+ 	lea.l	sa_track+206,a4
+ 	bsr.w	SA_AdvanceTrack
+ .Skip7:
+@@ -570,7 +575,7 @@
+ 	move.w	sa_overNotePtr-4,d6
+ 	moveq.l	#4,d2
+ 	lea.l	sa_insertLockTime-2,a2
+-	lea.l	Custom+aud2+ac_ptr,a3
++	lea.l	Paula+aud2+ac_ptr,a3	; ST: (Falcon)
+ 	lea.l	sa_track+412,a4
+ 	bsr.w	SA_AdvanceTrack
+ .Skip9:
+@@ -587,7 +592,7 @@
+ 	move.w	sa_overNotePtr-2,d6
+ 	moveq.l	#8,d2
+ 	lea.l	sa_insertLockTime-1,a2
+-	lea.l	Custom+aud3+ac_ptr,a3
++	lea.l	Paula+aud3+ac_ptr,a3	; ST: (Falcon)
+ 	lea.l	sa_track+618,a4
+ 	bsr.w	SA_AdvanceTrack
+ .Skip11:
+@@ -758,10 +763,10 @@
+ SA_ApplyNoteEffect_LowPassFilter:
+ 	tst.b	d0
+ 	bne.s	.Exit
+-	bclr.b	#1,$bfe001
++	bclr.b	#1,Paula_filter	; ST: (Falcon)
+ 	rts
+ .Exit:
+-	bset.b	#1,$bfe001
++	bset.b	#1,Paula_filter	; ST: (Falcon)
+ 	rts
+ 
+ ;*****************************************************************************
+@@ -798,7 +803,7 @@
+ 	cmp.b	#127,d3
+ 	bne.s	.Skip2
+ 	bsr.w	SA_ClrTrackInst
+-	bra.s	.Skip10
++	bra.w	.Skip10	; ST: (Falcon : Paula_dmacon below is longer)
+ .Skip2:
+ 	move.w	d7,d0
+ 	moveq.l	#12,d1
+@@ -829,7 +834,8 @@
+ .Skip5:
+ 	tst.w	186(a4)
+ 	bne.s	.Skip6
+-	move.w	d2,Custom+dmacon
++	move.w	d2,Paula_dmacon_value	; ST: (Falcon)
++	jsr	Paula_dmacon	; ST: (Falcon)
+ 	move.w	#1,4(a3)
+ 	move.w	#114,6(a3)
+ .Skip6:
+@@ -964,7 +970,7 @@
+ 	moveq.l	#0,d0
+ 	move.w	d0,8(a3)
+ 	lea.l	sa_silence,a0
+-	move.w	a0,(a3)
++	move.l	a0,(a3)	; ST: (Falcon : the whole address, the emulation reads it)
+ 	move.w	#1,4(a3)
+ 	move.w	d0,142(a4)
+ 	move.w	d0,178(a4)
+@@ -981,22 +987,22 @@
+ 	move.l	a0,-(sp)
+ 	move.l	(a0),d7
+ 	lea.l	sa_track,a4
+-	lea.l	Custom+aud0+ac_ptr,a3
++	lea.l	Paula+aud0+ac_ptr,a3	; ST: (Falcon)
+ 	bsr.s	SA_ProcessTrack
+ 	move.l	(sp),a0
+ 	move.l	4(a0),d7
+ 	lea.l	sa_track+206,a4
+-	lea.l	Custom+aud1+ac_ptr,a3
++	lea.l	Paula+aud1+ac_ptr,a3	; ST: (Falcon)
+ 	bsr.s	SA_ProcessTrack
+ 	move.l	(sp),a0
+ 	move.l	8(a0),d7
+ 	lea.l	sa_track+412,a4
+-	lea.l	Custom+aud2+ac_ptr,a3
++	lea.l	Paula+aud2+ac_ptr,a3	; ST: (Falcon)
+ 	bsr.s	SA_ProcessTrack
+ 	move.l	(sp),a0
+ 	move.l	12(a0),d7
+ 	lea.l	sa_track+618,a4
+-	lea.l	Custom+aud3+ac_ptr,a3
++	lea.l	Paula+aud3+ac_ptr,a3	; ST: (Falcon)
+ 	bsr.s	SA_ProcessTrack
+ 	lea.l	4(sp),sp
+ 	rts
+@@ -1887,7 +1893,7 @@
+ SA_ApplySynthEffect_NoiseGen1:
+ 	lea.l	(a4),a0
+ 	move.w	168(a4),d1
+-	move.b	$dff007,d0
++	move.b	Paula_random,d0	; ST: (Falcon)
+ 	eor.b	d0,0(a0,d1.w)
+ 	bra.w	SA_AdvanceSynthEffectPos
+ 
+@@ -1904,7 +1910,7 @@
+ 	move.b	0(a0,d1.w),d0
+ 	eori.b	#5,d0
+ 	rol.b	#2,d0
+-	add.b	$dff007,d0
++	add.b	Paula_random,d0	; ST: (Falcon)
+ 	move.b	d0,0(a0,d1.w)
+ 	subq.w	#1,d1
+ 	bpl.s	.Loop
+@@ -2055,7 +2061,7 @@
+ 	move.l	d1,d0
+ 	mulu.w	#206,d0
+ 	lea.l	0(a4,d0.w),a4
+-	lea.l	Custom+aud0+ac_ptr,a3
++	lea.l	Paula+aud0+ac_ptr,a3	; ST: (Falcon)
+ 	move.l	d1,d0
+ 	lsl.l	#4,d0
+ 	lea.l	0(a3,d0.w),a3
+@@ -2064,7 +2070,8 @@
+ 	bsr.w	SA_AdvanceTrack
+ 	bsr.w	SA_ProcessSong
+ 	ori.w	#-$8000,d5
+-	move.w	d5,Custom+dmacon
++	move.w	d5,Paula_dmacon_value	; ST: (Falcon)
++	jsr	Paula_dmacon	; ST: (Falcon)
+ 	move.l	4,a6		; Exec base
+ 	jsr	_LVOEnable(a6)
+ 	movem.l	(sp)+,d0-d7/a0-a6

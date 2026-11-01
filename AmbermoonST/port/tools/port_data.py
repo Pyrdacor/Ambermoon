@@ -9,7 +9,8 @@ fixed files of Disks/Bugfixing/German/Amberfiles on top are copied unchanged int
 file for the ST kernel (File_map in port/KERNEL/LIBS.S), which translates the names the original code uses.
 With the json of port_palettes.py the graphics are converted to the ST format and the containers are stored
 raw (port_gfx.py), and Music.amb holds the songs of the ST version (port_music.py). With --falcon the graphics
-stay the original ones (32 colours, the Falcon version draws them as they are), Music.amb is the same.
+stay the original ones (32 colours, the Falcon version draws them as they are), and Music.amb is the one of the
+Amiga (the Falcon plays it with the Sonic Arranger replay of the Amiga version).
 """
 import os
 import sys
@@ -65,8 +66,9 @@ def main():
         import port_gfx
         if sys.argv[3] != '--falcon':
             files = port_gfx.convert_all(files, port_gfx.Palettes(sys.argv[3]))
-        import port_music                 # (the songs of the ST version, see port_music.py)
-        files['Music.amb'] = port_gfx.ambr(port_music.songs())
+        if sys.argv[3] != '--falcon':     # (the Falcon plays the Amiga music, see AmbermoonFalcon/KERNEL/MUSIC.S)
+            import port_music             # (the songs of the ST version, see port_music.py)
+            files['Music.amb'] = port_gfx.ambr(port_music.songs())
     short = short_names(files)
     data = os.path.join(hd, 'DATA')
     for name, content in files.items():

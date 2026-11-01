@@ -20,8 +20,9 @@ is a fix for both versions.
 * **Code:** one kernel. The ST kernel is split into common files and files for the hardware (video, colours,
   graphics, mouse pointer, text output). `AmbermoonFalcon/KERNEL` has only the Falcon versions of the hardware
   files; the build copies the ST kernel and replaces those.
-* **Music:** the music of the ST version (YM2149, MFP timers: the Falcon has both). Later maybe the Amiga
-  music with samples on the DMA sound of the Falcon.
+* **Music:** the Amiga music with the original Sonic Arranger replay (`KERNEL/MUSIC.S`, patch
+  `PATCHES/SONIC_ARRANGER.diff`): the replay writes an emulated Paula, a mixer plays the 4 channels on the DMA sound
+  (16 bit stereo, 24585 Hz).
 * **CPU:** 68030. The 68020 code of the original (3D) can stay.
 
 ## Stages
@@ -63,5 +64,6 @@ test runner of the ST port (`AmbermoonST/port/test/run.py`, `MACHINE=falcon`).
   `HATARI_ARGS="--monitor vga"` (the frames of a scenario times 1.2 : Hatari counts 60 frames per second).
 * Memory : 4 MB (the usual Falcon) are enough, tested with a 3D map with floor and ceiling and a combat with
   zoomed monsters; even 2 MB work. With 1 MB the TOS does not start the program (not enough memory).
-* Open: the graphics unpacked in advance (the data are the original files, the game unpacks them
+* Open: the intro, main menu and ending (separate Amiga programs without source: `Fantasy_intro`, `Ambermoon_intro`,
+  `Ambermoon_extro`), the CPU load of the mixer is not measured yet, the graphics unpacked in advance (the data are the original files, the game unpacks them
   itself), the zoom and the 3D maps on the ST (68000 replacements of the 68020 code).

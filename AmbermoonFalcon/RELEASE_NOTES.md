@@ -9,8 +9,8 @@ and about 6 MB on the hard disk.
 the folder `AMBERMOO` to the hard disk and start `AMBERFAL.PRG`. More in `README.TXT` in the archive.
 
 **Not there yet:**
-- The sampled Amiga music: the songs play on the YM2149, 13 of them from the Atari ST version of Ambermoon, 19
-  converted from the Amiga songs.
+- The intro, the main menu and the ending sequence: the game starts directly with the last savegame, or with the
+  character editor if there is none.
 - The wobbling screen when the party is drugged.
 
 Tested in Hatari only so far, not on a real Falcon.
