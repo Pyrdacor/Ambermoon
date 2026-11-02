@@ -626,6 +626,8 @@ L00ae4:
 	beq.b	L00b20	; 00b18
 	neg.w	(Intro_h5+$12140).l	; 00b1a
 L00b20:
+	jsr	Intro_comet_late
+	bne.w	L00bfc
 	bsr.w	L0288a	; 00b20
 	bsr.w	L02940	; 00b24
 	lea.l	(Intro_h2+$8e6e).l,a0	; 00b28

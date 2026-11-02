@@ -25,6 +25,8 @@ replace(0xc98, 0xd12, ['jsr\tFantasy_present', 'rts'])
 # the interrupt : buttons, colours, return
 after(0xd8e, ['jsr\tIntro_buttons'])
 after(0xdb0, ['jsr\tFantasy_palette'])
+# the sprites start here : before this the fairy has no position of her way yet
+after(0xe16, ['st\tFantasy_visible'])
 replace(0xff6, 0xff8, ['rts'])
 replace(0x1018, 0x101a, ['rts'])
 HEAD = '''; Falcon kernel : the fairy of Thalion

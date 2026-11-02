@@ -30,12 +30,13 @@ ch1	= $4c
 ch2	= $58
 ch3	= $64
 cmd_buf	= $80			; The 11 words of a channel from the host
-v_other	= $90			; The other side of the frame
+v_other	= $90			; The left side of the next frame
 v_a1	= $91			; (the main loop uses a and x0)
 v_a0	= $92
 v_a2	= $93
 v_x0	= $94
 v_shift	= $95			; 3 words : the shift of a byte in a word
+v_right	= $98			; The right side of the next frame
 
 	org	0
 	jmp	start
@@ -55,6 +56,7 @@ start:
 	rep	#48
 	move	a,x:(r0)+
 	move	a,x:v_other
+	move	a,x:v_right
 	move	#>v_shift,r0
 	move	#>0,x0
 	move	x0,x:(r0)+
@@ -191,20 +193,22 @@ ssi:
 	move	a2,x:v_a2
 	move	x0,x:v_x0
 	jclr	#2,x:$ffee,second
+	move	x:v_right,x0		; (the frame sync came with the word before :
+	move	x0,x:$ffef		;  this is the right side)
+; The next frame, behind the word : mixing takes longer than a word is sent
 	move	#>ch0,r0		; The frame : channels 0 and 3 left, 1 and 2
 	move	#>0,x1			;  right
 	jsr	mix
 	move	#>ch3,r0
 	jsr	mix
-	move	x1,y1
+	move	x1,x:v_other
 	move	#>ch1,r0
 	move	#>0,x1
-	move	y1,x:v_other		; (mix changes y1)
 	jsr	mix
 	move	#>ch2,r0
 	jsr	mix
-	move	x1,x:$ffef		; (the frame sync came with the word before :
-	jmp	ssi_end			;  this is the right side)
+	move	x1,x:v_right
+	jmp	ssi_end
 second:
 	move	x:v_other,x0		; The left side
 	move	x0,x:$ffef

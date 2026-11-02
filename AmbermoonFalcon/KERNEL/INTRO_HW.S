@@ -353,6 +353,35 @@ Intro_menu_wait:
 .Wait:	jmp	L0288a
 
 ;*****************************************************************************
+; [ Is this step of the comet late ? ]
+;  OUT : Z clear if it is not drawn
+; All registers are restored
+; NOTE :
+;   - The steps come every 2 vertical blanks ([ Comet_ticks ]), until the comet
+;     is so big that the CPU needs longer. The time of the impact stays right.
+;   - The distance in [ Intro_h5+$1212c ] goes from $36b0 down to $fe00 in steps
+;     of $100. The last step is always drawn : the destroyed town stays there.
+;*****************************************************************************
+Comet_ticks	EQU	2
+
+Intro_comet_late:
+	movem.l	d0/d1,-(sp)
+	moveq.l	#0,d1
+	move.w	Intro_h5+$1212c,d0
+	cmp.w	#$fe00+$100,d0
+	beq.s	.Exit
+	move.w	#$36b0+$100,d1
+	sub.w	d0,d1
+	lsr.w	#8,d1
+	mulu.w	#Comet_ticks,d1
+	cmp.l	Intro_h5+$4,d1
+	sls	d1
+	ext.w	d1
+.Exit:	tst.w	d1
+	movem.l	(sp)+,d0/d1
+	rts
+
+;*****************************************************************************
 ; [ Set the colours ] (vertical blank)
 ; Changed registers : d0-d2, d7, a0-a2
 ;*****************************************************************************

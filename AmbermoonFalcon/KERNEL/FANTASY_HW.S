@@ -43,6 +43,7 @@ Fantasy_init:
 	move.w	#-1,Fantasy_old_y+2
 	clr.w	Fantasy_full
 	clr.w	Fant_h2+$d0
+	sf	Fantasy_visible
 	lea.l	F00d88,a0
 	move.l	a0,VBL_hook
 	movem.l	(sp)+,d0/d1/a0
@@ -77,7 +78,7 @@ Fantasy_present:
 	beq.s	.First
 	moveq.l	#2,d6
 .First:	move.w	Fant_h2+$ca,d5		; The fairy
-	tst.w	Fant_h2+$d0
+	tst.b	Fantasy_visible		; (set by the interrupt, with the sprites)
 	bne.s	.Fairy
 	moveq.l	#-1,d5
 .Fairy:	lea.l	Fantasy_old_y,a5
@@ -116,6 +117,8 @@ Fantasy_present:
 	beq.s	.Show
 	jsr	Fantasy_fairy
 .Show:	jsr	Intro_show
+	move.l	Off_screen,Work_screen
+	jsr	Pointer_out_of_work
 	movem.l	(sp)+,d0-d7/a0-a6
 	rts
 
@@ -287,7 +290,7 @@ Fantasy_fairy:
 ;     of which the copper takes those in the table F00d12.
 ;*****************************************************************************
 Fantasy_palette:
-	movem.l	d0-d2/d7/a0-a3,-(sp)
+	movem.l	d0-d3/d7/a0-a3,-(sp)
 	lea.l	Fant_h2+$20,a0		; The same as last time ?
 	lea.l	Fantasy_old_palette,a1
 	moveq.l	#64-1,d7
@@ -312,16 +315,16 @@ Fantasy_palette:
 .Bank:	move.l	(a0)+,(a1)+
 	dbra	d7,.Bank
 	lea.l	F00d12,a3			; (those of the copper list)
-.Copper:	move.w	(a3)+,d2
+.Copper:	move.w	(a3)+,d3
 	bmi.s	.Exit
 	lea.l	Fant_h2+$60,a0
-	move.w	0(a0,d2.w),d0
+	move.w	0(a0,d3.w),d0
 	jsr	Amiga_to_videl
 	lea.l	Videl_palette+32*4,a0
-	add.w	d2,d2
-	move.l	d1,0(a0,d2.w)
+	add.w	d3,d3
+	move.l	d1,0(a0,d3.w)
 	bra.s	.Copper
-.Exit:	movem.l	(sp)+,d0-d2/d7/a0-a3
+.Exit:	movem.l	(sp)+,d0-d3/d7/a0-a3
 	rts
 
 	SECTION	Fast_BSS,bss
@@ -330,5 +333,7 @@ Fantasy_old_y:	ds.w 2
 Fantasy_shift:	ds.w 1
 Fantasy_chunk:	ds.w 1
 Fantasy_old_palette:	ds.w 64
+Fantasy_visible:	ds.b 1
+	even
 
 	SECTION	Program,code

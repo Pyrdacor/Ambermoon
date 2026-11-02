@@ -1018,6 +1018,7 @@ F00e04:
 	move.w	d1,(Fant_h2+$ca).l	; 00e10
 F00e16:
 	lea.l	(Fant_h1+$1ac).l,a0	; 00e16
+	st	Fantasy_visible
 	move.w	(Fant_h2+$bc).l,d2	; 00e1c
 	mulu.w	#$920,d2	; 00e22
 	adda.l	d2,a0	; 00e26
