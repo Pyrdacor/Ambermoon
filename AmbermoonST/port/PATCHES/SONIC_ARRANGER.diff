@@ -1,14 +1,13 @@
 --- a/MUSIC/SONIC_ARRANGER.S
 +++ b/MUSIC/SONIC_ARRANGER.S
-@@ -121,6 +121,7 @@
- 	subq.l	#1,d0
+@@ -122,14 +122,16 @@
  	bne.s	.Loop
  .Exit:
  	movem.l	(sp)+,d0-d7/a0-a6
 +	jsr	Paula_new_song	; ST: (Falcon : the samples go to the DSP)
  	rts
  
-@@ -128,8 +129,9 @@
+ ;*****************************************************************************
  ; [ SA_LoadSong ]
  ;*****************************************************************************
  SA_LoadSong:
@@ -20,7 +19,7 @@
  	move.w	#255,158(a0)
  	move.w	#1920,154(a0)
  	move.w	#1920,156(a0)
-@@ -219,7 +220,7 @@
+@@ -219,7 +221,7 @@
  	bsr.w	SA_LoadSong
  	lea.l	sa_overLinePos,a0
  	addq.w	#1,(a0)
@@ -29,7 +28,7 @@
  	move.b	#17,3840(a0)
  	move.b	#-126,3328(a0)
  .Exit:
-@@ -244,7 +245,8 @@
+@@ -244,7 +246,8 @@
  	move.l	4,a6		; Exec base
  	jsr	_LVOEnable(a6)
  	bsr.s	SA_SilenceAllTracks
@@ -39,7 +38,7 @@
  .Exit:
  	move.l	(sp)+,a6
  	rts
-@@ -253,7 +255,7 @@
+@@ -253,7 +256,7 @@
  ; [ SA_GetTimerCounter ]
  ;*****************************************************************************
  SA_GetTimerCounter:
@@ -48,7 +47,7 @@
  	move.b	1792(a0),d0
  	move.b	1536(a0),d1
  	cmp.b	1792(a0),d0
-@@ -268,10 +270,10 @@
+@@ -268,10 +271,10 @@
  SA_SetTimerCounter:
  	move.l	d1,-(sp)
  	move.l	#709379,d0
@@ -60,7 +59,7 @@
  .Skip:
  	clr.b	3840(a0)
  	move.b	d0,1536(a0)
-@@ -296,7 +298,7 @@
+@@ -296,7 +299,7 @@
  ; [ SA_StartSong ]
  ;*****************************************************************************
  SA_StartSong:
@@ -69,7 +68,7 @@
  	movem.l	d0-d7/a0-a6,-(sp)
  	lea.l	sa_songState,a6
  	clr.w	(a6)
-@@ -322,13 +324,15 @@
+@@ -322,13 +325,15 @@
  ; [ SA_StopSong ]
  ;*****************************************************************************
  SA_StopSong:
@@ -86,7 +85,7 @@
  	movem.l	(sp)+,d0-d7/a0-a6
  	rts
  
-@@ -401,25 +405,25 @@
+@@ -401,25 +406,25 @@
  	beq.s	.Skip5
  	tst.b	(a6)
  	beq.s	.Skip
@@ -116,7 +115,7 @@
  	lea.l	sa_track+618,a4
  	bsr.w	SA_RepTrackSample
  .Skip4:
-@@ -439,7 +443,8 @@
+@@ -439,7 +444,8 @@
  	lea.l	sa_dmaConValue,a0
  	tst.w	(a0)
  	beq.s	.Exit
@@ -126,7 +125,7 @@
  	clr.w	(a0)
  .Exit:
  	movem.l	(sp)+,d0-d7/a0-a6
-@@ -536,7 +541,7 @@
+@@ -536,7 +542,7 @@
  	move.w	sa_overTranspose,d6
  	moveq.l	#1,d2
  	lea.l	sa_sampleRepeat,a2
@@ -135,7 +134,7 @@
  	lea.l	sa_track,a4
  	bsr.w	SA_AdvanceTrack
  .Skip5:
-@@ -553,7 +558,7 @@
+@@ -553,7 +559,7 @@
  	move.w	sa_overTranspose+2,d6
  	moveq.l	#2,d2
  	lea.l	sa_insertLockTime-3,a2
@@ -144,7 +143,7 @@
  	lea.l	sa_track+206,a4
  	bsr.w	SA_AdvanceTrack
  .Skip7:
-@@ -570,7 +575,7 @@
+@@ -570,7 +576,7 @@
  	move.w	sa_overNotePtr-4,d6
  	moveq.l	#4,d2
  	lea.l	sa_insertLockTime-2,a2
@@ -153,7 +152,7 @@
  	lea.l	sa_track+412,a4
  	bsr.w	SA_AdvanceTrack
  .Skip9:
-@@ -587,7 +592,7 @@
+@@ -587,7 +593,7 @@
  	move.w	sa_overNotePtr-2,d6
  	moveq.l	#8,d2
  	lea.l	sa_insertLockTime-1,a2
@@ -162,7 +161,34 @@
  	lea.l	sa_track+618,a4
  	bsr.w	SA_AdvanceTrack
  .Skip11:
-@@ -758,10 +763,10 @@
+@@ -603,9 +609,23 @@
+ 	move.b	797(a4),7(a1)
+ 	rts
+ 
+-sa_noteEffectTable:
+-	dc.w	2,4,$a,2,$10,$38,$42,$50
+-	dc.w	$56,$5c,$70,$76,$8e,$ae,$bc,$d4
++sa_noteEffectTable:	; ST: (the distances from the labels : the assembler makes the code shorter)
++	dc.w	SA_ApplyNoteEffect_None-Switch_note_command	; ST:
++	dc.w	SA_ApplyNoteEffect_PitchBend-Switch_note_command	; ST:
++	dc.w	SA_ApplyNoteEffect_RestartAdsr-Switch_note_command	; ST:
++	dc.w	SA_ApplyNoteEffect_None-Switch_note_command	; ST:
++	dc.w	SA_ApplyNoteEffect_Vibrato-Switch_note_command	; ST:
++	dc.w	SA_ApplyNoteEffect_SetSyncValue-Switch_note_command	; ST:
++	dc.w	SA_ApplyNoteEffect_SetMasterVolume-Switch_note_command	; ST:
++	dc.w	SA_ApplyNoteEffect_SetPortamento-Switch_note_command	; ST:
++	dc.w	SA_ApplyNoteEffect_SkipPortamento-Switch_note_command	; ST:
++	dc.w	SA_ApplyNoteEffect_SetPatternLength-Switch_note_command	; ST:
++	dc.w	SA_ApplyNoteEffect_VolumeSlide-Switch_note_command	; ST:
++	dc.w	SA_ApplyNoteEffect_PatternJump-Switch_note_command	; ST:
++	dc.w	SA_ApplyNoteEffect_SetVolume-Switch_note_command	; ST:
++	dc.w	SA_ApplyNoteEffect_BreakPattern-Switch_note_command	; ST:
++	dc.w	SA_ApplyNoteEffect_LowPassFilter-Switch_note_command	; ST:
++	dc.w	SA_ApplyNoteEffect_SetSongSpeed-Switch_note_command	; ST:
+ 
+ ;*****************************************************************************
+ ; [ SA_ApplyNoteEffect ]
+@@ -758,10 +778,10 @@
  SA_ApplyNoteEffect_LowPassFilter:
  	tst.b	d0
  	bne.s	.Exit
@@ -175,7 +201,7 @@
  	rts
  
  ;*****************************************************************************
-@@ -798,7 +803,7 @@
+@@ -798,7 +818,7 @@
  	cmp.b	#127,d3
  	bne.s	.Skip2
  	bsr.w	SA_ClrTrackInst
@@ -184,7 +210,7 @@
  .Skip2:
  	move.w	d7,d0
  	moveq.l	#12,d1
-@@ -829,7 +834,8 @@
+@@ -829,7 +849,8 @@
  .Skip5:
  	tst.w	186(a4)
  	bne.s	.Skip6
@@ -194,7 +220,7 @@
  	move.w	#1,4(a3)
  	move.w	#114,6(a3)
  .Skip6:
-@@ -964,7 +970,7 @@
+@@ -964,7 +985,7 @@
  	moveq.l	#0,d0
  	move.w	d0,8(a3)
  	lea.l	sa_silence,a0
@@ -203,7 +229,7 @@
  	move.w	#1,4(a3)
  	move.w	d0,142(a4)
  	move.w	d0,178(a4)
-@@ -981,22 +987,22 @@
+@@ -981,22 +1002,22 @@
  	move.l	a0,-(sp)
  	move.l	(a0),d7
  	lea.l	sa_track,a4
@@ -230,7 +256,69 @@
  	bsr.s	SA_ProcessTrack
  	lea.l	4(sp),sp
  	rts
-@@ -1887,7 +1893,7 @@
+@@ -1259,43 +1280,43 @@
+ 	rts
+ 
+ Switch_instrument_effect_jump_offsets:
+-	dc.w	$57e
++	dc.w	SA_ApplySynthEffect_None-Switch_instrument_effect	; ST:
+ 
+ sa_synthEffectTable:
+ 	; unsigned short
+-	dc.w	2
++	dc.w	SA_ApplySynthEffect_WaveNegator-Switch_instrument_effect	; ST:
+ 	; unsigned short
+-	dc.w	$12
++	dc.w	SA_ApplySynthEffect_FreeNegator-Switch_instrument_effect	; ST:
+ 	; unsigned short
+-	dc.w	$da
++	dc.w	SA_ApplySynthEffect_RotateVert-Switch_instrument_effect	; ST:
+ 	; unsigned short
+-	dc.w	$128
++	dc.w	SA_ApplySynthEffect_RotateHori-Switch_instrument_effect	; ST:
+ 	; unsigned short
+-	dc.w	$14a
++	dc.w	SA_ApplySynthEffect_AlienVoice-Switch_instrument_effect	; ST:
+ 	; unsigned short
+-	dc.w	$1b6
++	dc.w	SA_ApplySynthEffect_PolyNegato-Switch_instrument_effect	; ST:
+ 	; unsigned short
+-	dc.w	$1ec
++	dc.w	SA_ApplySynthEffect_ShackWave1-Switch_instrument_effect	; ST:
+ 	; unsigned short
+-	dc.w	$256
++	dc.w	SA_ApplySynthEffect_ShackWave2-Switch_instrument_effect	; ST:
+ 	; unsigned short
+-	dc.w	$2b4
++	dc.w	SA_ApplySynthEffect_Metamorph-Switch_instrument_effect	; ST:
+ 	; unsigned short
+-	dc.w	$3b6
++	dc.w	SA_ApplySynthEffect_LaserAmf-Switch_instrument_effect	; ST:
+ 	; unsigned short
+-	dc.w	$3d2
++	dc.w	SA_ApplySynthEffect_WaveAlias-Switch_instrument_effect	; ST:
+ 	; unsigned short
+-	dc.w	$474
++	dc.w	SA_ApplySynthEffect_NoiseGen1-Switch_instrument_effect	; ST:
+ 	; unsigned short
+-	dc.w	$4b4
++	dc.w	SA_ApplySynthEffect_LowPassF1-Switch_instrument_effect	; ST:
+ 	; unsigned short
+-	dc.w	$506
++	dc.w	SA_ApplySynthEffect_LowPassF2-Switch_instrument_effect	; ST:
+ 	; unsigned short
+-	dc.w	$282
++	dc.w	SA_ApplySynthEffect_Oszilator1-Switch_instrument_effect	; ST:
+ 	; unsigned short
+-	dc.w	$488
++	dc.w	SA_ApplySynthEffect_NoiseGen2-Switch_instrument_effect	; ST:
+ 	; unsigned short
+-	dc.w	$388
++	dc.w	SA_ApplySynthEffect_FmDrum-Switch_instrument_effect	; ST:
+ 
+ ;*****************************************************************************
+ ; [ SA_ApplySynthEffect ]
+@@ -1887,7 +1908,7 @@
  SA_ApplySynthEffect_NoiseGen1:
  	lea.l	(a4),a0
  	move.w	168(a4),d1
@@ -239,7 +327,7 @@
  	eor.b	d0,0(a0,d1.w)
  	bra.w	SA_AdvanceSynthEffectPos
  
-@@ -1904,7 +1910,7 @@
+@@ -1904,7 +1925,7 @@
  	move.b	0(a0,d1.w),d0
  	eori.b	#5,d0
  	rol.b	#2,d0
@@ -248,7 +336,7 @@
  	move.b	d0,0(a0,d1.w)
  	subq.w	#1,d1
  	bpl.s	.Loop
-@@ -2055,7 +2061,7 @@
+@@ -2055,7 +2076,7 @@
  	move.l	d1,d0
  	mulu.w	#206,d0
  	lea.l	0(a4,d0.w),a4
@@ -257,7 +345,7 @@
  	move.l	d1,d0
  	lsl.l	#4,d0
  	lea.l	0(a3,d0.w),a3
-@@ -2064,7 +2070,8 @@
+@@ -2064,7 +2085,8 @@
  	bsr.w	SA_AdvanceTrack
  	bsr.w	SA_ProcessSong
  	ori.w	#-$8000,d5
