@@ -34,6 +34,8 @@ replace(0x1018, 0x101a, ['rts'])
 after(0x226, ['clr.l	(Fant_h2+$a0).l'])
 replace(0x22e, 0x238, [])
 replace(0x248, 0x252, ['cmpi.l	#3,(Fant_h2+$a0).l'])
+# a sparkle : straight to the blit of the sparkles (the same kind of blit every time)
+replace(0x7fa, 0x7fe, ['jsr	Fantasy_sparkle'])
 HEAD = '''; Falcon kernel : the fairy of Thalion
 ; The code of the Amiga program Fantasy_intro (deploded and made from the
 ; executable with tools/intro_source.py and tools/fantasy_patch.py). The labels

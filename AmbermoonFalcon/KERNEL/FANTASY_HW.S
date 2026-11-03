@@ -29,6 +29,33 @@ Fantasy_main:
 	rts
 
 ;*****************************************************************************
+; [ Blit a sparkle ] (F0078c : the registers of the blitter are set)
+;   IN : d3 - BLTSIZE (.w)
+;        a6 - Pointer to [ Intro_custom ] (.l)
+; All registers are restored
+; NOTE :
+;   - Always the same kind of blit (cookie cut, two words, from the data of
+;     the fairy) : straight to [ Intro_star_blit ], without the checks of
+;     [ Intro_blit ].
+;*****************************************************************************
+Fantasy_sparkle:
+	move.w	d3,Blt_size(a6)
+	movem.l	d0-d7/a0-a5,-(sp)
+	move.w	d3,d0			; Height
+	lsr.w	#6,d0
+	cmp.w	#Star_rows,d0
+	bhi.s	.Blit
+	move.w	d0,Bl_height
+	move.w	Blt_con0(a6),d2		; Shift
+	rol.w	#4,d2
+	andi.w	#15,d2
+	jsr	Intro_star_blit
+	movem.l	(sp)+,d0-d7/a0-a5
+	rts
+.Blit:	movem.l	(sp)+,d0-d7/a0-a5
+	jmp	Intro_blit
+
+;*****************************************************************************
 ; [ Take over the screens, start the interrupt ]
 ; All registers are restored
 ;*****************************************************************************

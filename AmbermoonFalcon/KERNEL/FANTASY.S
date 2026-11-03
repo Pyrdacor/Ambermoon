@@ -600,8 +600,7 @@ F007b2:
 	move.w	#$0,$62(a6)	; 007e8
 	move.w	#$24,$60(a6)	; 007ee
 	move.w	#$24,$66(a6)	; 007f4
-	move.w	d3,$58(a6)	; 007fa
-	jsr	Intro_blit
+	jsr	Fantasy_sparkle
 	movem.l	(a7)+,d2/a2	; 007fe
 	rts		; 00802
 F00804:

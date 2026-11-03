@@ -29,7 +29,6 @@ ch0	= $40
 ch1	= $4c
 ch2	= $58
 ch3	= $64
-cmd_buf	= $80			; The 11 words of a channel from the host
 v_other	= $90			; The left side of the next frame
 v_a1	= $91			; (the main loop uses a and x0)
 v_a0	= $92
@@ -37,6 +36,7 @@ v_a2	= $93
 v_x0	= $94
 v_shift	= $95			; 3 words : the shift of a byte in a word
 v_right	= $98			; The right side of the next frame
+cmd_buf	= $a0			; The 4 * 11 words of the channels from the host
 
 	org	0
 	jmp	start
@@ -110,75 +110,99 @@ ping:
 	jmp	main
 
 ; ---------- The registers of the channels -----------
+; The words of all 4 channels first, then the next samples, steps and volumes,
+; then the starts and stops together : the channels which are started at the
+; same time start in the same frame, like with DMACON on the Amiga.
+; (The interrupt uses r0-r2 and n0-n2, x1, y and b : not here.)
 channels:
-	move	#>ch0,r6
-	jsr	channel
-	move	#>ch1,r6
-	jsr	channel
-	move	#>ch2,r6
-	jsr	channel
-	move	#>ch3,r6
-	jsr	channel
-	jmp	main
-
-channel:
 	move	#>cmd_buf,r4		; The words from the host
-	move	#>11,x0
+	move	#>44,x0
 	do	x0,ch_end
 ch_w:	jclr	#0,x:$ffe9,ch_w
 	move	x:$ffeb,a
 	move	a1,x:(r4)+
 ch_end:
 	move	#>cmd_buf,r4
+	move	#>ch0,r6
+	jsr	ch_regs
+	move	#>cmd_buf+11,r4
+	move	#>ch1,r6
+	jsr	ch_regs
+	move	#>cmd_buf+22,r4
+	move	#>ch2,r6
+	jsr	ch_regs
+	move	#>cmd_buf+33,r4
+	move	#>ch3,r6
+	jsr	ch_regs
 	ori	#3,mr			; (the interrupt must not see half of it)
-	move	x:(r4)+,a		; Flags
+	move	#>cmd_buf,r4
+	move	#>ch0,r6
+	jsr	ch_flags
+	move	#>cmd_buf+11,r4
+	move	#>ch1,r6
+	jsr	ch_flags
+	move	#>cmd_buf+22,r4
+	move	#>ch2,r6
+	jsr	ch_flags
+	move	#>cmd_buf+33,r4
+	move	#>ch3,r6
+	jsr	ch_flags
+	andi	#$fc,mr
+	jmp	main
+
+; The next sample, the step and the volume of the channel r6 (words at r4)
+ch_regs:
+	move	r4,r5			; (behind flags, position and end)
+	move	#>5,n5
+	move	(r5)+n5
+	move	r6,r3			; The next sample
+	move	#>c_next,n3
+	move	(r3)+n3
+	move	x:(r5)+,a
+	move	a1,x:(r3)+
+	move	x:(r5)+,a
+	move	a1,x:(r3)+
+	move	x:(r5)+,a
+	move	a1,x:(r3)+
+	move	x:(r5)+,a
+	move	a1,x:(r3)+
+	move	#>c_step,n6		; Step, volume
+	move	x:(r5)+,a
+	move	a1,x:(r6+n6)
+	move	#>c_vol,n6
+	move	x:(r5)+,a
+	move	a1,x:(r6+n6)
+	rts
+
+; Start or stop the channel r6 (words at r4)
+ch_flags:
+	move	x:(r4),a		; Flags
 	move	#>1,x0
 	cmp	x0,a
 	jeq	ch_start
 	move	#>2,x0
 	cmp	x0,a
-	jne	ch_skip
+	jne	ch_done
 	move	#>c_on,n6		; Off
 	clr	a
 	move	a,x:(r6+n6)
-ch_skip:
-	move	(r4)+			; (no start position, no end)
-	move	(r4)+
-	move	(r4)+
-	move	(r4)+
-	jmp	ch_regs
+	rts
 ch_start:
-	move	r6,r5			; Start : position, end
-	move	x:(r4)+,a
-	move	a1,x:(r5)+
-	move	x:(r4)+,a
-	move	a1,x:(r5)+
-	move	x:(r4)+,a
-	move	a1,x:(r5)+
-	move	x:(r4)+,a
-	move	a1,x:(r5)+
+	move	r4,r5			; Start : position, end
+	move	(r5)+
+	move	r6,r3
+	move	x:(r5)+,a
+	move	a1,x:(r3)+
+	move	x:(r5)+,a
+	move	a1,x:(r3)+
+	move	x:(r5)+,a
+	move	a1,x:(r3)+
+	move	x:(r5)+,a
+	move	a1,x:(r3)+
 	move	#>c_on,n6
 	move	#>1,x0
 	move	x0,x:(r6+n6)
-ch_regs:
-	move	#>c_next,n5		; The next sample
-	move	r6,r5
-	move	(r5)+n5
-	move	x:(r4)+,a
-	move	a1,x:(r5)+
-	move	x:(r4)+,a
-	move	a1,x:(r5)+
-	move	x:(r4)+,a
-	move	a1,x:(r5)+
-	move	x:(r4)+,a
-	move	a1,x:(r5)+
-	move	#>c_step,n6		; Step, volume
-	move	x:(r4)+,a
-	move	a1,x:(r6+n6)
-	move	#>c_vol,n6
-	move	x:(r4)+,a
-	move	a1,x:(r6+n6)
-	andi	#$fc,mr
+ch_done:
 	rts
 
 ; The next word from the host in a
