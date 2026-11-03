@@ -603,6 +603,9 @@ Blt_cdat	EQU	$70
 Blt_bdat	EQU	$72
 Blt_adat	EQU	$74
 
+Star_slots	EQU	256		; The sparkles of the fairy (a slot : 512
+Star_rows	EQU	46		;  bytes, 18 + 10 for each line with A)
+
 Intro_blit:
 	movem.l	d0-d7/a0-a6,-(sp)
 	lea.l	Intro_custom,a6
@@ -1036,7 +1039,22 @@ Intro_blit_cookie:
 	beq.s	.Go
 	btst	#11,d0			; (the mask of A only without A)
 	bne	.No
-.Go:	move.w	d1,Bl_sb
+	bra.s	.General
+.Go:	cmp.w	#1,d6			; Two words, A only in the first one,
+	bne.s	.General			;  C = D ? (the sparkles of the fairy)
+	btst	#11,d0
+	beq.s	.General
+	cmp.l	#$ffff0000,Blt_afwm(a6)
+	bne.s	.General
+	move.l	Blt_cpt(a6),d3
+	cmp.l	Blt_dpt(a6),d3
+	bne.s	.General
+	move.w	Blt_cmod(a6),d3
+	cmp.w	Blt_dmod(a6),d3
+	bne.s	.General
+	tst.w	Blt_bmod(a6)
+	beq	.Two
+.General:	move.w	d1,Bl_sb
 	move.w	d2,Bl_sa
 	move.w	d0,Bl_con0
 	move.l	Blt_apt(a6),a0
@@ -1093,6 +1111,194 @@ Intro_blit_cookie:
 	moveq.l	#0,d0
 	rts
 .No:	moveq.l	#1,d0
+	rts
+; Two words : the second word of A is masked, so a line without A stays C.
+; (B without modulo : the B before a line is the word before it)
+.Two:	move.l	Blt_apt(a6),d3		; From the data of the fairy ?
+	cmp.l	#Fant_h1,d3
+	bcs.s	.Two_direct
+	cmp.l	#Fant_h1_end,d3
+	bcc.s	.Two_direct
+	cmp.w	#Star_rows,Bl_height
+	bhi.s	.Two_direct
+	jmp	Intro_star_blit		; Yes -> made once
+.Two_direct:	move.w	d2,d5			; (the shift of A and B)
+	move.l	Blt_apt(a6),a0
+	move.l	Blt_bpt(a6),a1
+	move.l	Blt_cpt(a6),a2
+	move.l	a1,a5			; (the first line : no B before it)
+	move.w	Blt_amod(a6),a4
+	addq.w	#4,a4
+	move.w	Blt_cmod(a6),a3
+	addq.w	#4,a3
+	move.w	Bl_height,d7
+	subq.w	#1,d7
+.T_line:	tst.w	(a0)			; A ?
+	bne.s	.T_draw
+.T_next:	add.w	a4,a0
+	addq.l	#4,a1
+	add.w	a3,a2
+	dbra	d7,.T_line
+	move.l	a0,Blt_apt(a6)
+	move.l	a1,Blt_bpt(a6)
+	move.l	a2,Blt_cpt(a6)
+	move.l	a2,Blt_dpt(a6)
+	moveq.l	#0,d0
+	rts
+.T_draw:	move.w	(a0),d0			; A
+	move.w	(a1),d2			; B
+	move.w	2(a1),d3
+	moveq.l	#0,d4			; (the B before)
+	cmpa.l	a5,a1
+	beq.s	.T_first
+	move.w	-2(a1),d4
+.T_first:	swap	d0			; A : the first word high, the
+	clr.w	d0			;  second one low
+	lsr.l	d5,d0
+	move.w	d4,d1			; B : the first word
+	swap	d1
+	move.w	d2,d1
+	lsr.l	d5,d1
+	swap	d2			; B : the second word
+	move.w	d3,d2
+	lsr.l	d5,d2
+	move.l	d0,d6			; (A & B) | (!A & C)
+	swap	d6
+	and.w	d6,d1
+	not.w	d6
+	and.w	(a2),d6
+	or.w	d1,d6
+	move.w	d6,(a2)
+	and.w	d0,d2
+	not.w	d0
+	and.w	2(a2),d0
+	or.w	d2,d0
+	move.w	d0,2(a2)
+	bra.s	.T_next
+
+;*****************************************************************************
+; [ Cookie cut blit of a sparkle ] (see [ Intro_blit_cookie ], .Two)
+;   IN : d2 - Shift of A and B (.w)
+;        a6 - Pointer to [ Intro_custom ] (.l)
+;  OUT : Z set (the blit was done)
+; Changed registers : d0-d7, a0-a5
+; NOTE :
+;   - A and B come from the data of the fairy, which never changes : each
+;     sparkle (source, shift, size) is made once into a list of its lines with
+;     A, each with the mask and the data of both words (Star_slots, the slot
+;     from the source and the shift).
+;*****************************************************************************
+Intro_star_blit:
+	move.l	Blt_apt(a6),d3		; The slot
+	move.l	d3,d0
+	sub.l	#Fant_h1,d0		; (the sparkles are 180 bytes apart :
+	lsl.l	#2,d0			;  45 * 16 for each, with the 16
+	add.w	d2,d0			;  shifts behind it)
+	andi.l	#Star_slots-1,d0
+	lsl.l	#8,d0			; (512 bytes)
+	add.l	d0,d0
+	lea.l	Star_cache,a2
+	add.l	d0,a2
+	cmp.l	(a2),d3			; Made already ?
+	bne.s	.Make
+	move.l	Blt_bpt(a6),d0
+	cmp.l	4(a2),d0
+	bne.s	.Make
+	cmp.w	8(a2),d2
+	bne.s	.Make
+	move.w	Bl_height,d0
+	cmp.w	10(a2),d0
+	bne.s	.Make
+	move.w	Blt_amod(a6),d0
+	cmp.w	12(a2),d0
+	bne.s	.Make
+	move.w	Blt_cmod(a6),d0
+	cmp.w	14(a2),d0
+	beq	.Draw
+.Make:	move.l	d3,(a2)			; Make the lines
+	move.l	Blt_bpt(a6),4(a2)
+	move.w	d2,8(a2)
+	move.w	Bl_height,10(a2)
+	move.w	Blt_amod(a6),12(a2)
+	move.w	Blt_cmod(a6),14(a2)
+	lea.l	18(a2),a3
+	move.l	d3,a0			; A
+	move.l	4(a2),a1			; B
+	move.w	d2,d5
+	moveq.l	#0,d4			; (previous B)
+	moveq.l	#0,d6			; (the line in C)
+	move.w	12(a2),a4
+	addq.w	#4,a4
+	move.w	14(a2),a5
+	addq.w	#4,a5
+	move.w	10(a2),d7
+	subq.w	#1,d7
+.M_line:	move.w	(a0),d0			; A
+	move.w	(a1)+,d2			; B
+	move.w	(a1)+,d3
+	tst.w	d0
+	beq.s	.M_next
+	swap	d0			; A : the first word high, the
+	clr.w	d0			;  second one low
+	lsr.l	d5,d0
+	move.w	d4,d1			; B : the first word
+	swap	d1
+	move.w	d2,d1
+	lsr.l	d5,d1
+	swap	d2			; B : the second word
+	move.w	d3,d2
+	lsr.l	d5,d2
+	move.w	d6,(a3)+			; Line : the offset in C, then for
+	swap	d0			;  each word !A and A & B
+	and.w	d0,d1
+	not.w	d0
+	move.w	d0,(a3)+
+	move.w	d1,(a3)+
+	swap	d0
+	and.w	d0,d2
+	not.w	d0
+	move.w	d0,(a3)+
+	move.w	d2,(a3)+
+.M_next:	move.w	d3,d4
+	add.w	a4,a0
+	add.w	a5,d6
+	dbra	d7,.M_line
+	move.l	a3,d0			; Number of lines
+	sub.l	a2,d0
+	sub.l	#18,d0
+	divu.w	#10,d0
+	move.w	d0,16(a2)
+.Draw:	move.l	Blt_cpt(a6),a1		; Draw : (C & !A) | (A & B)
+	lea.l	16(a2),a0
+	move.w	(a0)+,d7
+	beq.s	.Done
+	subq.w	#1,d7
+.D_line:	move.w	(a0)+,d0
+	lea.l	0(a1,d0.w),a3
+	move.w	(a3),d1
+	and.w	(a0)+,d1
+	or.w	(a0)+,d1
+	move.w	d1,(a3)+
+	move.w	(a3),d1
+	and.w	(a0)+,d1
+	or.w	(a0)+,d1
+	move.w	d1,(a3)
+	dbra	d7,.D_line
+.Done:	move.w	10(a2),d1			; The pointers behind the blit
+	move.w	12(a2),d0
+	addq.w	#4,d0
+	mulu.w	d1,d0
+	add.l	d0,Blt_apt(a6)
+	moveq.l	#0,d0
+	move.w	d1,d0
+	lsl.l	#2,d0
+	add.l	d0,Blt_bpt(a6)
+	move.w	14(a2),d0
+	addq.w	#4,d0
+	mulu.w	d1,d0
+	add.l	d0,Blt_cpt(a6)
+	add.l	d0,Blt_dpt(a6)
+	moveq.l	#0,d0
 	rts
 
 ; The functions : IN d0 (A), d1 (B), d2 (C), OUT d0. d3 is the old A, d4 the
@@ -1200,6 +1406,7 @@ Intro_star_last:	ds.w $96
 Intro_first_screen:	ds.l 1
 Intro_old_palette:	ds.w 32+2
 Intro_line_used:	ds.b 2*5*256
+Star_cache:	ds.b Star_slots*512		; (see [ Intro_star_blit ])
 Bl_height:	ds.w 1
 Bl_minterms:	ds.w 1
 Bl_sa:	ds.w 1

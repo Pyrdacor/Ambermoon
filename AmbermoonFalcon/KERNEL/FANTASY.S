@@ -79,15 +79,14 @@ F0020e:
 	move.w	#$ffff,(Fant_h2+$d0).l	; 0021e
 F00226:
 	bsr.w	F00c0a	; 00226
+	clr.l	(Fant_h2+$a0).l
 	bsr.w	F00c98	; 0022a
-	bsr.w	F0101a	; 0022e
-	clr.l	(Fant_h2+$a0).l	; 00232
 	bsr.w	F00bc0	; 00238
 	bsr.w	F005be	; 0023c
 	bsr.w	F006c8	; 00240
 	bsr.w	F00316	; 00244
 F00248:
-	cmpi.l	#$2,(Fant_h2+$a0).l	; 00248
+	cmpi.l	#3,(Fant_h2+$a0).l
 	blt.b	F00248	; 00252
 	btst	#$6,(Intro_ciaa).l	; 00254
 	bne.b	F00278	; 0025c
@@ -1364,6 +1363,7 @@ F01188:
 	even
 Fant_h1:
 	incbin	"ST_KERNEL/FANT_H1.BIN"
+Fant_h1_end:
 	even
 
 	SECTION	Fast_BSS,bss

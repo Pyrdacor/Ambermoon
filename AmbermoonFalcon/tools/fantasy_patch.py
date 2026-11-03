@@ -29,6 +29,11 @@ after(0xdb0, ['jsr\tFantasy_palette'])
 after(0xe16, ['st\tFantasy_visible'])
 replace(0xff6, 0xff8, ['rts'])
 replace(0x1018, 0x101a, ['rts'])
+# the frame : present and draw share the 3 ticks (the Amiga waits a tick after the copper
+# so that the old screen is not shown any more : the Falcon shows its own screens)
+after(0x226, ['clr.l	(Fant_h2+$a0).l'])
+replace(0x22e, 0x238, [])
+replace(0x248, 0x252, ['cmpi.l	#3,(Fant_h2+$a0).l'])
 HEAD = '''; Falcon kernel : the fairy of Thalion
 ; The code of the Amiga program Fantasy_intro (deploded and made from the
 ; executable with tools/intro_source.py and tools/fantasy_patch.py). The labels
@@ -45,6 +50,7 @@ TAIL = '''
 	even
 Fant_h1:
 	incbin	"ST_KERNEL/FANT_H1.BIN"
+Fant_h1_end:
 	even
 
 	SECTION	Fast_BSS,bss
