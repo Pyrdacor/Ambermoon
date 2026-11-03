@@ -21,7 +21,7 @@ replace(0x25e, 0x268, ['jsr\t_SA_StartSong'])
 replace(0xc96, 0xc9c, [])
 replace(0xc9e, 0xca2, ['jsr\t_SA_StartSong'])
 replace(0x282c, 0x2836, ['jsr\t_SA_IrqLowLevel'])
-# the comet : the steps which are late are not drawn (the impact belongs to the music)
+# the comet : the steps wait for their time, the late ones are not drawn (the impact belongs to the music)
 replace(0xb20, 0xb24, ['jsr\tIntro_comet_late', 'bne.w\tL00bfc', 'bsr.w\tL0288a'])
 # end of the program
 replace(0x1158, 0x11c8, ['jsr\t_SA_StopSong', 'jsr\tIntro_exit', 'rts'])

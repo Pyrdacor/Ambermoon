@@ -353,33 +353,47 @@ Intro_menu_wait:
 .Wait:	jmp	L0288a
 
 ;*****************************************************************************
-; [ Is this step of the comet late ? ]
+; [ Wait for this step of the comet / is it late ? ]
 ;  OUT : Z clear if it is not drawn
 ; All registers are restored
 ; NOTE :
-;   - The steps come every 2 vertical blanks ([ Comet_ticks ]), until the comet
-;     is so big that the CPU needs longer. The time of the impact stays right.
+;   - The impact (the step after $7b0 : the flash, the destroyed town) comes
+;     with the beat of the music, like on the Amiga : [ Comet_impact ] ticks
+;     after the start of the town (the music has its beat there). The steps
+;     before and after come at the same pace (about 3 vertical blanks, the
+;     speed of the Amiga). An early step waits, a late step is not drawn.
 ;   - The distance in [ Intro_h5+$1212c ] goes from $36b0 down to $fe00 in steps
 ;     of $100. The last step is always drawn : the destroyed town stays there.
 ;*****************************************************************************
-Comet_ticks	EQU	2
+Comet_steps	EQU	($36b0-$7b0)/$100+2	; (the step of the impact)
+Comet_draw	EQU	2			; From the wait to the screen
 
 Intro_comet_late:
-	movem.l	d0/d1,-(sp)
+	movem.l	d0-d2,-(sp)
 	moveq.l	#0,d1
 	move.w	Intro_h5+$1212c,d0
 	cmp.w	#$fe00+$100,d0
 	beq.s	.Exit
-	move.w	#$36b0+$100,d1
+	move.w	#$36b0+$100,d1		; The tick of the step
 	sub.w	d0,d1
 	lsr.w	#8,d1
-	mulu.w	#Comet_ticks,d1
-	cmp.l	Intro_h5+$4,d1
-	sls	d1
+	move.w	Intro_h5+$12132,d2
+	add.w	d2,d2
+	mulu.w	Comet_impact(pc,d2.w),d1
+	divu.w	#Comet_steps,d1
+	andi.l	#$ffff,d1
+	move.l	d1,d2			; Early : wait
+	subq.l	#Comet_draw,d2
+.Wait:	cmp.l	Intro_h5+$4,d2
+	bgt.s	.Wait
+	cmp.l	Intro_h5+$4,d1		; Late ?
+	slo	d1
 	ext.w	d1
 .Exit:	tst.w	d1
-	movem.l	(sp)+,d0/d1
+	movem.l	(sp)+,d0-d2
 	rts
+
+Comet_impact:	dc.w	141,155,149	; The 3 towns
 
 ;*****************************************************************************
 ; [ Set the colours ] (vertical blank)
