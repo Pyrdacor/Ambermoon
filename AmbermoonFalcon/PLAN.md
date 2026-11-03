@@ -75,6 +75,14 @@ test runner of the ST port (`AmbermoonST/port/test/run.py`, `MACHINE=falcon`).
   the screen, only the lines which change are converted. Every frame takes 3 vertical blanks like on the Amiga:
   present and draw share the 3 ticks (the Falcon shows its own screens), the sparkles of the lettering go straight
   to their own blit (`Fantasy_sparkle`), made once for each source and shift (`Star_cache`).
+* The extro : `KERNEL/EXTRO.S` is the code of `Ambermoon_extro` (imploded), made by `tools/intro_source.py ... extro` and
+  `tools/extro_patch.py`, its music is `Extro_music`. `Exit_program` (`ST_KERNEL/START.S`) calls `Run_extro`, which shows it
+  when the game is completed (`Return_value` -5000 to -5002 : the kind of the ending). `KERNEL/EXTRO_HW.S` : the 5 blits of a
+  frame (the picture, the brightened picture where the text is) are done straight into the screen of the Falcon
+  (`Extro_compose`), at the pace of the Amiga (the blits take about 2.7 vertical blanks : the text scrolls a line every 4
+  vertical blanks, like the 12 pixels per second of Ambermoon.net). Its BSS is the BSS of the intro. The question of the
+  Amiga loader whether to see it again is not there : the program ends. The ST has an empty `Run_extro`. Test : a
+  breakpoint on `Run_intro` which sets `Return_value` and jumps to `Exit_program` (debugger commands `w`, `r pc=`).
 * Music : two players of the 4 channels. The DSP (`KERNEL/MUSIC_DSP.S`, `KERNEL/DSP_MIX.ASM`, assembled by `tools/dsp_asm.py`) mixes in the
   SSI interrupt and sends to the DAC directly, the samples of a song go to its memory at `SA_Hardcalc`, the channels
   in every vertical blank (all 4 first, then the starts and stops together, like DMACON). The CPU (`KERNEL/MUSIC.S`) mixes
@@ -87,6 +95,6 @@ test runner of the ST port (`AmbermoonST/port/test/run.py`, `MACHINE=falcon`).
   differ) : music 26 % with the CPU player, 1.5 % with the DSP player. 3D map 16.7 frames per second without music, 12.4 with the
   CPU player, 13.6 with the DSP player. Intro with big zooms 6 frames per second with the CPU player, 7.9 with the DSP player (74 %
   software blitter, 9 % conversion). Unpacking pictures below 0.1 %.
-* Open: `Ambermoon_extro` (a separate Amiga program), the graphics unpacked in advance (the data are the original files, the game unpacks them
+* Open: the graphics unpacked in advance (the data are the original files, the game unpacks them
   itself), the zoom and the 3D maps on the ST (68000 replacements of the 68020 code), a test on a real Falcon (above all the
   DSP).

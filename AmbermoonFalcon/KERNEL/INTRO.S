@@ -7,6 +7,7 @@
 
 	include	ST_KERNEL/INTRO_HW.S
 	include	ST_KERNEL/FANTASY.S
+	include	ST_KERNEL/EXTRO.S
 
 	SECTION	Program,code
 
@@ -628,7 +629,7 @@ L00ae4:
 L00b20:
 	jsr	Intro_comet_late
 	bne.w	L00bfc
-	bsr.w	L0288a	; 00b20
+	bsr.w	L0288a
 	bsr.w	L02940	; 00b24
 	lea.l	(Intro_h2+$8e6e).l,a0	; 00b28
 	move.w	(Intro_h5+$12132).l,d0	; 00b2e

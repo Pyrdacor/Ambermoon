@@ -67,6 +67,7 @@ HEAD = '''; Falcon kernel : the intro and the main menu
 
 	include	ST_KERNEL/INTRO_HW.S
 	include	ST_KERNEL/FANTASY.S
+	include	ST_KERNEL/EXTRO.S
 
 	SECTION	Program,code
 

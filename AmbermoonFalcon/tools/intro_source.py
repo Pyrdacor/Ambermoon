@@ -5,13 +5,15 @@ the entry points, the rest is data.
 
     intro_source.py <Ambermoon_intro> <out.s>
     intro_source.py <Fantasy_intro> <out.s> fantasy
+    intro_source.py <Ambermoon_extro> <out.s> extro
 """
 import os, re, struct, sys
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from hunks import deplode, hunks
 from capstone import Cs, CS_ARCH_M68K, CS_MODE_M68K_030, CS_MODE_BIG_ENDIAN
 
-FANTASY = len(sys.argv) > 3
+MODE = sys.argv[3] if len(sys.argv) > 3 else 'intro'
+FANTASY = MODE != 'intro'          # (imploded, pointers in the code hunk)
 H = hunks(sys.argv[1])
 if FANTASY:
     H = deplode(H)
@@ -20,10 +22,14 @@ md = Cs(CS_ARCH_M68K, CS_MODE_M68K_030 + CS_MODE_BIG_ENDIAN)
 ROOTS = [0, 0xfe, 0x114, 0x12c, 0x2522, 0x28de, 0x29ea]
 LABEL = 'L%05x'
 NAME = {i: 'Intro_h%d' % i for i in range(len(H))}
-if FANTASY:     # (the table of the pixel routines : $8c0)
+if MODE == 'fantasy':     # (the table of the pixel routines : $8c0)
     ROOTS = [0x110, 0xd88] + [rel[o][1] for o in range(0x8c0, 0x940, 4)]
     LABEL = 'F%05x'
     NAME = {i: 'Fant_h%d' % i for i in range(len(H))}
+if MODE == 'extro':     # (the trap, the program in supervisor mode, the interrupt)
+    ROOTS = [0, 0x108, 0x120, 0xf26]
+    LABEL = 'E%05x'
+    NAME = {i: 'Extro_h%d' % i for i in range(len(H))}
 insn, todo, labels = {}, list(ROOTS), set(ROOTS)
 while todo:
     p = todo.pop()

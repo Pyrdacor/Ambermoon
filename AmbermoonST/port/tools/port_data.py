@@ -60,10 +60,11 @@ def main():
         for f in fn:
             p = os.path.join(dp, f)
             files[os.path.relpath(p, FIXED).replace(os.sep, '/')] = open(p, 'rb').read()
-    if len(sys.argv) > 3 and sys.argv[3] == '--falcon':  # (the intro and its music go into the program)
+    if len(sys.argv) > 3 and sys.argv[3] == '--falcon':  # (the intro, the extro and their music go into the program)
         sys.path.insert(0, os.path.join(ROOT, 'AmbermoonFalcon', 'tools'))
         import intro_data
-        intro_data.write(os.path.dirname(inc), files['Ambermoon_intro'], files['Intro_music'], files['Fantasy_intro'])
+        intro_data.write(os.path.dirname(inc), files['Ambermoon_intro'], files['Intro_music'], files['Fantasy_intro'],
+                         files['Ambermoon_extro'], files['Extro_music'])
     files = {k: v for k, v in files.items() if k.split('/')[-1] not in SKIP}
     if len(sys.argv) > 3:
         sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
