@@ -1,6 +1,6 @@
 # Builds a test release of the Atari Falcon version (AmbermoonFalcon, built from the original source and the ST port in
 # AmbermoonST, see AmbermoonFalcon/PLAN.md). Later the Falcon and ST versions become part of the normal releases
-# (release.yml); until then this workflow makes separate alpha releases.
+# (release.yml); until then this workflow makes separate test releases.
 #
 # Trigger: a pushed tag falcon-vX.Y[-suffix] (e.g. falcon-v0.1-alpha): the archive is attached to a draft pre-release
 # "Ambermoon Falcon X.Y[-suffix]" of the tag, which is published by hand. By hand (Actions -> falcon -> Run workflow)
