@@ -38,6 +38,10 @@ Besides these, all original modules were changed in the same way:
   `moveq.l	#2,d7`
 * Line 2031 – **FIX**: Was 3 digits (too wide for the window)  
   `moveq.l	#2,d7`
+* Line 2804 – **FIX**: Was "mulu.w #6,d0" (skills are 8 bytes)  
+  `mulu.w	#Skill_data_size,d0`
+* Line 2812 – **FIX**: Was "mulu.w #6,d0" (skills are 8 bytes)  
+  `mulu.w	#Skill_data_size,d0`
 * Line 2876 – **FIX**: Was "mulu.w #6,d0" (skills are 8 bytes)  
   `mulu.w	#Skill_data_size,d0`
 * Line 2884 – **FIX**: Was "mulu.w #6,d0" (skills are 8 bytes)  
