@@ -29,7 +29,10 @@
 ;*****************************************************************************
 VBL_pointer:
 	tst.b	Pointer_frozen		; Left alone ?
-	bne.s	.Exit
+	beq.s	Pointer_shown
+	rts
+; [ The same, while the pointer is frozen ] (see [ Show_pointer ])
+Pointer_shown:
 	movem.l	d0-d7/a0-a3,-(sp)
 	move.l	On_screen,a3
 	jsr	Pointer_record
@@ -91,26 +94,25 @@ Pointer_out_of_work:
 ;     ([ Duplicate_block ]), the pointer must not be missing when the frame
 ;     is shown (the Falcon shows the whole frame from the memory at the
 ;     vertical blank).
+;   - The interrupts stay on : the pointer is frozen while it is erased or
+;     drawn here, so the vertical blank leaves it alone (with the interrupts
+;     off the raster interrupt came lines late : the colour gradients
+;     flickered while texts were printed).
 ;*****************************************************************************
 Hide_pointer:
 	movem.l	d0/a2/a3,-(sp)
-	move.w	sr,-(sp)
-	ori.w	#$0700,sr
 	addq.b	#1,Pointer_frozen
 	move.l	On_screen,a3
 	jsr	Pointer_record
 	jsr	Restore_pointer
-	move.w	(sp)+,sr
 	movem.l	(sp)+,d0/a2/a3
 	rts
 
 Show_pointer:
-	move.w	sr,-(sp)
-	ori.w	#$0700,sr
-	subq.b	#1,Pointer_frozen
-	bne.s	.Exit
-	jsr	VBL_pointer		; (draws it into the shown screen)
-.Exit:	move.w	(sp)+,sr
+	cmp.b	#1,Pointer_frozen		; The last one ?
+	bne.s	.Nested
+	jsr	Pointer_shown		; (draws it into the shown screen)
+.Nested:	subq.b	#1,Pointer_frozen
 	rts
 
 ;*****************************************************************************

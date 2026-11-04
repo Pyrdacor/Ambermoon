@@ -188,6 +188,7 @@ Render_raster:
 .End:	move.w	#$7fff,(a1)+
 	move.l	a6,a0
 	jsr	Sort_raster_events
+	jsr	Make_raster_steps
 	move.l	a6,Next_raster
 	movem.l	(sp)+,d0-d7/a0-a6
 	rts
@@ -442,50 +443,174 @@ Raster_VBL:
 	movem.l	d0-d7,(a1)
 	addq.l	#8,a0
 	bra.s	.Loop
-.Arm:	cmp.w	#$7fff,d0			; Any more events ?
+.Arm:	move.l	Active_raster,a0		; The steps of the other lines
+	lea.l	Raster_steps_offset(a0),a0
+	move.b	(a0),d0			; Any ?
 	beq.s	.Exit
-	move.l	a0,Raster_event_ptr
-	move.b	d0,MFP_TBDR
+	addq.l	#2,a0
+	move.l	a0,Raster_step
+	move.b	d0,MFP_TBDR		; (stopped : the counter)
 	move.b	#8,MFP_TBCR		; Event count mode
+	move.b	-1(a0),MFP_TBDR		; (running : the next value)
 .Exit:	rts
 
 ;*****************************************************************************
 ; [ Timer B interrupt (raster events) ]
+; NOTE :
+;   - The steps of [ Make_raster_steps ] : the first colour of the line at
+;     once, with as few cycles as possible. The interrupt comes at the end of
+;     the line before, the colour must be there before the line is shown; the
+;     music has interrupts at the frequency of its notes (Timer A, Timer D),
+;     which can delay this one by about 100 cycles. With the slow way the
+;     colour came a line late now and then : the gradients behind the
+;     portraits flickered.
+;   - Timer B is not stopped : in event count mode it starts again with the
+;     value of its data register, which is set one step ahead.
 ;*****************************************************************************
 Timer_B_interrupt:
-	movem.l	d0/d1/a0-a2,-(sp)
-	move.l	Raster_event_ptr,a0
-	lea.l	Palette_regs,a1
-	move.w	(a0),d1			; Line of this event
-.Loop:	move.w	2(a0),d0
-	bmi.s	.Full
-	add.w	d0,d0			; One colour
-	move.w	6(a0),0(a1,d0.w)
-	bra.s	.Next
-.Full:	move.l	4(a0),a2			; Complete palette
-	move.l	(a2)+,(a1)+
-	move.l	(a2)+,(a1)+
-	move.l	(a2)+,(a1)+
-	move.l	(a2)+,(a1)+
-	move.l	(a2)+,(a1)+
-	move.l	(a2)+,(a1)+
-	move.l	(a2)+,(a1)+
-	move.l	(a2)+,(a1)+
-	lea.l	Palette_regs,a1
-.Next:	addq.l	#8,a0
-	move.w	(a0),d0			; Next event on the same line ?
-	cmp.w	d1,d0
-	beq.s	.Loop
-	clr.b	MFP_TBCR
-	cmp.w	#$7fff,d0			; Any more events ?
-	beq.s	.Exit
-	sub.w	d1,d0			; Start Timer B for the next one
-	move.b	d0,MFP_TBDR
-	move.b	#8,MFP_TBCR
-	move.l	a0,Raster_event_ptr
-.Exit:	bclr	#0,MFP_ISRA
-	movem.l	(sp)+,d0/d1/a0-a2
+	move.l	a0,-(sp)
+	move.l	a1,-(sp)
+	move.l	Raster_step,a0
+	move.l	(a0)+,a1			; The first colour
+	move.w	(a0)+,(a1)
+	addq.l	#1,a0			; (line)
+	move.b	(a0)+,MFP_TBDR		; The lines after the next step
+	tst.b	(a0)+			; More on this line ?
+	bne.s	.More
+	addq.l	#1,a0
+.Done:	move.l	a0,Raster_step
+	bclr	#0,MFP_ISRA
+	move.l	(sp)+,a1
+	move.l	(sp)+,a0
 	rte
+.More:	move.l	d0,-(sp)
+	moveq.l	#0,d0
+	move.b	-1(a0),d0
+	addq.l	#1,a0
+	subq.w	#1,d0
+.Extra:	move.l	(a0)+,a1			; A colour or a palette
+	cmp.w	#-1,(a0)
+	beq.s	.Palette
+	move.w	(a0),(a1)
+.Next:	addq.l	#4,a0
+	dbra	d0,.Extra
+	move.l	(sp)+,d0
+	bra.s	.Done
+.Palette:	move.l	a2,-(sp)
+	lea.l	Palette_regs,a2
+	move.l	(a1)+,(a2)+
+	move.l	(a1)+,(a2)+
+	move.l	(a1)+,(a2)+
+	move.l	(a1)+,(a2)+
+	move.l	(a1)+,(a2)+
+	move.l	(a1)+,(a2)+
+	move.l	(a1)+,(a2)+
+	move.l	(a1)+,(a2)+
+	move.l	(sp)+,a2
+	bra.s	.Next
+
+;*****************************************************************************
+; [ Make the steps of Timer B from the raster events ]
+;   IN : a0 - Pointer to the sorted raster events (.l)
+; Changed registers : d0-d4, a0-a5
+; NOTE :
+;   - The steps are behind the events ([ Raster_steps_offset ]) : 2 bytes
+;     (the line of the first step, the lines from there to the second; 0 :
+;     no steps), then per line with events :
+;       .l  colour register of the first event (or [ Raster_dummy ] if it is
+;           a palette)
+;       .w  its colour
+;       .b  line
+;       .b  lines from the next step to the one after it (0 : none)
+;       .b  number of the other events of the line, which follow (8 bytes
+;           each : .l colour register and .w colour, or .l pointer to the
+;           palette and .w -1; .w unused)
+;       .b  unused
+;     and a last step to the dummy. The events of line 0 are done in the
+;     vertical blank ([ Raster_VBL ]).
+;*****************************************************************************
+Make_raster_steps:
+	lea.l	Raster_steps_offset(a0),a1
+	move.l	a1,a3			; (the 2 bytes in front)
+	clr.w	(a1)+
+.Line0:	tst.w	(a0)
+	bne.s	.Step
+	addq.l	#8,a0
+	bra.s	.Line0
+.Step:	move.w	(a0),d1			; A line
+	cmp.w	#$7fff,d1
+	beq.s	.End
+	move.l	a1,a4
+	move.w	2(a0),d0			; Its first event
+	bmi.s	.First_palette
+	add.w	d0,d0
+	lea.l	Palette_regs,a2
+	add.w	d0,a2
+	move.l	a2,(a1)+
+	move.w	6(a0),(a1)+
+	addq.l	#8,a0
+	bra.s	.Fields
+.First_palette:
+	move.l	#Raster_dummy,(a1)+
+	clr.w	(a1)+
+.Fields:	move.b	d1,(a1)+
+	clr.b	(a1)+
+	clr.w	(a1)+
+	moveq.l	#0,d2
+.Others:	cmp.w	(a0),d1			; The others of the line
+	bne.s	.Count
+	move.w	2(a0),d0
+	bmi.s	.Palette
+	add.w	d0,d0
+	lea.l	Palette_regs,a2
+	add.w	d0,a2
+	move.l	a2,(a1)+
+	move.w	6(a0),(a1)+
+	bra.s	.Other
+.Palette:	move.l	4(a0),(a1)+
+	move.w	#-1,(a1)+
+.Other:	clr.w	(a1)+
+	addq.l	#8,a0
+	addq.b	#1,d2
+	bra.s	.Others
+.Count:	move.b	d2,8(a4)
+	bra.s	.Step
+.End:	move.l	#Raster_dummy,(a1)+		; The last step
+	clr.l	(a1)+
+	clr.w	(a1)+
+; ---------- The numbers of lines ------------------
+	lea.l	2(a3),a1
+	moveq.l	#0,d3			; Line of the step before
+	moveq.l	#0,d4			; Number of the step
+	sub.l	a4,a4			; The steps before
+	sub.l	a5,a5
+.Lines:	moveq.l	#0,d1
+	move.b	6(a1),d1
+	beq.s	.Exit
+	addq.w	#1,d4
+	move.b	d1,d0
+	sub.b	d3,d0
+	cmp.w	#1,d4
+	bne.s	.Second
+	move.b	d0,(a3)			; First : from line 0
+	bra.s	.Go_on
+.Second:	cmp.w	#2,d4
+	bne.s	.Later
+	move.b	d0,1(a3)
+	bra.s	.Go_on
+.Later:	move.b	d0,7(a4)			; (set by the step two before)
+.Go_on:	move.l	a5,a4
+	move.l	a1,a5
+	move.w	d1,d3
+	moveq.l	#0,d0
+	move.b	8(a1),d0
+	lsl.w	#3,d0
+	lea.l	10(a1,d0.w),a1
+	bra.s	.Lines
+.Exit:	rts
+
+Raster_steps_size	EQU	2+10*257+8*256	; (the steps and the other events)
+Raster_steps_offset	EQU	8*256
 
 ;*****************************************************************************
 ; [ Sort raster events by line (insertion sort, stable) ]
@@ -554,7 +679,8 @@ Default_LUT:
 	SECTION	Fast_BSS,bss
 Active_raster:	ds.l 1
 Next_raster:	ds.l 1
-Raster_event_ptr:	ds.l 1
+Raster_step:	ds.l 1
+Raster_dummy:	ds.w 1
 Old_Timer_B:	ds.l 1
 Old_TBCR:	ds.b 1
 	even
@@ -564,6 +690,8 @@ Current_RL_targets:	ds.w 32*Max_RL_palettes
 Current_RL_ST:	ds.l Max_RL_palettes
 LUT_cache_LUT:	ds.l 1
 Raster_events1:	ds.b 8*256
+Raster_steps1:	ds.b Raster_steps_size	; (see [ Make_raster_steps ])
 Raster_events2:	ds.b 8*256
+Raster_steps2:	ds.b Raster_steps_size
 Raster_palettes1:	ds.w 16*Max_RL_palettes
 Raster_palettes2:	ds.w 16*Max_RL_palettes
