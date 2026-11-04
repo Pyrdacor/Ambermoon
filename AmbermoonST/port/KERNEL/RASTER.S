@@ -7,7 +7,8 @@
 ;     [ ST_palettes ]) : found by the colours of the Amiga palette. The fade
 ;     state of the Amiga colours is applied to the ST colours.
 ;   - A colour of a range is set exactly in its line, in the ST colour which
-;     the palette above it uses for this Amiga colour.
+;     the palette above it uses for this Amiga colour. After the range that
+;     ST colour gets the colour of the palette again.
 ; [ Get_ST_colour ] gives the ST colour of an Amiga colour in a line (with
 ; the raster list of the current module), the graphics routines use it.
 ;
@@ -177,6 +178,11 @@ Render_raster:
 	move.w	d0,(a1)+
 	addq.w	#1,d1
 .Next:	dbra	d3,.Loop2
+	move.w	d1,(a1)+			; After the range : the colour of the
+	move.w	d5,(a1)+			;  palette again (the ST colour stands
+	clr.w	(a1)+			;  for other Amiga colours too, e.g. of
+	add.w	d5,d5			;  the frame below the sky of a 3D map)
+	move.w	-32(a5,d5.w),(a1)+
 	bra	.Loop
 ; ---------- End : sort by line ------------------
 .End:	move.w	#$7fff,(a1)+

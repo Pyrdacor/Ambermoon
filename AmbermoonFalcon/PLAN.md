@@ -52,7 +52,7 @@ test runner of the ST port (`AmbermoonST/port/test/run.py`, `MACHINE=falcon`).
   line gets its own colour from the end of the 256 colours downwards (RASTER.S), the graphics routines draw the
   pixels of the colour of the range in the colour of the line.
 * 3D maps (dungeons, cities with sky, horizon and stars) : the CPU renderer of the original
-  (`MAP/3D_RENDER.S`) runs on the 68030 as it is (`KERNEL/3D.S`, the ST kernel has stubs in its `3D.S`), it
+  (`MAP/3D_RENDER.S`) runs on the 68030 as it is (`KERNEL/3D.S`, the ST includes it too, `ST_KERNEL/3D_CPU.S`), it
   draws the 3D view into the MOVEP screen (4 planes), `Show_MOVEP_screen` (GRAPHICS.S) puts it on the screen
   with the bank of the line and the sky range. Tested by starting a test copy of the data in a 3D map (the
   position in the `Party_data.sav` files, `AmbermoonST/port/test/set_start.py`, e.g. map 416 at 28,11).
@@ -96,5 +96,5 @@ test runner of the ST port (`AmbermoonST/port/test/run.py`, `MACHINE=falcon`).
   CPU player, 13.6 with the DSP player. Intro with big zooms 6 frames per second with the CPU player, 7.9 with the DSP player (74 %
   software blitter, 9 % conversion). Unpacking pictures below 0.1 %.
 * Open: the graphics unpacked in advance (the data are the original files, the game unpacks them
-  itself), the zoom and the 3D maps on the ST (68000 replacements of the 68020 code), a test on a real Falcon (above all the
+  itself), the zoom on the ST, a test on a real Falcon (above all the
   DSP).

@@ -15,8 +15,14 @@ Working notes for continuing the port (build, tests in Hatari, pitfalls, open po
   mouse and keyboard, files, zoom, 3D drawing, music, diagnostics screen).
 * The game logic hardly touches the hardware: only two DMA accesses in `HULL/VARIOUS.S` (sound off).
   `FAIRY.S` is not part of the build.
-* `MAP/3D_RENDER.S` uses 68020 instructions (`divsl.l`), because the original executable `AM2_CPU` needs a
-  68020. These divisions need 68000 replacements.
+* `MAP/3D_RENDER.S` uses 68020 instructions (`divsl.l`) only for floor and ceiling, which the game draws only on a
+  68020 or better (`CPU_68020_plus`, like the A500 on the Amiga). `KERNEL/3D.S` assembles it with `machine 68020`, the
+  rest of the renderer runs on the 68000 as it is.
+* 3D maps: the renderer draws ST colours (the textures, horizons and the sky & floor colours of the lab data are
+  converted by `port/tools/port_gfx.py` with the one lookup table of the 3D palettes, weighted by the colours of
+  the textures in `port_palettes.py`), `Show_MOVEP_screen` puts the 3D view on the screen with `movep`. 4 to 2
+  frames per second on an 8 MHz ST (the A500 has the blitter). Unpacked data of AMBR subfiles gets the space of
+  its file (`PATCHES/FILES.diff` : the layout of the 3D maps was broken at the bottom).
 * The memory manager (`KERNEL/MEMORY.S`) is plain 68000 code; only `Allocate_system_memory` calls the
   Amiga OS (`AllocMem`). The file system (`KERNEL/FILES.S`) needs GEMDOS instead of AmigaDOS.
 * The game code uses the Amiga graphics format: planar data with 3, 4 or 5 planes (line interleaved) and a
@@ -50,7 +56,7 @@ Working notes for continuing the port (build, tests in Hatari, pitfalls, open po
   table every frame made the vertical blank longer than a frame during fades: wrong colours in parts of
   the screen). The ST colours are faded like the Amiga colours they stand for.
 * Memory: 2 MB are enough, 1 MB is not (the program ends at once).
-* Open: music, zoom, 3D maps, diagnostic screen.
+* Open: zoom (combat), intro and extro, diagnostic screen, speed of the 3D maps (the STE blitter ?).
 
 ![Character editor](docs/port/editor.png) ![Event](docs/port/event.png) ![Map](docs/port/map.png)
 

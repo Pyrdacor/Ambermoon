@@ -1059,11 +1059,49 @@ Duplicate_block:
 	rts
 
 ; [ Clear a block in one plane of the work screen ] (3D map)
+; NOTE :
+;   - Only used for plane 4 of the 3D view : the ST has no plane 4.
 Clear_1plane_block:
 	rts
 
-; [ Show a MOVEP screen ] (3D map)
+;*****************************************************************************
+; [ Copy MOVEP graphics to the work screen ] (the 3D view)
+;   IN : d0 - X-coordinate (a multiple of 16) (.w)
+;        d1 - Y-coordinate (.w)
+;        d6 - Width in truncs (.w)
+;        d7 - Height in pixels (.w)
+;        a0 - Pointer to MOVEP graphics (.l)
+; All registers are restored
+; NOTE :
+;   - MOVEP graphics store 4 planes interleaved per byte : 8 pixels are 4
+;     bytes, the planes 0-3. With MOVEP they become the high and low bytes
+;     of the 4 plane words of an ST chunk. The colours are ST colours
+;     already : the textures of the 3D maps were converted with the lookup
+;     table of their palettes (port/tools/port_gfx.py).
+;   - Not clipped, like the Amiga version.
+;*****************************************************************************
 Show_MOVEP_screen:
+	movem.l	d0-d7/a0-a2,-(sp)
+	tst.w	d6
+	ble.s	.Exit
+	tst.w	d7
+	ble.s	.Exit
+	move.l	Work_screen,a1
+	jsr	Get_screen_offset
+	add.l	d2,a1
+	subq.w	#1,d6
+	subq.w	#1,d7
+.Line:	move.l	a1,a2
+	move.w	d6,d5
+.Chunk:	move.l	(a0)+,d0			; The left 8 pixels
+	movep.l	d0,0(a2)
+	move.l	(a0)+,d0			; The right 8 pixels
+	movep.l	d0,1(a2)
+	addq.l	#8,a2
+	dbra	d5,.Chunk
+	lea.l	ST_bytes_per_line(a1),a1
+	dbra	d7,.Line
+.Exit:	movem.l	(sp)+,d0-d7/a0-a2
 	rts
 
 	SECTION	Fast_DATA,data

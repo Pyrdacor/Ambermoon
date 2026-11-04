@@ -1,26 +1,14 @@
 ; ST kernel - the renderer of the 3D maps (walls, objects, floor & ceiling)
-; Not ported yet for the ST : MAP/3D_RENDER.S (the CPU version of the
-; original) uses 68020 instructions. The Falcon version includes it
-; (AmbermoonFalcon/KERNEL/3D.S).
+;
+; The CPU version of the original renderer (MAP/3D_RENDER.S, AM2_CPU) : it
+; draws into the MOVEP screen of the 3D view, which [ Show_MOVEP_screen ]
+; (GRAPHICS.S) puts on the screen. Floor and ceiling ([ Draw_floor ],
+; [ Draw_ceiling ]) use 68020 instructions : they are only drawn on a 68020
+; or better ([ CPU_68020_plus ], like on the Amiga), the ST never calls them.
+; (The Falcon version has its own 3D.S, without the change of the CPU.)
 
-	SECTION	Program,code
-Draw_ceiling:
-	rts
-Draw_floor:
-	rts
-Insert_horizon:
-	rts
-draw_zoomshape:
-	rts
-put_dpoly:
-	rts
+	machine	68020
+	include	MAP/3D_RENDER.S
+	machine	68000
 
-	SECTION	Fast_BSS,bss
-Floor_X:	ds.w 1
-Floor_Z:	ds.w 1
-Floor_source_gfx:	ds.l 1
-cls_bottom:	ds.w 1
-cls_top:	ds.w 1
-dpoly_koos3d:	ds.w 64
-zoom_screen:	ds.l 1
-zoom_screen2:	ds.l 1
+	include	ST_KERNEL/3D_CPU.S

@@ -124,6 +124,42 @@ def st_chunks(data, width, height, lut, frames=1, offset=0):
     return bytes(out)
 
 
+def remap_planes(planes, lut):
+    """The pixels of plane bytes (plane 0 first, 8 pixels each) through lut; returns the new plane bytes."""
+    out = [0] * len(planes)
+    for b in range(8):
+        v = 0
+        for p, x in enumerate(planes):
+            v |= (x >> b & 1) << p
+        s = lut[v]
+        for p in range(len(planes)):
+            out[p] |= (s >> p & 1) << b
+    return out
+
+
+def texture_3d(data, lut):
+    """A texture of the 3D maps (4 bit packed : 8 pixels are 4 bytes, the planes 0-3, the MOVEP format of the
+    renderer) with the colours through lut (16 entries)."""
+    out, cache = bytearray(data), {}
+    for o in range(0, len(data) - 3, 4):
+        group = data[o:o + 4]
+        if group not in cache:
+            cache[group] = bytes(remap_planes(group, lut))
+        out[o:o + 4] = cache[group]
+    return bytes(out)
+
+
+def planes_3d(data, width, lut):
+    """4-plane graphics (line interleaved, e.g. the horizon of the 3D maps) with the colours through lut."""
+    out, row = bytearray(data), width // 8
+    for line in range(0, len(data) - 4 * row + 1, 4 * row):
+        for x in range(row):
+            new = remap_planes([data[line + p * row + x] for p in range(4)], lut)
+            for p in range(4):
+                out[line + p * row + x] = new[p]
+    return bytes(out)
+
+
 class Palettes:
     """The lookup tables of the ST palettes (port_palettes.py writes them as json)."""
 
@@ -256,6 +292,26 @@ def convert_all(files, pals):
             d = st_chunks(d, w, h, lut, 1, o)
             o += (w + 15) // 16 * 10 * h
         return d
+
+    # ---------- 3D maps : textures, horizons, sky & floor colours ----------
+    # (the palettes of the 3D maps are a group with one lookup table, port_palettes.py : converted once)
+    luts_3d = set()
+    for f in ('1Map_data.amb', '2Map_data.amb', '3Map_data.amb'):
+        for md in read_container(files[f]).values():
+            if md and md[2] != 2:
+                luts_3d.add(tuple(pals.lut(palettes[md[9]])[:16]))
+    assert len(luts_3d) == 1, 'the 3D maps have more than one lookup table'
+    lut_3d = luts_3d.pop()
+    assert lut_3d[0] == 0 and 0 not in lut_3d[1:], 'colour 0 of the 3D maps must stay alone (transparent)'
+    for name in ('2Wall3D.amb', '3Wall3D.amb', '2Object3D.amb', '3Object3D.amb', '2Overlay3D.amb',
+                 '3Overlay3D.amb'):
+        container(name, lambda k, d: texture_3d(d, lut_3d))
+    container('Lab_background.amb', lambda k, d: planes_3d(d, 144, lut_3d))
+
+    def lab_colours(k, d):              # Sky_colour_nr, Floor_colour_nr (4 bits, see M3_ModInit)
+        return d[:4] + bytes((lut_3d[d[4] & 15], lut_3d[d[5] & 15])) + d[6:]
+    for name in ('2Lab_data.amb', '3Lab_data.amb'):
+        container(name, lab_colours)
 
     for pal in sorted(map_pals) + [None]:
         lut = pals.lut(palettes[pal or 1])

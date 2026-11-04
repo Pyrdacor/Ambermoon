@@ -22,7 +22,7 @@ State of the work and what is needed to continue it. The plan, the design and th
 | `tools/st_convert.py` | Data and palette conversion of the proof of concept; `make_palette` is also used by the port. |
 | `port/AMBERST.S` | Include list of the port: `AMBERMOON.S` of the original with the Amiga kernel replaced (`; ST: replaced`). |
 | `port/KERNEL/` | ST kernel with the interface of the Amiga kernel (the 99 missing symbols). |
-| `port/PATCHES/` | Patches of original files: `MEMORY` (memory, blitter), `VARIOUS` (sound DMA), `EVENTS` (palette before picture). |
+| `port/PATCHES/` | Patches of original files: `MEMORY` (memory, blitter), `VARIOUS` (sound DMA), `EVENTS` (palette before picture), `FILES` (unpack space of AMBR subfiles). |
 | `port/tools/port_data.py` | Game files (German 1.20 + `Disks/Bugfixing/German/Amberfiles`) with 8.3 names → `build/port/hd/DATA`, `FILEMAP.I`. |
 | `port/tools/port_music.py`, `ice.py` | Music of the ST version (`port/MUSIC`: `PLAYER.BIN` + `AMBER<n>.BIN` song data, made by `--extract` from `ORIGINAL/AMBR`, Pack-Ice): the player once → `MUSPLAY.I`, the songs → `Music.amb`. |
 | `port/tools/sa_to_st.py` | Converts Amiga songs (Sonic Arranger) for the ST player → `port/MUSIC/SONG<nn>.BIN`; `OVERRIDES` per song. |
@@ -120,6 +120,5 @@ Hatari as STE (a plain ST works too), **at least 2 MB** (with 1 MB the program e
   not examined (loading, conversion of graphics?).
 * With 1 MB the program ends without a message.
 * Next stages (PORT.md): play through the 2D map (movement, events, dialogues, inventory, places, chests),
-  combat (zoom of the monsters, `STUBS.S`), 3D maps (68000 replacement of `divsl.l` in `MAP/3D_RENDER.S`,
-  drawing of walls, floor and ceiling), music of the songs without ST version (1, 3, 10, 12, 13, 19-32, e.g. 31 in the
+  combat (zoom of the monsters, `STUBS.S`), speed of the 3D maps (4 to 2 frames per second), music of the songs without ST version (1, 3, 10, 12, 13, 19-32, e.g. 31 in the
   character editor), diagnostic screen, speed and memory.
