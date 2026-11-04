@@ -1,0 +1,11 @@
+--- a/KERNEL/FILES.S
++++ b/KERNEL/FILES.S
+@@ -530,6 +530,8 @@
+ 	move.b	d0,22(a5)
+ 	bra.s	.Exit
+ .Skip2:
++	move.w	10(a5),d0		; ST: the space to unpack data of the subfile
++	jsr	Set_current_file_compression_space	; ST: (else that of an older file : only AMPC and AMNP set it, the ST has AMBR files)
+ 	move.l	6(a5),d1
+ 	move.l	14(a5),d2
+ 	moveq.l	#0,d3

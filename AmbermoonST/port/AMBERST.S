@@ -90,23 +90,33 @@
 	include	KERNEL/CHIP_DATA.S
 	include	KERNEL/CHIP_BSS.S
 	include	KERNEL/FILES2.S
-;include	MAP/3D_RENDER.S		; ST: replaced by the ST kernel
+;include	MAP/3D_RENDER.S		; ST: replaced by the ST kernel (3D.S)
 ;include	MUSIC/SONIC_ARRANGER.S		; ST: replaced by the ST kernel
-;include	KERNEL/ZOOM.S		; ST: replaced by the ST kernel
+;include	KERNEL/ZOOM.S		; ST: replaced by the ST kernel (ZOOM.S)
 	include	KERNEL/TEXTS.S
 ;include	MAP/3D_BLIT.S		; ST: replaced by the ST kernel
 ;include	MAP/3D_BLIT2.S		; ST: replaced by the ST kernel
 	include	KERNEL/BUFFERS.S
 
 ; ---------- ST kernel ----------------------------
+; (VIDEO, RASTER, GRAPHICS and SPRITE depend on the video hardware : the
+; Falcon version has its own, the other files are common.)
 	include	ST_KERNEL/START.S		; ST:
 	include	ST_KERNEL/SYSTEM.S		; ST:
+	include	ST_KERNEL/VIDEO.S		; ST:
 	include	ST_KERNEL/COLOURS.S		; ST:
+	include	ST_KERNEL/RASTER.S		; ST:
 	include	ST_KERNEL/MOUSE.S		; ST:
 	include	ST_KERNEL/POINTER.S		; ST:
+	include	ST_KERNEL/SPRITE.S		; ST:
+	include	ST_KERNEL/CLIP.S		; ST:
 	include	ST_KERNEL/GRAPHICS.S		; ST:
+	include	ST_KERNEL/RECOLOUR.S		; ST: (Recolour_block of the Amiga version)
 	include	ST_KERNEL/TEXT.S		; ST:
 	include	ST_KERNEL/IKBD.S		; ST:
 	include	ST_KERNEL/LIBS.S		; ST:
 	include	ST_KERNEL/MUSIC.S		; ST:
 	include	ST_KERNEL/STUBS.S		; ST: (stage 1)
+	include	ST_KERNEL/3D.S		; ST: (the 3D renderer : MAP/3D_RENDER.S on the Falcon)
+	include	ST_KERNEL/ZOOM.S		; ST: (the zoom of the combat monsters)
+	include	ST_KERNEL/INTRO.S		; ST: (intro and main menu : the Falcon)

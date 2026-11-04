@@ -61,6 +61,7 @@ Start_program:
 	jmp	Exit_to_loader
 .Skip:
 	jsr	Init_system
+	jsr	Run_intro			; (the Falcon : intro and main menu)
 Restart_game:
 	lea.l	Return_value,sp
 	jsr	Init_sub_files
@@ -94,6 +95,7 @@ Restart_game:
 Exit_program:
 	moveq.l	#0,d0
 	jsr	Set_music
+	jsr	Run_extro			; (the Falcon : the end of the game)
 	jsr	Exit_system
 Exit_to_loader:
 	jsr	Free_all_memory

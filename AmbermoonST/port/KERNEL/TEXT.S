@@ -2,8 +2,9 @@
 ; Replaces KERNEL/TEXT.S of the Amiga version. The glyphs are drawn into the
 ; 1 bit text line buffer like in the Amiga version (Draw_glyphs, Render_glyph
 ; and the text commands are taken from it, without the blitter), then the
-; buffer is put on the screen with the shadow and ink colours (the Amiga
-; colours become ST colours, [ Get_ST_colour ]).
+; buffer is put on the screen with the shadow and ink colours
+; ([ Put_text_buffer ] in GRAPHICS.S, the colours of the screen :
+; [ Get_screen_colour ]).
 
 	SECTION	Program,code
 
@@ -32,109 +33,16 @@ Put_text_line:
 	move.w	Shadow_colour,d4		; Shadow
 	bmi.s	.No_shadow
 	addq.w	#1,d1
-	jsr	Get_ST_colour
+	jsr	Get_screen_colour
 	moveq.l	#1,d5
 	jsr	Put_text_buffer
 	subq.w	#1,d1
 .No_shadow:	move.w	Ink_colour,d4		; Ink
-	jsr	Get_ST_colour
+	jsr	Get_screen_colour
 	moveq.l	#0,d5
 	jsr	Put_text_buffer
 	move.l	a4,a0
 	movem.l	(sp)+,d0-d7/a1-a4
-	rts
-
-;*****************************************************************************
-; [ Put the text line buffer on the work screen ]
-;   IN : d0 - X-coordinate (multiple of 16) (.w)
-;        d1 - Y-coordinate (.w)
-;        d4 - ST colour (.w)
-;        d5 - Shift to the right (0 or 1) (.w)
-;        d6 - Number of truncs (.w)
-; All registers are restored
-;*****************************************************************************
-Put_text_buffer:
-	movem.l	d0-d7/a0-a6,-(sp)
-	jsr	Make_clip_masks		; (clipped like the Amiga version)
-	move.w	d1,a4			; Y
-	move.w	d0,d2
-	lsr.w	#3,d2			; (chunk * 2)
-	lea.l	Clip_masks,a5
-	add.w	d2,a5
-	move.l	Work_screen,a1
-	jsr	Get_screen_offset
-	add.l	d2,a1
-	lea.l	Text_line_bit_plane_buffer,a0
-	move.w	d6,d7			; Truncs to draw
-	add.w	d5,d7
-	lsr.w	#4,d0			; Not more than the screen
-	moveq.l	#20,d2
-	sub.w	d0,d2
-	cmp.w	d2,d7
-	ble.s	.Ok
-	move.w	d2,d7
-.Ok:	subq.w	#1,d7
-	bmi	.Exit
-	move.w	#200,d3			; Lines
-	sub.w	d1,d3
-	ble	.Exit
-	cmp.w	#Char_height,d3
-	ble.s	.Ok2
-	moveq.l	#Char_height,d3
-.Ok2:	subq.w	#1,d3
-.Line:	cmpa.w	Clip_Y1,a4		; Line visible ?
-	blt	.Skip_line
-	cmpa.w	Clip_Y2,a4
-	bgt	.Skip_line
-	move.l	a0,a2
-	move.l	a1,a3
-	move.l	a5,-(sp)
-	moveq.l	#0,d2			; Previous word
-	move.w	d7,d0
-	move.w	d6,a6			; Words left in the buffer line
-.Trunc:	swap	d2			; Previous word -> high word
-	clr.w	d2
-	cmp.w	#0,a6
-	ble.s	.Empty
-	move.w	(a2)+,d2
-	subq.w	#1,a6
-.Empty:	move.l	d2,d1			; Mask
-	lsr.l	d5,d1
-	and.w	(a5)+,d1			; Clip
-	btst	#0,d4			; Plane 0
-	beq.s	.C0
-	or.w	d1,(a3)+
-	bra.s	.P1
-.C0:	not.w	d1
-	and.w	d1,(a3)+
-	not.w	d1
-.P1:	btst	#1,d4			; Plane 1
-	beq.s	.C1
-	or.w	d1,(a3)+
-	bra.s	.P2
-.C1:	not.w	d1
-	and.w	d1,(a3)+
-	not.w	d1
-.P2:	btst	#2,d4			; Plane 2
-	beq.s	.C2
-	or.w	d1,(a3)+
-	bra.s	.P3
-.C2:	not.w	d1
-	and.w	d1,(a3)+
-	not.w	d1
-.P3:	btst	#3,d4			; Plane 3
-	beq.s	.C3
-	or.w	d1,(a3)+
-	bra.s	.Next
-.C3:	not.w	d1
-	and.w	d1,(a3)+
-.Next:	dbra	d0,.Trunc
-	move.l	(sp)+,a5
-.Skip_line:	lea.l	40(a0),a0			; Next line
-	lea.l	ST_bytes_per_line(a1),a1
-	addq.w	#1,a4
-	dbra	d3,.Line
-.Exit:	movem.l	(sp)+,d0-d7/a0-a6
 	rts
 
 ;*****************************************************************************

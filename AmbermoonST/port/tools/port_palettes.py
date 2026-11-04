@@ -82,6 +82,60 @@ def words(raw):
     return [struct.unpack('>H', raw[i * 2:i * 2 + 2])[0] & 0xfff for i in range(32)]
 
 
+def texture_counts(data, world, lab):
+    """The colour counts of a 3D map (its labyrinth data lab of the world '2' or '3') : the pixels of its walls,
+    objects and overlays (4 bit packed textures : 8 pixels are 4 bytes, the planes 0-3), the sky and the floor
+    (each about half of the 3D view)."""
+    counts = [0] * 32
+    try:
+        d = data.read(f'{world}Lab_data.amb/{lab:03}')
+    except KeyError:
+        return counts
+    counts[d[4] & 15] += 144 * 72          # sky, floor
+    counts[d[5] & 15] += 144 * 72
+    o = 8
+    groups = struct.unpack_from('>H', d, o)[0]
+    o += 2 + groups * (2 + 8 * 8)
+    textures = []
+    n = struct.unpack_from('>H', d, o)[0]
+    o += 2
+    for i in range(n):
+        textures.append(('Object3D', struct.unpack_from('>H', d, o + 4)[0]))
+        o += 14
+    n = struct.unpack_from('>H', d, o)[0]
+    o += 2
+    for i in range(n):
+        textures.append(('Wall3D', d[o + 4]))
+        overlays = d[o + 7]
+        o += 8
+        for j in range(overlays):
+            textures.append(('Overlay3D', d[o + 1]))
+            o += 6
+    for kind, number in textures:
+        name = f'{world}{kind}.amb/{number:03}'
+        if name in data.names:
+            for i, c in enumerate(texture_pixels(data, name)):
+                counts[i] += c
+    return counts
+
+
+TEXTURE_PIXELS = {}
+
+
+def texture_pixels(data, name):
+    """The colour counts (16) of a texture of the 3D maps (cached : textures are shared by the maps)."""
+    if name not in TEXTURE_PIXELS:
+        counts, groups = [0] * 16, {}
+        raw = data.read(name)
+        for p in range(0, len(raw) - 3, 4):
+            groups[raw[p:p + 4]] = groups.get(raw[p:p + 4], 0) + 1
+        for planes, n in groups.items():
+            for b in range(8):
+                counts[sum((planes[q] >> b & 1) << q for q in range(4))] += n
+        TEXTURE_PIXELS[name] = counts
+    return TEXTURE_PIXELS[name]
+
+
 def make_group_palettes(entries):
     """ST palettes of a palette group with one lookup table for all (see above). entries: (32 rgb, weights).
     Returns (16 rgb, lookup table) per entry."""
@@ -161,10 +215,14 @@ def main():
     add(sc.source_words('KERNEL/DATA.S', 'Automap_pal', 32))
     add(tactic_pal)
     # ---------- palettes of Palettes.amb (maps, pictures, combat backgrounds) ----------
-    maps = []
+    maps, weights_3d = [], {}
     for name in sorted(data.names):
         if name[1:13] == 'Map_data.amb' and name[-1] != '/':
             maps.append(data.read(name))
+            if maps[-1][2] != 2:          # the textures of a 3D map count for its palette
+                w = weights_3d.setdefault(maps[-1][9], [0] * 32)
+                for i, n in enumerate(texture_counts(data, name[0], maps[-1][6])):
+                    w[i] += n
     # group keys of the palettes : the 3D maps (textures), the combat backgrounds (monsters)
     keys = {}
     for md in maps:
@@ -189,7 +247,10 @@ def main():
                 for i in range(len(gfx) // 160):
                     for v in planar(gfx, 16, 16, 5, i * 160):
                         weights[v] += 0.05
-        add(colours, weights, keys=keys.get(index, set()) | ({'combat'} if index in combat else set()))
+        weights_map = list(weights)       # (the combat screen below shows no textures)
+        for i, n in enumerate(weights_3d.get(index, ())):
+            weights_map[i] += 0.05 * n
+        add(colours, weights_map, keys=keys.get(index, set()) | ({'combat'} if index in combat else set()))
         # in the combat screen the last 6 colours come from the tactic palette (Set_layout_colours)
         add(colours[:26] + tactic_pal[26:], weights, keys={'combat'} if index in combat else set())
     # ---------- event pictures (Event_pix_palette_table, the 9th picture uses the palette of the others) ----------

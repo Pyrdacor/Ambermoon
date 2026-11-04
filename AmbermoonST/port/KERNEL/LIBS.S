@@ -456,19 +456,29 @@ Dos_IoErr:
 
 ; [ Switch the TOS system timer on / off ]
 ; Timer C is needed by the disk drivers (time-outs). While the system is
-; taken over, it is only switched on while a file is accessed.
+; taken over, it is only switched on while a file is accessed. When Timer C
+; is the 50 Hz of the game ([ Tick_timer ], SYSTEM.S) it stays on, the TOS
+; gets its interrupts from [ Tick_interrupt ] while a file is accessed.
 ; All registers are restored
 Timer_C_on:
 	tst.b	System_active
 	beq.s	.Exit
-	bset	#5,MFP_IERB
+	tst.b	Tick_timer
+	beq.s	.Own
+	st	TOS_timer_C
+	rts
+.Own:	bset	#5,MFP_IERB
 	bset	#5,MFP_IMRB
 .Exit:	rts
 
 Timer_C_off:
 	tst.b	System_active
 	beq.s	.Exit
-	bclr	#5,MFP_IERB
+	tst.b	Tick_timer
+	beq.s	.Own
+	sf	TOS_timer_C
+	rts
+.Own:	bclr	#5,MFP_IERB
 	bclr	#5,MFP_IMRB
 .Exit:	rts
 

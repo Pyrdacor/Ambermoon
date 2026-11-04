@@ -48,6 +48,7 @@ _SA_StartSong:
 	ori.w	#$0700,sr
 	moveq.l	#1,d0			; Start
 	jsr	Music_player
+	jsr	Enable_tick_timer		; (the player switches Timer C off)
 	st	Music_playing
 	move.w	(sp)+,sr
 	movem.l	(sp)+,d0-d7/a0-a6
@@ -62,9 +63,22 @@ _SA_StopSong:
 	sf	Music_playing
 	moveq.l	#0,d0			; Stop (sound off, the timers as
 	jsr	Music_player		;  before the start)
+	jsr	Enable_tick_timer
 	move.w	(sp)+,sr
 	movem.l	(sp)+,d0-d7/a0-a6
 .Exit:	rts
+
+;*****************************************************************************
+; [ The sound hardware ] (the Falcon : the DMA sound and its mixer)
+; NOTE :
+;   - The YM2149 needs nothing : [ Init_sound ] / [ Exit_sound ] (system
+;     start and end) and [ Music_VBL ] (every vertical blank, after the
+;     player) do nothing on the ST.
+;*****************************************************************************
+Init_sound:
+Exit_sound:
+Music_VBL:
+	rts
 
 ;*****************************************************************************
 ; [ Play the song (vertical blank) ]

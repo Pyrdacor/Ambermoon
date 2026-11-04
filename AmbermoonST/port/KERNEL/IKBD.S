@@ -39,7 +39,9 @@ Init_IKBD:
 ; [ ACIA interrupt (keyboard & mouse) ]
 ;*****************************************************************************
 ACIA_interrupt:
-	movem.l	d0-d2/a0/a1,-(sp)
+	move.w	#$2500,sr			; Timer B may come (the colours of the
+	movem.l	d0-d2/a0/a1,-(sp)		;  lines : the MFP lets only the higher
+					;  ones through while this one is in service)
 .Again:	move.b	ACIA_kbd_ctrl,d0		; Keyboard ACIA
 	bpl.s	.Midi			; Interrupt request ?
 	btst	#0,d0			; Receive buffer full ?
