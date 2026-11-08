@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
-"""Makes KERNEL/INTRO.S from the output of intro_source.py : the changes for the Falcon (see KERNEL/INTRO_HW.S).
+"""Makes KERNEL/INTRO.S from the output of intro_source.py : the changes for the ST and the Falcon (see
+KERNEL/INTRO_COMMON.S and the INTRO_HW.S of each machine).
 
     intro_patch.py <generated.s> <INTRO.S>
 """
@@ -15,11 +16,11 @@ replace, after = S.replace, S.after
 H5 = '(Intro_h5+$%x).l'
 # entry : no system, no interrupts
 replace(0x0, 0x12c, [])
-# the music : the replay of the kernel
-replace(0x24a, 0x252, ['lea.l\tIntro_music_module,a0', 'jsr\t_SA_Hardcalc'])
-replace(0x25e, 0x268, ['jsr\t_SA_StartSong'])
+# the music : the player of the kernel (the songs of the machine : INTRO_HW.S)
+replace(0x24a, 0x252, ['jsr\tIntro_music_init'])
+replace(0x25e, 0x268, ['jsr\tIntro_song'])
 replace(0xc96, 0xc9c, [])
-replace(0xc9e, 0xca2, ['jsr\t_SA_StartSong'])
+replace(0xc9e, 0xca2, ['jsr\tIntro_song'])
 replace(0x282c, 0x2836, ['jsr\t_SA_IrqLowLevel'])
 # the comet : the steps wait for their time, the late ones are not drawn (the impact belongs to the music)
 replace(0xb20, 0xb24, ['jsr\tIntro_comet_late', 'bne.w\tL00bfc', 'bsr.w\tL0288a'])
@@ -44,6 +45,10 @@ after(0x268, ['jsr	Intro_clear_stars'])
 # the pointer of the menu
 after(0x10b0, ['jsr\tIntro_pointer_on'])
 replace(0x1136, 0x113c, ['clr.l\t' + H5 % 0x12174, 'jsr\tIntro_pointer_off'])
+# the menu entry INTRO : Z set : the intro of the Amiga program again (the ST : its own intro, Run_intro)
+replace(0x1146, 0x114e, ['jsr\tIntro_replay'])
+# the colours of the main menu come (Intro_menu_in : at once after the intro of the machine)
+replace(0xd94, 0xd9e, ['jsr\tIntro_menu_in'])
 # the system
 # the copper list, the screen change
 replace(0x2452, 0x24cc, ['jsr\tIntro_present', 'rts'])
@@ -52,31 +57,32 @@ replace(0x289a, 0x28de, ['jmp\tIntro_video'])
 replace(0x2738, 0x2744, [])
 # the interrupt : colours, buttons, mouse, stars, return
 replace(0x252c, 0x254e, ['jsr\tIntro_buttons', 'jsr\tIntro_palette'])
-replace(0x255e, 0x263e, ['move.w\tMouse_X,' + H5 % 0x12168, 'move.w\tMouse_Y,' + H5 % 0x1216a])
+replace(0x255e, 0x263e, ['jsr\tIntro_mouse'])
 replace(0x2646, 0x2664, ['jsr\tIntro_stars'])
 replace(0x283a, 0x2848, ['rts'])
-# the stars : offsets in a screen of the Falcon (plane 4)
-replace(0x1ac4, 0x1acc, ['mulu.w\t#Screen_bytes_per_line,d3', 'move.w\td2,d0', 'lsr.w\t#4,d0', 'lsl.w\t#4,d0',
-                         'add.w\td0,d3', 'addq.w\t#8,d3', 'btst\t#3,d2', 'beq.s\t*+4', 'addq.w\t#1,d3'])
-HEAD = '''; Falcon kernel : the intro and the main menu
+# the stars : offsets in a screen of the machine (d0 must stay : the direction of the star)
+replace(0x1ac4, 0x1acc, ['jsr\tIntro_star_offset'])
+HEAD = '''; ST kernel : the intro and the main menu
 ; The code of the Amiga program Ambermoon_intro (made from the executable with
-; tools/intro_source.py and tools/intro_patch.py : without the changes it
-; assembles to the same bytes). The labels are the offsets in the code. The
-; hardware of the Amiga : INTRO_HW.S. The data hunks are made by
-; tools/intro_data.py.
+; port/tools/intro_source.py and port/tools/intro_patch.py : without the
+; changes it assembles to the same bytes). The labels are the offsets in the
+; code. The hardware of the Amiga : INTRO_COMMON.S, AMIGA_BLIT.S and the
+; INTRO_HW.S of the machine. The data are made by port/tools/intro_data.py.
 
+	include	ST_KERNEL/INTRO_COMMON.S
+	include	ST_KERNEL/AMIGA_BLIT.S
 	include	ST_KERNEL/INTRO_HW.S
 	include	ST_KERNEL/FANTASY.S
-	include	ST_KERNEL/EXTRO.S
 
 	SECTION	Program,code
 
 ; [ The intro and the main menu ]
 ;   IN : d0 - There is a savegame ($ff) or not (0) (.b)
+;        d1 - The intro is skipped ($ff : the menu at once) or not (0) (.b)
 ;  OUT : d0 - The chosen menu entry (.w)
 Intro_main:
 	move.b	d0,(Intro_h5+$12212).l
-	move.b	d0,(Intro_h5+$12213).l
+	move.b	d1,(Intro_h5+$12213).l
 	jsr	L0012c
 	moveq.l	#0,d0
 	move.w	(Intro_h5+$12172).l,d0
@@ -89,22 +95,36 @@ TAIL = '''
 Intro_h1:
 	include	ST_KERNEL/INTRO_H1.I
 	even
-Intro_h2:
-	incbin	"ST_KERNEL/INTRO_H2.BIN"
-	even
-Intro_h3:
-	incbin	"ST_KERNEL/INTRO_H3.BIN"
-	even
-Intro_h4:
-	incbin	"ST_KERNEL/INTRO_H4.BIN"
-	even
 Intro_music_module:
 	incbin	"ST_KERNEL/INTRO_MU.BIN"
 	even
 
-	SECTION	Fast_BSS,bss
+; The data hunks 2-4 (loaded from the file Intro_data) and the BSS : the memory
+; of the intro, the last part of the BSS (INTRO_COMMON.S)
+	include	ST_KERNEL/INTRO.I
+	SECTION	Intro_BSS,bss
+Intro_area:
+Intro_h2:	ds.b	Intro_h2_size
+Intro_h3:	ds.b	Intro_h3_size
+Intro_h4:	ds.b	Intro_h4_size
 Intro_h5:	ds.b	$%x
 	even
 Intro_h6:	ds.b	$%x
+Intro_h6_end:
+	include	ST_KERNEL/INTRO_ST.I		; (the intro of the ST : its data and a screen,
+	IFGT	Intro_st_size+256+Screen_size-(*-Intro_area)	;  more memory when it needs it)
+	ds.b	Intro_st_size+256+Screen_size-(*-Intro_area)
+	ENDC
+	IFNE	Intro_st_size			; (its screen stays until the menu is there)
+	IFLT	Intro_st_size-(Intro_h6_end-Intro_area)
+	FAIL	"The last screen of the intro of the ST is in the memory of the Amiga program"
+	ENDC
+	ENDC
+Intro_area_end:
+	IFGT	Star_cache+Star_slots*512-Intro_area_end
+	FAIL	"The fairy needs more memory than the intro"
+	ENDC
+
+	SECTION	Program,code
 ''' % (0x488c * 4, 0x915b * 4)
 open(sys.argv[2], 'w', newline='\n').write(HEAD + S.text() + TAIL)

@@ -10,7 +10,8 @@ file for the ST kernel (File_map in port/KERNEL/LIBS.S), which translates the na
 With the json of port_palettes.py the graphics are converted to the ST format and the containers are stored
 raw (port_gfx.py), and Music.amb holds the songs of the ST version (port_music.py). With --falcon the graphics
 stay the original ones (32 colours, the Falcon version draws them as they are), and Music.amb is the one of the
-Amiga (the Falcon plays it with the Sonic Arranger replay of the Amiga version).
+Amiga (the Falcon plays it with the Sonic Arranger replay of the Amiga version). The programs of the intro are
+not copied : intro_data.py makes their includes and the data files Intro_data and Fantasy_data.
 """
 import os
 import sys
@@ -60,14 +61,19 @@ def main():
         for f in fn:
             p = os.path.join(dp, f)
             files[os.path.relpath(p, FIXED).replace(os.sep, '/')] = open(p, 'rb').read()
-    if len(sys.argv) > 3 and sys.argv[3] == '--falcon':  # (the intro, the extro and their music go into the program)
-        sys.path.insert(0, os.path.join(ROOT, 'AmbermoonFalcon', 'tools'))
+    sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+    falcon = len(sys.argv) > 3 and sys.argv[3] == '--falcon'
+    if len(sys.argv) > 3:       # (the intro, the fairy and the extro : includes and data files, intro_data.py)
         import intro_data
-        intro_data.write(os.path.dirname(inc), files['Ambermoon_intro'], files['Intro_music'], files['Fantasy_intro'],
-                         files['Ambermoon_extro'], files['Extro_music'])
+        intro = intro_data.write(os.path.dirname(inc), files, falcon)
+    if falcon:                  # (the mixer of the music on the DSP)
+        sys.path.insert(0, os.path.join(ROOT, 'AmbermoonFalcon', 'tools'))
+        from dsp_asm import assemble
+        assemble(os.path.join(ROOT, 'AmbermoonFalcon', 'KERNEL', 'DSP_MIX.ASM'),
+                 os.path.join(os.path.dirname(inc), 'DSP_MIX.BIN'))
     files = {k: v for k, v in files.items() if k.split('/')[-1] not in SKIP}
     if len(sys.argv) > 3:
-        sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+        files.update(intro)
         import port_gfx
         if sys.argv[3] != '--falcon':
             files = port_gfx.convert_all(files, port_gfx.Palettes(sys.argv[3]))

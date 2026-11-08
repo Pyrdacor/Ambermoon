@@ -2,9 +2,10 @@
 """Converts songs of the Amiga version (Sonic Arranger modules, Music/SONIC.<name>.sa) for the music player of the
 ST version (port/MUSIC/README.md has its format).
 
-    sa_to_st.py <Amiga song number>... [-o <folder>] [-v] [-f]
+    sa_to_st.py <Amiga song number | intro>... [-o <folder>] [-v] [-f]
 
-Writes <folder>/SONG<nn>.BIN (default port/MUSIC), the data of the song for the ST player. Songs in the folder
+Writes <folder>/SONG<nn>.BIN (default port/MUSIC), the data of the song for the ST player ("intro" : the two songs
+of the intro module, INTRO0.BIN and INTRO1.BIN, the intro and the main menu). Songs in the folder
 are accepted ones (by listening) : they are only replaced with -f.
 
 The Amiga version has 4 tracks with samples and synth waves, the ST player 3 channels of the YM2149 with square
@@ -146,7 +147,8 @@ class Instrument:
 
 
 class Module:
-    def __init__(self, path):
+    def __init__(self, path, song=0):
+        self.song = song                               # (the intro module has two : the intro and the menu)
         d = open(path, 'rb').read()
         if d[:4] != b'SOAR':
             raise ValueError(f'{path} : no Sonic Arranger module')
@@ -201,7 +203,7 @@ class Module:
     def rows(self):
         """The rows of the song as played : [[(note, instrument, command, parameter) x 4]], the position where
         the song repeats (row) and the speed at the start"""
-        speed, length, start, stop, repeat, _ = self.songs[0]
+        speed, length, start, stop, repeat, _ = self.songs[self.song]
         out = []
         restart = 0
         for pos in range(start, stop + 1):
@@ -1124,14 +1126,20 @@ def main():
         i = args.index('-o')
         out = args[i + 1]
         del args[i:i + 2]
+    jobs = []
     for a in args:
-        n = int(a)
-        print(f'{n} {NAMES[n]}')
-        conv = Converter(Module(os.path.join(SONGS, f'SONIC.{NAMES[n]}.sa')), verbose, OVERRIDES.get(n))
+        if a == 'intro':        # (the two songs of the intro module : INTRO0.BIN, INTRO1.BIN)
+            jobs += [('Intro', s, None, f'INTRO{s}.BIN') for s in (0, 1)]
+        else:
+            n = int(a)
+            jobs.append((NAMES[n], 0, OVERRIDES.get(n), f'SONG{n:02}.BIN'))
+    for name, s, override, file in jobs:
+        print(f'{name} {s}')
+        conv = Converter(Module(os.path.join(SONGS, f'SONIC.{name}.sa'), s), verbose, override)
         if verbose:
             describe(conv)
         data = conv.song()
-        path = os.path.join(out, f'SONG{n:02}.BIN')
+        path = os.path.join(out, file)
         if os.path.exists(path) and not force:
             print(f'  {path} exists (accepted), not replaced (-f)')
             continue

@@ -1,8 +1,8 @@
 ; Falcon kernel : the hardware of the fairy of Thalion (FANTASY.S)
 ;
 ; FANTASY.S is the code of the Amiga program Fantasy_intro. It draws into Amiga
-; screens with 5 planes and 256 lines, like the intro (INTRO_HW.S : custom chips
-; in memory, the blitter). Here :
+; screens with 5 planes and 256 lines, like the intro (ST_KERNEL/INTRO_COMMON.S :
+; custom chips in memory, the blitter). Here :
 ;   - The copper is gone : [ Fantasy_present ] converts the Amiga screen. Only
 ;     the lines from [ Fantasy_split ] on change, and the lines of the fairy.
 ;   - The copper changes 7 colours in the line [ Fantasy_split ] : the lines
@@ -17,43 +17,6 @@ Fairy_sprite	EQU	$124		; Size of a sprite
 Fairy_frame	EQU	$920		; Size of a frame of the 8 sprites
 
 	SECTION	Program,code
-
-;*****************************************************************************
-; [ Show the fairy ]
-; All registers are restored
-;*****************************************************************************
-Fantasy_main:
-	movem.l	d0-d7/a0-a6,-(sp)
-	jsr	F00110
-	movem.l	(sp)+,d0-d7/a0-a6
-	rts
-
-;*****************************************************************************
-; [ Blit a sparkle ] (F0078c : the registers of the blitter are set)
-;   IN : d3 - BLTSIZE (.w)
-;        a6 - Pointer to [ Intro_custom ] (.l)
-; All registers are restored
-; NOTE :
-;   - Always the same kind of blit (cookie cut, two words, from the data of
-;     the fairy) : straight to [ Intro_star_blit ], without the checks of
-;     [ Intro_blit ].
-;*****************************************************************************
-Fantasy_sparkle:
-	move.w	d3,Blt_size(a6)
-	movem.l	d0-d7/a0-a5,-(sp)
-	move.w	d3,d0			; Height
-	lsr.w	#6,d0
-	cmp.w	#Star_rows,d0
-	bhi.s	.Blit
-	move.w	d0,Bl_height
-	move.w	Blt_con0(a6),d2		; Shift
-	rol.w	#4,d2
-	andi.w	#15,d2
-	jsr	Intro_star_blit
-	movem.l	(sp)+,d0-d7/a0-a5
-	rts
-.Blit:	movem.l	(sp)+,d0-d7/a0-a5
-	jmp	Intro_blit
 
 ;*****************************************************************************
 ; [ Take over the screens, start the interrupt ]
@@ -74,6 +37,23 @@ Fantasy_init:
 	lea.l	F00d88,a0
 	move.l	a0,VBL_hook
 	movem.l	(sp)+,d0/d1/a0
+	rts
+
+;*****************************************************************************
+; [ The drawing of the fairy ] (FANTASY.S : the ST draws into its screen)
+;  OUT : Z clear : the code of the Amiga draws
+;*****************************************************************************
+Fantasy_draw_lower:
+Fantasy_draw_reveal:
+Fantasy_draw_sparkle:
+Fantasy_draw_small:
+Fantasy_draw_dots:
+Fantasy_draw_dot:
+	andi.b	#$fb,ccr
+	rts
+
+; [ The fairy in the vertical blank ] (the Falcon : when the screen is shown)
+Fantasy_vbl:
 	rts
 
 ;*****************************************************************************

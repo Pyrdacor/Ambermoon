@@ -8,7 +8,7 @@
 ; effects, and is called by the vertical blank handler.
 ; The routines replace those of the Amiga player (see INCLUDES/MACROS.I).
 
-MUSIC_DATA_SIZE	EQU	20480			; (port_music.py checks the songs)
+MUSIC_DATA_SIZE	EQU	26624			; (port_music.py checks the songs)
 
 	SECTION	Program,code
 

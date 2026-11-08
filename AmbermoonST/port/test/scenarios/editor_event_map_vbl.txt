@@ -1,4 +1,5 @@
 # Character editor: OK, "JA", the first event (text pages, the free scrolling text ends with the right button), the 2D map of grandfather's house (frame by frame, for run.py; about 2700 VBLs)
+nointro
 vbl 700
 move 255 104
 click left

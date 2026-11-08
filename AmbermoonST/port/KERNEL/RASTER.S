@@ -196,6 +196,35 @@ Render_raster:
 Max_RL_palettes	EQU	32			; (index = offset in Current_RL / 66)
 
 ;*****************************************************************************
+; [ Show raster events which are not made from a raster list ]
+;   IN : a0 - Pointer to the raster events, the last one with line $7fff (.l)
+; All registers are restored
+; NOTE :
+;   - For the intro and the fairy (INTRO_HW.S, FANTASY_HW.S) : they set their
+;     colours themselves. Like the events of [ Render_raster ], they become
+;     active with the next frame. The palettes they point to must stay until
+;     then.
+;*****************************************************************************
+Show_raster_events:
+	movem.l	d0-d4/a0-a6,-(sp)
+	lea.l	Raster_events1,a1		; Use the inactive buffer
+	cmp.l	Active_raster,a1
+	bne.s	.Go
+	lea.l	Raster_events2,a1
+.Go:	move.l	a1,a6
+.Copy:	move.w	(a0),d0
+	move.l	(a0)+,(a1)+
+	move.l	(a0)+,(a1)+
+	cmp.w	#$7fff,d0
+	bne.s	.Copy
+	move.l	a6,a0
+	jsr	Sort_raster_events
+	jsr	Make_raster_steps
+	move.l	a6,Next_raster
+	movem.l	(sp)+,d0-d4/a0-a6
+	rts
+
+;*****************************************************************************
 ; [ Fade the colours of an ST palette like the Amiga colours ]
 ;   IN : d6 - Index of the target colours (.w)
 ;        a0 - Pointer to the current Amiga colours (32 words) (.l)

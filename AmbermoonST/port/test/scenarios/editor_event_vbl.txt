@@ -1,4 +1,5 @@
 # Character editor: OK, "JA", then the first event picture (frame by frame, for run.py; about 1400 VBLs)
+nointro
 vbl 700
 move 255 104
 click left

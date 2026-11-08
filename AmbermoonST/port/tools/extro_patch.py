@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
-"""Makes KERNEL/EXTRO.S from the output of intro_source.py : the changes for the Falcon (see KERNEL/EXTRO_HW.S).
+"""Makes KERNEL/EXTRO.S from the output of intro_source.py : the changes for the Falcon (see
+AmbermoonFalcon/KERNEL/EXTRO_HW.S; written there).
 
     extro_patch.py <generated.s> <EXTRO.S>
 """
@@ -38,9 +39,10 @@ after(0xf2a, ['jsr\tIntro_buttons', 'jsr\tExtro_palette'])
 replace(0xf46, 0xf54, ['rts'])
 HEAD = '''; Falcon kernel : the extro (the end of the game)
 ; The code of the Amiga program Ambermoon_extro (deploded and made from the
-; executable with tools/intro_source.py and tools/extro_patch.py). The labels
-; are the offsets in the code. The hardware of the Amiga : EXTRO_HW.S and
-; INTRO_HW.S. The data hunks are made by tools/intro_data.py.
+; executable with AmbermoonST/port/tools/intro_source.py and extro_patch.py).
+; The labels are the offsets in the code. The hardware of the Amiga :
+; EXTRO_HW.S, INTRO_HW.S and ST_KERNEL/INTRO_COMMON.S. The data hunks are made
+; by AmbermoonST/port/tools/intro_data.py.
 
 	include	ST_KERNEL/EXTRO_HW.S
 

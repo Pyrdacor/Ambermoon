@@ -10,7 +10,7 @@ State of the work and what is needed to continue it. The plan, the design and th
   does (`AmbermoonSource/src`) instead of guessing. The game logic is not re-implemented any more: the
   original files are assembled unchanged, only the hardware kernel is new.
 * Static, precomputed ST palettes (`port/tools/port_palettes.py`), no palettes computed at run time.
-* Work on the branch `ccr-9a694101-ljput5`, no pull request unless asked.
+* Work on `master` (the Falcon version is in the same branch), no pull request unless asked.
 * Changes of original files only as patches in `port/PATCHES/*.diff`, every changed line marked `; ST:`.
 * No model names in commits or code.
 
@@ -27,6 +27,9 @@ State of the work and what is needed to continue it. The plan, the design and th
 | `port/tools/port_music.py`, `ice.py` | Music of the ST version (`port/MUSIC`: `PLAYER.BIN` + `AMBER<n>.BIN` song data, made by `--extract` from `ORIGINAL/AMBR`, Pack-Ice): the player once → `MUSPLAY.I`, the songs → `Music.amb`. |
 | `port/tools/sa_to_st.py` | Converts Amiga songs (Sonic Arranger) for the ST player → `port/MUSIC/SONG<nn>.BIN`; `OVERRIDES` per song. |
 | `port/tools/port_palettes.py` | ST palettes of all Amiga palettes → `build/port/STPALS.I` (made again only when the script changed). |
+| `port/tools/intro_source.py`, `intro_patch.py`, `fantasy_patch.py`, `extro_patch.py`, `hunks.py`, `patchlib.py` | The code of the Amiga programs of the intro → `KERNEL/INTRO.S`, `KERNEL/FANTASY.S` (and `AmbermoonFalcon/KERNEL/EXTRO.S`): `intro_source.py <Ambermoon_intro> out.s` (needs capstone, only when a change is made), then `intro_patch.py out.s KERNEL/INTRO.S`. |
+| `port/tools/intro_data.py`, `fantasy_st.py` | The data of the intro (called by `port_data.py`): includes, `INTRO.I` (sizes), the music, the files `Intro_data` and `Fantasy_data` (the fairy with ST colours). |
+| `port/tools/intro_st.py`, `intro_graphics.py` | The intro made anew for the ST (`KERNEL/INTRO_ST.S`): `intro_graphics.py` reads the graphics, texts and palettes of `Ambermoon_intro` (like `IntroData.cs` of Ambermoon.net; `intro_graphics.py <Ambermoon_intro> <folder>` writes previews), `intro_st.py` makes the file `Intro_st` and `INTRO_ST.I` (the timings and the logic of `Intro.cs` are computed there, per tick). |
 | `port/test/` | Hatari test runner, scenarios, symbol and frame tools (below). |
 
 ## Build

@@ -20,6 +20,7 @@
 	SECTION	Blitter,code
 	SECTION	Blitter2,code
 	SECTION	Font_DATA,data
+	SECTION	Intro_BSS,bss		; ST: the last one (the memory of the intro, INTRO_COMMON.S)
 
 	include	INCLUDES/HARDWARE.I
 	include	INCLUDES/MACROS.I
@@ -119,4 +120,4 @@
 	include	ST_KERNEL/STUBS.S		; ST: (stage 1)
 	include	ST_KERNEL/3D.S		; ST: (the 3D renderer : MAP/3D_RENDER.S on the Falcon)
 	include	ST_KERNEL/ZOOM.S		; ST: (the zoom of the combat monsters)
-	include	ST_KERNEL/INTRO.S		; ST: (intro and main menu : the Falcon)
+	include	ST_KERNEL/INTRO.S		; ST: (the fairy, the intro and the main menu)

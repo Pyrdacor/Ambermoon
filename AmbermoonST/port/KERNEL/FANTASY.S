@@ -1,8 +1,9 @@
-; Falcon kernel : the fairy of Thalion
+; ST kernel : the fairy of Thalion
 ; The code of the Amiga program Fantasy_intro (deploded and made from the
-; executable with tools/intro_source.py and tools/fantasy_patch.py). The labels
-; are the offsets in the code. The hardware of the Amiga : FANTASY_HW.S and
-; INTRO_HW.S. The data hunk is made by tools/intro_data.py.
+; executable with port/tools/intro_source.py and port/tools/fantasy_patch.py).
+; The labels are the offsets in the code. The hardware of the Amiga :
+; INTRO_COMMON.S, AMIGA_BLIT.S and the FANTASY_HW.S of the machine. The data
+; are made by port/tools/intro_data.py.
 
 	include	ST_KERNEL/FANTASY_HW.S
 
@@ -117,9 +118,9 @@ F00316:
 	move.w	(Fant_h2+$c0).l,d4	; 00316
 	bmi.w	F00404	; 0031c
 	cmp.w	#$40,d4	; 00320
-	blt.b	F003a0	; 00324
+	blt.w	F003a0
 	cmp.w	#$110,d4	; 00326
-	bge.b	F003a0	; 0032a
+	bge.w	F003a0
 	move.w	d4,d0	; 0032c
 	subi.w	#$40,d0	; 0032e
 	moveq	#$f,d2	; 00332
@@ -129,7 +130,9 @@ F00316:
 	lea.l	(Fant_h1+$1a3fc).l,a0	; 0033e
 	adda.w	d0,a0	; 00344
 	adda.w	d0,a1	; 00346
-	lea.l	Intro_custom,a6	; 00348
+	jsr	Fantasy_draw_reveal
+	beq	F003a0
+	lea.l	Intro_custom,a6
 	lsr.w	#$2,d2	; 0034e
 	add.w	d2,d2	; 00350
 	lea.l	(F00544).l,a2	; 00352
@@ -149,7 +152,9 @@ F00358:
 	move.w	#$67c1,$58(a6)	; 0039a
 	jsr	Intro_blit
 F003a0:
-	moveq	#$17,d7	; 003a0
+	moveq	#$17,d7
+	lea.l	(Fant_h2+$102).l,a0
+	move.w	#$18f,d6
 F003a2:
 	bsr.w	F005a2	; 003a2
 	move.l	d0,d1	; 003a6
@@ -162,8 +167,6 @@ F003a2:
 	andi.w	#$7,d0	; 003bc
 	subi.w	#$4,d0	; 003c0
 	add.w	d4,d0	; 003c4
-	lea.l	(Fant_h2+$102).l,a0	; 003c6
-	move.w	#$18f,d6	; 003cc
 F003d0:
 	tst.w	(a0)	; 003d0
 	bmi.b	F003dc	; 003d2
@@ -174,6 +177,8 @@ F003dc:
 	move.w	d0,(a0)+	; 003dc
 	move.w	d1,(a0)+	; 003de
 	move.w	d2,(a0)+	; 003e0
+	subq.w	#1,d6
+	bmi.s	F003e6
 	dbra	d7,F003a2	; 003e2
 F003e6:
 	addq.w	#$4,(Fant_h2+$c0).l	; 003e6
@@ -526,7 +531,9 @@ F00708:
 F00724:
 	addq.w	#$2,d3	; 00724
 	move.w	d3,$4(a4)	; 00726
-	mulu.w	#$c8,d1	; 0072a
+	jsr	Fantasy_draw_dot
+	beq	F00744
+	mulu.w	#$c8,d1
 	movea.l	(Fant_h2+$ec).l,a0	; 0072e
 	adda.w	d0,a0	; 00734
 	adda.l	d1,a0	; 00736
@@ -572,7 +579,10 @@ F0074e:
 	dc.w	$fed4	; 00788
 	dc.w	$0000	; 0078a
 F0078c:
-	movem.l	d2/a2,-(a7)	; 0078c
+	jsr	Fantasy_draw_sparkle
+	bne.s	*+4
+	rts
+	movem.l	d2/a2,-(a7)
 	mulu.w	#$c8,d1	; 00790
 	moveq	#$f,d2	; 00794
 	and.w	d0,d2	; 00796
@@ -604,7 +614,10 @@ F007b2:
 	movem.l	(a7)+,d2/a2	; 007fe
 	rts		; 00802
 F00804:
-	mulu.w	#$c8,d1	; 00804
+	jsr	Fantasy_draw_small
+	bne.s	*+4
+	rts
+	mulu.w	#$c8,d1
 	movea.l	(Fant_h2+$ec).l,a1	; 00808
 	adda.w	d0,a1	; 0080e
 	adda.l	d1,a1	; 00810
@@ -631,7 +644,10 @@ F0081c:
 	jsr	Intro_blit
 	rts		; 0086c
 F0086e:
-	mulu.w	#$c8,d1	; 0086e
+	jsr	Fantasy_draw_dots
+	bne.s	*+4
+	rts
+	mulu.w	#$c8,d1
 	moveq	#$7,d3	; 00872
 	and.w	d0,d3	; 00874
 	eori.w	#$7,d3	; 00876
@@ -922,7 +938,10 @@ F00bac:
 	or.b	d0,$a0(a0)	; 00bba
 	rts		; 00bbe
 F00bc0:
-	lea.l	Intro_custom,a6	; 00bc0
+	jsr	Fantasy_draw_lower
+	bne.s	*+4
+	rts
+	lea.l	Intro_custom,a6
 F00bc6:
 	btst	#$e,(Intro_custom+$002).l	; 00bc6
 	bne.b	F00bc6	; 00bce
@@ -1135,7 +1154,8 @@ F00fc4:
 	bne.b	F00fe6	; 00fdc
 	move.w	#$3c,(Fant_h2+$c0).l	; 00fde
 F00fe6:
-	movem.l	(a7)+,d0-d7/a0-a6	; 00fe6
+	jsr	Fantasy_vbl
+	movem.l	(a7)+,d0-d7/a0-a6
 	move.w	#$20,(Intro_custom+$09c).l	; 00fea
 	nop		; 00ff2
 	nop		; 00ff4
@@ -1147,7 +1167,8 @@ F00ff8:
 F01006:
 	move.l	a1,(a0)+	; 01006
 	dbra	d7,F01006	; 01008
-	movem.l	(a7)+,d0-d7/a0-a6	; 0100c
+	jsr	Fantasy_vbl
+	movem.l	(a7)+,d0-d7/a0-a6
 	move.w	#$20,(Intro_custom+$09c).l	; 01010
 	rts
 F0101a:
@@ -1358,16 +1379,12 @@ F01188:
 	dc.w	$fffc	; 011e4
 	dc.w	$4e75	; 011e6
 
-	SECTION	Fast_DATA,data
-	even
-Fant_h1:
-	incbin	"ST_KERNEL/FANT_H1.BIN"
-Fant_h1_end:
-	even
-
-	SECTION	Fast_BSS,bss
-Fant_h2:	ds.b	$2224
-	even
-Fant_h3:	ds.b	$19320
+; The data (loaded from the file Fantasy_data) and the BSS : in the memory of
+; the intro (INTRO_COMMON.S), before the intro
+Fant_h1	EQU	Intro_area
+Fant_h1_end	EQU	Fant_h1+Fant_h1_size
+Fant_h2	EQU	Intro_area+((Fantasy_data_size+3)&-4)
+Fant_h3	EQU	Fant_h2+$2224
+Star_cache	EQU	Fant_h3+$19320		; (AMIGA_BLIT.S, INTRO.S : it fits)
 
 	SECTION	Program,code

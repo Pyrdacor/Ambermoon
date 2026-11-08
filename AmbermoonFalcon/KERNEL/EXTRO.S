@@ -1,8 +1,9 @@
 ; Falcon kernel : the extro (the end of the game)
 ; The code of the Amiga program Ambermoon_extro (deploded and made from the
-; executable with tools/intro_source.py and tools/extro_patch.py). The labels
-; are the offsets in the code. The hardware of the Amiga : EXTRO_HW.S and
-; INTRO_HW.S. The data hunks are made by tools/intro_data.py.
+; executable with AmbermoonST/port/tools/intro_source.py and extro_patch.py).
+; The labels are the offsets in the code. The hardware of the Amiga :
+; EXTRO_HW.S, INTRO_HW.S and ST_KERNEL/INTRO_COMMON.S. The data hunks are made
+; by AmbermoonST/port/tools/intro_data.py.
 
 	include	ST_KERNEL/EXTRO_HW.S
 

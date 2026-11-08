@@ -17,6 +17,7 @@ Scenario lines :
   wait <vbls>               the next lines come so many frames later
   vbl <n>                   the next lines come at frame n
   click left|right          press the button (ST_mouse_buttons) for 15 frames; the next line 20 frames later
+  nointro                   the fairy, the intro and the menu are skipped (the game starts at once)
   move <x> <y>              set the mouse position (Mouse_X/Mouse_Y, screen coordinates)
   <hatari debugger command> at the current frame, e.g. "w {Mouse_X} $00 $10"; before the first wait / vbl it
                             is set at the start (e.g. "b pc = {Raster_VBL} && HBL > 2 :trace");
@@ -60,6 +61,10 @@ def main():
     def word_bytes(v):
         return '$%02x $%02x' % ((v >> 8) & 255, v & 255)
 
+    tmp = tempfile.mkdtemp(prefix='hatari_')
+    skip = os.path.join(tmp, 'nointro.ini')     # (the scenario line "nointro")
+    with open(skip, 'w') as f:
+        f.write('r pc=$%x\n' % symbols['Intro_free'])
     start, actions, frame, timed = [], {}, 0, False
     for line in open(scen, encoding='utf-8'):
         line = line.strip()
@@ -80,6 +85,8 @@ def main():
             actions.setdefault(frame, []).append('w $%x %s' % (symbols['ST_mouse_buttons'], b))
             actions.setdefault(frame + 15, []).append('w $%x $00' % symbols['ST_mouse_buttons'])
             frame += 20
+        elif cmd[0] == 'nointro':
+            start.append('b pc = $%x :once :quiet :trace :file %s' % (symbols['Run_intro'], skip))
         elif cmd[0] == 'move':
             x, y = int(cmd[1]), int(cmd[2])
             actions.setdefault(frame, []).append('w $%x %s %s' % (symbols['Mouse_X'], word_bytes(x), word_bytes(y)))
@@ -89,7 +96,6 @@ def main():
         else:
             actions.setdefault(frame, []).append(resolve(line))
 
-    tmp = tempfile.mkdtemp(prefix='hatari_')
     parse = os.path.join(tmp, 'parse.ini')
     with open(parse, 'w') as f:
         for line in start:

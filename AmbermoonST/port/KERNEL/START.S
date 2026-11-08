@@ -10,6 +10,7 @@
 ;*****************************************************************************
 Start:
 	move.l	4(sp),a0			; Get basepage
+	move.l	a0,Basepage
 	move.l	$c(a0),d0			; Size of TEXT
 	add.l	$14(a0),d0			;  + DATA
 	add.l	$1c(a0),d0			;  + BSS
@@ -50,18 +51,21 @@ Init_texts_and_resources:
 ;*****************************************************************************
 ; [ Program start ]
 ; NOTE :
-;   - Like [ Start_program ] of the Amiga version.
+;   - Like [ Start_program ] of the Amiga version, with the intro and the
+;     main menu (the loader of the Amiga version starts them before) : before
+;     the memory is allocated, the ST gives the memory of the intro to the
+;     game ([ Intro_free ]).
 ;*****************************************************************************
 Start_program:
 	move.l	(sp)+,Return_address
 	move.l	sp,Stack_pointer
 	lea.l	Return_value,sp
-	jsr	Allocate_chip_and_fast_memory
-	bpl.s	.Skip
-	jmp	Exit_to_loader
-.Skip:
 	jsr	Init_system
-	jsr	Run_intro			; (the Falcon : intro and main menu)
+	jsr	Run_intro
+	jsr	Allocate_chip_and_fast_memory
+	bpl.s	Restart_game
+	jsr	Exit_system
+	jmp	Exit_to_loader
 Restart_game:
 	lea.l	Return_value,sp
 	jsr	Init_sub_files
@@ -95,7 +99,7 @@ Restart_game:
 Exit_program:
 	moveq.l	#0,d0
 	jsr	Set_music
-	jsr	Run_extro			; (the Falcon : the end of the game)
+	jsr	Run_extro			; (the end of the game : the Falcon)
 	jsr	Exit_system
 Exit_to_loader:
 	jsr	Free_all_memory
@@ -110,5 +114,6 @@ Version_string2_ptr:	dc.l 0
 
 	SECTION	Fast_BSS,bss
 Old_SSP:	ds.l 1
+Basepage:	ds.l 1
 	ds.b	8192
 ST_stack_top:

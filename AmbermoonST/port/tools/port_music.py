@@ -31,7 +31,7 @@ import ice                                 # noqa: E402
 ORIGINAL = os.path.normpath(os.path.join(HERE, '..', '..', 'ORIGINAL', 'AMBR'))
 FOLDER = os.path.normpath(os.path.join(HERE, '..', 'MUSIC'))
 PLAYER = 8294 + 20                         # code + table of the offsets (the same in all files)
-MUSIC_DATA_SIZE = 20480                    # (KERNEL/MUSIC.S : the space behind the player)
+MUSIC_DATA_SIZE = 26624                    # (KERNEL/MUSIC.S : the space behind the player)
 SONGS = 32                                 # (Music.amb of the Amiga version, Max_songs)
 ST_FILES = {                               # Amiga song : number of the ST file
     2: 15,                                 # Mellow Camel Funk
