@@ -100,8 +100,8 @@ def signed(b):
 # ticks - 1 per note of the arpeggio, 'vibrato' : (parameter, delay in ticks), 'hit_ticks' : ticks of noise,
 # 'envelope' : YM levels per tick, 'attack' : ticks (soft start), 'noise_sweep' : True (the noise gets brighter
 # or darker like the sample; 'brighter' : that much lower periods), 'tone_sweep' : True (the pitch follows the main frequency of the sample), 'gate' :
-# YM level (a note ends when it gets quieter)}}, 'track_instruments' : {track : {number : the same for the
-# instrument in this track}},
+# YM level (a note ends when it gets quieter), 'priority' : True (its notes are not left out when tracks share a
+# channel)}}, 'track_instruments' : {track : {number : the same for the instrument in this track}},
 # 'keep' : tracks (1-4) which are never left out, 'keep_echoes' : True (quiet repeated notes are played),
 # 'layers' : {number : overrides} (the notes of the instrument once more with another sound, together),
 # 'chords' : tracks (1-4) played in one channel, the notes which sound together as an arpeggio, 'boost' : YM levels
@@ -128,7 +128,8 @@ OVERRIDES = {
                          1: {'vibrato': (2, 10)}}},                     # the organ : creepy
     26: {'keep': (3,), 'instruments': {2: {'volume': 2}, 1: {'volume': -2}, 5: {'volume': -2}}},  # the choir
     27: {'instruments': {2: {'drop': True}}},                           # Mega Bass Sound : droning
-}
+    'Intro': {'instruments': {14: {'kind': 'hit', 'noise': 24, 'hit_ticks': 4, 'volume': 3, 'priority': True}}},
+}                                                                       # (the Pauke : the impacts of the meteor)
 
 
 # ---------------------------------------------------------------------------------------------------------------
@@ -592,6 +593,7 @@ class Converter:
                 self.real[100 * track + n] = n
                 overrides[100 * track + n] = o
         self.dropped = {n for n, o in overrides.items() if o.get('drop')}
+        self.priority = {n for n, o in overrides.items() if o.get('priority')}
         self.echoes = {n: o['echo'] for n, o in overrides.items() if o.get('echo')}
         rows, self.restart, self.speed = module.rows()
         rows = [[(note, 100 * (t + 1) + ins if 100 * (t + 1) + ins in self.real else ins, cmd, param)
@@ -910,7 +912,13 @@ class Converter:
             e = self.energy(full[s], first + r, last)
             doubled = any(tracks[k][r] is not None and tracks[k][r].note and c.note and
                           (tracks[k][r].note - c.note) % 12 == 0 for k in range(len(tracks)) if k != s)
-            gain = e * (0.2 if doubled else 1)
+            prio = self.instrument_of(c.ins) in self.priority
+            gain = e * (0.2 if doubled else 1) * (100 if prio else 1)
+            if prio and own is not None and own.levels is not None and self.instrument_of(own.ins) not in self.priority:
+                merged[r] = c                     # (it replaces the note of p)
+                lost += self.energy(full[p], first + r, last)
+                current = s
+                continue
             tail = 0.0
             if current == p and own is None:
                 i = r
@@ -1129,7 +1137,7 @@ def main():
     jobs = []
     for a in args:
         if a == 'intro':        # (the two songs of the intro module : INTRO0.BIN, INTRO1.BIN)
-            jobs += [('Intro', s, None, f'INTRO{s}.BIN') for s in (0, 1)]
+            jobs += [('Intro', s, OVERRIDES['Intro'], f'INTRO{s}.BIN') for s in (0, 1)]
         else:
             n = int(a)
             jobs.append((NAMES[n], 0, OVERRIDES.get(n), f'SONG{n:02}.BIN'))
