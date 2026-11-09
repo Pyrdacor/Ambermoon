@@ -123,5 +123,5 @@ Hatari as STE (a plain ST works too), **at least 2 MB** (with 1 MB the program e
   not examined (loading, conversion of graphics?).
 * With 1 MB the program ends without a message.
 * Next stages (PORT.md): play through the 2D map (movement, events, dialogues, inventory, places, chests),
-  combat (zoom of the monsters, `STUBS.S`), speed of the 3D maps (4 to 2 frames per second), music of the songs without ST version (1, 3, 10, 12, 13, 19-32, e.g. 31 in the
+  combat (the zoom of the monsters : `KERNEL/ZOOM.S`, a test : `port/test/scenarios/combat.txt`), speed of the 3D maps (4 to 2 frames per second), music of the songs without ST version (1, 3, 10, 12, 13, 19-32, e.g. 31 in the
   character editor), diagnostic screen, speed and memory.

@@ -90,7 +90,10 @@ Working notes for continuing the port (build, tests in Hatari, pitfalls, open po
   `Intro_st` is about 900 KB, the intro memory grows for it (BSS, given back afterwards). Speed on the STE : 50
   frames per second most of the time, about 18 when the sun or the meteor are big. Tests : `port/test/run.py`
   scenarios start with `nointro` (the game at once).
-* Open: zoom (combat), extro, diagnostic screen, speed of the 3D maps (the STE blitter ?).
+* The zoom of the combat monsters (`KERNEL/ZOOM.S`) : the monsters are ST chunks, the visible part is zoomed into
+  a buffer of ST chunks and drawn as a 5-plane graphic. Graphics with fewer planes get the bits of the base colour
+  in the planes above (like the Amiga : 3 planes with base colour 28 are the colours 24-31).
+* Open: extro, diagnostic screen, speed of the 3D maps (the STE blitter ?).
 
 ![Character editor](docs/port/editor.png) ![Event](docs/port/event.png) ![Map](docs/port/map.png)
 

@@ -1,0 +1,37 @@
+# Like editor_event_map_vbl.txt, then a combat with monster group 1 (Combat_req : the requester, the first answer)
+nointro
+vbl 700
+move 255 104
+click left
+vbl 800
+move 125 113
+click left
+vbl 1450
+click left
+wait 110
+click left
+wait 110
+click left
+wait 110
+click left
+wait 110
+click right
+wait 260
+click left
+wait 110
+click right
+vbl 2800
+w {Monstergroup_nr} $00 $01
+w {Combat_req} $ff
+wait 100
+move 130 113
+click left
+vbl 3400
+move 285 150
+click left
+vbl 4400
+move 285 150
+click left
+vbl 5400
+move 285 150
+click left

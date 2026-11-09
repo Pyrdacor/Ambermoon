@@ -289,13 +289,17 @@ Put_block:
 .Lut:	move.w	Blit_Y,d1			; Lookup table
 	jsr	Get_ST_LUT
 	move.l	a0,Blit_LUT
+	move.w	Blit_planes,d3		; The planes above the graphic : the bits
+	moveq.l	#-1,d4			;  of the base colour (like the Amiga :
+	lsl.w	d3,d4			;  3 planes, base colour 28 : 24-31)
+	and.w	Blit_colour,d4
 	lea.l	Blit_table,a1		; Colours of the pixel values
 	clr.b	(a1)+
 	moveq.l	#1,d2
 .Table:	move.w	d2,d3
 	cmp.w	#5,Blit_planes
 	beq.s	.Full
-	add.w	Blit_colour,d3
+	or.w	d4,d3
 .Full:	andi.w	#31,d3
 	move.b	0(a0,d3.w),(a1)+
 	addq.w	#1,d2
