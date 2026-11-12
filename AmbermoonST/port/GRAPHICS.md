@@ -89,7 +89,9 @@ format; their colours are the colours 0-15 of the map palette.
    `Atari_recol` table (`GAME_OFF.S:704`): the original was planned for 16 colours. Combat needs combat
    palettes with indices of the same purpose for all backgrounds, so that monsters can be converted once.
 7. **Portraits, items, 80x80 pictures** (5 planes, `Main_pal`): one conversion with the ST version of
-   `Main_pal` (9 colours besides the 7 UI colours).
+   `Main_pal` (9 colours besides the 7 UI colours). The items are dithered (`port_gfx.py`, `Palettes.dither`):
+   every colour is the nearest mix of two ST colours in quarters (2x2 Bayer), so the shades stay (a torch was
+   one brown area); the white, the yellow and the colours of the bars get less weight in the palette.
 8. **Mouse pointers**: converted into ST pointer data by the tool.
 
 ## Changes in the game which follow

@@ -94,9 +94,13 @@ def ambr(subfiles):
 
 
 # ---------- conversion ----------
+BAYER = ((0, 2), (3, 1))
+
+
 def st_chunks(data, width, height, lut, frames=1, offset=0):
     """5-plane Amiga graphics (line interleaved) -> ST chunks (mask + 4 planes per 16 pixels, the same size).
-    frames graphics of width x height one after the other from offset; the rest of data is kept."""
+    frames graphics of width x height one after the other from offset; the rest of data is kept. An entry of
+    lut can be a dither (a, b, t) : the ST colour b in t of 4 pixels (2x2 Bayer), else a (Palettes.dither)."""
     out = bytearray(data)
     wpr = (width + 15) // 16
     size = wpr * 10 * height
@@ -117,6 +121,8 @@ def st_chunks(data, width, height, lut, frames=1, offset=0):
                     if v:
                         mask |= 1 << (15 - b)
                         s = lut[v]
+                        if isinstance(s, tuple):
+                            s = s[1] if BAYER[y & 1][b & 1] < s[2] else s[0]
                         for p in range(4):
                             if s >> p & 1:
                                 st[p] |= 1 << (15 - b)
@@ -171,6 +177,34 @@ class Palettes:
             if p['amiga'] == list(colours):
                 return p['lut']
         raise SystemExit('no ST palette for the Amiga palette %s' % ' '.join('%03x' % c for c in colours))
+
+    def dither(self, colours, penalty=0.5):
+        """The lookup table of the palette with dithers (see st_chunks) : every content colour (1-24) gets the
+        mix of two ST colours (in quarters) which is nearest to it, the distance of the two ST colours counts
+        with penalty (no noise of far colours). For small graphics with fine shades (the items : 24 colours on
+        10 ST colours)."""
+        lut = self.lut(colours)
+        st = next(p['st'] for p in self.items if p['amiga'] == list(colours))
+
+        def rgb(w):                       # STE colour register -> rgb
+            return tuple(((w >> s & 7) << 1 | (w >> s + 3 & 1)) * 17 for s in (8, 4, 0))
+        pal16 = [rgb(w) for w in st]
+        labs = [sc.to_lab(c) for c in pal16]
+        out = list(lut)
+        for v in range(1, 25):
+            c = sc.to_lab(sc.amiga_rgb(colours[v]))
+            best = (sc.dist(c, labs[lut[v]]), lut[v])
+            for a in range(1, 16):        # (never 0 : transparent)
+                for b in range(1, 16):
+                    if a == b:
+                        continue
+                    for t in (1, 2, 3):
+                        m = tuple((pal16[a][i] * (4 - t) + pal16[b][i] * t) / 4 for i in range(3))
+                        d = sc.dist(c, sc.to_lab(m)) + penalty * sc.dist(labs[a], labs[b])
+                        if d < best[0]:
+                            best = (d, (a, b, t))
+            out[v] = best[1]
+        return out
 
 
 def words(raw):
@@ -253,7 +287,8 @@ def convert_all(files, pals):
                                                         len(d) // ((sizes[k][0] + 15) // 16 * 10 * sizes[k][1])))
     # ---------- single files ----------
     icons = read_file(files['Object_icons'])
-    out['Object_icons'] = st_chunks(icons, 16, 16, main_lut, len(icons) // 160)
+    out['Object_icons'] = st_chunks(icons, 16, 16, pals.dither(sc.source_words('KERNEL/DATA.S', 'Main_pal', 32)),
+                                    len(icons) // 160)
     automap = read_file(files['Automap_graphics'])
     out['Automap_graphics'] = st_chunks(automap, 16, 16, automap_lut, 55, 16 * 16 + 4 * 384 + 16 * 192)
     fx = read_file(files['Combat_graphics'])

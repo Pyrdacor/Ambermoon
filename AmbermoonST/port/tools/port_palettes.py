@@ -208,8 +208,8 @@ def main():
     for i in range(len(raw) // 160):
         for v in planar(raw, 16, 16, 5, i * 160):
             weights[v] += 1
-    for c in (2, 16, 6, 7, 22, 23, 24):       # white, yellow, the bars
-        weights[c] += 2000
+    for c in (2, 16, 6, 7, 22, 23, 24):       # white, yellow, the bars (not more : the items keep their
+        weights[c] += 200                     #  shades of brown, port_gfx.py dithers them)
     add(main_pal, weights, fixed=(2,))     # white : the texts
     tactic_pal = sc.source_words('KERNEL/DATA.S', 'Tactic_pal', 32)
     add(sc.source_words('KERNEL/DATA.S', 'Automap_pal', 32))
