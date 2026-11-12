@@ -20,8 +20,13 @@ Working notes for continuing the port (build, tests in Hatari, pitfalls, open po
   rest of the renderer runs on the 68000 as it is.
 * 3D maps: the renderer draws ST colours (the textures, horizons and the sky & floor colours of the lab data are
   converted by `port/tools/port_gfx.py` with the one lookup table of the 3D palettes, weighted by the colours of
-  the textures in `port_palettes.py`), `Show_MOVEP_screen` puts the 3D view on the screen with `movep`. 4 to 2
-  frames per second on an 8 MHz ST (the A500 has the blitter). Unpacked data of AMBR subfiles gets the space of
+  the textures in `port_palettes.py`), `Show_MOVEP_screen` puts the 3D view on the screen with `movep`. The
+  columns of the walls and objects are unrolled on the ST (`KERNEL/3D.S`, `PATCHES/3D_RENDER.diff` : one block per
+  line, no loop; the Falcon keeps the loops, its cache), the raster events of the colour ranges leave out the lines
+  with the same colour (the sky of the 3D cities and the portraits : 108 interrupts per frame before, 14 % of the
+  time). About 1.15 instead of 1.42 million cycles per frame (5 to 7 frames per second on an 8 MHz STE; the A500 has
+  the blitter). A buffer with one byte per pixel would make the walls faster, but its conversion to the planes of
+  the ST costs about as much as it saves. Unpacked data of AMBR subfiles gets the space of
   its file (`PATCHES/FILES.diff` : the layout of the 3D maps was broken at the bottom).
 * The memory manager (`KERNEL/MEMORY.S`) is plain 68000 code; only `Allocate_system_memory` calls the
   Amiga OS (`AllocMem`). The file system (`KERNEL/FILES.S`) needs GEMDOS instead of AmigaDOS.
@@ -93,7 +98,7 @@ Working notes for continuing the port (build, tests in Hatari, pitfalls, open po
 * The zoom of the combat monsters (`KERNEL/ZOOM.S`) : the monsters are ST chunks, the visible part is zoomed into
   a buffer of ST chunks and drawn as a 5-plane graphic. Graphics with fewer planes get the bits of the base colour
   in the planes above (like the Amiga : 3 planes with base colour 28 are the colours 24-31).
-* Open: extro, diagnostic screen, speed of the 3D maps (the STE blitter ?).
+* Open: extro, diagnostic screen.
 
 ![Character editor](docs/port/editor.png) ![Event](docs/port/event.png) ![Map](docs/port/map.png)
 

@@ -1093,8 +1093,10 @@ Show_MOVEP_screen:
 	move.l	Work_screen,a1
 	jsr	Get_screen_offset
 	add.l	d2,a1
-	subq.w	#1,d6
 	subq.w	#1,d7
+	cmp.w	#9,d6			; The 3D view (144 pixels) ?
+	beq.s	.View
+	subq.w	#1,d6
 .Line:	move.l	a1,a2
 	move.w	d6,d5
 .Chunk:	move.l	(a0)+,d0			; The left 8 pixels
@@ -1107,6 +1109,30 @@ Show_MOVEP_screen:
 	dbra	d7,.Line
 .Exit:	movem.l	(sp)+,d0-d7/a0-a2
 	rts
+.View:	movem.l	(a0)+,d0-d5		; Yes -> 3 chunks at once
+	movep.l	d0,0(a1)
+	movep.l	d1,1(a1)
+	movep.l	d2,8(a1)
+	movep.l	d3,9(a1)
+	movep.l	d4,16(a1)
+	movep.l	d5,17(a1)
+	movem.l	(a0)+,d0-d5
+	movep.l	d0,24(a1)
+	movep.l	d1,25(a1)
+	movep.l	d2,32(a1)
+	movep.l	d3,33(a1)
+	movep.l	d4,40(a1)
+	movep.l	d5,41(a1)
+	movem.l	(a0)+,d0-d5
+	movep.l	d0,48(a1)
+	movep.l	d1,49(a1)
+	movep.l	d2,56(a1)
+	movep.l	d3,57(a1)
+	movep.l	d4,64(a1)
+	movep.l	d5,65(a1)
+	lea.l	ST_bytes_per_line(a1),a1
+	dbra	d7,.View
+	bra.s	.Exit
 
 	SECTION	Fast_DATA,data
 Cache_free:	dc.l Cache_pool

@@ -165,9 +165,13 @@ Render_raster:
 .Lut:	andi.w	#31,d2			; Translate colour number
 	moveq.l	#0,d5
 	move.b	0(a3,d2.w),d5
+	moveq.l	#-1,d4			; (the colour of the line before)
 	bra.s	.Next
 .Loop2:	move.w	(a0)+,d0			; Convert colour
 	jsr	Amiga_to_STE_colour
+	cmp.w	d4,d0			; The same as on the line before ?
+	beq.s	.Same			; (no interrupt : the sky of the 3D
+	move.w	d0,d4			;  cities and the portraits)
 	move.w	d1,(a1)
 	cmp.w	#1,d1			; Line 1 -> in the VBL
 	bne.s	.Not1
@@ -176,7 +180,7 @@ Render_raster:
 	move.w	d5,(a1)+
 	clr.w	(a1)+
 	move.w	d0,(a1)+
-	addq.w	#1,d1
+.Same:	addq.w	#1,d1
 .Next:	dbra	d3,.Loop2
 	move.w	d1,(a1)+			; After the range : the colour of the
 	move.w	d5,(a1)+			;  palette again (the ST colour stands
