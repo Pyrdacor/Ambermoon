@@ -566,6 +566,7 @@ static void PatchBootDiskFiles(string sourceDir, string language)
                     { "French", "Voulez vous copier les fichiers sur le disque RAM ?" },
                     { "Czech", "Chcete kopirovat soubory na RAM disk ?" },
                     { "Polish", "Czy skopiowac pliki na RAM dysk ?" },
+                    { "Spanish", "Quieres copiar archivos al disco RAM ?" },
                 }
             },
             { "Installing 7 disks to RAM...", new Dictionary<string, string>()
@@ -574,6 +575,7 @@ static void PatchBootDiskFiles(string sourceDir, string language)
                     { "French", "Installation de 7 disquettes en RAM..." },
                     { "Czech", "Instaluji 7 disket do RAM..." },
                     { "Polish", "Instalowanie 7 dyskow do RAM..." },
+                    { "Spanish", "Instalando 7 discos en la RAM..." },
                 }
             },
             { "Remove all disks now ! Except Amber_A, Amber_B and Amber_J (Put them in)", new Dictionary<string, string>()
@@ -582,6 +584,7 @@ static void PatchBootDiskFiles(string sourceDir, string language)
                     { "French", "Retire tous les disques maintenant ! Sauf Amber_A, Amber_B et Amber_J (Mets les)" },
                     { "Czech", "Odeber vsechny diskety ted ! Krome Amber_A, Amber_B a Amber_J (Vloz je)" },
                     { "Polish", "Usun wszystkie dyski teraz! Z wyjatkiem Amber_A, Amber_B i Amber_J (Wloz je)" },
+                    { "Spanish", "Retira ahora todos los discos! Excepto Amber_A, Amber_B y Amber_J (Insertalos)" },
                 }
             },
             { "Ready.", new Dictionary<string, string>()
@@ -590,6 +593,7 @@ static void PatchBootDiskFiles(string sourceDir, string language)
                     { "French", "Pret." },
                     { "Czech", "Hotovo." },
                     { "Polish", "Gotowe." },
+                    { "Spanish", "Listo." },
                 }
             },
             { "Running now...", new Dictionary<string, string>()
@@ -598,6 +602,7 @@ static void PatchBootDiskFiles(string sourceDir, string language)
                     { "French", "Execution maintenant..." },
                     { "Czech", "Teraz dziala..." },
                     { "Polish", "Prave bezi..." },
+                    { "Spanish", "Ejecutando..." },
                 }
             },
         };

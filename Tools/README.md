@@ -351,7 +351,7 @@ when it removes old matches. Packing is 60 to 300 times faster:
   folder, which Windows does not do when `NoDefaultCurrentDirectoryInExePath` is set). The German release does not
   contain `AmbermoonTextManager.exe` (the original publishes it into the files of the release and does not delete it
   again: the German archives of the repository contain it). Missing files and folders, a language whose boot disk
-  texts are missing (only German, French, Czech and Polish have them) and files that do not fit on a disk give an error
+  texts are missing (only German, French, Czech, Polish and Spanish have them) and files that do not fit on a disk give an error
   message (the original ends with an exception, or writes an empty ADF image for a full disk); the temporary folder is
   always deleted. The zip files are deflated by System.Compression (not zlib-ng): the same entries and header fields,
   other compressed bytes; the gzip data likewise. The first line of `readme.txt` and `liesmich.txt` (version and date)

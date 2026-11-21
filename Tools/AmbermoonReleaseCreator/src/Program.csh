@@ -447,6 +447,8 @@ struct Creator
             "Odeber vsechny diskety ted ! Krome Amber_A, Amber_B a Amber_J (Vloz je)", "Hotovo.", "Teraz dziala..."];
         const ReadOnlySlice<string> polish = ["Czy skopiowac pliki na RAM dysk ?", "Instalowanie 7 dyskow do RAM...",
             "Usun wszystkie dyski teraz! Z wyjatkiem Amber_A, Amber_B i Amber_J (Wloz je)", "Gotowe.", "Prave bezi..."];
+        const ReadOnlySlice<string> spanish = ["Quieres copiar archivos al disco RAM ?", "Instalando 7 discos en la RAM...",
+            "Retira ahora todos los discos! Excepto Amber_A, Amber_B y Amber_J (Insertalos)", "Listo.", "Ejecutando..."];
         ReadOnlySlice<string> translated;
         switch (Language)
         {
@@ -454,7 +456,8 @@ struct Creator
             case "French": translated = french; break;
             case "Czech": translated = czech; break;
             case "Polish": translated = polish; break;
-            default: return Failed("The boot disk has no texts in " + Language + " (only German, French, Czech and Polish).");
+            case "Spanish": translated = spanish; break;
+            default: return Failed("The boot disk has no texts in " + Language + " (only German, French, Czech, Polish and Spanish).");
         }
         var raminstall = Path.Combine(sourceDir, "raminstall");
         var content = ReadText(raminstall);
