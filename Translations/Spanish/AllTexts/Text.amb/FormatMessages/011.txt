@@ -1,0 +1,1 @@
+﻿{0} recupera {1} PV y {2} PM.

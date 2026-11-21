@@ -1,0 +1,1 @@
+﻿~CAST~ marca por medios mágicos la posición actual.
