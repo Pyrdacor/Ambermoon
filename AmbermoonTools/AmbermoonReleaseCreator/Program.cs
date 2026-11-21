@@ -625,9 +625,21 @@ static void PatchBootDiskFiles(string sourceDir, string language)
         {
             return content.Replace("gb", "f");
         }
+        else if (language == "Spanish")
+        {
+            return content.Replace("gb", "e");
+        }
+        else if (language == "Czech")
+        {
+            return content.Replace("gb", "cz");
+        }
+        else if (language == "Polish")
+        {
+            return content.Replace("gb", "pl");
+        }
         else
         {
-            // All other languages use the english keymap (gb)
+            // English uses the british keymap (gb); e, cz and pl are made by Translations/make_keymaps.py
             return content;
         }
     });

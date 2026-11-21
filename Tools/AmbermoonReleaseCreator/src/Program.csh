@@ -472,7 +472,13 @@ struct Creator
             startupText = startupText.Replace("gb", "d");
         else if (Language == "French")
             startupText = startupText.Replace("gb", "f");
-        // (all other languages keep the English keymap, gb)
+        else if (Language == "Spanish")
+            startupText = startupText.Replace("gb", "e");
+        else if (Language == "Czech")
+            startupText = startupText.Replace("gb", "cz");
+        else if (Language == "Polish")
+            startupText = startupText.Replace("gb", "pl");
+        // (English keeps the British keymap, gb; the keymaps e, cz and pl are made by Translations/make_keymaps.py)
         if (File.WriteAllText(startup, startupText) is error e2)
             return Failed(e2.Message);
         return true;
