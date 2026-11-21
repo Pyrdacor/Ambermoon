@@ -1,54 +1,51 @@
-# Spanish translation (work in progress)
+# Spanish translation
 
-This folder contains the groundwork for a Spanish translation of Ambermoon.
+A complete Spanish translation of Ambermoon: all game texts, the intro and extro, and the
+remake's own texts.
 
-| File | Content |
+| Path | Content |
 |---|---|
-| [Glossary.md](Glossary.md) | Terminology: classes, races, skills, spells, items, places, keywords |
-| [Sample/AllTexts](Sample/AllTexts) | Sample translation, same layout as `AllTexts.zip` |
+| [AllTexts](AllTexts) | All game texts, same layout as `Disks/Bugfixing/English/AllTexts` (3448 files) |
+| [IntroTexts](IntroTexts), [ExtroTexts](ExtroTexts) | Intro and extro, same layout as `Disks/Bugfixing/English/` |
+| [RemakeTranslatableTexts.txt](RemakeTranslatableTexts.txt) | Remake messages, outro and tutorial texts |
+| [Glossary.md](Glossary.md) | Terminology |
+| [Names.tsv](Names.tsv) | Every translated name (items, spells, monsters, NPCs, places, keywords): German / English / Spanish |
+| [TranslatorBrief.md](TranslatorBrief.md) | Rules that were used for translating |
 | [tools/check_translation.py](tools/check_translation.py) | Validator for placeholders, line breaks, characters and length limits |
+| [tools/missing_files.py](tools/missing_files.py) | Lists reference files without a Spanish counterpart |
+| [tools/short_names.py](tools/short_names.py) | Source of all name lists. It regenerates Dict, Objects, monsters, NPCs, places, automap labels and the Text.amb name lists |
 
 ## Status
 
-**Draft / sample.** No native speaker has reviewed it yet, and it has not been tested in game.
-
-The sample covers the game's opening:
-
-- `2Map_texts.amb/258`: Grandfather's house
-- `2Map_texts.amb/259`: Grandfather's cellar, including the stone-head riddle (keyword *VINO*)
-- `NPC_texts.amb/001`: Grandfather's dialogue
-- matching entries in `Dict.amb`, `Objects.amb`, `NPC_char.amb`, `Monster_char.amb` and the
-  he/she/his/her texts in `Text.amb/UITexts`
+- **Complete:** every reference file has a Spanish counterpart.
+- **Validator:** 0 errors and 0 warnings. It checks placeholders, `^` line breaks, the
+  character set and the length limits.
+- **Not done yet:** review by a native speaker, and testing in game (on the Amiga or in the
+  remake).
+- **Translator:** Claude (Anthropic). Most texts were translated from the German original and
+  cross-checked against the English. The intro and extro were translated from the English,
+  because there is no German version of these files in the repository.
 
 ## Conventions
 
-- **Source text.** Translated from the German original and cross-checked against the English
-  version. Where the English file layout differs from the German one, the English layout is
-  used, because the English data is the base for new languages. Example: `NPC_texts.amb/001/005`
-  contains the full text in English, but German splits it across 005 and 007.
 - **Variety.** European (Castilian) Spanish. The player character is addressed with *tú*, the
-  party with *vosotros* (e.g. "OÍS", "CONSEGUÍS"). Switching to neutral Latin American Spanish
-  (*ustedes*) would be a global search-and-review task, so it should be decided early.
-- **Orthography.** Full Spanish spelling, including accents on capitals (Á É Í Ó Ú Ü Ñ) and the
-  opening marks ¿ and ¡. If the font cannot get these glyphs,
-  `check_translation.py --fallback-out <dir>` produces a copy with accents and opening marks
-  removed. **Ñ is always kept**, because dropping it changes meaning (AÑO → ANO).
-- **Gender.** The original only offers `~SEX1~` (he/she) and `~SEX2~` (his/her) for the subject.
-  Spanish also inflects adjectives and participles (*cansado/cansada*), and the protagonist
-  (`~SELF~`) may be female. Texts that refer to the player or the active character are therefore
-  phrased gender-neutrally. Example: the grandfather calls the hero *"sangre de mi sangre"*
-  instead of *"mi querido nieto"*, and the narration says *"en tu infancia"* instead of
-  *"de pequeño"*.
-- **Riddles and rhymes.** These are re-written as Spanish verse, not translated word for word. The
-  stone head speaks in octosyllables with assonance (*pasarás / tendrás*, *vino / camino*). The
-  keyword the riddle expects must match the `Dict.amb` entry exactly.
-- **Placeholders.** `~LEAD~`, `~SELF~`, `~SEX1~`, `~INK17~`, `{0}` and the line-break
-  character `^` are kept as they are. The validator checks this.
+  party with *vosotros*.
+- **Orthography.** Full Spanish spelling with accented capitals (Á É Í Ó Ú Ü Ñ) and the opening
+  marks ¿ ¡. If the font cannot get these glyphs,
+  `check_translation.py --fallback-out <dir>` writes a copy without accents and opening marks.
+  **Ñ is always kept.**
+- **Rune texts** (`~RUN1~…~NORM~`) use plain A–Z only.
+- **Gender.** The player character and the active party member can be male or female, so texts
+  that refer to them avoid gendered adjectives and participles. The grandfather, for example,
+  calls the hero *"sangre de mi sangre"*. `~SEX1~` = ÉL/ELLA, `~SEX2~` = SU.
+- **Riddles and verse** are rewritten as Spanish verse. The Illien stone-head riddles (map 416)
+  were adapted so that the answers match the dictionary entries NARIZ, AGUJA, ESPEJO and ARO.
+  The rune statues show the answers reversed (ZIRAN, AJUGA, OJEPSE, ORA).
+- **Layout.** Where German and English differ in file structure, placeholders or line breaks,
+  the English layout is used, because the English data is the base for new languages.
+- **Junk bytes.** Junk bytes at the end of some source files (`\0`, `STOP.`) were dropped.
 
 ## Length limits
-
-These limits are based on the longest existing German, English and French entries and on the
-game's data structures. `check_translation.py` enforces them.
 
 | Data | Limit |
 |---|---|
@@ -59,27 +56,34 @@ game's data structures. `check_translation.py` enforces them.
 | Class names | 7 |
 | Race names | 10 |
 | Attribute / skill short names | 3 |
-| Spell names (`Text.amb`) | 21 (19 recommended, so scrolls can use the same name) |
+| Spell names (`Text.amb`) | 21 |
 
 ## Validation
 
 ```
-python3 tools/check_translation.py Sample/AllTexts
-python3 tools/check_translation.py Sample/AllTexts --fallback-out /tmp/es_ascii
+python3 tools/check_translation.py AllTexts
+python3 tools/check_translation.py IntroTexts --ref ../../Disks/Bugfixing/English/IntroTexts
+python3 tools/check_translation.py ExtroTexts --ref ../../Disks/Bugfixing/English/ExtroTexts
+python3 tools/missing_files.py
 ```
 
-By default the reference is `Disks/Bugfixing/English/AllTexts`.
+## Open points for review
 
-## Open questions (for the maintainer)
-
-1. **Font.** Which glyphs can be added? Minimum: Ñ/ñ. Desirable: Á É Í Ó Ú Ü, ¿ ¡ and lower case
-   with accents (the remake and some UI texts use mixed case). This also determines the
-   `encoding.txt` code page. All Spanish characters are in ISO-8859-1 (the Amiga's native
-   character set) and in CP850.
-2. **Typed words.** Can the player type Ñ or accented letters when answering riddles or asking
-   about keywords? If not, keywords that are typed should avoid them, or the input should be
-   normalised (e.g. ÁMBAR ⇄ AMBAR).
-3. **Gender-dependent endings.** Optionally, a new placeholder for the ending *-o/-a* of the
-   subject would allow more natural texts than neutral phrasing. This would need a change in
-   the code and the remake.
-4. **Variety.** European Spanish (*vosotros*) or Latin American (*ustedes*)?
+1. **Font.** The game font (and the intro font) needs at least Ñ/ñ. Á É Í Ó Ú Ü ¿ ¡ are wanted
+   too. The code page for `encoding.txt` could be ISO-8859-1 or CP850; both contain every
+   Spanish character.
+2. **Typing keywords.** Whether Ñ and accented letters can be typed on the Amiga depends on the
+   keymap. In the remake it should work. Keywords affected: SÓTANO, ÁMBAR, ANTÍDOTO, ÁRBOL,
+   SÍLFIDE, ALMACÉN, CARTOGRAFÍA, MALDICIÓN, HABITACIÓN, LÍOS, PALABRAS MÁGICAS, SALAS DE PRÁCTICAS.
+   The riddle answers (NARIZ, AGUJA, ESPEJO, ARO, VINO) contain no special characters.
+3. **UI abbreviations.** LP → PV, SP → PM, SLP → PAM, APR → A/R, G: → O: (oro). EP stays "EP"
+   because the field width is fixed. ON/OFF → SÍ/NO.
+4. **Version string.** `Text.amb/DateAndLanguageString` and `VersionString` use the English
+   date and version. Adjust them at release time.
+5. **Translator credit.** It is in `ExtroTexts/005/032` (`$_Claude (Anthropic)`).
+6. **Places worth checking in game:**
+   - The riddles and verses in 2Map_texts 259, 265, 412 and 416.
+   - The puns: 285/005 "CARL ACTUS", 411/003 "(PELOTA, PELOTA)", 353/003, and the drunk dwarf in 336/004.
+   - The half-faded words in the spider book (`Object_texts.amb/002/000`).
+   - Places where German and English contradict each other. The German was followed in, for
+     example, 3Map_texts 369/016, NPC_texts 058/007 and NPC_texts 008/009–010.

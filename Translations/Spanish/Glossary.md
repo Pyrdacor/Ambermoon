@@ -393,3 +393,28 @@ player – see "Open questions" in the README regarding accents.
 |---|---|---|
 | ER / SIE | HE / SHE | ÉL / ELLA |
 | SEINE / IHRE | HIS / HER | SU / SU |
+
+## Terms fixed during the full translation
+
+| DE | EN | ES | Notes |
+|---|---|---|---|
+| Flugschiff / Luftschiff | airship | aeronave | |
+| Waldmond | forest moon | luna del bosque | |
+| Wüstenmond | desert moon | luna del desierto | |
+| Navstein | navstone | navipiedra | item: NAVIPIEDRA AZUL/VERDE/AMARILLA |
+| Weltenteleporter | world-teleporter | portal de mundos | |
+| Windtor | wind gate | Puerta del Viento | item: LIBRO PUERTA VIENTO |
+| Windschrein | wind shrine | Santuario del Viento | |
+| Insel der Winde | island of the winds | Isla de los Vientos | |
+| Quelle des Lebens | spring of life | Fuente de la Vida | |
+| Sandboot | sandboat | barco de arena | |
+| Rat (Morag) | council | Consejo de Morag | |
+| Bruderschaft Tarbos | Brotherhood of Tarbos | Hermandad de Tarbos | |
+| Echsenmagier | lizard mages | magos lagarto | |
+| Hexenmeister | warlock | brujo | |
+| Komposthaufen | compost heap | estercolero | |
+| Waldläufer | rangers (people) | exploradores del bosque | |
+| Wächterdämonen | guardian demons | demonios guardianes | |
+| Losungswort | password | contraseña | |
+| Schlangenfraß (Gasthaus) | Snake Food | Serpiente Glotona | |
+| Adlerhorst | eyrie | Nido de Águilas | |
