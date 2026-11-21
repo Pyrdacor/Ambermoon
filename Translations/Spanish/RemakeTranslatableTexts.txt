@@ -7,7 +7,7 @@
 { Index.StartNewGameOrQuit, "¿Quieres empezar una partida nueva o salir del juego?" },
 { Index.RuneTableUsage, "Mientras lleves la tabla de runas en el inventario, todas las runas se mostrarán automáticamente como texto." },
 { Index.LoadCrashedGame, "Se ha detectado una copia de seguridad tras un cierre inesperado. ¿Quieres cargarla?" },
-{ Index.FailedToRemoveCrashSavegame, "La copia de seguridad del cierre inesperado no se ha podido borrar automáticamente. Bórrala tú mismo. Está guardada en la subcarpeta 'Save.99'." },
+{ Index.FailedToRemoveCrashSavegame, "La copia de seguridad del cierre inesperado no se ha podido borrar automáticamente. Bórrala manualmente. Está guardada en la subcarpeta 'Save.99'." },
 { Index.GameSaved, "Guardada como ~INK 22~'{0}'~INK 31~."},
 { Index.GameLoaded, "Se ha cargado la ~INK 22~partida {0}~INK 31~."},
 { Index.InitialGameLoaded, "Se ha cargado la ~INK 22~partida inicial~INK 31~."}
