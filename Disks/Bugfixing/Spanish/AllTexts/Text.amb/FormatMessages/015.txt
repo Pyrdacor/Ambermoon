@@ -1,0 +1,1 @@
+﻿Una racion de comida os costara {0} de oro.

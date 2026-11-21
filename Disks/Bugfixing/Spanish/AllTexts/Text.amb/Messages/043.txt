@@ -1,0 +1,1 @@
+﻿Este objeto cumple ahora una funcion especial.

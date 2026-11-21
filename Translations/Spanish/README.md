@@ -14,6 +14,9 @@ remake's own texts.
 | [tools/check_translation.py](tools/check_translation.py) | Validator for placeholders, line breaks, characters and length limits |
 | [tools/missing_files.py](tools/missing_files.py) | Lists reference files without a Spanish counterpart |
 | [tools/short_names.py](tools/short_names.py) | Source of all name lists. It regenerates Dict, Objects, monsters, NPCs, places, automap labels and the Text.amb name lists |
+| [tools/build_amiga_data.py](tools/build_amiga_data.py) | Fills `Disks/Bugfixing/Spanish`, the input of the release creator (see *Amiga release*) |
+| [tools/make_font.py](tools/make_font.py) | Builds the intro/extro font (`font.json`, `SmallGlyphs.png`, `LargeGlyphs.png`) |
+| `encoding.txt`, `font.json`, `*Glyphs.png`, `click-text.txt`, `translators.txt` | Configuration of the release creator for the intro and extro |
 
 ## Status
 
@@ -44,6 +47,22 @@ remake's own texts.
 - **Layout.** Where German and English differ in file structure, placeholders or line breaks,
   the English layout is used, because the English data is the base for new languages.
 - **Junk bytes.** Junk bytes at the end of some source files (`\0`, `STOP.`) were dropped.
+
+## Amiga release
+
+The release creator (`Tools/AmbermoonReleaseCreator`, run by `.github/workflows/release.yml`) reads
+`Disks/Bugfixing/Spanish` and `Translations/Spanish`:
+
+- **Source of truth.** `Translations/Spanish/AllTexts` is the full text with accents.
+  `tools/build_amiga_data.py` writes `Disks/Bugfixing/Spanish/AllTexts` from it without accents and without ¿ ¡,
+  because the in-game font has no glyphs for them. For languages other than German and English, the release creator
+  removes the accents itself (`-u`, which also turns Ñ into N), but it leaves ¿ ¡ alone. Run the script after
+  every change of the texts.
+- **Intro and extro** keep all Spanish characters. They use their own font (ISO-8859-1, 91 glyphs, built from the
+  Czech font by `tools/make_font.py`; Ñ ñ Ü ü ¿ ¡ were added).
+- **Button graphics** are the English ones; there are no Spanish button graphics yet.
+- **Date and language.** The release creator writes `DateAndLanguageString` and `VersionString` itself
+  ("dd-MM-yyyy / Spanish", "Ambermoon vX.XX"). The files here hold "21-11-2026 / Español" and "Ambermoon v1.22".
 
 ## Length limits
 
@@ -78,8 +97,8 @@ python3 tools/missing_files.py
    The riddle answers (NARIZ, AGUJA, ESPEJO, ARO, VINO) contain no special characters.
 3. **UI abbreviations.** LP → PV, SP → PM, SLP → PAM, APR → A/R, G: → O: (oro). EP stays "EP"
    because the field width is fixed. ON/OFF → SÍ/NO.
-4. **Version string.** `Text.amb/DateAndLanguageString` and `VersionString` use the English
-   date and version. Adjust them at release time.
+4. **Accents in game.** On the Amiga, the game texts are shown without accents and Ñ (see *Amiga release*).
+   Only the intro and extro show them.
 5. **Translator credit.** It is in `ExtroTexts/005/032` (`$_Claude (Anthropic)`).
 6. **Places worth checking in game:**
    - The riddles and verses in 2Map_texts 259, 265, 412 and 416.
