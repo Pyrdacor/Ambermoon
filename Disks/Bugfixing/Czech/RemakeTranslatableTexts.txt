@@ -21,12 +21,12 @@
 " ^~HERO~: ...",
 " ^Cizinec: Ne tak rychle ~HERO~!",
 " ^~HERO~: Kdo jsi?",
-"Cizinec: Jmenuji se ~INK 17~Pyrdacor~INK 31~. Nemám mnoho času.",
+"Cizinec: Jmenuji se ~INK17~Pyrdacor~INK31~. Nemám mnoho času.",
 "Cizinec: Ale mohu vám říci toto: Dobrodružství ještě nekončí.",
 " ^~HERO~: O čem to mluvíš?",
-" ^~INK 17~Je v plánu třetí část~INK 31~ trilogie Amber.",
+" ^~INK17~Je v plánu třetí část~INK31~ trilogie Amber.",
 " ^~HERO~: Úžasné!",
-"Pyrdacor: Děkuji, že jsi si zahrál ~INK 22~Ambermoon~INK 31~! Doufám, že jsi se bavil."
+"Pyrdacor: Děkuji, že jsi si zahrál ~INK22~Ambermoon~INK31~! Doufám, že jsi se bavil."
 
 
 ## Tutorial texts
@@ -36,7 +36,7 @@
 // Tip 1
 "Ikony v pravé dolní části obrazovky poskytují mnoho užitečných funkcí ve hře. " +
 "Pokud jsi na hlavní obrazovce, můžeš přepínat zobrazení ikon stiskem " +
-"pravého tlačítka myši" po najetí na oblast, nebo stiskem klávesy Enter. Tím se odemknou " +
+"pravého tlačítka myši po najetí na oblast, nebo stiskem klávesy Enter. Tím se odemknou " +
 "další funkce."
 // Tip 2
 "Ikony lze ovládat také pomocí numerické klávesnice. Rozložení " +
@@ -69,7 +69,7 @@
 // Charisma
 "Charisma^^Zvyšuje prodejní cenu o 1%^každých plných 10 bodů.^^Aktuálně +{0}% prodejní ceny",
 // Luck
-"Štěstí^^Šance vyhnout se účinku již spuštěné pasti.^Přidává spolu s obratností ^k šanci vyhnout se boji.^^Aktuálně {0}% šance vyhnout se účinku pasti^          {1}% šance vyhnout se boji,
+"Štěstí^^Šance vyhnout se účinku již spuštěné pasti.^Přidává spolu s obratností ^k šanci vyhnout se boji.^^Aktuálně {0}% šance vyhnout se účinku pasti^          {1}% šance vyhnout se boji",
 // Anti-Magic
 "Anti-Magie^^Šance na blokování nepřátelských kouzel v procentech.^^V současné době {0}% šance na blokování kouzel"
 
@@ -81,7 +81,7 @@
 // Parry
 "Parírování^^Šance zablokovat nepřátelský útok.^Je k tomu nutná bojová akce 'Parírování'.^^Současná {0}% šance na zablokování",
 // Swim
-"Plavání^^Snížení poškození při plavání.^^V současné době {0}% snížení poškození,
+"Plavání^^Snížení poškození při plavání.^^V současné době {0}% snížení poškození",
 // Crit
 "Kritický zásah^^Šance zabít protivníka jediným úderem.^Nefunguje proti bossům.^^Aktuální šance: {0}%",
 // Find traps
@@ -89,7 +89,7 @@
 // Disarm traps
 "Zneškodnit past^^Šance na zneškodnění nalezené pasti na zámku.^^Aktuální šance: {0}%",
 // Lockpick
-"Odemykání^^Šance na odemčení zámku bez paklíče.^Nefunguje u dveří, které vyžadují klíč.^^Aktuální šance: {0}%,
+"Odemykání^^Šance na odemčení zámku bez paklíče.^Nefunguje u dveří, které vyžadují klíč.^^Aktuální šance: {0}%",
 // Search
 "Průzkum^^Šance najít tajné poklady.^Vyšší hodnoty umožňují najít konkrétní truhly.",
 // Read magic

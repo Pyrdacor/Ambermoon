@@ -1,3 +1,5 @@
+> **Note:** this brief was written for translating into the text folders. The texts are now in `Translations/PO/es.po`; the rules for the texts are the same.
+
 # Brief for translating Ambermoon text files into Spanish
 
 Read this whole brief before you translate anything. Also read `README.md` (conventions),

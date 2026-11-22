@@ -1,1 +1,1 @@
-﻿Ese mismo objeto ya esta en uso.
+﻿Ese mismo objeto ya está en uso.
