@@ -1,6 +1,6 @@
 {
   "numChars": 224,
-  "numGlyphs": 94,
+  "numGlyphs": 95,
   "smallGlyphHeight": 11,
   "largeGlyphHeight": 22,
   "smallUsedGlyphHeight": 10,
@@ -12,7 +12,7 @@
   "glyphMapping": [
     255,
     66,
-    255,
+    94,
     255,
     255,
     255,
