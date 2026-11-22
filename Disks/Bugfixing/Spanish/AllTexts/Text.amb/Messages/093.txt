@@ -1,0 +1,1 @@
+﻿Se ha producido un error de lectura/escritura.

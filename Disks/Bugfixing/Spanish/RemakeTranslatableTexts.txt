@@ -1,0 +1,323 @@
+## Remake messages
+
+{ Index.ReallyStartNewGame, "¿De verdad quieres empezar una partida nueva?" },
+{ Index.FailedToLoadSavegame, "No se ha podido cargar la partida." },
+{ Index.FailedToLoadInitialSavegame, "No se ha podido cargar la partida inicial." },
+{ Index.FailedToLoadSavegameUseInitial, "No se ha podido cargar la partida. Se ha cargado la partida inicial en su lugar." },
+{ Index.StartNewGameOrQuit, "¿Quieres empezar una partida nueva o salir del juego?" },
+{ Index.RuneTableUsage, "Mientras lleves la tabla de runas en el inventario, todas las runas se mostrarán automáticamente como texto." },
+{ Index.LoadCrashedGame, "Se ha detectado una copia de seguridad tras un cierre inesperado. ¿Quieres cargarla?" },
+{ Index.FailedToRemoveCrashSavegame, "La copia de seguridad del cierre inesperado no se ha podido borrar automáticamente. Bórrala manualmente. Está guardada en la subcarpeta 'Save.99'." },
+{ Index.GameSaved, "Guardada como ~INK 22~'{0}'~INK 31~."},
+{ Index.GameLoaded, "Se ha cargado la ~INK 22~partida {0}~INK 31~."},
+{ Index.InitialGameLoaded, "Se ha cargado la ~INK 22~partida inicial~INK 31~."}
+
+
+## Custom remake outro texts
+
+"Egil: Ha sido una aventura increíble, pero ahora tengo que despedirme.",
+"Egil: Los enanos de Gemstone necesitan voluntarios para reconstruir su capital.",
+"~HERO~: Espero que volvamos a vernos. ¡Buen viaje, amigo mío!",
+" ^~HERO~: ...",
+" ^Desconocido: ¡No tan deprisa, ~HERO~!",
+" ^~HERO~: ¿Quién eres?",
+"Desconocido: Me llamo ~INK17~Pyrdacor~INK31~. No tengo mucho tiempo.",
+"Desconocido: Pero sí puedo decirte esto: la aventura aún no ha terminado.",
+" ^~HERO~: ¿De qué estás hablando?",
+" ^Está prevista ~INK17~la tercera parte de la trilogía de Amber~INK31~.",
+" ^~HERO~: ¡Genial!",
+"Pyrdacor: ¡Gracias por jugar a ~INK22~Ambermoon~INK31~! Espero que te hayas divertido."
+
+
+## Tutorial texts
+
+// Introduction
+"Hola, ~SELF~, te doy la bienvenida al remake de Ambermoon.^^¿Necesitas una pequeña introducción?",
+// Tip 1
+"Los botones de la zona inferior derecha de la pantalla ofrecen muchas funciones útiles " +
+"del juego. En la pantalla principal puedes alternar los botones pulsando el botón " +
+"derecho del ratón sobre esa zona o la tecla Intro. Así se desbloquean " +
+"funciones adicionales.",
+// Tip 2
+"También puedes usar el teclado numérico para controlar esos botones. La disposición " +
+"es exactamente la de los botones del juego. Así, pulsar la tecla 7 equivale a pulsar " +
+"el botón superior izquierdo (el ojo).",
+// Tip 3
+"En la zona superior ves los retratos de los personajes. Haz clic en ellos para elegir al " +
+"jugador activo o clic derecho para abrir los inventarios. Las teclas 1-6 también eligen " +
+"a un jugador y las teclas F1-F6 abren los inventarios.",
+// Tip 4
+"Puedes moverte por los mapas con el ratón, las teclas W, A, S, D o las flechas del cursor. En 2D puedes " +
+"hacer clic derecho en el mapa para cambiar el cursor a un cursor de acción e interactuar con objetos " +
+"o personajes como los PNJ.",
+// End
+"Ahora me callo. ¡Que te diviertas jugando a Ambermoon!"
+
+
+## Attribute tooltips
+
+// Strength
+"Fuerza^^Aumenta el peso máximo en 1 kg por punto.^También aumenta el daño en 1 cada 25 puntos.^^Ahora: +{0} kg y +{1} de daño",
+// Intelligence
+"Inteligencia^^Añade 1 PM y 1 PAM adicionales al^subir de nivel por cada 25 puntos.^^Ahora: +{0} PM y PAM",
+// Dexterity
+"Destreza^^Probabilidad en % de no activar^una trampa al manipular cerraduras.^Junto con Suerte, aumenta la^probabilidad de evitar combates.^^Ahora: {0}% de evitar trampas^       {1}% de evitar combates",
+// Speed
+"Velocidad^^Más velocidad te permite actuar antes en combate.^Cada 80 puntos puedes moverte 1 casilla más^por ronda.^^Ahora puedes moverte {0} casilla(s).",
+// Stamina
+"Constitución^^Aumenta la defensa en 1 cada 25 puntos.^^Ahora: +{0} de defensa",
+// Charisma
+"Carisma^^Aumenta el precio de venta un 1%^por cada 10 puntos completos.^^Ahora: +{0}% de precio de venta",
+// Luck
+"Suerte^^Probabilidad en % de evitar el efecto^de una trampa ya activada.^Junto con Destreza, aumenta la^probabilidad de evitar combates.^^Ahora: {0}% de evitar el efecto de trampas^       {1}% de evitar combates",
+// Anti-Magic
+"Antimagia^^Probabilidad en % de bloquear hechizos enemigos.^^Ahora: {0}% de bloquear hechizos"
+
+
+## Skill tooltips
+
+// Attack
+"Ataque^^Probabilidad de acertar a un enemigo.^^Ahora: {0}% de acierto",
+// Parry
+"Parada^^Probabilidad de bloquear un ataque enemigo.^Para ello hace falta la acción de combate 'Parar'.^^Ahora: {0}% de bloqueo",
+// Swim
+"Natación^^Reducción del daño al nadar.^^Ahora: {0}% menos de daño",
+// Crit
+"Golpe crítico^^Probabilidad de matar a un enemigo de un solo golpe.^No funciona contra jefes.^^Probabilidad actual: {0}%",
+// Find traps
+"Buscar trampas^^Probabilidad de encontrar una trampa en una cerradura.^^Probabilidad actual: {0}%",
+// Disarm traps
+"Desarmar trampas^^Probabilidad de desarmar una trampa encontrada.^^Probabilidad actual: {0}%",
+// Lockpick
+"Forzar cerraduras^^Probabilidad de abrir una cerradura sin ganzúa.^No funciona en puertas que requieren llave.^^Probabilidad actual: {0}%",
+// Search
+"Registrar^^Probabilidad de encontrar tesoros secretos.^Con valores altos encuentras ciertos cofres.",
+// Read magic
+"Leer pergaminos^^Probabilidad de aprender un hechizo de un pergamino.^Si falla, el pergamino se destruye.^^Probabilidad actual: {0}%",
+// Use magic
+"Usar magia^^Probabilidad de lanzar un hechizo con éxito.^Algunos hechizos tienen efectos negativos si fallan.^^Probabilidad actual: {0}%",
+				
+
+## Condition tooltips
+		
+// Irritated
+{ Condition.Irritated,"El personaje no puede lanzar hechizos.^^Solo activo durante el combate." },
+// Crazy
+{ Condition.Crazy, "El personaje realiza acciones al azar en combate.^No se puede acceder a su inventario." },
+// Sleep
+{ Condition.Sleep, "El personaje no puede realizar acciones de combate.^Cualquier daño anula este estado.^^Solo activo durante el combate." },
+// Panic
+{ Condition.Panic, "El personaje intenta huir.^No puede realizar acciones de combate.^No se puede acceder al inventario.^^Solo activo durante el combate." },
+// Blind
+{ Condition.Blind, "El personaje no puede ver.^Sin radio de luz en los mapas 2D.^Oscuridad total en los mapas 3D." },
+// Drugged
+{ Condition.Drugged, "El personaje está bajo los efectos de las drogas.^Control más difícil y efectos visuales." },
+// Exhausted
+{ Condition.Exhausted, "Todos los atributos se reducen a la mitad temporalmente.^Se elimina durmiendo." },
+// Unused
+{ Condition.Unused, "" },
+// Lamed
+{ Condition.Lamed, "No es posible moverse ni atacar." },
+// Poisoned
+{ Condition.Poisoned, "El personaje recibe daño^en cada ronda de combate o cada hora." },
+// Petrified
+{ Condition.Petrified, "No se puede acceder al inventario.^El personaje no puede realizar ninguna^acción y no envejece." },
+// Diseased
+{ Condition.Diseased, "El personaje pierde un punto de^un atributo al azar cada día." },
+// Aging
+{ Condition.Aging, "El personaje envejece cada día.^Según su raza, acabará muriendo^al llegar a cierta edad.^^Edad máxima: {0}" },
+// DeadCorpse
+{ Condition.DeadCorpse, "El personaje no participa en los combates.^No puede comunicarse." },
+// DeadAshes
+{ Condition.DeadAshes, "El personaje no participa en los combates.^No puede comunicarse.^Sus cenizas deben convertirse primero^en carne para poder resucitarlo." },
+// DeadDust
+{ Condition.DeadDust, "El personaje no participa en los combates.^No puede comunicarse.^Su polvo debe convertirse en cenizas^y luego en carne para poder resucitarlo." }
+
+
+## Stat tooltips
+
+// Age
+"Edad del personaje^^Muere al alcanzar la edad máxima de {0}.",
+// LP
+"Puntos de vida^^Cuando llegan a 0,^el personaje muere.",
+// SP
+"Puntos de magia^^Se usan para lanzar hechizos.",
+// SLP
+"Puntos de aprendizaje mágico^^Se usan para aprender hechizos.",
+// TP
+"Puntos de entrenamiento^^Se usan para mejorar^habilidades con los entrenadores.",
+// Gold
+"Oro^^La moneda de Ambermoon.^Se usa para comprar mercancías.",
+// Food
+"Raciones^^En cada descanso (salvo al dormir en posadas)^cada personaje consume 1 ración para^recuperar PV y PM.",
+// Damage
+"Daño^^Valor base del daño en combate.^^Depende del equipo y de la fuerza.",
+// Defense
+"Defensa^^Valor base de la reducción del daño^físico en combate.^^Depende del equipo y de la constitución.",
+// EPPre50
+"Puntos de experiencia^^Sirven para subir de nivel.^^Siguiente nivel con {0} EXP.",
+// EP50
+"Puntos de experiencia^^Sirven para subir de nivel.^^Ya has alcanzado el nivel máximo.",
+// LevelWithAPRIncrease
+"Nivel del personaje^^Cada subida de nivel aumenta^los valores del personaje en:^^ PV : {0,-10}{1} PE : {2}{3}^^Los ataques por ronda aumentan^en ciertos niveles:^^ {5}^^Ataques por ronda: {4}",
+// LevelWithoutAPRIncrease
+"Nivel del personaje^^Cada subida de nivel aumenta^los valores del personaje en:^^ PV : {0,-10}{1} PE : {2}{3}^^Ataques por ronda: {4}",
+// MagicLevelUpValues
+" PM : {0}^ PAM: {1,-10}",
+// RangeOperator
+" a ",
+// MagicIntBonus
+"^ Bonus: PM y PAM +INT/25 ({0})"
+
+
+## Button tooltips
+
+"Cerrar",
+"Salir del juego",
+"Opciones",
+"Guardar",
+"Cargar",
+"Partida nueva",
+"Examinar",
+"Tocar",
+"Hablar",
+"Transporte",
+"Libro de hechizos",
+"Acampar",
+"Mapa",
+"Posiciones de combate",
+"Esperar",
+"Datos del personaje",
+"Inventario",
+"Usar objeto",
+"Examinar objeto",
+"Guardar objeto en el cofre",
+"Guardar oro en el cofre",
+"Guardar comida en el cofre",
+"Tirar objeto",
+"Tirar oro",
+"Tirar comida",
+"Entregar oro",
+"Entregar comida",
+"Repartir oro",
+"Repartir comida",
+"Comprar",
+"Vender",
+"Entrenar",
+"Curar a una persona",
+"Quitar maldición",
+"Curar estado",
+"Pasar la noche",
+"Identificar equipo",
+"Identificar objetos",
+"Reparar objeto",
+"Recargar objeto",
+"Leer pergamino",
+"Dormir",
+"Forzar cerradura",
+"Buscar trampa",
+"Desarmar trampa",
+"Responder",
+"Volver a oír el acertijo",
+"Decir algo",
+"Mostrar objeto",
+"Dar objeto",
+"Dar oro",
+"Dar comida",
+"Pedir que se una",
+"Pedir que se marche",
+"Huir",
+"Empezar ronda",
+"Moverse",
+"Avanzar",
+"Atacar",
+"Defender",
+"Lanzar hechizo",
+"Ver puntos de aprendizaje necesarios"
+
+
+## Option names
+
+IMPORTANT: Try to limit those texts to the end marker at max!
+                             | <- end marker including the quotes
+// Page 1
+"Música",
+"Volumen",
+"Resolución",
+"Pantalla completa",
+"Filtro gráfico",
+"Superposición gráfica",
+"Efecto",
+// Page 2
+"Velocidad de combate",
+"Movimiento 3D",
+"Ayuda de botones",
+"Ayuda de estadísticas",
+"Mostrar runas como texto",
+"Activar trucos",
+"Suelo y techo 3D",
+// Page 3
+"Ranuras de guardado extra",
+"Música externa",
+"Mostrar logo de Pyrdacor",
+"Mostrar intro de fantasía",
+"Info de guardar/cargar"
+// TODO
+//"Mostrar intro",
+
+
+## Floor / ceiling display names
+
+"Ninguno",
+"Suelo",
+"Techo",
+"Ambos"
+
+
+## Default battle speed name
+
+"Normal"
+
+
+## Language names
+
+"Alemán",
+"Francés",
+"Inglés"
+
+
+## Version selector texts
+
+IMPORTANT: The (?) must be at the same position (fill with spaces)!
+
+"Elige versión de los datos:        (?)"
+"La versión de los datos del juego se refiere a los datos base de Amiga. Es independiente de la versión de Ambermoon.net."
+"Las partidas se guardan junto a Ambermoon.net.exe, en la subcarpeta 'Saves'."
+"Las partidas se guardan en la ruta de los datos originales y pueden sobrescribir las partidas originales."
+
+IMPORTANT: The following 2 texts must not be longer than the first english text!
+                            | <- end marker including the 2 quotes
+
+"Guardar en ruta programa"
+"Guardar en ruta de datos"
+
+
+## Starting texts
+
+"Iniciando el juego ...",
+"Preparando partida nueva ..."
+
+
+## Patcher texts
+
+"¿Quieres usar el actualizador? Aumenta un poco el tiempo de arranque y necesitas acceso a internet. Pero así se detectarán automáticamente las nuevas versiones y podrás instalarlas directamente.",
+"Si decides usar el actualizador más adelante, puedes activarlo a mano en el archivo de configuración 'ambermoon.cfg'.",
+"Haz clic para continuar",
+"¡Hay una nueva versión disponible! ¿Quieres descargarla e instalarla ahora?",
+"No se ha encontrado la nueva versión. Informa de ello a Pyrdacor (trobt(at)web.de).",
+"No se ha podido descargar la nueva versión. Inténtalo más tarde o descárgala manualmente.",
+"Descargando Ambermoon {0} ...",
+"{0} de {1}",
+"Hecho",
+"Cancelar descarga",
+"No se ha podido aplicar el parche. Descarga manualmente la versión más reciente."

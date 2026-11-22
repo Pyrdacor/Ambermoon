@@ -1,0 +1,34 @@
+# Checks that the translations (Translations/PO) and the text folders of the release (Disks/Bugfixing/<Language>)
+# are up to date with each other: the template must match the English texts, and importing the PO files must not
+# change any text file (python3 Translations/po.py verify). Also prints the checks of each translation.
+
+name: translations
+
+on:
+  pull_request:
+    paths:
+      - "Translations/**"
+      - "Disks/Bugfixing/**"
+      - ".github/workflows/translations.yml"
+  push:
+    branches:
+      - master
+    paths:
+      - "Translations/**"
+      - "Disks/Bugfixing/**"
+      - ".github/workflows/translations.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    name: PO files up to date
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - name: Verify
+        run: python3 Translations/po.py verify
+      - name: Check the translations (information only)
+        run: python3 Translations/po.py check --all || true
