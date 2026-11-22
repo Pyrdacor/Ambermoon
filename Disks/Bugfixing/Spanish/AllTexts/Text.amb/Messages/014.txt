@@ -1,1 +1,1 @@
-﻿El archivo esta protegido contra escritura.
+﻿El archivo está protegido contra escritura.

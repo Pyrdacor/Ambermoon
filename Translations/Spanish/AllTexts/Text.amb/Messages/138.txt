@@ -1,1 +1,0 @@
-﻿Quita la protección contra escritura del disco de partidas guardadas. (La ventanilla de protección debe estar cerrada.)

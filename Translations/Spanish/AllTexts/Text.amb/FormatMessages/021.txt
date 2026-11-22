@@ -1,1 +1,0 @@
-﻿Todos reciben {0} puntos de experiencia.

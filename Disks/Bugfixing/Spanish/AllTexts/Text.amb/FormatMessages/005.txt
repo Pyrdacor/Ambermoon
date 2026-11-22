@@ -1,10 +1,10 @@
-﻿No queda memoria libre! El programa intentara
-reiniciarse. Tu posicion en el juego se conservara,
-pero volveras a la pantalla del mapa.
+﻿No queda memoria libre! El programa intentará
+reiniciarse. Tu posición en el juego se conservará,
+pero volverás a la pantalla del mapa.
 
-Usa el programa de instalacion para leer el
-documento de solucion de problemas y saber como
+Usa el programa de instalación para leer el
+documento de solución de problemas y saber cómo
 evitar este problema.
 
-Pulsa cualquier boton del raton para continuar.
+Pulsa cualquier botón del ratón para continuar.
 {{Click}}

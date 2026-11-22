@@ -1,1 +1,0 @@
-﻿Se ha producido un error de E/S: ^{0}^^El archivo actual: ^{1}^^¿Reintentar?

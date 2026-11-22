@@ -1,9 +1,9 @@
-﻿Por falta de memoria chip, el programa desactivara
-ahora la musica.
+﻿Por falta de memoria chip, el programa desactivará
+ahora la música.
 
-Usa el programa de instalacion para leer el
-documento de solucion de problemas y saber como
+Usa el programa de instalación para leer el
+documento de solución de problemas y saber cómo
 evitar este problema.
 
-Pulsa cualquier boton del raton para continuar.
+Pulsa cualquier botón del ratón para continuar.
 {{Click}}

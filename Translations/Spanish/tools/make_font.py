@@ -82,14 +82,22 @@ def derived(kind):
     for c in range(g.width):
         g.putpixel((c, first), u.getpixel((c, 0)))
     draw(g, DIAER, 0, 2 if small else 4, s, 1); res['Ü'] = g
+    # ": the Czech font has none; two apostrophes
+    a = cut(kind, cz_glyph["'"])
+    cols = [c for c in range(a.width) if any(a.getpixel((c, r))[3] for r in range(a.height))]
+    w = cols[-1] - cols[0] + 1
+    g = Image.new('RGBA', a.size, (0, 0, 0, 0))
+    part = a.crop((cols[0], 0, cols[-1] + 1, a.height))
+    g.paste(part, (cols[0], 0)); g.paste(part, (cols[0] + w + s, 0), part); res['"'] = g
     res['¿'] = upside_down(cut(kind, cz_glyph['?']))
     res['¡'] = upside_down(cut(kind, cz_glyph['!']))
     return res
 
 
 chars = [chr(c) for c in range(0x21, 0x7F)] + list('ÁÉÍÓÚáéíóú') + list('ÑñÜü¿¡')
+NEW = 'ÑñÜü¿¡"'
 reserved = set('$~<>^')
-glyph_chars = [c for c in chars if c not in reserved and (c in cz_glyph or c in 'ÑñÜü¿¡')]
+glyph_chars = [c for c in chars if c not in reserved and (c in cz_glyph or c in NEW)]
 
 new = {k: derived(k) for k in sheets}
 order = []

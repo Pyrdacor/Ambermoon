@@ -1,1 +1,0 @@
-﻿¡{0} lanza el hechizo {1} usando {2}!

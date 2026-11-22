@@ -5,7 +5,8 @@
 #
 # The tools are built with the latest release of CShift (Tools/build.ps1). German comes first: it is made of the previous
 # German release in Disks/German and the files in Disks/Bugfixing/German, and it is the base of the other languages
-# (Disks/Bugfixing/<language>, Translations/<language>). The archives (ADF images and the extracted files as zip, tar.gz
+# (Disks/Bugfixing/<language>, Translations/<language>); the texts of the languages are imported from the PO files in
+# Translations/PO first. The archives (ADF images and the extracted files as zip, tar.gz
 # and LHA) are the artifacts of the run, and they are attached to a draft release "Ambermoon X.XX" (tag game-vX.XX),
 # which is published by hand. SOURCE_DATE_EPOCH is the time of the commit: the same commit gives the same release.
 
@@ -65,6 +66,10 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ github.token }} # the GitHub API limits requests without a token (403)
         run: ./Tools/build.ps1
+
+      # the text folders of the languages (Disks/Bugfixing/<Language>) are written from the PO files
+      - name: Import the translations
+        run: python Translations/po.py import --all
 
       - name: Create the releases
         shell: pwsh

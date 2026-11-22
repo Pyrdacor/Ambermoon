@@ -3,26 +3,22 @@
 A complete Spanish translation of Ambermoon: all game texts, the intro and extro, and the
 remake's own texts.
 
+The texts are in [../PO/es.po](../PO/es.po) (see [../README.md](../README.md) for the PO workflow).
+`python3 Translations/po.py import es` writes them to `Disks/Bugfixing/Spanish`, the input of the release creator.
+
 | Path | Content |
 |---|---|
-| [AllTexts](AllTexts) | All game texts, same layout as `Disks/Bugfixing/English/AllTexts` (3448 files) |
-| [IntroTexts](IntroTexts), [ExtroTexts](ExtroTexts) | Intro and extro, same layout as `Disks/Bugfixing/English/` |
-| [RemakeTranslatableTexts.txt](RemakeTranslatableTexts.txt) | Remake messages, outro and tutorial texts |
+| [../PO/es.po](../PO/es.po) | All texts: game, intro, extro and remake |
 | [Glossary.md](Glossary.md) | Terminology |
-| [Names.tsv](Names.tsv) | Every translated name (items, spells, monsters, NPCs, places, keywords): German / English / Spanish |
+| [Names.tsv](Names.tsv) | The translated names (items, spells, monsters, NPCs, places, keywords): German / English / Spanish |
 | [TranslatorBrief.md](TranslatorBrief.md) | Rules that were used for translating |
-| [tools/check_translation.py](tools/check_translation.py) | Validator for placeholders, line breaks, characters and length limits |
-| [tools/missing_files.py](tools/missing_files.py) | Lists reference files without a Spanish counterpart |
-| [tools/short_names.py](tools/short_names.py) | Source of all name lists. It regenerates Dict, Objects, monsters, NPCs, places, automap labels and the Text.amb name lists |
-| [tools/build_amiga_data.py](tools/build_amiga_data.py) | Fills `Disks/Bugfixing/Spanish`, the input of the release creator (see *Amiga release*) |
 | [tools/make_font.py](tools/make_font.py) | Builds the intro/extro font (`font.json`, `SmallGlyphs.png`, `LargeGlyphs.png`) |
 | `encoding.txt`, `font.json`, `*Glyphs.png`, `click-text.txt`, `translators.txt` | Configuration of the release creator for the intro and extro |
 
 ## Status
 
-- **Complete:** every reference file has a Spanish counterpart.
-- **Validator:** 0 errors and 0 warnings. It checks placeholders, `^` line breaks, the
-  character set and the length limits.
+- **Complete:** all 3741 texts of the template are translated.
+- **Check:** `python3 Translations/po.py check es` reports 0 errors and 0 warnings.
 - **Not done yet:** review by a native speaker, and testing in game (on the Amiga or in the
   remake).
 - **Translator:** Claude (Anthropic). Most texts were translated from the German original and
@@ -34,9 +30,7 @@ remake's own texts.
 - **Variety.** European (Castilian) Spanish. The player character is addressed with *tú*, the
   party with *vosotros*.
 - **Orthography.** Full Spanish spelling with accented capitals (Á É Í Ó Ú Ü Ñ) and the opening
-  marks ¿ ¡. If the font cannot get these glyphs,
-  `check_translation.py --fallback-out <dir>` writes a copy without accents and opening marks.
-  **Ñ is always kept.**
+  marks ¿ ¡.
 - **Rune texts** (`~RUN1~…~NORM~`) use plain A–Z only.
 - **Gender.** The player character and the active party member can be male or female, so texts
   that refer to them avoid gendered adjectives and participles. The grandfather, for example,
@@ -53,38 +47,13 @@ remake's own texts.
 The release creator (`Tools/AmbermoonReleaseCreator`, run by `.github/workflows/release.yml`) reads
 `Disks/Bugfixing/Spanish` and `Translations/Spanish`:
 
-- **Source of truth.** `Translations/Spanish/AllTexts` is the full text with accents.
-  `tools/build_amiga_data.py` writes `Disks/Bugfixing/Spanish/AllTexts` from it without accents and without ¿ ¡,
-  because the in-game font has no glyphs for them. For languages other than German and English, the release creator
-  removes the accents itself (`-u`, which also turns Ñ into N), but it leaves ¿ ¡ alone. Run the script after
-  every change of the texts.
-- **Intro and extro** keep all Spanish characters. They use their own font (ISO-8859-1, 91 glyphs, built from the
-  Czech font by `tools/make_font.py`; Ñ ñ Ü ü ¿ ¡ were added).
+- **Game texts.** `po.py import es` removes ¿ ¡ from the game texts (`AllTexts`), because the in-game font has no
+  glyphs for them. The release creator removes the accents itself (`-u`, which also turns Ñ into N).
+- **Intro and extro** keep all Spanish characters. They use their own font (ISO-8859-1, 92 glyphs, built from the
+  Czech font by `tools/make_font.py`; Ñ ñ Ü ü ¿ ¡ and " were added).
 - **Button graphics** are the English ones; there are no Spanish button graphics yet.
 - **Date and language.** The release creator writes `DateAndLanguageString` and `VersionString` itself
   ("dd-MM-yyyy / Spanish", "Ambermoon vX.XX"). The files here hold "21-11-2026 / Español" and "Ambermoon v1.22".
-
-## Length limits
-
-| Data | Limit |
-|---|---|
-| Item names (`Objects.amb`) | 19 |
-| NPC / monster names | 15 |
-| Dictionary words | 21 |
-| Place names (`Place_data`) | 30 |
-| Class names | 7 |
-| Race names | 10 |
-| Attribute / skill short names | 3 |
-| Spell names (`Text.amb`) | 21 |
-
-## Validation
-
-```
-python3 tools/check_translation.py AllTexts
-python3 tools/check_translation.py IntroTexts --ref ../../Disks/Bugfixing/English/IntroTexts
-python3 tools/check_translation.py ExtroTexts --ref ../../Disks/Bugfixing/English/ExtroTexts
-python3 tools/missing_files.py
-```
 
 ## Open points for review
 
