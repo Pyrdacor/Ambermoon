@@ -8,7 +8,8 @@
 # (Disks/Bugfixing/<language>, Translations/<language>); the texts of the languages are imported from the PO files in
 # Translations/PO first. The archives (ADF images and the extracted files as zip, tar.gz
 # and LHA) are the artifacts of the run, and they are attached to a draft release "Ambermoon X.XX" (tag game-vX.XX),
-# which is published by hand. SOURCE_DATE_EPOCH is the time of the commit: the same commit gives the same release.
+# which is published by hand. A run by hand with the input `attach` (e.g. Spanish) attaches the archives of these languages
+# to the release if it is published already (to add a language to a release later). SOURCE_DATE_EPOCH is the time of the commit: the same commit gives the same release.
 
 name: release
 
@@ -21,6 +22,10 @@ on:
       version:
         description: "The version of the release (X.XX)"
         required: true
+      attach:
+        description: "Only if the release is published already: languages whose archives are attached to it (e.g. Spanish or Spanish,Czech; existing files of these languages are replaced)"
+        required: false
+        default: ""
 
 permissions:
   contents: write # the draft release
@@ -121,14 +126,29 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
           VERSION: ${{ steps.version.outputs.version }}
+          ATTACH: ${{ github.event.inputs.attach }}
         run: |
           $tag = "game-v$env:VERSION"
           # the releases with this tag (a draft has no tag yet: it is found by the tag it will get)
           $releases = gh api "repos/${{ github.repository }}/releases?per_page=100" | ConvertFrom-Json |
               Where-Object { $_.tag_name -eq $tag }
           if ($releases | Where-Object { -not $_.draft }) {
-            Write-Host "::warning::The release $tag is published already: the archives are only artifacts of this run"
-            exit 0
+            $attach = @("$env:ATTACH".Split(",") | ForEach-Object { $_.Trim().ToLower() } | Where-Object { $_ })
+            if ($attach.Count -eq 0) {
+              Write-Host "::warning::The release $tag is published already: the archives are only artifacts of this run"
+              exit 0
+            }
+            # attach the archives of the given languages to the published release
+            $files = @(Get-ChildItem releases | Where-Object {
+                $_.Name -match '^ambermoon_([a-z]+)_' -and $attach -contains $Matches[1] })
+            $missing = @($attach | Where-Object { $l = $_; -not ($files | Where-Object { $_.Name -like "ambermoon_$($l)_*" }) })
+            if ($missing.Count -gt 0) {
+              Write-Error "No archives for: $($missing -join ', ')"
+              exit 1
+            }
+            $files | Format-Table Name, Length
+            gh release upload $tag $files.FullName --clobber
+            exit $LASTEXITCODE
           }
           # a new run replaces the draft of the same version
           foreach ($draft in $releases) {
